@@ -24,7 +24,7 @@
     <number>0</number>
    </property>
    <item row="0" column="0">
-    <widget class="QTabWidget" name="tabWidgetOutput">
+    <widget class="NewGeneTabWidget" name="tabWidgetOutput">
      <property name="styleSheet">
       <string notr="true">
 QWidget {
@@ -185,6 +185,12 @@ border-bottom: 0px;
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>NewGeneTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header location="global">newgenetabwidget.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>NewGeneSelectVariables</class>
    <extends>QWidget</extends>

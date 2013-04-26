@@ -14,12 +14,6 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
         pTWmain->NewGeneInitialize();
     }
 
-    NewGeneTabWidget * pTWoutput = findChild<NewGeneTabWidget*>("tabWidgetOutput");
-    if (pTWoutput)
-    {
-        pTWoutput->NewGeneInitialize();
-    }
-
 }
 
 NewGeneMainWindow::~NewGeneMainWindow()
