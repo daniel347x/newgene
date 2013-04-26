@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NewGeneSelectVariables</class>
+ <widget class="QWidget" name="NewGeneSelectVariables">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>663</width>
+    <height>395</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="NewGeneVariables" name="widget" native="true"/>
+     <widget class="NewGeneVariableSummary" name="widget_2" native="true"/>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NewGeneVariables</class>
+   <extends>QWidget</extends>
+   <header>Variables\newgenevariables.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NewGeneVariableSummary</class>
+   <extends>QWidget</extends>
+   <header>VariableSummary\newgenevariablesummary.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

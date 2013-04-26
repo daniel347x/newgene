@@ -13,11 +13,23 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        newgenemainwindow.cpp
+        newgenemainwindow.cpp \
+    CreateOutput/newgenecreateoutput.cpp \
+    CreateOutput/SelectVariables/newgeneselectvariables.cpp \
+    CreateOutput/SelectVariables/Variables/newgenevariables.cpp \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.cpp
 
-HEADERS  += newgenemainwindow.h
+HEADERS  += newgenemainwindow.h \
+    CreateOutput/newgenecreateoutput.h \
+    CreateOutput/SelectVariables/newgeneselectvariables.h \
+    CreateOutput/SelectVariables/Variables/newgenevariables.h \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.h
 
-FORMS    += newgenemainwindow.ui
+FORMS    += newgenemainwindow.ui \
+    CreateOutput/newgenecreateoutput.ui \
+    CreateOutput/SelectVariables/newgeneselectvariables.ui \
+    CreateOutput/SelectVariables/Variables/newgenevariables.ui \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
