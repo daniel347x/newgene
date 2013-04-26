@@ -17,13 +17,15 @@ SOURCES += main.cpp\
     CreateOutput/newgenecreateoutput.cpp \
     CreateOutput/SelectVariables/newgeneselectvariables.cpp \
     CreateOutput/SelectVariables/Variables/newgenevariables.cpp \
-    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.cpp
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.cpp \
+    CreateOutput/newgenetabwidget.cpp
 
 HEADERS  += newgenemainwindow.h \
     CreateOutput/newgenecreateoutput.h \
     CreateOutput/SelectVariables/newgeneselectvariables.h \
     CreateOutput/SelectVariables/Variables/newgenevariables.h \
-    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.h
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.h \
+    CreateOutput/newgenetabwidget.h
 
 FORMS    += newgenemainwindow.ui \
     CreateOutput/newgenecreateoutput.ui \

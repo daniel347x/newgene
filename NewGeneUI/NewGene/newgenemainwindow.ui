@@ -28,7 +28,7 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QTabWidget" name="tabWidgetMain">
+     <widget class="NewGeneTabWidget" name="tabWidgetMain">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
         <horstretch>0</horstretch>
@@ -36,7 +36,47 @@
        </sizepolicy>
       </property>
       <property name="styleSheet">
-       <string notr="true"/>
+       <string notr="true">QTabWidget::tab-bar {
+border: 0px;
+}
+
+QTabBar::tab:selected {
+border-left: 1px solid #1c1515;
+padding-left: 10px;
+border-right: 1px solid #1c1515;
+padding-right: 10px;
+border-bottom: 1px solid #7e7fff;
+border-top: 1px solid #a0a0a0;
+margin-bottom: 0px;
+border-bottom-left-radius: 8px;
+border-bottom-right-radius: 8px;
+padding-top: 1px;
+padding-bottom: 2px;
+background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0 #ff450c,
+                                 stop: 0.05 #f98a74,
+                                 stop: 0.2 #fde0d3,
+                                 stop: 0.9 #f9dac7,
+                                 stop: 1 #f98a74);
+ }
+
+QTabBar::tab:!selected {
+border-left: 1px solid #1c1515;
+padding-left: 10px;
+border-right: 1px solid #1c1515;
+padding-right: 10px;
+border-bottom: 1px solid #7e7fff;
+border-top: 1px solid #a0a0a0;
+margin-bottom: 2px;
+border-bottom-left-radius: 8px;
+border-bottom-right-radius: 8px;
+padding-top: 1px;
+padding-bottom: 2px;
+background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0 #d3d3d3, stop: 0.4 #cfcfcf,
+                                 stop: 0.6 #c7c7c7, stop: 1.0 #a1a1a1);
+}
+</string>
       </property>
       <property name="tabPosition">
        <enum>QTabWidget::South</enum>
@@ -54,12 +94,18 @@
        <bool>true</bool>
       </property>
       <widget class="QWidget" name="tabHome">
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
        <attribute name="title">
         <string>Home</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout"/>
       </widget>
       <widget class="QWidget" name="tabOutput">
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
        <attribute name="title">
         <string>Create output dataset</string>
        </attribute>
@@ -73,6 +119,9 @@
        </layout>
       </widget>
       <widget class="QWidget" name="tabInput">
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
        <attribute name="title">
         <string>Manage input dataset</string>
        </attribute>
@@ -100,6 +149,12 @@
    <class>NewGeneCreateOutput</class>
    <extends>QWidget</extends>
    <header>CreateOutput/newgenecreateoutput.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NewGeneTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>CreateOutput\newgenetabwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

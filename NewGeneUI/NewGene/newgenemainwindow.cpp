@@ -6,6 +6,11 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
     ui(new Ui::NewGeneMainWindow)
 {
     ui->setupUi(this);
+    NewGeneTabWidget * pTW = findChild<NewGeneTabWidget*>("tabWidgetMain");
+    if (pTW)
+    {
+        pTW->NewGeneInitialize();
+    }
 }
 
 NewGeneMainWindow::~NewGeneMainWindow()
