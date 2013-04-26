@@ -13,6 +13,5 @@ void NewGeneTabWidget::NewGeneInitialize()
     if (pTB)
     {
         pTB->setDrawBase(false);
-        pTB->setTabText(1, "Foo");
     }
 }

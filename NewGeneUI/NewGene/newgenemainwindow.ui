@@ -73,8 +73,10 @@ border-bottom-right-radius: 8px;
 padding-top: 1px;
 padding-bottom: 2px;
 background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #d3d3d3, stop: 0.4 #cfcfcf,
-                                 stop: 0.6 #c7c7c7, stop: 1.0 #a1a1a1);
+                                 stop: 0 /* #d3d3d3, */ #5354dd,
+                                 stop: 0.3 /* #cfcfcf, */ #b1b1ff,
+                                 stop: 0.6 #c7c7c7,
+                                 stop: 1.0 #a1a1a1);
 }
 </string>
       </property>
@@ -148,13 +150,13 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
   <customwidget>
    <class>NewGeneCreateOutput</class>
    <extends>QWidget</extends>
-   <header>CreateOutput/newgenecreateoutput.h</header>
+   <header location="global">newgenecreateoutput.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>NewGeneTabWidget</class>
    <extends>QTabWidget</extends>
-   <header>CreateOutput\newgenetabwidget.h</header>
+   <header location="global">newgenetabwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

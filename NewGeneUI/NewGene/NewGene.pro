@@ -40,6 +40,8 @@ else:unix: LIBS += -L$$PWD/../../NewGeneBackEnd/ -lNewGeneBackEnd
 
 INCLUDEPATH += $$PWD/../../NewGeneBackEnd/Debug
 DEPENDPATH += $$PWD/../../NewGeneBackEnd/Debug
+INCLUDEPATH += $$PWD/CreateOutput
+INCLUDEPATH += $$PWD/CreateOutput/SelectVariables
 
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/release/NewGeneBackEnd.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/debug/NewGeneBackEnd.lib

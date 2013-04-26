@@ -24,7 +24,7 @@
     <number>0</number>
    </property>
    <item row="0" column="0">
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="tabWidgetOutput">
      <property name="styleSheet">
       <string notr="true">
 QWidget {
@@ -34,11 +34,12 @@ QWidget {
                                  stop: 0.8 #7e7fff,
                                  stop: 1 #3233ff);*/
 border-bottom: 6px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 /* #b1b1ff, */ /* #6565ff, */ /* strong-&gt; #0000cd, */ #4d4eff,
+                                 stop: 0 /* #b1b1ff, */ /* #6565ff, */ /* strong-&gt; #0000cd, */ #4d4eff, stop: 0.25 #5354dd,
                                  /*stop: 0.3 #cbcbff,
                                  stop: 0.4 #cbcbff,
                                  stop: 0.7 #fde0d3*/
-                                 stop: 1 /* strong-&gt; #ff450c */ #ff9372
+                                 stop: /* 0.5 */ 1.0/* strong-&gt; #ff450c */ #ff9372
+                                 /* stop: 1 #4d4eff */
                                  );
 }
 
@@ -54,9 +55,15 @@ border-bottom-left-radius: 0px;
 border-bottom-right-radius: 0px;
 padding-top: 0px;
 padding-bottom: 0px;
-background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+/* background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                  stop: 0 #ededed, stop: 0.9 #9898ff,
-                                 stop: 1 #7e7fff);
+                                 stop: 1 #7e7fff); */
+background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 /*stop: 0 #ededed,*/
+                                 stop: 0 #ffbaa5,
+                                 stop: 0.3 #ffbaa5,
+                                 stop: 0.9 #ff9372,
+                                 stop: 1 #ff450c);
  }
 
 QTabBar::tab:!selected {
@@ -71,10 +78,15 @@ border-bottom-left-radius: 0px;
 border-bottom-right-radius: 0px;
 padding-top: 0px;
 padding-bottom: 0px;
-background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+/* background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                  stop: 0 #e0e0e0, stop: 0.4 #dbdbdb,
-                                 stop: 0.5 #d3d3d3, stop: 1.0 #cfcfcf);
- }</string>
+                                 stop: 0.5 #d3d3d3, stop: 1.0 #cfcfcf); */
+background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 1.0 /* #d3d3d3, */ #5354dd,
+                                 stop: 0.4 /* #cfcfcf, */ #b1b1ff,
+                                 stop: 0.9 #c7c7c7,
+                                 stop: 0 #a1a1a1);
+}</string>
      </property>
      <property name="tabPosition">
       <enum>QTabWidget::South</enum>
@@ -88,7 +100,7 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
      <widget class="QWidget" name="tabSelectVariables">
       <property name="styleSheet">
        <string notr="true">QWidget {
-border-bottom: none;
+border-bottom: 2px solid #ffbaa5;
 }</string>
       </property>
       <attribute name="title">
@@ -97,6 +109,11 @@ border-bottom: none;
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
         <widget class="NewGeneSelectVariables" name="widget" native="true">
+         <property name="styleSheet">
+          <string notr="true">QWidget {
+border-bottom: 0px;;
+}</string>
+         </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <property name="leftMargin">
            <number>0</number>
@@ -118,7 +135,7 @@ border-bottom: none;
      <widget class="QWidget" name="tabColumnOrder">
       <property name="styleSheet">
        <string notr="true">QWidget {
-border-bottom: none;
+border-bottom: 2px solid #ffbaa5;
 }</string>
       </property>
       <attribute name="title">
@@ -126,14 +143,20 @@ border-bottom: none;
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
        <item row="0" column="0">
-        <widget class="QWidget" name="widget_2" native="true"/>
+        <widget class="QWidget" name="widget_2" native="true">
+         <property name="styleSheet">
+          <string notr="true">QWidget {
+border-bottom: 0px;
+}</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabOutputDestination">
       <property name="styleSheet">
        <string notr="true">QWidget {
-border-bottom: none;
+border-bottom: 2px solid #ffbaa5;
 }</string>
       </property>
       <attribute name="title">
@@ -147,7 +170,13 @@ border-bottom: none;
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="QWidget" name="widget_3" native="true"/>
+        <widget class="QWidget" name="widget_3" native="true">
+         <property name="styleSheet">
+          <string notr="true">QWidget {
+border-bottom: 0px;
+}</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -159,7 +188,7 @@ border-bottom: none;
   <customwidget>
    <class>NewGeneSelectVariables</class>
    <extends>QWidget</extends>
-   <header>SelectVariables\newgeneselectvariables.h</header>
+   <header location="global">newgeneselectvariables.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

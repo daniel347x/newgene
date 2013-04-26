@@ -5,12 +5,21 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::NewGeneMainWindow)
 {
+
     ui->setupUi(this);
-    NewGeneTabWidget * pTW = findChild<NewGeneTabWidget*>("tabWidgetMain");
-    if (pTW)
+
+    NewGeneTabWidget * pTWmain = findChild<NewGeneTabWidget*>("tabWidgetMain");
+    if (pTWmain)
     {
-        pTW->NewGeneInitialize();
+        pTWmain->NewGeneInitialize();
     }
+
+    NewGeneTabWidget * pTWoutput = findChild<NewGeneTabWidget*>("tabWidgetOutput");
+    if (pTWoutput)
+    {
+        pTWoutput->NewGeneInitialize();
+    }
+
 }
 
 NewGeneMainWindow::~NewGeneMainWindow()
