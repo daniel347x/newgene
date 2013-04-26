@@ -39,9 +39,9 @@ border-left: 1px solid #1c1515;
 padding-left: 10px;
 border-right: 1px solid #1c1515;
 padding-right: 10px;
-border-bottom: 1px solid #1c1515;
+border-bottom: 1px solid #7e7fff;
 border-top: 1px solid #a0a0a0;
-margin-bottom: 2px;
+margin-bottom: 6px;
 background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                  stop: 0 #ededed, stop: 0.9 #9898ff,
                                  stop: 1 #7e7fff);
@@ -52,9 +52,9 @@ border-left: 1px solid #1c1515;
 padding-left: 10px;
 border-right: 1px solid #1c1515;
 padding-right: 10px;
-border-bottom: 1px solid #1c1515;
+border-bottom: 1px solid #7e7fff;
 border-top: 1px solid #a0a0a0;
-margin-bottom: 2px;
+margin-bottom: 6px;
 background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                  stop: 0 #e0e0e0, stop: 0.4 #dbdbdb,
                                  stop: 0.5 #d3d3d3, stop: 1.0 #cfcfcf);
@@ -64,7 +64,7 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
       <enum>QTabWidget::South</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="documentMode">
       <bool>true</bool>
