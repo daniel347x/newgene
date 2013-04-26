@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -31,36 +34,104 @@
    </property>
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
+     <property name="styleSheet">
+      <string notr="true">QWidget {
+border-bottom: 3px solid #3233ff;
+}
+
+QTabBar::tab:selected {
+border-left: 1px solid #1c1515;
+padding-left: 10px;
+border-right: 1px solid #1c1515;
+padding-right: 10px;
+border-bottom: 1px solid #1c1515;
+border-top: 1px solid #a0a0a0;
+background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0 #ededed, stop: 0.7 #9898ff,
+                                 stop: 0.9 #7e7fff, stop: 1.0 #3233ff);
+ }
+
+QTabBar::tab:!selected {
+border-left: 1px solid #1c1515;
+padding-left: 10px;
+border-right: 1px solid #1c1515;
+padding-right: 10px;
+border-bottom: 1px solid #1c1515;
+border-top: 1px solid #a0a0a0;
+margin-bottom: 2px;
+background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0 #e0e0e0, stop: 0.4 #dbdbdb,
+                                 stop: 0.5 #d3d3d3, stop: 1.0 #cfcfcf);
+ }</string>
+     </property>
      <property name="tabPosition">
       <enum>QTabWidget::South</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="documentMode">
       <bool>true</bool>
      </property>
      <widget class="QWidget" name="tabSelectVariables">
+      <property name="styleSheet">
+       <string notr="true">QWidget {
+border-bottom: none;
+}</string>
+      </property>
       <attribute name="title">
        <string>Select variables</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
         <widget class="NewGeneSelectVariables" name="widget" native="true">
-         <layout class="QGridLayout" name="gridLayout_3"/>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="spacing">
+           <number>0</number>
+          </property>
+         </layout>
         </widget>
        </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabColumnOrder">
+      <property name="styleSheet">
+       <string notr="true">QWidget {
+border-bottom: none;
+}</string>
+      </property>
       <attribute name="title">
        <string>Set column order</string>
       </attribute>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="QWidget" name="widget_2" native="true"/>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="tabOutputDestination">
+      <property name="styleSheet">
+       <string notr="true">QWidget {
+border-bottom: none;
+}</string>
+      </property>
       <attribute name="title">
        <string>Choose output destination</string>
       </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="0">
+        <widget class="QWidget" name="widget_3" native="true"/>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
