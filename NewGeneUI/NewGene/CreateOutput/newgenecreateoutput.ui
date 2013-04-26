@@ -27,7 +27,11 @@
     <widget class="QTabWidget" name="tabWidget">
      <property name="styleSheet">
       <string notr="true">QWidget {
-border-bottom: 3px solid #7e7fff;
+border-bottom: 6px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0 #d1d1d1,
+                                 stop: 0.5 #d1d1d1,
+                                 stop: 0.8 #7e7fff,
+                                 stop: 1 #3233ff);
 }
 
 QTabBar::tab:selected {
