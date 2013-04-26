@@ -28,42 +28,32 @@
      <property name="styleSheet">
       <string notr="true">
 QWidget {
-/*border-bottom: 6px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #d1d1d1,
-                                 stop: 0.5 #d1d1d1,
-                                 stop: 0.8 #7e7fff,
-                                 stop: 1 #3233ff);*/
-border-bottom: 6px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 /* #b1b1ff, */ /* #6565ff, */ /* strong-&gt; #0000cd, */ #4d4eff, stop: 0.25 #5354dd,
-                                 /*stop: 0.3 #cbcbff,
-                                 stop: 0.4 #cbcbff,
-                                 stop: 0.7 #fde0d3*/
-                                 stop: /* 0.5 */ 1.0/* strong-&gt; #ff450c */ #ff9372
-                                 /* stop: 1 #4d4eff */
+border-bottom: 9px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                 stop: 0 #9394ea,
+                                 stop: 0.1 #4d4eff,
+                                 stop: 0.15 #5354dd,
+                                 stop: 1.0 #ff9372
                                  );
 }
 
 QTabBar::tab:selected {
-border-left: 1px solid #1c1515;
+border-left: 0px solid #1c1515;
 padding-left: 10px;
-border-right: 1px solid #1c1515;
+border-right: 0px solid #1c1515;
 padding-right: 10px;
-border-bottom: 1px solid #7e7fff;
-border-top: 1px solid #a0a0a0;
-margin-bottom: 6px;
+border-bottom: 0px;
+border-top: 0px;
+margin-bottom: 2px;
 border-bottom-left-radius: 0px;
 border-bottom-right-radius: 0px;
-padding-top: 0px;
-padding-bottom: 0px;
-/* background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #ededed, stop: 0.9 #9898ff,
-                                 stop: 1 #7e7fff); */
+padding-top: 1px;
+padding-bottom: 2px;
 background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 /*stop: 0 #ededed,*/
-                                 stop: 0 #ffbaa5,
-                                 stop: 0.3 #ffbaa5,
-                                 stop: 0.9 #ff9372,
-                                 stop: 1 #ff450c);
+                                 stop: 0 #f9dac7,
+                                 /*stop: 0.3 #ffbaa5,*/
+                                 stop: 1.0 #ff9372
+                                 /*stop: 1 #ff450c*/
+                                 );
  }
 
 QTabBar::tab:!selected {
@@ -72,20 +62,17 @@ padding-left: 10px;
 border-right: 1px solid #1c1515;
 padding-right: 10px;
 border-bottom: 1px solid #7e7fff;
-border-top: 1px solid #a0a0a0;
-margin-bottom: 6px;
+border-top: 0px solid #a0a0a0;
+margin-bottom: 9px;
 border-bottom-left-radius: 0px;
 border-bottom-right-radius: 0px;
-padding-top: 0px;
-padding-bottom: 0px;
-/* background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #e0e0e0, stop: 0.4 #dbdbdb,
-                                 stop: 0.5 #d3d3d3, stop: 1.0 #cfcfcf); */
+padding-top: 2px;
+padding-bottom: 2px;
 background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 1.0 /* #d3d3d3, */ #5354dd,
-                                 stop: 0.4 /* #cfcfcf, */ #b1b1ff,
-                                 stop: 0.9 #c7c7c7,
-                                 stop: 0 #a1a1a1);
+                                 stop: 0 #cbcbff,
+                                 stop: 0.3 #cbcbff,
+                                 stop: 0.6 #b1b1ff,
+                                 stop: 1.0 #9394ea);
 }</string>
      </property>
      <property name="tabPosition">
@@ -100,11 +87,11 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
      <widget class="QWidget" name="tabSelectVariables">
       <property name="styleSheet">
        <string notr="true">QWidget {
-border-bottom: 2px solid #ffbaa5;
+border-bottom: 3px solid #f9dac7;
 }</string>
       </property>
       <attribute name="title">
-       <string>Select variables</string>
+       <string> Select variables </string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
@@ -135,11 +122,11 @@ border-bottom: 0px;;
      <widget class="QWidget" name="tabColumnOrder">
       <property name="styleSheet">
        <string notr="true">QWidget {
-border-bottom: 2px solid #ffbaa5;
+border-bottom: 3px solid #f9dac7;
 }</string>
       </property>
       <attribute name="title">
-       <string>Set column order</string>
+       <string> Set column order </string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
        <item row="0" column="0">
@@ -156,11 +143,11 @@ border-bottom: 0px;
      <widget class="QWidget" name="tabOutputDestination">
       <property name="styleSheet">
        <string notr="true">QWidget {
-border-bottom: 2px solid #ffbaa5;
+border-bottom: 3px solid #f9dac7;
 }</string>
       </property>
       <attribute name="title">
-       <string>Choose output destination</string>
+       <string> Choose output destination </string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
        <property name="margin">

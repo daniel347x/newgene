@@ -15,7 +15,7 @@ public slots:
 
 public:
     void NewGeneInitialize();
-    
+
 };
 
 #endif // NEWGENETABWIDGET_H
