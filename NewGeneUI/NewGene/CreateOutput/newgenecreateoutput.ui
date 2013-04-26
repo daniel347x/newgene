@@ -17,17 +17,8 @@
    <string notr="true"/>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="leftMargin">
+   <property name="margin">
     <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>3</number>
    </property>
    <property name="spacing">
     <number>0</number>
@@ -36,7 +27,7 @@
     <widget class="QTabWidget" name="tabWidget">
      <property name="styleSheet">
       <string notr="true">QWidget {
-border-bottom: 3px solid #3233ff;
+border-bottom: 3px solid #7e7fff;
 }
 
 QTabBar::tab:selected {
@@ -46,9 +37,10 @@ border-right: 1px solid #1c1515;
 padding-right: 10px;
 border-bottom: 1px solid #1c1515;
 border-top: 1px solid #a0a0a0;
+margin-bottom: 2px;
 background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #ededed, stop: 0.7 #9898ff,
-                                 stop: 0.9 #7e7fff, stop: 1.0 #3233ff);
+                                 stop: 0 #ededed, stop: 0.9 #9898ff,
+                                 stop: 1 #7e7fff);
  }
 
 QTabBar::tab:!selected {
@@ -128,6 +120,12 @@ border-bottom: none;
        <string>Choose output destination</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
+       <property name="margin">
+        <number>0</number>
+       </property>
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <item row="0" column="0">
         <widget class="QWidget" name="widget_3" native="true"/>
        </item>
