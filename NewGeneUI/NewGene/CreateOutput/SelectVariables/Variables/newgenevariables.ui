@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>608</width>
+    <height>490</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,10 +15,67 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QPushButton" name="pushButton">
-     <property name="text">
-      <string>PushButton</string>
+    <widget class="QToolBox" name="toolBox">
+     <property name="styleSheet">
+      <string notr="true">QToolBox::tab {
+     background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0,
+                                 stop: 0 #7e7fff,
+                                 stop: 0.4 #DDDDDD,
+                                 stop: 0.5 #D8D8D8,
+                                 stop: 1.0 #D3D3D3);
+     border-radius: 5px;
+     border: 20px;
+     padding-left: 5px;
+     /*color: darkgray;*/
+ }</string>
      </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <property name="tabSpacing">
+      <number>2</number>
+     </property>
+     <widget class="QWidget" name="page">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>590</width>
+        <height>357</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Country Variables</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="page_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>590</width>
+        <height>337</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Geography Variables</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="page_3">
+      <attribute name="label">
+       <string>Polity Variables</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="page_4">
+      <attribute name="label">
+       <string>MID Variables</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="page_5">
+      <attribute name="label">
+       <string>MID Detail Variables</string>
+      </attribute>
+     </widget>
     </widget>
    </item>
   </layout>
