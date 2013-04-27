@@ -14,6 +14,18 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>6</number>
+   </property>
+   <property name="topMargin">
+    <number>9</number>
+   </property>
+   <property name="rightMargin">
+    <number>6</number>
+   </property>
+   <property name="bottomMargin">
+    <number>9</number>
+   </property>
    <item row="0" column="0">
     <widget class="QToolBox" name="toolBox">
      <property name="styleSheet">
@@ -40,7 +52,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>590</width>
+        <width>596</width>
         <height>357</height>
        </rect>
       </property>
@@ -53,8 +65,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>590</width>
-        <height>337</height>
+        <width>596</width>
+        <height>366</height>
        </rect>
       </property>
       <attribute name="label">
@@ -62,16 +74,40 @@
       </attribute>
      </widget>
      <widget class="QWidget" name="page_3">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>596</width>
+        <height>366</height>
+       </rect>
+      </property>
       <attribute name="label">
        <string>Polity Variables</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="page_4">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>596</width>
+        <height>366</height>
+       </rect>
+      </property>
       <attribute name="label">
        <string>MID Variables</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="page_5">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>596</width>
+        <height>366</height>
+       </rect>
+      </property>
       <attribute name="label">
        <string>MID Detail Variables</string>
       </attribute>

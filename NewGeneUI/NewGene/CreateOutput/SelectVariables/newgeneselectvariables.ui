@@ -17,6 +17,9 @@
    <property name="margin">
     <number>0</number>
    </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
     <widget class="QSplitter" name="splitter">
      <property name="styleSheet">
@@ -27,8 +30,10 @@ stop:0 rgba(255, 255, 255, 0),
 stop:0.407273 rgba(200, 200, 200, 255), 
 stop:0.4825 rgba(101, 104, 113, 235), 
 stop:0.6 rgba(255, 255, 255, 0));
-    image: url(:/images/splitter.png);
-     }</string>
+    /* image: url(:/images/splitter.png); */
+     }
+
+</string>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
