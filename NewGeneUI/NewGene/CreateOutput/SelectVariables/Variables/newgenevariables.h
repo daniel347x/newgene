@@ -2,6 +2,8 @@
 #define NEWGENEVARIABLES_H
 
 #include <QWidget>
+#include <QStringListModel>
+#include <QItemSelectionModel>
 
 namespace Ui {
 class NewGeneVariables;
@@ -20,6 +22,10 @@ protected:
     
 private:
     Ui::NewGeneVariables *ui;
+
+protected:
+    QStringListModel model_;
+
 };
 
 #endif // NEWGENEVARIABLES_H

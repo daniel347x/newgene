@@ -2,6 +2,7 @@
 #define NEWGENEVARIABLESUMMARY_H
 
 #include <QWidget>
+#include <QStringListModel>
 
 namespace Ui {
 class NewGeneVariableSummary;
@@ -20,6 +21,13 @@ protected:
     
 private:
     Ui::NewGeneVariableSummary *ui;
+
+protected:
+    QStringListModel model1;
+    QStringListModel model2;
+    QStringListModel model3;
+    QStringListModel model4;
+    QStringListModel model5;
 };
 
 #endif // NEWGENEVARIABLESUMMARY_H

@@ -48,13 +48,13 @@ stop:0.6 rgba(255, 255, 255, 0));
   <customwidget>
    <class>NewGeneVariables</class>
    <extends>QWidget</extends>
-   <header>Variables\newgenevariables.h</header>
+   <header location="global">Variables\newgenevariables.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>NewGeneVariableSummary</class>
    <extends>QWidget</extends>
-   <header>VariableSummary\newgenevariablesummary.h</header>
+   <header location="global">newgenevariablesummary.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

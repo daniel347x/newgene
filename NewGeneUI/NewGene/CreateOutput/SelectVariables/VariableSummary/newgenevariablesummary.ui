@@ -6,51 +6,39 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>543</width>
+    <height>427</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Country</string>
-     </property>
-    </widget>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="NewGeneVariableSummaryHolder" name="widgetHolder1" native="true"/>
    </item>
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string>Geography</string>
-     </property>
-    </widget>
+   <item>
+    <widget class="NewGeneVariableSummaryHolder" name="widgetHolder2" native="true"/>
    </item>
-   <item row="2" column="0">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Polity</string>
-     </property>
-    </widget>
+   <item>
+    <widget class="NewGeneVariableSummaryHolder" name="widgetHolder3" native="true"/>
    </item>
-   <item row="3" column="0">
-    <widget class="QGroupBox" name="groupBox_4">
-     <property name="title">
-      <string>MID</string>
-     </property>
-    </widget>
+   <item>
+    <widget class="NewGeneVariableSummaryHolder" name="widgetHolder4" native="true"/>
    </item>
-   <item row="4" column="0">
-    <widget class="QGroupBox" name="groupBox_5">
-     <property name="title">
-      <string>MID Detail</string>
-     </property>
-    </widget>
+   <item>
+    <widget class="NewGeneVariableSummaryHolder" name="widgetHolder5" native="true"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NewGeneVariableSummaryHolder</class>
+   <extends>QWidget</extends>
+   <header location="global">newgenevariablesummaryholder.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -18,20 +18,29 @@ SOURCES += main.cpp\
     CreateOutput/SelectVariables/newgeneselectvariables.cpp \
     CreateOutput/SelectVariables/Variables/newgenevariables.cpp \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.cpp \
-    CreateOutput/newgenetabwidget.cpp
+    CreateOutput/newgenetabwidget.cpp \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.cpp \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroupbox.cpp \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryholder.cpp
 
 HEADERS  += newgenemainwindow.h \
     CreateOutput/newgenecreateoutput.h \
     CreateOutput/SelectVariables/newgeneselectvariables.h \
     CreateOutput/SelectVariables/Variables/newgenevariables.h \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.h \
-    CreateOutput/newgenetabwidget.h
+    CreateOutput/newgenetabwidget.h \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.h \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroupbox.h \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryholder.h
 
 FORMS    += newgenemainwindow.ui \
     CreateOutput/newgenecreateoutput.ui \
     CreateOutput/SelectVariables/newgeneselectvariables.ui \
     CreateOutput/SelectVariables/Variables/newgenevariables.ui \
-    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.ui
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummary.ui \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.ui \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroupbox.ui \
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryholder.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
@@ -42,6 +51,7 @@ INCLUDEPATH += $$PWD/../../NewGeneBackEnd/Debug
 DEPENDPATH += $$PWD/../../NewGeneBackEnd/Debug
 INCLUDEPATH += $$PWD/CreateOutput
 INCLUDEPATH += $$PWD/CreateOutput/SelectVariables
+INCLUDEPATH += $$PWD/CreateOutput/SelectVariables/VariableSummary
 
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/release/NewGeneBackEnd.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/debug/NewGeneBackEnd.lib
