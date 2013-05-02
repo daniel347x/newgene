@@ -38,23 +38,23 @@ stop:0.6 rgba(255, 255, 255, 0));
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="NewGeneVariables" name="widget" native="true"/>
-     <widget class="NewGeneVariableSummary" name="widget_2" native="true"/>
+     <widget class="NewGeneVariables" name="CreateOutputDataset_VariablesSplitter_VariableSelections" native="true"/>
+     <widget class="NewGeneVariableSummary" name="CreateOutputDataset_VariablesSplitter_VariableSummary" native="true"/>
     </widget>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>NewGeneVariables</class>
-   <extends>QWidget</extends>
-   <header location="global">Variables\newgenevariables.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>NewGeneVariableSummary</class>
    <extends>QWidget</extends>
    <header location="global">newgenevariablesummary.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NewGeneVariables</class>
+   <extends>QWidget</extends>
+   <header location="global">newgenevariables.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
