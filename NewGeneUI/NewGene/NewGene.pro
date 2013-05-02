@@ -21,10 +21,11 @@ SOURCES += main.cpp\
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.cpp \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroupbox.cpp \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryholder.cpp \
-    CreateOutput/SelectVariables/Variables/newgenevariablestoolbox.cpp \
     CreateOutput/SelectVariables/Variables/newgenevariablegroup.cpp \
     CreateOutput/SelectVariables/Variables/newgenevariables.cpp \
-    CreateOutput/SelectVariables/Variables/newgenevariablegroupsscrollarea.cpp
+    CreateOutput/SelectVariables/Variables/newgenevariablegroupsscrollarea.cpp \
+    CreateOutput/SelectVariables/Variables/newgenevariablestoolboxwrapper.cpp \
+    CreateOutput/SelectVariables/Variables/newgenevariablestoolbox.cpp
 
 HEADERS  += newgenemainwindow.h \
     CreateOutput/newgenecreateoutput.h \
@@ -34,10 +35,11 @@ HEADERS  += newgenemainwindow.h \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.h \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroupbox.h \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryholder.h \
-    CreateOutput/SelectVariables/Variables/newgenevariablestoolbox.h \
     CreateOutput/SelectVariables/Variables/newgenevariablegroup.h \
     CreateOutput/SelectVariables/Variables/newgenevariables.h \
-    CreateOutput/SelectVariables/Variables/newgenevariablegroupsscrollarea.h
+    CreateOutput/SelectVariables/Variables/newgenevariablegroupsscrollarea.h \
+    CreateOutput/SelectVariables/Variables/newgenevariablestoolboxwrapper.h \
+    CreateOutput/SelectVariables/Variables/newgenevariablestoolbox.h
 
 FORMS    += newgenemainwindow.ui \
     CreateOutput/newgenecreateoutput.ui \
@@ -46,7 +48,6 @@ FORMS    += newgenemainwindow.ui \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.ui \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroupbox.ui \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryholder.ui \
-    CreateOutput/SelectVariables/Variables/newgenevariablestoolbox.ui \
     CreateOutput/SelectVariables/Variables/newgenevariablegroup.ui \
     CreateOutput/SelectVariables/Variables/newgenevariables.ui \
     CreateOutput/SelectVariables/Variables/newgenevariablegroupsscrollarea.ui

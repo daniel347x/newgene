@@ -14,36 +14,22 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
-    <widget class="NewGeneVariablesToolbox" name="toolBox">
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <property name="tabSpacing">
-      <number>3</number>
-     </property>
-     <widget class="QWidget" name="page">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>382</width>
-        <height>258</height>
-       </rect>
-      </property>
-      <attribute name="label">
-       <string>Page 1</string>
-      </attribute>
-     </widget>
-    </widget>
+    <widget class="NewGeneVariablesToolboxWrapper" name="widget" native="true"/>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>NewGeneVariablesToolbox</class>
-   <extends>QToolBox</extends>
-   <header>newgenevariablestoolbox.h</header>
+   <class>NewGeneVariablesToolboxWrapper</class>
+   <extends>QWidget</extends>
+   <header location="global">newgenevariablestoolboxwrapper.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
