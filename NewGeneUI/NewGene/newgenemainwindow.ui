@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>NewGeneMainWindow</string>
+   <string>NewGene - K-adic data management for the social sciences</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
@@ -158,21 +158,51 @@ border-bottom: 9px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuInput">
+    <property name="title">
+     <string>Input</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuOutput">
+    <property name="title">
+     <string>Output</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+   </widget>
+   <addaction name="menuInput"/>
+   <addaction name="menuOutput"/>
+   <addaction name="menuView"/>
+   <addaction name="menuOptions"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>NewGeneCreateOutput</class>
-   <extends>QWidget</extends>
-   <header location="global">newgenecreateoutput.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>NewGeneTabWidget</class>
    <extends>QTabWidget</extends>
    <header location="global">newgenetabwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NewGeneCreateOutput</class>
+   <extends>QWidget</extends>
+   <header location="global">newgenecreateoutput.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

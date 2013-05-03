@@ -30,7 +30,7 @@
 {
 	background-color : #0cff7f;
 	font-weight: bold;
-	font-size: 20px;
+	font-size: 16px;
 }</string>
      </property>
      <property name="text">
@@ -58,7 +58,7 @@
         <x>0</x>
         <y>0</y>
         <width>400</width>
-        <height>276</height>
+        <height>281</height>
        </rect>
       </property>
      </widget>
@@ -70,7 +70,7 @@
   <customwidget>
    <class>NewGeneVariableGroupsScrollArea</class>
    <extends>QWidget</extends>
-   <header>newgenevariablegroupsscrollarea.h</header>
+   <header location="global">newgenevariablegroupsscrollarea.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

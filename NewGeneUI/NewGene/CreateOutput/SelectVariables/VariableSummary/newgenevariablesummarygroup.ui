@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NewGeneVariableGroup</class>
- <widget class="QWidget" name="NewGeneVariableGroup">
+ <class>NewGeneVariableSummaryGroup</class>
+ <widget class="QGroupBox" name="NewGeneVariableSummaryGroup">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,13 +11,16 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>GroupBox</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+  <property name="title">
+   <string>GroupBox</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Yi hi!</string>
+      <string>Yo No!</string>
      </property>
     </widget>
    </item>
