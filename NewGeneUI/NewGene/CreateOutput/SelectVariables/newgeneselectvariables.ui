@@ -14,14 +14,29 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>20</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <property name="spacing">
     <number>0</number>
    </property>
-   <item row="0" column="0">
+   <item row="2" column="0">
     <widget class="QSplitter" name="splitter">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
+     </property>
      <property name="styleSheet">
       <string notr="true">/* from http://stackoverflow.com/a/6833364/368896 */
 QSplitter::handle {
@@ -42,6 +57,26 @@ stop:0.6 rgba(255, 255, 255, 0));
      <widget class="NewGeneVariableSummary" name="CreateOutputDataset_VariablesSplitter_VariableSummary" native="true"/>
     </widget>
    </item>
+   <item row="1" column="0">
+    <widget class="TimeRangeBox" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="KAdColumnSelectionBox" name="frame_2">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -55,6 +90,18 @@ stop:0.6 rgba(255, 255, 255, 0));
    <class>NewGeneVariables</class>
    <extends>QWidget</extends>
    <header location="global">newgenevariables.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>KAdColumnSelectionBox</class>
+   <extends>QFrame</extends>
+   <header>kadcolumnselectionbox.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TimeRangeBox</class>
+   <extends>QFrame</extends>
+   <header>timerangebox.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

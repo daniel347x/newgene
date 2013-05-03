@@ -24,7 +24,9 @@ SOURCES += main.cpp\
     CreateOutput/SelectVariables/Variables/newgenevariablestoolboxwrapper.cpp \
     CreateOutput/SelectVariables/Variables/newgenevariablestoolbox.cpp \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.cpp \
-    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.cpp
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.cpp \
+    CreateOutput/SelectVariables/kadcolumnselectionbox.cpp \
+    CreateOutput/SelectVariables/timerangebox.cpp
 
 HEADERS  += newgenemainwindow.h \
     CreateOutput/newgenecreateoutput.h \
@@ -37,7 +39,9 @@ HEADERS  += newgenemainwindow.h \
     CreateOutput/SelectVariables/Variables/newgenevariablestoolboxwrapper.h \
     CreateOutput/SelectVariables/Variables/newgenevariablestoolbox.h \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.h \
-    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.h
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.h \
+    CreateOutput/SelectVariables/kadcolumnselectionbox.h \
+    CreateOutput/SelectVariables/timerangebox.h
 
 FORMS    += newgenemainwindow.ui \
     CreateOutput/newgenecreateoutput.ui \
@@ -47,7 +51,9 @@ FORMS    += newgenemainwindow.ui \
     CreateOutput/SelectVariables/Variables/newgenevariables.ui \
     CreateOutput/SelectVariables/Variables/newgenevariablegroupsscrollarea.ui \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.ui \
-    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.ui
+    CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.ui \
+    CreateOutput/SelectVariables/kadcolumnselectionbox.ui \
+    CreateOutput/SelectVariables/timerangebox.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
