@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     Model/modelchangeindicator.cpp \
     Model/modelchangerequest.cpp \
     Model/modelchange.cpp \
-    Model/modelvalidator.cpp
+    Model/modelvalidator.cpp \
+    Model/modelchangeitem.cpp
 
 HEADERS  += newgenemainwindow.h \
     CreateOutput/newgenecreateoutput.h \
@@ -51,7 +52,8 @@ HEADERS  += newgenemainwindow.h \
     Model/modelchangeindicator.h \
     Model/modelchangerequest.h \
     Model/modelchange.h \
-    Model/modelvalidator.h
+    Model/modelvalidator.h \
+    Model/modelchangeitem.h
 
 FORMS    += newgenemainwindow.ui \
     CreateOutput/newgenecreateoutput.ui \
