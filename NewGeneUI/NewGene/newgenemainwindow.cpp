@@ -1,5 +1,7 @@
 #include "newgenemainwindow.h"
 #include "ui_newgenemainwindow.h"
+#include <QMessageBox>
+#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 
 NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -7,12 +9,39 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
     ui(new Ui::NewGeneMainWindow)
 {
 
-    ui->setupUi(this);
-
-    NewGeneTabWidget * pTWmain = findChild<NewGeneTabWidget*>("tabWidgetMain");
-    if (pTWmain)
+    try
     {
-        pTWmain->NewGeneInitialize();
+
+        ui->setupUi(this);
+
+        NewGeneTabWidget * pTWmain = findChild<NewGeneTabWidget*>("tabWidgetMain");
+        if (pTWmain)
+        {
+            pTWmain->NewGeneInitialize();
+        }
+
+    }
+    catch (boost::exception & e)
+    {
+        if( std::string const * error_desc = boost::get_error_info<newgene_error_description>(e) )
+        {
+            boost::format msg(error_desc->c_str());
+            QMessageBox msgBox;
+            msgBox.setText(msg.str().c_str());
+            msgBox.exec();
+        }
+        else
+        {
+            boost::format msg("Unknown exception thrown");
+            QMessageBox msgBox;
+            msgBox.setText(msg.str().c_str());
+            msgBox.exec();
+        }
+    }
+    catch (std::exception & e)
+    {
+        boost::format msg("Exception thrown: %1%");
+        msg % e.what();
     }
 
 }

@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include "newgenewidget.h"
-#include "NewGeneModel.h"
 
 #include <memory>
 
@@ -25,6 +24,8 @@ protected:
 private:
     Ui::NewGeneMainWindow *ui;
     std::unique_ptr<NewGeneModel> model;
+
+    friend class NewGeneWidget;
 };
 
 #endif // NEWGENEMAINWINDOW_H
