@@ -26,7 +26,11 @@ SOURCES += main.cpp\
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.cpp \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.cpp \
     CreateOutput/SelectVariables/kadcolumnselectionbox.cpp \
-    CreateOutput/SelectVariables/timerangebox.cpp
+    CreateOutput/SelectVariables/timerangebox.cpp \
+    Model/newgenemodel.cpp \
+    Model/modelchangeindicator.cpp \
+    Model/modelchangerequest.cpp \
+    Model/modelchange.cpp
 
 HEADERS  += newgenemainwindow.h \
     CreateOutput/newgenecreateoutput.h \
@@ -41,7 +45,11 @@ HEADERS  += newgenemainwindow.h \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.h \
     CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.h \
     CreateOutput/SelectVariables/kadcolumnselectionbox.h \
-    CreateOutput/SelectVariables/timerangebox.h
+    CreateOutput/SelectVariables/timerangebox.h \
+    Model/newgenemodel.h \
+    Model/modelchangeindicator.h \
+    Model/modelchangerequest.h \
+    Model/modelchange.h
 
 FORMS    += newgenemainwindow.ui \
     CreateOutput/newgenecreateoutput.ui \
