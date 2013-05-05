@@ -3,7 +3,8 @@
 #include <QLayout>
 
 NewGeneVariablesToolbox::NewGeneVariablesToolbox(QWidget *parent) :
-    QToolBox(parent)
+    QToolBox(parent),
+    NewGeneWidget(this) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
     layout()->setSpacing(1);
 

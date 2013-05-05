@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     Model/modelchange.cpp \
     Model/modelvalidator.cpp \
     Model/modelchangeitem.cpp \
-    Model/modelchangerequestitem.cpp
+    Model/modelchangerequestitem.cpp \
+    newgenewidget.cpp
 
 HEADERS  += newgenemainwindow.h \
     CreateOutput/newgenecreateoutput.h \
@@ -55,7 +56,8 @@ HEADERS  += newgenemainwindow.h \
     Model/modelchange.h \
     Model/modelvalidator.h \
     Model/modelchangeitem.h \
-    Model/modelchangerequestitem.h
+    Model/modelchangerequestitem.h \
+    newgenewidget.h
 
 FORMS    += newgenemainwindow.ui \
     CreateOutput/newgenecreateoutput.ui \
@@ -76,10 +78,13 @@ else:unix: LIBS += -L$$PWD/../../NewGeneBackEnd/ -lNewGeneBackEnd
 
 INCLUDEPATH += $$PWD/../../NewGeneBackEnd/Debug
 DEPENDPATH += $$PWD/../../NewGeneBackEnd/Debug
+INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/CreateOutput
 INCLUDEPATH += $$PWD/CreateOutput/SelectVariables
 INCLUDEPATH += $$PWD/CreateOutput/SelectVariables/VariableSummary
 INCLUDEPATH += $$PWD/CreateOutput/SelectVariables/Variables
+INCLUDEPATH += $$PWD/Model
+INCLUDEPATH += $(BOOST_ROOT)
 
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/release/NewGeneBackEnd.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/debug/NewGeneBackEnd.lib
