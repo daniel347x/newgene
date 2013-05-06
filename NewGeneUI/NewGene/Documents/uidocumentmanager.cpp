@@ -3,8 +3,8 @@
 
 UIDocumentManager * UIDocumentManager::documentManager = NULL;
 
-UIDocumentManager::UIDocumentManager(QObject *parent) :
-    QObject(parent)
+UIDocumentManager::UIDocumentManager(NewGeneMainWindow *parent) :
+    UIManager(parent)
 {
 }
 

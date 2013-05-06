@@ -2,16 +2,15 @@
 #define UIDOCUMENTMANAGER_H
 
 #include "globals.h"
-#include "newgenemainwindow.h"
-#include <QObject>
+#include "uimanager.h"
 
 class NewGeneMainWindow;
 
-class UIDocumentManager : public QObject
+class UIDocumentManager : public UIManager
 {
     Q_OBJECT
 public:
-    explicit UIDocumentManager(QObject *parent = 0);
+    explicit UIDocumentManager(NewGeneMainWindow *parent = 0);
 
     static UIDocumentManager * getDocumentManager(NewGeneMainWindow * parent = NULL);
 

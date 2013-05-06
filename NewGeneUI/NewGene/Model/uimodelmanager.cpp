@@ -3,8 +3,8 @@
 
 UIModelManager * UIModelManager::modelManager = NULL;
 
-UIModelManager::UIModelManager(QObject *parent) :
-    QObject(parent)
+UIModelManager::UIModelManager(NewGeneMainWindow *parent) :
+    UIManager(parent)
 {
 }
 

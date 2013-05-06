@@ -2,12 +2,11 @@
 #define UISTATUSMANAGER_H
 
 #include "globals.h"
-#include "newgenemainwindow.h"
-#include <QObject>
+#include "uimanager.h"
 
 class NewGeneMainWindow;
 
-class UIStatusManager : public QObject
+class UIStatusManager : public UIManager
 {
     Q_OBJECT
 
@@ -21,7 +20,7 @@ public:
         , IMPORTANCE_CRITICAL
     };
 
-    explicit UIStatusManager(QObject *parent = 0);
+    explicit UIStatusManager(NewGeneMainWindow *parent = 0);
 
     static UIStatusManager * getStatusManager(NewGeneMainWindow * parent = NULL);
 

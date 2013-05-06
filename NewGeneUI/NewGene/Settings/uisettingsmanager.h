@@ -2,22 +2,21 @@
 #define UISETTINGS_H
 
 #include "globals.h"
-#include "newgenemainwindow.h"
+#include "uimanager.h"
+#include <QString>
 #ifndef Q_MOC_RUN
 #   include <boost\filesystem.hpp>
 #   include <boost/property_tree/ptree.hpp>
 #   include <boost/property_tree/xml_parser.hpp>
 #endif
-#include <QObject>
-#include <QString>
 
 class NewGeneMainWindow;
 
-class UISettingsManager : public QObject
+class UISettingsManager : public UIManager
 {
     Q_OBJECT
 public:
-    explicit UISettingsManager(QObject *parent = 0);
+    explicit UISettingsManager(NewGeneMainWindow *parent = 0);
 
     static UISettingsManager * getSettingsManager(NewGeneMainWindow * parent = NULL);
 

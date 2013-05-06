@@ -6,6 +6,7 @@
 #include "uidocumentmanager.h"
 #include "uisettingsmanager.h"
 #include "uimodelmanager.h"
+#include "uimodel.h"
 
 NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
     QMainWindow(parent),

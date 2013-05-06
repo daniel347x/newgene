@@ -2,18 +2,16 @@
 #define UIMODELMANAGER_H
 
 #include "globals.h"
-#include <QObject>
-#include "uimodel.h"
-#include "uisettingsmanager.h"
-#include "uistatusmanager.h"
+#include "uimanager.h"
 
 class NewGeneMainWindow;
+class UIModel;
 
-class UIModelManager : public QObject
+class UIModelManager : public UIManager
 {
     Q_OBJECT
 public:
-    explicit UIModelManager(QObject *parent = 0);
+    explicit UIModelManager(NewGeneMainWindow *parent = 0);
 
     static UIModelManager * getModelManager(NewGeneMainWindow * parent = NULL);
 

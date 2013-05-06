@@ -39,7 +39,8 @@ SOURCES += main.cpp\
 	Model/uimodelmanager.cpp \
 	Documents/uidocumentmanager.cpp \
 	Status/uistatusmanager.cpp \
-    globals.cpp
+    globals.cpp \
+    uimanager.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -67,7 +68,8 @@ HEADERS  += newgenemainwindow.h \
 	Model/uimodelmanager.h \
 	Documents/uidocumentmanager.h \
 	Status/uistatusmanager.h \
-    globals.h
+    globals.h \
+    uimanager.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \

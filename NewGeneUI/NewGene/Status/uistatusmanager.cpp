@@ -4,8 +4,8 @@
 
 UIStatusManager * UIStatusManager::status_ = NULL;
 
-UIStatusManager::UIStatusManager(QObject *parent) :
-    QObject(parent)
+UIStatusManager::UIStatusManager(NewGeneMainWindow *parent) :
+    UIManager(parent)
 {
 }
 
