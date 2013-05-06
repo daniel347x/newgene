@@ -38,7 +38,8 @@ SOURCES += main.cpp\
 	Settings/uisettingsmanager.cpp \
 	Model/uimodelmanager.cpp \
 	Documents/uidocumentmanager.cpp \
-	Status/uistatusmanager.cpp
+	Status/uistatusmanager.cpp \
+    globals.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
