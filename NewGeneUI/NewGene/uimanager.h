@@ -22,7 +22,7 @@ public:
     };
 
     explicit UIManager(NewGeneMainWindow *parent = 0);
-    NewGeneMainWindow & mainWindow();
+    NewGeneMainWindow & getMainWindow();
 
 signals:
 

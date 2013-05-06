@@ -1,6 +1,8 @@
 #include "uistatusmanager.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 #include <QMessageBox>
+#include <QStatusBar>
+#include "newgenemainwindow.h"
 
 UIStatusManager * UIStatusManager::status_ = NULL;
 
@@ -46,6 +48,7 @@ void UIStatusManager::LogStatus(const QString &status_, const UIStatusManager::I
 
 void UIStatusManager::PostStatus(const QString &status_, const UIStatusManager::IMPORTANCE importance_level)
 {
+
     switch (importance_level)
     {
     case IMPORTANCE_DEBUG:
@@ -64,5 +67,7 @@ void UIStatusManager::PostStatus(const QString &status_, const UIStatusManager::
         msgBox.exec();
     }
 
+    NewGeneMainWindow & mainWindow = getMainWindow();
+    mainWindow.statusBar()->showMessage(status_);
 
 }

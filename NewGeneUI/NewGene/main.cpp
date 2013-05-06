@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include "..\..\NewGeneBackEnd\test.h"
+#include "uistatusmanager.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,6 +12,8 @@ int main(int argc, char *argv[])
 
     try
     {
+
+        w.statusManager().PostStatus("Main window created.");
 
         w.show();
         return a.exec();

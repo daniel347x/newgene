@@ -17,7 +17,6 @@ class NewGeneWidget
 public:
     explicit NewGeneWidget(QWidget * self_ = 0);
 
-protected:
     NewGeneMainWindow & mainWindow();
     UIModel & model();
     UIModelManager & modelManager(NewGeneMainWindow * parent = NULL);
