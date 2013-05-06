@@ -6,6 +6,7 @@
 #   include <boost\filesystem.hpp>
 #endif
 #include <QObject>
+#include <QString>
 
 class UISettingsManager : public QObject
 {
@@ -14,6 +15,8 @@ public:
     explicit UISettingsManager(QObject *parent = 0);
 
     static UISettingsManager * getSettingsManager();
+
+    static QString settingsFileName;
 
 signals:
 
