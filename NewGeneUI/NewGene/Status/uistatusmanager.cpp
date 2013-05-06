@@ -20,6 +20,11 @@ UIStatusManager * UIStatusManager::getStatusManager(NewGeneMainWindow * parent)
     if (status_ == NULL)
     {
         status_ = new UIStatusManager(parent);
+        if (status_)
+        {
+            status_->which = MANAGER_STATUS;
+            status_->which_descriptor = "UIStatusManager";
+        }
     }
     if (status_ == NULL)
     {

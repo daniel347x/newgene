@@ -19,6 +19,11 @@ UIDocumentManager * UIDocumentManager::getDocumentManager(NewGeneMainWindow * pa
     if (documentManager == NULL)
     {
         documentManager = new UIDocumentManager(parent);
+        if (documentManager)
+        {
+            documentManager->which = MANAGER_DOCUMENTS;
+            documentManager->which_descriptor = "UIDocumentManager";
+        }
     }
     if (documentManager == NULL)
     {

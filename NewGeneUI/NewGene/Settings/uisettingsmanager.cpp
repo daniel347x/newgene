@@ -29,6 +29,11 @@ UISettingsManager * UISettingsManager::getSettingsManager(NewGeneMainWindow * pa
     if (settings_ == NULL)
     {
         settings_ = new UISettingsManager(parent);
+        if (settings_)
+        {
+            settings_->which = MANAGER_SETTINGS;
+            settings_->which_descriptor = "UISettingsManager";
+        }
     }
     if (settings_ == NULL)
     {

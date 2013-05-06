@@ -19,6 +19,11 @@ UIModelManager *UIModelManager::getModelManager(NewGeneMainWindow * parent)
     if (modelManager == NULL)
     {
         modelManager = new UIModelManager(parent);
+        if (modelManager)
+        {
+            modelManager->which = MANAGER_MODEL;
+            modelManager->which_descriptor = "UIModelManager";
+        }
     }
     if (modelManager == NULL)
     {
