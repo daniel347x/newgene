@@ -1,6 +1,9 @@
 #ifndef UISETTINGS_H
 #define UISETTINGS_H
 
+#ifndef Q_MOC_RUN
+#   include <boost\filesystem.hpp>
+#endif
 #include <QObject>
 
 class UISettingsManager : public QObject
