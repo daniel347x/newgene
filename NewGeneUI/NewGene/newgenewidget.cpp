@@ -35,3 +35,8 @@ UISettingsManager &NewGeneWidget::settingsManager()
 {
     return *UISettingsManager::getSettingsManager();
 }
+
+UIDocumentManager &NewGeneWidget::documentManager()
+{
+    return *UIDocumentManager::getDocumentManager();
+}

@@ -9,6 +9,8 @@ class UIDocumentManager : public QObject
 public:
     explicit UIDocumentManager(QObject *parent = 0);
 
+    static UIDocumentManager * getDocumentManager();
+
 signals:
 
 public slots:

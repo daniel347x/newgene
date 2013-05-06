@@ -3,6 +3,7 @@
 
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 #include "uisettingsmanager.h"
+#include "uidocumentmanager.h"
 #include "uimodel.h"
 #include "uimodelmanager.h"
 class QWidget;
@@ -18,6 +19,7 @@ protected:
     UIModel & model();
     UIModelManager & modelManager();
     UISettingsManager & settingsManager();
+    UIDocumentManager & documentManager();
 
 private:
     QWidget * self;

@@ -1,4 +1,5 @@
 #include "uidocumentmanager.h"
+#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 
 UIDocumentManager * UIDocumentManager::documentManager = NULL;
 

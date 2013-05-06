@@ -91,6 +91,7 @@ INCLUDEPATH += $$PWD/CreateOutput/SelectVariables/VariableSummary
 INCLUDEPATH += $$PWD/CreateOutput/SelectVariables/Variables
 INCLUDEPATH += $$PWD/Model
 INCLUDEPATH += $$PWD/Settings
+INCLUDEPATH += $$PWD/Documents
 INCLUDEPATH += $(BOOST_ROOT)
 
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/release/NewGeneBackEnd.lib
