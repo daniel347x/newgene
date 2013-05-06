@@ -37,11 +37,13 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
             msgBox.setText(msg.str().c_str());
             msgBox.exec();
         }
+        QCoreApplication::exit(-1);
     }
     catch (std::exception & e)
     {
         boost::format msg("Exception thrown: %1%");
         msg % e.what();
+        QCoreApplication::exit(-1);
     }
 
 }
