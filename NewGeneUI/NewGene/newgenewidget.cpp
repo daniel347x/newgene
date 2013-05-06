@@ -28,22 +28,10 @@ UIModel & NewGeneWidget::model()
 
 UIModelManager &NewGeneWidget::modelManager()
 {
-    UIModelManager * pModelManager = UIModelManager::getModelManager();
-    if (!pModelManager)
-    {
-        boost::format msg("Model manager not instantiated.");
-        throw NewGeneException() << newgene_error_description(msg.str());
-    }
-    return *pModelManager;
+    return *UIModelManager::getModelManager();
 }
 
 UISettingsManager &NewGeneWidget::settingsManager()
 {
-    UISettingsManager * pSettingsManager = UISettingsManager::getSettingsManager();
-    if (!pSettingsManager)
-    {
-        boost::format msg("Settings manager not instantiated.");
-        throw NewGeneException() << newgene_error_description(msg.str());
-    }
-    return *pSettingsManager;
+    return *UISettingsManager::getSettingsManager();
 }

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "uimodel.h"
+#include "..\Settings\uisettingsmanager.h"
 
 class UIModelManager : public QObject
 {
@@ -17,6 +18,9 @@ public:
 signals:
 
 public slots:
+
+protected:
+    UISettingsManager & getSettingsManager();
 
 private:
     static UIModelManager * modelManager;
