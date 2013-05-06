@@ -2,7 +2,7 @@
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 #include <QStandardPaths>
 #include <fstream>
-//#include <QDebug>
+#include <QDebug>
 
 QString UISettingsManager::settingsFileName = "NewGene.Settings.xml";
 UISettingsManager * UISettingsManager::settings_ = NULL;
@@ -31,7 +31,16 @@ UISettingsManager::UISettingsManager(QObject *parent) :
         {
             QString settingsPathString = settingsPathStringList.at(n);
             boost::filesystem::path settingsPathTest(settingsPathString.toStdString());
+            if (!boost::filesystem::exists(settingsPathTest))
+            {
+                //qDebug() << "Attempting to create directory " << settingsPathTest.string().c_str();
+                if (!boost::filesystem::create_directory(settingsPathTest))
+                {
+                    continue;
+                }
+            }
             settingsPathTest /= settingsFileName.toStdString();
+            //qDebug() << "Attempting to create file " << settingsPathTest.string().c_str();
             std::ofstream settingsPathTestFile;
             settingsPathTestFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             try
@@ -42,7 +51,9 @@ UISettingsManager::UISettingsManager(QObject *parent) :
                     settingsPathTestFile.write("\n", 1); // write 1 character
                     settingsPathTestFile.close();
                     settingsPath = settingsPathTest;
+                    //qDebug() << "Created: " << settingsPath.string().c_str();
                     found = true;
+                    break;
                 }
                 else
                 {
@@ -59,6 +70,11 @@ UISettingsManager::UISettingsManager(QObject *parent) :
     if (found)
     {
         //ReadSettings();
+        //qDebug() << "Found: " << settingsPath.string().c_str();
+    }
+    else
+    {
+        //qDebug() << "Not found.";
     }
 }
 
