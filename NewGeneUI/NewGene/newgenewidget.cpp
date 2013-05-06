@@ -40,3 +40,8 @@ UIDocumentManager &NewGeneWidget::documentManager()
 {
     return *UIDocumentManager::getDocumentManager();
 }
+
+UIStatusManager &NewGeneWidget::statusManager()
+{
+    return *UIStatusManager::getStatusManager();
+}

@@ -4,6 +4,7 @@
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 #include "uisettingsmanager.h"
 #include "uidocumentmanager.h"
+#include "uistatusmanager.h"
 #include "uimodel.h"
 #include "uimodelmanager.h"
 class QWidget;
@@ -20,6 +21,7 @@ protected:
     UIModelManager & modelManager();
     UISettingsManager & settingsManager();
     UIDocumentManager & documentManager();
+    UIStatusManager & statusManager();
 
 private:
     QWidget * self;
