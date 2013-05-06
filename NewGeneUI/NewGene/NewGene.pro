@@ -35,7 +35,8 @@ SOURCES += main.cpp\
     Model/modelchangerequestitem.cpp \
     newgenewidget.cpp \
     Model/uimodel.cpp \
-    Settings/uisettingsmanager.cpp
+    Settings/uisettingsmanager.cpp \
+    Model/uimodelmanager.cpp
 
 HEADERS  += newgenemainwindow.h \
     CreateOutput/newgenecreateoutput.h \
@@ -59,7 +60,8 @@ HEADERS  += newgenemainwindow.h \
     Model/modelchangerequestitem.h \
     newgenewidget.h \
     Model/uimodel.h \
-    Settings/uisettingsmanager.h
+    Settings/uisettingsmanager.h \
+    Model/uimodelmanager.h
 
 FORMS    += newgenemainwindow.ui \
     CreateOutput/newgenecreateoutput.ui \
