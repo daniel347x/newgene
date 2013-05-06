@@ -74,10 +74,16 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Documents\DocumentManager.h" />
+    <ClInclude Include="Model\ModelManager.h" />
+    <ClInclude Include="Settings\SettingsManager.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Documents\DocumentManager.cpp" />
+    <ClCompile Include="Model\ModelManager.cpp" />
+    <ClCompile Include="Settings\SettingsManager.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
   </ItemGroup>

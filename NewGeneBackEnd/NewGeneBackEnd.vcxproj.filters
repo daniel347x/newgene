@@ -19,6 +19,24 @@
     <Filter Include="Source Files\Utilities">
       <UniqueIdentifier>{a486581f-e298-48da-b272-9744c6e5489d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Model">
+      <UniqueIdentifier>{611cc8c0-3416-4ea1-a63c-196fc645762c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model">
+      <UniqueIdentifier>{fa72034d-cb23-4f3c-bb91-2c2150dca332}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Settings">
+      <UniqueIdentifier>{0ae3c0c2-1070-4fd2-a088-a4d8e30bfe6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Settings">
+      <UniqueIdentifier>{384f8d97-2440-43d5-b299-0bff42d32167}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Documents">
+      <UniqueIdentifier>{0a012376-4ae2-4466-8684-0d7c3a7f212f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Documents">
+      <UniqueIdentifier>{7f26984a-b471-4273-b9e2-bc0ae1e1c77b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -30,6 +48,15 @@
     <ClInclude Include="Utilities\NewGeneException.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Model\ModelManager.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Documents\DocumentManager.h">
+      <Filter>Header Files\Documents</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\SettingsManager.h">
+      <Filter>Header Files\Settings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -37,6 +64,15 @@
     </ClCompile>
     <ClCompile Include="Utilities\NewGeneException.cpp">
       <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\ModelManager.cpp">
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Documents\DocumentManager.cpp">
+      <Filter>Source Files\Documents</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\SettingsManager.cpp">
+      <Filter>Source Files\Settings</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
