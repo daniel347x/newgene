@@ -16,6 +16,8 @@ public:
 protected:
     NewGeneMainWindow & mainWindow();
     UIModel & model();
+    UIModelManager & modelManager();
+    UISettingsManager & settingsManager();
 
 private:
     QWidget * self;

@@ -9,7 +9,7 @@ class UIModelManager : public QObject
 public:
     explicit UIModelManager(QObject *parent = 0);
 
-    UIModelManager * getModelManager();
+    static UIModelManager * getModelManager();
 
 signals:
 

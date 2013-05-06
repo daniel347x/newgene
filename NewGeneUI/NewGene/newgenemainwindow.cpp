@@ -20,6 +20,8 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
             pTWmain->NewGeneInitialize();
         }
 
+
+
     }
     catch (boost::exception & e)
     {
