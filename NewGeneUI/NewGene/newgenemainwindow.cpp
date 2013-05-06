@@ -20,6 +20,7 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
             pTWmain->NewGeneInitialize();
         }
 
+        settingsManager(); // empty call whose purpose is to simply instantiate the Settings singleton, if not done previously; the first time it is instantiated, the Settings manager will load current settings from disk
         model.reset(modelManager().loadDefaultModel());
 
     }

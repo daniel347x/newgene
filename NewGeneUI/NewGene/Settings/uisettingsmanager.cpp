@@ -4,7 +4,8 @@
 UISettingsManager * UISettingsManager::settings_ = NULL;
 
 UISettingsManager::UISettingsManager(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    dirty(false)
 {
 }
 

@@ -18,6 +18,8 @@ public slots:
 private:
     static UISettingsManager * settings_;
 
+    bool dirty;
+
 };
 
 #endif // UISETTINGS_H
