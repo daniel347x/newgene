@@ -16,7 +16,7 @@ signals:
 public slots:
 
 private:
-    UIModelManager * modelManager;
+    static UIModelManager * modelManager;
 };
 
 #endif // UIMODELMANAGER_H

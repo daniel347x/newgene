@@ -1,4 +1,4 @@
-#include "uisettings.h"
+#include "uisettingsmanager.h"
 
 UISettingsManager * UISettingsManager::settings_ = NULL;
 
