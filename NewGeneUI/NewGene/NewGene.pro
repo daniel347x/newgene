@@ -65,7 +65,8 @@ HEADERS  += newgenemainwindow.h \
 	Settings/uisettingsmanager.h \
 	Model/uimodelmanager.h \
 	Documents/uidocumentmanager.h \
-	Status/uistatusmanager.h
+	Status/uistatusmanager.h \
+    globals.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \

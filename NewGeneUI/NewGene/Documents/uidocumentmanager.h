@@ -1,6 +1,7 @@
 #ifndef UIDOCUMENTMANAGER_H
 #define UIDOCUMENTMANAGER_H
 
+#include "globals.h"
 #include <QObject>
 
 class UIDocumentManager : public QObject

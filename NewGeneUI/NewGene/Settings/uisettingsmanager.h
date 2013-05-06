@@ -1,6 +1,7 @@
 #ifndef UISETTINGS_H
 #define UISETTINGS_H
 
+#include "globals.h"
 #ifndef Q_MOC_RUN
 #   include <boost\filesystem.hpp>
 #endif
@@ -22,7 +23,7 @@ private:
     static UISettingsManager * settings_;
 
     bool dirty;
-
+    boost::filesystem::path settingsPath;
 };
 
 #endif // UISETTINGS_H

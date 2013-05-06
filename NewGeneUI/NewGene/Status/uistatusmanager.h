@@ -1,6 +1,7 @@
 #ifndef UISTATUSMANAGER_H
 #define UISTATUSMANAGER_H
 
+#include "globals.h"
 #include <QObject>
 
 class UIStatusManager : public QObject

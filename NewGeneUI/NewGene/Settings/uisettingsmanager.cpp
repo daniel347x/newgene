@@ -7,6 +7,7 @@ UISettingsManager::UISettingsManager(QObject *parent) :
     QObject(parent),
     dirty(false)
 {
+
 }
 
 UISettingsManager * UISettingsManager::getSettingsManager()

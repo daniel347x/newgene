@@ -1,6 +1,7 @@
 #ifndef NEWGENEWIDGET_H
 #define NEWGENEWIDGET_H
 
+#include "globals.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 #include "uisettingsmanager.h"
 #include "uidocumentmanager.h"

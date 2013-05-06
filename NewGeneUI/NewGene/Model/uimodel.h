@@ -1,6 +1,7 @@
 #ifndef NEWGENEMODEL_H
 #define NEWGENEMODEL_H
 
+#include "globals.h"
 #include <QObject>
 
 class UIModel : public QObject

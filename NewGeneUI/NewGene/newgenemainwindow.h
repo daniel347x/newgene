@@ -1,6 +1,7 @@
 #ifndef NEWGENEMAINWINDOW_H
 #define NEWGENEMAINWINDOW_H
 
+#include "globals.h"
 #include <QMainWindow>
 #include "newgenewidget.h"
 

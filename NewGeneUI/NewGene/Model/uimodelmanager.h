@@ -1,9 +1,11 @@
 #ifndef UIMODELMANAGER_H
 #define UIMODELMANAGER_H
 
+#include "globals.h"
 #include <QObject>
 #include "uimodel.h"
-#include "..\Settings\uisettingsmanager.h"
+#include "uisettingsmanager.h"
+#include "uistatusmanager.h"
 
 class UIModelManager : public QObject
 {
