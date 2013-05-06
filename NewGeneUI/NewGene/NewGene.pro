@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     newgenewidget.cpp \
     Model/uimodel.cpp \
     Settings/uisettingsmanager.cpp \
-    Model/uimodelmanager.cpp
+    Model/uimodelmanager.cpp \
+    Documents/uidocumentmanager.cpp
 
 HEADERS  += newgenemainwindow.h \
     CreateOutput/newgenecreateoutput.h \
@@ -61,7 +62,8 @@ HEADERS  += newgenemainwindow.h \
     newgenewidget.h \
     Model/uimodel.h \
     Settings/uisettingsmanager.h \
-    Model/uimodelmanager.h
+    Model/uimodelmanager.h \
+    Documents/uidocumentmanager.h
 
 FORMS    += newgenemainwindow.ui \
     CreateOutput/newgenecreateoutput.ui \
