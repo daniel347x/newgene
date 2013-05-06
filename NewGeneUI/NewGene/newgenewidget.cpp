@@ -2,6 +2,10 @@
 #include <QWidget>
 #include "newgenemainwindow.h"
 #include "newgenewidget.h"
+#include "uimodelmanager.h"
+#include "uisettingsmanager.h"
+#include "uidocumentmanager.h"
+#include "uistatusmanager.h"
 
 NewGeneWidget::NewGeneWidget(QWidget * self_) :
     self(self_)
@@ -26,22 +30,22 @@ UIModel & NewGeneWidget::model()
     return *pNewGeneModel;
 }
 
-UIModelManager &NewGeneWidget::modelManager()
+UIModelManager &NewGeneWidget::modelManager(NewGeneMainWindow * parent)
 {
-    return *UIModelManager::getModelManager();
+    return *UIModelManager::getModelManager(parent);
 }
 
-UISettingsManager &NewGeneWidget::settingsManager()
+UISettingsManager &NewGeneWidget::settingsManager(NewGeneMainWindow * parent)
 {
-    return *UISettingsManager::getSettingsManager();
+    return *UISettingsManager::getSettingsManager(parent);
 }
 
-UIDocumentManager &NewGeneWidget::documentManager()
+UIDocumentManager &NewGeneWidget::documentManager(NewGeneMainWindow * parent)
 {
-    return *UIDocumentManager::getDocumentManager();
+    return *UIDocumentManager::getDocumentManager(parent);
 }
 
-UIStatusManager &NewGeneWidget::statusManager()
+UIStatusManager &NewGeneWidget::statusManager(NewGeneMainWindow * parent)
 {
-    return *UIStatusManager::getStatusManager();
+    return *UIStatusManager::getStatusManager(parent);
 }

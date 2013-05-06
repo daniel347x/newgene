@@ -7,22 +7,21 @@
 #include "uisettingsmanager.h"
 #include "uistatusmanager.h"
 
+class NewGeneMainWindow;
+
 class UIModelManager : public QObject
 {
     Q_OBJECT
 public:
     explicit UIModelManager(QObject *parent = 0);
 
-    static UIModelManager * getModelManager();
+    static UIModelManager * getModelManager(NewGeneMainWindow * parent = NULL);
 
     UIModel * loadDefaultModel();
 
 signals:
 
 public slots:
-
-protected:
-    UISettingsManager & getSettingsManager();
 
 private:
     static UIModelManager * modelManager;

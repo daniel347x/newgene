@@ -3,13 +3,14 @@
 
 #include "globals.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
-#include "uisettingsmanager.h"
-#include "uidocumentmanager.h"
-#include "uistatusmanager.h"
-#include "uimodel.h"
-#include "uimodelmanager.h"
+
 class QWidget;
 class NewGeneMainWindow;
+class UIModelManager;
+class UISettingsManager;
+class UIDocumentManager;
+class UIStatusManager;
+class UIModel;
 
 class NewGeneWidget
 {
@@ -19,10 +20,10 @@ public:
 protected:
     NewGeneMainWindow & mainWindow();
     UIModel & model();
-    UIModelManager & modelManager();
-    UISettingsManager & settingsManager();
-    UIDocumentManager & documentManager();
-    UIStatusManager & statusManager();
+    UIModelManager & modelManager(NewGeneMainWindow * parent = NULL);
+    UISettingsManager & settingsManager(NewGeneMainWindow * parent = NULL);
+    UIDocumentManager & documentManager(NewGeneMainWindow * parent = NULL);
+    UIStatusManager & statusManager(NewGeneMainWindow * parent = NULL);
 
 private:
     QWidget * self;

@@ -2,7 +2,10 @@
 #define UIDOCUMENTMANAGER_H
 
 #include "globals.h"
+#include "newgenemainwindow.h"
 #include <QObject>
+
+class NewGeneMainWindow;
 
 class UIDocumentManager : public QObject
 {
@@ -10,7 +13,7 @@ class UIDocumentManager : public QObject
 public:
     explicit UIDocumentManager(QObject *parent = 0);
 
-    static UIDocumentManager * getDocumentManager();
+    static UIDocumentManager * getDocumentManager(NewGeneMainWindow * parent = NULL);
 
 signals:
 

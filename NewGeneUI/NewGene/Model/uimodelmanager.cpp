@@ -8,23 +8,30 @@ UIModelManager::UIModelManager(QObject *parent) :
 {
 }
 
-UIModelManager *UIModelManager::getModelManager()
+UIModelManager *UIModelManager::getModelManager(NewGeneMainWindow * parent)
 {
+
+    // *****************************************************************
+    // TODO: Create std::map<> from parent to manager, and retrieve that
+    // ... this will support multiple main windows in the future.
+    // *****************************************************************
+
     if (modelManager == NULL)
     {
-        modelManager = new UIModelManager;
+        modelManager = new UIModelManager(parent);
     }
     if (modelManager == NULL)
     {
         boost::format msg("Model manager not instantiated.");
         throw NewGeneException() << newgene_error_description(msg.str());
     }
+    if (modelManager->parent() == NULL)
+    {
+        boost::format msg("Model manager's main window not set.");
+        throw NewGeneException() << newgene_error_description(msg.str());
+    }
     return modelManager;
-}
 
-UISettingsManager &UIModelManager::getSettingsManager()
-{
-    return *UISettingsManager::getSettingsManager();
 }
 
 UIModel *UIModelManager::loadDefaultModel()

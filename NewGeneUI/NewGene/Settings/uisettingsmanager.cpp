@@ -11,6 +11,41 @@ UISettingsManager::UISettingsManager(QObject *parent) :
     QObject(parent),
     dirty(false)
 {
+    bool found = ObtainSettingsPath();
+    if (!found)
+    {
+
+    }
+}
+
+UISettingsManager * UISettingsManager::getSettingsManager(NewGeneMainWindow * parent)
+{
+
+    // *****************************************************************
+    // TODO: Create std::map<> from parent to manager, and retrieve that
+    // ... this will support multiple main windows in the future.
+    // *****************************************************************
+
+    if (settings_ == NULL)
+    {
+        settings_ = new UISettingsManager(parent);
+    }
+    if (settings_ == NULL)
+    {
+        boost::format msg("Settings manager not instantiated.");
+        throw NewGeneException() << newgene_error_description(msg.str());
+    }
+    if (settings_->parent() == NULL)
+    {
+        boost::format msg("Settings manager's main window not set.");
+        throw NewGeneException() << newgene_error_description(msg.str());
+    }
+    return settings_;
+
+}
+
+bool UISettingsManager::ObtainSettingsPath()
+{
     QStringList settingsPathStringList = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
     bool found = false;
     for (int n=0; n<settingsPathStringList.size(); ++n)
@@ -66,28 +101,5 @@ UISettingsManager::UISettingsManager(QObject *parent) :
             }
         }
     }
-
-    if (found)
-    {
-        //ReadSettings();
-        //qDebug() << "Found: " << settingsPath.string().c_str();
-    }
-    else
-    {
-        //qDebug() << "Not found.";
-    }
-}
-
-UISettingsManager * UISettingsManager::getSettingsManager()
-{
-    if (settings_ == NULL)
-    {
-        settings_ = new UISettingsManager;
-    }
-    if (settings_ == NULL)
-    {
-        boost::format msg("Settings manager not instantiated.");
-        throw NewGeneException() << newgene_error_description(msg.str());
-    }
-    return settings_;
+    return found;
 }

@@ -2,6 +2,10 @@
 #include "ui_newgenemainwindow.h"
 #include <QMessageBox>
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "uistatusmanager.h"
+#include "uidocumentmanager.h"
+#include "uisettingsmanager.h"
+#include "uimodelmanager.h"
 
 NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,7 +24,12 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
             pTWmain->NewGeneInitialize();
         }
 
-        settingsManager(); // empty call whose purpose is to simply instantiate the Settings singleton, if not done previously; the first time it is instantiated, the Settings manager will load current settings from disk
+        // Empty calls to create manager instances
+        statusManager(this);
+        documentManager(this);
+        settingsManager(this);
+        modelManager(this);
+
         model.reset(modelManager().loadDefaultModel());
 
     }
