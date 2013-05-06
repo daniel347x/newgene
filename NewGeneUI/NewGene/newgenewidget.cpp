@@ -15,9 +15,9 @@ NewGeneMainWindow & NewGeneWidget::mainWindow()
     return *pNewGeneMainWindow;
 }
 
-NewGeneModel & NewGeneWidget::model()
+UIModel & NewGeneWidget::model()
 {
-    NewGeneModel * pNewGeneModel = mainWindow().model.get();
+    UIModel * pNewGeneModel = mainWindow().model.get();
     if (!pNewGeneModel)
     {
         boost::format msg("Model not instantiated.");

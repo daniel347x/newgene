@@ -2,7 +2,7 @@
 #define NEWGENEWIDGET_H
 
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
-#include "newgenemodel.h"
+#include "uimodel.h"
 class QWidget;
 class NewGeneMainWindow;
 
@@ -13,7 +13,7 @@ public:
 
 protected:
     NewGeneMainWindow & mainWindow();
-    NewGeneModel & model();
+    UIModel & model();
 
 private:
     QWidget * self;

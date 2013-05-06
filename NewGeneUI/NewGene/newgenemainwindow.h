@@ -23,7 +23,7 @@ protected:
 
 private:
     Ui::NewGeneMainWindow *ui;
-    std::unique_ptr<NewGeneModel> model;
+    std::unique_ptr<UIModel> model;
 
     friend class NewGeneWidget;
 };
