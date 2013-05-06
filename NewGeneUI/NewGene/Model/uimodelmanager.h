@@ -2,6 +2,7 @@
 #define UIMODELMANAGER_H
 
 #include <QObject>
+#include "uimodel.h"
 
 class UIModelManager : public QObject
 {
@@ -10,6 +11,8 @@ public:
     explicit UIModelManager(QObject *parent = 0);
 
     static UIModelManager * getModelManager();
+
+    UIModel * loadDefaultModel();
 
 signals:
 

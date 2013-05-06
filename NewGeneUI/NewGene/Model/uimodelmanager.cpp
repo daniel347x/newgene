@@ -15,3 +15,8 @@ UIModelManager *UIModelManager::getModelManager()
     }
     return modelManager;
 }
+
+UIModel *UIModelManager::loadDefaultModel()
+{
+    return NULL;
+}

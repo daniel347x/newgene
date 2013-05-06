@@ -20,7 +20,7 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
             pTWmain->NewGeneInitialize();
         }
 
-
+        model.reset(modelManager().loadDefaultModel());
 
     }
     catch (boost::exception & e)
