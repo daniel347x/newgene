@@ -14,27 +14,29 @@ class NewGeneMainWindow;
 
 class UISettingsManager : public UIManager
 {
-    Q_OBJECT
+
+	Q_OBJECT
+
 public:
-    explicit UISettingsManager(NewGeneMainWindow *parent = 0);
+	explicit UISettingsManager(NewGeneMainWindow *parent = 0);
 
-    static UISettingsManager * getSettingsManager(NewGeneMainWindow * parent = NULL);
+	static UISettingsManager * getSettingsManager(NewGeneMainWindow * parent = NULL);
 
-    static QString settingsFileName;
+	static QString settingsFileName;
 
 signals:
 
 public slots:
 
 protected:
-    bool ObtainSettingsPath();
+	bool ObtainSettingsPath();
 
 private:
-    static UISettingsManager * settings_;
+	static UISettingsManager * settings_;
 
-    bool dirty;
-    boost::filesystem::path settingsPath;
-    boost::property_tree::ptree settings;
+	bool dirty;
+	boost::filesystem::path settingsPath;
+	boost::property_tree::ptree settings;
 
 };
 
