@@ -2,17 +2,18 @@
 #define MODELCHANGEREQUESTITEM_H
 
 #include <QObject>
+#include "modelchangeitem.h"
 
-class ModelChangeRequestItem : public QObject
+class ModelChangeRequestItem : public ModelChangeItem
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit ModelChangeRequestItem(QObject *parent = 0);
-    
+	explicit ModelChangeRequestItem(QObject *parent = 0);
+
 signals:
-    
+
 public slots:
-    
+
 };
 
 #endif // MODELCHANGEREQUESTITEM_H

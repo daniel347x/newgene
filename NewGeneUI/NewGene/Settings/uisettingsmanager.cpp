@@ -8,46 +8,46 @@
 QString             UISettingsManager::settingsFileName = "NewGene.Settings.xml";
 UISettingsManager * UISettingsManager::settings_        = NULL;
 
-UISettingsManager::UISettingsManager (NewGeneMainWindow * parent) :
-	UIManager (parent),
-	dirty (false)
+UISettingsManager::UISettingsManager( NewGeneMainWindow * parent ) :
+	UIManager( parent ),
+	dirty( false )
 {
 	bool found = ObtainSettingsPath();
 
-	if (!found)
+	if ( !found )
 	{
 	}
 }
 
-UISettingsManager * UISettingsManager::getSettingsManager (NewGeneMainWindow * parent)
+UISettingsManager * UISettingsManager::getSettingsManager( NewGeneMainWindow * parent )
 {
 	// *****************************************************************
 	// TODO: Create std::map<> from parent to manager, and retrieve that
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
-	if (settings_ == NULL)
+	if ( settings_ == NULL )
 	{
-		settings_ = new UISettingsManager (parent);
+		settings_ = new UISettingsManager( parent );
 
-		if (settings_)
+		if ( settings_ )
 		{
 			settings_ -> which            = MANAGER_SETTINGS;
 			settings_ -> which_descriptor = "UISettingsManager";
 		}
 	}
 
-	if (settings_ == NULL)
+	if ( settings_ == NULL )
 	{
-		boost::format msg ("Settings manager not instantiated.");
+		boost::format msg( "Settings manager not instantiated." );
 
-		throw NewGeneException() << newgene_error_description (msg.str());
+		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	if (settings_ -> parent() == NULL)
+	if ( settings_ -> parent() == NULL )
 	{
-		boost::format msg ("Settings manager's main window not set.");
+		boost::format msg( "Settings manager's main window not set." );
 
-		throw NewGeneException() << newgene_error_description (msg.str());
+		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
 	return settings_;
@@ -55,18 +55,18 @@ UISettingsManager * UISettingsManager::getSettingsManager (NewGeneMainWindow * p
 
 bool UISettingsManager::ObtainSettingsPath()
 {
-	QStringList settingsPathStringList = QStandardPaths::standardLocations (QStandardPaths::DataLocation);
+	QStringList settingsPathStringList = QStandardPaths::standardLocations( QStandardPaths::DataLocation );
 	bool        found                  = false;
 
-	for (int n = 0; n < settingsPathStringList.size(); ++n)
+	for ( int n = 0; n < settingsPathStringList.size(); ++n )
 	{
-		QString settingsPathString = settingsPathStringList.at (n);
+		QString settingsPathString = settingsPathStringList.at( n );
 
-		boost::filesystem::path settingsPathTest (settingsPathString.toStdString());
+		boost::filesystem::path settingsPathTest( settingsPathString.toStdString() );
 
 		settingsPathTest /= settingsFileName.toStdString();
 
-		if (boost::filesystem::exists (settingsPathTest) && boost::filesystem::is_regular_file (settingsPathTest))
+		if ( boost::filesystem::exists( settingsPathTest ) && boost::filesystem::is_regular_file( settingsPathTest ) )
 		{
 			settingsPath = settingsPathTest;
 			found        = true;
@@ -75,18 +75,18 @@ bool UISettingsManager::ObtainSettingsPath()
 		}
 	}
 
-	if (!found)
+	if ( !found )
 	{
-		for (int n = 0; n < settingsPathStringList.size(); ++n)
+		for ( int n = 0; n < settingsPathStringList.size(); ++n )
 		{
-			QString settingsPathString = settingsPathStringList.at (n);
+			QString settingsPathString = settingsPathStringList.at( n );
 
-			boost::filesystem::path settingsPathTest (settingsPathString.toStdString());
+			boost::filesystem::path settingsPathTest( settingsPathString.toStdString() );
 
-			if (!boost::filesystem::exists (settingsPathTest))
+			if ( !boost::filesystem::exists( settingsPathTest ) )
 			{
 				// qDebug() << "Attempting to create directory " << settingsPathTest.string().c_str();
-				if (!boost::filesystem::create_directory (settingsPathTest))
+				if ( !boost::filesystem::create_directory( settingsPathTest ) )
 				{
 					continue;
 				}
@@ -96,15 +96,15 @@ bool UISettingsManager::ObtainSettingsPath()
 
 			// qDebug() << "Attempting to create file " << settingsPathTest.string().c_str();
 			std::ofstream settingsPathTestFile;
-			settingsPathTestFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+			settingsPathTestFile.exceptions( std::ifstream::failbit | std::ifstream::badbit );
 
 			try
 			{
-				settingsPathTestFile.open (settingsPathTest.c_str());
+				settingsPathTestFile.open( settingsPathTest.c_str() );
 
-				if (settingsPathTestFile.is_open())
+				if ( settingsPathTestFile.is_open() )
 				{
-					settingsPathTestFile.write ("\n", 1);   // write 1 character
+					settingsPathTestFile.write( "\n", 1 );  // write 1 character
 					settingsPathTestFile.close();
 
 					settingsPath = settingsPathTest;
@@ -119,7 +119,7 @@ bool UISettingsManager::ObtainSettingsPath()
 					continue;
 				}
 			}
-			catch (std::ofstream::failure e)
+			catch ( std::ofstream::failure e )
 			{
 				continue;
 			}
@@ -127,4 +127,9 @@ bool UISettingsManager::ObtainSettingsPath()
 	}
 
 	return found;
+}
+
+void UISettingsManager::LoadDefaultSettings(bool const initializing)
+{
+
 }

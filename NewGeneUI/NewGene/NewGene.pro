@@ -29,9 +29,7 @@ SOURCES += main.cpp\
 	CreateOutput/SelectVariables/timerangebox.cpp \
 	Model/modelchangeindicator.cpp \
 	Model/modelchangerequest.cpp \
-	Model/modelchange.cpp \
 	Model/modelvalidator.cpp \
-	Model/modelchangeitem.cpp \
 	Model/modelchangerequestitem.cpp \
 	newgenewidget.cpp \
 	Model/uimodel.cpp \
@@ -39,8 +37,32 @@ SOURCES += main.cpp\
 	Model/uimodelmanager.cpp \
 	Documents/uidocumentmanager.cpp \
 	Status/uistatusmanager.cpp \
-    globals.cpp \
-    uimanager.cpp
+	globals.cpp \
+	uimanager.cpp \
+	Settings/uiprojectsettings.cpp \
+	Settings/uiglobalsettings.cpp \
+	Model/modelchangeresponse.cpp \
+	Model/modelchangeresponseitem.cpp \
+	Model/modelchangeitem.cpp \
+	Settings/Indicator/settingchangeresponseindicator.cpp \
+	Settings/Indicator/settingchangerequestindicator.cpp \
+	Settings/Indicator/settingchangeindicator.cpp \
+	Settings/Indicator/projectsettingchangeindicator.cpp \
+	Settings/Indicator/globalsettingchangeindicator.cpp \
+	Settings/Item/settingchangeresponseitem.cpp \
+	Settings/Item/settingchangerequestitem.cpp \
+	Settings/Item/settingchangeitem.cpp \
+	Settings/Item/projectsettingchangeitem.cpp \
+	Settings/Item/globalsettingchangeitem.cpp \
+	Settings/Base/uisettings.cpp \
+	Settings/Global/globalsettingchangerequestindicator.cpp \
+	Settings/Global/globalsettingchangeresponseindicator.cpp \
+	Settings/Global/globalsettingchangerequestitem.cpp \
+	Settings/Global/globalsettingchangeresponseitem.cpp \
+	Settings/Project/projectsettingchangerequestindicator.cpp \
+	Settings/Project/projectsettingchangeresponseindicator.cpp \
+	Settings/Project/projectsettingchangerequestitem.cpp \
+	Settings/Project/projectsettingchangeresponseitem.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -58,9 +80,7 @@ HEADERS  += newgenemainwindow.h \
 	CreateOutput/SelectVariables/timerangebox.h \
 	Model/modelchangeindicator.h \
 	Model/modelchangerequest.h \
-	Model/modelchange.h \
 	Model/modelvalidator.h \
-	Model/modelchangeitem.h \
 	Model/modelchangerequestitem.h \
 	newgenewidget.h \
 	Model/uimodel.h \
@@ -68,8 +88,32 @@ HEADERS  += newgenemainwindow.h \
 	Model/uimodelmanager.h \
 	Documents/uidocumentmanager.h \
 	Status/uistatusmanager.h \
-    globals.h \
-    uimanager.h
+	globals.h \
+	uimanager.h \
+	Settings/uiprojectsettings.h \
+	Settings/uiglobalsettings.h \
+	Model/modelchangeresponse.h \
+	Model/modelchangeresponseitem.h \
+	Model/modelchangeitem.h \
+	Settings/Indicator/settingchangeresponseindicator.h \
+	Settings/Indicator/settingchangerequestindicator.h \
+	Settings/Indicator/settingchangeindicator.h \
+	Settings/Indicator/globalsettingchangeindicator.h \
+	Settings/Indicator/projectsettingchangeindicator.h \
+	Settings/Item/settingchangeresponseitem.h \
+	Settings/Item/settingchangerequestitem.h \
+	Settings/Item/settingchangeitem.h \
+	Settings/Item/projectsettingchangeitem.h \
+	Settings/Item/globalsettingchangeitem.h \
+	Settings/Base/uisettings.h \
+	Settings/Global/globalsettingchangerequestindicator.h \
+	Settings/Global/globalsettingchangeresponseindicator.h \
+	Settings/Global/globalsettingchangerequestitem.h \
+	Settings/Global/globalsettingchangeresponseitem.h \
+	Settings/Project/projectsettingchangerequestindicator.h \
+	Settings/Project/projectsettingchangeresponseindicator.h \
+	Settings/Project/projectsettingchangerequestitem.h \
+	Settings/Project/projectsettingchangeresponseitem.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \
@@ -101,6 +145,11 @@ INCLUDEPATH += $$PWD/CreateOutput/SelectVariables/VariableSummary
 INCLUDEPATH += $$PWD/CreateOutput/SelectVariables/Variables
 INCLUDEPATH += $$PWD/Model
 INCLUDEPATH += $$PWD/Settings
+INCLUDEPATH += $$PWD/Settings/Base
+INCLUDEPATH += $$PWD/Settings/Indicator
+INCLUDEPATH += $$PWD/Settings/Item
+INCLUDEPATH += $$PWD/Settings/Global
+INCLUDEPATH += $$PWD/Settings/Project
 INCLUDEPATH += $$PWD/Documents
 INCLUDEPATH += $$PWD/Status
 INCLUDEPATH += $(BOOST_ROOT)

@@ -1,5 +1,5 @@
-#ifndef UISETTINGS_H
-#define UISETTINGS_H
+#ifndef UISETTINGSMANAGER_H
+#define UISETTINGSMANAGER_H
 
 #include "globals.h"
 #include "uimanager.h"
@@ -29,10 +29,14 @@ signals:
 public slots:
 
 protected:
+
 	bool ObtainSettingsPath();
 
 private:
+
 	static UISettingsManager * settings_;
+
+	void LoadDefaultSettings(bool const initializing);
 
 	bool dirty;
 	boost::filesystem::path settingsPath;
@@ -40,4 +44,4 @@ private:
 
 };
 
-#endif // UISETTINGS_H
+#endif // UISETTINGSMANAGER_H
