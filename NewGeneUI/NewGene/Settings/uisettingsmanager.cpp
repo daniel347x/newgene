@@ -8,7 +8,7 @@
 #include <QDebug>
 
 QString             UISettingsManager::settingsFileName = "NewGene.Settings.xml";
-UISettingsManager * UISettingsManager::settings_        = NULL;
+std::unique_ptr<UISettingsManager> UISettingsManager::settings_;
 
 UISettingsManager::UISettingsManager( NewGeneMainWindow * parent ) :
 	UIManager( parent )
@@ -20,7 +20,7 @@ UISettingsManager::UISettingsManager( NewGeneMainWindow * parent ) :
 	}
 }
 
-UISettingsManager * UISettingsManager::getSettingsManager( NewGeneMainWindow * parent )
+UISettingsManager & UISettingsManager::getSettingsManager( NewGeneMainWindow * parent )
 {
 	// *****************************************************************
 	// TODO: Create std::map<> from parent to manager, and retrieve that
@@ -28,7 +28,7 @@ UISettingsManager * UISettingsManager::getSettingsManager( NewGeneMainWindow * p
 	// *****************************************************************
 	if ( settings_ == NULL )
 	{
-		settings_ = new UISettingsManager( parent );
+		settings_.reset(new UISettingsManager( parent ));
 
 		if ( settings_ )
 		{
@@ -51,7 +51,7 @@ UISettingsManager * UISettingsManager::getSettingsManager( NewGeneMainWindow * p
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	return settings_;
+	return *settings_;
 }
 
 bool UISettingsManager::ObtainSettingsPath()

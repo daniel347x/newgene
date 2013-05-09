@@ -9,20 +9,20 @@ class UIModel;
 
 class UIModelManager : public UIManager
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit UIModelManager(NewGeneMainWindow *parent = 0);
+	explicit UIModelManager(NewGeneMainWindow *parent = 0);
 
-    static UIModelManager * getModelManager(NewGeneMainWindow * parent = NULL);
+	static UIModelManager & getModelManager(NewGeneMainWindow * parent = NULL);
 
-    UIModel * loadDefaultModel();
+	UIModel * loadDefaultModel();
 
 signals:
 
 public slots:
 
 private:
-    static UIModelManager * modelManager;
+	static std::unique_ptr<UIModelManager> modelManager;
 };
 
 #endif // UIMODELMANAGER_H

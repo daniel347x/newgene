@@ -22,10 +22,10 @@ NewGeneMainWindow & NewGeneWidget::mainWindow()
 
 UISettingsManager &NewGeneWidget::settingsManager(NewGeneMainWindow * parent)
 {
-	return *UISettingsManager::getSettingsManager(parent);
+	return UISettingsManager::getSettingsManager(parent);
 }
 
 UIProjectManager &NewGeneWidget::projectManager(NewGeneMainWindow * parent)
 {
-	return *UIProjectManager::projectManager(parent);
+	return UIProjectManager::projectManager(parent);
 }

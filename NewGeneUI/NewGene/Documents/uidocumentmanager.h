@@ -8,18 +8,18 @@ class NewGeneMainWindow;
 
 class UIDocumentManager : public UIManager
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit UIDocumentManager(NewGeneMainWindow *parent = 0);
+	explicit UIDocumentManager(NewGeneMainWindow *parent = 0);
 
-    static UIDocumentManager * getDocumentManager(NewGeneMainWindow * parent = NULL);
+	static UIDocumentManager & getDocumentManager(NewGeneMainWindow * parent = NULL);
 
 signals:
 
 public slots:
 
 private:
-    static UIDocumentManager * documentManager;
+	static std::unique_ptr<UIDocumentManager> documentManager;
 
 };
 

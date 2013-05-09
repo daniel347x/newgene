@@ -6,14 +6,14 @@
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
 
-UIProjectManager * UIProjectManager::projectManager_ = NULL;
+std::unique_ptr<UIProjectManager> UIProjectManager::projectManager_;
 
 UIProjectManager::UIProjectManager(NewGeneMainWindow *parent) :
 	UIManager(parent)
 {
 }
 
-UIProjectManager * UIProjectManager::projectManager( NewGeneMainWindow * parent )
+UIProjectManager & UIProjectManager::projectManager( NewGeneMainWindow * parent )
 {
 	// *****************************************************************
 	// TODO: Create std::map<> from parent to manager, and retrieve that
@@ -29,7 +29,7 @@ UIProjectManager * UIProjectManager::projectManager( NewGeneMainWindow * parent 
 			throw NewGeneException() << newgene_error_description( msg.str() );
 		}
 
-		projectManager_ = new UIProjectManager( parent );
+		projectManager_.reset(new UIProjectManager( parent ));
 
 		if ( projectManager_ )
 		{
@@ -58,27 +58,27 @@ UIProjectManager * UIProjectManager::projectManager( NewGeneMainWindow * parent 
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	return projectManager_;
+	return *(projectManager_.get());
 }
 
 UIModelManager &UIProjectManager::modelManager(NewGeneMainWindow * parent)
 {
-	return *UIModelManager::getModelManager(parent);
+	return UIModelManager::getModelManager(parent);
 }
 
 UISettingsManager &UIProjectManager::settingsManager(NewGeneMainWindow * parent)
 {
-	return *UISettingsManager::getSettingsManager(parent);
+	return UISettingsManager::getSettingsManager(parent);
 }
 
 UIDocumentManager &UIProjectManager::documentManager(NewGeneMainWindow * parent)
 {
-	return *UIDocumentManager::getDocumentManager(parent);
+	return UIDocumentManager::getDocumentManager(parent);
 }
 
 UIStatusManager &UIProjectManager::statusManager(NewGeneMainWindow * parent)
 {
-	return *UIStatusManager::getStatusManager(parent);
+	return UIStatusManager::getStatusManager(parent);
 }
 
 void UIProjectManager::LoadDefaultProject()

@@ -1,6 +1,7 @@
 #ifndef UIMANAGER_H
 #define UIMANAGER_H
 
+#include "globals.h"
 #include <QObject>
 #include <QString>
 

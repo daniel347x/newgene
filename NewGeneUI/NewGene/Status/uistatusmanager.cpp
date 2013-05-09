@@ -4,14 +4,14 @@
 #include <QStatusBar>
 #include "newgenemainwindow.h"
 
-UIStatusManager * UIStatusManager::status_ = NULL;
+std::unique_ptr<UIStatusManager> UIStatusManager::status_;
 
 UIStatusManager::UIStatusManager(NewGeneMainWindow *parent) :
 	UIManager(parent)
 {
 }
 
-UIStatusManager * UIStatusManager::getStatusManager(NewGeneMainWindow * parent)
+UIStatusManager & UIStatusManager::getStatusManager(NewGeneMainWindow * parent)
 {
 
 	// *****************************************************************
@@ -21,7 +21,7 @@ UIStatusManager * UIStatusManager::getStatusManager(NewGeneMainWindow * parent)
 
 	if (status_ == NULL)
 	{
-		status_ = new UIStatusManager(parent);
+		status_.reset(new UIStatusManager(parent));
 		if (status_)
 		{
 			status_->which = MANAGER_STATUS;
@@ -38,7 +38,7 @@ UIStatusManager * UIStatusManager::getStatusManager(NewGeneMainWindow * parent)
 		boost::format msg("Status manager's main window not set.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-	return status_;
+	return *status_;
 
 }
 

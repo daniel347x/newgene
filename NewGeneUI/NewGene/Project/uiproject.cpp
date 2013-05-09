@@ -26,20 +26,20 @@ UIProjectSettings * UIProject::settings()
 
 UIModelManager &UIProject::modelManager()
 {
-	return *UIModelManager::getModelManager(parent_.get());
+	return UIModelManager::getModelManager(parent_.get());
 }
 
 UISettingsManager &UIProject::settingsManager()
 {
-	return *UISettingsManager::getSettingsManager(parent_.get());
+	return UISettingsManager::getSettingsManager(parent_.get());
 }
 
 UIDocumentManager &UIProject::documentManager()
 {
-	return *UIDocumentManager::getDocumentManager(parent_.get());
+	return UIDocumentManager::getDocumentManager(parent_.get());
 }
 
 UIStatusManager &UIProject::statusManager()
 {
-	return *UIStatusManager::getStatusManager(parent_.get());
+	return UIStatusManager::getStatusManager(parent_.get());
 }

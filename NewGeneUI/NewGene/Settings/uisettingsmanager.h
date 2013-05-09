@@ -22,7 +22,7 @@ class UISettingsManager : public UIManager
 public:
 	explicit UISettingsManager(NewGeneMainWindow *parent = 0);
 
-	static UISettingsManager * getSettingsManager(NewGeneMainWindow * parent = NULL);
+	static UISettingsManager & getSettingsManager(NewGeneMainWindow * parent = NULL);
 
 	static QString settingsFileName;
 
@@ -36,7 +36,7 @@ protected:
 
 private:
 
-	static UISettingsManager * settings_;
+	static std::unique_ptr<UISettingsManager> settings_;
 
 	UIProjectSettings * LoadDefaultProjectSettings(bool const initializing);
 	void LoadDefaultGlobalSettings(bool const initializing);

@@ -15,7 +15,7 @@ class UIProjectManager : public UIManager
 	public:
 		explicit UIProjectManager(NewGeneMainWindow *parent = 0);
 
-		static UIProjectManager * projectManager(NewGeneMainWindow * parent = NULL);
+		static UIProjectManager & projectManager(NewGeneMainWindow * parent = NULL);
 
 		void LoadDefaultProject();
 
@@ -30,7 +30,7 @@ class UIProjectManager : public UIManager
 
 	private:
 
-		static UIProjectManager * projectManager_;
+		static std::unique_ptr<UIProjectManager> projectManager_;
 
 };
 
