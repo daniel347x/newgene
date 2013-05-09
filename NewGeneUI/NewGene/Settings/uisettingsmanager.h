@@ -11,6 +11,8 @@
 #endif
 
 class NewGeneMainWindow;
+class UIProjectSettings;
+class UIGlobalSettings;
 
 class UISettingsManager : public UIManager
 {
@@ -36,7 +38,9 @@ private:
 
 	static UISettingsManager * settings_;
 
-	void LoadDefaultSettings(bool const initializing);
+	UIProjectSettings * LoadDefaultProjectSettings(bool const initializing);
+	void LoadDefaultGlobalSettings(bool const initializing);
+	UIGlobalSettings * LoadGlobalSettings(bool const initializing);
 
 	bool dirty;
 	boost::filesystem::path settingsPath;

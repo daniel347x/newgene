@@ -1,6 +1,8 @@
 
 #include "uisettingsmanager.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "uiprojectsettings.h"
+#include "uiglobalsettings.h"
 #include <QStandardPaths>
 #include <fstream>
 #include <QDebug>
@@ -129,7 +131,7 @@ bool UISettingsManager::ObtainSettingsPath()
 	return found;
 }
 
-void UISettingsManager::LoadDefaultSettings(bool const initializing)
+UIProjectSettings * UISettingsManager::LoadDefaultProjectSettings(bool const initializing)
 {
-
+	return NULL;
 }

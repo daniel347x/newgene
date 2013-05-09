@@ -61,7 +61,9 @@ SOURCES += main.cpp\
 	Model/Indicator/modelchangeindicator.cpp \
 	Model/Item/modelchangeresponseitem.cpp \
 	Model/Item/modelchangerequestitem.cpp \
-	Model/Item/modelchangeitem.cpp
+	Model/Item/modelchangeitem.cpp \
+	Project/uiproject.cpp \
+	Project/uiprojectmanager.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -111,7 +113,9 @@ HEADERS  += newgenemainwindow.h \
 	Model/Indicator/modelchangeindicator.h \
 	Model/Item/modelchangeresponseitem.h \
 	Model/Item/modelchangerequestitem.h \
-	Model/Item/modelchangeitem.h
+	Model/Item/modelchangeitem.h \
+	Project/uiproject.h \
+	Project/uiprojectmanager.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \
@@ -144,6 +148,7 @@ INCLUDEPATH += $$PWD/CreateOutput/SelectVariables/Variables
 INCLUDEPATH += $$PWD/Model
 INCLUDEPATH += $$PWD/Model/Indicator
 INCLUDEPATH += $$PWD/Model/Item
+INCLUDEPATH += $$PWD/Project
 INCLUDEPATH += $$PWD/Settings
 INCLUDEPATH += $$PWD/Settings/Base
 INCLUDEPATH += $$PWD/Settings/Indicator
