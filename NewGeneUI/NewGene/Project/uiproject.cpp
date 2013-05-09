@@ -5,10 +5,13 @@
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
 #include "uimodel.h"
+#include "uiprojectsettings.h"
+#include "newgenemainwindow.h"
 
-UIProject::UIProject(QObject *parent) :
+UIProject::UIProject(NewGeneMainWindow *parent) :
 	QObject(parent)
 {
+	parent_.reset(parent);
 }
 
 UIModel * UIProject::model()
@@ -16,22 +19,27 @@ UIModel * UIProject::model()
 	return model_.get();
 }
 
-UIModelManager &UIProject::modelManager(NewGeneMainWindow * parent)
+UIProjectSettings * UIProject::settings()
 {
-	return *UIModelManager::getModelManager(parent);
+	return settings_.get();
 }
 
-UISettingsManager &UIProject::settingsManager(NewGeneMainWindow * parent)
+UIModelManager &UIProject::modelManager()
 {
-	return *UISettingsManager::getSettingsManager(parent);
+	return *UIModelManager::getModelManager(parent_.get());
 }
 
-UIDocumentManager &UIProject::documentManager(NewGeneMainWindow * parent)
+UISettingsManager &UIProject::settingsManager()
 {
-	return *UIDocumentManager::getDocumentManager(parent);
+	return *UISettingsManager::getSettingsManager(parent_.get());
 }
 
-UIStatusManager &UIProject::statusManager(NewGeneMainWindow * parent)
+UIDocumentManager &UIProject::documentManager()
 {
-	return *UIStatusManager::getStatusManager(parent);
+	return *UIDocumentManager::getDocumentManager(parent_.get());
+}
+
+UIStatusManager &UIProject::statusManager()
+{
+	return *UIStatusManager::getStatusManager(parent_.get());
 }

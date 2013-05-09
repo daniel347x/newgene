@@ -2,11 +2,11 @@
 #define NEWGENEWIDGET_H
 
 #include "globals.h"
-#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 
 class QWidget;
 class NewGeneMainWindow;
 class UISettingsManager;
+class UIProjectManager;
 
 class NewGeneWidget
 {
@@ -14,6 +14,7 @@ public:
 	explicit NewGeneWidget(QWidget * self_ = 0);
 
 	NewGeneMainWindow & mainWindow();
+	UIProjectManager & projectManager(NewGeneMainWindow * parent = NULL);
 	UISettingsManager & settingsManager(NewGeneMainWindow * parent = NULL);
 
 private:

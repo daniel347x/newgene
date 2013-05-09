@@ -42,7 +42,6 @@ private:
 	void LoadDefaultGlobalSettings(bool const initializing);
 	UIGlobalSettings * LoadGlobalSettings(bool const initializing);
 
-	bool dirty;
 	boost::filesystem::path settingsPath;
 	boost::property_tree::ptree settings;
 

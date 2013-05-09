@@ -7,6 +7,7 @@
 #include "uisettingsmanager.h"
 #include "uimodelmanager.h"
 #include "uimodel.h"
+#include "uiprojectmanager.h"
 #include "uiproject.h"
 
 NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
@@ -26,14 +27,7 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
 			pTWmain->NewGeneInitialize();
 		}
 
-		// Empty calls to create manager instances
-//		statusManager(this);
-//		documentManager(this);
-//		settingsManager(this);
-//		modelManager(this);
-
-//		globalSettings.reset(settingsManager().loadGlobalSettings());
-//		model.reset(modelManager().loadDefaultModel());
+		projectManager(this).LoadDefaultProject();
 
 	}
 	catch (boost::exception & e)

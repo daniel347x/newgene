@@ -11,8 +11,7 @@ QString             UISettingsManager::settingsFileName = "NewGene.Settings.xml"
 UISettingsManager * UISettingsManager::settings_        = NULL;
 
 UISettingsManager::UISettingsManager( NewGeneMainWindow * parent ) :
-	UIManager( parent ),
-	dirty( false )
+	UIManager( parent )
 {
 	bool found = ObtainSettingsPath();
 

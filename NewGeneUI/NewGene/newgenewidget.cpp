@@ -24,3 +24,8 @@ UISettingsManager &NewGeneWidget::settingsManager(NewGeneMainWindow * parent)
 {
 	return *UISettingsManager::getSettingsManager(parent);
 }
+
+UIProjectManager &NewGeneWidget::projectManager(NewGeneMainWindow * parent)
+{
+	return *UIProjectManager::projectManager(parent);
+}

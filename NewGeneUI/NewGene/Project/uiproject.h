@@ -13,18 +13,16 @@ class UIStatusManager;
 class UIProjectManager;
 class UIModel;
 class NewGeneMainWindow;
+class UIProjectSettings;
 
 class UIProject : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit UIProject(QObject *parent = 0);
+		explicit UIProject(NewGeneMainWindow *parent = 0);
 
 		UIModel * model();
-		UIModelManager & modelManager(NewGeneMainWindow * parent = NULL);
-		UISettingsManager & settingsManager(NewGeneMainWindow * parent = NULL);
-		UIDocumentManager & documentManager(NewGeneMainWindow * parent = NULL);
-		UIStatusManager & statusManager(NewGeneMainWindow * parent = NULL);
+		UIProjectSettings * settings();
 
 	signals:
 
@@ -33,6 +31,14 @@ class UIProject : public QObject
 	protected:
 		std::unique_ptr<UIModel> model_;
 
+	private:
+		UIModelManager & modelManager();
+		UISettingsManager & settingsManager();
+		UIDocumentManager & documentManager();
+		UIStatusManager & statusManager();
+
+		std::unique_ptr<NewGeneMainWindow> parent_;
+		std::unique_ptr<UIProjectSettings> settings_;
 };
 
 #endif // UIPROJECT_H
