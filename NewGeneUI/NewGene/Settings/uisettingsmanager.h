@@ -20,9 +20,9 @@ class UISettingsManager : public UIManager
 	Q_OBJECT
 
 public:
-	explicit UISettingsManager(NewGeneMainWindow *parent = 0);
+	explicit UISettingsManager(QObject *parent = 0);
 
-	static UISettingsManager & getSettingsManager(NewGeneMainWindow * parent = NULL);
+	static UISettingsManager & getSettingsManager();
 
 signals:
 

@@ -7,6 +7,7 @@ class QWidget;
 class NewGeneMainWindow;
 class UISettingsManager;
 class UIProjectManager;
+class UILoggingManager;
 
 class NewGeneWidget
 {
@@ -14,8 +15,9 @@ public:
 	explicit NewGeneWidget(QWidget * self_ = 0);
 
 	NewGeneMainWindow & mainWindow();
-	UIProjectManager & projectManager(NewGeneMainWindow * parent = NULL);
-	UISettingsManager & settingsManager(NewGeneMainWindow * parent = NULL);
+	UIProjectManager & projectManager();
+	UISettingsManager & settingsManager();
+	UILoggingManager & loggingManager();
 
 private:
 	QWidget * self;

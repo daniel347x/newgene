@@ -12,9 +12,9 @@ class UIDocumentManager : public UIManager
 {
 	Q_OBJECT
 public:
-	explicit UIDocumentManager(NewGeneMainWindow *parent = 0);
+	explicit UIDocumentManager(QObject *parent = 0);
 
-	static UIDocumentManager & getDocumentManager(NewGeneMainWindow * parent = NULL);
+	static UIDocumentManager & getDocumentManager();
 
 signals:
 

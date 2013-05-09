@@ -13,7 +13,7 @@
 
 std::unique_ptr<UISettingsManager> UISettingsManager::globalSettings_;
 
-UISettingsManager::UISettingsManager( NewGeneMainWindow * parent ) :
+UISettingsManager::UISettingsManager( QObject * parent ) :
 	UIManager( parent )
 {
 
@@ -26,7 +26,7 @@ UISettingsManager::UISettingsManager( NewGeneMainWindow * parent ) :
 	}
 }
 
-UISettingsManager & UISettingsManager::getSettingsManager( NewGeneMainWindow * parent )
+UISettingsManager & UISettingsManager::getSettingsManager()
 {
 	// *****************************************************************
 	// TODO: Create std::map<> from parent to manager, and retrieve that
@@ -34,7 +34,7 @@ UISettingsManager & UISettingsManager::getSettingsManager( NewGeneMainWindow * p
 	// *****************************************************************
 	if ( globalSettings_ == NULL )
 	{
-		globalSettings_.reset(new UISettingsManager( parent ));
+		globalSettings_.reset(new UISettingsManager(NULL));
 
 		if ( globalSettings_ )
 		{
@@ -46,13 +46,6 @@ UISettingsManager & UISettingsManager::getSettingsManager( NewGeneMainWindow * p
 	if ( globalSettings_ == NULL )
 	{
 		boost::format msg( "Settings manager not instantiated." );
-
-		throw NewGeneException() << newgene_error_description( msg.str() );
-	}
-
-	if ( globalSettings_ -> parent() == NULL )
-	{
-		boost::format msg( "Settings manager's main window not set." );
 
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}

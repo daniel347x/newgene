@@ -4,42 +4,55 @@
 #include "uisettingsmanager.h"
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
+#include "uiloggingmanager.h"
+#include "uiprojectmanager.h"
 #include "uimodel.h"
 #include "uiprojectsettings.h"
 #include "newgenemainwindow.h"
 
 UIProject::UIProject(NewGeneMainWindow *parent) :
-	QObject(parent)
+	QObject(parent),
+	model_(NULL),
+	projectSettings_(NULL)
 {
-	parent_.reset(parent);
 }
 
 UIModel * UIProject::model()
 {
-	return model_.get();
+	return model_;
 }
 
 UIProjectSettings * UIProject::settings()
 {
-	return settings_.get();
+	return projectSettings_;
 }
 
 UIModelManager &UIProject::modelManager()
 {
-	return UIModelManager::getModelManager(parent_.get());
+	return UIModelManager::getModelManager();
 }
 
 UISettingsManager &UIProject::settingsManager()
 {
-	return UISettingsManager::getSettingsManager(parent_.get());
+	return UISettingsManager::getSettingsManager();
 }
 
 UIDocumentManager &UIProject::documentManager()
 {
-	return UIDocumentManager::getDocumentManager(parent_.get());
+	return UIDocumentManager::getDocumentManager();
 }
 
 UIStatusManager &UIProject::statusManager()
 {
-	return UIStatusManager::getStatusManager(parent_.get());
+	return UIStatusManager::getStatusManager();
+}
+
+UILoggingManager &UIProject::loggingManager()
+{
+	return UILoggingManager::getLoggingManager();
+}
+
+UIProjectManager &UIProject::projectManager()
+{
+	return UIProjectManager::projectManager();
 }

@@ -11,6 +11,7 @@ class UISettingsManager;
 class UIDocumentManager;
 class UIStatusManager;
 class UILoggingManager;
+class NewGeneWidget;
 
 class UIManager : public QObject
 {
@@ -29,7 +30,7 @@ public:
 		, MANAGER_PROJECT
 	};
 
-	explicit UIManager(NewGeneMainWindow *parent = 0);
+	explicit UIManager(QObject *parent = 0);
 	NewGeneMainWindow & getMainWindow();
 
 signals:
@@ -42,11 +43,13 @@ protected:
 
 protected:
 
-	static UIModelManager & modelManager(NewGeneMainWindow * parent = NULL);
-	static UISettingsManager & settingsManager(NewGeneMainWindow * parent = NULL);
-	static UIDocumentManager & documentManager(NewGeneMainWindow * parent = NULL);
-	static UIStatusManager & statusManager(NewGeneMainWindow * parent = NULL);
-	static UILoggingManager & loggingManager(NewGeneMainWindow * parent = NULL);
+	static UIModelManager & modelManager();
+	static UISettingsManager & settingsManager();
+	static UIDocumentManager & documentManager();
+	static UIStatusManager & statusManager();
+	static UILoggingManager & loggingManager();
+
+	friend class NewGeneWidget;
 
 };
 

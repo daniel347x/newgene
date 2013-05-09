@@ -4,16 +4,17 @@
 #include "uimanager.h"
 
 class NewGeneMainWindow;
+class UIProject;
 
 class UIProjectManager : public UIManager
 {
 		Q_OBJECT
 	public:
-		explicit UIProjectManager(NewGeneMainWindow *parent = 0);
+		explicit UIProjectManager(QObject *parent = 0);
 
-		static UIProjectManager & projectManager(NewGeneMainWindow * parent = NULL);
+		static UIProjectManager & projectManager();
 
-		void LoadDefaultProject();
+		UIProject * LoadDefaultProject(NewGeneMainWindow * parent);
 
 	signals:
 

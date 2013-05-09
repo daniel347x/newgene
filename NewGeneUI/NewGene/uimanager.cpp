@@ -5,18 +5,19 @@
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
 #include "uiloggingmanager.h"
+#include <QApplication>
 
-UIManager::UIManager(NewGeneMainWindow *parent) :
-	QObject(static_cast<QObject*>(parent))
+UIManager::UIManager(QObject *parent) :
+	QObject(parent)
 {
 }
 
 NewGeneMainWindow &UIManager::getMainWindow()
 {
-	QObject * myParent = parent();
-	if (myParent == NULL)
+	QWidget * mainWidget = QApplication::activeWindow();
+	if (mainWidget == NULL)
 	{
-		boost::format msg("Parent is not valid in %1%");
+		boost::format msg("Main window does not exist in %1%");
 		msg % which_descriptor.toStdString();
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
@@ -24,7 +25,7 @@ NewGeneMainWindow &UIManager::getMainWindow()
 	NewGeneMainWindow * myWindow = NULL;
 	try
 	{
-		myWindow = dynamic_cast<NewGeneMainWindow *>(myParent);
+		myWindow = dynamic_cast<NewGeneMainWindow *>(mainWidget);
 	}
 	catch (std::bad_cast)
 	{
@@ -36,27 +37,27 @@ NewGeneMainWindow &UIManager::getMainWindow()
 	return *myWindow;
 }
 
-UIModelManager &UIManager::modelManager(NewGeneMainWindow * parent)
+UIModelManager &UIManager::modelManager()
 {
-	return UIModelManager::getModelManager(parent);
+	return UIModelManager::getModelManager();
 }
 
-UISettingsManager &UIManager::settingsManager(NewGeneMainWindow * parent)
+UISettingsManager &UIManager::settingsManager()
 {
-	return UISettingsManager::getSettingsManager(parent);
+	return UISettingsManager::getSettingsManager();
 }
 
-UIDocumentManager &UIManager::documentManager(NewGeneMainWindow * parent)
+UIDocumentManager &UIManager::documentManager()
 {
-	return UIDocumentManager::getDocumentManager(parent);
+	return UIDocumentManager::getDocumentManager();
 }
 
-UIStatusManager &UIManager::statusManager(NewGeneMainWindow * parent)
+UIStatusManager &UIManager::statusManager()
 {
-	return UIStatusManager::getStatusManager(parent);
+	return UIStatusManager::getStatusManager();
 }
 
-UILoggingManager &UIManager::loggingManager(NewGeneMainWindow * parent)
+UILoggingManager &UIManager::loggingManager()
 {
-	return UILoggingManager::getLoggingManager(parent);
+	return UILoggingManager::getLoggingManager();
 }

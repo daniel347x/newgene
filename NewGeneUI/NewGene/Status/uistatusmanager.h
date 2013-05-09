@@ -20,9 +20,9 @@ public:
 		, IMPORTANCE_CRITICAL
 	};
 
-	explicit UIStatusManager(NewGeneMainWindow *parent = 0);
+	explicit UIStatusManager(QObject *parent = 0);
 
-	static UIStatusManager & getStatusManager(NewGeneMainWindow * parent = NULL);
+	static UIStatusManager & getStatusManager();
 
 	void LogStatus(QString const & status_, IMPORTANCE const importance_level = IMPORTANCE_STANDARD);
 	void PostStatus(QString const & status_, IMPORTANCE const importance_level = IMPORTANCE_STANDARD, bool const forbidWritingToLog = false);

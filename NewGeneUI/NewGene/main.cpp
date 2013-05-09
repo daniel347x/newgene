@@ -2,18 +2,29 @@
 #include <QApplication>
 #include <QMessageBox>
 #include "..\..\NewGeneBackEnd\test.h"
+#include "uimodelmanager.h"
+#include "uisettingsmanager.h"
+#include "uidocumentmanager.h"
 #include "uistatusmanager.h"
+#include "uiloggingmanager.h"
 
 int main(int argc, char *argv[])
 {
-
-	QApplication a(argc, argv);
-	NewGeneMainWindow w;
 
 	try
 	{
 
 		//w.statusManager().PostStatus("Main window created.");
+
+		QApplication a(argc, argv);
+		NewGeneMainWindow w;
+
+		// Instantiate Managers
+		UIStatusManager::getStatusManager();
+		UIDocumentManager::getDocumentManager();
+		UILoggingManager::getLoggingManager();
+		UISettingsManager::getSettingsManager();
+		UIModelManager::getModelManager();
 
 		w.show();
 		return a.exec();

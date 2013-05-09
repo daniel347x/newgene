@@ -27,7 +27,7 @@ protected:
 private:
 	Ui::NewGeneMainWindow *ui;
 
-	std::unique_ptr<UIProject> project;
+	UIProject * project; // owned by this NewGeneMainWindow
 
 	friend class NewGeneWidget;
 };

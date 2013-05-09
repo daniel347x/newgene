@@ -11,9 +11,9 @@ class UIModelManager : public UIManager
 {
 	Q_OBJECT
 public:
-	explicit UIModelManager(NewGeneMainWindow *parent = 0);
+	explicit UIModelManager(QObject *parent = 0);
 
-	static UIModelManager & getModelManager(NewGeneMainWindow * parent = NULL);
+	static UIModelManager & getModelManager();
 
 	UIModel * loadDefaultModel();
 

@@ -9,9 +9,9 @@ class UILoggingManager : public UIManager
 {
 		Q_OBJECT
 	public:
-		explicit UILoggingManager(NewGeneMainWindow *parent = 0);
+		explicit UILoggingManager(QObject *parent = 0);
 
-		static UILoggingManager & getLoggingManager(NewGeneMainWindow * parent = NULL);
+		static UILoggingManager & getLoggingManager();
 
 	signals:
 

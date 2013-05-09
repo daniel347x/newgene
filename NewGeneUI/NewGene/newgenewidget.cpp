@@ -7,6 +7,7 @@
 #include "uisettingsmanager.h"
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
+#include "uiloggingmanager.h"
 
 NewGeneWidget::NewGeneWidget(QWidget * self_) :
 	self(self_)
@@ -20,12 +21,17 @@ NewGeneMainWindow & NewGeneWidget::mainWindow()
 	return *pNewGeneMainWindow;
 }
 
-UISettingsManager &NewGeneWidget::settingsManager(NewGeneMainWindow * parent)
+UISettingsManager &NewGeneWidget::settingsManager()
 {
-	return UISettingsManager::getSettingsManager(parent);
+	return UISettingsManager::getSettingsManager();
 }
 
-UIProjectManager &NewGeneWidget::projectManager(NewGeneMainWindow * parent)
+UILoggingManager &NewGeneWidget::loggingManager()
 {
-	return UIProjectManager::projectManager(parent);
+	return UILoggingManager::loggingManager();
+}
+
+UIProjectManager &NewGeneWidget::projectManager()
+{
+	return UIProjectManager::projectManager();
 }

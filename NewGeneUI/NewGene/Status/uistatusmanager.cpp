@@ -6,12 +6,12 @@
 
 std::unique_ptr<UIStatusManager> UIStatusManager::status_;
 
-UIStatusManager::UIStatusManager(NewGeneMainWindow *parent) :
+UIStatusManager::UIStatusManager(QObject *parent) :
 	UIManager(parent)
 {
 }
 
-UIStatusManager & UIStatusManager::getStatusManager(NewGeneMainWindow * parent)
+UIStatusManager & UIStatusManager::getStatusManager()
 {
 
 	// *****************************************************************
@@ -21,7 +21,7 @@ UIStatusManager & UIStatusManager::getStatusManager(NewGeneMainWindow * parent)
 
 	if (status_ == NULL)
 	{
-		status_.reset(new UIStatusManager(parent));
+		status_.reset(new UIStatusManager(NULL));
 		if (status_)
 		{
 			status_->which = MANAGER_STATUS;
@@ -31,11 +31,6 @@ UIStatusManager & UIStatusManager::getStatusManager(NewGeneMainWindow * parent)
 	if (status_ == NULL)
 	{
 		boost::format msg("Status manager not instantiated.");
-		throw NewGeneException() << newgene_error_description(msg.str());
-	}
-	if (status_->parent() == NULL)
-	{
-		boost::format msg("Status manager's main window not set.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 	return *status_;

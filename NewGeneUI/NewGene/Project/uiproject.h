@@ -14,6 +14,8 @@ class UIProjectManager;
 class UIModel;
 class NewGeneMainWindow;
 class UIProjectSettings;
+class UILoggingManager;
+class UIProjectManager;
 
 class UIProject : public QObject
 {
@@ -29,16 +31,16 @@ class UIProject : public QObject
 	public slots:
 
 	protected:
-		std::unique_ptr<UIModel> model_;
+		UIModel * model_; // owned by this UIProject
+		UIProjectSettings * projectSettings_; // owned by this UIProject
 
 	private:
 		UIModelManager & modelManager();
 		UISettingsManager & settingsManager();
 		UIDocumentManager & documentManager();
 		UIStatusManager & statusManager();
-
-		std::unique_ptr<NewGeneMainWindow> parent_;
-		std::unique_ptr<UIProjectSettings> settings_;
+		UILoggingManager & loggingManager();
+		UIProjectManager & projectManager();
 };
 
 #endif // UIPROJECT_H

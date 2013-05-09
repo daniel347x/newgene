@@ -9,20 +9,26 @@
 
 std::unique_ptr<UILoggingManager> UILoggingManager::loggingManager_;
 
-UILoggingManager::UILoggingManager(NewGeneMainWindow *parent) :
+UILoggingManager::UILoggingManager(QObject *parent) :
 	UIManager(parent)
 {
+	//bool found = ObtainLogfilePath();
+	//if (!found)
+//	{
+//		statusManager().PostStatus("Unable to open NewGene logfile for writing.  No logging will occur.", UIStatusManager::IMPORTANCE_STANDARD, true);
+//	}
 }
 
-UILoggingManager &UILoggingManager::getLoggingManager(NewGeneMainWindow * parent)
+UILoggingManager &UILoggingManager::getLoggingManager()
 {
+
 	// *****************************************************************
 	// TODO: Create std::map<> from parent to manager, and retrieve that
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
 	if ( loggingManager_ == NULL )
 	{
-		loggingManager_.reset(new UILoggingManager( parent ));
+		loggingManager_.reset(new UILoggingManager(NULL));
 
 		if ( loggingManager_ )
 		{
@@ -38,14 +44,8 @@ UILoggingManager &UILoggingManager::getLoggingManager(NewGeneMainWindow * parent
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	if ( loggingManager_ -> parent() == NULL )
-	{
-		boost::format msg( "Logging manager's main window not set." );
-
-		throw NewGeneException() << newgene_error_description( msg.str() );
-	}
-
 	return *loggingManager_;
+
 }
 
 bool UILoggingManager::ObtainLogfilePath()
@@ -79,12 +79,6 @@ bool UILoggingManager::ObtainLogfilePath()
 	}
 	catch ( std::ofstream::failure e )
 	{
-	}
-
-	if (true)
-	//if (!found)
-	{
-		statusManager().PostStatus("Unable to open NewGene logfile for writing.  No logging will occur.", UIStatusManager::IMPORTANCE_STANDARD, true);
 	}
 
 	return found;

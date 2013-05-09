@@ -3,12 +3,12 @@
 
 std::unique_ptr<UIModelManager> UIModelManager::modelManager;
 
-UIModelManager::UIModelManager(NewGeneMainWindow *parent) :
+UIModelManager::UIModelManager(QObject *parent) :
 	UIManager(parent)
 {
 }
 
-UIModelManager & UIModelManager::getModelManager(NewGeneMainWindow * parent)
+UIModelManager & UIModelManager::getModelManager()
 {
 
 	// *****************************************************************
@@ -18,7 +18,7 @@ UIModelManager & UIModelManager::getModelManager(NewGeneMainWindow * parent)
 
 	if (modelManager == NULL)
 	{
-		modelManager.reset(new UIModelManager(parent));
+		modelManager.reset(new UIModelManager(NULL));
 		if (modelManager)
 		{
 			modelManager->which = MANAGER_MODEL;
@@ -28,11 +28,6 @@ UIModelManager & UIModelManager::getModelManager(NewGeneMainWindow * parent)
 	if (modelManager == NULL)
 	{
 		boost::format msg("Model manager not instantiated.");
-		throw NewGeneException() << newgene_error_description(msg.str());
-	}
-	if (modelManager->parent() == NULL)
-	{
-		boost::format msg("Model manager's main window not set.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 	return *modelManager;

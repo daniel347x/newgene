@@ -10,12 +10,12 @@
 
 std::unique_ptr<UIProjectManager> UIProjectManager::projectManager_;
 
-UIProjectManager::UIProjectManager(NewGeneMainWindow *parent) :
+UIProjectManager::UIProjectManager(QObject *parent) :
 	UIManager(parent)
 {
 }
 
-UIProjectManager & UIProjectManager::projectManager( NewGeneMainWindow * parent )
+UIProjectManager & UIProjectManager::projectManager()
 {
 	// *****************************************************************
 	// TODO: Create std::map<> from parent to manager, and retrieve that
@@ -24,26 +24,13 @@ UIProjectManager & UIProjectManager::projectManager( NewGeneMainWindow * parent 
 
 	if ( projectManager_ == NULL )
 	{
-		if (parent == NULL)
-		{
-			boost::format msg( "Project manager's main window not set." );
 
-			throw NewGeneException() << newgene_error_description( msg.str() );
-		}
-
-		projectManager_.reset(new UIProjectManager( parent ));
+		projectManager_.reset(new UIProjectManager(NULL));
 
 		if ( projectManager_ )
 		{
 			projectManager_ -> which            = MANAGER_PROJECT;
 			projectManager_ -> which_descriptor = "UIProjectManager";
-
-			// instantiate other managers
-			statusManager(parent);
-			documentManager(parent);
-			loggingManager(parent);
-			settingsManager(parent);
-			modelManager(parent);
 		}
 	}
 
@@ -54,18 +41,12 @@ UIProjectManager & UIProjectManager::projectManager( NewGeneMainWindow * parent 
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	if ( projectManager_ -> parent() == NULL )
-	{
-		boost::format msg( "Project manager's main window not set." );
-
-		throw NewGeneException() << newgene_error_description( msg.str() );
-	}
-
 	return *(projectManager_.get());
 }
 
-void UIProjectManager::LoadDefaultProject()
+UIProject * UIProjectManager::LoadDefaultProject(NewGeneMainWindow * parent)
 {
 	//		globalSettings.reset(settingsManager().loadGlobalSettings());
 	//		model.reset(modelManager().loadDefaultModel());
+	return NULL;
 }
