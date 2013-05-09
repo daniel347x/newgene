@@ -12,11 +12,11 @@ std::unique_ptr<UILoggingManager> UILoggingManager::loggingManager_;
 UILoggingManager::UILoggingManager(QObject *parent) :
 	UIManager(parent)
 {
-	//bool found = ObtainLogfilePath();
-	//if (!found)
-//	{
-		//statusManager().PostStatus("Unable to open NewGene logfile for writing.  No logging will occur.", UIStatusManager::IMPORTANCE_STANDARD, true);
-//	}
+	bool found = ObtainLogfilePath();
+	if (!found)
+	{
+		statusManager().PostStatus("Unable to open NewGene logfile for writing.  No logging will occur.", UIStatusManager::IMPORTANCE_STANDARD, true);
+	}
 }
 
 UILoggingManager &UILoggingManager::getLoggingManager()
