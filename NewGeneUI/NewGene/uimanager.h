@@ -10,6 +10,7 @@ class UIModelManager;
 class UISettingsManager;
 class UIDocumentManager;
 class UIStatusManager;
+class UILoggingManager;
 
 class UIManager : public QObject
 {
@@ -24,6 +25,7 @@ public:
 		, MANAGER_SETTINGS
 		, MANAGER_STATUS
 		, MANAGER_MODEL
+		, MANAGER_LOGGING
 		, MANAGER_PROJECT
 	};
 
@@ -44,6 +46,7 @@ protected:
 	static UISettingsManager & settingsManager(NewGeneMainWindow * parent = NULL);
 	static UIDocumentManager & documentManager(NewGeneMainWindow * parent = NULL);
 	static UIStatusManager & statusManager(NewGeneMainWindow * parent = NULL);
+	static UILoggingManager & loggingManager(NewGeneMainWindow * parent = NULL);
 
 };
 

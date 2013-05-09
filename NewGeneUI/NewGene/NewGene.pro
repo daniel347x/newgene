@@ -63,7 +63,9 @@ SOURCES += main.cpp\
 	Model/Item/modelchangerequestitem.cpp \
 	Model/Item/modelchangeitem.cpp \
 	Project/uiproject.cpp \
-	Project/uiprojectmanager.cpp
+	Project/uiprojectmanager.cpp \
+	Utility/newgenefilenames.cpp \
+	Logging/uiloggingmanager.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -115,7 +117,9 @@ HEADERS  += newgenemainwindow.h \
 	Model/Item/modelchangerequestitem.h \
 	Model/Item/modelchangeitem.h \
 	Project/uiproject.h \
-	Project/uiprojectmanager.h
+	Project/uiprojectmanager.h \
+	Utility/newgenefilenames.h \
+	Logging/uiloggingmanager.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \
@@ -157,6 +161,8 @@ INCLUDEPATH += $$PWD/Settings/Global
 INCLUDEPATH += $$PWD/Settings/Project
 INCLUDEPATH += $$PWD/Documents
 INCLUDEPATH += $$PWD/Status
+INCLUDEPATH += $$PWD/Logging
+INCLUDEPATH += $$PWD/Utility
 INCLUDEPATH += $(BOOST_ROOT)
 
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/release/NewGeneBackEnd.lib

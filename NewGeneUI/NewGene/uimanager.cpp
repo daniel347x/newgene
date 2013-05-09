@@ -4,6 +4,7 @@
 #include "uisettingsmanager.h"
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
+#include "uiloggingmanager.h"
 
 UIManager::UIManager(NewGeneMainWindow *parent) :
 	QObject(static_cast<QObject*>(parent))
@@ -55,3 +56,7 @@ UIStatusManager &UIManager::statusManager(NewGeneMainWindow * parent)
 	return UIStatusManager::getStatusManager(parent);
 }
 
+UILoggingManager &UIManager::loggingManager(NewGeneMainWindow * parent)
+{
+	return UILoggingManager::getLoggingManager(parent);
+}

@@ -5,6 +5,7 @@
 #include "uisettingsmanager.h"
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
+#include "uiloggingmanager.h"
 
 
 std::unique_ptr<UIProjectManager> UIProjectManager::projectManager_;
@@ -40,6 +41,7 @@ UIProjectManager & UIProjectManager::projectManager( NewGeneMainWindow * parent 
 			// instantiate other managers
 			statusManager(parent);
 			documentManager(parent);
+			loggingManager(parent);
 			settingsManager(parent);
 			modelManager(parent);
 		}

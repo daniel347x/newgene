@@ -1,5 +1,8 @@
 #include "uidocumentmanager.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include <QStandardPaths>
+#include <QCoreApplication>
+#include <fstream>
 
 std::unique_ptr<UIDocumentManager> UIDocumentManager::documentManager;
 

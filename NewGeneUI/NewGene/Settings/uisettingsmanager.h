@@ -24,8 +24,6 @@ public:
 
 	static UISettingsManager & getSettingsManager(NewGeneMainWindow * parent = NULL);
 
-	static QString settingsFileName;
-
 signals:
 
 public slots:

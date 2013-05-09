@@ -3,11 +3,14 @@
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 #include "uiprojectsettings.h"
 #include "uiglobalsettings.h"
+#include "uimodelmanager.h"
+#include "uisettingsmanager.h"
+#include "uidocumentmanager.h"
+#include "uistatusmanager.h"
 #include <QStandardPaths>
 #include <fstream>
 #include <QDebug>
 
-QString             UISettingsManager::settingsFileName = "NewGene.Settings.xml";
 std::unique_ptr<UISettingsManager> UISettingsManager::globalSettings_;
 
 UISettingsManager::UISettingsManager( NewGeneMainWindow * parent ) :
@@ -19,6 +22,7 @@ UISettingsManager::UISettingsManager( NewGeneMainWindow * parent ) :
 	bool found = ObtainSettingsPath();
 	if ( !found )
 	{
+		statusManager().PostStatus("Cannot load global applicaton settings", UIStatusManager::IMPORTANCE_HIGH);
 	}
 }
 
@@ -67,7 +71,7 @@ bool UISettingsManager::ObtainSettingsPath()
 
 		boost::filesystem::path settingsPathTest( settingsPathString.toStdString() );
 
-		settingsPathTest /= settingsFileName.toStdString();
+		settingsPathTest /= NewGeneFileNames::settingsFileName.toStdString();
 
 		if ( boost::filesystem::exists( settingsPathTest ) && boost::filesystem::is_regular_file( settingsPathTest ) )
 		{
@@ -95,7 +99,7 @@ bool UISettingsManager::ObtainSettingsPath()
 				}
 			}
 
-			settingsPathTest /= settingsFileName.toStdString();
+			settingsPathTest /= NewGeneFileNames::settingsFileName.toStdString();
 
 			// qDebug() << "Attempting to create file " << settingsPathTest.string().c_str();
 			std::ofstream settingsPathTestFile;

@@ -6,6 +6,8 @@
 
 class NewGeneMainWindow;
 
+
+
 class UIDocumentManager : public UIManager
 {
 	Q_OBJECT

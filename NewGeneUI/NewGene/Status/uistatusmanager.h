@@ -25,7 +25,7 @@ public:
 	static UIStatusManager & getStatusManager(NewGeneMainWindow * parent = NULL);
 
 	void LogStatus(QString const & status_, IMPORTANCE const importance_level = IMPORTANCE_STANDARD);
-	void PostStatus(QString const & status_, IMPORTANCE const importance_level = IMPORTANCE_STANDARD);
+	void PostStatus(QString const & status_, IMPORTANCE const importance_level = IMPORTANCE_STANDARD, bool const forbidWritingToLog = false);
 
 signals:
 
