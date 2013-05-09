@@ -6,6 +6,10 @@
 #include <QString>
 
 class NewGeneMainWindow;
+class UIModelManager;
+class UISettingsManager;
+class UIDocumentManager;
+class UIStatusManager;
 
 class UIManager : public QObject
 {
@@ -33,6 +37,13 @@ public slots:
 protected:
 	WHICH_MANAGER which;
 	QString which_descriptor;
+
+protected:
+
+	static UIModelManager & modelManager(NewGeneMainWindow * parent = NULL);
+	static UISettingsManager & settingsManager(NewGeneMainWindow * parent = NULL);
+	static UIDocumentManager & documentManager(NewGeneMainWindow * parent = NULL);
+	static UIStatusManager & statusManager(NewGeneMainWindow * parent = NULL);
 
 };
 

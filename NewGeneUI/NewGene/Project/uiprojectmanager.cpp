@@ -6,6 +6,7 @@
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
 
+
 std::unique_ptr<UIProjectManager> UIProjectManager::projectManager_;
 
 UIProjectManager::UIProjectManager(NewGeneMainWindow *parent) :
@@ -37,10 +38,10 @@ UIProjectManager & UIProjectManager::projectManager( NewGeneMainWindow * parent 
 			projectManager_ -> which_descriptor = "UIProjectManager";
 
 			// instantiate other managers
-			projectManager_->modelManager(parent);
-			projectManager_->settingsManager(parent);
-			projectManager_->documentManager(parent);
-			projectManager_->statusManager(parent);
+			statusManager(parent);
+			documentManager(parent);
+			settingsManager(parent);
+			modelManager(parent);
 		}
 	}
 
@@ -59,26 +60,6 @@ UIProjectManager & UIProjectManager::projectManager( NewGeneMainWindow * parent 
 	}
 
 	return *(projectManager_.get());
-}
-
-UIModelManager &UIProjectManager::modelManager(NewGeneMainWindow * parent)
-{
-	return UIModelManager::getModelManager(parent);
-}
-
-UISettingsManager &UIProjectManager::settingsManager(NewGeneMainWindow * parent)
-{
-	return UISettingsManager::getSettingsManager(parent);
-}
-
-UIDocumentManager &UIProjectManager::documentManager(NewGeneMainWindow * parent)
-{
-	return UIDocumentManager::getDocumentManager(parent);
-}
-
-UIStatusManager &UIProjectManager::statusManager(NewGeneMainWindow * parent)
-{
-	return UIStatusManager::getStatusManager(parent);
 }
 
 void UIProjectManager::LoadDefaultProject()

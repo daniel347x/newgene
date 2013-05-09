@@ -8,13 +8,15 @@
 #include <QDebug>
 
 QString             UISettingsManager::settingsFileName = "NewGene.Settings.xml";
-std::unique_ptr<UISettingsManager> UISettingsManager::settings_;
+std::unique_ptr<UISettingsManager> UISettingsManager::globalSettings_;
 
 UISettingsManager::UISettingsManager( NewGeneMainWindow * parent ) :
 	UIManager( parent )
 {
-	bool found = ObtainSettingsPath();
 
+	LoadDefaultGlobalSettings();
+
+	bool found = ObtainSettingsPath();
 	if ( !found )
 	{
 	}
@@ -26,32 +28,32 @@ UISettingsManager & UISettingsManager::getSettingsManager( NewGeneMainWindow * p
 	// TODO: Create std::map<> from parent to manager, and retrieve that
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
-	if ( settings_ == NULL )
+	if ( globalSettings_ == NULL )
 	{
-		settings_.reset(new UISettingsManager( parent ));
+		globalSettings_.reset(new UISettingsManager( parent ));
 
-		if ( settings_ )
+		if ( globalSettings_ )
 		{
-			settings_ -> which            = MANAGER_SETTINGS;
-			settings_ -> which_descriptor = "UISettingsManager";
+			globalSettings_ -> which            = MANAGER_SETTINGS;
+			globalSettings_ -> which_descriptor = "UISettingsManager";
 		}
 	}
 
-	if ( settings_ == NULL )
+	if ( globalSettings_ == NULL )
 	{
 		boost::format msg( "Settings manager not instantiated." );
 
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	if ( settings_ -> parent() == NULL )
+	if ( globalSettings_ -> parent() == NULL )
 	{
 		boost::format msg( "Settings manager's main window not set." );
 
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	return *settings_;
+	return *globalSettings_;
 }
 
 bool UISettingsManager::ObtainSettingsPath()
@@ -130,7 +132,16 @@ bool UISettingsManager::ObtainSettingsPath()
 	return found;
 }
 
-UIProjectSettings * UISettingsManager::LoadDefaultProjectSettings(bool const initializing)
+UIProjectSettings * UISettingsManager::LoadDefaultProjectSettings()
+{
+	return NULL;
+}
+
+void UISettingsManager::LoadDefaultGlobalSettings()
+{
+}
+
+UIGlobalSettings *UISettingsManager::LoadGlobalSettings()
 {
 	return NULL;
 }

@@ -36,11 +36,11 @@ protected:
 
 private:
 
-	static std::unique_ptr<UISettingsManager> settings_;
+	static std::unique_ptr<UISettingsManager> globalSettings_;
 
-	UIProjectSettings * LoadDefaultProjectSettings(bool const initializing);
-	void LoadDefaultGlobalSettings(bool const initializing);
-	UIGlobalSettings * LoadGlobalSettings(bool const initializing);
+	UIProjectSettings * LoadDefaultProjectSettings();
+	void LoadDefaultGlobalSettings();
+	UIGlobalSettings * LoadGlobalSettings();
 
 	boost::filesystem::path settingsPath;
 	boost::property_tree::ptree settings;
