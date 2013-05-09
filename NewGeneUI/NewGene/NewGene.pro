@@ -65,7 +65,8 @@ SOURCES += main.cpp\
 	Project/uiproject.cpp \
 	Project/uiprojectmanager.cpp \
 	Utility/newgenefilenames.cpp \
-	Logging/uiloggingmanager.cpp
+	Logging/uiloggingmanager.cpp \
+    newgeneapplication.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -119,7 +120,8 @@ HEADERS  += newgenemainwindow.h \
 	Project/uiproject.h \
 	Project/uiprojectmanager.h \
 	Utility/newgenefilenames.h \
-	Logging/uiloggingmanager.h
+	Logging/uiloggingmanager.h \
+    newgeneapplication.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \

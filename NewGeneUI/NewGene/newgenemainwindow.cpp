@@ -6,6 +6,7 @@
 #include "uidocumentmanager.h"
 #include "uisettingsmanager.h"
 #include "uimodelmanager.h"
+#include "uiloggingmanager.h"
 #include "uimodel.h"
 #include "uiprojectmanager.h"
 #include "uiproject.h"
@@ -61,6 +62,25 @@ NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
 NewGeneMainWindow::~NewGeneMainWindow()
 {
 	delete ui;
+}
+
+void NewGeneMainWindow::doInitialize()
+{
+
+	//throw NewGeneException() << newgene_error_description("Test throw during initialization.");
+
+	//boost::format msg("Reached doInitialize().");
+	//QMessageBox msgBox;
+	//msgBox.setText(msg.str().c_str());
+	//msgBox.exec();
+
+	// Instantiate Managers
+	UIStatusManager::getStatusManager();
+	UIDocumentManager::getDocumentManager();
+	UILoggingManager::getLoggingManager();
+	UISettingsManager::getSettingsManager();
+	UIModelManager::getModelManager();
+
 }
 
 void NewGeneMainWindow::changeEvent(QEvent *e)

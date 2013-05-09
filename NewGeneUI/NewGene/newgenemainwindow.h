@@ -21,6 +21,11 @@ public:
 	explicit NewGeneMainWindow(QWidget *parent = 0);
 	~NewGeneMainWindow();
 
+	signals:
+
+	public slots:
+		void doInitialize();
+
 protected:
 	void changeEvent(QEvent *e);
 
