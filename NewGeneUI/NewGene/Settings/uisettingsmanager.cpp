@@ -20,7 +20,7 @@ UISettingsManager::UISettingsManager( QObject * parent ) :
 
     globalSettings.reset(LoadDefaultGlobalSettings());
 
-    bool found = ObtainSettingsPath();
+    bool found = ObtainGlobalSettingsPath();
 
     if ( !found )
     {
@@ -60,7 +60,7 @@ UISettingsManager & UISettingsManager::getSettingsManager()
     return *settingsManager;
 }
 
-bool UISettingsManager::ObtainSettingsPath()
+bool UISettingsManager::ObtainGlobalSettingsPath()
 {
     QStringList settingsPathStringList = QStandardPaths::standardLocations( QStandardPaths::DataLocation );
     bool        found                  = false;

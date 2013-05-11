@@ -30,7 +30,7 @@ public slots:
 
 protected:
 
-    bool ObtainSettingsPath();
+    bool ObtainGlobalSettingsPath();
 
 private:
 
