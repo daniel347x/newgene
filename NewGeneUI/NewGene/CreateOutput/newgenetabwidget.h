@@ -15,7 +15,7 @@ signals:
 public slots:
 
 public:
-    void NewGeneInitialize();
+    void NewGeneUIInitialize();
 
 };
 

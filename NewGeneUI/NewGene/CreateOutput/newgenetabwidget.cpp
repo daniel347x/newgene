@@ -8,7 +8,7 @@ NewGeneTabWidget::NewGeneTabWidget(QWidget *parent) :
 {
 }
 
-void NewGeneTabWidget::NewGeneInitialize()
+void NewGeneTabWidget::NewGeneUIInitialize()
 {
     QTabBar * pTB = tabBar();
     if (pTB)

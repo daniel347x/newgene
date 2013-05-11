@@ -14,7 +14,7 @@ NewGeneCreateOutput::NewGeneCreateOutput(QWidget *parent) :
     NewGeneTabWidget * pTWoutput = findChild<NewGeneTabWidget*>("tabWidgetOutput");
     if (pTWoutput)
     {
-        pTWoutput->NewGeneInitialize();
+        pTWoutput->NewGeneUIInitialize();
     }
 
 }

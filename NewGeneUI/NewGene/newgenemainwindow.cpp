@@ -11,86 +11,96 @@
 #include "uiprojectmanager.h"
 #include "uiproject.h"
 
-NewGeneMainWindow::NewGeneMainWindow(QWidget *parent) :
-	QMainWindow(parent),
-	NewGeneWidget(this), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui(new Ui::NewGeneMainWindow),
-	project(NULL)
+NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
+    QMainWindow( parent ),
+    NewGeneWidget(
+        this ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+    ui( new Ui::NewGeneMainWindow ),
+    project( NULL )
 {
 
-	try
-	{
+    try
+    {
 
-		ui->setupUi(this);
+        ui->setupUi( this );
 
-		NewGeneTabWidget * pTWmain = findChild<NewGeneTabWidget*>("tabWidgetMain");
-		if (pTWmain)
-		{
-			pTWmain->NewGeneInitialize();
-		}
+        NewGeneTabWidget * pTWmain = findChild<NewGeneTabWidget *>( "tabWidgetMain" );
 
-		project = projectManager().LoadDefaultProject(this);
+        if ( pTWmain )
+        {
+            pTWmain->NewGeneUIInitialize();
+        }
 
-	}
-	catch (boost::exception & e)
-	{
-		if( std::string const * error_desc = boost::get_error_info<newgene_error_description>(e) )
-		{
-			boost::format msg(error_desc->c_str());
-			QMessageBox msgBox;
-			msgBox.setText(msg.str().c_str());
-			msgBox.exec();
-		}
-		else
-		{
-			boost::format msg("Unknown exception thrown");
-			QMessageBox msgBox;
-			msgBox.setText(msg.str().c_str());
-			msgBox.exec();
-		}
-		QCoreApplication::exit(-1);
-	}
-	catch (std::exception & e)
-	{
-		boost::format msg("Exception thrown: %1%");
-		msg % e.what();
-		QCoreApplication::exit(-1);
-	}
+    }
+    catch ( boost::exception & e )
+    {
+
+        if ( std::string const * error_desc = boost::get_error_info<newgene_error_description>( e ) )
+        {
+            boost::format msg( error_desc->c_str() );
+            QMessageBox msgBox;
+            msgBox.setText( msg.str().c_str() );
+            msgBox.exec();
+        }
+        else
+        {
+            boost::format msg( "Unknown exception thrown" );
+            QMessageBox msgBox;
+            msgBox.setText( msg.str().c_str() );
+            msgBox.exec();
+        }
+
+        QCoreApplication::exit( -1 );
+
+    }
+    catch ( std::exception & e )
+    {
+
+        boost::format msg( "Exception thrown: %1%" );
+        msg % e.what();
+        QCoreApplication::exit( -1 );
+
+    }
 
 }
 
 NewGeneMainWindow::~NewGeneMainWindow()
 {
-	delete ui;
+    delete ui;
 }
 
 void NewGeneMainWindow::doInitialize()
 {
 
-	//throw NewGeneException() << newgene_error_description("Test throw during initialization.");
+    //throw NewGeneException() << newgene_error_description("Test throw during initialization.");
 
-	//boost::format msg("Reached doInitialize().");
-	//QMessageBox msgBox;
-	//msgBox.setText(msg.str().c_str());
-	//msgBox.exec();
+    //boost::format msg("Reached doInitialize().");
+    //QMessageBox msgBox;
+    //msgBox.setText(msg.str().c_str());
+    //msgBox.exec();
 
-	// Instantiate Managers
-	UIStatusManager::getStatusManager();
-	UIDocumentManager::getDocumentManager();
-	UILoggingManager::getLoggingManager();
-	UISettingsManager::getSettingsManager();
-	UIModelManager::getModelManager();
+    // Instantiate Managers
+    UIStatusManager::getStatusManager();
+    UIDocumentManager::getDocumentManager();
+    UILoggingManager::getLoggingManager();
+    UISettingsManager::getSettingsManager();
+    UIModelManager::getModelManager();
+
+    project = projectManager().LoadDefaultProject( this );
 
 }
 
-void NewGeneMainWindow::changeEvent(QEvent *e)
+void NewGeneMainWindow::changeEvent( QEvent * e )
 {
-	QMainWindow::changeEvent(e);
-	switch (e->type()) {
-	case QEvent::LanguageChange:
-		ui->retranslateUi(this);
-		break;
-	default:
-		break;
-	}
+    QMainWindow::changeEvent( e );
+
+    switch ( e->type() )
+    {
+        case QEvent::LanguageChange:
+            ui->retranslateUi( this );
+            break;
+
+        default:
+            break;
+    }
 }

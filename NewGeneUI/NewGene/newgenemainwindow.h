@@ -34,7 +34,7 @@ private:
 
 	UIProject * project; // owned by this NewGeneMainWindow
 
-	friend class NewGeneWidget;
+	friend class NewGeneWidget; // saved using Dropbox + SyncBack Pro - and a second time.  Now, editing it on the Xeon machine.
 };
 
 #endif // NEWGENEMAINWINDOW_H
