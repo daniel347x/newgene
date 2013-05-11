@@ -37,11 +37,13 @@ private:
     static std::unique_ptr<UISettingsManager> settingsManager;
 
     UIProjectSettings * LoadDefaultProjectSettings();
-    void LoadDefaultGlobalSettings();
+    UIGlobalSettings * LoadDefaultGlobalSettings();
     UIGlobalSettings * LoadGlobalSettings();
 
-    boost::filesystem::path settingsPath;
+    boost::filesystem::path globalsettingsPath;
     boost::property_tree::ptree settings;
+
+    std::unique_ptr<UIGlobalSettings> globalSettings;
 
 };
 

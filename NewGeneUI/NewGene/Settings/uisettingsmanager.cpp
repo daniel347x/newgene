@@ -7,6 +7,7 @@
 #include "uisettingsmanager.h"
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
+#include "uiglobalsettings.h"
 #include <QStandardPaths>
 #include <fstream>
 #include <QDebug>
@@ -17,13 +18,19 @@ UISettingsManager::UISettingsManager( QObject * parent ) :
     UIManager( parent )
 {
 
-    LoadDefaultGlobalSettings();
+    globalSettings.reset(LoadDefaultGlobalSettings());
 
     bool found = ObtainSettingsPath();
+
     if ( !found )
     {
-        statusManager().PostStatus("Cannot load global applicaton settings", UIStatusManager::IMPORTANCE_HIGH);
+        statusManager().PostStatus( "Cannot load global applicaton settings", UIStatusManager::IMPORTANCE_HIGH );
     }
+    else
+    {
+        globalSettings.reset(LoadGlobalSettings());
+    }
+
 }
 
 UISettingsManager & UISettingsManager::getSettingsManager()
@@ -34,7 +41,7 @@ UISettingsManager & UISettingsManager::getSettingsManager()
     // *****************************************************************
     if ( settingsManager == NULL )
     {
-        settingsManager.reset(new UISettingsManager(NULL));
+        settingsManager.reset( new UISettingsManager( NULL ) );
 
         if ( settingsManager )
         {
@@ -68,7 +75,7 @@ bool UISettingsManager::ObtainSettingsPath()
 
         if ( boost::filesystem::exists( settingsPathTest ) && boost::filesystem::is_regular_file( settingsPathTest ) )
         {
-            settingsPath = settingsPathTest;
+            globalsettingsPath = settingsPathTest;
             found        = true;
 
             break;
@@ -107,7 +114,7 @@ bool UISettingsManager::ObtainSettingsPath()
                     settingsPathTestFile.write( "\n", 1 );  // write 1 character
                     settingsPathTestFile.close();
 
-                    settingsPath = settingsPathTest;
+                    globalsettingsPath = settingsPathTest;
 
                     // qDebug() << "Created: " << settingsPath.string().c_str();
                     found = true;
@@ -134,11 +141,12 @@ UIProjectSettings * UISettingsManager::LoadDefaultProjectSettings()
     return NULL;
 }
 
-void UISettingsManager::LoadDefaultGlobalSettings()
+UIGlobalSettings * UISettingsManager::LoadDefaultGlobalSettings()
 {
+    return NULL;
 }
 
-UIGlobalSettings *UISettingsManager::LoadGlobalSettings()
+UIGlobalSettings * UISettingsManager::LoadGlobalSettings()
 {
     return NULL;
 }
