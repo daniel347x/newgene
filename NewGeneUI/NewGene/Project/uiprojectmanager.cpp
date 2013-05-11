@@ -11,42 +11,41 @@
 std::unique_ptr<UIProjectManager> UIProjectManager::projectManager_;
 
 UIProjectManager::UIProjectManager(QObject *parent) :
-	UIManager(parent)
+    UIManager(parent)
 {
 }
 
 UIProjectManager & UIProjectManager::projectManager()
 {
-	// *****************************************************************
-	// TODO: Create std::map<> from parent to manager, and retrieve that
-	// ... this will support multiple main windows in the future.
-	// *****************************************************************
+    // *****************************************************************
+    // TODO: Create std::map<> from parent to manager, and retrieve that
+    // ... this will support multiple main windows in the future.
+    // *****************************************************************
 
-	if ( projectManager_ == NULL )
-	{
+    if ( projectManager_ == NULL )
+    {
 
-		projectManager_.reset(new UIProjectManager(NULL));
+        projectManager_.reset(new UIProjectManager(NULL));
 
-		if ( projectManager_ )
-		{
-			projectManager_ -> which            = MANAGER_PROJECT;
-			projectManager_ -> which_descriptor = "UIProjectManager";
-		}
-	}
+        if ( projectManager_ )
+        {
+            projectManager_ -> which            = MANAGER_PROJECT;
+            projectManager_ -> which_descriptor = "UIProjectManager";
+        }
+    }
 
-	if ( projectManager_ == NULL )
-	{
-		boost::format msg( "Project manager not instantiated." );
+    if ( projectManager_ == NULL )
+    {
+        boost::format msg( "Project manager not instantiated." );
 
-		throw NewGeneException() << newgene_error_description( msg.str() );
-	}
+        throw NewGeneException() << newgene_error_description( msg.str() );
+    }
 
-	return *(projectManager_.get());
+    return *(projectManager_.get());
 }
 
 UIProject * UIProjectManager::LoadDefaultProject(NewGeneMainWindow * parent)
 {
-	//		globalSettings.reset(settingsManager().loadGlobalSettings());
-	//		model.reset(modelManager().loadDefaultModel());
-	return NULL;
+    //		model.reset(modelManager().loadDefaultModel());
+    return NULL;
 }
