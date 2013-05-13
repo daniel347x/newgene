@@ -148,5 +148,6 @@ UIGlobalSettings * UISettingsManager::LoadDefaultGlobalSettings()
 
 UIGlobalSettings * UISettingsManager::LoadGlobalSettings()
 {
+
     return NULL;
 }

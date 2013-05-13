@@ -57,6 +57,15 @@
     <ClInclude Include="Settings\SettingsManager.h">
       <Filter>Header Files\Settings</Filter>
     </ClInclude>
+    <ClInclude Include="Settings\Settings.h">
+      <Filter>Header Files\Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\ProjectSettings.h">
+      <Filter>Header Files\Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\GlobalSettings.h">
+      <Filter>Header Files\Settings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -72,6 +81,15 @@
       <Filter>Source Files\Documents</Filter>
     </ClCompile>
     <ClCompile Include="Settings\SettingsManager.cpp">
+      <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\Settings.cpp">
+      <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\ProjectSettings.cpp">
+      <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\GlobalSettings.cpp">
       <Filter>Source Files\Settings</Filter>
     </ClCompile>
   </ItemGroup>

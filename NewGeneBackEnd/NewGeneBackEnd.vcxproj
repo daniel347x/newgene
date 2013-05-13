@@ -76,6 +76,9 @@
   <ItemGroup>
     <ClInclude Include="Documents\DocumentManager.h" />
     <ClInclude Include="Model\ModelManager.h" />
+    <ClInclude Include="Settings\GlobalSettings.h" />
+    <ClInclude Include="Settings\ProjectSettings.h" />
+    <ClInclude Include="Settings\Settings.h" />
     <ClInclude Include="Settings\SettingsManager.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
@@ -83,6 +86,9 @@
   <ItemGroup>
     <ClCompile Include="Documents\DocumentManager.cpp" />
     <ClCompile Include="Model\ModelManager.cpp" />
+    <ClCompile Include="Settings\GlobalSettings.cpp" />
+    <ClCompile Include="Settings\ProjectSettings.cpp" />
+    <ClCompile Include="Settings\Settings.cpp" />
     <ClCompile Include="Settings\SettingsManager.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
