@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "uisettings.h"
+#include "../../../NewGeneBackEnd/Settings/GlobalSettings.h"
 
 class UIGlobalSettings : public UISettings
 {
