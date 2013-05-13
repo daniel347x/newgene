@@ -5,7 +5,8 @@
 
 class ProjectSettings : public Settings
 {
-
+	public:
+		virtual ~ProjectSettings() {}
 };
 
 #endif

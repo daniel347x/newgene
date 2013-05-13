@@ -2,6 +2,7 @@
 #define UISETTINGS_H
 
 #include <QObject>
+#include "globals.h"
 #include "../../../NewGeneBackEnd/Settings/Settings.h"
 
 class UISettings : public QObject
@@ -13,6 +14,10 @@ class UISettings : public QObject
 	signals:
 
 	public slots:
+
+	protected:
+
+		std::unique_ptr<Settings> backend_settings;
 
 };
 

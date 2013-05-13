@@ -3,7 +3,8 @@
 
 class Settings
 {
-
+	public:
+		virtual ~Settings() {}
 };
 
 #endif

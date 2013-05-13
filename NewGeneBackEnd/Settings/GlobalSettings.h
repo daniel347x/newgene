@@ -5,7 +5,8 @@
 
 class GlobalSettings : public Settings
 {
-
+	public:
+		virtual ~GlobalSettings() {}
 };
 
 #endif
