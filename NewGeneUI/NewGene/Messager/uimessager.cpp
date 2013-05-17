@@ -32,12 +32,15 @@ void UIMessager::displayStatusMessages()
 			if (first == false)
 			{
 				msg += " ";
-				first = true;
 			}
 			msg += _m->get()->_message_text;
+			first = false;
 		}
 	}
-	statusManager().PostStatus(msg.c_str());
+	if (!first)
+	{
+		statusManager().PostStatus(msg.c_str());
+	}
 }
 
 UISettingsManager & UIMessager::settingsManager()
