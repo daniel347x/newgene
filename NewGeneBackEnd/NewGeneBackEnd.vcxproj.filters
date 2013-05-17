@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Documents">
       <UniqueIdentifier>{7f26984a-b471-4273-b9e2-bc0ae1e1c77b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Messager">
+      <UniqueIdentifier>{84f890c9-076c-4e11-90c1-03acfa9e47d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Messager">
+      <UniqueIdentifier>{0fa8e894-2de8-4731-b4a1-2c285f02eac9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -72,6 +78,9 @@
     <ClInclude Include="Settings\SettingsRepository.h">
       <Filter>Header Files\Settings</Filter>
     </ClInclude>
+    <ClInclude Include="Messager\Messager.h">
+      <Filter>Header Files\Messager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -103,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="Settings\SettingsRepository.cpp">
       <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Messager\Messager.cpp">
+      <Filter>Source Files\Messager</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
