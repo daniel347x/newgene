@@ -25,8 +25,7 @@ UISettingsManager::UISettingsManager( QObject * parent ) :
 
 	{
 		UIMessager messager;
-
-		if ( found )
+		if ( !found )
 		{
 			statusManager().PostStatus( "Cannot load global applicaton settings; using built-in default global settings.", UIStatusManager::IMPORTANCE_HIGH );
 			_global_settings.reset( new UIAllGlobalSettings(messager) );

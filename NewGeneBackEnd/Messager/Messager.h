@@ -2,6 +2,7 @@
 #define MESSAGER_H
 
 #include <vector>
+#include <set>
 #include <memory>
 #include <cstdint>
 
@@ -25,7 +26,7 @@ class MessagerMessage
 {
 
 	public:
-	
+
 		MessagerMessage(MESSAGER_MESSAGE_ENUM const TheMessage, std::int32_t const TheMessageLevel, std::string const & TheMessageText)
 			: _message(TheMessage)
 			, _message_level(TheMessageLevel)
@@ -89,7 +90,7 @@ class Messager
 	public:
 
 		typedef std::vector<std::unique_ptr<MessagerMessage> > MessagesVector;
-	
+
 		Messager() {}
 
 		void AppendMessage(MessagerMessage * message);

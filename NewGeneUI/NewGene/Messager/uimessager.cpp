@@ -23,20 +23,28 @@ UIMessager::~UIMessager()
 
 void UIMessager::displayStatusMessages()
 {
-	std::string msg;
-	bool first = true;
+	std::set<std::string> msgs;
+	std::pair<std::set<std::string>::iterator,bool> insert_result;
 	for (MessagesVector::const_iterator _m = _messages.cbegin(); _m != _messages.cend(); ++ _m)
 	{
 		if (_m->get()->_message_level & MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE)
 		{
-			if (first == false)
-			{
-				msg += " ";
-			}
-			msg += _m->get()->_message_text;
-			first = false;
+			insert_result = msgs.insert(_m->get()->_message_text);
 		}
 	}
+
+	std::string msg;
+	bool first = true;
+	for (std::set<std::string>::const_iterator _s = msgs.cbegin(); _s != msgs.cend(); ++_s)
+	{
+		if (first == false)
+		{
+			msg += " ";
+		}
+		msg += *_s;
+		first = false;
+	}
+
 	if (!first)
 	{
 		statusManager().PostStatus(msg.c_str());
