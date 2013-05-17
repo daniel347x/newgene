@@ -29,7 +29,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 	protected:
 
-		class UIOnlySettings : public UIAllSettings::UIOnlySettings_base
+		class UIOnlySettings : public UIAllSettings::UIOnlySettings_base<PROJECT_SETTINGS_UI, UIProjectSetting>
 		{
 
 			public:
@@ -41,7 +41,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 			public:
 
-				class _UIRelatedImpl : public _UIRelatedImpl_base<PROJECT_SETTINGS_UI, UIProjectSetting>
+				class _UIRelatedImpl : public _UIRelatedImpl_base
 				{
 
 					public:

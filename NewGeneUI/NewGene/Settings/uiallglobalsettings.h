@@ -29,7 +29,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 	protected:
 
-		class UIOnlySettings : public UIAllSettings::UIOnlySettings_base
+		class UIOnlySettings : public UIAllSettings::UIOnlySettings_base<GLOBAL_SETTINGS_UI, UIGlobalSetting>
 		{
 
 			public:
@@ -41,7 +41,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			public:
 
-				class _UIRelatedImpl : public _UIRelatedImpl_base<GLOBAL_SETTINGS_UI, UIGlobalSetting>
+				class _UIRelatedImpl : public _UIRelatedImpl_base
 				{
 
 					public:

@@ -31,8 +31,20 @@ class UIAllSettings : public QObject
 
 	protected:
 
-		class UIOnlySettings_base
+		template<typename SETTINGS_ENUM, typename SETTING_CLASS>
+		class UIOnlySettings_base : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
 		{
+
+				// ***********************************************************************
+				// Directory derive from SettingsRepository.
+				// Therefore, we ourselves (through this base class)
+				// maintain the UI-related settings.
+				//
+				// (Unlike the backend-related settings implementation, below,
+				// which simply holds a pointer to a backend settings instance,
+				// and it is the backend settings instance which derives from
+				// SettingsRepository.)
+				// ***********************************************************************
 
 			protected:
 
@@ -43,20 +55,8 @@ class UIAllSettings : public QObject
 
 			protected:
 
-				template<typename SETTINGS_ENUM, typename SETTING_CLASS>
-				class _UIRelatedImpl_base : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
+				class _UIRelatedImpl_base
 				{
-
-						// ***********************************************************************
-						// Directory derive from SettingsRepository.
-						// Therefore, we ourselves (through this base class)
-						// maintain the UI-related settings.
-						//
-						// (Unlike the backend-related settings implementation, below,
-						// which simply holds a pointer to a backend settings instance,
-						// and it is the backend settings instance which derives from
-						// SettingsRepository.)
-						// ***********************************************************************
 
 					protected:
 
