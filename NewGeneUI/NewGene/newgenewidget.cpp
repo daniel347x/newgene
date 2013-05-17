@@ -9,29 +9,29 @@
 #include "uistatusmanager.h"
 #include "uiloggingmanager.h"
 
-NewGeneWidget::NewGeneWidget(QWidget * self_) :
-	self(self_)
+NewGeneWidget::NewGeneWidget( QWidget * self_ ) :
+	self( self_ )
 {
 }
 
 NewGeneMainWindow & NewGeneWidget::mainWindow()
 {
 	QWidget * pMainWindow = self->window();
-	NewGeneMainWindow * pNewGeneMainWindow = dynamic_cast<NewGeneMainWindow *>(pMainWindow);
+	NewGeneMainWindow * pNewGeneMainWindow = dynamic_cast<NewGeneMainWindow *>( pMainWindow );
 	return *pNewGeneMainWindow;
 }
 
-UISettingsManager &NewGeneWidget::settingsManager()
+UISettingsManager & NewGeneWidget::settingsManager()
 {
 	return UISettingsManager::getSettingsManager();
 }
 
-UILoggingManager &NewGeneWidget::loggingManager()
+UILoggingManager & NewGeneWidget::loggingManager()
 {
 	return UILoggingManager::loggingManager();
 }
 
-UIProjectManager &NewGeneWidget::projectManager()
+UIProjectManager & NewGeneWidget::projectManager()
 {
 	return UIProjectManager::projectManager();
 }

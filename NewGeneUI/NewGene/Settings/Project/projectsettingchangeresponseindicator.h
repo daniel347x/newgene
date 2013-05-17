@@ -9,7 +9,7 @@ class ProjectSettingChangeResponseIndicator : public QObject, public ProjectSett
 {
 		Q_OBJECT
 	public:
-		explicit ProjectSettingChangeResponseIndicator(QObject *parent = 0);
+		explicit ProjectSettingChangeResponseIndicator( QObject * parent = 0 );
 
 	signals:
 

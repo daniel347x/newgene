@@ -17,33 +17,33 @@ class UIGlobalSettings;
 class UISettingsManager : public UIManager
 {
 
-    Q_OBJECT
+		Q_OBJECT
 
-public:
-    explicit UISettingsManager(QObject *parent = 0);
+	public:
+		explicit UISettingsManager( QObject * parent = 0 );
 
-    static UISettingsManager & getSettingsManager();
+		static UISettingsManager & getSettingsManager();
 
-signals:
+	signals:
 
-public slots:
+	public slots:
 
-protected:
+	protected:
 
-    bool ObtainGlobalSettingsPath();
+		bool ObtainGlobalSettingsPath();
 
-private:
+	private:
 
-    static std::unique_ptr<UISettingsManager> settingsManager;
+		static std::unique_ptr<UISettingsManager> settingsManager;
 
-    UIProjectSettings * LoadDefaultProjectSettings();
-    UIGlobalSettings * LoadDefaultGlobalSettings();
-    UIGlobalSettings * LoadGlobalSettings();
+		UIProjectSettings * LoadDefaultProjectSettings();
+		UIGlobalSettings * LoadDefaultGlobalSettings();
+		UIGlobalSettings * LoadGlobalSettings();
 
-    boost::filesystem::path globalsettingsPath;
-    boost::property_tree::ptree settings;
+		boost::filesystem::path globalsettingsPath;
+		boost::property_tree::ptree settings;
 
-    std::unique_ptr<UIGlobalSettings> globalSettings;
+		std::unique_ptr<UIGlobalSettings> globalSettings;
 
 };
 

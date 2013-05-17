@@ -7,12 +7,12 @@ class ModelChangeItem : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit ModelChangeItem(QObject *parent = 0);
-		
+		explicit ModelChangeItem( QObject * parent = 0 );
+
 	signals:
-		
+
 	public slots:
-		
+
 };
 
 #endif // MODELCHANGEITEM_H

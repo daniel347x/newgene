@@ -6,16 +6,16 @@
 
 class NewGeneTabWidget : public QTabWidget, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
-    Q_OBJECT
-public:
-    explicit NewGeneTabWidget(QWidget *parent = 0);
+		Q_OBJECT
+	public:
+		explicit NewGeneTabWidget( QWidget * parent = 0 );
 
-signals:
+	signals:
 
-public slots:
+	public slots:
 
-public:
-    void NewGeneUIInitialize();
+	public:
+		void NewGeneUIInitialize();
 
 };
 

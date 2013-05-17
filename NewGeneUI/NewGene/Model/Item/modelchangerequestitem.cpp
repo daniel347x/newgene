@@ -1,6 +1,6 @@
 #include "modelchangerequestitem.h"
 
-ModelChangeRequestItem::ModelChangeRequestItem(QObject *parent) :
-	ModelChangeItem(parent)
+ModelChangeRequestItem::ModelChangeRequestItem( QObject * parent ) :
+	ModelChangeItem( parent )
 {
 }

@@ -6,13 +6,13 @@
 
 class ModelChangeResponse : public ModelChangeIndicator
 {
-	Q_OBJECT
-public:
-	explicit ModelChangeResponse(QObject *parent = 0);
+		Q_OBJECT
+	public:
+		explicit ModelChangeResponse( QObject * parent = 0 );
 
-signals:
+	signals:
 
-public slots:
+	public slots:
 
 };
 

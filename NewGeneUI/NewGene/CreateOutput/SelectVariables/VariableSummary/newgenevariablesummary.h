@@ -5,30 +5,31 @@
 #include "..\..\..\newgenewidget.h"
 #include <QStringListModel>
 
-namespace Ui {
-class NewGeneVariableSummary;
+namespace Ui
+{
+	class NewGeneVariableSummary;
 }
 
 class NewGeneVariableSummary : public QWidget, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
-    Q_OBJECT
+		Q_OBJECT
 
-public:
-    explicit NewGeneVariableSummary(QWidget *parent = 0);
-    ~NewGeneVariableSummary();
+	public:
+		explicit NewGeneVariableSummary( QWidget * parent = 0 );
+		~NewGeneVariableSummary();
 
-protected:
-    void changeEvent(QEvent *e);
+	protected:
+		void changeEvent( QEvent * e );
 
-private:
-    Ui::NewGeneVariableSummary *ui;
+	private:
+		Ui::NewGeneVariableSummary * ui;
 
-protected:
-    QStringListModel model1;
-    QStringListModel model2;
-    QStringListModel model3;
-    QStringListModel model4;
-    QStringListModel model5;
+	protected:
+		QStringListModel model1;
+		QStringListModel model2;
+		QStringListModel model3;
+		QStringListModel model4;
+		QStringListModel model5;
 };
 
 #endif // NEWGENEVARIABLESUMMARY_H

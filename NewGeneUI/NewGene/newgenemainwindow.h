@@ -9,32 +9,33 @@
 
 class UIProject;
 
-namespace Ui {
-class NewGeneMainWindow;
+namespace Ui
+{
+	class NewGeneMainWindow;
 }
 
 class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
-	Q_OBJECT
+		Q_OBJECT
 
-public:
-	explicit NewGeneMainWindow(QWidget *parent = 0);
-	~NewGeneMainWindow();
+	public:
+		explicit NewGeneMainWindow( QWidget * parent = 0 );
+		~NewGeneMainWindow();
 
 	signals:
 
 	public slots:
 		void doInitialize();
 
-protected:
-	void changeEvent(QEvent *e);
+	protected:
+		void changeEvent( QEvent * e );
 
-private:
-	Ui::NewGeneMainWindow *ui;
+	private:
+		Ui::NewGeneMainWindow * ui;
 
-	UIProject * project; // owned by this NewGeneMainWindow
+		UIProject * project; // owned by this NewGeneMainWindow
 
-	friend class NewGeneWidget; // saved using Dropbox + SyncBack Pro - and a second time.  Now, editing it on the Xeon machine.
+		friend class NewGeneWidget; // saved using Dropbox + SyncBack Pro - and a second time.  Now, editing it on the Xeon machine.
 };
 
 #endif // NEWGENEMAINWINDOW_H

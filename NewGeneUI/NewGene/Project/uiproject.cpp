@@ -10,10 +10,10 @@
 #include "uiprojectsettings.h"
 #include "newgenemainwindow.h"
 
-UIProject::UIProject(NewGeneMainWindow *parent) :
-	QObject(parent),
-	model_(NULL),
-	projectSettings_(NULL)
+UIProject::UIProject( NewGeneMainWindow * parent ) :
+	QObject( parent ),
+	model_( NULL ),
+	projectSettings_( NULL )
 {
 }
 
@@ -27,32 +27,32 @@ UIProjectSettings * UIProject::settings()
 	return projectSettings_;
 }
 
-UIModelManager &UIProject::modelManager()
+UIModelManager & UIProject::modelManager()
 {
 	return UIModelManager::getModelManager();
 }
 
-UISettingsManager &UIProject::settingsManager()
+UISettingsManager & UIProject::settingsManager()
 {
 	return UISettingsManager::getSettingsManager();
 }
 
-UIDocumentManager &UIProject::documentManager()
+UIDocumentManager & UIProject::documentManager()
 {
 	return UIDocumentManager::getDocumentManager();
 }
 
-UIStatusManager &UIProject::statusManager()
+UIStatusManager & UIProject::statusManager()
 {
 	return UIStatusManager::getStatusManager();
 }
 
-UILoggingManager &UIProject::loggingManager()
+UILoggingManager & UIProject::loggingManager()
 {
 	return UILoggingManager::getLoggingManager();
 }
 
-UIProjectManager &UIProject::projectManager()
+UIProjectManager & UIProject::projectManager()
 {
 	return UIProjectManager::projectManager();
 }

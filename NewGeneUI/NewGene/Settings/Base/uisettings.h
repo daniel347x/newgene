@@ -9,7 +9,9 @@ class UISettings : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit UISettings(QObject *parent = 0);
+		explicit UISettings( QObject * parent = 0 );
+
+		virtual Settings * LoadBackendSettings() = 0;
 
 	signals:
 
@@ -17,6 +19,7 @@ class UISettings : public QObject
 
 	protected:
 
+		//virtual void CreateBackendSettings() = 0;
 		std::unique_ptr<Settings> backend_settings;
 
 };

@@ -4,23 +4,24 @@
 #include <QWidget>
 #include "..\..\..\newgenewidget.h"
 
-namespace Ui {
-class NewGeneVariableGroup;
+namespace Ui
+{
+	class NewGeneVariableGroup;
 }
 
 class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
-    Q_OBJECT
+		Q_OBJECT
 
-public:
-    explicit NewGeneVariableGroup(QWidget *parent = 0);
-    ~NewGeneVariableGroup();
+	public:
+		explicit NewGeneVariableGroup( QWidget * parent = 0 );
+		~NewGeneVariableGroup();
 
-protected:
-    void changeEvent(QEvent *e);
+	protected:
+		void changeEvent( QEvent * e );
 
-private:
-    Ui::NewGeneVariableGroup *ui;
+	private:
+		Ui::NewGeneVariableGroup * ui;
 };
 
 #endif // NEWGENEVARIABLEGROUP_H

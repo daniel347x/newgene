@@ -21,7 +21,7 @@ class UIProject : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit UIProject(NewGeneMainWindow *parent = 0);
+		explicit UIProject( NewGeneMainWindow * parent = 0 );
 
 		UIModel * model();
 		UIProjectSettings * settings();

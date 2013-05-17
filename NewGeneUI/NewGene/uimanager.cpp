@@ -7,43 +7,44 @@
 #include "uiloggingmanager.h"
 #include <QApplication>
 
-UIManager::UIManager(QObject *parent) :
-	QObject(parent)
+UIManager::UIManager( QObject * parent ) :
+	QObject( parent )
 {
 }
 
-NewGeneMainWindow &UIManager::getMainWindow()
+NewGeneMainWindow & UIManager::getMainWindow()
 {
-	if (theMainWindow == NULL)
+	if ( theMainWindow == NULL )
 	{
-		boost::format msg("Main window does not exist in %1%");
+		boost::format msg( "Main window does not exist in %1%" );
 		msg % which_descriptor.toStdString();
-		throw NewGeneException() << newgene_error_description(msg.str());
+		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
+
 	return *theMainWindow;
 }
 
-UIModelManager &UIManager::modelManager()
+UIModelManager & UIManager::modelManager()
 {
 	return UIModelManager::getModelManager();
 }
 
-UISettingsManager &UIManager::settingsManager()
+UISettingsManager & UIManager::settingsManager()
 {
 	return UISettingsManager::getSettingsManager();
 }
 
-UIDocumentManager &UIManager::documentManager()
+UIDocumentManager & UIManager::documentManager()
 {
 	return UIDocumentManager::getDocumentManager();
 }
 
-UIStatusManager &UIManager::statusManager()
+UIStatusManager & UIManager::statusManager()
 {
 	return UIStatusManager::getStatusManager();
 }
 
-UILoggingManager &UIManager::loggingManager()
+UILoggingManager & UIManager::loggingManager()
 {
 	return UILoggingManager::getLoggingManager();
 }

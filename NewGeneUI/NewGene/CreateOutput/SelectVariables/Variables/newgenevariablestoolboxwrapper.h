@@ -6,23 +6,24 @@
 #include <QGridLayout>
 #include "newgenevariablestoolbox.h"
 
-namespace Ui {
-class NewGeneVariablesToolboxWrapper;
+namespace Ui
+{
+	class NewGeneVariablesToolboxWrapper;
 }
 
 class NewGeneVariablesToolboxWrapper : public QWidget, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
-    Q_OBJECT
+		Q_OBJECT
 
-public:
-    explicit NewGeneVariablesToolboxWrapper(QWidget *parent = 0);
-    ~NewGeneVariablesToolboxWrapper();
+	public:
+		explicit NewGeneVariablesToolboxWrapper( QWidget * parent = 0 );
+		~NewGeneVariablesToolboxWrapper();
 
-protected:
+	protected:
 
-private:
-    QGridLayout * gridLayout;
-    NewGeneVariablesToolbox * newgeneToolBox;
+	private:
+		QGridLayout * gridLayout;
+		NewGeneVariablesToolbox * newgeneToolBox;
 };
 
 #endif // NEWGENEVARIABLESTOOLBOXWRAPPER_H

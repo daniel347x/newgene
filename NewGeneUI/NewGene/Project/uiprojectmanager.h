@@ -10,11 +10,11 @@ class UIProjectManager : public UIManager
 {
 		Q_OBJECT
 	public:
-		explicit UIProjectManager(QObject *parent = 0);
+		explicit UIProjectManager( QObject * parent = 0 );
 
 		static UIProjectManager & projectManager();
 
-		UIProject * LoadDefaultProject(NewGeneMainWindow * parent);
+		UIProject * LoadDefaultProject( NewGeneMainWindow * parent );
 
 	signals:
 

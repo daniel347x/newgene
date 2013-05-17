@@ -6,8 +6,8 @@
 
 std::unique_ptr<UIDocumentManager> UIDocumentManager::documentManager;
 
-UIDocumentManager::UIDocumentManager(QObject *parent) :
-	UIManager(parent)
+UIDocumentManager::UIDocumentManager( QObject * parent ) :
+	UIManager( parent )
 {
 }
 
@@ -19,19 +19,21 @@ UIDocumentManager & UIDocumentManager::getDocumentManager()
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
 
-	if (documentManager == NULL)
+	if ( documentManager == NULL )
 	{
-		documentManager.reset(new UIDocumentManager(NULL));
-		if (documentManager)
+		documentManager.reset( new UIDocumentManager( NULL ) );
+
+		if ( documentManager )
 		{
 			documentManager->which = MANAGER_DOCUMENTS;
 			documentManager->which_descriptor = "UIDocumentManager";
 		}
 	}
-	if (documentManager == NULL)
+
+	if ( documentManager == NULL )
 	{
-		boost::format msg("Document manager not instantiated.");
-		throw NewGeneException() << newgene_error_description(msg.str());
+		boost::format msg( "Document manager not instantiated." );
+		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
 	return *documentManager;

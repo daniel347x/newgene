@@ -3,23 +3,24 @@
 
 #include <QWidget>
 
-namespace Ui {
-class Form;
+namespace Ui
+{
+	class Form;
 }
 
 class Form : public QWidget
 {
-    Q_OBJECT
-    
-public:
-    explicit Form(QWidget *parent = 0);
-    ~Form();
-    
-protected:
-    void changeEvent(QEvent *e);
-    
-private:
-    Ui::Form *ui;
+		Q_OBJECT
+
+	public:
+		explicit Form( QWidget * parent = 0 );
+		~Form();
+
+	protected:
+		void changeEvent( QEvent * e );
+
+	private:
+		Ui::Form * ui;
 };
 
 #endif // FORM_H

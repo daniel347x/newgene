@@ -7,16 +7,16 @@
 
 class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
-    Q_OBJECT
-public:
-    explicit NewGeneVariablesToolbox(QWidget *parent = 0);
+		Q_OBJECT
+	public:
+		explicit NewGeneVariablesToolbox( QWidget * parent = 0 );
 
-signals:
+	signals:
 
-public slots:
+	public slots:
 
-private:
-    NewGeneVariableGroup * groups;
+	private:
+		NewGeneVariableGroup * groups;
 
 };
 

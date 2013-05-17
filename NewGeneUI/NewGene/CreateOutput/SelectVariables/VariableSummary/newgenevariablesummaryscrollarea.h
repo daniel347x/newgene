@@ -5,26 +5,27 @@
 #include "..\..\..\newgenewidget.h"
 #include "NewGeneVariableSummaryGroup.h"
 
-namespace Ui {
-class NewGeneVariableSummaryScrollArea;
+namespace Ui
+{
+	class NewGeneVariableSummaryScrollArea;
 }
 
 class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
-    Q_OBJECT
+		Q_OBJECT
 
-public:
-    explicit NewGeneVariableSummaryScrollArea(QWidget *parent = 0);
-    ~NewGeneVariableSummaryScrollArea();
+	public:
+		explicit NewGeneVariableSummaryScrollArea( QWidget * parent = 0 );
+		~NewGeneVariableSummaryScrollArea();
 
-protected:
-    void changeEvent(QEvent *e);
+	protected:
+		void changeEvent( QEvent * e );
 
-private:
-    Ui::NewGeneVariableSummaryScrollArea *ui;
+	private:
+		Ui::NewGeneVariableSummaryScrollArea * ui;
 
-private:
-    NewGeneVariableSummaryGroup * groups;
+	private:
+		NewGeneVariableSummaryGroup * groups;
 
 };
 

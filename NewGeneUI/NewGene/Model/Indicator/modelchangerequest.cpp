@@ -1,6 +1,6 @@
 #include "modelchangerequest.h"
 
-ModelChangeRequest::ModelChangeRequest(QObject *parent) :
-    ModelChangeIndicator(parent)
+ModelChangeRequest::ModelChangeRequest( QObject * parent ) :
+	ModelChangeIndicator( parent )
 {
 }

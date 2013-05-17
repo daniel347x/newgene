@@ -16,40 +16,40 @@ class NewGeneWidget;
 class UIManager : public QObject
 {
 
-	Q_OBJECT
+		Q_OBJECT
 
-public:
+	public:
 
-	enum WHICH_MANAGER
-	{
-		  MANAGER_DOCUMENTS
-		, MANAGER_SETTINGS
-		, MANAGER_STATUS
-		, MANAGER_MODEL
-		, MANAGER_LOGGING
-		, MANAGER_PROJECT
-	};
+		enum WHICH_MANAGER
+		{
+			MANAGER_DOCUMENTS
+			, MANAGER_SETTINGS
+			, MANAGER_STATUS
+			, MANAGER_MODEL
+			, MANAGER_LOGGING
+			, MANAGER_PROJECT
+		};
 
-	explicit UIManager(QObject *parent = 0);
-	NewGeneMainWindow & getMainWindow();
+		explicit UIManager( QObject * parent = 0 );
+		NewGeneMainWindow & getMainWindow();
 
-signals:
+	signals:
 
-public slots:
+	public slots:
 
-protected:
-	WHICH_MANAGER which;
-	QString which_descriptor;
+	protected:
+		WHICH_MANAGER which;
+		QString which_descriptor;
 
-protected:
+	protected:
 
-	static UIModelManager & modelManager();
-	static UISettingsManager & settingsManager();
-	static UIDocumentManager & documentManager();
-	static UIStatusManager & statusManager();
-	static UILoggingManager & loggingManager();
+		static UIModelManager & modelManager();
+		static UISettingsManager & settingsManager();
+		static UIDocumentManager & documentManager();
+		static UIStatusManager & statusManager();
+		static UILoggingManager & loggingManager();
 
-	friend class NewGeneWidget;
+		friend class NewGeneWidget;
 
 };
 

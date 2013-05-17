@@ -2,17 +2,18 @@
 
 #include <QTabBar>
 
-NewGeneTabWidget::NewGeneTabWidget(QWidget *parent) :
-    QTabWidget(parent),
-    NewGeneWidget(this) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+NewGeneTabWidget::NewGeneTabWidget( QWidget * parent ) :
+	QTabWidget( parent ),
+	NewGeneWidget( this ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
 }
 
 void NewGeneTabWidget::NewGeneUIInitialize()
 {
-    QTabBar * pTB = tabBar();
-    if (pTB)
-    {
-        pTB->setDrawBase(false);
-    }
+	QTabBar * pTB = tabBar();
+
+	if ( pTB )
+	{
+		pTB->setDrawBase( false );
+	}
 }

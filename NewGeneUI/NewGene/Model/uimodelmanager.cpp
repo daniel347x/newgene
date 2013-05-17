@@ -3,8 +3,8 @@
 
 std::unique_ptr<UIModelManager> UIModelManager::modelManager;
 
-UIModelManager::UIModelManager(QObject *parent) :
-	UIManager(parent)
+UIModelManager::UIModelManager( QObject * parent ) :
+	UIManager( parent )
 {
 }
 
@@ -16,25 +16,28 @@ UIModelManager & UIModelManager::getModelManager()
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
 
-	if (modelManager == NULL)
+	if ( modelManager == NULL )
 	{
-		modelManager.reset(new UIModelManager(NULL));
-		if (modelManager)
+		modelManager.reset( new UIModelManager( NULL ) );
+
+		if ( modelManager )
 		{
 			modelManager->which = MANAGER_MODEL;
 			modelManager->which_descriptor = "UIModelManager";
 		}
 	}
-	if (modelManager == NULL)
+
+	if ( modelManager == NULL )
 	{
-		boost::format msg("Model manager not instantiated.");
-		throw NewGeneException() << newgene_error_description(msg.str());
+		boost::format msg( "Model manager not instantiated." );
+		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
+
 	return *modelManager;
 
 }
 
-UIModel *UIModelManager::loadDefaultModel()
+UIModel * UIModelManager::loadDefaultModel()
 {
 	// Settings manager constructor obtains location of settings file
 	// ... and then calls backend settings manager to load settings file

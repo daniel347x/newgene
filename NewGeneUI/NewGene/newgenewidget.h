@@ -11,16 +11,16 @@ class UILoggingManager;
 
 class NewGeneWidget
 {
-public:
-	explicit NewGeneWidget(QWidget * self_ = 0);
+	public:
+		explicit NewGeneWidget( QWidget * self_ = 0 );
 
-	NewGeneMainWindow & mainWindow();
-	UIProjectManager & projectManager();
-	UISettingsManager & settingsManager();
-	UILoggingManager & loggingManager();
+		NewGeneMainWindow & mainWindow();
+		UIProjectManager & projectManager();
+		UISettingsManager & settingsManager();
+		UILoggingManager & loggingManager();
 
-private:
-	QWidget * self;
+	private:
+		QWidget * self;
 
 };
 

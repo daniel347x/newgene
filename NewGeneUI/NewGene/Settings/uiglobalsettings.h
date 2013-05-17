@@ -7,13 +7,22 @@
 
 class UIGlobalSettings : public UISettings
 {
+
 		Q_OBJECT
+
 	public:
-		explicit UIGlobalSettings(QObject *parent = 0);
+
+		explicit UIGlobalSettings( QObject * parent = 0 );
+
+		virtual Settings * LoadBackendSettings();
 
 	signals:
 
 	public slots:
+
+	protected:
+
+		//virtual void CreateBackendSettings();
 
 };
 

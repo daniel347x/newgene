@@ -10,14 +10,14 @@
 #include "uiloggingmanager.h"
 #include "newgeneapplication.h"
 
-int main(int argc, char *argv[])
+int main( int argc, char * argv[] )
 {
 
-	NewGeneApplication a(argc, argv);
+	NewGeneApplication a( argc, argv );
 	NewGeneMainWindow w;
 	theMainWindow = &w;
 
-	QTimer::singleShot(0, &w, SLOT(doInitialize()));
+	QTimer::singleShot( 0, &w, SLOT( doInitialize() ) );
 
 	w.show();
 	return a.exec();

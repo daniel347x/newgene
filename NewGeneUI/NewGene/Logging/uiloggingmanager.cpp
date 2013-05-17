@@ -9,17 +9,18 @@
 
 std::unique_ptr<UILoggingManager> UILoggingManager::loggingManager_;
 
-UILoggingManager::UILoggingManager(QObject *parent) :
-	UIManager(parent)
+UILoggingManager::UILoggingManager( QObject * parent ) :
+	UIManager( parent )
 {
 	bool found = ObtainLogfilePath();
-	if (!found)
+
+	if ( !found )
 	{
-		statusManager().PostStatus("Unable to open NewGene logfile for writing.  No logging will occur.", UIStatusManager::IMPORTANCE_STANDARD, true);
+		statusManager().PostStatus( "Unable to open NewGene logfile for writing.  No logging will occur.", UIStatusManager::IMPORTANCE_STANDARD, true );
 	}
 }
 
-UILoggingManager &UILoggingManager::getLoggingManager()
+UILoggingManager & UILoggingManager::getLoggingManager()
 {
 
 	// *****************************************************************
@@ -28,7 +29,7 @@ UILoggingManager &UILoggingManager::getLoggingManager()
 	// *****************************************************************
 	if ( loggingManager_ == NULL )
 	{
-		loggingManager_.reset(new UILoggingManager(NULL));
+		loggingManager_.reset( new UILoggingManager( NULL ) );
 
 		if ( loggingManager_ )
 		{
@@ -59,6 +60,7 @@ bool UILoggingManager::ObtainLogfilePath()
 	std::ofstream logfilePathTestFile;
 	logfilePathTestFile.exceptions( std::ifstream::failbit | std::ifstream::badbit );
 	bool found = false;
+
 	try
 	{
 		logfilePathTestFile.open( logfilePathTest.c_str() );

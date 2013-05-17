@@ -7,13 +7,22 @@
 
 class UIProjectSettings : public UISettings
 {
+
 		Q_OBJECT
+
 	public:
-		explicit UIProjectSettings(QObject *parent = 0);
+
+		explicit UIProjectSettings( QObject * parent = 0 );
+
+		virtual Settings * LoadBackendSettings();
 
 	signals:
 
 	public slots:
+
+	protected:
+
+		//virtual void CreateBackendSettings();
 
 };
 

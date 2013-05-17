@@ -3,23 +3,24 @@
 
 #include <QGroupBox>
 
-namespace Ui {
-class GroupBox;
+namespace Ui
+{
+	class GroupBox;
 }
 
 class GroupBox : public QGroupBox
 {
-    Q_OBJECT
-    
-public:
-    explicit GroupBox(QWidget *parent = 0);
-    ~GroupBox();
-    
-protected:
-    void changeEvent(QEvent *e);
-    
-private:
-    Ui::GroupBox *ui;
+		Q_OBJECT
+
+	public:
+		explicit GroupBox( QWidget * parent = 0 );
+		~GroupBox();
+
+	protected:
+		void changeEvent( QEvent * e );
+
+	private:
+		Ui::GroupBox * ui;
 };
 
 #endif // GROUPBOX_H

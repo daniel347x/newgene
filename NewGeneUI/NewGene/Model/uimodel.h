@@ -6,13 +6,13 @@
 
 class UIModel : public QObject
 {
-	Q_OBJECT
-public:
-	explicit UIModel(QObject *parent = 0);
+		Q_OBJECT
+	public:
+		explicit UIModel( QObject * parent = 0 );
 
-signals:
+	signals:
 
-public slots:
+	public slots:
 
 };
 
