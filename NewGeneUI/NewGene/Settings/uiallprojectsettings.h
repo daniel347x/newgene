@@ -69,7 +69,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 						}
 
-						_UIRelatedImpl(boost::filesystem::path const path_to_settings) : _UIRelatedImpl_base()
+						_UIRelatedImpl(boost::filesystem::path const path_to_settings) : _UIRelatedImpl_base(path_to_settings)
 						{
 
 						}
@@ -86,7 +86,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 						}
 
-						_BackendRelatedImpl(boost::filesystem::path const path_to_settings) : _BackendRelatedImpl_base()
+						_BackendRelatedImpl(boost::filesystem::path const path_to_settings) : _BackendRelatedImpl_base(path_to_settings)
 						{
 
 						}

@@ -67,7 +67,16 @@ class UIAllSettings : public QObject
 					protected:
 
 						_RelatedImpl_base()
-						{}
+							: _settings_repository(new SETTINGS_REPOSITORY_CLASS())
+						{
+
+						}
+
+						_RelatedImpl_base(boost::filesystem::path const path_to_settings)
+							: _settings_repository(new SETTINGS_REPOSITORY_CLASS(path_to_settings))
+						{
+
+						}
 
 						std::unique_ptr<SETTINGS_REPOSITORY_CLASS> _settings_repository;
 
@@ -80,7 +89,15 @@ class UIAllSettings : public QObject
 
 						_UIRelatedImpl_base()
 							: _RelatedImpl_base<UI_SETTINGS_CLASS>()
-						{}
+						{
+
+						}
+
+						_UIRelatedImpl_base(boost::filesystem::path const path_to_settings)
+							: _RelatedImpl_base<UI_SETTINGS_CLASS>(path_to_settings)
+						{
+
+						}
 
 				};
 
@@ -91,7 +108,15 @@ class UIAllSettings : public QObject
 
 						_BackendRelatedImpl_base()
 							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>()
-						{}
+						{
+
+						}
+
+						_BackendRelatedImpl_base(boost::filesystem::path const path_to_settings)
+							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>(path_to_settings)
+						{
+
+						}
 
 				};
 
