@@ -10,7 +10,7 @@ enum PROJECT_SETTINGS_BACKEND
 	PROJECT_SETTING_BACKEND__LAST
 };
 
-class ProjectSettings : public Settings
+class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND, BackendProjectSetting>
 {
 
 	public:

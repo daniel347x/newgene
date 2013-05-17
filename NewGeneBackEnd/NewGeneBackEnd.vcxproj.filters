@@ -69,7 +69,7 @@
     <ClInclude Include="Settings\Setting.h">
       <Filter>Header Files\Settings</Filter>
     </ClInclude>
-    <ClInclude Include="Settings\SettingsParser.h">
+    <ClInclude Include="Settings\SettingsRepository.h">
       <Filter>Header Files\Settings</Filter>
     </ClInclude>
   </ItemGroup>
@@ -101,7 +101,7 @@
     <ClCompile Include="Settings\Setting.cpp">
       <Filter>Source Files\Settings</Filter>
     </ClCompile>
-    <ClCompile Include="Settings\SettingsParser.cpp">
+    <ClCompile Include="Settings\SettingsRepository.cpp">
       <Filter>Source Files\Settings</Filter>
     </ClCompile>
   </ItemGroup>

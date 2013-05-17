@@ -10,7 +10,7 @@ enum GLOBAL_SETTINGS_BACKEND
 	GLOBAL_SETTING_BACKEND__LAST
 };
 
-class GlobalSettings : public Settings
+class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND, BackendGlobalSetting>
 {
 
 	public:

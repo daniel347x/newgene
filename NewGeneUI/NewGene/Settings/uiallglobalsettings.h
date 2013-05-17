@@ -41,7 +41,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			public:
 
-				class _UIRelatedImpl : public _UIRelatedImpl_base<GLOBAL_SETTINGS_UI>
+				class _UIRelatedImpl : public _UIRelatedImpl_base<GLOBAL_SETTINGS_UI, UIGlobalSetting>
 				{
 
 					public:

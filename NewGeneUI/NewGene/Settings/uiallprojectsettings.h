@@ -41,7 +41,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 			public:
 
-				class _UIRelatedImpl : public _UIRelatedImpl_base<PROJECT_SETTINGS_UI>
+				class _UIRelatedImpl : public _UIRelatedImpl_base<PROJECT_SETTINGS_UI, UIProjectSetting>
 				{
 
 					public:

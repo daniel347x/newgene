@@ -4,7 +4,7 @@
 #include <QObject>
 #include "globals.h"
 #include "../../../NewGeneBackEnd/Settings/Settings.h"
-#include "../../../NewGeneBackEnd/Settings/SettingsParser.h"
+#include "../../../NewGeneBackEnd/Settings/SettingsRepository.h"
 #include "uisetting.h"
 
 class UIAllSettings : public QObject
@@ -43,16 +43,14 @@ class UIAllSettings : public QObject
 
 			protected:
 
-				template<typename SETTINGS_ENUM>
-				class _UIRelatedImpl_base
+				template<typename SETTINGS_ENUM, typename SETTING_CLASS>
+				class _UIRelatedImpl_base : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
 				{
 
 					protected:
 
 						virtual void CreateDefaultUISettings() = 0;
 						virtual void CreateUISettings(boost::filesystem::path const path_to_settings) = 0; // just overwrite whatever already exists in _ui_settings
-
-						std::map<SETTINGS_ENUM, UIProjectSetting> _ui_settings_map;
 
 				};
 

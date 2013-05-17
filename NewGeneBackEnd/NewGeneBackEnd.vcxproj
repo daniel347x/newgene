@@ -81,7 +81,7 @@
     <ClInclude Include="Settings\Setting.h" />
     <ClInclude Include="Settings\Settings.h" />
     <ClInclude Include="Settings\SettingsManager.h" />
-    <ClInclude Include="Settings\SettingsParser.h" />
+    <ClInclude Include="Settings\SettingsRepository.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
   </ItemGroup>
@@ -93,7 +93,7 @@
     <ClCompile Include="Settings\Setting.cpp" />
     <ClCompile Include="Settings\Settings.cpp" />
     <ClCompile Include="Settings\SettingsManager.cpp" />
-    <ClCompile Include="Settings\SettingsParser.cpp" />
+    <ClCompile Include="Settings\SettingsRepository.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
   </ItemGroup>

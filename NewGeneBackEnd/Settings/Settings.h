@@ -5,15 +5,23 @@
 #	include <boost/filesystem.hpp>
 #endif
 
-#include "SettingsParser.h"
+#include "SettingsRepository.h"
 
-class Settings
+template<typename SETTINGS_ENUM, typename SETTING_CLASS>
+class Settings : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
 {
 
 	public:
 
-		Settings(boost::filesystem::path const settings_path);
-		virtual ~Settings() {}
+		Settings(boost::filesystem::path const settings_path)
+		{
+
+		}
+
+		virtual ~Settings()
+		{
+
+		}
 
 };
 
