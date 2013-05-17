@@ -1,13 +1,12 @@
 
 #include "uisettingsmanager.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
-#include "uiprojectsettings.h"
-#include "uiglobalsettings.h"
+#include "uiallprojectsettings.h"
+#include "uiallglobalsettings.h"
 #include "uimodelmanager.h"
 #include "uisettingsmanager.h"
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
-#include "uiglobalsettings.h"
 #include <QStandardPaths>
 #include <fstream>
 #include <QDebug>
@@ -18,17 +17,16 @@ UISettingsManager::UISettingsManager( QObject * parent ) :
 	UIManager( parent )
 {
 
-	ui_global_Settings.reset( LoadDefaultGlobalSettings() );
-
 	bool found = ObtainGlobalSettingsPath();
 
-	if ( !found )
+	if ( found )
 	{
-		statusManager().PostStatus( "Cannot load global applicaton settings", UIStatusManager::IMPORTANCE_HIGH );
+		statusManager().PostStatus( "Cannot load global applicaton settings; using built-in default global settings.", UIStatusManager::IMPORTANCE_HIGH );
+		_global_settings.reset( new UIAllGlobalSettings() );
 	}
 	else
 	{
-		ui_global_Settings.reset( LoadGlobalSettings() );
+		_global_settings.reset( new UIAllGlobalSettings( getGlobalSettingsPath() ) );
 	}
 
 }
@@ -75,7 +73,7 @@ bool UISettingsManager::ObtainGlobalSettingsPath()
 
 		if ( boost::filesystem::exists( settingsPathTest ) && boost::filesystem::is_regular_file( settingsPathTest ) )
 		{
-			globalsettingsPath = settingsPathTest;
+			global_settings_path = settingsPathTest;
 			found        = true;
 
 			break;
@@ -114,7 +112,7 @@ bool UISettingsManager::ObtainGlobalSettingsPath()
 					settingsPathTestFile.write( "\n", 1 );  // write 1 character
 					settingsPathTestFile.close();
 
-					globalsettingsPath = settingsPathTest;
+					global_settings_path = settingsPathTest;
 
 					// qDebug() << "Created: " << settingsPath.string().c_str();
 					found = true;
@@ -134,33 +132,4 @@ bool UISettingsManager::ObtainGlobalSettingsPath()
 	}
 
 	return found;
-}
-
-UIProjectSettings * UISettingsManager::LoadDefaultProjectSettings()
-{
-	return NULL;
-}
-
-UIGlobalSettings * UISettingsManager::LoadDefaultGlobalSettings()
-{
-	std::unique_ptr<GlobalSettings> test_global_settings = dynamic_cast<GlobalSettings*>(ui_global_Settings->CreateDefaultBackendSettings());
-
-	if (test_global_settings)
-	{
-		ui_global_Settings.resetBackendSettings(test_global_settings.release());
-	}
-
-	return ui_global_Settings.get();
-}
-
-UIGlobalSettings * UISettingsManager::LoadGlobalSettings()
-{
-	std::unique_ptr<GlobalSettings> test_global_settings = dynamic_cast<GlobalSettings*>(ui_global_Settings->CreateBackendSettings(globalsettingsPath));
-
-	if (test_global_settings)
-	{
-		ui_global_Settings.resetBackendSettings(test_global_settings.release());
-	}
-
-	return ui_global_Settings.get();
 }

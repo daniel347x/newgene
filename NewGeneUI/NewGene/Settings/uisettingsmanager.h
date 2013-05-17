@@ -11,8 +11,8 @@
 #endif
 
 class NewGeneMainWindow;
-class UIProjectSettings;
-class UIGlobalSettings;
+class UIAllProjectSettings;
+class UIAllGlobalSettings;
 
 class UISettingsManager : public UIManager
 {
@@ -20,6 +20,7 @@ class UISettingsManager : public UIManager
 		Q_OBJECT
 
 	public:
+
 		explicit UISettingsManager( QObject * parent = 0 );
 
 		static UISettingsManager & getSettingsManager();
@@ -31,19 +32,15 @@ class UISettingsManager : public UIManager
 	protected:
 
 		bool ObtainGlobalSettingsPath();
+		boost::filesystem::path getGlobalSettingsPath() { return global_settings_path; }
 
 	private:
 
 		static std::unique_ptr<UISettingsManager> settingsManager;
 
-		UIProjectSettings * LoadDefaultProjectSettings();
-		UIGlobalSettings * LoadDefaultGlobalSettings();
-		UIGlobalSettings * LoadGlobalSettings();
 
-		boost::filesystem::path globalsettingsPath;
-		boost::property_tree::ptree settings;
-
-		std::unique_ptr<UIGlobalSettings> ui_global_Settings;
+		boost::filesystem::path global_settings_path;
+		std::unique_ptr<UIAllGlobalSettings> _global_settings;
 
 };
 

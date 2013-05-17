@@ -35,8 +35,6 @@ SOURCES += main.cpp\
 	Status/uistatusmanager.cpp \
 	globals.cpp \
 	uimanager.cpp \
-	Settings/uiprojectsettings.cpp \
-	Settings/uiglobalsettings.cpp \
 	Settings/Indicator/settingchangeresponseindicator.cpp \
 	Settings/Indicator/settingchangerequestindicator.cpp \
 	Settings/Indicator/settingchangeindicator.cpp \
@@ -47,7 +45,6 @@ SOURCES += main.cpp\
 	Settings/Item/settingchangeitem.cpp \
 	Settings/Item/projectsettingchangeitem.cpp \
 	Settings/Item/globalsettingchangeitem.cpp \
-	Settings/Base/uisettings.cpp \
 	Settings/Global/globalsettingchangerequestindicator.cpp \
 	Settings/Global/globalsettingchangeresponseindicator.cpp \
 	Settings/Global/globalsettingchangerequestitem.cpp \
@@ -66,7 +63,11 @@ SOURCES += main.cpp\
 	Project/uiprojectmanager.cpp \
 	Utility/newgenefilenames.cpp \
 	Logging/uiloggingmanager.cpp \
-    newgeneapplication.cpp
+    newgeneapplication.cpp \
+    Settings/Base/uiallsettings.cpp \
+    Settings/uiallprojectsettings.cpp \
+    Settings/uiallglobalsettings.cpp \
+    Settings/Base/uisetting.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -90,8 +91,6 @@ HEADERS  += newgenemainwindow.h \
 	Status/uistatusmanager.h \
 	globals.h \
 	uimanager.h \
-	Settings/uiprojectsettings.h \
-	Settings/uiglobalsettings.h \
 	Settings/Indicator/settingchangeresponseindicator.h \
 	Settings/Indicator/settingchangerequestindicator.h \
 	Settings/Indicator/settingchangeindicator.h \
@@ -102,7 +101,6 @@ HEADERS  += newgenemainwindow.h \
 	Settings/Item/settingchangeitem.h \
 	Settings/Item/projectsettingchangeitem.h \
 	Settings/Item/globalsettingchangeitem.h \
-	Settings/Base/uisettings.h \
 	Settings/Global/globalsettingchangerequestindicator.h \
 	Settings/Global/globalsettingchangeresponseindicator.h \
 	Settings/Global/globalsettingchangerequestitem.h \
@@ -121,7 +119,11 @@ HEADERS  += newgenemainwindow.h \
 	Project/uiprojectmanager.h \
 	Utility/newgenefilenames.h \
 	Logging/uiloggingmanager.h \
-    newgeneapplication.h
+    newgeneapplication.h \
+    Settings/Base/uiallsettings.h \
+    Settings/uiallprojectsettings.h \
+    Settings/uiallglobalsettings.h \
+    Settings/Base/uisetting.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \

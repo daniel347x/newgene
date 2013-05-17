@@ -7,7 +7,7 @@
 #include "uiloggingmanager.h"
 #include "uiprojectmanager.h"
 #include "uimodel.h"
-#include "uiprojectsettings.h"
+#include "uiallprojectsettings.h"
 #include "newgenemainwindow.h"
 
 UIProject::UIProject( NewGeneMainWindow * parent ) :
@@ -22,7 +22,7 @@ UIModel * UIProject::model()
 	return model_;
 }
 
-UIProjectSettings * UIProject::settings()
+UIAllProjectSettings * UIProject::settings()
 {
 	return projectSettings_;
 }

@@ -5,6 +5,7 @@
 #include "newgenefilenames.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 #include <memory>
+#include <vector>
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>
 #endif

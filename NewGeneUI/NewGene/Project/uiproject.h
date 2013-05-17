@@ -13,7 +13,7 @@ class UIStatusManager;
 class UIProjectManager;
 class UIModel;
 class NewGeneMainWindow;
-class UIProjectSettings;
+class UIAllProjectSettings;
 class UILoggingManager;
 class UIProjectManager;
 
@@ -24,7 +24,7 @@ class UIProject : public QObject
 		explicit UIProject( NewGeneMainWindow * parent = 0 );
 
 		UIModel * model();
-		UIProjectSettings * settings();
+		UIAllProjectSettings * settings();
 
 	signals:
 
@@ -32,7 +32,7 @@ class UIProject : public QObject
 
 	protected:
 		UIModel * model_; // owned by this UIProject
-		UIProjectSettings * projectSettings_; // owned by this UIProject
+		UIAllProjectSettings * projectSettings_; // owned by this UIProject
 
 	private:
 		UIModelManager & modelManager();
