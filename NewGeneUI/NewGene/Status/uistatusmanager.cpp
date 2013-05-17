@@ -9,7 +9,12 @@ std::unique_ptr<UIStatusManager> UIStatusManager::_statusManager;
 UIStatusManager::UIStatusManager( QObject * parent ) :
 	UIManager( parent )
 {
-}
+
+	// *************************************************************************
+	// All Managers are instantiated AFTER the application event loop is running
+	// *************************************************************************
+
+}}
 
 UIStatusManager & UIStatusManager::getStatusManager()
 {

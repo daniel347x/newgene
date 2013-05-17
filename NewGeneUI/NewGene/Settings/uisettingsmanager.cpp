@@ -17,6 +17,10 @@ UISettingsManager::UISettingsManager( QObject * parent ) :
 	UIManager( parent )
 {
 
+	// *************************************************************************
+	// All Managers are instantiated AFTER the application event loop is running
+	// *************************************************************************
+
 	bool found = ObtainGlobalSettingsPath();
 
 	{

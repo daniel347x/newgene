@@ -6,7 +6,12 @@ std::unique_ptr<UIModelManager> UIModelManager::_modelManager;
 UIModelManager::UIModelManager( QObject * parent ) :
 	UIManager( parent )
 {
-}
+
+	// *************************************************************************
+	// All Managers are instantiated AFTER the application event loop is running
+	// *************************************************************************
+
+}}
 
 UIModelManager & UIModelManager::getModelManager()
 {

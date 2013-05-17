@@ -9,6 +9,11 @@ std::unique_ptr<UIDocumentManager> UIDocumentManager::_documentManager;
 UIDocumentManager::UIDocumentManager( QObject * parent ) :
 	UIManager( parent )
 {
+
+	// *************************************************************************
+	// All Managers are instantiated AFTER the application event loop is running
+	// *************************************************************************
+
 }
 
 UIDocumentManager & UIDocumentManager::getDocumentManager()

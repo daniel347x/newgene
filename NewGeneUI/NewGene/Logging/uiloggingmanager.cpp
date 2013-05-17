@@ -12,7 +12,12 @@ std::unique_ptr<UILoggingManager> UILoggingManager::_loggingManager;
 UILoggingManager::UILoggingManager( QObject * parent ) :
 	UIManager( parent )
 {
-	bool found = ObtainLogfilePath();
+
+	// *************************************************************************
+	// All Managers are instantiated AFTER the application event loop is running
+	// *************************************************************************
+
+}	bool found = ObtainLogfilePath();
 
 	if ( !found )
 	{
