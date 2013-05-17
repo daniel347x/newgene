@@ -13,6 +13,11 @@ class Settings : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
 
 	public:
 
+		Settings()
+		{
+
+		}
+
 		Settings(boost::filesystem::path const settings_path)
 		{
 

@@ -15,7 +15,8 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND, BackendProject
 
 	public:
 
-		ProjectSettings(boost::filesystem::path const global_settings_path);
+		ProjectSettings();
+		ProjectSettings(boost::filesystem::path const project_settings_path);
 		virtual ~ProjectSettings() {}
 
 	private:

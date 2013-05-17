@@ -15,6 +15,7 @@ class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND, BackendGlobalSet
 
 	public:
 
+		GlobalSettings();
 		GlobalSettings(boost::filesystem::path const global_settings_path);
 		virtual ~GlobalSettings() {}
 

@@ -11,6 +11,12 @@ template<typename SETTINGS_ENUM, typename SETTING_CLASS>
 class SettingsRepository
 {
 
+public:
+
+	SettingsRepository() {}
+
+	SettingsRepository(boost::filesystem::path const path_to_settings) {}
+
 	protected:
 
 		void LoadSettingsFromFile(Messager & messager, boost::filesystem::path const path_to_settings)

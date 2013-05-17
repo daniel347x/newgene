@@ -16,7 +16,6 @@ class UIAllSettings : public QObject
 	public:
 
 		explicit UIAllSettings(QObject * parent = NULL);
-		UIAllSettings(boost::filesystem::path const path_to_settings, QObject * parent = NULL);
 
 
 	signals:
@@ -25,8 +24,6 @@ class UIAllSettings : public QObject
 
 
 	protected:
-
-		virtual void ProvideDefaultSettings() = 0;
 
 
 	protected:
@@ -48,54 +45,71 @@ class UIAllSettings : public QObject
 
 			protected:
 
+				UIOnlySettings_base() : SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>() {}
+
 		};
 
+		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS>
 		class _impl_base
 		{
 
+			public:
+
+				_impl_base()
+				{}
+
 			protected:
 
-				class _UIRelatedImpl_base
+				template<typename SETTINGS_REPOSITORY_CLASS>
+				class _RelatedImpl_base
 				{
 
 					protected:
 
-						virtual void CreateDefaultUISettings() = 0;
-						virtual void CreateUISettings(boost::filesystem::path const path_to_settings) = 0; // just overwrite whatever already exists in _ui_settings
+						_RelatedImpl_base()
+						{}
+
+						std::unique_ptr<SETTINGS_REPOSITORY_CLASS> _settings_repository;
 
 				};
 
-				template<typename BACKEND_SETTINGS_CLASS>
-				class _BackendRelatedImpl_base
+				class _UIRelatedImpl_base : public _RelatedImpl_base<UI_SETTINGS_CLASS>
 				{
 
 					protected:
 
-						virtual void CreateDefaultBackendSettings() = 0;
-						virtual void CreateBackendSettings(boost::filesystem::path const path_to_settings) = 0;
-
-						// ***********************************************************************
-						// The BACKEND settings class possesses and maintains the
-						// std::map<BACKEND_ENUM, BackendSetting> _backend_settings;
-						// ... it does so by deriving from SettingsRepository.
-						//
-						// We simply own a pointer to the backend-related settings class.
-						// ***********************************************************************
-						std::unique_ptr<BACKEND_SETTINGS_CLASS> _backend_settings;
+						_UIRelatedImpl_base()
+							: _RelatedImpl_base<UI_SETTINGS_CLASS>()
+						{}
 
 				};
+
+				class _BackendRelatedImpl_base : public _RelatedImpl_base<BACKEND_SETTINGS_CLASS>
+				{
+
+					protected:
+
+						_BackendRelatedImpl_base()
+							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>()
+						{}
+
+				};
+
+				virtual void CreateInternalImplementations() = 0;
+				virtual void CreateInternalImplementations(boost::filesystem::path const path_to_settings) = 0;
+				std::unique_ptr<_UIRelatedImpl_base> __ui_impl;
+				std::unique_ptr<_BackendRelatedImpl_base> __backend_impl;
 
 		};
 
 
 	private:
 
-		void init();
 
 	protected:
 
 		virtual void CreateImplementation() = 0;
-		std::unique_ptr<_impl_base> __impl;
+		virtual void CreateImplementation(boost::filesystem::path const path_to_settings) = 0;
 
 };
 

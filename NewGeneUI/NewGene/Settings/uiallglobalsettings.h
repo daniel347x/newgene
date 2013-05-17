@@ -20,8 +20,6 @@ class UIAllGlobalSettings : public UIAllSettings
 		explicit UIAllGlobalSettings( QObject * parent = 0 );
 		UIAllGlobalSettings(boost::filesystem::path const path_to_settings, QObject * parent = NULL);
 
-		void ProvideDefaultSettings();
-
 
 	signals:
 
@@ -29,41 +27,82 @@ class UIAllGlobalSettings : public UIAllSettings
 
 	protected:
 
-		class UIOnlySettings : public UIAllSettings::UIOnlySettings_base<GLOBAL_SETTINGS_UI, UIGlobalSetting>
+		class UIOnlySettings : public UIOnlySettings_base<GLOBAL_SETTINGS_UI, UIGlobalSetting>
 		{
 
 			public:
+
+				UIOnlySettings() : UIOnlySettings_base()
+				{
+
+				}
+
+				UIOnlySettings(boost::filesystem::path const path_to_settings) : UIOnlySettings_base()
+				{
+
+				}
 
 		};
 
-		class _impl : public UIAllSettings::_impl_base
+		class _impl : public _impl_base<GlobalSettings, UIOnlySettings>
 		{
 
 			public:
+
+				_impl() : _impl_base()
+				{
+					CreateInternalImplementations();
+				}
+
+				_impl(boost::filesystem::path const path_to_settings) : _impl_base()
+				{
+					CreateInternalImplementations(path_to_settings);
+				}
 
 				class _UIRelatedImpl : public _UIRelatedImpl_base
 				{
 
 					public:
 
-						void CreateDefaultUISettings();
-						void CreateUISettings(boost::filesystem::path const path_to_settings);
+						_UIRelatedImpl() : _UIRelatedImpl_base()
+						{
+
+						}
+
+						_UIRelatedImpl(boost::filesystem::path const path_to_settings) : _UIRelatedImpl_base()
+						{
+
+						}
 
 				};
 
-				class _BackendRelatedImpl : public _BackendRelatedImpl_base<GlobalSettings>
+				class _BackendRelatedImpl : public _BackendRelatedImpl_base
 				{
 
 					public:
 
-						void CreateDefaultBackendSettings();
-						void CreateBackendSettings(boost::filesystem::path const path_to_settings);
+						_BackendRelatedImpl() : _BackendRelatedImpl_base()
+						{
+
+						}
+
+						_BackendRelatedImpl(boost::filesystem::path const path_to_settings) : _BackendRelatedImpl_base()
+						{
+
+						}
 
 				};
 
+			protected:
+
+				void CreateInternalImplementations();
+				void CreateInternalImplementations(boost::filesystem::path const path_to_settings)
+;\
 		};
 
 		void CreateImplementation();
+		void CreateImplementation(boost::filesystem::path const path_to_settings);
+		std::unique_ptr<_impl> __impl;
 
 };
 
