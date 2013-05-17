@@ -5,6 +5,11 @@
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/GlobalSettings.h"
 
+enum GLOBAL_SETTINGS_UI
+{
+	GLOBAL_SETTING_UI__LAST
+};
+
 class UIAllGlobalSettings : public UIAllSettings
 {
 
@@ -36,7 +41,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			public:
 
-				class _UIRelatedImpl : public _UIRelatedImpl_base
+				class _UIRelatedImpl : public _UIRelatedImpl_base<GLOBAL_SETTINGS_UI>
 				{
 
 					public:
@@ -46,7 +51,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 				};
 
-				class _BackendRelatedImpl : public _BackendRelatedImpl_base
+				class _BackendRelatedImpl : public _BackendRelatedImpl_base<GlobalSettings>
 				{
 
 					public:

@@ -7,14 +7,32 @@
 
 class Setting
 {
-
-public:
-
+	public:
 };
 
-class BackendSetting : public Setting
+class GlobalSetting : virtual public Setting
 {
-public:
+	public:
+};
+
+class ProjectSetting : virtual public Setting
+{
+	public:
+};
+
+class BackendSetting : virtual public Setting
+{
+	public:
+};
+
+class BackendGlobalSetting : public GlobalSetting, public BackendSetting
+{
+	public:
+};
+
+class BackendProjectSetting : public ProjectSetting, public BackendSetting
+{
+	public:
 };
 
 #endif

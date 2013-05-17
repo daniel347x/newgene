@@ -44,8 +44,7 @@ UIProjectManager & UIProjectManager::projectManager()
 	return *( projectManager_.get() );
 }
 
-UIProject * UIProjectManager::LoadDefaultProject( NewGeneMainWindow * parent )
+UIProject * UIProjectManager::LoadDefaultProject( NewGeneMainWindow * )
 {
-	//		model.reset(modelManager().loadDefaultModel());
 	return NULL;
 }

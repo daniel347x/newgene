@@ -15,8 +15,7 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	QMainWindow( parent ),
 	NewGeneWidget(
 		this ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::NewGeneMainWindow ),
-	project( NULL )
+	ui( new Ui::NewGeneMainWindow )
 {
 
 	try
@@ -69,6 +68,21 @@ NewGeneMainWindow::~NewGeneMainWindow()
 	delete ui;
 }
 
+void NewGeneMainWindow::changeEvent( QEvent * e )
+{
+	QMainWindow::changeEvent( e );
+
+	switch ( e->type() )
+	{
+		case QEvent::LanguageChange:
+			ui->retranslateUi( this );
+			break;
+
+		default:
+			break;
+	}
+}
+
 void NewGeneMainWindow::doInitialize()
 {
 
@@ -86,21 +100,6 @@ void NewGeneMainWindow::doInitialize()
 	UISettingsManager::getSettingsManager();
 	UIModelManager::getModelManager();
 
-	project = projectManager().LoadDefaultProject( this );
+	_current_project.reset(projectManager().LoadDefaultProject());
 
-}
-
-void NewGeneMainWindow::changeEvent( QEvent * e )
-{
-	QMainWindow::changeEvent( e );
-
-	switch ( e->type() )
-	{
-		case QEvent::LanguageChange:
-			ui->retranslateUi( this );
-			break;
-
-		default:
-			break;
-	}
 }

@@ -14,7 +14,7 @@ class UIProjectManager : public UIManager
 
 		static UIProjectManager & projectManager();
 
-		UIProject * LoadDefaultProject( NewGeneMainWindow * parent );
+		UIProject * LoadDefaultProject( NewGeneMainWindow * parent = NULL );
 
 	signals:
 

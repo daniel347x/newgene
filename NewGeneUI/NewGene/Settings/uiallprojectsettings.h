@@ -5,6 +5,11 @@
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"
 
+enum PROJECT_SETTINGS_UI
+{
+	PROJECT_SETTING_UI__LAST
+};
+
 class UIAllProjectSettings : public UIAllSettings
 {
 
@@ -36,7 +41,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 			public:
 
-				class _UIRelatedImpl : public _UIRelatedImpl_base
+				class _UIRelatedImpl : public _UIRelatedImpl_base<PROJECT_SETTINGS_UI>
 				{
 
 					public:
@@ -46,7 +51,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 				};
 
-				class _BackendRelatedImpl : public _BackendRelatedImpl_base
+				class _BackendRelatedImpl : public _BackendRelatedImpl_base<ProjectSettings>
 				{
 
 					public:

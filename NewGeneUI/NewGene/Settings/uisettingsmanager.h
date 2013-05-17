@@ -9,6 +9,7 @@
 #   include <boost/property_tree/ptree.hpp>
 #   include <boost/property_tree/xml_parser.hpp>
 #endif
+#include "../../../NewGeneBackEnd/Settings/Setting.h"
 
 class NewGeneMainWindow;
 class UIAllProjectSettings;
@@ -24,6 +25,8 @@ class UISettingsManager : public UIManager
 		explicit UISettingsManager( QObject * parent = 0 );
 
 		static UISettingsManager & getSettingsManager();
+
+		Setting const & get_global_setting();
 
 	signals:
 

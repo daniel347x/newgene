@@ -69,6 +69,9 @@
     <ClInclude Include="Settings\Setting.h">
       <Filter>Header Files\Settings</Filter>
     </ClInclude>
+    <ClInclude Include="Settings\SettingsParser.h">
+      <Filter>Header Files\Settings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -96,6 +99,9 @@
       <Filter>Source Files\Settings</Filter>
     </ClCompile>
     <ClCompile Include="Settings\Setting.cpp">
+      <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\SettingsParser.cpp">
       <Filter>Source Files\Settings</Filter>
     </ClCompile>
   </ItemGroup>

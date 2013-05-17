@@ -5,6 +5,8 @@
 #	include <boost/filesystem.hpp>
 #endif
 
+#include "SettingsParser.h"
+
 class Settings
 {
 

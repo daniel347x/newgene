@@ -11,20 +11,26 @@
 #include "newgenemainwindow.h"
 
 UIProject::UIProject( NewGeneMainWindow * parent ) :
+	QObject( parent )
+{
+}
+
+UIProject::UIProject( boost::filesystem::path const path_to_settings, NewGeneMainWindow * parent ) :
 	QObject( parent ),
-	model_( NULL ),
-	projectSettings_( NULL )
+	_project_settings( new UIAllProjectSettings(path_to_settings) )
 {
 }
 
 UIModel * UIProject::model()
 {
-	return model_;
+	//return model_;
+	return NULL;
 }
 
 UIAllProjectSettings * UIProject::settings()
 {
-	return projectSettings_;
+	//return projectSettings_;
+	return NULL;
 }
 
 UIModelManager & UIProject::modelManager()

@@ -2,8 +2,9 @@
 #define UIPROJECT_H
 
 #include <QObject>
+#include <memory>
 #ifndef Q_MOC_RUN
-#	include <memory>
+#	include <boost/filesystem.hpp>
 #endif
 
 class UIModelManager;
@@ -22,6 +23,7 @@ class UIProject : public QObject
 		Q_OBJECT
 	public:
 		explicit UIProject( NewGeneMainWindow * parent = 0 );
+		explicit UIProject( boost::filesystem::path const path_to_settings, NewGeneMainWindow * parent = 0 );
 
 		UIModel * model();
 		UIAllProjectSettings * settings();
@@ -31,8 +33,8 @@ class UIProject : public QObject
 	public slots:
 
 	protected:
-		UIModel * model_; // owned by this UIProject
-		UIAllProjectSettings * projectSettings_; // owned by this UIProject
+		std::unique_ptr<UIModel> _model;
+		std::unique_ptr<UIAllProjectSettings> _project_settings;
 
 	private:
 		UIModelManager & modelManager();
