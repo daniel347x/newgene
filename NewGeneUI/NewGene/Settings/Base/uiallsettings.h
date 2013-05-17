@@ -47,6 +47,17 @@ class UIAllSettings : public QObject
 				class _UIRelatedImpl_base : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
 				{
 
+						// ***********************************************************************
+						// Directory derive from SettingsRepository.
+						// Therefore, we ourselves (through this base class)
+						// maintain the UI-related settings.
+						//
+						// (Unlike the backend-related settings implementation, below,
+						// which simply holds a pointer to a backend settings instance,
+						// and it is the backend settings instance which derives from
+						// SettingsRepository.
+						// ***********************************************************************
+
 					protected:
 
 						virtual void CreateDefaultUISettings() = 0;
@@ -64,8 +75,9 @@ class UIAllSettings : public QObject
 						virtual void CreateBackendSettings(boost::filesystem::path const path_to_settings) = 0;
 
 						// ***********************************************************************
-						// The BACKEND possesses and maintains the
-						// std::vector<BackendSetting> _backend_settings;
+						// The BACKEND settings class possesses and maintains the
+						// std::map<BACKEND_ENUM, BackendSetting> _backend_settings;
+						// ... it does so by deriving from SettingsRepository.
 						// ***********************************************************************
 						std::unique_ptr<BACKEND_SETTINGS_CLASS> _backend_settings;
 
