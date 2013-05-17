@@ -17,7 +17,7 @@ UILoggingManager::UILoggingManager( QObject * parent ) :
 	// All Managers are instantiated AFTER the application event loop is running
 	// *************************************************************************
 
-}	bool found = ObtainLogfilePath();
+	bool found = ObtainLogfilePath();
 
 	if ( !found )
 	{

@@ -18,7 +18,7 @@ UIProjectManager::UIProjectManager( QObject * parent ) :
 	// All Managers are instantiated AFTER the application event loop is running
 	// *************************************************************************
 
-}}
+}
 
 UIProjectManager & UIProjectManager::getProjectManager()
 {
