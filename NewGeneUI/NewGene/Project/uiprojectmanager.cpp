@@ -8,40 +8,40 @@
 #include "uiloggingmanager.h"
 
 
-std::unique_ptr<UIProjectManager> UIProjectManager::projectManager_;
+std::unique_ptr<UIProjectManager> UIProjectManager::_projectManager;
 
 UIProjectManager::UIProjectManager( QObject * parent ) :
 	UIManager( parent )
 {
 }
 
-UIProjectManager & UIProjectManager::projectManager()
+UIProjectManager & UIProjectManager::getProjectManager()
 {
 	// *****************************************************************
 	// TODO: Create std::map<> from parent to manager, and retrieve that
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
 
-	if ( projectManager_ == NULL )
+	if ( _projectManager == NULL )
 	{
 
-		projectManager_.reset( new UIProjectManager( NULL ) );
+		_projectManager.reset( new UIProjectManager( NULL ) );
 
-		if ( projectManager_ )
+		if ( _projectManager )
 		{
-			projectManager_ -> which            = MANAGER_PROJECT;
-			projectManager_ -> which_descriptor = "UIProjectManager";
+			_projectManager -> which            = MANAGER_PROJECT;
+			_projectManager -> which_descriptor = "UIProjectManager";
 		}
 	}
 
-	if ( projectManager_ == NULL )
+	if ( _projectManager == NULL )
 	{
 		boost::format msg( "Project manager not instantiated." );
 
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	return *( projectManager_.get() );
+	return *( _projectManager.get() );
 }
 
 UIProject * UIProjectManager::LoadDefaultProject( NewGeneMainWindow * )

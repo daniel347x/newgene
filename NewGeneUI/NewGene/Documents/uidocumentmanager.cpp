@@ -4,7 +4,7 @@
 #include <QCoreApplication>
 #include <fstream>
 
-std::unique_ptr<UIDocumentManager> UIDocumentManager::documentManager;
+std::unique_ptr<UIDocumentManager> UIDocumentManager::_documentManager;
 
 UIDocumentManager::UIDocumentManager( QObject * parent ) :
 	UIManager( parent )
@@ -19,14 +19,14 @@ UIDocumentManager & UIDocumentManager::getDocumentManager()
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
 
-	if ( documentManager == NULL )
+	if ( _documentManager == NULL )
 	{
-		documentManager.reset( new UIDocumentManager( NULL ) );
+		_documentManager.reset( new UIDocumentManager( NULL ) );
 
-		if ( documentManager )
+		if ( _documentManager )
 		{
-			documentManager->which = MANAGER_DOCUMENTS;
-			documentManager->which_descriptor = "UIDocumentManager";
+			_documentManager->which = MANAGER_DOCUMENTS;
+			_documentManager->which_descriptor = "UIDocumentManager";
 		}
 	}
 
@@ -36,6 +36,6 @@ UIDocumentManager & UIDocumentManager::getDocumentManager()
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	return *documentManager;
+	return *_documentManager;
 
 }

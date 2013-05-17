@@ -1,13 +1,13 @@
 #include "GlobalSettings.h"
 
-GlobalSettings::GlobalSettings()
-	: Settings()
+GlobalSettings::GlobalSettings(Messager & messager)
+	: Settings(messager)
 {
 
 }
 
-GlobalSettings::GlobalSettings(boost::filesystem::path const global_settings_path)
-	: Settings(global_settings_path)
+GlobalSettings::GlobalSettings(Messager & messager, boost::filesystem::path const global_settings_path)
+	: Settings(messager, global_settings_path)
 {
 
 }

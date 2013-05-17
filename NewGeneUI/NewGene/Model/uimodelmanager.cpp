@@ -1,7 +1,7 @@
 #include "uimodelmanager.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 
-std::unique_ptr<UIModelManager> UIModelManager::modelManager;
+std::unique_ptr<UIModelManager> UIModelManager::_modelManager;
 
 UIModelManager::UIModelManager( QObject * parent ) :
 	UIManager( parent )
@@ -16,24 +16,24 @@ UIModelManager & UIModelManager::getModelManager()
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
 
-	if ( modelManager == NULL )
+	if ( _modelManager == NULL )
 	{
-		modelManager.reset( new UIModelManager( NULL ) );
+		_modelManager.reset( new UIModelManager( NULL ) );
 
-		if ( modelManager )
+		if ( _modelManager )
 		{
-			modelManager->which = MANAGER_MODEL;
-			modelManager->which_descriptor = "UIModelManager";
+			_modelManager->which = MANAGER_MODEL;
+			_modelManager->which_descriptor = "UIModelManager";
 		}
 	}
 
-	if ( modelManager == NULL )
+	if ( _modelManager == NULL )
 	{
 		boost::format msg( "Model manager not instantiated." );
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	return *modelManager;
+	return *_modelManager;
 
 }
 

@@ -15,8 +15,8 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND, BackendProject
 
 	public:
 
-		ProjectSettings();
-		ProjectSettings(boost::filesystem::path const project_settings_path);
+		ProjectSettings(Messager & messager);
+		ProjectSettings(Messager & messager, boost::filesystem::path const project_settings_path);
 		virtual ~ProjectSettings() {}
 
 	private:

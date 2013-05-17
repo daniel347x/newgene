@@ -39,7 +39,7 @@ class UISettingsManager : public UIManager
 
 	private:
 
-		static std::unique_ptr<UISettingsManager> settingsManager;
+		static std::unique_ptr<UISettingsManager> _settingsManager;
 
 
 		boost::filesystem::path global_settings_path;

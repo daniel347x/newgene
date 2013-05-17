@@ -22,7 +22,7 @@ class UIModelManager : public UIManager
 	public slots:
 
 	private:
-		static std::unique_ptr<UIModelManager> modelManager;
+		static std::unique_ptr<UIModelManager> _modelManager;
 };
 
 #endif // UIMODELMANAGER_H

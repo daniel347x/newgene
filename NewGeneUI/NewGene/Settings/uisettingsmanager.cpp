@@ -11,7 +11,7 @@
 #include <fstream>
 #include <QDebug>
 
-std::unique_ptr<UISettingsManager> UISettingsManager::settingsManager;
+std::unique_ptr<UISettingsManager> UISettingsManager::_settingsManager;
 
 UISettingsManager::UISettingsManager( QObject * parent ) :
 	UIManager( parent )
@@ -19,15 +19,19 @@ UISettingsManager::UISettingsManager( QObject * parent ) :
 
 	bool found = ObtainGlobalSettingsPath();
 
+	UIMessager messager;
+
 	if ( found )
 	{
 		statusManager().PostStatus( "Cannot load global applicaton settings; using built-in default global settings.", UIStatusManager::IMPORTANCE_HIGH );
-		_global_settings.reset( new UIAllGlobalSettings() );
+		_global_settings.reset( new UIAllGlobalSettings(messager) );
 	}
 	else
 	{
-		_global_settings.reset( new UIAllGlobalSettings( getGlobalSettingsPath() ) );
+		_global_settings.reset( new UIAllGlobalSettings(messager, getGlobalSettingsPath()) );
 	}
+
+	messager.displayStatusMessages();
 
 }
 
@@ -37,25 +41,25 @@ UISettingsManager & UISettingsManager::getSettingsManager()
 	// TODO: Create std::map<> from parent to manager, and retrieve that
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
-	if ( settingsManager == NULL )
+	if ( _settingsManager == NULL )
 	{
-		settingsManager.reset( new UISettingsManager( NULL ) );
+		_settingsManager.reset( new UISettingsManager( NULL ) );
 
-		if ( settingsManager )
+		if ( _settingsManager )
 		{
-			settingsManager -> which            = MANAGER_SETTINGS;
-			settingsManager -> which_descriptor = "UISettingsManager";
+			_settingsManager -> which            = MANAGER_SETTINGS;
+			_settingsManager -> which_descriptor = "UISettingsManager";
 		}
 	}
 
-	if ( settingsManager == NULL )
+	if ( _settingsManager == NULL )
 	{
 		boost::format msg( "Settings manager not instantiated." );
 
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	return *settingsManager;
+	return *_settingsManager;
 }
 
 bool UISettingsManager::ObtainGlobalSettingsPath()

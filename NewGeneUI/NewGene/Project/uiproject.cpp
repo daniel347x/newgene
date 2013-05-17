@@ -10,14 +10,14 @@
 #include "uiallprojectsettings.h"
 #include "newgenemainwindow.h"
 
-UIProject::UIProject( NewGeneMainWindow * parent ) :
-	QObject( parent )
+UIProject::UIProject(Messager &, NewGeneMainWindow * parent) :
+	QObject(parent)
 {
 }
 
-UIProject::UIProject( boost::filesystem::path const path_to_settings, NewGeneMainWindow * parent ) :
-	QObject( parent ),
-	_project_settings( new UIAllProjectSettings(path_to_settings) )
+UIProject::UIProject(Messager & messager, boost::filesystem::path const path_to_settings, NewGeneMainWindow * parent) :
+	QObject(parent),
+	_project_settings( new UIAllProjectSettings(messager, path_to_settings) )
 {
 }
 
@@ -60,5 +60,5 @@ UILoggingManager & UIProject::loggingManager()
 
 UIProjectManager & UIProject::projectManager()
 {
-	return UIProjectManager::projectManager();
+	return UIProjectManager::getProjectManager();
 }

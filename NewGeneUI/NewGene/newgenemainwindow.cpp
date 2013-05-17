@@ -99,6 +99,7 @@ void NewGeneMainWindow::doInitialize()
 	UILoggingManager::getLoggingManager();
 	UISettingsManager::getSettingsManager();
 	UIModelManager::getModelManager();
+	UIProjectManager::getProjectManager();
 
 	_current_project.reset(projectManager().LoadDefaultProject());
 

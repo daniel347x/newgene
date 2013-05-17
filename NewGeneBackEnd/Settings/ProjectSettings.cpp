@@ -1,13 +1,13 @@
 #include "ProjectSettings.h"
 
-ProjectSettings::ProjectSettings()
-	: Settings()
+ProjectSettings::ProjectSettings(Messager & messager)
+	: Settings(messager)
 {
 
 }
 
-ProjectSettings::ProjectSettings(boost::filesystem::path const project_settings_path)
-	: Settings(project_settings_path)
+ProjectSettings::ProjectSettings(Messager & messager, boost::filesystem::path const project_settings_path)
+	: Settings(messager, project_settings_path)
 {
 
 }

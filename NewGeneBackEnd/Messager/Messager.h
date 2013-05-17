@@ -26,17 +26,19 @@ class MessagerMessage
 
 	public:
 	
-		MessagerMessage(MESSAGER_MESSAGE_ENUM const TheMessage, std::int32_t const TheMessageLevel)
+		MessagerMessage(MESSAGER_MESSAGE_ENUM const TheMessage, std::int32_t const TheMessageLevel, std::string const & TheMessageText)
 			: _message(TheMessage)
 			, _message_level(TheMessageLevel)
+			, _message_text(TheMessageText)
 		{
 
 		}
 
-	protected:
+	public:
 
 		MESSAGER_MESSAGE_ENUM _message;
 		std::int32_t _message_level;
+		std::string _message_text;
 
 		friend class Messager;
 
@@ -47,8 +49,8 @@ class MessagerStatusMessage : public MessagerMessage
 
 	public:
 
-		MessagerStatusMessage(MESSAGER_MESSAGE_ENUM const TheMessage)
-			: MessagerMessage(TheMessage, MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE)
+		MessagerStatusMessage(MESSAGER_MESSAGE_ENUM const TheMessage, std::string const & TheMessageText)
+			: MessagerMessage(TheMessage, MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE, TheMessageText)
 		{
 
 		}
@@ -60,8 +62,8 @@ class MessagerWarningMessage : public MessagerMessage
 
 public:
 
-	MessagerWarningMessage(MESSAGER_MESSAGE_ENUM const TheMessage)
-		: MessagerMessage(TheMessage, MESSAGER_MESSAGE_CATEGORY__WARNING | MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE)
+	MessagerWarningMessage(MESSAGER_MESSAGE_ENUM const TheMessage, std::string const & TheMessageText)
+		: MessagerMessage(TheMessage, MESSAGER_MESSAGE_CATEGORY__WARNING | MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE, TheMessageText)
 	{
 
 	}
@@ -73,8 +75,8 @@ class MessagerErrorMessage : public MessagerMessage
 
 public:
 
-	MessagerErrorMessage(MESSAGER_MESSAGE_ENUM const TheMessage)
-		: MessagerMessage(TheMessage, MESSAGER_MESSAGE_CATEGORY__ERROR | MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE)
+	MessagerErrorMessage(MESSAGER_MESSAGE_ENUM const TheMessage, std::string const & TheMessageText)
+		: MessagerMessage(TheMessage, MESSAGER_MESSAGE_CATEGORY__ERROR | MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE, TheMessageText)
 	{
 
 	}

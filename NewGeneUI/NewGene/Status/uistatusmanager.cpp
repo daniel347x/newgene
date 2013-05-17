@@ -4,7 +4,7 @@
 #include <QStatusBar>
 #include "newgenemainwindow.h"
 
-std::unique_ptr<UIStatusManager> UIStatusManager::status_;
+std::unique_ptr<UIStatusManager> UIStatusManager::_statusManager;
 
 UIStatusManager::UIStatusManager( QObject * parent ) :
 	UIManager( parent )
@@ -19,24 +19,24 @@ UIStatusManager & UIStatusManager::getStatusManager()
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
 
-	if ( status_ == NULL )
+	if ( _statusManager == NULL )
 	{
-		status_.reset( new UIStatusManager( NULL ) );
+		_statusManager.reset( new UIStatusManager( NULL ) );
 
-		if ( status_ )
+		if ( _statusManager )
 		{
-			status_->which = MANAGER_STATUS;
-			status_->which_descriptor = "UIStatusManager";
+			_statusManager->which = MANAGER_STATUS;
+			_statusManager->which_descriptor = "UIStatusManager";
 		}
 	}
 
-	if ( status_ == NULL )
+	if ( _statusManager == NULL )
 	{
 		boost::format msg( "Status manager not instantiated." );
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	return *status_;
+	return *_statusManager;
 
 }
 

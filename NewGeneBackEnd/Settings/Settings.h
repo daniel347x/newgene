@@ -13,12 +13,14 @@ class Settings : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
 
 	public:
 
-		Settings()
+		Settings(Messager & messager)
+			: SettingsRepository(messager)
 		{
 
 		}
 
-		Settings(boost::filesystem::path const settings_path)
+		Settings(Messager & messager, boost::filesystem::path const path_to_settings)
+			: SettingsRepository(messager, path_to_settings)
 		{
 
 		}

@@ -7,7 +7,7 @@
 #include <QCoreApplication>
 #include <fstream>
 
-std::unique_ptr<UILoggingManager> UILoggingManager::loggingManager_;
+std::unique_ptr<UILoggingManager> UILoggingManager::_loggingManager;
 
 UILoggingManager::UILoggingManager( QObject * parent ) :
 	UIManager( parent )
@@ -27,25 +27,25 @@ UILoggingManager & UILoggingManager::getLoggingManager()
 	// TODO: Create std::map<> from parent to manager, and retrieve that
 	// ... this will support multiple main windows in the future.
 	// *****************************************************************
-	if ( loggingManager_ == NULL )
+	if ( _loggingManager == NULL )
 	{
-		loggingManager_.reset( new UILoggingManager( NULL ) );
+		_loggingManager.reset( new UILoggingManager( NULL ) );
 
-		if ( loggingManager_ )
+		if ( _loggingManager )
 		{
-			loggingManager_ -> which            = MANAGER_LOGGING;
-			loggingManager_ -> which_descriptor = "UILoggingManager";
+			_loggingManager -> which            = MANAGER_LOGGING;
+			_loggingManager -> which_descriptor = "UILoggingManager";
 		}
 	}
 
-	if ( loggingManager_ == NULL )
+	if ( _loggingManager == NULL )
 	{
 		boost::format msg( "Logging manager not instantiated." );
 
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
 
-	return *loggingManager_;
+	return *_loggingManager;
 
 }
 

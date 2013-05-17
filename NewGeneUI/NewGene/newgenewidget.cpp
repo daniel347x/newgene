@@ -28,10 +28,25 @@ UISettingsManager & NewGeneWidget::settingsManager()
 
 UILoggingManager & NewGeneWidget::loggingManager()
 {
-	return UILoggingManager::loggingManager();
+	return UILoggingManager::getLoggingManager();
 }
 
 UIProjectManager & NewGeneWidget::projectManager()
 {
-	return UIProjectManager::projectManager();
+	return UIProjectManager::getProjectManager();
+}
+
+UIModelManager & NewGeneWidget::modelManager()
+{
+	return UIModelManager::getModelManager();
+}
+
+UIDocumentManager & NewGeneWidget::documentManager()
+{
+	return UIDocumentManager::getDocumentManager();
+}
+
+UIStatusManager & NewGeneWidget::statusManager()
+{
+	return UIStatusManager::getStatusManager();
 }

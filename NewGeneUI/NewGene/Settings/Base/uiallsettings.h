@@ -15,7 +15,7 @@ class UIAllSettings : public QObject
 
 	public:
 
-		explicit UIAllSettings(QObject * parent = NULL);
+		explicit UIAllSettings(Messager & messager, QObject * parent = NULL);
 
 
 	signals:
@@ -45,7 +45,8 @@ class UIAllSettings : public QObject
 
 			protected:
 
-				UIOnlySettings_base() : SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>() {}
+				UIOnlySettings_base(Messager & messager) : SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>(messager) {}
+				UIOnlySettings_base(Messager & messager, boost::filesystem::path const path_to_settings) : SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>(messager, path_to_settings) {}
 
 		};
 
@@ -55,7 +56,7 @@ class UIAllSettings : public QObject
 
 			public:
 
-				_impl_base()
+				_impl_base(Messager &)
 				{}
 
 			protected:
@@ -66,14 +67,14 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_RelatedImpl_base()
-							: _settings_repository(new SETTINGS_REPOSITORY_CLASS())
+						_RelatedImpl_base(Messager & messager)
+							: _settings_repository(new SETTINGS_REPOSITORY_CLASS(messager))
 						{
 
 						}
 
-						_RelatedImpl_base(boost::filesystem::path const path_to_settings)
-							: _settings_repository(new SETTINGS_REPOSITORY_CLASS(path_to_settings))
+						_RelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+							: _settings_repository(new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings))
 						{
 
 						}
@@ -87,14 +88,14 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_UIRelatedImpl_base()
-							: _RelatedImpl_base<UI_SETTINGS_CLASS>()
+						_UIRelatedImpl_base(Messager & messager)
+							: _RelatedImpl_base<UI_SETTINGS_CLASS>(messager)
 						{
 
 						}
 
-						_UIRelatedImpl_base(boost::filesystem::path const path_to_settings)
-							: _RelatedImpl_base<UI_SETTINGS_CLASS>(path_to_settings)
+						_UIRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+							: _RelatedImpl_base<UI_SETTINGS_CLASS>(messager, path_to_settings)
 						{
 
 						}
@@ -106,22 +107,22 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_BackendRelatedImpl_base()
-							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>()
+						_BackendRelatedImpl_base(Messager & messager)
+							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager)
 						{
 
 						}
 
-						_BackendRelatedImpl_base(boost::filesystem::path const path_to_settings)
-							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>(path_to_settings)
+						_BackendRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager, path_to_settings)
 						{
 
 						}
 
 				};
 
-				virtual void CreateInternalImplementations() = 0;
-				virtual void CreateInternalImplementations(boost::filesystem::path const path_to_settings) = 0;
+				virtual void CreateInternalImplementations(Messager & messager) = 0;
+				virtual void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings) = 0;
 				std::unique_ptr<_UIRelatedImpl_base> __ui_impl;
 				std::unique_ptr<_BackendRelatedImpl_base> __backend_impl;
 
@@ -133,8 +134,8 @@ class UIAllSettings : public QObject
 
 	protected:
 
-		virtual void CreateImplementation() = 0;
-		virtual void CreateImplementation(boost::filesystem::path const path_to_settings) = 0;
+		virtual void CreateImplementation(Messager & messager) = 0;
+		virtual void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings) = 0;
 
 };
 

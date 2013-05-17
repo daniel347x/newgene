@@ -1,6 +1,7 @@
 #ifndef UIPROJECT_H
 #define UIPROJECT_H
 
+#include "globals.h"
 #include <QObject>
 #include <memory>
 #ifndef Q_MOC_RUN
@@ -22,8 +23,8 @@ class UIProject : public QObject
 {
 		Q_OBJECT
 	public:
-		explicit UIProject( NewGeneMainWindow * parent = 0 );
-		explicit UIProject( boost::filesystem::path const path_to_settings, NewGeneMainWindow * parent = 0 );
+		explicit UIProject(Messager & messager, NewGeneMainWindow * parent = 0);
+		explicit UIProject(Messager & messager, boost::filesystem::path const path_to_settings, NewGeneMainWindow * parent = 0);
 
 		UIModel * model();
 		UIAllProjectSettings * settings();

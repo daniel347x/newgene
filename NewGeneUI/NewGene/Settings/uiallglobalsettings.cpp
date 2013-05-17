@@ -1,35 +1,35 @@
 #include "uiallglobalsettings.h"
 
-UIAllGlobalSettings::UIAllGlobalSettings( QObject * parent ) :
-	UIAllSettings( parent )
+UIAllGlobalSettings::UIAllGlobalSettings(Messager & messager, QObject * parent)
+	: UIAllSettings(messager, parent)
 {
-	CreateImplementation();
+	CreateImplementation(messager);
 }
 
-UIAllGlobalSettings::UIAllGlobalSettings(boost::filesystem::path const path_to_settings, QObject * parent) :
-	UIAllSettings(parent)
+UIAllGlobalSettings::UIAllGlobalSettings(Messager & messager, boost::filesystem::path const path_to_settings, QObject * parent) :
+	UIAllSettings(messager, parent)
 {
-	CreateImplementation(path_to_settings);
+	CreateImplementation(messager, path_to_settings);
 }
 
-void UIAllGlobalSettings::CreateImplementation()
+void UIAllGlobalSettings::CreateImplementation(Messager & messager)
 {
-	__impl.reset(new _impl);
+	__impl.reset(new _impl(messager));
 }
 
-void UIAllGlobalSettings::CreateImplementation(boost::filesystem::path const path_to_settings)
+void UIAllGlobalSettings::CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings)
 {
-	__impl.reset(new _impl(path_to_settings));
+	__impl.reset(new _impl(messager, path_to_settings));
 }
 
-void UIAllGlobalSettings::_impl::CreateInternalImplementations()
+void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messager)
 {
-	__ui_impl.reset(new _UIRelatedImpl);
-	__backend_impl.reset(new _BackendRelatedImpl);
+	__ui_impl.reset(new _UIRelatedImpl(messager));
+	__backend_impl.reset(new _BackendRelatedImpl(messager));
 }
 
-void UIAllGlobalSettings::_impl::CreateInternalImplementations(boost::filesystem::path const path_to_settings)
+void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings)
 {
-	__ui_impl.reset(new _UIRelatedImpl(path_to_settings));
-	__backend_impl.reset(new _BackendRelatedImpl(path_to_settings));
+	__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
+	__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
 }

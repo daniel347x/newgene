@@ -3,6 +3,7 @@
 
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>
+#	include <boost/format.hpp>
 #endif
 #include <map>
 #include "..\Messager\Messager.h"
@@ -13,9 +14,14 @@ class SettingsRepository
 
 public:
 
-	SettingsRepository() {}
+	SettingsRepository(Messager &)
+	{
+	}
 
-	SettingsRepository(boost::filesystem::path const path_to_settings) {}
+	SettingsRepository(Messager & messager, boost::filesystem::path const path_to_settings)
+	{
+		LoadSettingsFromFile(messager, path_to_settings);
+	}
 
 	protected:
 
@@ -24,7 +30,9 @@ public:
 
 			if ( !boost::filesystem::exists(path_to_settings) || !boost::filesystem::is_regular_file(path_to_settings) )
 			{
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_DOES_NOT_EXIST));
+				boost::format msg("Settings file %1% does not exist.");
+				msg % path_to_settings;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_DOES_NOT_EXIST, msg.str()));
 				return;
 			}
 

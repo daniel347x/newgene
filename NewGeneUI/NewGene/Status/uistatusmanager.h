@@ -14,7 +14,7 @@ class UIStatusManager : public UIManager
 
 		enum IMPORTANCE
 		{
-			IMPORTANCE_DEBUG
+			  IMPORTANCE_DEBUG
 			, IMPORTANCE_STANDARD
 			, IMPORTANCE_HIGH
 			, IMPORTANCE_CRITICAL
@@ -24,15 +24,15 @@ class UIStatusManager : public UIManager
 
 		static UIStatusManager & getStatusManager();
 
-		void LogStatus( QString const & status_, IMPORTANCE const importance_level = IMPORTANCE_STANDARD );
-		void PostStatus( QString const & status_, IMPORTANCE const importance_level = IMPORTANCE_STANDARD, bool const forbidWritingToLog = false );
+		void LogStatus( QString const & _statusManager, IMPORTANCE const importance_level = IMPORTANCE_STANDARD );
+		void PostStatus( QString const & _statusManager, IMPORTANCE const importance_level = IMPORTANCE_STANDARD, bool const forbidWritingToLog = false );
 
 	signals:
 
 	public slots:
 
 	private:
-		static std::unique_ptr<UIStatusManager> status_;
+		static std::unique_ptr<UIStatusManager> _statusManager;
 
 };
 

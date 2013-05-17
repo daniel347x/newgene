@@ -23,7 +23,7 @@ class UILoggingManager : public UIManager
 
 	private:
 
-		static std::unique_ptr<UILoggingManager> loggingManager_;
+		static std::unique_ptr<UILoggingManager> _loggingManager;
 
 		boost::filesystem::path loggingPath;
 

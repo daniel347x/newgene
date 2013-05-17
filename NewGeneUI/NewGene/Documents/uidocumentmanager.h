@@ -21,7 +21,7 @@ class UIDocumentManager : public UIManager
 	public slots:
 
 	private:
-		static std::unique_ptr<UIDocumentManager> documentManager;
+		static std::unique_ptr<UIDocumentManager> _documentManager;
 
 };
 

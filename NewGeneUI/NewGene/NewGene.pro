@@ -63,12 +63,12 @@ SOURCES += main.cpp\
 	Project/uiprojectmanager.cpp \
 	Utility/newgenefilenames.cpp \
 	Logging/uiloggingmanager.cpp \
-    newgeneapplication.cpp \
-    Settings/Base/uiallsettings.cpp \
-    Settings/uiallprojectsettings.cpp \
-    Settings/uiallglobalsettings.cpp \
-    Settings/Base/uisetting.cpp \
-    Messager/uimessager.cpp
+	newgeneapplication.cpp \
+	Settings/Base/uiallsettings.cpp \
+	Settings/uiallprojectsettings.cpp \
+	Settings/uiallglobalsettings.cpp \
+	Settings/Base/uisetting.cpp \
+	Messager/uimessager.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -120,12 +120,12 @@ HEADERS  += newgenemainwindow.h \
 	Project/uiprojectmanager.h \
 	Utility/newgenefilenames.h \
 	Logging/uiloggingmanager.h \
-    newgeneapplication.h \
-    Settings/Base/uiallsettings.h \
-    Settings/uiallprojectsettings.h \
-    Settings/uiallglobalsettings.h \
-    Settings/Base/uisetting.h \
-    Messager/uimessager.h
+	newgeneapplication.h \
+	Settings/Base/uiallsettings.h \
+	Settings/uiallprojectsettings.h \
+	Settings/uiallglobalsettings.h \
+	Settings/Base/uisetting.h \
+	Messager/uimessager.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \
@@ -165,6 +165,7 @@ INCLUDEPATH += $$PWD/Settings/Indicator
 INCLUDEPATH += $$PWD/Settings/Item
 INCLUDEPATH += $$PWD/Settings/Global
 INCLUDEPATH += $$PWD/Settings/Project
+INCLUDEPATH += $$PWD/Messager
 INCLUDEPATH += $$PWD/Documents
 INCLUDEPATH += $$PWD/Status
 INCLUDEPATH += $$PWD/Logging

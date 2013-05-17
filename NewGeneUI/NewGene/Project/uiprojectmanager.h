@@ -12,7 +12,7 @@ class UIProjectManager : public UIManager
 	public:
 		explicit UIProjectManager( QObject * parent = 0 );
 
-		static UIProjectManager & projectManager();
+		static UIProjectManager & getProjectManager();
 
 		UIProject * LoadDefaultProject( NewGeneMainWindow * parent = NULL );
 
@@ -22,7 +22,7 @@ class UIProjectManager : public UIManager
 
 	private:
 
-		static std::unique_ptr<UIProjectManager> projectManager_;
+		static std::unique_ptr<UIProjectManager> _projectManager;
 
 };
 
