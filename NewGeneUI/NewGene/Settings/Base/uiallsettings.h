@@ -92,6 +92,11 @@ class UIAllSettings : public QObject
 
 		void init();
 
+	protected:
+
+		virtual void CreateImplementation() = 0;
+		std::unique_ptr<_impl_base> __impl;
+
 };
 
 #endif // UISETTINGS_H

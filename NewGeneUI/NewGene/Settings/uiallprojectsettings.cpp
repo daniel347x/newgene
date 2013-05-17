@@ -30,3 +30,8 @@ void UIAllProjectSettings::_impl::_BackendRelatedImpl::CreateDefaultBackendSetti
 void UIAllProjectSettings::_impl::_BackendRelatedImpl::CreateBackendSettings(boost::filesystem::path const path_to_settings)
 {
 }
+
+void UIAllProjectSettings::CreateImplementation()
+{
+	__impl.reset(new _impl);
+}

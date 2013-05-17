@@ -63,6 +63,8 @@ class UIAllProjectSettings : public UIAllSettings
 
 		};
 
+		void CreateImplementation();
+
 };
 
 #endif // UIPROJECTSETTINGS_H

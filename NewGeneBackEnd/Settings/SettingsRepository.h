@@ -18,7 +18,7 @@ class SettingsRepository
 
 			if ( !boost::filesystem::exists(path_to_settings) || !boost::filesystem::is_regular_file(path_to_settings) )
 			{
-				messager.AppendMessage(MessagerWarningMessage(MESSAGER_MESSAGE__FILE_DOES_NOT_EXIST));
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_DOES_NOT_EXIST));
 				return;
 			}
 

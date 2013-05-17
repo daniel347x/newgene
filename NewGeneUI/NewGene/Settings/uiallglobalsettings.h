@@ -63,6 +63,8 @@ class UIAllGlobalSettings : public UIAllSettings
 
 		};
 
+		void CreateImplementation();
+
 };
 
 #endif // UIGLOBALSETTINGS_H
