@@ -1,7 +1,9 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include <boost/filesystem.hpp>
+#ifndef Q_MOC_RUN
+#	include <boost/filesystem.hpp>
+#endif
 
 class Settings
 {
