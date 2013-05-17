@@ -16,6 +16,7 @@ class UIMessager : public QObject, public Messager
 		Q_OBJECT
 	public:
 		explicit UIMessager(QObject *parent = 0);
+		~UIMessager();
 
 		void displayStatusMessages();
 
@@ -29,6 +30,10 @@ class UIMessager : public QObject, public Messager
 	signals:
 
 	public slots:
+
+	public:
+
+		bool do_not_handle_messages_on_desctruction;
 
 };
 

@@ -19,19 +19,19 @@ UISettingsManager::UISettingsManager( QObject * parent ) :
 
 	bool found = ObtainGlobalSettingsPath();
 
-	UIMessager messager;
-
-	if ( found )
 	{
-		statusManager().PostStatus( "Cannot load global applicaton settings; using built-in default global settings.", UIStatusManager::IMPORTANCE_HIGH );
-		_global_settings.reset( new UIAllGlobalSettings(messager) );
-	}
-	else
-	{
-		_global_settings.reset( new UIAllGlobalSettings(messager, getGlobalSettingsPath()) );
-	}
+		UIMessager messager;
 
-	messager.displayStatusMessages();
+		if ( found )
+		{
+			statusManager().PostStatus( "Cannot load global applicaton settings; using built-in default global settings.", UIStatusManager::IMPORTANCE_HIGH );
+			_global_settings.reset( new UIAllGlobalSettings(messager) );
+		}
+		else
+		{
+			_global_settings.reset( new UIAllGlobalSettings(messager, getGlobalSettingsPath()) );
+		}
+	}
 
 }
 
