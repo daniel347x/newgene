@@ -55,7 +55,7 @@ class UIAllSettings : public QObject
 						// (Unlike the backend-related settings implementation, below,
 						// which simply holds a pointer to a backend settings instance,
 						// and it is the backend settings instance which derives from
-						// SettingsRepository.
+						// SettingsRepository.)
 						// ***********************************************************************
 
 					protected:
@@ -78,6 +78,8 @@ class UIAllSettings : public QObject
 						// The BACKEND settings class possesses and maintains the
 						// std::map<BACKEND_ENUM, BackendSetting> _backend_settings;
 						// ... it does so by deriving from SettingsRepository.
+						//
+						// We simply own a pointer to the backend-related settings class.
 						// ***********************************************************************
 						std::unique_ptr<BACKEND_SETTINGS_CLASS> _backend_settings;
 
