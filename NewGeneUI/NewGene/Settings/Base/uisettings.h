@@ -7,11 +7,20 @@
 
 class UISettings : public QObject
 {
-		Q_OBJECT
-	public:
-		explicit UISettings( QObject * parent = 0 );
 
-		virtual Settings * LoadBackendSettings() = 0;
+		Q_OBJECT
+
+	public:
+
+		Settings * getBackendSettings()
+		{
+			return backend_settings.get();
+		}
+
+		void resetBackendSettings(Settings * backend_settings_)
+		{
+			backend_settings.reset(backend_settings_);
+		}
 
 	signals:
 
@@ -19,8 +28,11 @@ class UISettings : public QObject
 
 	protected:
 
-		//virtual void CreateBackendSettings() = 0;
+		virtual Settings * CreateBackendSettings(boost::filesystem::path const path_to_settings) = 0; // from file
+		virtual Settings * CreateDefaultBackendSettings() = 0; // default
+
 		std::unique_ptr<Settings> backend_settings;
+
 
 };
 

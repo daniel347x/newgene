@@ -43,7 +43,7 @@ class UISettingsManager : public UIManager
 		boost::filesystem::path globalsettingsPath;
 		boost::property_tree::ptree settings;
 
-		std::unique_ptr<UIGlobalSettings> globalSettings;
+		std::unique_ptr<UIGlobalSettings> ui_global_Settings;
 
 };
 

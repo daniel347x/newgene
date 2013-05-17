@@ -5,8 +5,11 @@
 
 class ProjectSettings : public Settings
 {
+
 	public:
+		ProjectSettings(boost::filesystem::path const global_settings_path);
 		virtual ~ProjectSettings() {}
+
 };
 
 #endif

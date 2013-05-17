@@ -14,15 +14,14 @@ class UIGlobalSettings : public UISettings
 
 		explicit UIGlobalSettings( QObject * parent = 0 );
 
-		virtual Settings * LoadBackendSettings();
-
 	signals:
 
 	public slots:
 
 	protected:
 
-		//virtual void CreateBackendSettings();
+		Settings * CreateBackendSettings(boost::filesystem::path const path_to_settings);
+		Settings * CreateDefaultBackendSettings();
 
 };
 

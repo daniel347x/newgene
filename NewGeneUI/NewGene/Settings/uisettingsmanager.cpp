@@ -18,7 +18,7 @@ UISettingsManager::UISettingsManager( QObject * parent ) :
 	UIManager( parent )
 {
 
-	globalSettings.reset( LoadDefaultGlobalSettings() );
+	ui_global_Settings.reset( LoadDefaultGlobalSettings() );
 
 	bool found = ObtainGlobalSettingsPath();
 
@@ -28,7 +28,7 @@ UISettingsManager::UISettingsManager( QObject * parent ) :
 	}
 	else
 	{
-		globalSettings.reset( LoadGlobalSettings() );
+		ui_global_Settings.reset( LoadGlobalSettings() );
 	}
 
 }
@@ -143,10 +143,24 @@ UIProjectSettings * UISettingsManager::LoadDefaultProjectSettings()
 
 UIGlobalSettings * UISettingsManager::LoadDefaultGlobalSettings()
 {
-	return NULL;
+	std::unique_ptr<GlobalSettings> test_global_settings = dynamic_cast<GlobalSettings*>(ui_global_Settings->CreateDefaultBackendSettings());
+
+	if (test_global_settings)
+	{
+		ui_global_Settings.resetBackendSettings(test_global_settings.release());
+	}
+
+	return ui_global_Settings.get();
 }
 
 UIGlobalSettings * UISettingsManager::LoadGlobalSettings()
 {
-	return NULL;
+	std::unique_ptr<GlobalSettings> test_global_settings = dynamic_cast<GlobalSettings*>(ui_global_Settings->CreateBackendSettings(globalsettingsPath));
+
+	if (test_global_settings)
+	{
+		ui_global_Settings.resetBackendSettings(test_global_settings.release());
+	}
+
+	return ui_global_Settings.get();
 }

@@ -1,10 +1,15 @@
 #include "uiglobalsettings.h"
 
 UIGlobalSettings::UIGlobalSettings( QObject * parent ) :
-	UISettings( parent )
+    UISettings( parent )
 {
 }
 
-Settings * UIGlobalSettings::LoadBackendSettings()
+Settings * UIGlobalSettings::CreateBackendSettings(boost::filesystem::path const path_to_settings)
+{
+    return new GlobalSettings(path_to_settings);
+}
+
+Settings * UIGlobalSettings::CreateDefaultBackendSettings()
 {
 }
