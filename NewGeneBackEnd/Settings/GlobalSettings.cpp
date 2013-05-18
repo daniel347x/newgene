@@ -14,5 +14,4 @@ GlobalSettings::GlobalSettings(Messager & messager, boost::filesystem::path cons
 
 void GlobalSettings::LoadDefaultSettings(Messager &messager)
 {
-
 }

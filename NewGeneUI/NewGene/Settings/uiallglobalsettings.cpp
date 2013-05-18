@@ -1,5 +1,23 @@
 #include "uiallglobalsettings.h"
 
+class UIGlobalSetting_MRUList : public UIGlobalSetting, public StringSetting
+{
+
+	public:
+
+		UIGlobalSetting_MRUList(Messager & messager, std::string const & setting)
+			: UIGlobalSetting()
+			, StringSetting(messager, setting)
+		{}
+
+		virtual void DoSpecialParse(Messager & messager)
+		{
+			boost::format msg("Here is a message!");
+			messager.AppendMessage(new UIMessagerErrorMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
+		}
+
+};
+
 UIAllGlobalSettings::UIAllGlobalSettings(Messager & messager, QObject * parent)
 	: UIAllSettings(messager, parent)
 {
@@ -34,7 +52,7 @@ void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messag
 	__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
 }
 
-void UIAllGlobalSettings::UIOnlySettings::LoadDefaultSettings(Messager &messager)
+void UIAllGlobalSettings::UIOnlySettings::LoadDefaultSettings(Messager & messager)
 {
-
+	_settings_map[GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, ""));
 }

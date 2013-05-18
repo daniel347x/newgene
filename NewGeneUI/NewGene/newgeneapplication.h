@@ -15,6 +15,7 @@ class NewGeneApplication : public QApplication
 	signals:
 
 	public slots:
+		void showErrorBox(std::string const msg);
 
 };
 

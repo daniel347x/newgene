@@ -45,3 +45,11 @@ bool NewGeneApplication::notify( QObject * receiver, QEvent * e )
 	return true;
 
 }
+
+void NewGeneApplication::showErrorBox(std::string const theMsg)
+{
+	boost::format msg( theMsg );
+	QMessageBox msgBox;
+	msgBox.setText( msg.str().c_str() );
+	msgBox.exec();
+}

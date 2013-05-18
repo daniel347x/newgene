@@ -8,7 +8,7 @@
 #include "uiloggingmanager.h"
 
 UIMessager::UIMessager(QObject *parent) :
-	QObject(parent)
+    QObject(parent)
   , do_not_handle_messages_on_desctruction(false)
 {
 }
@@ -80,3 +80,8 @@ UIStatusManager & UIMessager::statusManager()
 {
 	return UIStatusManager::getStatusManager();
 }
+
+//void UIMessagerErrorMessage::sendErrorMessageToBeDisplayed(std::string const msg)
+//{
+
+//}
