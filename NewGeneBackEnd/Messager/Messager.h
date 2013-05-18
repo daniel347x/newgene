@@ -31,6 +31,8 @@ class MessagerMessage
 
 	public:
 
+		virtual ~MessagerMessage() {}
+
 		MessagerMessage(MESSAGER_MESSAGE_ENUM const TheMessage, std::int32_t const TheMessageLevel, std::string const & TheMessageText)
 			: _message(TheMessage)
 			, _message_level(TheMessageLevel)

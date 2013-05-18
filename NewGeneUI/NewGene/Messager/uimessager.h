@@ -50,8 +50,8 @@ class UIMessagerErrorMessage : public QObject, public MessagerErrorMessage
 		UIMessagerErrorMessage(MESSAGER_MESSAGE_ENUM const TheMessage, std::string const & TheMessageText)
 			: MessagerErrorMessage(TheMessage, TheMessageText)
 		{
-			QObject::connect(this, SIGNAL(sendErrorMessageToBeDisplayed(std::string const msg)),
-								  QCoreApplication::instance(), SLOT(showErrorBox(std::string const msg)));
+			QObject::connect(this, SIGNAL(sendErrorMessageToBeDisplayed(std::string const)),
+								  QCoreApplication::instance(), SLOT(showErrorBox(std::string const)));
 
 			emit sendErrorMessageToBeDisplayed(TheMessageText);
 
