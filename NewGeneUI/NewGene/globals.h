@@ -14,6 +14,21 @@
 
 class NewGeneMainWindow;
 
+class UISettingsManager;
+class UIProjectManager;
+class UILoggingManager;
+class UIModelManager;
+class UIDocumentManager;
+class UIStatusManager;
+
 extern NewGeneMainWindow * theMainWindow;
+
+UIProjectManager & projectManager();
+UISettingsManager & settingsManager();
+UILoggingManager & loggingManager();
+UIModelManager & modelManager();
+UIDocumentManager & documentManager();
+UIStatusManager & statusManager();
+
 
 #endif // GLOBALS_H

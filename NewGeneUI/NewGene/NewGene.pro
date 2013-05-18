@@ -172,6 +172,11 @@ INCLUDEPATH += $$PWD/Logging
 INCLUDEPATH += $$PWD/Utility
 INCLUDEPATH += $(BOOST_ROOT)
 
+##QMAKE_LFLAGS += /ignore:4099
+#QMAKE_CFLAGS += /ignore:4503 # "decorated name length exceeded" (common for template instantiations)
+#QMAKE_CFLAGS += /ignore:4100 # "unreferenced formal parameter" (many "Messager & messager" parameters, with the token "messager" left on for uniformity and convenience
+#QMAKE_CXXFLAGS_WARN_OFF -= -Wunused-parameter
+
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/release/NewGeneBackEnd.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/debug/NewGeneBackEnd.lib
 else:unix: PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/libNewGeneBackEnd.a

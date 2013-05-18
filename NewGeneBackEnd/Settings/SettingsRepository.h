@@ -93,7 +93,7 @@ class SettingsRepository
 
 	protected:
 
-		//virtual void GetSettingsPath(Messager & messager, SettingInfo & setting_info) = 0;
+		virtual boost::filesystem::path GetSettingsPath(Messager & messager, SettingInfo & setting_info) = 0;
 		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt) = 0;
 		virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS * current_setting, SettingInfo & setting_info) const = 0;
 		virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void) = 0;

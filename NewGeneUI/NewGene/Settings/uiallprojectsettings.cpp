@@ -90,6 +90,11 @@ UIProjectSetting * UIAllProjectSettings::UIOnlySettings::NewSetting(Messager & m
 
 }
 
+boost::filesystem::path UIAllProjectSettings::UIOnlySettings::GetSettingsPath(Messager & messager, SettingInfo & setting_info)
+{
+	return boost::filesystem::path();
+}
+
 template<>
 SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(Messager & messager, PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_)
 {

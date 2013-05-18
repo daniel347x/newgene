@@ -90,6 +90,11 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 
 }
 
+boost::filesystem::path UIAllGlobalSettings::UIOnlySettings::GetSettingsPath(Messager & messager, SettingInfo & setting_info)
+{
+	return boost::filesystem::path();
+}
+
 template<>
 SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(Messager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_)
 {

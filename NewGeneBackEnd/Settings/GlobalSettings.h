@@ -31,6 +31,7 @@ class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL
 
 	protected:
 
+		boost::filesystem::path GetSettingsPath(Messager & messager, SettingInfo & setting_info);
 		void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 		BackendGlobalSetting * CloneSetting(Messager & messager, BackendGlobalSetting * current_setting, SettingInfo & setting_info) const;
 		BackendGlobalSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);

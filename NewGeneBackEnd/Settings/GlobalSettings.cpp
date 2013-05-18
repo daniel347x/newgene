@@ -90,6 +90,11 @@ BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingIn
 
 }
 
+boost::filesystem::path GlobalSettings::GetSettingsPath(Messager & messager, SettingInfo & setting_info)
+{
+	return boost::filesystem::path();
+}
+
 template<>
 SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND>(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const value_)
 {

@@ -90,6 +90,11 @@ BackendProjectSetting * ProjectSettings::NewSetting(Messager & messager, Setting
 
 }
 
+boost::filesystem::path ProjectSettings::GetSettingsPath(Messager & messager, SettingInfo & setting_info)
+{
+	return boost::filesystem::path();
+}
+
 template<>
 SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND>(Messager & messager, PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const value_)
 {
