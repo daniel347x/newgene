@@ -2,6 +2,7 @@
 #define UIPROJECTMANAGER_H
 
 #include "uimanager.h"
+#include <memory>
 
 class NewGeneMainWindow;
 class UIProject;

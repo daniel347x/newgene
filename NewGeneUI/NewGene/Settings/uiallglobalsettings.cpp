@@ -92,6 +92,7 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 
 boost::filesystem::path UIAllGlobalSettings::UIOnlySettings::GetSettingsPath(Messager & messager, SettingInfo & setting_info)
 {
+	//settingsManager()
 	return boost::filesystem::path();
 }
 

@@ -2,6 +2,9 @@
 #define UILOGGINGMANAGER_H
 
 #include "uimanager.h"
+#ifndef Q_MOC_RUN
+#	include <boost/filesystem.hpp>
+#endif
 
 class NewGeneMainWindow;
 

@@ -1,17 +1,18 @@
 #ifndef UIMANAGER_H
 #define UIMANAGER_H
 
-#include "globals.h"
 #include <QObject>
 #include <QString>
 
 class NewGeneMainWindow;
+class NewGeneWidget;
+
 class UIModelManager;
 class UISettingsManager;
 class UIDocumentManager;
 class UIStatusManager;
 class UILoggingManager;
-class NewGeneWidget;
+class UIProjectManager;
 
 class UIManager : public QObject
 {
@@ -22,7 +23,7 @@ class UIManager : public QObject
 
 		enum WHICH_MANAGER
 		{
-			MANAGER_DOCUMENTS
+			  MANAGER_DOCUMENTS
 			, MANAGER_SETTINGS
 			, MANAGER_STATUS
 			, MANAGER_MODEL
@@ -48,6 +49,7 @@ class UIManager : public QObject
 		static UIDocumentManager & documentManager();
 		static UIStatusManager & statusManager();
 		static UILoggingManager & loggingManager();
+		static UIProjectManager & projectManager();
 
 		friend class NewGeneWidget;
 

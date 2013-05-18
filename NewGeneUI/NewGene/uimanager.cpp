@@ -48,3 +48,8 @@ UILoggingManager & UIManager::loggingManager()
 {
 	return UILoggingManager::getLoggingManager();
 }
+
+UIProjectManager & UIManager::projectManager()
+{
+	return UIProjectManager::getProjectManager();
+}
