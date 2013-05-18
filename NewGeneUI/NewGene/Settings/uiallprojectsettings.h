@@ -5,10 +5,15 @@
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"
 
-enum PROJECT_SETTINGS_UI
+namespace PROJECT_SETTINGS_UI_NAMESPACE
 {
-	PROJECT_SETTING_UI__LAST
-};
+
+	enum PROJECT_SETTINGS_UI
+	{
+		SETTING_LAST
+	};
+
+}
 
 class UIAllProjectSettings : public UIAllSettings
 {
@@ -27,7 +32,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 	protected:
 
-		class UIOnlySettings : public UIOnlySettings_base<PROJECT_SETTINGS_UI, UIProjectSetting>
+		class UIOnlySettings : public UIOnlySettings_base<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI, UIProjectSetting>
 		{
 
 			public:
@@ -41,6 +46,10 @@ class UIAllProjectSettings : public UIAllSettings
 				{
 
 				}
+
+			protected:
+
+				void LoadDefaultSettings(Messager & messager);
 
 		};
 

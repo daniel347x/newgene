@@ -5,12 +5,17 @@
 #include "Setting.h"
 #include <map>
 
-enum GLOBAL_SETTINGS_BACKEND
+namespace GLOBAL_SETTINGS_BACKEND_NAMESPACE
 {
-	GLOBAL_SETTING_BACKEND__LAST
-};
 
-class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND, BackendGlobalSetting>
+	enum GLOBAL_SETTINGS_BACKEND
+	{
+		SETTING_LAST
+	};
+
+}
+
+class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND, BackendGlobalSetting>
 {
 
 	public:
@@ -19,9 +24,15 @@ class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND, BackendGlobalSet
 		GlobalSettings(Messager & messager, boost::filesystem::path const global_settings_path);
 		virtual ~GlobalSettings() {}
 
+
+	protected:
+
+		void LoadDefaultSettings(Messager & messager);
+
+
 	private:
 
-		std::map<GLOBAL_SETTINGS_BACKEND, BackendGlobalSetting> _ui_settings;
+		std::map<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND, BackendGlobalSetting> _ui_settings;
 
 };
 

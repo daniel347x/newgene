@@ -5,10 +5,15 @@
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/GlobalSettings.h"
 
-enum GLOBAL_SETTINGS_UI
+namespace GLOBAL_SETTINGS_UI_NAMESPACE
 {
-	GLOBAL_SETTING_UI__LAST
-};
+
+	enum GLOBAL_SETTINGS_UI
+	{
+		SETTING_LAST
+	};
+
+}
 
 class UIAllGlobalSettings : public UIAllSettings
 {
@@ -27,7 +32,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 	protected:
 
-		class UIOnlySettings : public UIOnlySettings_base<GLOBAL_SETTINGS_UI, UIGlobalSetting>
+		class UIOnlySettings : public UIOnlySettings_base<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, UIGlobalSetting>
 		{
 
 			public:
@@ -41,6 +46,10 @@ class UIAllGlobalSettings : public UIAllSettings
 				{
 
 				}
+
+			protected:
+
+				void LoadDefaultSettings(Messager & messager);
 
 		};
 

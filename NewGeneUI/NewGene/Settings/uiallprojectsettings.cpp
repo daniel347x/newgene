@@ -33,3 +33,8 @@ void UIAllProjectSettings::_impl::CreateInternalImplementations(Messager & messa
 	__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
 	__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
 }
+
+void UIAllProjectSettings::UIOnlySettings::LoadDefaultSettings(Messager &messager)
+{
+
+}

@@ -11,3 +11,8 @@ ProjectSettings::ProjectSettings(Messager & messager, boost::filesystem::path co
 {
 
 }
+
+void ProjectSettings::LoadDefaultSettings(Messager &messager)
+{
+
+}

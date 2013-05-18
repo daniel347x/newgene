@@ -5,12 +5,17 @@
 #include "Setting.h"
 #include <map>
 
-enum PROJECT_SETTINGS_BACKEND
+namespace PROJECT_SETTINGS_BACKEND_NAMESPACE
 {
-	PROJECT_SETTING_BACKEND__LAST
-};
 
-class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND, BackendProjectSetting>
+	enum PROJECT_SETTINGS_BACKEND
+	{
+		SETTING_LAST
+	};
+
+}
+
+class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND, BackendProjectSetting>
 {
 
 	public:
@@ -19,9 +24,15 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND, BackendProject
 		ProjectSettings(Messager & messager, boost::filesystem::path const project_settings_path);
 		virtual ~ProjectSettings() {}
 
+
+	protected:
+
+		void LoadDefaultSettings(Messager & messager);
+
+
 	private:
 
-		std::map<PROJECT_SETTINGS_BACKEND, BackendProjectSetting> _ui_settings;
+		std::map<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND, BackendProjectSetting> _ui_settings;
 
 };
 
