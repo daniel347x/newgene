@@ -8,29 +8,24 @@ void UIAllGlobalSettings::UIOnlySettings::LoadDefaultSettings(Messager & message
 void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt)
 {
 
-	switch (setting_info.type)
+	switch (setting_info.setting_class)
 	{
 
-		switch (setting_info.setting_class)
-		{
-
-			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
+			{
+				std::string string_setting = pt.get<std::string>(setting_info.text, "");
+				if (!string_setting.empty())
 				{
-					std::string string_setting = pt.get<std::string>(setting_info.text, "");
-					if (!string_setting.empty())
-					{
-						_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
-					}
+					_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
 				}
-				break;
+			}
+			break;
 
-			default:
-				{
+		default:
+			{
 
-				}
-				break;
-
-		}
+			}
+			break;
 
 	}
 
@@ -41,7 +36,7 @@ SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS
 {
 	switch (value_)
 	{
-		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return SettingInfo(SettingInfo::SETTING_TYPE_STRING, SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST, "MRU_LIST", "");
+		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST, "MRU_LIST", "");
 	}
 
 	return SettingInfo();

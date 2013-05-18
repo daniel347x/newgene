@@ -20,7 +20,7 @@ public:
 
 	enum SETTING_CLASS_ENUM
 	{
-		SETTING_CLASS_NONE
+		  SETTING_CLASS_NONE
 		, SETTING_CLASS_BACKEND_GLOBAL_SETTING
 		, SETTING_CLASS_BACKEND_PROJECT_SETTING
 		, SETTING_CLASS_UI_GLOBAL_SETTING
@@ -28,16 +28,8 @@ public:
 		, SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST
 	};
 
-	enum SETTING_TYPE
-	{
-		SETTING_TYPE_NONE
-		, SETTING_TYPE_STRING
-		, SETTING_TYPE_INT32
-	};
-
 	SettingInfo()
-		: type(SETTING_TYPE_NONE)
-		, setting_class(SETTING_CLASS_NONE)
+		: setting_class(SETTING_CLASS_NONE)
 		, text("")
 		, default_val_string("")
 		, default_val_int32(0)
@@ -45,9 +37,8 @@ public:
 
 	}
 
-	SettingInfo(SETTING_TYPE const type_, SETTING_CLASS_ENUM const setting_class_enum_, std::string const & text_, std::string default_val_string_)
-		: type(type_)
-		, setting_class(setting_class_enum_)
+	SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, std::string const & text_, std::string default_val_string_)
+		: setting_class(setting_class_enum_)
 		, text(text_)
 		, default_val_string(default_val_string_)
 		, default_val_int32(0)
@@ -55,9 +46,8 @@ public:
 
 	}
 
-	SettingInfo(SETTING_TYPE const type_, SETTING_CLASS_ENUM const setting_class_enum_, std::string const & text_, std::int32_t default_val_int32_)
-		: type(type_)
-		, setting_class(setting_class_enum_)
+	SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, std::string const & text_, std::int32_t default_val_int32_)
+		: setting_class(setting_class_enum_)
 		, text(text_)
 		, default_val_string("")
 		, default_val_int32(default_val_int32_)
@@ -65,7 +55,6 @@ public:
 
 	}
 
-	SETTING_TYPE type;
 	SETTING_CLASS_ENUM setting_class;
 	std::string text;
 	std::string default_val_string;
