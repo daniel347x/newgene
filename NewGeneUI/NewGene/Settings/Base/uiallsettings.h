@@ -33,7 +33,7 @@ class UIAllSettings : public QObject
 		{
 
 				// ***********************************************************************
-				// Directory derive from SettingsRepository.
+				// Directly derive from SettingsRepository.
 				// Therefore, we ourselves (through this base class)
 				// maintain the UI-related settings.
 				//
