@@ -47,8 +47,6 @@ class UIAllProjectSettings : public UIAllSettings
 
 				}
 
-			protected:
-
 				void LoadDefaultSettings(Messager & messager);
 
 		};

@@ -24,9 +24,6 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJ
 		ProjectSettings(Messager & messager, boost::filesystem::path const project_settings_path);
 		virtual ~ProjectSettings() {}
 
-
-	protected:
-
 		void LoadDefaultSettings(Messager & messager);
 
 

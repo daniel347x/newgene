@@ -18,14 +18,14 @@ class SettingsRepository
 
 	public:
 
-		template<typename SETTINGS_ENUM, typename SETTING_CLASS>
+		template<typename SETTINGS_REPOSITORY_CLASS>
 		friend class SettingsRepositoryFactory;
 
 		typedef std::map<SETTINGS_ENUM, std::unique_ptr<SETTING_CLASS> > SettingsMap;
 
-	protected:
-
 		virtual void LoadDefaultSettings(Messager & messager) = 0;
+
+	protected:
 
 		void LoadSettingsFromFile(Messager & messager, boost::filesystem::path const path_to_settings)
 		{
@@ -66,22 +66,22 @@ class SettingsRepository
 
 };
 
-template<typename SETTINGS_ENUM, typename SETTING_CLASS>
+template<typename SETTINGS_REPOSITORY_CLASS>
 class SettingsRepositoryFactory
 {
 
 public:
 
-	SettingsRepository<SETTINGS_ENUM, SETTING_CLASS> * operator()(Messager & messager)
+	SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager)
 	{
-		SettingsRepository<SETTINGS_ENUM, SETTING_CLASS> * new_settings_repository = new SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>(messager);
+		SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager);
 		new_settings_repository->LoadDefaultSettings(messager);
 		return new_settings_repository;
 	}
 
-	SettingsRepository<SETTINGS_ENUM, SETTING_CLASS> * operator()(Messager & messager, boost::filesystem::path const path_to_settings)
+	SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_settings)
 	{
-		SettingsRepository<SETTINGS_ENUM, SETTING_CLASS> * new_settings_repository = new SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>(messager, path_to_settings);
+		SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings);
 		new_settings_repository->LoadDefaultSettings(messager);
 		new_settings_repository->LoadSettingsFromFile(messager, path_to_settings);
 		return new_settings_repository;

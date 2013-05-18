@@ -24,9 +24,6 @@ class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL
 		GlobalSettings(Messager & messager, boost::filesystem::path const global_settings_path);
 		virtual ~GlobalSettings() {}
 
-
-	protected:
-
 		void LoadDefaultSettings(Messager & messager);
 
 

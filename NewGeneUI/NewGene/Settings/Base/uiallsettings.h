@@ -68,13 +68,15 @@ class UIAllSettings : public QObject
 					protected:
 
 						_RelatedImpl_base(Messager & messager)
-							: _settings_repository(new SETTINGS_REPOSITORY_CLASS(messager))
+							//: _settings_repository(new SETTINGS_REPOSITORY_CLASS(messager))
+							: _settings_repository(SettingsRepositoryFactory<SETTINGS_REPOSITORY_CLASS>()(messager))
 						{
 
 						}
 
 						_RelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
-							: _settings_repository(new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings))
+							//: _settings_repository(new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings))
+							: _settings_repository(SettingsRepositoryFactory<SETTINGS_REPOSITORY_CLASS>()(messager, path_to_settings))
 						{
 
 						}

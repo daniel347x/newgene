@@ -48,8 +48,6 @@ class UIAllGlobalSettings : public UIAllSettings
 
 				}
 
-			protected:
-
 				void LoadDefaultSettings(Messager & messager);
 
 		};
