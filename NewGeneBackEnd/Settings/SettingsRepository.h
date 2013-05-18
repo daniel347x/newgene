@@ -66,10 +66,10 @@ class SettingsRepository
 			{
 				std::string setting_text = GetSettingTextFromEnum<SETTINGS_ENUM>(static_cast<SETTINGS_ENUM>(n));
 
-				boost::format msg("The setting name is \"%1%\"");
-				msg % setting_text;
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
-				return;
+				//boost::format msg("The setting name is \"%1%\"");
+				//msg % setting_text;
+				//messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
+				//return;
 			}
 
 		}
