@@ -30,9 +30,19 @@ class SettingsRepository
 		void LoadSettingsFromFile(Messager & messager, boost::filesystem::path const path_to_settings)
 		{
 
-			if ( !boost::filesystem::exists(path_to_settings) || !boost::filesystem::is_regular_file(path_to_settings) )
+			if ( !boost::filesystem::exists(path_to_settings) )
 			{
-				boost::format msg("Settings file %1% does not exist.");
+				return; // no file is fine
+			}
+
+			else if ( boost::filesystem::file_size(path_to_settings) == 0 )
+			{
+				return; // empty file is fine
+			}
+
+			else if ( !boost::filesystem::is_regular_file(path_to_settings) )
+			{
+				boost::format msg("Settings file %1% is not available.");
 				msg % path_to_settings;
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_DOES_NOT_EXIST, msg.str()));
 				return;
@@ -49,6 +59,16 @@ class SettingsRepository
 				boost::format msg("Settings file %1% is not in the correct format: %2%");
 				msg % path_to_settings % e.what();
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_FORMAT, msg.str()));
+				return;
+			}
+
+			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
+			{
+				std::string setting_text = GetSettingTextFromEnum<SETTINGS_ENUM>(static_cast<SETTINGS_ENUM>(n));
+
+				boost::format msg("The setting name is \"%1%\"");
+				msg % setting_text;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
 				return;
 			}
 

@@ -10,11 +10,15 @@ namespace GLOBAL_SETTINGS_UI_NAMESPACE
 
 	enum GLOBAL_SETTINGS_UI
 	{
-		  MRU_LIST
+		  SETTING_FIRST = 0
+		, MRU_LIST
 		, SETTING_LAST
 	};
 
 }
+
+template<>
+std::string GetSettingTextFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_);
 
 class UIAllGlobalSettings : public UIAllSettings
 {

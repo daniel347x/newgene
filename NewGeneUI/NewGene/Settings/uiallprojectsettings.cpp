@@ -38,3 +38,14 @@ void UIAllProjectSettings::UIOnlySettings::LoadDefaultSettings(Messager &message
 {
 
 }
+
+template<>
+std::string GetSettingTextFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_)
+{
+	switch (value_)
+	{
+		//case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return "MRU_LIST";
+	}
+
+	return "";
+}

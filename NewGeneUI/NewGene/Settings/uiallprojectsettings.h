@@ -10,10 +10,14 @@ namespace PROJECT_SETTINGS_UI_NAMESPACE
 
 	enum PROJECT_SETTINGS_UI
 	{
-		SETTING_LAST
+		  SETTING_FIRST = 0
+		, SETTING_LAST
 	};
 
 }
+
+template<>
+std::string GetSettingTextFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_);
 
 class UIAllProjectSettings : public UIAllSettings
 {

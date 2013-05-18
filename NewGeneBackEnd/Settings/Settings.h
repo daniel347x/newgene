@@ -32,4 +32,10 @@ class Settings : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
 
 };
 
+template<typename SETTINGS_ENUM>
+std::string GetSettingTextFromEnum(SETTINGS_ENUM const value_)
+{
+	return "";
+}
+
 #endif
