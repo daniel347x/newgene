@@ -1,7 +1,17 @@
 #include "uiallprojectsettings.h"
 
+void UIAllProjectSettings::UIOnlySettings::LoadDefaultSettings(Messager &messager)
+{
+
+}
+
+void UIAllProjectSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt)
+{
+
+}
+
 template<>
-SettingInfo GetSettingTextFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_)
+SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_)
 {
 	switch (value_)
 	{
@@ -43,9 +53,4 @@ void UIAllProjectSettings::_impl::CreateInternalImplementations(Messager & messa
 {
 	__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
 	__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
-}
-
-void UIAllProjectSettings::UIOnlySettings::LoadDefaultSettings(Messager &messager)
-{
-
 }

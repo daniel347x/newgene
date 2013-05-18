@@ -17,8 +17,26 @@ namespace GLOBAL_SETTINGS_UI_NAMESPACE
 
 }
 
+class UIGlobalSetting_MRUList : public UIGlobalSetting, public StringSetting
+{
+
+	public:
+
+		UIGlobalSetting_MRUList(Messager & messager, std::string const & setting)
+			: UIGlobalSetting()
+			, StringSetting(messager, setting)
+		{}
+
+		virtual void DoSpecialParse(Messager & messager)
+		{
+//			boost::format msg("Here is a message!");
+//			messager.AppendMessage(new UIMessagerErrorMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
+		}
+
+};
+
 template<>
-SettingInfo GetSettingTextFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_);
+SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_);
 
 class UIAllGlobalSettings : public UIAllSettings
 {
@@ -53,6 +71,7 @@ class UIAllGlobalSettings : public UIAllSettings
 				}
 
 				void LoadDefaultSettings(Messager & messager);
+				void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt);
 
 		};
 

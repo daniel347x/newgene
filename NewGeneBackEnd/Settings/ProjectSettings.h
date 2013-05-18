@@ -17,7 +17,7 @@ namespace PROJECT_SETTINGS_BACKEND_NAMESPACE
 }
 
 template<>
-SettingInfo GetSettingTextFromEnum<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND>(PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const value_);
+SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND>(PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const value_);
 
 class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND, BackendProjectSetting>
 {
@@ -29,6 +29,7 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJ
 		virtual ~ProjectSettings() {}
 
 		void LoadDefaultSettings(Messager & messager);
+		void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt);
 
 
 	private:

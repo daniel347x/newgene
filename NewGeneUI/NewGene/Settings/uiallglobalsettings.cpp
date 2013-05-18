@@ -1,29 +1,47 @@
 #include "uiallglobalsettings.h"
 
-class UIGlobalSetting_MRUList : public UIGlobalSetting, public StringSetting
+void UIAllGlobalSettings::UIOnlySettings::LoadDefaultSettings(Messager & messager)
+{
+	_settings_map[GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, ""));
+}
+
+void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt)
 {
 
-	public:
+	switch (setting_info.type)
+	{
 
-		UIGlobalSetting_MRUList(Messager & messager, std::string const & setting)
-			: UIGlobalSetting()
-			, StringSetting(messager, setting)
-		{}
-
-		virtual void DoSpecialParse(Messager & messager)
+		switch (setting_info.setting_class)
 		{
-//			boost::format msg("Here is a message!");
-//			messager.AppendMessage(new UIMessagerErrorMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
+
+			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
+				{
+					std::string string_setting = pt.get<std::string>(setting_info.text, "");
+					if (!string_setting.empty())
+					{
+						_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
+					}
+				}
+				break;
+
+			default:
+				{
+
+				}
+				break;
+
 		}
 
-};
+	}
+
+}
 
 template<>
-SettingInfo GetSettingTextFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_)
+SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_)
 {
 	switch (value_)
 	{
-		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return SettingInfo(SettingInfo::SETTING_TYPE_STRING, "MRU_LIST", "");
+		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return SettingInfo(SettingInfo::SETTING_TYPE_STRING, SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST, "MRU_LIST", "");
 	}
 
 	return SettingInfo();
@@ -61,9 +79,4 @@ void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messag
 {
 	__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
 	__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
-}
-
-void UIAllGlobalSettings::UIOnlySettings::LoadDefaultSettings(Messager & messager)
-{
-	_settings_map[GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, ""));
 }

@@ -13,6 +13,66 @@
 #endif
 #include <cstdint>
 
+class SettingInfo
+{
+
+public:
+
+	enum SETTING_CLASS_ENUM
+	{
+		SETTING_CLASS_NONE
+		, SETTING_CLASS_BACKEND_GLOBAL_SETTING
+		, SETTING_CLASS_BACKEND_PROJECT_SETTING
+		, SETTING_CLASS_UI_GLOBAL_SETTING
+		, SETTING_CLASS_UI_PROJECT_SETTING
+		, SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST
+	};
+
+	enum SETTING_TYPE
+	{
+		SETTING_TYPE_NONE
+		, SETTING_TYPE_STRING
+		, SETTING_TYPE_INT32
+	};
+
+	SettingInfo()
+		: type(SETTING_TYPE_NONE)
+		, setting_class(SETTING_CLASS_NONE)
+		, text("")
+		, default_val_string("")
+		, default_val_int32(0)
+	{
+
+	}
+
+	SettingInfo(SETTING_TYPE const type_, SETTING_CLASS_ENUM const setting_class_enum_, std::string const & text_, std::string default_val_string_)
+		: type(type_)
+		, setting_class(setting_class_enum_)
+		, text(text_)
+		, default_val_string(default_val_string_)
+		, default_val_int32(0)
+	{
+
+	}
+
+	SettingInfo(SETTING_TYPE const type_, SETTING_CLASS_ENUM const setting_class_enum_, std::string const & text_, std::int32_t default_val_int32_)
+		: type(type_)
+		, setting_class(setting_class_enum_)
+		, text(text_)
+		, default_val_string("")
+		, default_val_int32(default_val_int32_)
+	{
+
+	}
+
+	SETTING_TYPE type;
+	SETTING_CLASS_ENUM setting_class;
+	std::string text;
+	std::string default_val_string;
+	std::int32_t default_val_int32;
+
+};
+
 template<typename SETTINGS_ENUM, typename SETTING_CLASS>
 class SettingsRepository
 {
@@ -25,6 +85,7 @@ class SettingsRepository
 		typedef std::map<SETTINGS_ENUM, std::unique_ptr<SETTING_CLASS> > SettingsMap;
 
 		virtual void LoadDefaultSettings(Messager & messager) = 0;
+		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt) = 0;
 
 	protected:
 
@@ -65,34 +126,8 @@ class SettingsRepository
 
 			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
 			{
-				SettingInfo setting_info = GetSettingTextFromEnum<SETTINGS_ENUM>(static_cast<SETTINGS_ENUM>(n));
-
-				std::string setting_string;
-				std::int32_t setting_int32 = 0;
-
-				switch (setting_info.type)
-				{
-					case SettingInfo::SETTING_TYPE_STRING:
-						{
-							setting_string = pt.get<std::string>(setting_info.text, setting_info.default_val_string).c_str();
-						}
-						break;
-					case SettingInfo::SETTING_TYPE_INT32:
-						{
-							setting_int32 = pt.get<std::int32_t>(setting_info.text, setting_info.default_val_int32);
-						}
-						break;
-					default:
-						{
-
-						}
-						break;
-				}
-
-				//boost::format msg("The setting name is \"%1%\"");
-				//msg % setting_text;
-				//messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
-				//return;
+				SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(static_cast<SETTINGS_ENUM>(n));
+				SetMapEntry(messager, setting_info, n, pt);
 			}
 
 		}

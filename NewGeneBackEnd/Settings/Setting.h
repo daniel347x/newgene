@@ -9,13 +9,13 @@
 
 class Setting;
 
-template<typename SETTING_CLASS, typename SETTING_VALUE = SETTING_CLASS::type>
+template<typename SETTING_CLASS, typename SETTING_VALUE_TYPE = SETTING_CLASS::type>
 class SettingFactory
 {
 
 	public:
 	
-		SETTING_CLASS * operator()(Messager & messager, SETTING_VALUE const & initializing_val)
+		SETTING_CLASS * operator()(Messager & messager, SETTING_VALUE_TYPE const & initializing_val)
 		{
 
 			SETTING_CLASS * new_setting = new SETTING_CLASS(messager, initializing_val);
@@ -35,7 +35,7 @@ public:
 
 protected:
 	
-		Setting() {} // must use factory function to create settings
+	Setting() {} // must use factory function to create settings
 
 };
 

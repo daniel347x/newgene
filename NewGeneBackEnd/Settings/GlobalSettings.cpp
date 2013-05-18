@@ -1,7 +1,16 @@
 #include "GlobalSettings.h"
 
+void GlobalSettings::LoadDefaultSettings(Messager &messager)
+{
+}
+
+void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt)
+{
+
+}
+
 template<>
-SettingInfo GetSettingTextFromEnum<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND>(GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const value_)
+SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND>(GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const value_)
 {
 	switch (value_)
 	{
@@ -21,8 +30,4 @@ GlobalSettings::GlobalSettings(Messager & messager, boost::filesystem::path cons
 	: Settings(messager, global_settings_path)
 {
 
-}
-
-void GlobalSettings::LoadDefaultSettings(Messager &messager)
-{
 }
