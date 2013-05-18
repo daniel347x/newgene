@@ -28,7 +28,6 @@ class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL
 		GlobalSettings(Messager & messager, boost::filesystem::path const global_settings_path);
 		virtual ~GlobalSettings() {}
 
-		void LoadDefaultSettings(Messager & messager);
 		void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt);
 
 

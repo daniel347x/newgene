@@ -73,7 +73,6 @@ class SettingsRepository
 
 		typedef std::map<SETTINGS_ENUM, std::unique_ptr<SETTING_CLASS> > SettingsMap;
 
-		virtual void LoadDefaultSettings(Messager & messager) = 0;
 		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt) = 0;
 
 	protected:
@@ -81,42 +80,46 @@ class SettingsRepository
 		void LoadSettingsFromFile(Messager & messager, boost::filesystem::path const path_to_settings)
 		{
 
+			bool no_file = false;
+
 			if ( !boost::filesystem::exists(path_to_settings) )
 			{
-				return; // no file is fine
+				no_file = true; // no file is fine
 			}
 
 			else if ( boost::filesystem::file_size(path_to_settings) == 0 )
 			{
-				return; // empty file is fine
+				no_file = true; // empty file is fine
 			}
 
 			else if ( !boost::filesystem::is_regular_file(path_to_settings) )
 			{
-				boost::format msg("Settings file %1% is not available.");
+				boost::format msg("Settings file %1% is not available.  Using default settings.");
 				msg % path_to_settings;
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_DOES_NOT_EXIST, msg.str()));
-				return;
+				no_file = true;
 			}
 
 			boost::property_tree::ptree pt;
 
-			try
+			if (!no_file)
 			{
-				boost::property_tree::xml_parser::read_xml(path_to_settings.string(), pt);
-			}
-			catch (const boost::property_tree::xml_parser_error & e)
-			{
-				boost::format msg("Settings file %1% is not in the correct format: %2%");
-				msg % path_to_settings % e.what();
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_FORMAT, msg.str()));
-				return;
+				try
+				{
+					boost::property_tree::xml_parser::read_xml(path_to_settings.string(), pt);
+				}
+				catch (const boost::property_tree::xml_parser_error & e)
+				{
+					boost::format msg("Settings file %1% is not in the correct format: %2%");
+					msg % path_to_settings % e.what();
+					messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_FORMAT, msg.str()));
+				}
 			}
 
 			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
 			{
 				SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(static_cast<SETTINGS_ENUM>(n));
-				SetMapEntry(messager, setting_info, n, pt);
+				SetMapEntry(messager, setting_info, n, pt); // sets default value if not present in property tree at this point
 			}
 
 		}
@@ -142,14 +145,13 @@ public:
 	SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager)
 	{
 		SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager);
-		new_settings_repository->LoadDefaultSettings(messager);
+		new_settings_repository->LoadSettingsFromFile(messager, boost::filesystem::path());
 		return new_settings_repository;
 	}
 
 	SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_settings)
 	{
 		SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings);
-		new_settings_repository->LoadDefaultSettings(messager);
 		new_settings_repository->LoadSettingsFromFile(messager, path_to_settings);
 		return new_settings_repository;
 	}

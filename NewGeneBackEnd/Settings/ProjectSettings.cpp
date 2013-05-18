@@ -1,10 +1,5 @@
 #include "ProjectSettings.h"
 
-void ProjectSettings::LoadDefaultSettings(Messager &messager)
-{
-
-}
-
 void ProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt)
 {
 

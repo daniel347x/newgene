@@ -1,9 +1,5 @@
 #include "GlobalSettings.h"
 
-void GlobalSettings::LoadDefaultSettings(Messager &messager)
-{
-}
-
 void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt)
 {
 

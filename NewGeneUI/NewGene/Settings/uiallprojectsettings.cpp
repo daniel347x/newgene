@@ -1,10 +1,5 @@
 #include "uiallprojectsettings.h"
 
-void UIAllProjectSettings::UIOnlySettings::LoadDefaultSettings(Messager &messager)
-{
-
-}
-
 void UIAllProjectSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt)
 {
 

@@ -28,7 +28,6 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJ
 		ProjectSettings(Messager & messager, boost::filesystem::path const project_settings_path);
 		virtual ~ProjectSettings() {}
 
-		void LoadDefaultSettings(Messager & messager);
 		void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt);
 
 

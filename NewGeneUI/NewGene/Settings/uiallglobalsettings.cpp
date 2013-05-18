@@ -1,10 +1,5 @@
 #include "uiallglobalsettings.h"
 
-void UIAllGlobalSettings::UIOnlySettings::LoadDefaultSettings(Messager & messager)
-{
-	_settings_map[GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, ""));
-}
-
 void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt)
 {
 
@@ -13,11 +8,8 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, Setti
 
 		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
 			{
-				std::string string_setting = pt.get<std::string>(setting_info.text, "");
-				if (!string_setting.empty())
-				{
-					_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
-				}
+				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
+				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
 			}
 			break;
 
