@@ -84,6 +84,7 @@ class SettingsRepository
 		{
 			SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(which_setting);
 			_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
+			//WriteSettingsToFile(Messager & messager);
 		}
 
 	protected:
@@ -155,21 +156,21 @@ template<typename SETTINGS_REPOSITORY_CLASS>
 class SettingsRepositoryFactory
 {
 
-public:
-
-	SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager)
-	{
-		SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager);
-		new_settings_repository->LoadSettingsFromFile(messager, boost::filesystem::path());
-		return new_settings_repository;
-	}
-
-	SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_settings)
-	{
-		SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings);
-		new_settings_repository->LoadSettingsFromFile(messager, path_to_settings);
-		return new_settings_repository;
-	}
+	public:
+	
+		SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager)
+		{
+			SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager);
+			new_settings_repository->LoadSettingsFromFile(messager, boost::filesystem::path());
+			return new_settings_repository;
+		}
+	
+		SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_settings)
+		{
+			SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings);
+			new_settings_repository->LoadSettingsFromFile(messager, path_to_settings);
+			return new_settings_repository;
+		}
 
 };
 
