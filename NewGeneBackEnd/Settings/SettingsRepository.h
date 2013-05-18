@@ -73,9 +73,24 @@ class SettingsRepository
 
 		typedef std::map<SETTINGS_ENUM, std::unique_ptr<SETTING_CLASS> > SettingsMap;
 
+		std::unique_ptr<SETTING_CLASS> GetSetting(Messager & messager, SETTINGS_ENUM const which_setting) const
+		{
+			SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(which_setting);
+			return std::unique_ptr<SETTING_CLASS>(CloneSetting(messager, _settings_map[which_setting]->get(), setting_info));
+		}
+
+		template<typename T>
+		void UpdateSetting(Messager & messager, SETTINGS_ENUM const which_setting, T const & setting_value)
+		{
+			SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(which_setting);
+			_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
+		}
+
 	protected:
 
 		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt) = 0;
+		virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS * current_setting, SettingInfo & setting_info) const = 0;
+		virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void) = 0;
 
 		void LoadSettingsFromFile(Messager & messager, boost::filesystem::path const path_to_settings)
 		{

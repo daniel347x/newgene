@@ -32,6 +32,8 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJ
 	protected:
 
 		void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt);
+		BackendProjectSetting * CloneSetting(Messager & messager, BackendProjectSetting * current_setting, SettingInfo & setting_info) const;
+		BackendProjectSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
 
 
 	private:

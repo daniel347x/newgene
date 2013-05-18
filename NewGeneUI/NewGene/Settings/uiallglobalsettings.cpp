@@ -23,6 +23,16 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, Setti
 
 }
 
+UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & messager, UIGlobalSetting * current_setting, SettingInfo & setting_info) const
+{
+	return NULL;
+}
+
+UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void)
+{
+	return NULL;
+}
+
 template<>
 SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_)
 {

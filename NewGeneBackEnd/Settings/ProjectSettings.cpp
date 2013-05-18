@@ -5,6 +5,16 @@ void ProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_inf
 
 }
 
+BackendProjectSetting * ProjectSettings::CloneSetting(Messager & messager, BackendProjectSetting * current_setting, SettingInfo & setting_info) const
+{
+	return NULL;
+}
+
+BackendProjectSetting * ProjectSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void)
+{
+	return NULL;
+}
+
 template<>
 SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND>(PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const value_)
 {

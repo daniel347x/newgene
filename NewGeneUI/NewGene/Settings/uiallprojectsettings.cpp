@@ -5,6 +5,16 @@ void UIAllProjectSettings::UIOnlySettings::SetMapEntry(Messager & messager, Sett
 
 }
 
+UIProjectSetting * UIAllProjectSettings::UIOnlySettings::CloneSetting(Messager & messager, UIProjectSetting * current_setting, SettingInfo & setting_info) const
+{
+	return NULL;
+}
+
+UIProjectSetting * UIAllProjectSettings::UIOnlySettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void)
+{
+	return NULL;
+}
+
 template<>
 SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_)
 {

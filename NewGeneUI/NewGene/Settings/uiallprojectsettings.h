@@ -56,6 +56,8 @@ class UIAllProjectSettings : public UIAllSettings
 
 				void LoadDefaultSettings(Messager & messager);
 				void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt);
+				UIProjectSetting * CloneSetting(Messager & messager, UIProjectSetting * current_setting, SettingInfo & setting_info) const;
+				UIProjectSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
 
 		};
 
