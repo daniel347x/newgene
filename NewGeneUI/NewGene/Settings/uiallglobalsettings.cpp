@@ -18,6 +18,17 @@ class UIGlobalSetting_MRUList : public UIGlobalSetting, public StringSetting
 
 };
 
+template<>
+SettingInfo GetSettingTextFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_)
+{
+	switch (value_)
+	{
+		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return SettingInfo(SettingInfo::SETTING_TYPE_STRING, "MRU_LIST", "");
+	}
+
+	return SettingInfo();
+}
+
 UIAllGlobalSettings::UIAllGlobalSettings(Messager & messager, QObject * parent)
 	: UIAllSettings(messager, parent)
 {
@@ -55,15 +66,4 @@ void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messag
 void UIAllGlobalSettings::UIOnlySettings::LoadDefaultSettings(Messager & messager)
 {
 	_settings_map[GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, ""));
-}
-
-template<>
-std::string GetSettingTextFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_)
-{
-	switch (value_)
-	{
-		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return "MRU_LIST";
-	}
-
-	return "";
 }

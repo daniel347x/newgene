@@ -11,6 +11,7 @@
 #	include <boost/property_tree/ptree.hpp>
 #	include <boost/property_tree/xml_parser.hpp>
 #endif
+#include <cstdint>
 
 template<typename SETTINGS_ENUM, typename SETTING_CLASS>
 class SettingsRepository
@@ -64,7 +65,29 @@ class SettingsRepository
 
 			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
 			{
-				std::string setting_text = GetSettingTextFromEnum<SETTINGS_ENUM>(static_cast<SETTINGS_ENUM>(n));
+				SettingInfo setting_info = GetSettingTextFromEnum<SETTINGS_ENUM>(static_cast<SETTINGS_ENUM>(n));
+
+				std::string setting_string;
+				std::int32_t setting_int32 = 0;
+
+				switch (setting_info.type)
+				{
+					case SettingInfo::SETTING_TYPE_STRING:
+						{
+							setting_string = pt.get<std::string>(setting_info.text, setting_info.default_val_string).c_str();
+						}
+						break;
+					case SettingInfo::SETTING_TYPE_INT32:
+						{
+							setting_int32 = pt.get<std::int32_t>(setting_info.text, setting_info.default_val_int32);
+						}
+						break;
+					default:
+						{
+
+						}
+						break;
+				}
 
 				//boost::format msg("The setting name is \"%1%\"");
 				//msg % setting_text;

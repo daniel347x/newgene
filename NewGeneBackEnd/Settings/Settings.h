@@ -32,8 +32,54 @@ class Settings : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
 
 };
 
+class SettingInfo
+{
+
+	public:
+
+		enum SETTING_TYPE
+		{
+			  SETTING_TYPE_NONE
+			, SETTING_TYPE_STRING
+			, SETTING_TYPE_INT32
+		};
+
+		SettingInfo()
+			: type(SETTING_TYPE_NONE)
+			, text("")
+			, default_val_string("")
+			, default_val_int32(0)
+		{
+
+		}
+
+		SettingInfo(SETTING_TYPE const type_, std::string const & text_, std::string default_val_string_)
+			: type(type_)
+			, text(text_)
+			, default_val_string(default_val_string_)
+			, default_val_int32(0)
+		{
+
+		}
+
+		SettingInfo(SETTING_TYPE const type_, std::string const & text_, std::int32_t default_val_int32_)
+			: type(type_)
+			, text(text_)
+			, default_val_string("")
+			, default_val_int32(default_val_int32_)
+		{
+
+		}
+
+		SETTING_TYPE type;
+		std::string text;
+		std::string default_val_string;
+		std::int32_t default_val_int32;
+
+};
+
 template<typename SETTINGS_ENUM>
-std::string GetSettingTextFromEnum(SETTINGS_ENUM const value_)
+SettingInfo GetSettingTextFromEnum(SETTINGS_ENUM const value_)
 {
 	return "";
 }

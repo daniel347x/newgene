@@ -1,5 +1,16 @@
 #include "uiallprojectsettings.h"
 
+template<>
+SettingInfo GetSettingTextFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_)
+{
+	switch (value_)
+	{
+		//case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return "MRU_LIST";
+	}
+
+	return SettingInfo();
+}
+
 UIAllProjectSettings::UIAllProjectSettings(Messager & messager, QObject * parent)
 	: UIAllSettings(messager, parent)
 {
@@ -37,15 +48,4 @@ void UIAllProjectSettings::_impl::CreateInternalImplementations(Messager & messa
 void UIAllProjectSettings::UIOnlySettings::LoadDefaultSettings(Messager &messager)
 {
 
-}
-
-template<>
-std::string GetSettingTextFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_)
-{
-	switch (value_)
-	{
-		//case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return "MRU_LIST";
-	}
-
-	return "";
 }

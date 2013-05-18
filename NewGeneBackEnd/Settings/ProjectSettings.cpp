@@ -1,5 +1,16 @@
 #include "ProjectSettings.h"
 
+template<>
+SettingInfo GetSettingTextFromEnum<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND>(PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const value_)
+{
+	switch (value_)
+	{
+		//case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return "MRU_LIST";
+	}
+
+	return SettingInfo();
+}
+
 ProjectSettings::ProjectSettings(Messager & messager)
 	: Settings(messager)
 {
@@ -15,15 +26,4 @@ ProjectSettings::ProjectSettings(Messager & messager, boost::filesystem::path co
 void ProjectSettings::LoadDefaultSettings(Messager &messager)
 {
 
-}
-
-template<>
-std::string GetSettingTextFromEnum<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND>(PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const value_)
-{
-	switch (value_)
-	{
-		//case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return "MRU_LIST";
-	}
-
-	return "";
 }
