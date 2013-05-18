@@ -51,6 +51,10 @@ class UIAllProjectSettings : public UIAllSettings
 
 				}
 
+
+			protected:
+
+				void LoadDefaultSettings(Messager & messager);
 				void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt);
 
 		};

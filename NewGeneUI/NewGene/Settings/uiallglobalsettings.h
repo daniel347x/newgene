@@ -70,6 +70,9 @@ class UIAllGlobalSettings : public UIAllSettings
 
 				}
 
+
+			protected:
+
 				void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt);
 
 		};

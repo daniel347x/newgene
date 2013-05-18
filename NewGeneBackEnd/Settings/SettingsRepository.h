@@ -73,9 +73,9 @@ class SettingsRepository
 
 		typedef std::map<SETTINGS_ENUM, std::unique_ptr<SETTING_CLASS> > SettingsMap;
 
-		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt) = 0;
-
 	protected:
+
+		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt) = 0;
 
 		void LoadSettingsFromFile(Messager & messager, boost::filesystem::path const path_to_settings)
 		{
