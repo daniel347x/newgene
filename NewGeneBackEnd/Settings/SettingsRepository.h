@@ -33,24 +33,27 @@ public:
 		, text("")
 		, default_val_string("")
 		, default_val_int32(0)
+		, enum_index(0)
 	{
 
 	}
 
-	SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, std::string const & text_, std::string default_val_string_)
+	SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, int const enum_index_, std::string const & text_, std::string default_val_string_)
 		: setting_class(setting_class_enum_)
 		, text(text_)
 		, default_val_string(default_val_string_)
 		, default_val_int32(0)
+		, enum_index(enum_index_)
 	{
 
 	}
 
-	SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, std::string const & text_, std::int32_t default_val_int32_)
+	SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, int const enum_index_, std::string const & text_, std::int32_t default_val_int32_)
 		: setting_class(setting_class_enum_)
 		, text(text_)
 		, default_val_string("")
 		, default_val_int32(default_val_int32_)
+		, enum_index(enum_index_)
 	{
 
 	}
@@ -59,6 +62,7 @@ public:
 	std::string text;
 	std::string default_val_string;
 	std::int32_t default_val_int32;
+	int enum_index;
 
 };
 
@@ -75,21 +79,22 @@ class SettingsRepository
 
 		std::unique_ptr<SETTING_CLASS> GetSetting(Messager & messager, SETTINGS_ENUM const which_setting) const
 		{
-			SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(which_setting);
+			SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(messager, which_setting);
 			return std::unique_ptr<SETTING_CLASS>(CloneSetting(messager, _settings_map[which_setting]->get(), setting_info));
 		}
 
 		template<typename T>
 		void UpdateSetting(Messager & messager, SETTINGS_ENUM const which_setting, T const & setting_value)
 		{
-			SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(which_setting);
+			SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(messager, which_setting);
 			_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
 			//WriteSettingsToFile(Messager & messager);
 		}
 
 	protected:
 
-		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt) = 0;
+		//virtual void GetSettingsPath(Messager & messager, SettingInfo & setting_info) = 0;
+		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt) = 0;
 		virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS * current_setting, SettingInfo & setting_info) const = 0;
 		virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void) = 0;
 
@@ -134,8 +139,8 @@ class SettingsRepository
 
 			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
 			{
-				SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(static_cast<SETTINGS_ENUM>(n));
-				SetMapEntry(messager, setting_info, n, pt); // sets default value if not present in property tree at this point
+				SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(messager, static_cast<SETTINGS_ENUM>(n));
+				SetMapEntry(messager, setting_info, pt); // sets default value if not present in property tree at this point
 			}
 
 		}
@@ -157,14 +162,14 @@ class SettingsRepositoryFactory
 {
 
 	public:
-	
+
 		SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager)
 		{
 			SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager);
 			new_settings_repository->LoadSettingsFromFile(messager, boost::filesystem::path());
 			return new_settings_repository;
 		}
-	
+
 		SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_settings)
 		{
 			SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings);

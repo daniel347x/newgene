@@ -17,7 +17,7 @@ namespace PROJECT_SETTINGS_BACKEND_NAMESPACE
 }
 
 template<>
-SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND>(PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const value_);
+SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND>(Messager & messager, PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const value_);
 
 class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND, BackendProjectSetting>
 {
@@ -31,7 +31,7 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJ
 
 	protected:
 
-		void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt);
+		void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 		BackendProjectSetting * CloneSetting(Messager & messager, BackendProjectSetting * current_setting, SettingInfo & setting_info) const;
 		BackendProjectSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
 

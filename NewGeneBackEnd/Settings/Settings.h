@@ -34,7 +34,7 @@ class Settings : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
 
 // Only specializations of this are used
 template<typename SETTINGS_ENUM>
-SettingInfo GetSettingInfoFromEnum(SETTINGS_ENUM const value_)
+SettingInfo GetSettingInfoFromEnum(Messager & messager, SETTINGS_ENUM const value_)
 {
 	return SettingInfo();
 }

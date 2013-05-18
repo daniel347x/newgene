@@ -1,6 +1,6 @@
 #include "uiallglobalsettings.h"
 
-void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt)
+void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	switch (setting_info.setting_class)
@@ -9,7 +9,7 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, Setti
 		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
 			{
 				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
+				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
 			}
 			break;
 
@@ -17,7 +17,7 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, Setti
 			{
 				boost::format msg("Unknown UI global setting \"%1%\" (\"%2%\") being loaded.");
 				msg % setting_info.text % setting_info.setting_class;
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_SETTING_OBJECT, msg.str()));
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
 			}
 			break;
 
@@ -45,7 +45,7 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & m
 				{
 					boost::format msg("Unknown UI global setting \"%1%\" (\"%2%\") being requested.");
 					msg % setting_info.text % setting_info.setting_class;
-					messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_SETTING_OBJECT, msg.str()));
+					messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
 				}
 				break;
 
@@ -56,7 +56,7 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & m
 	{
 		boost::format msg("Unable to retrieve setting \"%1%\" (\"%2%\"): %3%.");
 		msg % setting_info.text % setting_info.setting_class % e.what();
-		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_SETTING_OBJECT, msg.str()));
+		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
 	}
 
 	return NULL;
@@ -80,7 +80,7 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 			{
 				boost::format msg("Unknown UI global setting \"%1%\" (\"%2%\") being updated.");
 				msg % setting_info.text % setting_info.setting_class;
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_SETTING_OBJECT, msg.str()));
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
 			}
 			break;
 
@@ -91,14 +91,32 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 }
 
 template<>
-SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_)
+SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(Messager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_)
 {
+
 	switch (value_)
 	{
-		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST: return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST, "MRU_LIST", "");
+
+		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST:
+			{
+				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST,
+								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST),
+								   "MRU_LIST",
+								   "");
+			}
+			break;
+
+		default:
+			{
+				boost::format msg("Settings information is not available for GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI value %1%.  Using empty setting.");
+				msg % value_;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_SETTING_ENUM_VALUE, msg.str()));
+			}
+
 	}
 
 	return SettingInfo();
+
 }
 
 UIAllGlobalSettings::UIAllGlobalSettings(Messager & messager, QObject * parent)

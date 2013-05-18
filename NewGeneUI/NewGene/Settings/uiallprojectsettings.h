@@ -17,7 +17,7 @@ namespace PROJECT_SETTINGS_UI_NAMESPACE
 }
 
 template<>
-SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_);
+SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(Messager & messager, PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_);
 
 class UIAllProjectSettings : public UIAllSettings
 {
@@ -55,7 +55,7 @@ class UIAllProjectSettings : public UIAllSettings
 			protected:
 
 				void LoadDefaultSettings(Messager & messager);
-				void SetMapEntry(Messager & messager, SettingInfo & setting_info, int const enum_index, boost::property_tree::ptree & pt);
+				void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 				UIProjectSetting * CloneSetting(Messager & messager, UIProjectSetting * current_setting, SettingInfo & setting_info) const;
 				UIProjectSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
 
