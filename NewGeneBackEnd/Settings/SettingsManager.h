@@ -21,6 +21,8 @@ class SettingsManager : public Manager<SettingsManager, MANAGER_DESCRIPTION_NAME
 		std::unique_ptr<BackendGlobalSetting> getSetting(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting);
 		std::unique_ptr<BackendProjectSetting> getSetting(Messager & messager, Project * project, PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const which_setting);
 
+		std::unique_ptr<GlobalSettings> _global_settings;
+
 };
 
 #endif

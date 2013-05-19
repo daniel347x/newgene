@@ -85,14 +85,6 @@ void NewGeneMainWindow::changeEvent( QEvent * e )
 
 void NewGeneMainWindow::doInitialize()
 {
-
-	//throw NewGeneException() << newgene_error_description("Test throw during initialization.");
-
-	//boost::format msg("Reached doInitialize().");
-	//QMessageBox msgBox;
-	//msgBox.setText(msg.str().c_str());
-	//msgBox.exec();
-
 	// Instantiate Managers
 	UIStatusManager::getManager();
 	UIDocumentManager::getManager();

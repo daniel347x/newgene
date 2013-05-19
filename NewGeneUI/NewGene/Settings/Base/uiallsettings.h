@@ -4,6 +4,9 @@
 #include <QObject>
 #include "../../../NewGeneBackEnd/Settings/Settings.h"
 #include "../../../NewGeneBackEnd/Settings/SettingsRepository.h"
+#include "../../../NewGeneBackEnd/Settings/GlobalSettings.h"
+#include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"
+#include "../../../NewGeneBackEnd/globals.h"
 #include "uisetting.h"
 
 class UIAllSettings : public QObject
@@ -68,7 +71,7 @@ class UIAllSettings : public QObject
 						{
 							if (!_settings_repository)
 							{
-								boost::format msg( "Settings repository implementation not yet constructed." );
+								boost::format msg( "Settings repository instance not yet constructed." );
 								throw NewGeneException() << newgene_error_description( msg.str() );
 							}
 							return *(_settings_repository.get());
@@ -126,6 +129,37 @@ class UIAllSettings : public QObject
 							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager, path_to_settings)
 						{
 
+						}
+
+				};
+
+				// Specialization to allow ownership of the GlobalSettings singleton class to reside in the backend
+				template<>
+				class _RelatedImpl_base<GlobalSettings>
+				{
+
+					public:
+
+						GlobalSettings & getSettingsRepository()
+						{
+							if (!settingsManager()._global_settings)
+							{
+								boost::format msg( "GlobalSettings instance not yet constructed." );
+								throw NewGeneException() << newgene_error_description( msg.str() );
+							}
+							return *(settingsManager()._global_settings.get());
+						}
+
+					protected:
+
+						_RelatedImpl_base(Messager & messager)
+						{
+							settingsManager()._global_settings.reset(SettingsRepositoryFactory<GlobalSettings>()(messager));
+						}
+
+						_RelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+						{
+							settingsManager()._global_settings.reset(SettingsRepositoryFactory<GlobalSettings>()(messager, path_to_settings));
 						}
 
 				};
