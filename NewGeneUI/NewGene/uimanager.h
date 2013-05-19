@@ -40,9 +40,9 @@ class UIManager
 			MANAGER_CLASS_BACKEND::getManager().which_descriptor = MANAGER_DESCRIPTION_NAMESPACE::get_text_name_from_enum(MANAGER_ENUM_BACKEND).c_str();
 		}
 
-		~UIManager()
+		virtual ~UIManager()
 		{
-
+			MANAGER_CLASS_BACKEND::_manager.reset();
 		}
 
 		NewGeneMainWindow & getMainWindow()
