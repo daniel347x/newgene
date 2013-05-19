@@ -73,13 +73,6 @@ class UIMessager : public QObject, public Messager
 
 		void displayStatusMessages();
 
-		static UIProjectManager & projectManager();
-		static UISettingsManager & settingsManager();
-		static UILoggingManager & loggingManager();
-		static UIModelManager & modelManager();
-		static UIDocumentManager & documentManager();
-		static UIStatusManager & statusManager();
-
 	signals:
 
 	public slots:

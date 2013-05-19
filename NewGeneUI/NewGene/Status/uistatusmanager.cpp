@@ -4,44 +4,14 @@
 #include <QStatusBar>
 #include "newgenemainwindow.h"
 
-std::unique_ptr<UIStatusManager> UIStatusManager::_statusManager;
-
-UIStatusManager::UIStatusManager( QObject * parent ) :
-	UIManager( parent )
+UIStatusManager::UIStatusManager( QObject * parent )
+	: QObject(parent)
+	, UIManager()
 {
 
 	// *************************************************************************
 	// All Managers are instantiated AFTER the application event loop is running
 	// *************************************************************************
-
-}
-
-UIStatusManager & UIStatusManager::getStatusManager()
-{
-
-	// *****************************************************************
-	// TODO: Create std::map<> from parent to manager, and retrieve that
-	// ... this will support multiple main windows in the future.
-	// *****************************************************************
-
-	if ( _statusManager == NULL )
-	{
-		_statusManager.reset( new UIStatusManager( NULL ) );
-
-		if ( _statusManager )
-		{
-			_statusManager->which = MANAGER_STATUS;
-			_statusManager->which_descriptor = "UIStatusManager";
-		}
-	}
-
-	if ( _statusManager == NULL )
-	{
-		boost::format msg( "Status manager not instantiated." );
-		throw NewGeneException() << newgene_error_description( msg.str() );
-	}
-
-	return *_statusManager;
 
 }
 

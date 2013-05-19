@@ -3,25 +3,19 @@
 
 #include "globals.h"
 #include "uimanager.h"
+#include "..\..\..\NewGeneBackEnd\Documents\DocumentManager.h"
 
 class NewGeneMainWindow;
 
-
-
-class UIDocumentManager : public UIManager
+class UIDocumentManager : public QObject, public UIManager<UIDocumentManager, DocumentManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_DOCUMENTS>
 {
 		Q_OBJECT
 	public:
 		explicit UIDocumentManager( QObject * parent = 0 );
 
-		static UIDocumentManager & getDocumentManager();
-
 	signals:
 
 	public slots:
-
-	private:
-		static std::unique_ptr<UIDocumentManager> _documentManager;
 
 };
 

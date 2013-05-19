@@ -75,27 +75,33 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Documents\DocumentManager.h" />
+    <ClInclude Include="Logging\LoggingManager.h" />
     <ClInclude Include="Messager\Messager.h" />
     <ClInclude Include="Model\ModelManager.h" />
+    <ClInclude Include="Project\ProjectManager.h" />
     <ClInclude Include="Settings\GlobalSettings.h" />
     <ClInclude Include="Settings\ProjectSettings.h" />
     <ClInclude Include="Settings\Setting.h" />
     <ClInclude Include="Settings\Settings.h" />
     <ClInclude Include="Settings\SettingsManager.h" />
     <ClInclude Include="Settings\SettingsRepository.h" />
+    <ClInclude Include="Status\StatusManager.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Documents\DocumentManager.cpp" />
+    <ClCompile Include="Logging\LoggingManager.cpp" />
     <ClCompile Include="Messager\Messager.cpp" />
     <ClCompile Include="Model\ModelManager.cpp" />
+    <ClCompile Include="Project\ProjectManager.cpp" />
     <ClCompile Include="Settings\GlobalSettings.cpp" />
     <ClCompile Include="Settings\ProjectSettings.cpp" />
     <ClCompile Include="Settings\Setting.cpp" />
     <ClCompile Include="Settings\Settings.cpp" />
     <ClCompile Include="Settings\SettingsManager.cpp" />
     <ClCompile Include="Settings\SettingsRepository.cpp" />
+    <ClCompile Include="Status\StatusManager.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
   </ItemGroup>

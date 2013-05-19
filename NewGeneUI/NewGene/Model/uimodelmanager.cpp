@@ -1,44 +1,14 @@
 #include "uimodelmanager.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 
-std::unique_ptr<UIModelManager> UIModelManager::_modelManager;
-
-UIModelManager::UIModelManager( QObject * parent ) :
-	UIManager( parent )
+UIModelManager::UIModelManager( QObject * parent )
+	: QObject(parent)
+	, UIManager()
 {
 
 	// *************************************************************************
 	// All Managers are instantiated AFTER the application event loop is running
 	// *************************************************************************
-
-}
-
-UIModelManager & UIModelManager::getModelManager()
-{
-
-	// *****************************************************************
-	// TODO: Create std::map<> from parent to manager, and retrieve that
-	// ... this will support multiple main windows in the future.
-	// *****************************************************************
-
-	if ( _modelManager == NULL )
-	{
-		_modelManager.reset( new UIModelManager( NULL ) );
-
-		if ( _modelManager )
-		{
-			_modelManager->which = MANAGER_MODEL;
-			_modelManager->which_descriptor = "UIModelManager";
-		}
-	}
-
-	if ( _modelManager == NULL )
-	{
-		boost::format msg( "Model manager not instantiated." );
-		throw NewGeneException() << newgene_error_description( msg.str() );
-	}
-
-	return *_modelManager;
 
 }
 

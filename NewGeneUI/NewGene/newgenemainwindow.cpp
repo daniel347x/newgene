@@ -94,12 +94,12 @@ void NewGeneMainWindow::doInitialize()
 	//msgBox.exec();
 
 	// Instantiate Managers
-	UIStatusManager::getStatusManager();
-	UIDocumentManager::getDocumentManager();
-	UILoggingManager::getLoggingManager();
-	UISettingsManager::getSettingsManager();
-	UIModelManager::getModelManager();
-	UIProjectManager::getProjectManager();
+	UIStatusManager::getManager();
+	UIDocumentManager::getManager();
+	UILoggingManager::getManager();
+	UISettingsManager::getManager();
+	UIModelManager::getManager();
+	UIProjectManager::getManager();
 
 	_current_project.reset(projectManager().LoadDefaultProject());
 

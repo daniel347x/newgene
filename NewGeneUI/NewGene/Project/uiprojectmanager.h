@@ -2,18 +2,17 @@
 #define UIPROJECTMANAGER_H
 
 #include "uimanager.h"
+#include "..\..\..\NewGeneBackEnd\Project\ProjectManager.h"
 #include <memory>
 
 class NewGeneMainWindow;
 class UIProject;
 
-class UIProjectManager : public UIManager
+class UIProjectManager : public QObject, public UIManager<UIProjectManager, ProjectManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT>
 {
 		Q_OBJECT
 	public:
 		explicit UIProjectManager( QObject * parent = 0 );
-
-		static UIProjectManager & getProjectManager();
 
 		UIProject * LoadDefaultProject( NewGeneMainWindow * parent = NULL );
 
@@ -22,8 +21,6 @@ class UIProjectManager : public UIManager
 	public slots:
 
 	private:
-
-		static std::unique_ptr<UIProjectManager> _projectManager;
 
 };
 

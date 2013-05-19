@@ -43,6 +43,24 @@
     <Filter Include="Source Files\Messager">
       <UniqueIdentifier>{0fa8e894-2de8-4731-b4a1-2c285f02eac9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Logging">
+      <UniqueIdentifier>{6aa71f67-202f-43c5-8489-4a034ed9ecb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Logging">
+      <UniqueIdentifier>{b8ccf356-fdbf-44d6-aa16-4941615ddd9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Project">
+      <UniqueIdentifier>{75702514-1805-45d9-95a1-7ec32bc5b75a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Project">
+      <UniqueIdentifier>{96d12603-3025-4452-b4e6-d1e021036df4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Status">
+      <UniqueIdentifier>{ee2c8ecf-1a4a-4e45-ad74-5cb3241f8533}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Status">
+      <UniqueIdentifier>{04b74214-4862-4904-a53e-c5a59d4260d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -81,6 +99,15 @@
     <ClInclude Include="Messager\Messager.h">
       <Filter>Header Files\Messager</Filter>
     </ClInclude>
+    <ClInclude Include="Logging\LoggingManager.h">
+      <Filter>Header Files\Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="Project\ProjectManager.h">
+      <Filter>Header Files\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="Status\StatusManager.h">
+      <Filter>Header Files\Status</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -115,6 +142,15 @@
     </ClCompile>
     <ClCompile Include="Messager\Messager.cpp">
       <Filter>Source Files\Messager</Filter>
+    </ClCompile>
+    <ClCompile Include="Logging\LoggingManager.cpp">
+      <Filter>Source Files\Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="Project\ProjectManager.cpp">
+      <Filter>Source Files\Project</Filter>
+    </ClCompile>
+    <ClCompile Include="Status\StatusManager.cpp">
+      <Filter>Source Files\Status</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

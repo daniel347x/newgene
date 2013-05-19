@@ -37,13 +37,6 @@ class UIProject : public QObject
 		std::unique_ptr<UIModel> _model;
 		std::unique_ptr<UIAllProjectSettings> _project_settings;
 
-	private:
-		UIModelManager & modelManager();
-		UISettingsManager & settingsManager();
-		UIDocumentManager & documentManager();
-		UIStatusManager & statusManager();
-		UILoggingManager & loggingManager();
-		UIProjectManager & projectManager();
 };
 
 #endif // UIPROJECT_H

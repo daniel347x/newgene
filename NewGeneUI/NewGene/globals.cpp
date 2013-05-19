@@ -3,32 +3,38 @@
 
 NewGeneMainWindow * theMainWindow = NULL;
 
+template<typename MANAGER_CLASS>
+MANAGER_CLASS & get_a_manager()
+{
+	return static_cast<MANAGER_CLASS&>(MANAGER_CLASS::getManager());
+}
+
 UISettingsManager & settingsManager()
 {
-	return UISettingsManager::getSettingsManager();
+	return get_a_manager<UISettingsManager>();
 }
 
 UILoggingManager & loggingManager()
 {
-	return UILoggingManager::getLoggingManager();
+	return get_a_manager<UILoggingManager>();
 }
 
 UIProjectManager & projectManager()
 {
-	return UIProjectManager::getProjectManager();
+	return get_a_manager<UIProjectManager>();
 }
 
 UIModelManager & modelManager()
 {
-	return UIModelManager::getModelManager();
+	return get_a_manager<UIModelManager>();
 }
 
 UIDocumentManager & documentManager()
 {
-	return UIDocumentManager::getDocumentManager();
+	return get_a_manager<UIDocumentManager>();
 }
 
 UIStatusManager & statusManager()
 {
-	return UIStatusManager::getStatusManager();
+	return get_a_manager<UIStatusManager>();
 }

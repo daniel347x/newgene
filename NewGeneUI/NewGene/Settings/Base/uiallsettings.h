@@ -65,6 +65,10 @@ class UIAllSettings : public QObject
 				class _RelatedImpl_base
 				{
 
+					public:
+
+
+
 					protected:
 
 						_RelatedImpl_base(Messager & messager)

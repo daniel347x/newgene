@@ -3,10 +3,11 @@
 
 #include "globals.h"
 #include "uimanager.h"
+#include "..\..\..\NewGeneBackEnd\Status\StatusManager.h"
 
 class NewGeneMainWindow;
 
-class UIStatusManager : public UIManager
+class UIStatusManager : public QObject, public UIManager<UIStatusManager, StatusManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_STATUS>
 {
 		Q_OBJECT
 
@@ -22,8 +23,6 @@ class UIStatusManager : public UIManager
 
 		explicit UIStatusManager( QObject * parent = 0 );
 
-		static UIStatusManager & getStatusManager();
-
 		void LogStatus( QString const & _statusManager, IMPORTANCE const importance_level = IMPORTANCE_STANDARD );
 		void PostStatus( QString const & _statusManager, IMPORTANCE const importance_level = IMPORTANCE_STANDARD, bool const forbidWritingToLog = false );
 
@@ -32,7 +31,6 @@ class UIStatusManager : public UIManager
 	public slots:
 
 	private:
-		static std::unique_ptr<UIStatusManager> _statusManager;
 
 };
 

@@ -51,37 +51,3 @@ void UIMessager::displayStatusMessages()
 	}
 }
 
-UISettingsManager & UIMessager::settingsManager()
-{
-	return UISettingsManager::getSettingsManager();
-}
-
-UILoggingManager & UIMessager::loggingManager()
-{
-	return UILoggingManager::getLoggingManager();
-}
-
-UIProjectManager & UIMessager::projectManager()
-{
-	return UIProjectManager::getProjectManager();
-}
-
-UIModelManager & UIMessager::modelManager()
-{
-	return UIModelManager::getModelManager();
-}
-
-UIDocumentManager & UIMessager::documentManager()
-{
-	return UIDocumentManager::getDocumentManager();
-}
-
-UIStatusManager & UIMessager::statusManager()
-{
-	return UIStatusManager::getStatusManager();
-}
-
-//void UIMessagerErrorMessage::sendErrorMessageToBeDisplayed(std::string const msg)
-//{
-
-//}

@@ -11,10 +11,9 @@
 #include <fstream>
 #include <QDebug>
 
-std::unique_ptr<UISettingsManager> UISettingsManager::_settingsManager;
-
-UISettingsManager::UISettingsManager( QObject * parent ) :
-	UIManager( parent )
+UISettingsManager::UISettingsManager( QObject * parent )
+	: QObject(parent)
+	, UIManager()
 {
 
 	// *************************************************************************
@@ -36,33 +35,6 @@ UISettingsManager::UISettingsManager( QObject * parent ) :
 		}
 	}
 
-}
-
-UISettingsManager & UISettingsManager::getSettingsManager()
-{
-	// *****************************************************************
-	// TODO: Create std::map<> from parent to manager, and retrieve that
-	// ... this will support multiple main windows in the future.
-	// *****************************************************************
-	if ( _settingsManager == NULL )
-	{
-		_settingsManager.reset( new UISettingsManager( NULL ) );
-
-		if ( _settingsManager )
-		{
-			_settingsManager -> which            = MANAGER_SETTINGS;
-			_settingsManager -> which_descriptor = "UISettingsManager";
-		}
-	}
-
-	if ( _settingsManager == NULL )
-	{
-		boost::format msg( "Settings manager not instantiated." );
-
-		throw NewGeneException() << newgene_error_description( msg.str() );
-	}
-
-	return *_settingsManager;
 }
 
 bool UISettingsManager::ObtainGlobalSettingsPath()

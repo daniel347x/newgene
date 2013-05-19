@@ -3,11 +3,12 @@
 
 #include "globals.h"
 #include "uimanager.h"
+#include "..\..\..\NewGeneBackEnd\Model\ModelManager.h"
 
 class NewGeneMainWindow;
 class UIModel;
 
-class UIModelManager : public UIManager
+class UIModelManager : public QObject, public UIManager<UIModelManager, ModelManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL>
 {
 		Q_OBJECT
 	public:
@@ -22,7 +23,7 @@ class UIModelManager : public UIManager
 	public slots:
 
 	private:
-		static std::unique_ptr<UIModelManager> _modelManager;
+
 };
 
 #endif // UIMODELMANAGER_H
