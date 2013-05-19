@@ -2,6 +2,7 @@
 #define UIGLOBALSETTINGS_H
 
 #include <QObject>
+#include "../../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/GlobalSettings.h"
 
@@ -132,13 +133,27 @@ class UIAllGlobalSettings : public UIAllSettings
 			protected:
 
 				void CreateInternalImplementations(Messager & messager);
-				void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings)
-;\
+				void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings);
 		};
+
+		_impl_base<GlobalSettings, UIOnlySettings> & getImplementation()
+		{
+			if (!__impl)
+			{
+				boost::format msg( "UI Global settings implementation not yet constructed." );
+				throw NewGeneException() << newgene_error_description( msg.str() );
+			}
+			return *(__impl.get());
+		}
 
 		void CreateImplementation(Messager & messager);
 		void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings);
 		std::unique_ptr<_impl> __impl;
+
+	public:
+
+		UIOnlySettings & getUISettings();
+		GlobalSettings & getBackendSettings();
 
 };
 

@@ -58,15 +58,21 @@ class UIAllSettings : public QObject
 				_impl_base(Messager &)
 				{}
 
-			protected:
-
 				template<typename SETTINGS_REPOSITORY_CLASS>
 				class _RelatedImpl_base
 				{
 
 					public:
 
-
+						SETTINGS_REPOSITORY_CLASS & getSettingsRepository()
+						{
+							if (!_settings_repository)
+							{
+								boost::format msg( "Settings repository implementation not yet constructed." );
+								throw NewGeneException() << newgene_error_description( msg.str() );
+							}
+							return *(_settings_repository.get());
+						}
 
 					protected:
 
@@ -129,13 +135,51 @@ class UIAllSettings : public QObject
 				std::unique_ptr<_UIRelatedImpl_base> __ui_impl;
 				std::unique_ptr<_BackendRelatedImpl_base> __backend_impl;
 
+				_UIRelatedImpl_base & getInternalUIImplementation()
+				{
+					if (!__ui_impl)
+					{
+						boost::format msg( "Internal UI settings implementation not yet constructed." );
+						throw NewGeneException() << newgene_error_description( msg.str() );
+					}
+					return *(__ui_impl.get());
+				}
+
+				_BackendRelatedImpl_base & getInternalBackendImplementation()
+				{
+					if (!__backend_impl)
+					{
+						boost::format msg( "Internal backend settings implementation not yet constructed." );
+						throw NewGeneException() << newgene_error_description( msg.str() );
+					}
+					return *(__backend_impl.get());
+				}
+
 		};
+
+	public:
 
 
 	private:
 
 
 	protected:
+
+		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS, typename SETTINGS_ENUM, typename SETTING_CLASS>
+		UIOnlySettings_base<SETTINGS_ENUM, UI_SETTINGS_CLASS> & getUISettings_base(_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS> & impl)
+		{
+			_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_UIRelatedImpl_base & impl_ui = impl.getInternalUIImplementation();
+			UI_SETTINGS_CLASS & settings_repository = impl_ui.getSettingsRepository();
+			return reinterpret_cast<UIOnlySettings_base<SETTINGS_ENUM, UI_SETTINGS_CLASS> &>(settings_repository);
+		}
+
+		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS, typename SETTINGS_ENUM, typename SETTING_CLASS>
+		Settings<SETTINGS_ENUM, SETTING_CLASS> & getBackendSettings_base(_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS> & impl)
+		{
+			_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendRelatedImpl_base & impl_backend = impl.getInternalBackendImplementation();
+			BACKEND_SETTINGS_CLASS & settings_repository = impl_backend.getSettingsRepository();
+			return reinterpret_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
+		}
 
 		virtual void CreateImplementation(Messager & messager) = 0;
 		virtual void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings) = 0;

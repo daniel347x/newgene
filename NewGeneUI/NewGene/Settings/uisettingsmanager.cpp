@@ -112,3 +112,25 @@ bool UISettingsManager::ObtainGlobalSettingsPath()
 
 	return found;
 }
+
+BackendGlobalSetting const & UISettingsManager::get_setting(GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting)
+{
+	//_global_settings->__impl
+	return BackendGlobalSetting();
+}
+
+BackendProjectSetting const & UISettingsManager::get_setting(PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const which_setting)
+{
+	return BackendProjectSetting();
+}
+
+UIGlobalSetting const & UISettingsManager::get_setting(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const which_setting)
+{
+	return UIGlobalSetting();
+}
+
+UIProjectSetting const & UISettingsManager::get_setting(PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const which_setting)
+{
+	return UIProjectSetting();
+}
+

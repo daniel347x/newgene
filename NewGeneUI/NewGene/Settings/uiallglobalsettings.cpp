@@ -126,6 +126,26 @@ SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS
 
 }
 
+UIAllGlobalSettings::UIOnlySettings & UIAllGlobalSettings::getUISettings()
+{
+	if (!__impl)
+	{
+		boost::format msg( "Internal settings implementation not yet constructed." );
+		throw NewGeneException() << newgene_error_description( msg.str() );
+	}
+	return reinterpret_cast<UIAllGlobalSettings::UIOnlySettings &>(getUISettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, UIOnlySettings>(*(__impl.get())));
+}
+
+GlobalSettings & UIAllGlobalSettings::getBackendSettings()
+{
+	if (!__impl)
+	{
+		boost::format msg( "Internal settings implementation not yet constructed." );
+		throw NewGeneException() << newgene_error_description( msg.str() );
+	}
+	return reinterpret_cast<GlobalSettings &>(getBackendSettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, ProjectSettings>(*(__impl.get())));
+}
+
 UIAllGlobalSettings::UIAllGlobalSettings(Messager & messager, QObject * parent)
 	: UIAllSettings(messager, parent)
 {

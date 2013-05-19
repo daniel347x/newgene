@@ -2,6 +2,7 @@
 #define UIPROJECTSETTINGS_H
 
 #include <QObject>
+#include "../../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"
 
@@ -117,9 +118,25 @@ class UIAllProjectSettings : public UIAllSettings
 
 		};
 
+		_impl_base<ProjectSettings, UIOnlySettings> & getImplementation()
+		{
+			if (!__impl)
+			{
+				boost::format msg( "UI Project settings implementation not yet constructed." );
+				throw NewGeneException() << newgene_error_description( msg.str() );
+			}
+			return *(__impl.get());
+		}
+
 		void CreateImplementation(Messager & messager);
 		void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings);
 		std::unique_ptr<_impl> __impl;
+
+
+	public:
+
+		UIOnlySettings & getUISettings();
+		ProjectSettings & getBackendSettings();
 
 };
 
