@@ -2,7 +2,6 @@
 #define UISETTINGS_H
 
 #include <QObject>
-#include "globals.h"
 #include "../../../NewGeneBackEnd/Settings/Settings.h"
 #include "../../../NewGeneBackEnd/Settings/SettingsRepository.h"
 #include "uisetting.h"

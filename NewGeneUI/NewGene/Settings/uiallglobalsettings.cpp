@@ -1,4 +1,5 @@
 #include "uiallglobalsettings.h"
+#include "globals.h"
 
 void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
