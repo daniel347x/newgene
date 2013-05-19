@@ -80,7 +80,15 @@ class SettingsRepository
 		std::unique_ptr<SETTING_CLASS> GetSetting(Messager & messager, SETTINGS_ENUM const which_setting) const
 		{
 			SettingInfo setting_info = GetSettingInfoFromEnum<SETTINGS_ENUM>(messager, which_setting);
-			return std::unique_ptr<SETTING_CLASS>(CloneSetting(messager, _settings_map[which_setting]->get(), setting_info));
+			SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
+			if (theSetting == _settings_map.cend())
+			{
+				boost::format msg("Setting %1% is not available.  Using default settings.");
+				msg % which_setting;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__NO_SETTING_FOUND, msg.str()));
+				return std::unique_ptr<SETTING_CLASS>(new SETTING_CLASS());
+			}
+			return std::unique_ptr<SETTING_CLASS>(CloneSetting(messager, theSetting->second.get(), setting_info));
 		}
 
 		template<typename T>

@@ -115,7 +115,7 @@ SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTIN
 			{
 				boost::format msg("Settings information is not available for PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI value %1%.  Using empty setting.");
 				msg % value_;
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_SETTING_ENUM_VALUE, msg.str()));
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_ENUM_VALUE, msg.str()));
 			}
 
 	}

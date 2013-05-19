@@ -32,10 +32,10 @@ class UISettingsManager : public QObject, public UIManager<UISettingsManager, Se
 
 		explicit UISettingsManager( QObject * parent = 0 );
 
-		BackendGlobalSetting const & get_setting(GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting);
-		BackendProjectSetting const & get_setting(PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const which_setting);
-		UIGlobalSetting const & get_setting(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const which_setting);
-		UIProjectSetting const & get_setting(PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const which_setting);
+		std::unique_ptr<BackendGlobalSetting> get_setting(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting);
+		std::unique_ptr<BackendProjectSetting> get_setting(Messager & messager, UIProject * project, PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const which_setting);
+		std::unique_ptr<UIGlobalSetting> get_setting(Messager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const which_setting);
+		std::unique_ptr<UIProjectSetting> get_setting(Messager & messager, UIProject * project, PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const which_setting);
 
 		bool ObtainGlobalSettingsPath();
 		boost::filesystem::path getGlobalSettingsPath() { return global_settings_path; }
