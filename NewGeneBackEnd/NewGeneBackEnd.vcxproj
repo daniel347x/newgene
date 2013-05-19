@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Documents\DocumentManager.h" />
+    <ClInclude Include="globals.h" />
     <ClInclude Include="Logging\LoggingManager.h" />
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Messager\Messager.h" />
@@ -92,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Documents\DocumentManager.cpp" />
+    <ClCompile Include="globals.cpp" />
     <ClCompile Include="Logging\LoggingManager.cpp" />
     <ClCompile Include="Manager.cpp" />
     <ClCompile Include="Messager\Messager.cpp" />

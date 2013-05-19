@@ -47,7 +47,7 @@ void UIMessager::displayStatusMessages()
 
 	if (!first)
 	{
-		statusManager().PostStatus(msg.c_str());
+		statusManagerUI().PostStatus(msg.c_str());
 	}
 }
 

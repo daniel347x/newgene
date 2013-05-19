@@ -22,12 +22,11 @@ class NewGeneMainWindow;
 
 extern NewGeneMainWindow * theMainWindow;
 
-UIProjectManager & projectManager();
-UISettingsManager & settingsManager();
-UILoggingManager & loggingManager();
-UIModelManager & modelManager();
-UIDocumentManager & documentManager();
-UIStatusManager & statusManager();
-
+UIProjectManager & projectManagerUI();
+UISettingsManager & settingsManagerUI();
+UILoggingManager & loggingManagerUI();
+UIModelManager & modelManagerUI();
+UIDocumentManager & documentManagerUI();
+UIStatusManager & statusManagerUI();
 
 #endif // GLOBALS_H

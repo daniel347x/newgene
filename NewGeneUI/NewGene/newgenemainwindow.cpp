@@ -101,6 +101,6 @@ void NewGeneMainWindow::doInitialize()
 	UIModelManager::getManager();
 	UIProjectManager::getManager();
 
-	_current_project.reset(projectManager().LoadDefaultProject());
+	_current_project.reset(projectManagerUI().LoadDefaultProject());
 
 }
