@@ -80,6 +80,7 @@
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Messager\Messager.h" />
     <ClInclude Include="Model\ModelManager.h" />
+    <ClInclude Include="Project\Project.h" />
     <ClInclude Include="Project\ProjectManager.h" />
     <ClInclude Include="Settings\GlobalSettings.h" />
     <ClInclude Include="Settings\ProjectSettings.h" />
@@ -98,6 +99,7 @@
     <ClCompile Include="Manager.cpp" />
     <ClCompile Include="Messager\Messager.cpp" />
     <ClCompile Include="Model\ModelManager.cpp" />
+    <ClCompile Include="Project\Project.cpp" />
     <ClCompile Include="Project\ProjectManager.cpp" />
     <ClCompile Include="Settings\GlobalSettings.cpp" />
     <ClCompile Include="Settings\ProjectSettings.cpp" />

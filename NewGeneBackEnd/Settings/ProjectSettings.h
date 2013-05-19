@@ -36,11 +36,6 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJ
 		BackendProjectSetting * CloneSetting(Messager & messager, BackendProjectSetting * current_setting, SettingInfo & setting_info) const;
 		BackendProjectSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
 
-
-	private:
-
-		std::map<PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND, BackendProjectSetting> _ui_settings;
-
 };
 
 #endif
