@@ -16,7 +16,7 @@ class NewGeneMainWindow;
 class UIAllProjectSettings;
 class UIAllGlobalSettings;
 
-class UISettingsManager : public QObject, public UIManager<UISettingsManager, SettingsManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_SETTINGS>
+class UISettingsManager : public QObject, public UIManager<UISettingsManager, SettingsManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_SETTINGS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_SETTINGS>
 {
 
 		Q_OBJECT

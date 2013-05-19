@@ -1,7 +1,9 @@
 #ifndef PROJECTMANAGER_H
 #define PROJECTMANAGER_H
 
-class ProjectManager
+#include "..\Manager.h"
+
+class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT>
 {
 
 };

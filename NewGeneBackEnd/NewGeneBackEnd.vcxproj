@@ -76,6 +76,7 @@
   <ItemGroup>
     <ClInclude Include="Documents\DocumentManager.h" />
     <ClInclude Include="Logging\LoggingManager.h" />
+    <ClInclude Include="Manager.h" />
     <ClInclude Include="Messager\Messager.h" />
     <ClInclude Include="Model\ModelManager.h" />
     <ClInclude Include="Project\ProjectManager.h" />
@@ -92,6 +93,7 @@
   <ItemGroup>
     <ClCompile Include="Documents\DocumentManager.cpp" />
     <ClCompile Include="Logging\LoggingManager.cpp" />
+    <ClCompile Include="Manager.cpp" />
     <ClCompile Include="Messager\Messager.cpp" />
     <ClCompile Include="Model\ModelManager.cpp" />
     <ClCompile Include="Project\ProjectManager.cpp" />

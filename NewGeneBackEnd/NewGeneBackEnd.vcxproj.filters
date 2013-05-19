@@ -108,6 +108,9 @@
     <ClInclude Include="Status\StatusManager.h">
       <Filter>Header Files\Status</Filter>
     </ClInclude>
+    <ClInclude Include="Manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -151,6 +154,9 @@
     </ClCompile>
     <ClCompile Include="Status\StatusManager.cpp">
       <Filter>Source Files\Status</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

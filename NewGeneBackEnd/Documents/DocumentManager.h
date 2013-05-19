@@ -1,7 +1,9 @@
 #ifndef DOCUMENTMANAGER_H
 #define DOCUMENTMANAGER_H
 
-class DocumentManager
+#include "..\Manager.h"
+
+class DocumentManager : public Manager<DocumentManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_DOCUMENTS>
 {
 
 };

@@ -9,7 +9,7 @@
 
 class NewGeneMainWindow;
 
-class UILoggingManager : public QObject, public UIManager<UILoggingManager, LoggingManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_LOGGING>
+class UILoggingManager : public QObject, public UIManager<UILoggingManager, LoggingManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_LOGGING_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_LOGGING>
 {
 		Q_OBJECT
 	public:

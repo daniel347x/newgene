@@ -8,13 +8,11 @@
 class NewGeneMainWindow;
 class UIModel;
 
-class UIModelManager : public QObject, public UIManager<UIModelManager, ModelManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL>
+class UIModelManager : public QObject, public UIManager<UIModelManager, ModelManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL>
 {
 		Q_OBJECT
 	public:
 		explicit UIModelManager( QObject * parent = 0 );
-
-		static UIModelManager & getModelManager();
 
 		UIModel * loadDefaultModel();
 

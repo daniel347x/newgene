@@ -7,7 +7,7 @@
 
 class NewGeneMainWindow;
 
-class UIStatusManager : public QObject, public UIManager<UIStatusManager, StatusManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_STATUS>
+class UIStatusManager : public QObject, public UIManager<UIStatusManager, StatusManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_STATUS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_STATUS>
 {
 		Q_OBJECT
 

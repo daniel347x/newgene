@@ -3,27 +3,31 @@
 
 #include <QObject>
 #include <QString>
-//#include "newgenemainwindow.h"
 #include <QApplication>
 #include <memory>
+#include "..\..\NewGeneBackEnd\Manager.h"
 
 class NewGeneMainWindow;
 class NewGeneWidget;
 
 namespace MANAGER_DESCRIPTION_NAMESPACE
 {
-	enum WHICH_MANAGER
+
+	enum WHICH_MANAGER_UI
 	{
-		  MANAGER_DOCUMENTS
-		, MANAGER_SETTINGS
-		, MANAGER_STATUS
-		, MANAGER_MODEL
-		, MANAGER_LOGGING
-		, MANAGER_PROJECT
+		  MANAGER_DOCUMENTS_UI
+		, MANAGER_SETTINGS_UI
+		, MANAGER_STATUS_UI
+		, MANAGER_MODEL_UI
+		, MANAGER_LOGGING_UI
+		, MANAGER_PROJECT_UI
 	};
+
+	std::string get_text_name_from_enum_ui(MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER_UI const which_manager);
+
 }
 
-template<typename MANAGER_CLASS_UI, typename MANAGER_CLASS_BACKEND, MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER MANAGER_ENUM>
+template<typename MANAGER_CLASS_UI, typename MANAGER_CLASS_BACKEND, MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER_UI MANAGER_ENUM_UI, MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER MANAGER_ENUM_BACKEND>
 class UIManager
 {
 
@@ -31,7 +35,14 @@ class UIManager
 
 		explicit UIManager()
 		{
-			_backend_manager.reset(new MANAGER_CLASS_BACKEND);
+			MANAGER_CLASS_BACKEND::_manager.reset(new MANAGER_CLASS_BACKEND);
+			MANAGER_CLASS_BACKEND::getManager().which = MANAGER_ENUM_BACKEND;
+			MANAGER_CLASS_BACKEND::getManager().which_descriptor = MANAGER_DESCRIPTION_NAMESPACE::get_text_name_from_enum(MANAGER_ENUM_BACKEND).c_str();
+		}
+
+		~UIManager()
+		{
+
 		}
 
 		NewGeneMainWindow & getMainWindow()
@@ -45,7 +56,7 @@ class UIManager
 			return *theMainWindow;
 		}
 
-		static UIManager<MANAGER_CLASS_UI, MANAGER_CLASS_BACKEND, MANAGER_ENUM> & getManager()
+		static UIManager<MANAGER_CLASS_UI, MANAGER_CLASS_BACKEND, MANAGER_ENUM_UI, MANAGER_ENUM_BACKEND> & getManager()
 		{
 
 			if ( _ui_manager == NULL )
@@ -53,14 +64,15 @@ class UIManager
 				_ui_manager.reset( new MANAGER_CLASS_UI() );
 				if ( _ui_manager )
 				{
-					_ui_manager->which = MANAGER_ENUM;
-					_ui_manager->which_descriptor = get_text_name_from_enum(MANAGER_ENUM).c_str();
+					_ui_manager->which = MANAGER_ENUM_UI;
+					_ui_manager->which_descriptor = MANAGER_DESCRIPTION_NAMESPACE::get_text_name_from_enum_ui(MANAGER_ENUM_UI).c_str();
 				}
 			}
 
 			if ( _ui_manager == NULL )
 			{
-				boost::format msg( "Manager not instantiated." );
+				boost::format msg( "Manager \"%1%\" not instantiated." );
+				msg % MANAGER_DESCRIPTION_NAMESPACE::get_text_name_from_enum_ui(MANAGER_ENUM_UI);
 				throw NewGeneException() << newgene_error_description( msg.str() );
 			}
 
@@ -69,7 +81,7 @@ class UIManager
 		}
 
 	protected:
-		MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER which;
+		MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER_UI which;
 		QString which_descriptor;
 
 	protected:
@@ -78,41 +90,10 @@ class UIManager
 
 	protected:
 		static std::unique_ptr<MANAGER_CLASS_UI> _ui_manager;
-		std::unique_ptr<MANAGER_CLASS_BACKEND> _backend_manager;
-
-	private:
-		static std::string get_text_name_from_enum(MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER const which_manager)
-		{
-			if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_DOCUMENTS)
-			{
-				return "UIDocumentManager";
-			}
-			else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_LOGGING)
-			{
-				return "UILoggingManager";
-			}
-			else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL)
-			{
-				return "UIModelManager";
-			}
-			else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT)
-			{
-				return "UIProjectManager";
-			}
-			else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_SETTINGS)
-			{
-				return "UISettingsManager";
-			}
-			else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_STATUS)
-			{
-				return "UIStatusManager";
-			}
-			return std::string();
-		}
 
 };
 
-template<typename MANAGER_CLASS_UI, typename MANAGER_CLASS_BACKEND, MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER MANAGER_ENUM>
-std::unique_ptr<MANAGER_CLASS_UI> UIManager<MANAGER_CLASS_UI, MANAGER_CLASS_BACKEND, MANAGER_ENUM>::_ui_manager;
+template<typename MANAGER_CLASS_UI, typename MANAGER_CLASS_BACKEND, MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER_UI MANAGER_ENUM_UI, MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER MANAGER_ENUM_BACKEND>
+std::unique_ptr<MANAGER_CLASS_UI> UIManager<MANAGER_CLASS_UI, MANAGER_CLASS_BACKEND, MANAGER_ENUM_UI, MANAGER_ENUM_BACKEND>::_ui_manager;
 
 #endif // UIMANAGER_H
