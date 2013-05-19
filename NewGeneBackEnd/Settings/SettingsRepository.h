@@ -147,11 +147,11 @@ class SettingsRepository
 
 		SettingsMap _settings_map;
 
-		SettingsRepository(Messager & messager)
+		SettingsRepository(Messager &)
 		{
 		}
 
-		SettingsRepository(Messager & messager, boost::filesystem::path const path_to_settings)
+		SettingsRepository(Messager &, boost::filesystem::path const path_to_settings)
 		{
 		}
 

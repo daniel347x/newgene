@@ -15,11 +15,11 @@ UIStatusManager::UIStatusManager( QObject * parent )
 
 }
 
-void UIStatusManager::LogStatus( const QString & status_, const UIStatusManager::IMPORTANCE importance_level )
+void UIStatusManager::LogStatus( const QString & /* status_ */, const UIStatusManager::IMPORTANCE /* importance_level */ )
 {
 }
 
-void UIStatusManager::PostStatus( QString const & status_, UIStatusManager::IMPORTANCE const  importance_level, bool const forbidWritingToLog )
+void UIStatusManager::PostStatus( QString const & status_, UIStatusManager::IMPORTANCE const  importance_level, bool const /* forbidWritingToLog */ )
 {
 
 	switch ( importance_level )

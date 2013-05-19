@@ -14,7 +14,7 @@ class SettingFactory
 {
 
 	public:
-	
+
 		SETTING_CLASS * operator()(Messager & messager, SETTING_VALUE_TYPE const & initializing_val)
 		{
 
@@ -34,7 +34,7 @@ public:
 	virtual void DoSpecialParse(Messager &) {}
 
 protected:
-	
+
 	Setting() {} // must use factory function to create settings
 
 };
@@ -70,7 +70,7 @@ class StringSetting : virtual public Setting
 
 		typedef std::string type;
 
-		StringSetting(Messager & messager, std::string const & setting)
+		StringSetting(Messager &, std::string const & setting)
 			: string_setting(setting)
 		{}
 
@@ -86,7 +86,7 @@ class Int32Setting : virtual public Setting
 
 		typedef std::int32_t type;
 
-		Int32Setting(Messager & messager, std::int32_t const & setting)
+		Int32Setting(Messager &, std::int32_t const & setting)
 			: int32_setting(setting)
 		{}
 

@@ -1,6 +1,6 @@
 #include "uiallprojectsettings.h"
 
-void UIAllProjectSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+void UIAllProjectSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
 {
 
 	switch (setting_info.setting_class)
@@ -25,7 +25,7 @@ void UIAllProjectSettings::UIOnlySettings::SetMapEntry(Messager & messager, Sett
 
 }
 
-UIProjectSetting * UIAllProjectSettings::UIOnlySettings::CloneSetting(Messager & messager, UIProjectSetting * current_setting, SettingInfo & setting_info) const
+UIProjectSetting * UIAllProjectSettings::UIOnlySettings::CloneSetting(Messager & messager, UIProjectSetting * /* current_setting */, SettingInfo & setting_info) const
 {
 
 	try
@@ -63,7 +63,7 @@ UIProjectSetting * UIAllProjectSettings::UIOnlySettings::CloneSetting(Messager &
 
 }
 
-UIProjectSetting * UIAllProjectSettings::UIOnlySettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void)
+UIProjectSetting * UIAllProjectSettings::UIOnlySettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
 {
 
 	switch (setting_info.setting_class)
@@ -90,7 +90,7 @@ UIProjectSetting * UIAllProjectSettings::UIOnlySettings::NewSetting(Messager & m
 
 }
 
-boost::filesystem::path UIAllProjectSettings::UIOnlySettings::GetSettingsPath(Messager & messager, SettingInfo & setting_info)
+boost::filesystem::path UIAllProjectSettings::UIOnlySettings::GetSettingsPath(Messager &, SettingInfo & /* setting_info */ )
 {
 	return boost::filesystem::path();
 }

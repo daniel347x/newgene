@@ -27,7 +27,7 @@ class UIGlobalSetting_MRUList : public UIGlobalSetting, public StringSetting
 			, StringSetting(messager, setting)
 		{}
 
-		virtual void DoSpecialParse(Messager & messager)
+		virtual void DoSpecialParse(Messager &)
 		{
 //			boost::format msg("Here is a message!");
 //			messager.AppendMessage(new UIMessagerErrorMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
