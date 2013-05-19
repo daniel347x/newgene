@@ -16,6 +16,13 @@
 #endif
 #include "Messager/Messager.h"
 
+class ProjectManager;
+class SettingsManager;
+class LoggingManager;
+class ModelManager;
+class DocumentManager;
+class StatusManager;
+
 ProjectManager & projectManager();
 SettingsManager & settingsManager();
 LoggingManager & loggingManager();
