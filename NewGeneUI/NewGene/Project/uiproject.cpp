@@ -9,8 +9,9 @@ UIProject::UIProject(Messager &, NewGeneMainWindow * parent) :
 }
 
 UIProject::UIProject(Messager & messager, boost::filesystem::path const path_to_settings, NewGeneMainWindow * parent) :
-	QObject(parent),
-	_project_settings( new UIAllProjectSettings(messager, path_to_settings) )
+	  QObject(parent)
+	, _backend_project( new Project(messager) )
+	, _project_settings( new UIAllProjectSettings(messager, *_backend_project, path_to_settings) )
 {
 }
 

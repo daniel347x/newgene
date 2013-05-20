@@ -85,7 +85,7 @@ class SettingsRepository
 			{
 				boost::format msg("Setting %1% is not available.  Using default settings.");
 				msg % which_setting;
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__NO_SETTING_FOUND, msg.str()));
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
 				return std::unique_ptr<SETTING_CLASS>(new SETTING_CLASS());
 			}
 			return std::unique_ptr<SETTING_CLASS>(CloneSetting(messager, theSetting->second.get(), setting_info));

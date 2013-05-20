@@ -46,8 +46,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 	public:
 
-		explicit UIAllGlobalSettings(Messager & messager, QObject * parent = NULL);
-		UIAllGlobalSettings(Messager & messager, boost::filesystem::path const path_to_settings, QObject * parent = NULL);
+		UIAllGlobalSettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL);
 
 
 	signals:
@@ -56,17 +55,13 @@ class UIAllGlobalSettings : public UIAllSettings
 
 	protected:
 
+		// The following is the equivalent of the backend's GlobalSettings class
 		class UIOnlySettings : public UIOnlySettings_base<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, UIGlobalSetting>
 		{
 
 			public:
 
-				UIOnlySettings(Messager & messager) : UIOnlySettings_base(messager)
-				{
-
-				}
-
-				UIOnlySettings(Messager & messager, boost::filesystem::path const path_to_settings) : UIOnlySettings_base(messager, path_to_settings)
+				UIOnlySettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(messager, path_to_settings)
 				{
 
 				}
@@ -86,44 +81,33 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			public:
 
-				_impl(Messager & messager) : _impl_base(messager)
-				{
-					CreateInternalImplementations(messager);
-				}
-
-				_impl(Messager & messager, boost::filesystem::path const path_to_settings) : _impl_base(messager)
+				_impl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : _impl_base(messager)
 				{
 					CreateInternalImplementations(messager, path_to_settings);
 				}
 
-				class _UIRelatedImpl : public _UIRelatedImpl_base
+				class _UIRelatedImpl : public _UIGlobalRelatedImpl_base
 				{
 
 					public:
 
-						_UIRelatedImpl(Messager & messager) : _UIRelatedImpl_base(messager)
-						{
-
-						}
-
-						_UIRelatedImpl(Messager & messager, boost::filesystem::path const path_to_settings) : _UIRelatedImpl_base(messager, path_to_settings)
+						_UIRelatedImpl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+							: _RelatedImpl_base<UIOnlySettings>(messager, path_to_settings)
+							, _UIGlobalRelatedImpl_base(messager, path_to_settings)
 						{
 
 						}
 
 				};
 
-				class _BackendRelatedImpl : public _BackendRelatedImpl_base
+				class _BackendRelatedImpl : public _BackendGlobalRelatedImpl_base
 				{
 
 					public:
 
-						_BackendRelatedImpl(Messager & messager) : _BackendRelatedImpl_base(messager)
-						{
-
-						}
-
-						_BackendRelatedImpl(Messager & messager, boost::filesystem::path const path_to_settings) : _BackendRelatedImpl_base(messager, path_to_settings)
+						_BackendRelatedImpl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+							: _RelatedImpl_base<GlobalSettings>(messager, path_to_settings)
+							, _BackendGlobalRelatedImpl_base(messager, path_to_settings)
 						{
 
 						}
@@ -132,8 +116,11 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			protected:
 
-				void CreateInternalImplementations(Messager & messager);
-				void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings);
+				void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path());
+
+				// throws catastrophic error - only here to support abstract base class, SFINAE cannot be used because it would require virtual template member functions
+				void CreateInternalImplementations(Messager & messager, Project & project, boost::filesystem::path const path_to_settings = boost::filesystem::path());
+
 		};
 
 		_impl_base<GlobalSettings, UIOnlySettings> & getImplementation()
@@ -146,8 +133,11 @@ class UIAllGlobalSettings : public UIAllSettings
 			return *(__impl.get());
 		}
 
-		void CreateImplementation(Messager & messager);
-		void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings);
+		void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path());
+
+		// throws catastrophic error - only here to support abstract base class, SFINAE cannot be used because it would require virtual template member functions
+		void CreateImplementation(Messager & messager, Project & project, boost::filesystem::path const path_to_settings = boost::filesystem::path());
+
 		std::unique_ptr<_impl> __impl;
 
 	public:

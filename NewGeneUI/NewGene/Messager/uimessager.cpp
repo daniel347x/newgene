@@ -8,7 +8,7 @@
 #include "uiloggingmanager.h"
 
 UIMessager::UIMessager(QObject *parent) :
-    QObject(parent)
+	QObject(parent)
   , do_not_handle_messages_on_desctruction(false)
 {
 }
@@ -27,7 +27,7 @@ void UIMessager::displayStatusMessages()
 	std::pair<std::set<std::string>::iterator,bool> insert_result;
 	for (MessagesVector::const_iterator _m = _messages.cbegin(); _m != _messages.cend(); ++ _m)
 	{
-		if (_m->get()->_message_level & MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE)
+		if (_m->get()->_message_category & MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE)
 		{
 			insert_result = msgs.insert(_m->get()->_message_text);
 		}

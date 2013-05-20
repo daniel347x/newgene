@@ -146,21 +146,22 @@ GlobalSettings & UIAllGlobalSettings::getBackendSettings()
 	return reinterpret_cast<GlobalSettings &>(getBackendSettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, ProjectSettings>(*(__impl.get())));
 }
 
-UIAllGlobalSettings::UIAllGlobalSettings(Messager & messager, QObject * parent)
-	: UIAllSettings(messager, parent)
-{
-	CreateImplementation(messager);
-}
-
 UIAllGlobalSettings::UIAllGlobalSettings(Messager & messager, boost::filesystem::path const path_to_settings, QObject * parent) :
 	UIAllSettings(messager, parent)
 {
 	CreateImplementation(messager, path_to_settings);
 }
 
-void UIAllGlobalSettings::CreateImplementation(Messager & messager)
+void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings)
 {
-	__impl.reset(new _impl(messager));
+	__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
+	__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
+}
+
+void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messager, Project & project, boost::filesystem::path const path_to_settings)
+{
+	boost::format msg("UIAllGlobalSettings::_impl::CreateInternalImplementations() Project overload being called.");
+	messager.AppendMessage(new MessagerCatastrophicErrorMessage(MESSAGER_MESSAGE__PROJECT_PRESENT, msg.str()));
 }
 
 void UIAllGlobalSettings::CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings)
@@ -168,14 +169,8 @@ void UIAllGlobalSettings::CreateImplementation(Messager & messager, boost::files
 	__impl.reset(new _impl(messager, path_to_settings));
 }
 
-void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messager)
+void UIAllGlobalSettings::CreateImplementation(Messager & messager, Project & project, boost::filesystem::path const path_to_settings)
 {
-	__ui_impl.reset(new _UIRelatedImpl(messager));
-	__backend_impl.reset(new _BackendRelatedImpl(messager));
-}
-
-void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings)
-{
-	__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
-	__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
+	boost::format msg("UIAllGlobalSettings::CreateImplementation() Project overload being called.");
+	messager.AppendMessage(new MessagerCatastrophicErrorMessage(MESSAGER_MESSAGE__PROJECT_PRESENT, msg.str()));
 }

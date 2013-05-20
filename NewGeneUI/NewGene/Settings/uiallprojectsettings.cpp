@@ -144,36 +144,31 @@ ProjectSettings & UIAllProjectSettings::getBackendSettings()
 	return reinterpret_cast<ProjectSettings &>(getBackendSettings_base<ProjectSettings, UIOnlySettings, PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI, ProjectSettings>(*(__impl.get())));
 }
 
-UIAllProjectSettings::UIAllProjectSettings(Messager & messager, QObject * parent)
-	: UIAllSettings(messager, parent)
-{
-	CreateImplementation(messager);
-}
-
-UIAllProjectSettings::UIAllProjectSettings(Messager & messager, boost::filesystem::path const path_to_settings, QObject * parent) :
+UIAllProjectSettings::UIAllProjectSettings(Messager & messager, Project & project, boost::filesystem::path const path_to_settings, QObject * parent) :
 	UIAllSettings(messager, parent)
 {
-	CreateImplementation(messager, path_to_settings);
+	CreateImplementation(messager, project, path_to_settings);
 }
 
-void UIAllProjectSettings::CreateImplementation(Messager & messager)
+void UIAllProjectSettings::_impl::CreateInternalImplementations(Messager & messager, Project & project, boost::filesystem::path const path_to_settings)
 {
-	__impl.reset(new _impl(messager));
-}
-
-void UIAllProjectSettings::CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings)
-{
-	__impl.reset(new _impl(messager, path_to_settings));
-}
-
-void UIAllProjectSettings::_impl::CreateInternalImplementations(Messager & messager)
-{
-	__ui_impl.reset(new _UIRelatedImpl(messager));
-	__backend_impl.reset(new _BackendRelatedImpl(messager));
+	__ui_impl.reset(new _UIRelatedImpl(messager, project, path_to_settings));
+	__backend_impl.reset(new _BackendRelatedImpl(messager, project, path_to_settings));
 }
 
 void UIAllProjectSettings::_impl::CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings)
 {
-	__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
-	__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
+	boost::format msg("UIAllProjectSettings::_impl::CreateInternalImplementations() non-Project overload being called.");
+	messager.AppendMessage(new MessagerCatastrophicErrorMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
+}
+
+void UIAllProjectSettings::CreateImplementation(Messager & messager, Project & project, boost::filesystem::path const path_to_settings)
+{
+	__impl.reset(new _impl(messager, project, path_to_settings));
+}
+
+void UIAllProjectSettings::CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings)
+{
+	boost::format msg("UIAllProjectSettings::CreateImplementation() non-Project overload being called.");
+	messager.AppendMessage(new MessagerCatastrophicErrorMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
 }
