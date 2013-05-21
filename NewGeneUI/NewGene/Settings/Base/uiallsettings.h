@@ -209,8 +209,8 @@ class UIAllSettings : public QObject
 							// ***********************************************************************************************************************
 							// This single line is the entire reason that "Project &" as a parameter has to be woven through this framework.
 							// It is so that the backend project knows its backend project settings at the same time that the UI layer project
-							// instantiates its settings.  By placing this line embedded here, at the heart of this infrastructure, we
-							// guarantee the backend and UI layer will remain solidly synchronized.
+							// instantiates its settings.  By placing this line embedded here, at the heart of the infrastructure, we
+							// enforce that the backend and UI layer will remain synchronized.
 							// ***********************************************************************************************************************
 							project._settings = _settings_repository; // share the pointer
 						}
