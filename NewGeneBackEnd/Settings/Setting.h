@@ -54,6 +54,16 @@ class BackendSetting : virtual public Setting
 	public:
 };
 
+class InputSetting : virtual public Setting
+{
+public:
+};
+
+class OutputSetting : virtual public Setting
+{
+public:
+};
+
 class BackendGlobalSetting : public GlobalSetting, public BackendSetting
 {
 	public:
@@ -62,6 +72,36 @@ class BackendGlobalSetting : public GlobalSetting, public BackendSetting
 class BackendProjectSetting : public ProjectSetting, public BackendSetting
 {
 	public:
+};
+
+class BackendInputSetting : virtual public BackendSetting, virtual public InputSetting
+{
+public:
+};
+
+class BackendOutputSetting : virtual public BackendSetting, virtual public OutputSetting
+{
+public:
+};
+
+class ProjectInputSetting : virtual public ProjectSetting, virtual public InputSetting
+{
+public:
+};
+
+class ProjectOutputSetting : virtual public ProjectSetting, virtual public OutputSetting
+{
+public:
+};
+
+class BackendProjectInputSetting : public BackendProjectSetting, public BackendInputSetting, public ProjectInputSetting
+{
+public:
+};
+
+class BackendProjectOutputSetting : public BackendProjectSetting, public BackendOutputSetting, public ProjectOutputSetting
+{
+public:
 };
 
 class StringSetting : virtual public Setting

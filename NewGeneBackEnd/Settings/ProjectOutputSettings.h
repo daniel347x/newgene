@@ -25,6 +25,7 @@ public:
 	ProjectOutputSettings(Messager & messager, boost::filesystem::path const project_settings_path)
 		: ProjectSettings(messager, project_settings_path)
 	{}
+
 	virtual ~ProjectOutputSettings() {}
 
 };
