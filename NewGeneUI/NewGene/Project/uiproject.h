@@ -34,6 +34,11 @@ class UIProject
 			return NULL;
 		}
 
+		void apply_settings(UI_PROJECT_SETTINGS_CLASS * ui_settings)
+		{
+			_project_settings.reset(ui_settings);
+		}
+
 		// TODO: Test for validity
 		UI_PROJECT_SETTINGS_CLASS & settings()
 		{

@@ -99,8 +99,9 @@ void NewGeneMainWindow::doInitialize()
 	UIInputProject inp(messager);
 	UIOutputProject outp(messager);
 	UIAllGlobalSettings gset(messager);
-	AllInputProjectSettings inpset(messager, inp.backend());
-	AllOutputProjectSettings outset(messager, outp.backend());
+	inp.apply_settings( new AllInputProjectSettings(messager, inp.backend()) );
+	outp.apply_settings( new AllOutputProjectSettings(messager, outp.backend()) );
+
 
 	//_current_project.reset(projectManagerUI().LoadDefaultProject());
 
