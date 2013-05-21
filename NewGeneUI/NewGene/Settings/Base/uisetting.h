@@ -9,12 +9,32 @@ class UISetting : virtual public Setting
 		UISetting();
 };
 
+class UIInputSetting : virtual public UISetting, virtual public InputSetting
+{
+	public:
+};
+
+class UIOutputSetting : virtual public UISetting, virtual public OutputSetting
+{
+	public:
+};
+
 class UIGlobalSetting : public GlobalSetting, public UISetting
 {
 	public:
 };
 
-class UIProjectSetting : public ProjectSetting, public UISetting
+class UIProjectSetting : virtual public ProjectSetting, virtual public UISetting
+{
+	public:
+};
+
+class UIProjectInputSetting : public UIProjectSetting, public UIInputSetting, public ProjectInputSetting
+{
+	public:
+};
+
+class UIProjectOutputSetting : public UIProjectSetting, public UIOutputSetting, public ProjectOutputSetting
 {
 	public:
 };
