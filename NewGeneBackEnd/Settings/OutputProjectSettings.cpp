@@ -1,6 +1,6 @@
-#include "GlobalSettings.h"
+#include "OutputProjectSettings.h"
 
-void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+void OutputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	switch (setting_info.setting_class)
@@ -15,7 +15,7 @@ void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info
 
 	default:
 		{
-			boost::format msg("Unknown UI global setting \"%1%\" (\"%2%\") being loaded.");
+			boost::format msg("Unknown backend output project setting \"%1%\" (\"%2%\") being loaded.");
 			msg % setting_info.text % setting_info.setting_class;
 			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
 		}
@@ -25,7 +25,7 @@ void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info
 
 }
 
-BackendGlobalSetting * GlobalSettings::CloneSetting(Messager & messager, BackendGlobalSetting * current_setting, SettingInfo & setting_info) const
+BackendProjectOutputSetting * OutputProjectSettings::CloneSetting(Messager & messager, BackendProjectOutputSetting * current_setting, SettingInfo & setting_info) const
 {
 
 	try
@@ -34,16 +34,16 @@ BackendGlobalSetting * GlobalSettings::CloneSetting(Messager & messager, Backend
 		switch (setting_info.setting_class)
 		{
 
-		//case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
-		//	{
-		//		UIGlobalSetting_MRUList * setting = dynamic_cast<UIGlobalSetting_MRUList*>(current_setting);
-		//		return new UIGlobalSetting_MRUList(messager, setting->getString());
-		//	}
-		//	break;
+			//case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
+			//	{
+			//		UIGlobalSetting_MRUList * setting = dynamic_cast<UIGlobalSetting_MRUList*>(current_setting);
+			//		return new UIGlobalSetting_MRUList(messager, setting->getString());
+			//	}
+			//	break;
 
 		default:
 			{
-				boost::format msg("Unknown backend global setting \"%1%\" (\"%2%\") being requested.");
+				boost::format msg("Unknown backend output project setting \"%1%\" (\"%2%\") being requested.");
 				msg % setting_info.text % setting_info.setting_class;
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
 			}
@@ -63,7 +63,7 @@ BackendGlobalSetting * GlobalSettings::CloneSetting(Messager & messager, Backend
 
 }
 
-BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void)
+BackendProjectOutputSetting * OutputProjectSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void)
 {
 
 	switch (setting_info.setting_class)
@@ -78,7 +78,7 @@ BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingIn
 
 	default:
 		{
-			boost::format msg("Unknown backend global setting \"%1%\" (\"%2%\") being updated.");
+			boost::format msg("Unknown backend output project setting \"%1%\" (\"%2%\") being updated.");
 			msg % setting_info.text % setting_info.setting_class;
 			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
 		}
@@ -90,15 +90,10 @@ BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingIn
 
 }
 
-boost::filesystem::path GlobalSettings::GetSettingsPath(Messager & messager, SettingInfo & setting_info)
-{
-	return boost::filesystem::path();
-}
-
-SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
+SettingInfo BackendProjectOutputSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
 {
 
-	GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const value_ = static_cast<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const>(value__);
+	OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const value_ = static_cast<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const>(value__);
 
 	switch (value_)
 	{
@@ -114,7 +109,7 @@ SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, in
 
 	default:
 		{
-			boost::format msg("Settings information is not available for GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND value %1%.  Using empty setting.");
+			boost::format msg("Settings information is not available for OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND value %1%.  Using empty setting.");
 			msg % value_;
 			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_ENUM_VALUE, msg.str()));
 		}
@@ -122,11 +117,5 @@ SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, in
 	}
 
 	return SettingInfo();
-
-}
-
-GlobalSettings::GlobalSettings(Messager & messager, boost::filesystem::path const global_settings_path)
-	: Settings(messager, global_settings_path)
-{
 
 }

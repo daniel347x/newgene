@@ -8,31 +8,36 @@
 #	include <boost/filesystem.hpp>
 #endif
 #include "../../../NewGeneBackEnd/Project/Project.h"
+#include "../Model/uimodel.h"
 
 class UIModelManager;
 class UISettingsManager;
 class UIDocumentManager;
 class UIStatusManager;
 class UIProjectManager;
-class UIModel;
 class NewGeneMainWindow;
-class UIAllProjectSettings;
 class UILoggingManager;
 class UIProjectManager;
 
-class UIProject : public QObject
+template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS>
+class UIProject
 {
-		Q_OBJECT
 	public:
-		explicit UIProject(Messager & messager, NewGeneMainWindow * parent = 0);
-		explicit UIProject(Messager & messager, boost::filesystem::path const path_to_settings, NewGeneMainWindow * parent = 0);
+		UIProject(Messager & messager, boost::filesystem::path const path_to_settings)
+			: _backend_project( new BACKEND_PROJECT_CLASS(messager) )
+		{
 
-		UIModel * model();
-		UIAllProjectSettings * settings();
+		}
 
-	signals:
+		UIModel * model()
+		{
+			return NULL;
+		}
 
-	public slots:
+		UI_PROJECT_SETTINGS_CLASS & settings()
+		{
+			return *_project_settings;
+		}
 
 	protected:
 
@@ -58,13 +63,13 @@ class UIProject : public QObject
 		// which project they correspond to (i.e., a pointer
 		// to the backend project is passed to the constructor
 		// of the project settings when this UIProject is initialized).
-		std::shared_ptr<Project> _backend_project;
+		std::shared_ptr<BACKEND_PROJECT_CLASS > _backend_project;
 
 		// The settings are distinguished from the model only by the fact
 		// that they are stored permanently in human-readable XML or text files
 		// in order to be more accessible to end-users, and hence readable and
 		// editable by knowledgeable users.
-		std::unique_ptr<UIAllProjectSettings> _project_settings;
+		std::unique_ptr<UI_PROJECT_SETTINGS_CLASS> _project_settings;
 
 };
 

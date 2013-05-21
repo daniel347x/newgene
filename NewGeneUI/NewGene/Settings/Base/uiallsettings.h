@@ -49,7 +49,6 @@ class UIAllSettings : public QObject
 
 			protected:
 
-				UIOnlySettings_base(Messager & messager) : SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>(messager) {}
 				UIOnlySettings_base(Messager & messager, boost::filesystem::path const path_to_settings) : SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>(messager, path_to_settings) {}
 
 		};
@@ -100,7 +99,7 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_ProjectRelatedImpl_base(Messager & messager, Project &, boost::filesystem::path const path_to_settings)
+						_ProjectRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<SETTINGS_REPOSITORY_CLASS>(messager, path_to_settings)
 						{
 
@@ -182,6 +181,7 @@ class UIAllSettings : public QObject
 
 				};
 
+				template<typename BACKEND_PROJECT_CLASS>
 				class _BackendProjectRelatedImpl_base : public _BackendRelatedImpl_base, public _ProjectRelatedImpl_base<BACKEND_SETTINGS_CLASS>
 				{
 
@@ -194,18 +194,24 @@ class UIAllSettings : public QObject
 								boost::format msg( "Settings repository instance not yet constructed." );
 								throw NewGeneException() << newgene_error_description( msg.str() );
 							}
-							return *(_settings_repository.get());
+							return *_settings_repository;
 						}
 
 
 					protected:
 
-						_BackendProjectRelatedImpl_base(Messager & messager, Project & project, boost::filesystem::path const path_to_settings)
+						_BackendProjectRelatedImpl_base(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager, path_to_settings)
 							, _BackendRelatedImpl_base(messager, path_to_settings)
-							, _ProjectRelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager, project, path_to_settings)
+							, _ProjectRelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager, path_to_settings)
 							, _settings_repository(SettingsRepositoryFactory<BACKEND_SETTINGS_CLASS>()(messager, path_to_settings))
 						{
+							// ***********************************************************************************************************************
+							// This single line is the entire reason that "Project &" as a parameter has to be woven through this framework.
+							// It is so that the backend project knows its backend project settings at the same time that the UI layer project
+							// instantiates its settings.  By placing this line embedded here, at the heart of this infrastructure, we
+							// guarantee the backend and UI layer will remain solidly synchronized.
+							// ***********************************************************************************************************************
 							project._settings = _settings_repository; // share the pointer
 						}
 
@@ -233,18 +239,15 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_UIProjectRelatedImpl_base(Messager & messager, Project & project, boost::filesystem::path const path_to_settings)
+						_UIProjectRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<UI_SETTINGS_CLASS>(messager, path_to_settings)
 							, _UIRelatedImpl_base(messager, path_to_settings)
-							, _ProjectRelatedImpl_base<UI_SETTINGS_CLASS>(messager, project, path_to_settings)
+							, _ProjectRelatedImpl_base<UI_SETTINGS_CLASS>(messager, path_to_settings)
 						{
 
 						}
 
 				};
-
-				virtual void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings) = 0;
-				virtual void CreateInternalImplementations(Messager & messager, Project & project, boost::filesystem::path const path_to_settings) = 0;
 
 				std::unique_ptr<_UIRelatedImpl_base> __ui_impl;
 				std::unique_ptr<_BackendRelatedImpl_base> __backend_impl;
@@ -280,12 +283,12 @@ class UIAllSettings : public QObject
 	protected:
 
 		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS, typename SETTINGS_ENUM, typename SETTING_CLASS>
-		UIOnlySettings_base<SETTINGS_ENUM, UI_SETTINGS_CLASS> &
+		UIOnlySettings_base<SETTINGS_ENUM, SETTING_CLASS> &
 		getUISettings_base(_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS> & impl)
 		{
 			_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_UIRelatedImpl_base & impl_ui = impl.getInternalUIImplementation();
 			UI_SETTINGS_CLASS & settings_repository = impl_ui.getSettingsRepository();
-			return reinterpret_cast<UIOnlySettings_base<SETTINGS_ENUM, UI_SETTINGS_CLASS> &>(settings_repository);
+			return reinterpret_cast<UIOnlySettings_base<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
 		}
 
 		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS, typename SETTINGS_ENUM, typename SETTING_CLASS>
@@ -296,9 +299,6 @@ class UIAllSettings : public QObject
 			BACKEND_SETTINGS_CLASS & settings_repository = impl_backend.getSettingsRepository();
 			return reinterpret_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
 		}
-
-		virtual void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings) = 0;
-		virtual void CreateImplementation(Messager & messager, Project & project, boost::filesystem::path const path_to_settings) = 0;
 
 };
 

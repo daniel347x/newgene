@@ -97,9 +97,10 @@ boost::filesystem::path UIAllGlobalSettings::UIOnlySettings::GetSettingsPath(Mes
 	return settingsManagerUI().getGlobalSettingsPath();
 }
 
-template<>
-SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(Messager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_)
+SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
 {
+
+	GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_ = static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const>(value_);
 
 	switch (value_)
 	{
@@ -133,7 +134,7 @@ UIAllGlobalSettings::UIOnlySettings & UIAllGlobalSettings::getUISettings()
 		boost::format msg( "Internal settings implementation not yet constructed." );
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
-	return reinterpret_cast<UIAllGlobalSettings::UIOnlySettings &>(getUISettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, UIOnlySettings>(*(__impl.get())));
+	return reinterpret_cast<UIAllGlobalSettings::UIOnlySettings &>(getUISettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, UIGlobalSetting>(*__impl));
 }
 
 GlobalSettings & UIAllGlobalSettings::getBackendSettings()
@@ -143,7 +144,7 @@ GlobalSettings & UIAllGlobalSettings::getBackendSettings()
 		boost::format msg( "Internal settings implementation not yet constructed." );
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
-	return reinterpret_cast<GlobalSettings &>(getBackendSettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, ProjectSettings>(*(__impl.get())));
+	return reinterpret_cast<GlobalSettings &>(getBackendSettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, BackendGlobalSetting>(*__impl));
 }
 
 UIAllGlobalSettings::UIAllGlobalSettings(Messager & messager, boost::filesystem::path const path_to_settings, QObject * parent) :
@@ -158,19 +159,7 @@ void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messag
 	__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
 }
 
-void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messager, Project & project, boost::filesystem::path const path_to_settings)
-{
-	boost::format msg("UIAllGlobalSettings::_impl::CreateInternalImplementations() Project overload being called.");
-	messager.AppendMessage(new MessagerCatastrophicErrorMessage(MESSAGER_MESSAGE__PROJECT_PRESENT, msg.str()));
-}
-
 void UIAllGlobalSettings::CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings)
 {
 	__impl.reset(new _impl(messager, path_to_settings));
-}
-
-void UIAllGlobalSettings::CreateImplementation(Messager & messager, Project & project, boost::filesystem::path const path_to_settings)
-{
-	boost::format msg("UIAllGlobalSettings::CreateImplementation() Project overload being called.");
-	messager.AppendMessage(new MessagerCatastrophicErrorMessage(MESSAGER_MESSAGE__PROJECT_PRESENT, msg.str()));
 }

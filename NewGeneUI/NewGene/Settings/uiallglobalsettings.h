@@ -36,9 +36,6 @@ class UIGlobalSetting_MRUList : public UIGlobalSetting, public StringSetting
 
 };
 
-template<>
-SettingInfo GetSettingInfoFromEnum<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(Messager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_);
-
 class UIAllGlobalSettings : public UIAllSettings
 {
 
@@ -118,9 +115,6 @@ class UIAllGlobalSettings : public UIAllSettings
 
 				void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path());
 
-				// throws catastrophic error - only here to support abstract base class, SFINAE cannot be used because it would require virtual template member functions
-				void CreateInternalImplementations(Messager & messager, Project & project, boost::filesystem::path const path_to_settings = boost::filesystem::path());
-
 		};
 
 		_impl_base<GlobalSettings, UIOnlySettings> & getImplementation()
@@ -130,13 +124,10 @@ class UIAllGlobalSettings : public UIAllSettings
 				boost::format msg( "UI Global settings implementation not yet constructed." );
 				throw NewGeneException() << newgene_error_description( msg.str() );
 			}
-			return *(__impl.get());
+			return *__impl;
 		}
 
 		void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path());
-
-		// throws catastrophic error - only here to support abstract base class, SFINAE cannot be used because it would require virtual template member functions
-		void CreateImplementation(Messager & messager, Project & project, boost::filesystem::path const path_to_settings = boost::filesystem::path());
 
 		std::unique_ptr<_impl> __impl;
 

@@ -68,7 +68,11 @@ SOURCES += main.cpp\
 	Settings/uiallprojectsettings.cpp \
 	Settings/uiallglobalsettings.cpp \
 	Settings/Base/uisetting.cpp \
-	Messager/uimessager.cpp
+	Messager/uimessager.cpp \
+    Project/uiinputproject.cpp \
+    Project/uioutputproject.cpp \
+    Settings/allinputprojectsettings.cpp \
+    Settings/alloutputprojectsettings.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -125,7 +129,11 @@ HEADERS  += newgenemainwindow.h \
 	Settings/uiallprojectsettings.h \
 	Settings/uiallglobalsettings.h \
 	Settings/Base/uisetting.h \
-	Messager/uimessager.h
+	Messager/uimessager.h \
+    Project/uiinputproject.h \
+    Project/uioutputproject.h \
+    Settings/allinputprojectsettings.h \
+    Settings/alloutputprojectsettings.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \

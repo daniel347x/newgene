@@ -6,7 +6,8 @@
 #include <memory>
 
 class NewGeneMainWindow;
-class UIProject;
+class UIInputProject;
+class UIOutputProject;
 
 class UIProjectManager : public QObject, public UIManager<UIProjectManager, ProjectManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT>
 {
@@ -14,7 +15,7 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 	public:
 		explicit UIProjectManager( QObject * parent = 0 );
 
-		UIProject * LoadDefaultProject( NewGeneMainWindow * parent = NULL );
+		//UIProject * LoadDefaultProject( NewGeneMainWindow * parent = NULL );
 
 	signals:
 

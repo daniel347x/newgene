@@ -18,7 +18,7 @@ UIProjectManager::UIProjectManager( QObject * parent )
 
 }
 
-UIProject * UIProjectManager::LoadDefaultProject( NewGeneMainWindow * )
-{
-	return NULL;
-}
+//UIProject * UIProjectManager::LoadDefaultProject( NewGeneMainWindow * )
+//{
+//	return NULL;
+//}

@@ -11,7 +11,8 @@
 #include "Setting.h"
 #include "GlobalSettings.h"
 #include "ProjectSettings.h"
-#include "../Project/Project.h"
+#include "../Project/InputProject.h"
+#include "../Project/OutputProject.h"
 
 class SettingsManager : public Manager<SettingsManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_SETTINGS>
 {
@@ -19,7 +20,9 @@ class SettingsManager : public Manager<SettingsManager, MANAGER_DESCRIPTION_NAME
 	public:
 
 		std::unique_ptr<BackendGlobalSetting> getSetting(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting);
-		std::unique_ptr<BackendProjectSetting> getSetting(Messager & messager, Project * project, PROJECT_SETTINGS_BACKEND_NAMESPACE::PROJECT_SETTINGS_BACKEND const which_setting);
+
+		std::unique_ptr<BackendProjectInputSetting> getSetting(Messager & messager, InputProject * project, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting);
+		std::unique_ptr<BackendProjectOutputSetting> getSetting(Messager & messager, OutputProject * project, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting);
 
 		std::unique_ptr<GlobalSettings> _global_settings;
 

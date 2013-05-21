@@ -117,16 +117,16 @@
     <ClInclude Include="Project\Project.h">
       <Filter>Header Files\Project</Filter>
     </ClInclude>
-    <ClInclude Include="Project\ProjectInput.h">
+    <ClInclude Include="Project\InputProject.h">
       <Filter>Header Files\Project</Filter>
     </ClInclude>
-    <ClInclude Include="Project\ProjectOutput.h">
+    <ClInclude Include="Project\OutputProject.h">
       <Filter>Header Files\Project</Filter>
     </ClInclude>
-    <ClInclude Include="Settings\ProjectInputSettings.h">
+    <ClInclude Include="Settings\OutputProjectSettings.h">
       <Filter>Header Files\Settings</Filter>
     </ClInclude>
-    <ClInclude Include="Settings\ProjectOutputSettings.h">
+    <ClInclude Include="Settings\InputProjectSettings.h">
       <Filter>Header Files\Settings</Filter>
     </ClInclude>
   </ItemGroup>
@@ -182,16 +182,16 @@
     <ClCompile Include="Project\Project.cpp">
       <Filter>Source Files\Project</Filter>
     </ClCompile>
-    <ClCompile Include="Project\ProjectInput.cpp">
+    <ClCompile Include="Project\InputProject.cpp">
       <Filter>Source Files\Project</Filter>
     </ClCompile>
-    <ClCompile Include="Project\ProjectOutput.cpp">
+    <ClCompile Include="Project\OutputProject.cpp">
       <Filter>Source Files\Project</Filter>
     </ClCompile>
-    <ClCompile Include="Settings\ProjectInputSettings.cpp">
+    <ClCompile Include="Settings\InputProjectSettings.cpp">
       <Filter>Source Files\Project</Filter>
     </ClCompile>
-    <ClCompile Include="Settings\ProjectOutputSettings.cpp">
+    <ClCompile Include="Settings\OutputProjectSettings.cpp">
       <Filter>Source Files\Project</Filter>
     </ClCompile>
   </ItemGroup>

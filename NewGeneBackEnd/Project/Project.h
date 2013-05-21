@@ -4,6 +4,7 @@
 #include <memory>
 #include "../Settings/ProjectSettings.h"
 
+template<typename PROJECT_SETTINGS_ENUM, typename BACKEND_PROJECT_SETTING_CLASS>
 class Project
 {
 public:
@@ -11,7 +12,7 @@ public:
 	{
 
 	}
-	std::shared_ptr<ProjectSettings> _settings;
+	std::shared_ptr<ProjectSettings<PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS> > _settings;
 };
 
 #endif

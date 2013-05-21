@@ -6,38 +6,20 @@
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"
 
-namespace PROJECT_SETTINGS_UI_NAMESPACE
-{
-
-	enum PROJECT_SETTINGS_UI
-	{
-		  SETTING_FIRST = 0
-		, SETTING_LAST
-	};
-
-}
-
-template<>
-SettingInfo GetSettingInfoFromEnum<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI>(Messager & messager, PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI const value_);
-
+template<typename BACKEND_PROJECT_CLASS, typename BACKEND_PROJECT_SETTINGS_CLASS, typename PROJECT_SETTINGS_ENUM, typename BACKEND_PROJECT_SETTING_CLASS, typename UI_PROJECT_SETTING_CLASS>
 class UIAllProjectSettings : public UIAllSettings
 {
 
-		Q_OBJECT
-
 	public:
 
-		UIAllProjectSettings(Messager & messager, Project & project, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL);
-
-
-	signals:
-
-	public slots:
-
-	protected:
+		UIAllProjectSettings(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
+			: UIAllSettings(messager, parent)
+		{
+			CreateImplementation(messager, project, path_to_settings);
+		}
 
 		// The following is the equivalent of the backend's ProjectSettings class
-		class UIOnlySettings : public UIOnlySettings_base<PROJECT_SETTINGS_UI_NAMESPACE::PROJECT_SETTINGS_UI, UIProjectSetting>
+		class UIOnlySettings : public UIOnlySettings_base<PROJECT_SETTINGS_ENUM, UI_PROJECT_SETTING_CLASS>
 		{
 
 			public:
@@ -50,19 +32,21 @@ class UIAllProjectSettings : public UIAllSettings
 
 			protected:
 
-				boost::filesystem::path GetSettingsPath(Messager & messager, SettingInfo & setting_info);
-				void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
-				UIProjectSetting * CloneSetting(Messager & messager, UIProjectSetting * current_setting, SettingInfo & setting_info) const;
-				UIProjectSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
+				boost::filesystem::path GetSettingsPath(Messager & messager, SettingInfo & setting_info)
+				{
+					return boost::filesystem::path();
+				}
 
 		};
 
-		class _impl : public _impl_base<ProjectSettings, UIOnlySettings>
+	protected:
+
+		class _impl : public _impl_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings>
 		{
 
 			public:
 
-				_impl(Messager & messager, Project & project, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : _impl_base(messager)
+				_impl(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : _impl_base(messager)
 				{
 					CreateInternalImplementations(messager, project, path_to_settings);
 				}
@@ -72,22 +56,22 @@ class UIAllProjectSettings : public UIAllSettings
 
 					public:
 
-						_UIRelatedImpl(Messager & messager, Project & project, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+						_UIRelatedImpl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
 							: _RelatedImpl_base<UIOnlySettings>(messager, path_to_settings)
-							, _UIProjectRelatedImpl_base(messager, project, path_to_settings)
+							, _UIProjectRelatedImpl_base(messager, path_to_settings)
 						{
 
 						}
 
 				};
 
-				class _BackendRelatedImpl : public _BackendProjectRelatedImpl_base
+				class _BackendRelatedImpl : public _BackendProjectRelatedImpl_base<BACKEND_PROJECT_CLASS>
 				{
 
 					public:
 
-						_BackendRelatedImpl(Messager & messager, Project & project, boost::filesystem::path const path_to_settings = boost::filesystem::path())
-							: _RelatedImpl_base<ProjectSettings>(messager, path_to_settings)
+						_BackendRelatedImpl(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+							: _RelatedImpl_base<BACKEND_PROJECT_SETTINGS_CLASS>(messager, path_to_settings)
 							, _BackendProjectRelatedImpl_base(messager, project, path_to_settings)
 						{
 
@@ -97,35 +81,53 @@ class UIAllProjectSettings : public UIAllSettings
 
 			protected:
 
-				void CreateInternalImplementations(Messager & messager, Project & project, boost::filesystem::path const path_to_settings = boost::filesystem::path());
-
-				// throws catastrophic error - only here to support abstract base class, SFINAE cannot be used because it would require virtual template member functions
-				void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path());
+				void CreateInternalImplementations(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+				{
+					__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
+					__backend_impl.reset(new _BackendRelatedImpl(messager, project, path_to_settings));
+				}
 
 		};
 
-		_impl_base<ProjectSettings, UIOnlySettings> & getImplementation()
+		_impl_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings> & getImplementation()
 		{
 			if (!__impl)
 			{
 				boost::format msg( "UI Project settings implementation not yet constructed." );
 				throw NewGeneException() << newgene_error_description( msg.str() );
 			}
-			return *(__impl.get());
+			return *__impl;
 		}
 
-		void CreateImplementation(Messager & messager, Project & project, boost::filesystem::path const path_to_settings = boost::filesystem::path());
-
-		// throws catastrophic error - only here to support abstract base class, SFINAE cannot be used because it would require virtual template member functions
-		void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path());
+		void CreateImplementation(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+		{
+			__impl.reset(new _impl(messager, project, path_to_settings));
+		}
 
 		std::unique_ptr<_impl> __impl;
 
 
 	public:
 
-		UIOnlySettings & getUISettings();
-		ProjectSettings & getBackendSettings();
+		UIOnlySettings & getUISettings()
+		{
+			if (!__impl)
+			{
+				boost::format msg( "Internal settings implementation not yet constructed." );
+				throw NewGeneException() << newgene_error_description( msg.str() );
+			}
+			return reinterpret_cast<UIOnlySettings &>(getUISettings_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings, PROJECT_SETTINGS_ENUM, UI_PROJECT_SETTING_CLASS>(*__impl));
+		}
+
+		BACKEND_PROJECT_SETTINGS_CLASS & getBackendSettings()
+		{
+			if (!__impl)
+			{
+				boost::format msg( "Internal settings implementation not yet constructed." );
+				throw NewGeneException() << newgene_error_description( msg.str() );
+			}
+			return reinterpret_cast<BACKEND_PROJECT_SETTINGS_CLASS &>(getBackendSettings_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings, PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS>(*__impl));
+		}
 
 };
 

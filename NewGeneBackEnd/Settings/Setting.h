@@ -6,6 +6,7 @@
 #	include <boost/filesystem.hpp>
 #endif
 #include "..\Messager\Messager.h"
+#include "SettingsRepository.h"
 
 class Setting;
 
@@ -31,7 +32,12 @@ class Setting
 
 public:
 
+	friend class SettingRepository;
+
 	virtual void DoSpecialParse(Messager &) {}
+
+	// TODO: throw
+	virtual SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val) { return SettingInfo(); };
 
 protected:
 
@@ -67,6 +73,7 @@ public:
 class BackendGlobalSetting : public GlobalSetting, public BackendSetting
 {
 	public:
+		SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 };
 
 class BackendProjectSetting : public ProjectSetting, public BackendSetting
@@ -97,11 +104,13 @@ public:
 class BackendProjectInputSetting : public BackendProjectSetting, public BackendInputSetting, public ProjectInputSetting
 {
 public:
+	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 };
 
 class BackendProjectOutputSetting : public BackendProjectSetting, public BackendOutputSetting, public ProjectOutputSetting
 {
 public:
+	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 };
 
 class StringSetting : virtual public Setting
