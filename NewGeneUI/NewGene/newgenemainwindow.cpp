@@ -9,7 +9,8 @@
 #include "uiloggingmanager.h"
 #include "uimodel.h"
 #include "uiprojectmanager.h"
-#include "uiproject.h"
+#include "uiinputproject.h"
+#include "uioutputproject.h"
 
 NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	QMainWindow( parent ),
@@ -92,6 +93,14 @@ void NewGeneMainWindow::doInitialize()
 	UISettingsManager::getManager();
 	UIModelManager::getManager();
 	UIProjectManager::getManager();
+
+	// Test instantiating objects
+	Messager messager;
+	UIInputProject inp(messager);
+	UIOutputProject outp(messager);
+	UIAllGlobalSettings gset(messager);
+	AllInputProjectSettings inpset(messager, inp.backend());
+	AllOutputProjectSettings outset(messager, outp.backend());
 
 	//_current_project.reset(projectManagerUI().LoadDefaultProject());
 

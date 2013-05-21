@@ -34,9 +34,16 @@ class UIProject
 			return NULL;
 		}
 
+		// TODO: Test for validity
 		UI_PROJECT_SETTINGS_CLASS & settings()
 		{
 			return *_project_settings;
+		}
+
+		// TODO: Test for validity
+		BACKEND_PROJECT_CLASS & backend()
+		{
+			return *_backend_project;
 		}
 
 	protected:
