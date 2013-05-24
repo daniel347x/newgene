@@ -79,7 +79,10 @@
     <ClInclude Include="Logging\LoggingManager.h" />
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Messager\Messager.h" />
+    <ClInclude Include="Model\InputModel.h" />
+    <ClInclude Include="Model\Model.h" />
     <ClInclude Include="Model\ModelManager.h" />
+    <ClInclude Include="Model\OutputModel.h" />
     <ClInclude Include="Project\Project.h" />
     <ClInclude Include="Project\InputProject.h" />
     <ClInclude Include="Project\ProjectManager.h" />
@@ -102,7 +105,10 @@
     <ClCompile Include="Logging\LoggingManager.cpp" />
     <ClCompile Include="Manager.cpp" />
     <ClCompile Include="Messager\Messager.cpp" />
+    <ClCompile Include="Model\InputModel.cpp" />
+    <ClCompile Include="Model\Model.cpp" />
     <ClCompile Include="Model\ModelManager.cpp" />
+    <ClCompile Include="Model\OutputModel.cpp" />
     <ClCompile Include="Project\Project.cpp" />
     <ClCompile Include="Project\InputProject.cpp" />
     <ClCompile Include="Project\ProjectManager.cpp" />
