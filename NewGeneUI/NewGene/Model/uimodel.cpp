@@ -1,6 +1,6 @@
 #include "uimodel.h"
 
-UIModel::UIModel( QObject * parent ) :
-	QObject( parent )
+UIModel::UIModel( Messager & messager, MODEL_CLASS & model, boost::filesystem::path const path_to_model, QObject * parent ) :
+    QObject( parent )
 {
 }

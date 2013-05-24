@@ -19,7 +19,7 @@ class NewGeneMainWindow;
 class UILoggingManager;
 class UIProjectManager;
 
-template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS>
+template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_CLASS>
 class UIProject
 {
 	public:
@@ -39,10 +39,21 @@ class UIProject
 			_project_settings.reset(ui_settings);
 		}
 
+		void apply_model(UI_MODEL_CLASS * ui_model)
+		{
+			_model.reset(ui_model);
+		}
+
 		// TODO: Test for validity
 		UI_PROJECT_SETTINGS_CLASS & settings()
 		{
 			return *_project_settings;
+		}
+
+		// TODO: Test for validity
+		UI_MODEL_CLASS & model()
+		{
+			return *_model;
 		}
 
 		// TODO: Test for validity

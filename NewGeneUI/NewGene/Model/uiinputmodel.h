@@ -1,10 +1,12 @@
 #ifndef UIINPUTMODEL_H
 #define UIINPUTMODEL_H
 
-class UIInputModel : public UIModel
+#include "../../../NewGeneBackEnd/Model/InputModel.h"
+
+class UIInputModel : public UIModel<InputModel>
 {
     public:
-        UIInputModel();
+        UIInputModel(Messager & messager, InputModel & model, boost::filesystem::path const path_to_model = boost::filesystem::path());
 };
 
 #endif // UIINPUTMODEL_H

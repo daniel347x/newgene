@@ -31,7 +31,12 @@ class UIAllSettings : public QObject
 
 	protected:
 
-		// The following is the equivalent of the backend's Settings class
+		// The following is the equivalent of the backend's Settings class.
+		// It is itself a SettingsRepository class, just like the backend
+		// ProjectSettings class, but this SettingsRepository class
+		// stores settings related to the user interface for the project.
+		// A data member for this class is stored within an instance of
+		// _UIRelatedImpl_base, defined below.
 		template<typename SETTINGS_ENUM, typename SETTING_CLASS>
 		class UIOnlySettings_base : public SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>
 		{
