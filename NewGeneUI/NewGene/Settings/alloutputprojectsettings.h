@@ -18,22 +18,18 @@ namespace OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE
 
 }
 
-class UIOutputProjectSettings : public UIAllProjectSettings<OutputProject, OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting>::UIOnlySettings
+class AllOutputProjectSettings : public UIAllProjectSettings<OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting>
 {
 	public:
-		void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
-		UIProjectOutputSetting * CloneSetting(Messager & messager, UIProjectOutputSetting * current_setting, SettingInfo & setting_info) const;
-		UIProjectOutputSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
-};
-
-class AllOutputProjectSettings : public UIAllProjectSettings<OutputProject, OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting>
-{
-	public:
-		AllOutputProjectSettings(Messager & messager, OutputProject & project, boost::filesystem::path const path_to_settings = boost::filesystem::path())
-			: UIAllProjectSettings(messager, project, path_to_settings)
+		AllOutputProjectSettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+			: UIAllProjectSettings(messager, path_to_settings)
 		{
 
 		}
+
+		void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
+		UIProjectOutputSetting * CloneSetting(Messager & messager, UIProjectOutputSetting * current_setting, SettingInfo & setting_info) const;
+		UIProjectOutputSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
 };
 
 #endif // UIPROJECTOUTPUTSETTINGS_H

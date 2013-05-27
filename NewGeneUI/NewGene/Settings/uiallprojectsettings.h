@@ -6,16 +6,16 @@
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"
 
-template<typename BACKEND_PROJECT_CLASS, typename BACKEND_PROJECT_SETTINGS_CLASS, typename PROJECT_SETTINGS_ENUM, typename BACKEND_PROJECT_SETTING_CLASS, typename UI_PROJECT_SETTING_CLASS>
+template<typename BACKEND_PROJECT_SETTINGS_CLASS, typename PROJECT_SETTINGS_ENUM, typename BACKEND_PROJECT_SETTING_CLASS, typename UI_PROJECT_SETTING_CLASS>
 class UIAllProjectSettings : public UIAllSettings
 {
 
 	public:
 
-		UIAllProjectSettings(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
+		UIAllProjectSettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
 			: UIAllSettings(messager, parent)
 		{
-			CreateImplementation(messager, project, path_to_settings);
+			CreateImplementation(messager, path_to_settings);
 		}
 
 		// The following is the equivalent of the backend's ProjectSettings class
@@ -46,9 +46,9 @@ class UIAllProjectSettings : public UIAllSettings
 
 			public:
 
-				_impl(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : _impl_base(messager)
+				_impl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : _impl_base(messager)
 				{
-					CreateInternalImplementations(messager, project, path_to_settings);
+					CreateInternalImplementations(messager, path_to_settings);
 				}
 
 				class _UIRelatedImpl : public _UIProjectRelatedImpl_base
@@ -65,14 +65,14 @@ class UIAllProjectSettings : public UIAllSettings
 
 				};
 
-				class _BackendRelatedImpl : public _BackendProjectRelatedImpl_base<BACKEND_PROJECT_CLASS>
+				class _BackendRelatedImpl : public _BackendProjectRelatedImpl_base
 				{
 
 					public:
 
-						_BackendRelatedImpl(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+						_BackendRelatedImpl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
 							: _RelatedImpl_base<BACKEND_PROJECT_SETTINGS_CLASS>(messager, path_to_settings)
-							, _BackendProjectRelatedImpl_base(messager, project, path_to_settings)
+							, _BackendProjectRelatedImpl_base(messager, path_to_settings)
 						{
 
 						}
@@ -81,10 +81,10 @@ class UIAllProjectSettings : public UIAllSettings
 
 			protected:
 
-				void CreateInternalImplementations(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+				void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
 				{
 					__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
-					__backend_impl.reset(new _BackendRelatedImpl(messager, project, path_to_settings));
+					__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
 				}
 
 		};
@@ -99,9 +99,9 @@ class UIAllProjectSettings : public UIAllSettings
 			return *__impl;
 		}
 
-		void CreateImplementation(Messager & messager, BACKEND_PROJECT_CLASS & project, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+		void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
 		{
-			__impl.reset(new _impl(messager, project, path_to_settings));
+			__impl.reset(new _impl(messager, path_to_settings));
 		}
 
 		std::unique_ptr<_impl> __impl;
@@ -127,6 +127,16 @@ class UIAllProjectSettings : public UIAllSettings
 				throw NewGeneException() << newgene_error_description( msg.str() );
 			}
 			return reinterpret_cast<BACKEND_PROJECT_SETTINGS_CLASS &>(getBackendSettings_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings, PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS>(*__impl));
+		}
+
+		std::shared_ptr<BACKEND_PROJECT_SETTINGS_CLASS> & getBackendSettingsSharedPtr()
+		{
+			if (!__impl)
+			{
+				boost::format msg( "Internal settings implementation not yet constructed." );
+				throw NewGeneException() << newgene_error_description( msg.str() );
+			}
+			return getBackendSettingsSharedPtr_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings>(*__impl);
 		}
 
 };

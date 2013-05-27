@@ -1,6 +1,6 @@
 #include "alloutputprojectsettings.h"
 
-void UIOutputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
+void AllOutputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
 {
 
 	switch (setting_info.setting_class)
@@ -25,7 +25,7 @@ void UIOutputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & set
 
 }
 
-UIProjectOutputSetting * UIOutputProjectSettings::CloneSetting(Messager & messager, UIProjectOutputSetting * /* current_setting */, SettingInfo & setting_info) const
+UIProjectOutputSetting * AllOutputProjectSettings::CloneSetting(Messager & messager, UIProjectOutputSetting * /* current_setting */, SettingInfo & setting_info) const
 {
 
 	try
@@ -63,7 +63,7 @@ UIProjectOutputSetting * UIOutputProjectSettings::CloneSetting(Messager & messag
 
 }
 
-UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
+UIProjectOutputSetting * AllOutputProjectSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
 {
 
 	switch (setting_info.setting_class)

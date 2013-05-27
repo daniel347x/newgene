@@ -29,14 +29,10 @@ class UIProject
 
 		}
 
-		UIModel * model()
-		{
-			return NULL;
-		}
-
 		void apply_settings(UI_PROJECT_SETTINGS_CLASS * ui_settings)
 		{
 			_project_settings.reset(ui_settings);
+			backend()._settings = _project_settings->getBackendSettingsSharedPtr(); // share the pointer to the backend settings with the backend project
 		}
 
 		void apply_model(UI_MODEL_CLASS * ui_model)
@@ -69,7 +65,7 @@ class UIProject
 		// that together define a single NewGene "project".
 		// The model definition is contained within a single database file,
 		// although the project may contain many database files.
-		std::unique_ptr<UIModel> _model;
+		std::unique_ptr<UI_MODEL_CLASS> _model;
 
 		// The backend project is the backend equivalent of this UIProject,
 		// with the exception that this UIProject carries a shared_ptr to the backend project,

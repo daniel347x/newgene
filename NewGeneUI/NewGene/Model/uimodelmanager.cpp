@@ -12,7 +12,7 @@ UIModelManager::UIModelManager( QObject * parent )
 
 }
 
-UIModel * UIModelManager::loadDefaultModel()
+UIInputModel * UIModelManager::loadDefaultModel()
 {
 	// Settings manager constructor obtains location of settings file
 	// ... and then calls backend settings manager to load settings file

@@ -3,8 +3,9 @@
 
 #include "uiproject.h"
 #include "../Settings/alloutputprojectsettings.h"
+#include "uioutputmodel.h"
 
-class UIOutputProject : public QObject, public UIProject<OutputProject, AllOutputProjectSettings>
+class UIOutputProject : public QObject, public UIProject<OutputProject, AllOutputProjectSettings, UIOutputModel>
 {
 
 		Q_OBJECT

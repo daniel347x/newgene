@@ -4,12 +4,14 @@
 #include "globals.h"
 #include <QObject>
 
-template<typename MODEL_CLASS>
-class UIModel : public QObject
+template<typename BACKEND_MODEL_CLASS>
+class UIModel
 {
-		Q_OBJECT
 	public:
-		explicit UIModel( Messager & messager, MODEL_CLASS & model, boost::filesystem::path const path_to_model, QObject * parent = 0 );
+		UIModel( Messager & messager, BACKEND_MODEL_CLASS & model, boost::filesystem::path const path_to_model )
+		{
+
+		}
 
 	signals:
 
@@ -17,7 +19,7 @@ class UIModel : public QObject
 
 	protected:
 
-	std::shared_ptr<BACKEND_PROJECT_CLASS > _backend_project;
+	std::shared_ptr<BACKEND_MODEL_CLASS > _backend_model;
 
 };
 

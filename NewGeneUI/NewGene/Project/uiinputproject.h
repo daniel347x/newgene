@@ -3,8 +3,9 @@
 
 #include "uiproject.h"
 #include "../Settings/allinputprojectsettings.h"
+#include "uiinputmodel.h"
 
-class UIInputProject : public QObject, public UIProject<InputProject, AllInputProjectSettings>
+class UIInputProject : public QObject, public UIProject<InputProject, AllInputProjectSettings, UIInputModel>
 {
 
 		Q_OBJECT

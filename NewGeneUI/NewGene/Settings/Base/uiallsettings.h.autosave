@@ -201,11 +201,6 @@ class UIAllSettings : public QObject
 							return *_settings_repository;
 						}
 
-						std::shared_ptr<BACKEND_SETTINGS_CLASS> & getSettingsRepositorySharedPtr()
-						{
-							return _settings_repository;
-						}
-
 
 					protected:
 
@@ -277,6 +272,8 @@ class UIAllSettings : public QObject
 		};
 
 	public:
+		
+		
 
 
 	private:
@@ -300,23 +297,6 @@ class UIAllSettings : public QObject
 			_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendRelatedImpl_base & impl_backend = impl.getInternalBackendImplementation();
 			BACKEND_SETTINGS_CLASS & settings_repository = impl_backend.getSettingsRepository();
 			return reinterpret_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
-		}
-
-		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS>
-		std::shared_ptr<BACKEND_SETTINGS_CLASS>
-		getBackendSettingsSharedPtr_base(_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS> & impl)
-		{
-			try
-			{
-				_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendProjectRelatedImpl_base & impl_backend = dynamic_cast<_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendProjectRelatedImpl_base &>(impl.getInternalBackendImplementation());
-				return impl_backend.getSettingsRepositorySharedPtr();
-			}
-			catch (std::bad_cast & bc)
-			{
-				boost::format msg( "Cannot convert from _BackendRelatedImpl_base to _BackendProjectRelatedImpl_base in getBackendSettingsSharedPtr_base: %1%" );
-				msg % bc.what();
-				throw NewGeneException() << newgene_error_description( msg.str() );
-			}
 		}
 
 };

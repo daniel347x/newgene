@@ -6,6 +6,12 @@
 #include "..\..\..\NewGeneBackEnd\Model\ModelManager.h"
 
 class NewGeneMainWindow;
+
+class UIInputModel;
+
+class UIOutputModel;
+
+template<typename MODEL_CLASS>
 class UIModel;
 
 class UIModelManager : public QObject, public UIManager<UIModelManager, ModelManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL>
@@ -14,7 +20,7 @@ class UIModelManager : public QObject, public UIManager<UIModelManager, ModelMan
 	public:
 		explicit UIModelManager( QObject * parent = 0 );
 
-		UIModel * loadDefaultModel();
+		UIInputModel * loadDefaultModel();
 
 	signals:
 
