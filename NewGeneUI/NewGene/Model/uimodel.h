@@ -17,9 +17,21 @@ class UIModel
 
 	public slots:
 
+	public:
+
+		BACKEND_MODEL_CLASS & getBackendModel()
+		{
+			return *_backend_model;
+		}
+
+		std::shared_ptr<BACKEND_MODEL_CLASS> & getBackendModelSharedPtr()
+		{
+			return _backend_model;
+		}
+
 	protected:
 
-	std::shared_ptr<BACKEND_MODEL_CLASS > _backend_model;
+	std::shared_ptr<BACKEND_MODEL_CLASS> _backend_model;
 
 };
 

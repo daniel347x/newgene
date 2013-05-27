@@ -38,6 +38,7 @@ class UIProject
 		void apply_model(UI_MODEL_CLASS * ui_model)
 		{
 			_model.reset(ui_model);
+			backend()._model = _model->getBackendModelSharedPtr(); // share the pointer to the backend model with the backend project
 		}
 
 		// TODO: Test for validity
@@ -65,7 +66,7 @@ class UIProject
 		// that together define a single NewGene "project".
 		// The model definition is contained within a single database file,
 		// although the project may contain many database files.
-		std::unique_ptr<UI_MODEL_CLASS> _model;
+		std::shared_ptr<UI_MODEL_CLASS> _model;
 
 		// The backend project is the backend equivalent of this UIProject,
 		// with the exception that this UIProject carries a shared_ptr to the backend project,
