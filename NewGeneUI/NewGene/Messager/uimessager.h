@@ -79,7 +79,7 @@ class UIMessager : public QObject, public Messager
 
 	public:
 
-		bool do_not_handle_messages_on_desctruction;
+		bool do_not_handle_messages_on_destruction;
 
 };
 

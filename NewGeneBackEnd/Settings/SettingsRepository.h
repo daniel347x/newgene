@@ -13,6 +13,8 @@
 #endif
 #include <cstdint>
 
+class UIMessager;
+
 class SettingInfo
 {
 
@@ -79,7 +81,7 @@ class SettingsRepository
 
 		std::unique_ptr<SETTING_CLASS> GetSetting(Messager & messager, SETTINGS_ENUM const which_setting) const
 		{
-			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(reinterpret_cast<UIMessager&>(messager), which_setting);
 			SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
 			if (theSetting == _settings_map.cend())
 			{
@@ -148,7 +150,7 @@ class SettingsRepository
 
 			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
 			{
-				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, static_cast<SETTINGS_ENUM>(n));
+				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(reinterpret_cast<UIMessager&>(messager), static_cast<SETTINGS_ENUM>(n));
 				SetMapEntry(messager, setting_info, pt); // sets default value if not present in property tree at this point
 			}
 
@@ -181,7 +183,7 @@ class SettingsRepositoryFactory
 
 		SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_settings)
 		{
-			SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings);
+			SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(reinterpret_cast<UIMessager&>(messager), path_to_settings);
 			new_settings_repository->LoadSettingsFromFile(messager, path_to_settings);
 			return new_settings_repository;
 		}

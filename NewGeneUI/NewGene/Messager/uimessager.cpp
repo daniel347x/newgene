@@ -9,13 +9,13 @@
 
 UIMessager::UIMessager(QObject *parent) :
 	QObject(parent)
-  , do_not_handle_messages_on_desctruction(false)
+  , do_not_handle_messages_on_destruction(false)
 {
 }
 
 UIMessager::~UIMessager()
 {
-	if (!do_not_handle_messages_on_desctruction)
+	if (!do_not_handle_messages_on_destruction)
 	{
 		displayStatusMessages();
 	}

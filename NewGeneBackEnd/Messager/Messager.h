@@ -126,8 +126,6 @@ class Messager
 
 		typedef std::vector<std::unique_ptr<MessagerMessage> > MessagesVector;
 
-		Messager() {}
-
 		void AppendMessage(MessagerMessage * message);
 
 		bool HasStatus();
@@ -139,6 +137,10 @@ class Messager
 	protected:
 
 		MessagesVector _messages;
+
+	protected:
+
+		Messager() {} // Must only instantiate UIMessager from UI layer
 
 };
 

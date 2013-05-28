@@ -15,7 +15,6 @@ public:
 	{
 
 	}
-	//std::shared_ptr<OutputProjectSettings> _settings;
 };
 
 #endif

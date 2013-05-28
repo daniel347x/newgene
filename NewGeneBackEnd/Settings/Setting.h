@@ -9,6 +9,7 @@
 #include "SettingsRepository.h"
 
 class Setting;
+class UIMessager;
 
 template<typename SETTING_CLASS, typename SETTING_VALUE_TYPE = SETTING_CLASS::type>
 class SettingFactory
@@ -19,8 +20,8 @@ class SettingFactory
 		SETTING_CLASS * operator()(Messager & messager, SETTING_VALUE_TYPE const & initializing_val)
 		{
 
-			SETTING_CLASS * new_setting = new SETTING_CLASS(messager, initializing_val);
-			new_setting->DoSpecialParse(messager);
+			SETTING_CLASS * new_setting = new SETTING_CLASS(reinterpret_cast<UIMessager&>(messager), initializing_val);
+			new_setting->DoSpecialParse(reinterpret_cast<UIMessager&>(messager));
 			return new_setting;
 
 		}
