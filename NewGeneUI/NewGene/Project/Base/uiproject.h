@@ -8,7 +8,7 @@
 #	include <boost/filesystem.hpp>
 #endif
 #include "../../../NewGeneBackEnd/Project/Project.h"
-#include "../Model/uimodel.h"
+#include "../Model/Base/uimodel.h"
 
 class UIModelManager;
 class UISettingsManager;

@@ -28,7 +28,6 @@ SOURCES += main.cpp\
 	CreateOutput/SelectVariables/kadcolumnselectionbox.cpp \
 	CreateOutput/SelectVariables/timerangebox.cpp \
 	newgenewidget.cpp \
-	Model/uimodel.cpp \
 	Settings/uisettingsmanager.cpp \
 	Model/uimodelmanager.cpp \
 	Documents/uidocumentmanager.cpp \
@@ -59,7 +58,6 @@ SOURCES += main.cpp\
 	Model/Item/modelchangeresponseitem.cpp \
 	Model/Item/modelchangerequestitem.cpp \
 	Model/Item/modelchangeitem.cpp \
-	Project/uiproject.cpp \
 	Project/uiprojectmanager.cpp \
 	Utility/newgenefilenames.cpp \
 	Logging/uiloggingmanager.cpp \
@@ -74,7 +72,9 @@ SOURCES += main.cpp\
 	Model/uiinputmodel.cpp \
 	Model/uioutputmodel.cpp \
 	Settings/Project/uiallprojectsettings.cpp \
-	Settings/Global/uiallglobalsettings.cpp
+	Settings/Global/uiallglobalsettings.cpp \
+	Model/Base/uimodel.cpp \
+	Project/Base/uiproject.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -91,7 +91,6 @@ HEADERS  += newgenemainwindow.h \
 	CreateOutput/SelectVariables/kadcolumnselectionbox.h \
 	CreateOutput/SelectVariables/timerangebox.h \
 	newgenewidget.h \
-	Model/uimodel.h \
 	Settings/uisettingsmanager.h \
 	Model/uimodelmanager.h \
 	Documents/uidocumentmanager.h \
@@ -122,7 +121,6 @@ HEADERS  += newgenemainwindow.h \
 	Model/Item/modelchangeresponseitem.h \
 	Model/Item/modelchangerequestitem.h \
 	Model/Item/modelchangeitem.h \
-	Project/uiproject.h \
 	Project/uiprojectmanager.h \
 	Utility/newgenefilenames.h \
 	Logging/uiloggingmanager.h \
@@ -137,7 +135,9 @@ HEADERS  += newgenemainwindow.h \
 	Model/uiinputmodel.h \
 	Model/uioutputmodel.h \
 	Settings/Project/uiallprojectsettings.h \
-	Settings/Global/uiallglobalsettings.h
+	Settings/Global/uiallglobalsettings.h \
+	Model/Base/uimodel.h \
+	Project/Base/uiproject.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \
@@ -168,9 +168,11 @@ INCLUDEPATH += $$PWD/CreateOutput/SelectVariables
 INCLUDEPATH += $$PWD/CreateOutput/SelectVariables/VariableSummary
 INCLUDEPATH += $$PWD/CreateOutput/SelectVariables/Variables
 INCLUDEPATH += $$PWD/Model
+INCLUDEPATH += $$PWD/Model/Base
 INCLUDEPATH += $$PWD/Model/Indicator
 INCLUDEPATH += $$PWD/Model/Item
 INCLUDEPATH += $$PWD/Project
+INCLUDEPATH += $$PWD/Project/Base
 INCLUDEPATH += $$PWD/Settings
 INCLUDEPATH += $$PWD/Settings/Base
 INCLUDEPATH += $$PWD/Settings/Indicator

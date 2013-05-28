@@ -18,11 +18,20 @@ namespace OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE
 
 }
 
-class AllOutputProjectSettings : public UIAllProjectSettings<OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting>
+class AllOutputProjectSettings : public QObject, public UIAllProjectSettings<OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting>
 {
+
+		Q_OBJECT
+
+	signals:
+
+	public slots:
+
+
 	public:
-		AllOutputProjectSettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
-			: UIAllProjectSettings(messager, path_to_settings)
+		AllOutputProjectSettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
+			: QObject(parent)
+			, UIAllProjectSettings(messager, path_to_settings)
 		{
 
 		}
