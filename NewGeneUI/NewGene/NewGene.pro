@@ -65,16 +65,16 @@ SOURCES += main.cpp\
 	Logging/uiloggingmanager.cpp \
 	newgeneapplication.cpp \
 	Settings/Base/uiallsettings.cpp \
-	Settings/uiallprojectsettings.cpp \
-	Settings/uiallglobalsettings.cpp \
 	Settings/Base/uisetting.cpp \
 	Messager/uimessager.cpp \
-    Project/uiinputproject.cpp \
-    Project/uioutputproject.cpp \
-    Settings/allinputprojectsettings.cpp \
-    Settings/alloutputprojectsettings.cpp \
-    Model/uiinputmodel.cpp \
-    Model/uioutputmodel.cpp
+	Project/uiinputproject.cpp \
+	Project/uioutputproject.cpp \
+	Settings/allinputprojectsettings.cpp \
+	Settings/alloutputprojectsettings.cpp \
+	Model/uiinputmodel.cpp \
+	Model/uioutputmodel.cpp \
+	Settings/Project/uiallprojectsettings.cpp \
+	Settings/Global/uiallglobalsettings.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -128,16 +128,16 @@ HEADERS  += newgenemainwindow.h \
 	Logging/uiloggingmanager.h \
 	newgeneapplication.h \
 	Settings/Base/uiallsettings.h \
-	Settings/uiallprojectsettings.h \
-	Settings/uiallglobalsettings.h \
 	Settings/Base/uisetting.h \
 	Messager/uimessager.h \
-    Project/uiinputproject.h \
-    Project/uioutputproject.h \
-    Settings/allinputprojectsettings.h \
-    Settings/alloutputprojectsettings.h \
-    Model/uiinputmodel.h \
-    Model/uioutputmodel.h
+	Project/uiinputproject.h \
+	Project/uioutputproject.h \
+	Settings/allinputprojectsettings.h \
+	Settings/alloutputprojectsettings.h \
+	Model/uiinputmodel.h \
+	Model/uioutputmodel.h \
+	Settings/Project/uiallprojectsettings.h \
+	Settings/Global/uiallglobalsettings.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \
