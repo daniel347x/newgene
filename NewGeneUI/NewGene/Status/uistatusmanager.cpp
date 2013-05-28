@@ -19,7 +19,7 @@ void UIStatusManager::LogStatus( const QString & /* status_ */, const UIStatusMa
 {
 }
 
-void UIStatusManager::PostStatus( QString const & status_, UIStatusManager::IMPORTANCE const  importance_level, bool const /* forbidWritingToLog */ )
+void UIStatusManager::PostStatus( QString const & _status, UIStatusManager::IMPORTANCE const importance_level, bool const /* forbidWritingToLog */ )
 {
 
 	switch ( importance_level )
@@ -28,7 +28,7 @@ void UIStatusManager::PostStatus( QString const & status_, UIStatusManager::IMPO
 		case IMPORTANCE_HIGH:
 		case IMPORTANCE_CRITICAL:
 			{
-				LogStatus( status_, importance_level );
+				LogStatus( _status, importance_level );
 			}
 			break;
 	}
@@ -36,11 +36,11 @@ void UIStatusManager::PostStatus( QString const & status_, UIStatusManager::IMPO
 	if ( importance_level == IMPORTANCE_CRITICAL )
 	{
 		QMessageBox msgBox;
-		msgBox.setText( status_ );
+		msgBox.setText( _status );
 		msgBox.exec();
 	}
 
 	NewGeneMainWindow & mainWindow = getMainWindow();
-	mainWindow.statusBar()->showMessage( status_ );
+	mainWindow.statusBar()->showMessage( _status );
 
 }

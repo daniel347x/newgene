@@ -23,8 +23,8 @@ class UIStatusManager : public QObject, public UIManager<UIStatusManager, Status
 
 		explicit UIStatusManager( QObject * parent = 0 );
 
-		void LogStatus( QString const & _statusManager, IMPORTANCE const importance_level = IMPORTANCE_STANDARD );
-		void PostStatus( QString const & _statusManager, IMPORTANCE const importance_level = IMPORTANCE_STANDARD, bool const forbidWritingToLog = false );
+		void LogStatus( QString const & _status, IMPORTANCE const importance_level = IMPORTANCE_STANDARD );
+		void PostStatus( QString const & _status, IMPORTANCE const importance_level = IMPORTANCE_STANDARD, bool const forbidWritingToLog = false );
 
 	signals:
 

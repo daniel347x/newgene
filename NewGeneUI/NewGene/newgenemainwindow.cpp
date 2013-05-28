@@ -94,16 +94,19 @@ void NewGeneMainWindow::doInitialize()
 	UIModelManager::getManager();
 	UIProjectManager::getManager();
 
-	// Test instantiating objects
 	UIMessager messager;
-	UIInputProject inp(messager);
-	UIOutputProject outp(messager);
+
+	projectManagerUI().LoadOpenProjects(messager);
+
+	// Test instantiating objects
+	//UIInputProject inp(messager);
+	//UIOutputProject outp(messager);
 	//UIAllGlobalSettings gset(messager);
 	// Use project or settings manager to obtain the path to the project settings,
 	// and pass as argument to the instantiation of the settings objects, below.
 	// Likewise for the input and output model.
-	inp.apply_settings( new UIInputProjectSettings(messager) );
-	outp.apply_settings( new UIOutputProjectSettings(messager) );
+	//inp.apply_settings( new UIInputProjectSettings(messager) );
+	//outp.apply_settings( new UIOutputProjectSettings(messager) );
 
 
 	//_current_project.reset(projectManagerUI().LoadDefaultProject());
