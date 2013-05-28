@@ -21,8 +21,8 @@ class SettingsManager : public Manager<SettingsManager, MANAGER_DESCRIPTION_NAME
 
 		std::unique_ptr<BackendGlobalSetting> getSetting(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting);
 
-		std::unique_ptr<BackendProjectInputSetting> getSetting(Messager & messager, InputProject * project, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting);
-		std::unique_ptr<BackendProjectOutputSetting> getSetting(Messager & messager, OutputProject * project, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting);
+		std::unique_ptr<BackendProjectInputSetting> getSetting(Messager & messager, InputProject & project, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting);
+		std::unique_ptr<BackendProjectOutputSetting> getSetting(Messager & messager, OutputProject & project, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting);
 
 		std::unique_ptr<GlobalSettings> _global_settings;
 

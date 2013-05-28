@@ -117,7 +117,7 @@ bool UISettingsManager::ObtainGlobalSettingsPath()
 
 std::unique_ptr<BackendGlobalSetting> UISettingsManager::getSetting(UIMessager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting)
 {
-	std::unique_ptr<BackendGlobalSetting> the_setting_ = _global_settings->getBackendSettings().GetSetting<true>(messager, which_setting);
+	std::unique_ptr<BackendGlobalSetting> the_setting_ = _global_settings->getBackendSettings().GetSetting<false>(messager, which_setting);
 	BackendGlobalSetting * the_setting = the_setting_.get();
 	if (the_setting == NULL)
 	{
@@ -152,7 +152,7 @@ std::unique_ptr<BackendProjectInputSetting> UISettingsManager::getSetting(UIMess
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
 		return std::unique_ptr<BackendProjectInputSetting>(new BackendProjectInputSetting());
 	}
-	std::unique_ptr<BackendProjectInputSetting> the_setting_ = project->settings().getBackendSettings().GetSetting<true>(messager, which_setting);
+	std::unique_ptr<BackendProjectInputSetting> the_setting_ = project->settings().getBackendSettings().GetSetting<false>(messager, which_setting);
 	BackendProjectInputSetting * the_setting = the_setting_.get();
 	if (the_setting == NULL)
 	{
@@ -173,7 +173,7 @@ std::unique_ptr<BackendProjectOutputSetting> UISettingsManager::getSetting(UIMes
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
 		return std::unique_ptr<BackendProjectOutputSetting>(new BackendProjectOutputSetting());
 	}
-	std::unique_ptr<BackendProjectOutputSetting> the_setting_ = project->settings().getBackendSettings().GetSetting<true>(messager, which_setting);
+	std::unique_ptr<BackendProjectOutputSetting> the_setting_ = project->settings().getBackendSettings().GetSetting<false>(messager, which_setting);
 	BackendProjectOutputSetting * the_setting = the_setting_.get();
 	if (the_setting == NULL)
 	{
