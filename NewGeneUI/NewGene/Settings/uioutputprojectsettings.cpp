@@ -1,7 +1,10 @@
 #include "uioutputprojectsettings.h"
+#include "uioutputprojectsettings_list.h"
 
-SettingInfo UIProjectOutputSetting::GetSettingInfoFromEnum(UIMessager & messager, int const value__)
+SettingInfo UIProjectOutputSetting::GetSettingInfoFromEnum(Messager & messager_, int const value__)
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const value_ = static_cast<OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const>(value__);
 
@@ -30,8 +33,10 @@ SettingInfo UIProjectOutputSetting::GetSettingInfoFromEnum(UIMessager & messager
 
 }
 
-void UIOutputProjectSettings::SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
+void UIOutputProjectSettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	switch (setting_info.setting_class)
 	{
@@ -55,8 +60,10 @@ void UIOutputProjectSettings::SetMapEntry(UIMessager & messager, SettingInfo & s
 
 }
 
-UIProjectOutputSetting * UIOutputProjectSettings::CloneSetting(UIMessager & messager, UIProjectOutputSetting * /* current_setting */, SettingInfo & setting_info) const
+UIProjectOutputSetting * UIOutputProjectSettings::CloneSetting(Messager & messager_, UIProjectOutputSetting * /* current_setting */, SettingInfo & setting_info) const
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	try
 	{
@@ -93,8 +100,10 @@ UIProjectOutputSetting * UIOutputProjectSettings::CloneSetting(UIMessager & mess
 
 }
 
-UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
+UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(Messager & messager_, SettingInfo & setting_info, void const * /* setting_value_void */ )
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	switch (setting_info.setting_class)
 	{

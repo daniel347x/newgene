@@ -20,24 +20,6 @@ namespace GLOBAL_SETTINGS_UI_NAMESPACE
 
 }
 
-class UIGlobalSetting_MRUList : public UIGlobalSetting, public StringSetting
-{
-
-	public:
-
-		UIGlobalSetting_MRUList(UIMessager & messager, std::string const & setting)
-			: UIGlobalSetting()
-			, StringSetting(messager, setting)
-		{}
-
-		virtual void DoSpecialParse(UIMessager &)
-		{
-//			boost::format msg("Here is a message!");
-//			messager.AppendMessage(new UIMessagerErrorMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
-		}
-
-};
-
 class UIAllGlobalSettings : public UIAllSettings
 {
 
@@ -60,7 +42,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			public:
 
-				UIOnlySettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(messager, path_to_settings)
+				UIOnlySettings(Messager & messager_, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(static_cast<UIMessager&>(messager_), path_to_settings)
 				{
 
 				}
@@ -68,10 +50,10 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			protected:
 
-				boost::filesystem::path GetSettingsPath(UIMessager & messager, SettingInfo & setting_info);
-				void SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
-				UIGlobalSetting * CloneSetting(UIMessager & messager, UIGlobalSetting * current_setting, SettingInfo & setting_info) const;
-				UIGlobalSetting * NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);
+				boost::filesystem::path GetSettingsPath(Messager & messager_, SettingInfo & setting_info);
+				void SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt);
+				UIGlobalSetting * CloneSetting(Messager & messager_, UIGlobalSetting * current_setting, SettingInfo & setting_info) const;
+				UIGlobalSetting * NewSetting(Messager & messager_, SettingInfo & setting_info, void const * setting_value_void = NULL);
 
 		};
 

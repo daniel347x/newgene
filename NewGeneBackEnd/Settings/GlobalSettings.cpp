@@ -1,4 +1,5 @@
 #include "GlobalSettings.h"
+#include "GlobalSettings_list.h"
 
 SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
 {
@@ -39,7 +40,7 @@ void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info
 	case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
 		{
 			std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-			_settings_map[static_cast<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND>(setting_info.enum_index)] = std::unique_ptr<BackendGlobalSetting>(SettingFactory<GlobalSetting_Test, false>()(messager, string_setting));
+			_settings_map[static_cast<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND>(setting_info.enum_index)] = std::unique_ptr<BackendGlobalSetting>(SettingFactory<GlobalSetting_Test>()(messager, string_setting));
 		}
 		break;
 

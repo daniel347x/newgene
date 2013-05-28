@@ -1,10 +1,13 @@
 #include "uiallglobalsettings.h"
+#include "uiallglobalsettings_list.h"
 #include "globals.h"
 
-SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(UIMessager & messager, int const value__)
+SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager_, int const value__)
 {
 
-	GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_ = static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const>(value_);
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
+
+	GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_ = static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const>(value__);
 
 	switch (value_)
 	{
@@ -14,7 +17,7 @@ SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(UIMessager & messager, int c
 				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST,
 								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST),
 								   "MRU_LIST",
-								   "");
+								   "Good 'ol MRU list here");
 			}
 			break;
 
@@ -31,8 +34,10 @@ SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(UIMessager & messager, int c
 
 }
 
-void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	switch (setting_info.setting_class)
 	{
@@ -40,7 +45,7 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(UIMessager & messager, Set
 		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
 			{
 				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList, true>()(messager, string_setting));
+				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
 			}
 			break;
 
@@ -56,8 +61,10 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(UIMessager & messager, Set
 
 }
 
-UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(UIMessager & messager, UIGlobalSetting * current_setting, SettingInfo & setting_info) const
+UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & messager_, UIGlobalSetting * current_setting, SettingInfo & setting_info) const
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	try
 	{
@@ -94,8 +101,10 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(UIMessager &
 
 }
 
-UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void)
+UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & messager_, SettingInfo & setting_info, void const * setting_value_void)
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	switch (setting_info.setting_class)
 	{
@@ -125,7 +134,7 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(UIMessager & m
 
 }
 
-boost::filesystem::path UIAllGlobalSettings::UIOnlySettings::GetSettingsPath(UIMessager &, SettingInfo & /* setting_info */ )
+boost::filesystem::path UIAllGlobalSettings::UIOnlySettings::GetSettingsPath(Messager &, SettingInfo & /* setting_info */ )
 {
 	settingsManagerUI().ObtainGlobalSettingsPath();
 	return settingsManagerUI().getGlobalSettingsPath();
@@ -138,7 +147,7 @@ UIAllGlobalSettings::UIOnlySettings & UIAllGlobalSettings::getUISettings()
 		boost::format msg( "Internal settings implementation not yet constructed." );
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
-	return reinterpret_cast<UIAllGlobalSettings::UIOnlySettings &>(getUISettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, UIGlobalSetting>(*__impl));
+	return static_cast<UIAllGlobalSettings::UIOnlySettings &>(getUISettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, UIGlobalSetting>(*__impl));
 }
 
 GlobalSettings & UIAllGlobalSettings::getBackendSettings()
@@ -148,7 +157,7 @@ GlobalSettings & UIAllGlobalSettings::getBackendSettings()
 		boost::format msg( "Internal settings implementation not yet constructed." );
 		throw NewGeneException() << newgene_error_description( msg.str() );
 	}
-	return reinterpret_cast<GlobalSettings &>(getBackendSettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, BackendGlobalSetting>(*__impl));
+	return static_cast<GlobalSettings &>(getBackendSettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND, BackendGlobalSetting>(*__impl));
 }
 
 UIAllGlobalSettings::UIAllGlobalSettings(UIMessager & messager, boost::filesystem::path const path_to_settings, QObject * parent) :

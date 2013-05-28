@@ -23,7 +23,7 @@ class UIOutputSetting : virtual public UISetting, virtual public OutputSetting
 class UIGlobalSetting : public GlobalSetting, public UISetting
 {
 	public:
-		SettingInfo GetSettingInfoFromEnum(UIMessager & messager, int const enum_val);
+		SettingInfo GetSettingInfoFromEnum(Messager & messager_, int const enum_val);
 		static SETTING_CATEGORY category;
 };
 
@@ -35,14 +35,14 @@ class UIProjectSetting : virtual public ProjectSetting, virtual public UISetting
 class UIProjectInputSetting : public UIProjectSetting, public UIInputSetting, public ProjectInputSetting
 {
 	public:
-		SettingInfo GetSettingInfoFromEnum(UIMessager & messager, int const enum_val);
+		SettingInfo GetSettingInfoFromEnum(Messager & messager_, int const enum_val);
 		static SETTING_CATEGORY category;
 };
 
 class UIProjectOutputSetting : public UIProjectSetting, public UIOutputSetting, public ProjectOutputSetting
 {
 	public:
-		SettingInfo GetSettingInfoFromEnum(UIMessager & messager, int const enum_val);
+		SettingInfo GetSettingInfoFromEnum(Messager & messager_, int const enum_val);
 		static SETTING_CATEGORY category;
 };
 

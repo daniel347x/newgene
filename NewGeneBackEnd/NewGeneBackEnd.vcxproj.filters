@@ -138,6 +138,15 @@
     <ClInclude Include="Model\OutputModel.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
+    <ClInclude Include="Settings\GlobalSettings_list.h">
+      <Filter>Header Files\Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\InputProjectSettings_list.h">
+      <Filter>Header Files\Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\OutputProjectSettings_list.h">
+      <Filter>Header Files\Settings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -197,12 +206,6 @@
     <ClCompile Include="Project\OutputProject.cpp">
       <Filter>Source Files\Project</Filter>
     </ClCompile>
-    <ClCompile Include="Settings\InputProjectSettings.cpp">
-      <Filter>Source Files\Project</Filter>
-    </ClCompile>
-    <ClCompile Include="Settings\OutputProjectSettings.cpp">
-      <Filter>Source Files\Project</Filter>
-    </ClCompile>
     <ClCompile Include="Model\Model.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
@@ -211,6 +214,21 @@
     </ClCompile>
     <ClCompile Include="Model\OutputModel.cpp">
       <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\GlobalSettings_list.cpp">
+      <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\InputProjectSettings_list.cpp">
+      <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\OutputProjectSettings_list.cpp">
+      <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\InputProjectSettings.cpp">
+      <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\OutputProjectSettings.cpp">
+      <Filter>Source Files\Settings</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

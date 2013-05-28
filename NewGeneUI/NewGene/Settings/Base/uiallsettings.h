@@ -290,7 +290,7 @@ class UIAllSettings : public QObject
 		{
 			_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_UIRelatedImpl_base & impl_ui = impl.getInternalUIImplementation();
 			UI_SETTINGS_CLASS & settings_repository = impl_ui.getSettingsRepository();
-			return reinterpret_cast<UIOnlySettings_base<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
+			return static_cast<UIOnlySettings_base<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
 		}
 
 		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS, typename SETTINGS_ENUM, typename SETTING_CLASS>
@@ -299,7 +299,7 @@ class UIAllSettings : public QObject
 		{
 			_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendRelatedImpl_base & impl_backend = impl.getInternalBackendImplementation();
 			BACKEND_SETTINGS_CLASS & settings_repository = impl_backend.getSettingsRepository();
-			return reinterpret_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
+			return static_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
 		}
 
 		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS>

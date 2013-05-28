@@ -1,4 +1,5 @@
 #include "OutputProjectSettings.h"
+#include "OutputProjectSettings_list.h"
 
 SettingInfo BackendProjectOutputSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
 {

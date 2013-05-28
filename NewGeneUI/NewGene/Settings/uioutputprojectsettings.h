@@ -18,7 +18,7 @@ namespace OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE
 
 }
 
-class UIOutputProjectSettings : public QObject, public UIAllProjectSettings<OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting>
+class UIOutputProjectSettings : public QObject, public UIAllProjectSettings<OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting>
 {
 
 		Q_OBJECT
@@ -36,9 +36,9 @@ class UIOutputProjectSettings : public QObject, public UIAllProjectSettings<Outp
 
 		}
 
-		void SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
-		UIProjectOutputSetting * CloneSetting(UIMessager & messager, UIProjectOutputSetting * current_setting, SettingInfo & setting_info) const;
-		UIProjectOutputSetting * NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);
+		void SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt);
+		UIProjectOutputSetting * CloneSetting(Messager & messager_, UIProjectOutputSetting * current_setting, SettingInfo & setting_info) const;
+		UIProjectOutputSetting * NewSetting(Messager & messager_, SettingInfo & setting_info, void const * setting_value_void = NULL);
 };
 
 #endif // UIPROJECTOUTPUTSETTINGS_H

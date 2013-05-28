@@ -9,8 +9,6 @@
 #include "SettingsRepository.h"
 
 class Setting;
-class UIMessager;
-class UIGlobalSetting;
 
 enum SETTING_CATEGORY
 {
@@ -22,25 +20,8 @@ enum SETTING_CATEGORY
 	, SETTING_CATEGORY__PROJECT_OUTPUT_UI
 };
 
-template<typename SETTING_CLASS, bool UI, typename SETTING_VALUE_TYPE = SETTING_CLASS::type>
+template<typename SETTING_CLASS, typename SETTING_VALUE_TYPE = SETTING_CLASS::type>
 class SettingFactory
-{
-
-	public:
-
-		SETTING_CLASS * operator()(Messager & messager, SETTING_VALUE_TYPE const & initializing_val)
-		{
-
-			SETTING_CLASS * new_setting = new SETTING_CLASS(reinterpret_cast<UIMessager&>(messager), initializing_val);
-			new_setting->DoSpecialParse(reinterpret_cast<UIMessager&>(messager));
-			return new_setting;
-
-		}
-
-};
-
-template<typename SETTING_CLASS, typename SETTING_VALUE_TYPE>
-class SettingFactory<SETTING_CLASS, false, SETTING_VALUE_TYPE>
 {
 
 public:
@@ -81,27 +62,27 @@ class SimpleAccessSetting_base
 		typedef std::unique_ptr<DERIVED_SETTING_CLASS> instance;
 };
 
-template<typename DERIVED_SETTING_CLASS, typename SETTING_ENUM, SETTING_ENUM setting_enum>
+template<typename DERIVED_SETTING_CLASS, typename SETTING_ENUM, SETTING_ENUM setting_enum, typename SETTINGS_MANAGER_CLASS>
 class SimpleAccessSetting : public SimpleAccessSetting_base<DERIVED_SETTING_CLASS>
 {
-	public:
-		static instance get(Messager & messager)
+public:
+	static instance get(Messager & messager)
+	{
+		instance derived_setting;
+		std::unique_ptr<Setting> setting = static_cast<SETTINGS_MANAGER_CLASS&>(SETTINGS_MANAGER_CLASS::getManager()).getSetting(messager, setting_enum);
+		try
 		{
-			instance derived_setting;
-			std::unique_ptr<Setting> setting = settingsManager().getSetting(messager, setting_enum);
-			try
-			{
-				derived_setting.reset(dynamic_cast<DERIVED_SETTING_CLASS*>(setting.release()));
-			}
-			catch (std::bad_cast & bc)
-			{
-				boost::format msg("Cannot convert from UIGlobalSetting to derived setting class: %1%");
-				msg % bc.what();
-				messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
-				return instance();
-			}
-			return derived_setting;
+			derived_setting.reset(dynamic_cast<DERIVED_SETTING_CLASS*>(setting.release()));
 		}
+		catch (std::bad_cast & bc)
+		{
+			boost::format msg("Cannot convert from UIGlobalSetting to derived setting class: %1%");
+			msg % bc.what();
+			messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
+			return instance();
+		}
+		return derived_setting;
+	}
 };
 
 class GlobalSetting : virtual public Setting

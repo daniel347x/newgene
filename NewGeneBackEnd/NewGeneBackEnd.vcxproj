@@ -88,8 +88,11 @@
     <ClInclude Include="Project\ProjectManager.h" />
     <ClInclude Include="Project\OutputProject.h" />
     <ClInclude Include="Settings\GlobalSettings.h" />
+    <ClInclude Include="Settings\GlobalSettings_list.h" />
     <ClInclude Include="Settings\InputProjectSettings.h" />
+    <ClInclude Include="Settings\InputProjectSettings_list.h" />
     <ClInclude Include="Settings\OutputProjectSettings.h" />
+    <ClInclude Include="Settings\OutputProjectSettings_list.h" />
     <ClInclude Include="Settings\ProjectSettings.h" />
     <ClInclude Include="Settings\Setting.h" />
     <ClInclude Include="Settings\Settings.h" />
@@ -114,8 +117,11 @@
     <ClCompile Include="Project\ProjectManager.cpp" />
     <ClCompile Include="Project\OutputProject.cpp" />
     <ClCompile Include="Settings\GlobalSettings.cpp" />
+    <ClCompile Include="Settings\GlobalSettings_list.cpp" />
     <ClCompile Include="Settings\InputProjectSettings.cpp" />
+    <ClCompile Include="Settings\InputProjectSettings_list.cpp" />
     <ClCompile Include="Settings\OutputProjectSettings.cpp" />
+    <ClCompile Include="Settings\OutputProjectSettings_list.cpp" />
     <ClCompile Include="Settings\ProjectSettings.cpp" />
     <ClCompile Include="Settings\Setting.cpp" />
     <ClCompile Include="Settings\Settings.cpp" />

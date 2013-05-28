@@ -19,7 +19,7 @@ namespace INPUT_PROJECT_SETTINGS_UI_NAMESPACE
 
 }
 
-class UIInputProjectSettings : public QObject, public UIAllProjectSettings<InputProjectSettings, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI, BackendProjectInputSetting, UIProjectInputSetting>
+class UIInputProjectSettings : public QObject, public UIAllProjectSettings<InputProjectSettings, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI, BackendProjectInputSetting, UIProjectInputSetting>
 {
 
 		Q_OBJECT
@@ -37,9 +37,9 @@ class UIInputProjectSettings : public QObject, public UIAllProjectSettings<Input
 
 		}
 
-		void SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
-		UIProjectInputSetting * CloneSetting(UIMessager & messager, UIProjectInputSetting * current_setting, SettingInfo & setting_info) const;
-		UIProjectInputSetting * NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);
+		void SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt);
+		UIProjectInputSetting * CloneSetting(Messager & messager_, UIProjectInputSetting * current_setting, SettingInfo & setting_info) const;
+		UIProjectInputSetting * NewSetting(Messager & messager_, SettingInfo & setting_info, void const * setting_value_void = NULL);
 };
 
 #endif // UIPROJECTINPUTSETTINGS_H

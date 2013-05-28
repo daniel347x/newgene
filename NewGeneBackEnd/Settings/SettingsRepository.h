@@ -90,28 +90,7 @@ class SettingsRepository
 
 		typedef std::map<SETTINGS_ENUM, std::unique_ptr<SETTING_CLASS> > SettingsMap;
 
-		template<bool UI>
 		std::unique_ptr<SETTING_CLASS> GetSetting(Messager & messager, SETTINGS_ENUM const which_setting)
-		{
-			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(reinterpret_cast<UIMessager&>(messager), which_setting);
-			SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
-			if (theSetting == _settings_map.cend())
-			{
-				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(reinterpret_cast<UIMessager&>(messager), which_setting);
-				_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(reinterpret_cast<UIMessager&>(messager), setting_info));
-				theSetting = _settings_map.find(which_setting);
-				if (theSetting == _settings_map.cend())
-				{
-					boost::format msg("Setting cannot be created.");
-					messager.AppendMessage(new MessagerCatastrophicErrorMessage(MESSAGER_MESSAGE__SETTING_NOT_CREATED, msg.str()));
-					return std::unique_ptr<SETTING_CLASS>(new SETTING_CLASS());
-				}
-			}
-			return std::unique_ptr<SETTING_CLASS>(CloneSetting(messager, theSetting->second.get(), setting_info));
-		}
-
-		template<>
-		std::unique_ptr<SETTING_CLASS> GetSetting<false>(Messager & messager, SETTINGS_ENUM const which_setting)
 		{
 			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
 			SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
@@ -128,14 +107,6 @@ class SettingsRepository
 				}
 			}
 			return std::unique_ptr<SETTING_CLASS>(CloneSetting(messager, theSetting->second.get(), setting_info));
-		}
-
-		template<typename T>
-		void UpdateSettingUI(Messager & messager, SETTINGS_ENUM const which_setting, T const & setting_value)
-		{
-			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(reinterpret_cast<UIMessager&>(messager), which_setting);
-			_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(reinterpret_cast<UIMessager&>(messager), setting_info, (void const *)(&setting_value)));
-			//WriteSettingsToFile(Messager & messager);
 		}
 
 		template<typename T>
@@ -195,7 +166,7 @@ class SettingsRepository
 
 			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
 			{
-				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(reinterpret_cast<UIMessager&>(messager), static_cast<SETTINGS_ENUM>(n));
+				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, static_cast<SETTINGS_ENUM>(n));
 				SetMapEntry(messager, setting_info, pt); // sets default value if not present in property tree at this point
 			}
 
@@ -228,7 +199,7 @@ class SettingsRepositoryFactory
 
 		SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_settings)
 		{
-			SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(reinterpret_cast<UIMessager&>(messager), path_to_settings);
+			SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings);
 			new_settings_repository->LoadSettingsFromFile(messager, path_to_settings);
 			return new_settings_repository;
 		}

@@ -6,7 +6,7 @@
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"
 
-template<typename BACKEND_PROJECT_SETTINGS_CLASS, typename PROJECT_SETTINGS_ENUM, typename BACKEND_PROJECT_SETTING_CLASS, typename UI_PROJECT_SETTING_CLASS>
+template<typename BACKEND_PROJECT_SETTINGS_CLASS, typename PROJECT_SETTINGS_ENUM, typename UI_PROJECT_SETTINGS_ENUM, typename BACKEND_PROJECT_SETTING_CLASS, typename UI_PROJECT_SETTING_CLASS>
 class UIAllProjectSettings : public UIAllSettings
 {
 
@@ -19,12 +19,12 @@ class UIAllProjectSettings : public UIAllSettings
 		}
 
 		// The following is the equivalent of the backend's ProjectSettings class
-		class UIOnlySettings : public UIOnlySettings_base<PROJECT_SETTINGS_ENUM, UI_PROJECT_SETTING_CLASS>
+		class UIOnlySettings : public UIOnlySettings_base<UI_PROJECT_SETTINGS_ENUM, UI_PROJECT_SETTING_CLASS>
 		{
 
 			public:
 
-				UIOnlySettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(messager, path_to_settings)
+				UIOnlySettings(Messager & messager_, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(static_cast<UIMessager&>(messager_), path_to_settings)
 				{
 
 				}
@@ -32,8 +32,9 @@ class UIAllProjectSettings : public UIAllSettings
 
 			protected:
 
-				boost::filesystem::path GetSettingsPath(UIMessager & messager, SettingInfo & setting_info)
+				boost::filesystem::path GetSettingsPath(Messager & messager_, SettingInfo & setting_info)
 				{
+					UIMessager & messager = static_cast<UIMessager &>(messager_);
 					return boost::filesystem::path();
 				}
 
@@ -116,7 +117,7 @@ class UIAllProjectSettings : public UIAllSettings
 				boost::format msg( "Internal settings implementation not yet constructed." );
 				throw NewGeneException() << newgene_error_description( msg.str() );
 			}
-			return reinterpret_cast<UIOnlySettings &>(getUISettings_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings, PROJECT_SETTINGS_ENUM, UI_PROJECT_SETTING_CLASS>(*__impl));
+			return static_cast<UIOnlySettings &>(getUISettings_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings, UI_PROJECT_SETTINGS_ENUM, UI_PROJECT_SETTING_CLASS>(*__impl));
 		}
 
 		BACKEND_PROJECT_SETTINGS_CLASS & getBackendSettings()
@@ -126,7 +127,7 @@ class UIAllProjectSettings : public UIAllSettings
 				boost::format msg( "Internal settings implementation not yet constructed." );
 				throw NewGeneException() << newgene_error_description( msg.str() );
 			}
-			return reinterpret_cast<BACKEND_PROJECT_SETTINGS_CLASS &>(getBackendSettings_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings, PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS>(*__impl));
+			return static_cast<BACKEND_PROJECT_SETTINGS_CLASS &>(getBackendSettings_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings, PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS>(*__impl));
 		}
 
 		std::shared_ptr<BACKEND_PROJECT_SETTINGS_CLASS> & getBackendSettingsSharedPtr()

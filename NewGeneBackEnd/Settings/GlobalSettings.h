@@ -19,24 +19,6 @@ namespace GLOBAL_SETTINGS_BACKEND_NAMESPACE
 
 }
 
-class GlobalSetting_Test : public BackendGlobalSetting, public StringSetting, public SimpleAccessSetting<GlobalSetting_Test, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND, GLOBAL_SETTINGS_BACKEND_NAMESPACE::TEST_SETTING>
-{
-
-public:
-
-	GlobalSetting_Test(Messager & messager, std::string const & setting)
-		: BackendGlobalSetting()
-		, StringSetting(messager, setting)
-	{}
-
-	virtual void DoSpecialParse(Messager &)
-	{
-		//boost::format msg("Here is a message from TEST!");
-		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
-	}
-
-};
-
 class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND, BackendGlobalSetting>
 {
 

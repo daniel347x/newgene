@@ -1,7 +1,10 @@
 #include "uiinputprojectsettings.h"
+#include "uiinputprojectsettings_list.h"
 
-SettingInfo UIProjectInputSetting::GetSettingInfoFromEnum(UIMessager & messager, int const value__)
+SettingInfo UIProjectInputSetting::GetSettingInfoFromEnum(Messager & messager_, int const value__)
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const value_ = static_cast<INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const>(value__);
 
@@ -30,8 +33,10 @@ SettingInfo UIProjectInputSetting::GetSettingInfoFromEnum(UIMessager & messager,
 
 }
 
-void UIInputProjectSettings::SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
+void UIInputProjectSettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	switch (setting_info.setting_class)
 	{
@@ -55,8 +60,10 @@ void UIInputProjectSettings::SetMapEntry(UIMessager & messager, SettingInfo & se
 
 }
 
-UIProjectInputSetting * UIInputProjectSettings::CloneSetting(UIMessager & messager, UIProjectInputSetting * /* current_setting */, SettingInfo & setting_info) const
+UIProjectInputSetting * UIInputProjectSettings::CloneSetting(Messager & messager_, UIProjectInputSetting * /* current_setting */, SettingInfo & setting_info) const
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	try
 	{
@@ -93,8 +100,10 @@ UIProjectInputSetting * UIInputProjectSettings::CloneSetting(UIMessager & messag
 
 }
 
-UIProjectInputSetting * UIInputProjectSettings::NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
+UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager_, SettingInfo & setting_info, void const * /* setting_value_void */ )
 {
+
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
 	switch (setting_info.setting_class)
 	{

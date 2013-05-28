@@ -68,7 +68,7 @@ class UIMessager : public QObject, public Messager
 {
 		Q_OBJECT
 	public:
-		explicit UIMessager(QObject *parent = 0);
+		UIMessager(QObject *parent = 0);
 		~UIMessager();
 
 		void displayStatusMessages();
@@ -80,6 +80,10 @@ class UIMessager : public QObject, public Messager
 	public:
 
 		bool do_not_handle_messages_on_destruction;
+
+	private:
+
+		UIMessager(UIMessager const &) {}
 
 };
 
