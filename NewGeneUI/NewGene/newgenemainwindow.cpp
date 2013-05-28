@@ -102,8 +102,8 @@ void NewGeneMainWindow::doInitialize()
 	// Use project or settings manager to obtain the path to the project settings,
 	// and pass as argument to the instantiation of the settings objects, below.
 	// Likewise for the input and output model.
-	inp.apply_settings( new AllInputProjectSettings(messager) );
-	outp.apply_settings( new AllOutputProjectSettings(messager) );
+	inp.apply_settings( new UIInputProjectSettings(messager) );
+	outp.apply_settings( new UIOutputProjectSettings(messager) );
 
 
 	//_current_project.reset(projectManagerUI().LoadDefaultProject());

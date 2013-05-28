@@ -2,10 +2,10 @@
 #define UIOUTPUTPROJECT_H
 
 #include "uiproject.h"
-#include "../Settings/alloutputprojectsettings.h"
+#include "../Settings/uioutputprojectsettings.h"
 #include "uioutputmodel.h"
 
-class UIOutputProject : public QObject, public UIProject<OutputProject, AllOutputProjectSettings, UIOutputModel>
+class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, UIOutputModel>
 {
 
 		Q_OBJECT

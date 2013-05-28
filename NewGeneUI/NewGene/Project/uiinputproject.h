@@ -2,10 +2,10 @@
 #define UIINPUTPROJECT_H
 
 #include "uiproject.h"
-#include "../Settings/allinputprojectsettings.h"
+#include "../Settings/uiinputprojectsettings.h"
 #include "uiinputmodel.h"
 
-class UIInputProject : public QObject, public UIProject<InputProject, AllInputProjectSettings, UIInputModel>
+class UIInputProject : public QObject, public UIProject<InputProject, UIInputProjectSettings, UIInputModel>
 {
 
 		Q_OBJECT

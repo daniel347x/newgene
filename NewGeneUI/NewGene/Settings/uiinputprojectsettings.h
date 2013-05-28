@@ -19,7 +19,7 @@ namespace INPUT_PROJECT_SETTINGS_UI_NAMESPACE
 
 }
 
-class AllInputProjectSettings : public QObject, public UIAllProjectSettings<InputProjectSettings, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI, BackendProjectInputSetting, UIProjectInputSetting>
+class UIInputProjectSettings : public QObject, public UIAllProjectSettings<InputProjectSettings, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI, BackendProjectInputSetting, UIProjectInputSetting>
 {
 
 		Q_OBJECT
@@ -30,7 +30,7 @@ class AllInputProjectSettings : public QObject, public UIAllProjectSettings<Inpu
 
 
 	public:
-		AllInputProjectSettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
+		UIInputProjectSettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
 			: QObject(parent)
 			, UIAllProjectSettings(messager, path_to_settings)
 		{

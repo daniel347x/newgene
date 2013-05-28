@@ -1,6 +1,6 @@
-#include "allinputprojectsettings.h"
+#include "uiinputprojectsettings.h"
 
-void AllInputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
+void UIInputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
 {
 
 	switch (setting_info.setting_class)
@@ -25,7 +25,7 @@ void AllInputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & set
 
 }
 
-UIProjectInputSetting * AllInputProjectSettings::CloneSetting(Messager & messager, UIProjectInputSetting * /* current_setting */, SettingInfo & setting_info) const
+UIProjectInputSetting * UIInputProjectSettings::CloneSetting(Messager & messager, UIProjectInputSetting * /* current_setting */, SettingInfo & setting_info) const
 {
 
 	try
@@ -63,7 +63,7 @@ UIProjectInputSetting * AllInputProjectSettings::CloneSetting(Messager & message
 
 }
 
-UIProjectInputSetting * AllInputProjectSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
+UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
 {
 
 	switch (setting_info.setting_class)

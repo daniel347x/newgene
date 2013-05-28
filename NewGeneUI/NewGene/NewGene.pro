@@ -67,14 +67,14 @@ SOURCES += main.cpp\
 	Messager/uimessager.cpp \
 	Project/uiinputproject.cpp \
 	Project/uioutputproject.cpp \
-	Settings/allinputprojectsettings.cpp \
-	Settings/alloutputprojectsettings.cpp \
 	Model/uiinputmodel.cpp \
 	Model/uioutputmodel.cpp \
 	Settings/Project/uiallprojectsettings.cpp \
 	Settings/Global/uiallglobalsettings.cpp \
 	Model/Base/uimodel.cpp \
-	Project/Base/uiproject.cpp
+	Project/Base/uiproject.cpp \
+    Settings/uiinputprojectsettings.cpp \
+    Settings/uioutputprojectsettings.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -130,14 +130,14 @@ HEADERS  += newgenemainwindow.h \
 	Messager/uimessager.h \
 	Project/uiinputproject.h \
 	Project/uioutputproject.h \
-	Settings/allinputprojectsettings.h \
-	Settings/alloutputprojectsettings.h \
 	Model/uiinputmodel.h \
 	Model/uioutputmodel.h \
 	Settings/Project/uiallprojectsettings.h \
 	Settings/Global/uiallglobalsettings.h \
 	Model/Base/uimodel.h \
-	Project/Base/uiproject.h
+	Project/Base/uiproject.h \
+    Settings/uiinputprojectsettings.h \
+    Settings/uioutputprojectsettings.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \
