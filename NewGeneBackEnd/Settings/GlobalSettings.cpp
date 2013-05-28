@@ -13,7 +13,7 @@ SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, in
 			return SettingInfo(SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST,
 				static_cast<int>(GLOBAL_SETTINGS_BACKEND_NAMESPACE::TEST_SETTING),
 				"GLOBAL_BACKEND_TEST",
-				"default test string");
+				"default test string!  And it works");
 		}
 		break;
 
@@ -101,7 +101,11 @@ BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingIn
 
 	case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
 		{
-			std::string string_setting = *((std::string *)(setting_value_void));
+			std::string string_setting = setting_info.default_val_string;
+			if (setting_value_void)
+			{
+				string_setting = *((std::string *)(setting_value_void));
+			}
 			return new GlobalSetting_Test(messager, string_setting);
 		}
 		break;

@@ -3,7 +3,8 @@
 
 std::unique_ptr<BackendGlobalSetting> SettingsManager::getSetting(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting)
 {
-	//std::unique_ptr<BackendGlobalSetting> the_setting_ = _global_settings->getBackendSettings().GetSetting(messager, which_setting);
+	return _global_settings->GetSetting<false>(messager, which_setting);
+	//std::unique_ptr<BackendGlobalSetting> the_setting_ = _global_settings->getBackendSettings().GetSetting<false>(messager, which_setting);
 	//BackendGlobalSetting * the_setting = the_setting_.get();
 	//if (the_setting == NULL)
 	//{
@@ -13,7 +14,7 @@ std::unique_ptr<BackendGlobalSetting> SettingsManager::getSetting(Messager & mes
 	//	return std::unique_ptr<BackendGlobalSetting>(new BackendGlobalSetting());
 	//}
 	//return the_setting_;
-	return std::unique_ptr<BackendGlobalSetting>(new BackendGlobalSetting());
+	//return std::unique_ptr<BackendGlobalSetting>(new BackendGlobalSetting());
 }
 
 std::unique_ptr<BackendProjectInputSetting> SettingsManager::getSetting(Messager & messager, InputProject * project, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting)
@@ -25,7 +26,7 @@ std::unique_ptr<BackendProjectInputSetting> SettingsManager::getSetting(Messager
 	//	messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__NO_PROJECT_AVAILABLE, msg.str()));
 	//	return std::unique_ptr<BackendProjectSetting>(new BackendProjectSetting());
 	//}
-	//std::unique_ptr<BackendProjectSetting> the_setting_ = project->settings()->getBackendSettings().GetSetting(messager, which_setting);
+	//std::unique_ptr<BackendProjectSetting> the_setting_ = project->settings()->getBackendSettings().GetSetting<false>(messager, which_setting);
 	//BackendProjectSetting * the_setting = the_setting_.get();
 	//if (the_setting == NULL)
 	//{
@@ -47,7 +48,7 @@ std::unique_ptr<BackendProjectOutputSetting> SettingsManager::getSetting(Message
 	//	messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__NO_PROJECT_AVAILABLE, msg.str()));
 	//	return std::unique_ptr<BackendProjectSetting>(new BackendProjectSetting());
 	//}
-	//std::unique_ptr<BackendProjectSetting> the_setting_ = project->settings()->getBackendSettings().GetSetting(messager, which_setting);
+	//std::unique_ptr<BackendProjectSetting> the_setting_ = project->settings()->getBackendSettings().GetSetting<false>(messager, which_setting);
 	//BackendProjectSetting * the_setting = the_setting_.get();
 	//if (the_setting == NULL)
 	//{

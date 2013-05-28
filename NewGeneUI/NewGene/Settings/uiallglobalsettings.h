@@ -71,7 +71,7 @@ class UIAllGlobalSettings : public UIAllSettings
 				boost::filesystem::path GetSettingsPath(UIMessager & messager, SettingInfo & setting_info);
 				void SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 				UIGlobalSetting * CloneSetting(UIMessager & messager, UIGlobalSetting * current_setting, SettingInfo & setting_info) const;
-				UIGlobalSetting * NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void);
+				UIGlobalSetting * NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);
 
 		};
 

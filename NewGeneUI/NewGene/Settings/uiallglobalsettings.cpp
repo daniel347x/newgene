@@ -102,7 +102,11 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(UIMessager & m
 
 		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
 			{
-				std::string string_setting = *((std::string *)(setting_value_void));
+				std::string string_setting = setting_info.default_val_string;
+				if (setting_value_void)
+				{
+					string_setting = *((std::string *)(setting_value_void));
+				}
 				return new UIGlobalSetting_MRUList(messager, string_setting);
 			}
 			break;

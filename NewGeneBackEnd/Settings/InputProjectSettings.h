@@ -27,7 +27,7 @@ public:
 
 	void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 	BackendProjectInputSetting * CloneSetting(Messager & messager, BackendProjectInputSetting * current_setting, SettingInfo & setting_info) const;
-	BackendProjectInputSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
+	BackendProjectInputSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);
 
 };
 

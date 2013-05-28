@@ -39,7 +39,7 @@ class UIInputProjectSettings : public QObject, public UIAllProjectSettings<Input
 
 		void SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 		UIProjectInputSetting * CloneSetting(UIMessager & messager, UIProjectInputSetting * current_setting, SettingInfo & setting_info) const;
-		UIProjectInputSetting * NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void);
+		UIProjectInputSetting * NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);
 };
 
 #endif // UIPROJECTINPUTSETTINGS_H
