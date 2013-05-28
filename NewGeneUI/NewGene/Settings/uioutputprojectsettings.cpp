@@ -1,6 +1,6 @@
 #include "uioutputprojectsettings.h"
 
-void UIOutputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
+void UIOutputProjectSettings::SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
 {
 
 	switch (setting_info.setting_class)
@@ -25,7 +25,7 @@ void UIOutputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & set
 
 }
 
-UIProjectOutputSetting * UIOutputProjectSettings::CloneSetting(Messager & messager, UIProjectOutputSetting * /* current_setting */, SettingInfo & setting_info) const
+UIProjectOutputSetting * UIOutputProjectSettings::CloneSetting(UIMessager & messager, UIProjectOutputSetting * /* current_setting */, SettingInfo & setting_info) const
 {
 
 	try
@@ -63,7 +63,7 @@ UIProjectOutputSetting * UIOutputProjectSettings::CloneSetting(Messager & messag
 
 }
 
-UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
+UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
 {
 
 	switch (setting_info.setting_class)
@@ -90,7 +90,7 @@ UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(Messager & messager
 
 }
 
-SettingInfo UIProjectOutputSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
+SettingInfo UIProjectOutputSetting::GetSettingInfoFromEnum(UIMessager & messager, int const value__)
 {
 
 	OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const value_ = static_cast<OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const>(value__);

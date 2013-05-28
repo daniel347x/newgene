@@ -31,13 +31,13 @@ class UISettingsManager : public QObject, public UIManager<UISettingsManager, Se
 
 		explicit UISettingsManager( QObject * parent = 0 );
 
-		std::unique_ptr<BackendGlobalSetting> getSetting(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting);
-		std::unique_ptr<UIGlobalSetting> getSetting(Messager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const which_setting);
+		std::unique_ptr<BackendGlobalSetting> getSetting(UIMessager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting);
+		std::unique_ptr<UIGlobalSetting> getSetting(UIMessager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const which_setting);
 
-		std::unique_ptr<BackendProjectInputSetting> getSetting(Messager & messager, UIInputProject * project, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting);
-		std::unique_ptr<BackendProjectOutputSetting> getSetting(Messager & messager, UIOutputProject * project, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting);
-		std::unique_ptr<UIProjectInputSetting> getSetting(Messager & messager, UIInputProject * project, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const which_setting);
-		std::unique_ptr<UIProjectOutputSetting> getSetting(Messager & messager, UIOutputProject * project, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const which_setting);
+		std::unique_ptr<BackendProjectInputSetting> getSetting(UIMessager & messager, UIInputProject * project, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting);
+		std::unique_ptr<BackendProjectOutputSetting> getSetting(UIMessager & messager, UIOutputProject * project, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting);
+		std::unique_ptr<UIProjectInputSetting> getSetting(UIMessager & messager, UIInputProject * project, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const which_setting);
+		std::unique_ptr<UIProjectOutputSetting> getSetting(UIMessager & messager, UIOutputProject * project, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const which_setting);
 
 		bool ObtainGlobalSettingsPath();
 		boost::filesystem::path getGlobalSettingsPath() { return global_settings_path; }

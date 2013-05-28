@@ -1,7 +1,7 @@
 #include "uiallglobalsettings.h"
 #include "globals.h"
 
-void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	switch (setting_info.setting_class)
@@ -26,7 +26,7 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager, Setti
 
 }
 
-UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & messager, UIGlobalSetting * current_setting, SettingInfo & setting_info) const
+UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(UIMessager & messager, UIGlobalSetting * current_setting, SettingInfo & setting_info) const
 {
 
 	try
@@ -64,7 +64,7 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & m
 
 }
 
-UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void)
+UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void)
 {
 
 	switch (setting_info.setting_class)
@@ -91,13 +91,13 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 
 }
 
-boost::filesystem::path UIAllGlobalSettings::UIOnlySettings::GetSettingsPath(Messager &, SettingInfo & /* setting_info */ )
+boost::filesystem::path UIAllGlobalSettings::UIOnlySettings::GetSettingsPath(UIMessager &, SettingInfo & /* setting_info */ )
 {
 	settingsManagerUI().ObtainGlobalSettingsPath();
 	return settingsManagerUI().getGlobalSettingsPath();
 }
 
-SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
+SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(UIMessager & messager, int const value__)
 {
 
 	GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_ = static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const>(value_);
@@ -147,19 +147,19 @@ GlobalSettings & UIAllGlobalSettings::getBackendSettings()
 	return reinterpret_cast<GlobalSettings &>(getBackendSettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, BackendGlobalSetting>(*__impl));
 }
 
-UIAllGlobalSettings::UIAllGlobalSettings(Messager & messager, boost::filesystem::path const path_to_settings, QObject * parent) :
+UIAllGlobalSettings::UIAllGlobalSettings(UIMessager & messager, boost::filesystem::path const path_to_settings, QObject * parent) :
 	UIAllSettings(messager, parent)
 {
 	CreateImplementation(messager, path_to_settings);
 }
 
-void UIAllGlobalSettings::_impl::CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings)
+void UIAllGlobalSettings::_impl::CreateInternalImplementations(UIMessager & messager, boost::filesystem::path const path_to_settings)
 {
 	__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
 	__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
 }
 
-void UIAllGlobalSettings::CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings)
+void UIAllGlobalSettings::CreateImplementation(UIMessager & messager, boost::filesystem::path const path_to_settings)
 {
 	__impl.reset(new _impl(messager, path_to_settings));
 }

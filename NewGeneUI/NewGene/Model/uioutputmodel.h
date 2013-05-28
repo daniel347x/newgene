@@ -15,7 +15,7 @@ class UIOutputModel : public QObject, public UIModel<OutputModel>
 
 
 	public:
-		UIOutputModel(Messager & messager, OutputModel & model, boost::filesystem::path const path_to_model = boost::filesystem::path(), QObject * parent = NULL);
+		UIOutputModel(UIMessager & messager, OutputModel & model, boost::filesystem::path const path_to_model = boost::filesystem::path(), QObject * parent = NULL);
 };
 
 #endif // UIOUTPUTMODEL_H

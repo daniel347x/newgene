@@ -115,7 +115,7 @@ bool UISettingsManager::ObtainGlobalSettingsPath()
 	return found;
 }
 
-std::unique_ptr<BackendGlobalSetting> UISettingsManager::getSetting(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting)
+std::unique_ptr<BackendGlobalSetting> UISettingsManager::getSetting(UIMessager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting)
 {
 	std::unique_ptr<BackendGlobalSetting> the_setting_ = _global_settings->getBackendSettings().GetSetting(messager, which_setting);
 	BackendGlobalSetting * the_setting = the_setting_.get();
@@ -129,7 +129,7 @@ std::unique_ptr<BackendGlobalSetting> UISettingsManager::getSetting(Messager & m
 	return the_setting_;
 }
 
-std::unique_ptr<UIGlobalSetting> UISettingsManager::getSetting(Messager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const which_setting)
+std::unique_ptr<UIGlobalSetting> UISettingsManager::getSetting(UIMessager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const which_setting)
 {
 	std::unique_ptr<UIGlobalSetting> the_setting_ = _global_settings->getUISettings().GetSetting(messager, which_setting);
 	UIGlobalSetting * the_setting = the_setting_.get();
@@ -143,7 +143,7 @@ std::unique_ptr<UIGlobalSetting> UISettingsManager::getSetting(Messager & messag
 	return the_setting_;
 }
 
-std::unique_ptr<BackendProjectInputSetting> UISettingsManager::getSetting(Messager & messager, UIInputProject * project, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting)
+std::unique_ptr<BackendProjectInputSetting> UISettingsManager::getSetting(UIMessager & messager, UIInputProject * project, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting)
 {
 	if (project == NULL)
 	{
@@ -164,7 +164,7 @@ std::unique_ptr<BackendProjectInputSetting> UISettingsManager::getSetting(Messag
 	return the_setting_;
 }
 
-std::unique_ptr<BackendProjectOutputSetting> UISettingsManager::getSetting(Messager & messager, UIOutputProject * project, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting)
+std::unique_ptr<BackendProjectOutputSetting> UISettingsManager::getSetting(UIMessager & messager, UIOutputProject * project, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting)
 {
 	if (project == NULL)
 	{
@@ -185,7 +185,7 @@ std::unique_ptr<BackendProjectOutputSetting> UISettingsManager::getSetting(Messa
 	return the_setting_;
 }
 
-std::unique_ptr<UIProjectInputSetting> UISettingsManager::getSetting(Messager & messager, UIInputProject * project, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const which_setting)
+std::unique_ptr<UIProjectInputSetting> UISettingsManager::getSetting(UIMessager & messager, UIInputProject * project, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const which_setting)
 {
 	if (project == NULL)
 	{
@@ -206,7 +206,7 @@ std::unique_ptr<UIProjectInputSetting> UISettingsManager::getSetting(Messager & 
 	return the_setting_;
 }
 
-std::unique_ptr<UIProjectOutputSetting> UISettingsManager::getSetting(Messager & messager, UIOutputProject * project, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const which_setting)
+std::unique_ptr<UIProjectOutputSetting> UISettingsManager::getSetting(UIMessager & messager, UIOutputProject * project, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const which_setting)
 {
 	if (project == NULL)
 	{

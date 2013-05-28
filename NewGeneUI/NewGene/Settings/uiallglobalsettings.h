@@ -23,12 +23,12 @@ class UIGlobalSetting_MRUList : public UIGlobalSetting, public StringSetting
 
 	public:
 
-		UIGlobalSetting_MRUList(Messager & messager, std::string const & setting)
+		UIGlobalSetting_MRUList(UIMessager & messager, std::string const & setting)
 			: UIGlobalSetting()
 			, StringSetting(messager, setting)
 		{}
 
-		virtual void DoSpecialParse(Messager &)
+		virtual void DoSpecialParse(UIMessager &)
 		{
 //			boost::format msg("Here is a message!");
 //			messager.AppendMessage(new UIMessagerErrorMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
@@ -43,7 +43,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 	public:
 
-		UIAllGlobalSettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL);
+		UIAllGlobalSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL);
 
 
 	signals:
@@ -58,7 +58,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			public:
 
-				UIOnlySettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(messager, path_to_settings)
+				UIOnlySettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(messager, path_to_settings)
 				{
 
 				}
@@ -66,10 +66,10 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			protected:
 
-				boost::filesystem::path GetSettingsPath(Messager & messager, SettingInfo & setting_info);
-				void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
-				UIGlobalSetting * CloneSetting(Messager & messager, UIGlobalSetting * current_setting, SettingInfo & setting_info) const;
-				UIGlobalSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
+				boost::filesystem::path GetSettingsPath(UIMessager & messager, SettingInfo & setting_info);
+				void SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
+				UIGlobalSetting * CloneSetting(UIMessager & messager, UIGlobalSetting * current_setting, SettingInfo & setting_info) const;
+				UIGlobalSetting * NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void);
 
 		};
 
@@ -78,7 +78,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			public:
 
-				_impl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : _impl_base(messager)
+				_impl(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : _impl_base(messager)
 				{
 					CreateInternalImplementations(messager, path_to_settings);
 				}
@@ -88,7 +88,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 					public:
 
-						_UIRelatedImpl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+						_UIRelatedImpl(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
 							: _RelatedImpl_base<UIOnlySettings>(messager, path_to_settings)
 							, _UIGlobalRelatedImpl_base(messager, path_to_settings)
 						{
@@ -102,7 +102,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 					public:
 
-						_BackendRelatedImpl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+						_BackendRelatedImpl(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
 							: _RelatedImpl_base<GlobalSettings>(messager, path_to_settings)
 							, _BackendGlobalRelatedImpl_base(messager, path_to_settings)
 						{
@@ -113,7 +113,7 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			protected:
 
-				void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path());
+				void CreateInternalImplementations(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path());
 
 		};
 
@@ -127,7 +127,7 @@ class UIAllGlobalSettings : public UIAllSettings
 			return *__impl;
 		}
 
-		void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path());
+		void CreateImplementation(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path());
 
 		std::unique_ptr<_impl> __impl;
 

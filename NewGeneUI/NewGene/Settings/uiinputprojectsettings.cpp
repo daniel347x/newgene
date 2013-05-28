@@ -1,6 +1,6 @@
 #include "uiinputprojectsettings.h"
 
-void UIInputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
+void UIInputProjectSettings::SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
 {
 
 	switch (setting_info.setting_class)
@@ -25,7 +25,7 @@ void UIInputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & sett
 
 }
 
-UIProjectInputSetting * UIInputProjectSettings::CloneSetting(Messager & messager, UIProjectInputSetting * /* current_setting */, SettingInfo & setting_info) const
+UIProjectInputSetting * UIInputProjectSettings::CloneSetting(UIMessager & messager, UIProjectInputSetting * /* current_setting */, SettingInfo & setting_info) const
 {
 
 	try
@@ -63,7 +63,7 @@ UIProjectInputSetting * UIInputProjectSettings::CloneSetting(Messager & messager
 
 }
 
-UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
+UIProjectInputSetting * UIInputProjectSettings::NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * /* setting_value_void */ )
 {
 
 	switch (setting_info.setting_class)
@@ -90,7 +90,7 @@ UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager, 
 
 }
 
-SettingInfo UIProjectInputSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
+SettingInfo UIProjectInputSetting::GetSettingInfoFromEnum(UIMessager & messager, int const value__)
 {
 
 	INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const value_ = static_cast<INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const>(value__);

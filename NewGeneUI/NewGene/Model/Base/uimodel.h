@@ -12,7 +12,7 @@ template<typename BACKEND_MODEL_CLASS>
 class UIModel
 {
 	public:
-		UIModel( Messager & messager, BACKEND_MODEL_CLASS & model, boost::filesystem::path const path_to_model )
+		UIModel( UIMessager & messager, BACKEND_MODEL_CLASS & model, boost::filesystem::path const path_to_model )
 		{
 
 		}

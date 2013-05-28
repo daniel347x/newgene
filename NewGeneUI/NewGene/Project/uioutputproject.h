@@ -11,7 +11,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		Q_OBJECT
 
 	public:
-		UIOutputProject(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
+		UIOutputProject(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
 			: QObject(parent)
 			, UIProject(messager, path_to_settings)
 		{

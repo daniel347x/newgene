@@ -30,16 +30,16 @@ class UIInputProjectSettings : public QObject, public UIAllProjectSettings<Input
 
 
 	public:
-		UIInputProjectSettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
+		UIInputProjectSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
 			: QObject(parent)
 			, UIAllProjectSettings(messager, path_to_settings)
 		{
 
 		}
 
-		void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
-		UIProjectInputSetting * CloneSetting(Messager & messager, UIProjectInputSetting * current_setting, SettingInfo & setting_info) const;
-		UIProjectInputSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void);
+		void SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
+		UIProjectInputSetting * CloneSetting(UIMessager & messager, UIProjectInputSetting * current_setting, SettingInfo & setting_info) const;
+		UIProjectInputSetting * NewSetting(UIMessager & messager, SettingInfo & setting_info, void const * setting_value_void);
 };
 
 #endif // UIPROJECTINPUTSETTINGS_H

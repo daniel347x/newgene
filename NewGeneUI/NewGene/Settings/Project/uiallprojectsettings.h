@@ -12,7 +12,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 	public:
 
-		UIAllProjectSettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
+		UIAllProjectSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
 			: UIAllSettings(messager, parent)
 		{
 			CreateImplementation(messager, path_to_settings);
@@ -24,7 +24,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 			public:
 
-				UIOnlySettings(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(messager, path_to_settings)
+				UIOnlySettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : UIOnlySettings_base(messager, path_to_settings)
 				{
 
 				}
@@ -32,7 +32,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 			protected:
 
-				boost::filesystem::path GetSettingsPath(Messager & messager, SettingInfo & setting_info)
+				boost::filesystem::path GetSettingsPath(UIMessager & messager, SettingInfo & setting_info)
 				{
 					return boost::filesystem::path();
 				}
@@ -46,7 +46,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 			public:
 
-				_impl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : _impl_base(messager)
+				_impl(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path()) : _impl_base(messager)
 				{
 					CreateInternalImplementations(messager, path_to_settings);
 				}
@@ -56,7 +56,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 					public:
 
-						_UIRelatedImpl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+						_UIRelatedImpl(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
 							: _RelatedImpl_base<UIOnlySettings>(messager, path_to_settings)
 							, _UIProjectRelatedImpl_base(messager, path_to_settings)
 						{
@@ -70,7 +70,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 					public:
 
-						_BackendRelatedImpl(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+						_BackendRelatedImpl(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
 							: _RelatedImpl_base<BACKEND_PROJECT_SETTINGS_CLASS>(messager, path_to_settings)
 							, _BackendProjectRelatedImpl_base(messager, path_to_settings)
 						{
@@ -81,7 +81,7 @@ class UIAllProjectSettings : public UIAllSettings
 
 			protected:
 
-				void CreateInternalImplementations(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+				void CreateInternalImplementations(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
 				{
 					__ui_impl.reset(new _UIRelatedImpl(messager, path_to_settings));
 					__backend_impl.reset(new _BackendRelatedImpl(messager, path_to_settings));
@@ -99,7 +99,7 @@ class UIAllProjectSettings : public UIAllSettings
 			return *__impl;
 		}
 
-		void CreateImplementation(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
+		void CreateImplementation(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path())
 		{
 			__impl.reset(new _impl(messager, path_to_settings));
 		}

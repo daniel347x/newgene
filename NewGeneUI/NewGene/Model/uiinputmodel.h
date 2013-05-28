@@ -15,7 +15,7 @@ class UIInputModel : public QObject, public UIModel<InputModel>
 
 
 	public:
-		UIInputModel(Messager & messager, InputModel & model, boost::filesystem::path const path_to_model = boost::filesystem::path(), QObject * parent = NULL);
+		UIInputModel(UIMessager & messager, InputModel & model, boost::filesystem::path const path_to_model = boost::filesystem::path(), QObject * parent = NULL);
 };
 
 #endif // UIINPUTMODEL_H

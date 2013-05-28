@@ -1,5 +1,5 @@
 #include "uiallsettings.h"
 
-UIAllSettings::UIAllSettings(Messager &, QObject * parent) :
+UIAllSettings::UIAllSettings(UIMessager &, QObject * parent) :
 	QObject( parent )
 {}

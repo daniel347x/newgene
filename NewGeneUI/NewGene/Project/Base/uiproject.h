@@ -23,7 +23,7 @@ template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typ
 class UIProject
 {
 	public:
-		UIProject(Messager & messager, boost::filesystem::path const path_to_settings)
+		UIProject(UIMessager & messager, boost::filesystem::path const path_to_settings)
 			: _backend_project( new BACKEND_PROJECT_CLASS(messager) )
 		{
 

@@ -95,7 +95,7 @@ void NewGeneMainWindow::doInitialize()
 	UIProjectManager::getManager();
 
 	// Test instantiating objects
-	Messager messager;
+	UIMessager messager;
 	UIInputProject inp(messager);
 	UIOutputProject outp(messager);
 	//UIAllGlobalSettings gset(messager);

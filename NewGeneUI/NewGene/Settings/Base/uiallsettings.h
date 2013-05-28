@@ -18,7 +18,7 @@ class UIAllSettings : public QObject
 
 	public:
 
-		explicit UIAllSettings(Messager & messager, QObject * parent = NULL);
+		explicit UIAllSettings(UIMessager & messager, QObject * parent = NULL);
 
 
 	signals:
@@ -54,7 +54,7 @@ class UIAllSettings : public QObject
 
 			protected:
 
-				UIOnlySettings_base(Messager & messager, boost::filesystem::path const path_to_settings) : SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>(messager, path_to_settings) {}
+				UIOnlySettings_base(UIMessager & messager, boost::filesystem::path const path_to_settings) : SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>(messager, path_to_settings) {}
 
 		};
 
@@ -64,7 +64,7 @@ class UIAllSettings : public QObject
 
 			public:
 
-				_impl_base(Messager &)
+				_impl_base(UIMessager &)
 				{}
 
 				template<typename SETTINGS_REPOSITORY_CLASS>
@@ -77,7 +77,7 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_RelatedImpl_base(Messager & messager, boost::filesystem::path const)
+						_RelatedImpl_base(UIMessager & messager, boost::filesystem::path const)
 						{
 
 						}
@@ -90,7 +90,7 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_GlobalRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+						_GlobalRelatedImpl_base(UIMessager & messager, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<SETTINGS_REPOSITORY_CLASS>(messager, path_to_settings)
 						{
 
@@ -104,7 +104,7 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_ProjectRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+						_ProjectRelatedImpl_base(UIMessager & messager, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<SETTINGS_REPOSITORY_CLASS>(messager, path_to_settings)
 						{
 
@@ -132,7 +132,7 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_UIRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+						_UIRelatedImpl_base(UIMessager & messager, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<UI_SETTINGS_CLASS>(messager, path_to_settings)
 							, _settings_repository(SettingsRepositoryFactory<UI_SETTINGS_CLASS>()(messager, path_to_settings))
 						{
@@ -148,7 +148,7 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_BackendRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+						_BackendRelatedImpl_base(UIMessager & messager, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager, path_to_settings)
 						{
 
@@ -176,7 +176,7 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_BackendGlobalRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+						_BackendGlobalRelatedImpl_base(UIMessager & messager, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager, path_to_settings)
 							, _BackendRelatedImpl_base(messager, path_to_settings)
 							, _GlobalRelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager, path_to_settings)
@@ -209,7 +209,7 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_BackendProjectRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+						_BackendProjectRelatedImpl_base(UIMessager & messager, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager, path_to_settings)
 							, _BackendRelatedImpl_base(messager, path_to_settings)
 							, _ProjectRelatedImpl_base<BACKEND_SETTINGS_CLASS>(messager, path_to_settings)
@@ -226,7 +226,7 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_UIGlobalRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+						_UIGlobalRelatedImpl_base(UIMessager & messager, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<UI_SETTINGS_CLASS>(messager, path_to_settings)
 							, _UIRelatedImpl_base(messager, path_to_settings)
 							, _GlobalRelatedImpl_base<UI_SETTINGS_CLASS>(messager, path_to_settings)
@@ -241,7 +241,7 @@ class UIAllSettings : public QObject
 
 					protected:
 
-						_UIProjectRelatedImpl_base(Messager & messager, boost::filesystem::path const path_to_settings)
+						_UIProjectRelatedImpl_base(UIMessager & messager, boost::filesystem::path const path_to_settings)
 							: _RelatedImpl_base<UI_SETTINGS_CLASS>(messager, path_to_settings)
 							, _UIRelatedImpl_base(messager, path_to_settings)
 							, _ProjectRelatedImpl_base<UI_SETTINGS_CLASS>(messager, path_to_settings)

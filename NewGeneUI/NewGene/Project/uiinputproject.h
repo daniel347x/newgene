@@ -11,7 +11,7 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 		Q_OBJECT
 
 	public:
-		UIInputProject(Messager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
+		UIInputProject(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
 			: QObject(parent)
 			, UIProject(messager, path_to_settings)
 		{
