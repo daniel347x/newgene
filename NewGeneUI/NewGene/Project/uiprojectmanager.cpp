@@ -18,7 +18,7 @@ UIProjectManager::UIProjectManager( QObject * parent )
 
 }
 
-//UIProject * UIProjectManager::LoadDefaultProject( NewGeneMainWindow * )
-//{
-//	return NULL;
-//}
+void UIProjectManager::LoadOpenProjects(UIMessager & messager)
+{
+	//settingsManagerUI().getSetting(messager, )
+}

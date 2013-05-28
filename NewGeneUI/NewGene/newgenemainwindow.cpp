@@ -98,7 +98,7 @@ void NewGeneMainWindow::doInitialize()
 	Messager messager;
 	UIInputProject inp(messager);
 	UIOutputProject outp(messager);
-	UIAllGlobalSettings gset(messager);
+	//UIAllGlobalSettings gset(messager);
 	// Use project or settings manager to obtain the path to the project settings,
 	// and pass as argument to the instantiation of the settings objects, below.
 	// Likewise for the input and output model.

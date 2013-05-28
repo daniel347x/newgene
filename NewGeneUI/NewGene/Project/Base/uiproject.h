@@ -1,7 +1,7 @@
 #ifndef UIPROJECT_H
 #define UIPROJECT_H
 
-#include "globals.h"
+//#include "globals.h"
 #include <QObject>
 #include <memory>
 #ifndef Q_MOC_RUN

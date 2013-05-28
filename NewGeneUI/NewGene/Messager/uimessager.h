@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QCoreApplication>
-#include "newgeneapplication.h"
+//#include "newgeneapplication.h"
 #include "..\..\NewGeneBackEnd\Messager\Messager.h"
 
 class UISettingsManager;

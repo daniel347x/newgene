@@ -70,11 +70,11 @@ SOURCES += main.cpp\
 	Model/uiinputmodel.cpp \
 	Model/uioutputmodel.cpp \
 	Settings/Project/uiallprojectsettings.cpp \
-	Settings/Global/uiallglobalsettings.cpp \
 	Model/Base/uimodel.cpp \
 	Project/Base/uiproject.cpp \
     Settings/uiinputprojectsettings.cpp \
-    Settings/uioutputprojectsettings.cpp
+    Settings/uioutputprojectsettings.cpp \
+    Settings/uiallglobalsettings.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -133,11 +133,11 @@ HEADERS  += newgenemainwindow.h \
 	Model/uiinputmodel.h \
 	Model/uioutputmodel.h \
 	Settings/Project/uiallprojectsettings.h \
-	Settings/Global/uiallglobalsettings.h \
 	Model/Base/uimodel.h \
 	Project/Base/uiproject.h \
     Settings/uiinputprojectsettings.h \
-    Settings/uioutputprojectsettings.h
+    Settings/uioutputprojectsettings.h \
+    Settings/uiallglobalsettings.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \

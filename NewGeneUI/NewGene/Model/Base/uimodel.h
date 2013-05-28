@@ -1,8 +1,12 @@
 #ifndef UIMODEL_H
 #define UIMODEL_H
 
-#include "globals.h"
+//#include "globals.h"
+#include "uimessager.h"
 #include <QObject>
+#ifndef Q_MOC_RUN
+#	include <boost/filesystem.hpp>
+#endif
 
 template<typename BACKEND_MODEL_CLASS>
 class UIModel
