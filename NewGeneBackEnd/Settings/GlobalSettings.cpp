@@ -1,17 +1,47 @@
 #include "GlobalSettings.h"
 
+SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
+{
+
+	GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const value_ = static_cast<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const>(value__);
+
+	switch (value_)
+	{
+
+	case GLOBAL_SETTINGS_BACKEND_NAMESPACE::TEST_SETTING:
+		{
+			return SettingInfo(SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST,
+				static_cast<int>(GLOBAL_SETTINGS_BACKEND_NAMESPACE::TEST_SETTING),
+				"GLOBAL_BACKEND_TEST",
+				"default test string");
+		}
+		break;
+
+	default:
+		{
+			boost::format msg("Settings information is not available for GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND value %1%.  Using empty setting.");
+			msg % value_;
+			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_ENUM_VALUE, msg.str()));
+		}
+
+	}
+
+	return SettingInfo();
+
+}
+
 void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	switch (setting_info.setting_class)
 	{
 
-		//		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
-		//			{
-		//				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-		//				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
-		//			}
-		//			break;
+	case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
+		{
+			std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
+			_settings_map[static_cast<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND>(setting_info.enum_index)] = std::unique_ptr<BackendGlobalSetting>(SettingFactory<GlobalSetting_Test, false>()(messager, string_setting));
+		}
+		break;
 
 	default:
 		{
@@ -34,12 +64,12 @@ BackendGlobalSetting * GlobalSettings::CloneSetting(Messager & messager, Backend
 		switch (setting_info.setting_class)
 		{
 
-		//case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
-		//	{
-		//		UIGlobalSetting_MRUList * setting = dynamic_cast<UIGlobalSetting_MRUList*>(current_setting);
-		//		return new UIGlobalSetting_MRUList(messager, setting->getString());
-		//	}
-		//	break;
+		case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
+			{
+				GlobalSetting_Test * setting = dynamic_cast<GlobalSetting_Test*>(current_setting);
+				return new GlobalSetting_Test(messager, setting->getString());
+			}
+			break;
 
 		default:
 			{
@@ -69,12 +99,12 @@ BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingIn
 	switch (setting_info.setting_class)
 	{
 
-		//		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
-		//			{
-		//				std::string string_setting = *((std::string *)(setting_value_void));
-		//				return new UIGlobalSetting_MRUList(messager, string_setting);
-		//			}
-		//			break;
+	case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
+		{
+			std::string string_setting = *((std::string *)(setting_value_void));
+			return new GlobalSetting_Test(messager, string_setting);
+		}
+		break;
 
 	default:
 		{
@@ -93,36 +123,6 @@ BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingIn
 boost::filesystem::path GlobalSettings::GetSettingsPath(Messager & messager, SettingInfo & setting_info)
 {
 	return boost::filesystem::path();
-}
-
-SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
-{
-
-	GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const value_ = static_cast<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const>(value__);
-
-	switch (value_)
-	{
-
-		//		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST:
-		//			{
-		//				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST,
-		//								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST),
-		//								   "MRU_LIST",
-		//								   "");
-		//			}
-		//			break;
-
-	default:
-		{
-			boost::format msg("Settings information is not available for GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND value %1%.  Using empty setting.");
-			msg % value_;
-			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_ENUM_VALUE, msg.str()));
-		}
-
-	}
-
-	return SettingInfo();
-
 }
 
 GlobalSettings::GlobalSettings(Messager & messager, boost::filesystem::path const global_settings_path)

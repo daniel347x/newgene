@@ -10,8 +10,19 @@
 
 class Setting;
 class UIMessager;
+class UIGlobalSetting;
 
-template<typename SETTING_CLASS, typename SETTING_VALUE_TYPE = SETTING_CLASS::type>
+enum SETTING_CATEGORY
+{
+	  SETTING_CATEGORY__GLOBAL_BACKEND
+	, SETTING_CATEGORY__GLOBAL_UI
+	, SETTING_CATEGORY__PROJECT_INPUT_BACKEND
+	, SETTING_CATEGORY__PROJECT_INPUT_UI
+	, SETTING_CATEGORY__PROJECT_OUTPUT_BACKEND
+	, SETTING_CATEGORY__PROJECT_OUTPUT_UI
+};
+
+template<typename SETTING_CLASS, bool UI, typename SETTING_VALUE_TYPE = SETTING_CLASS::type>
 class SettingFactory
 {
 
@@ -25,6 +36,23 @@ class SettingFactory
 			return new_setting;
 
 		}
+
+};
+
+template<typename SETTING_CLASS, typename SETTING_VALUE_TYPE>
+class SettingFactory<SETTING_CLASS, false, SETTING_VALUE_TYPE>
+{
+
+public:
+
+	SETTING_CLASS * operator()(Messager & messager, SETTING_VALUE_TYPE const & initializing_val)
+	{
+
+		SETTING_CLASS * new_setting = new SETTING_CLASS(messager, initializing_val);
+		new_setting->DoSpecialParse(messager);
+		return new_setting;
+
+	}
 
 };
 
@@ -44,6 +72,36 @@ protected:
 
 	Setting() {} // must use factory function to create settings
 
+};
+
+template<typename DERIVED_SETTING_CLASS>
+class SimpleAccessSetting_base
+{
+	public:
+		typedef std::unique_ptr<DERIVED_SETTING_CLASS> instance;
+};
+
+template<typename DERIVED_SETTING_CLASS, typename SETTING_ENUM, SETTING_ENUM setting_enum>
+class SimpleAccessSetting : public SimpleAccessSetting_base<DERIVED_SETTING_CLASS>
+{
+	public:
+		static instance get(Messager & messager)
+		{
+			instance derived_setting;
+			std::unique_ptr<Setting> setting = settingsManager().getSetting(messager, setting_enum);
+			try
+			{
+				derived_setting.reset(dynamic_cast<DERIVED_SETTING_CLASS*>(setting.release()));
+			}
+			catch (std::bad_cast & bc)
+			{
+				boost::format msg("Cannot convert from UIGlobalSetting to derived setting class: %1%");
+				msg % bc.what();
+				messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
+				return instance();
+			}
+			return derived_setting;
+		}
 };
 
 class GlobalSetting : virtual public Setting
@@ -75,6 +133,7 @@ class BackendGlobalSetting : public GlobalSetting, public BackendSetting
 {
 	public:
 		SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
+		static SETTING_CATEGORY category;
 };
 
 class BackendProjectSetting : public ProjectSetting, public BackendSetting
@@ -106,12 +165,14 @@ class BackendProjectInputSetting : public BackendProjectSetting, public BackendI
 {
 public:
 	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
+	static SETTING_CATEGORY category;
 };
 
 class BackendProjectOutputSetting : public BackendProjectSetting, public BackendOutputSetting, public ProjectOutputSetting
 {
 public:
 	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
+	static SETTING_CATEGORY category;
 };
 
 class StringSetting : virtual public Setting

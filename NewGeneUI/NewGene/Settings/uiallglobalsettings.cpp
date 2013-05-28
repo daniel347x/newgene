@@ -1,16 +1,46 @@
 #include "uiallglobalsettings.h"
 #include "globals.h"
 
+SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(UIMessager & messager, int const value__)
+{
+
+	GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_ = static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const>(value_);
+
+	switch (value_)
+	{
+
+		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST:
+			{
+				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST,
+								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST),
+								   "MRU_LIST",
+								   "");
+			}
+			break;
+
+		default:
+			{
+				boost::format msg("Settings information is not available for GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI value %1%.  Using empty setting.");
+				msg % value_;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_ENUM_VALUE, msg.str()));
+			}
+
+	}
+
+	return SettingInfo();
+
+}
+
 void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(UIMessager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	switch (setting_info.setting_class)
 	{
 
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
 			{
 				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
+				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList, true>()(messager, string_setting));
 			}
 			break;
 
@@ -35,7 +65,7 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(UIMessager &
 		switch (setting_info.setting_class)
 		{
 
-			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
+			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
 				{
 					UIGlobalSetting_MRUList * setting = dynamic_cast<UIGlobalSetting_MRUList*>(current_setting);
 					return new UIGlobalSetting_MRUList(messager, setting->getString());
@@ -70,7 +100,7 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(UIMessager & m
 	switch (setting_info.setting_class)
 	{
 
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST:
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
 			{
 				std::string string_setting = *((std::string *)(setting_value_void));
 				return new UIGlobalSetting_MRUList(messager, string_setting);
@@ -95,36 +125,6 @@ boost::filesystem::path UIAllGlobalSettings::UIOnlySettings::GetSettingsPath(UIM
 {
 	settingsManagerUI().ObtainGlobalSettingsPath();
 	return settingsManagerUI().getGlobalSettingsPath();
-}
-
-SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(UIMessager & messager, int const value__)
-{
-
-	GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const value_ = static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const>(value_);
-
-	switch (value_)
-	{
-
-		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST:
-			{
-				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING_MRU_LIST,
-								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST),
-								   "MRU_LIST",
-								   "");
-			}
-			break;
-
-		default:
-			{
-				boost::format msg("Settings information is not available for GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI value %1%.  Using empty setting.");
-				msg % value_;
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_ENUM_VALUE, msg.str()));
-			}
-
-	}
-
-	return SettingInfo();
-
 }
 
 UIAllGlobalSettings::UIOnlySettings & UIAllGlobalSettings::getUISettings()
