@@ -12,12 +12,21 @@ SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager_, int co
 	switch (value_)
 	{
 
-		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST:
+		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_INPUT_LIST:
 			{
-				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST,
-								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST),
-								   "MRU_LIST",
-								   "Good 'ol MRU list here");
+				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST,
+								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_INPUT_LIST),
+								   "MRU_INPUT_LIST",
+								   "");
+			}
+			break;
+
+		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_OUTPUT_LIST:
+			{
+				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST,
+								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_OUTPUT_LIST),
+								   "MRU_OUTPUT_LIST",
+								   "");
 			}
 			break;
 
@@ -42,10 +51,17 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager_, Sett
 	switch (setting_info.setting_class)
 	{
 
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST:
 			{
 				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList>()(messager, string_setting));
+				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRU_Input_List>()(messager, string_setting));
+			}
+			break;
+
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST:
+			{
+				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
+				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRU_Output_List>()(messager, string_setting));
 			}
 			break;
 
@@ -72,10 +88,17 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & m
 		switch (setting_info.setting_class)
 		{
 
-			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
+			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST:
 				{
-					UIGlobalSetting_MRUList * setting = dynamic_cast<UIGlobalSetting_MRUList*>(current_setting);
-					return new UIGlobalSetting_MRUList(messager, setting->getString());
+					UIGlobalSetting_MRU_Input_List * setting = dynamic_cast<UIGlobalSetting_MRU_Input_List*>(current_setting);
+					return new UIGlobalSetting_MRU_Input_List(messager, setting->getString());
+				}
+				break;
+
+			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST:
+				{
+					UIGlobalSetting_MRU_Output_List * setting = dynamic_cast<UIGlobalSetting_MRU_Output_List*>(current_setting);
+					return new UIGlobalSetting_MRU_Output_List(messager, setting->getString());
 				}
 				break;
 
@@ -109,14 +132,25 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 	switch (setting_info.setting_class)
 	{
 
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST:
 			{
 				std::string string_setting = setting_info.default_val_string;
 				if (setting_value_void)
 				{
 					string_setting = *((std::string *)(setting_value_void));
 				}
-				return new UIGlobalSetting_MRUList(messager, string_setting);
+				return new UIGlobalSetting_MRU_Input_List(messager, string_setting);
+			}
+			break;
+
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST:
+			{
+				std::string string_setting = setting_info.default_val_string;
+				if (setting_value_void)
+				{
+					string_setting = *((std::string *)(setting_value_void));
+				}
+				return new UIGlobalSetting_MRU_Output_List(messager, string_setting);
 			}
 			break;
 
