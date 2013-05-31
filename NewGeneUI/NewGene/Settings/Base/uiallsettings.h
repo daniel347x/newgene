@@ -18,7 +18,7 @@ class UIAllSettings : public QObject
 
 	public:
 
-		explicit UIAllSettings(UIMessager & messager, QObject * parent = NULL);
+		UIAllSettings(UIMessager & messager, QObject * parent = NULL);
 
 
 	signals:
