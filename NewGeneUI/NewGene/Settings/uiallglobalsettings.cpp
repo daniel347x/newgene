@@ -2,6 +2,48 @@
 #include "uiallglobalsettings_list.h"
 #include "globals.h"
 
+#define GET_GLOBAL_UI_SETTING_INFO(GLOBAL_UI_SETTING_ENUM, SETTING_INFO_ENUM, SETTING_STRING, SETTING_DEFAULT) \
+case GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_UI_SETTING_ENUM: \
+	{ \
+		return SettingInfo(SettingInfo::SETTING_INFO_ENUM, \
+						   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_UI_SETTING_ENUM), \
+						   SETTING_STRING, \
+						   SETTING_DEFAULT); \
+	} \
+	break; \
+
+
+#define GLOBAL_UI_SET_MAP_ENTRY__STRING(SETTING_INFO_ENUM, SETTING_CLASS) \
+	case SettingInfo::SETTING_INFO_ENUM: \
+		{ \
+			std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string); \
+			_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<SETTING_CLASS>()(messager, string_setting)); \
+		} \
+		break; \
+
+
+#define GLOBAL_UI_CLONE_SETTING__STRING(SETTING_INFO_ENUM, SETTING_CLASS) \
+	case SettingInfo::SETTING_INFO_ENUM: \
+		{ \
+			SETTING_CLASS * setting = dynamic_cast<SETTING_CLASS*>(current_setting); \
+			return new SETTING_CLASS(messager, setting->getString()); \
+		} \
+		break; \
+
+
+#define GLOBAL_UI_NEW_SETTING__STRING(SETTING_INFO_ENUM, SETTING_CLASS) \
+	case SettingInfo::SETTING_INFO_ENUM: \
+		{ \
+			std::string string_setting = setting_info.default_val_string; \
+			if (setting_value_void) \
+			{ \
+				string_setting = *((std::string *)(setting_value_void)); \
+			} \
+			return new SETTING_CLASS(messager, string_setting); \
+		} \
+		break; \
+
+
 SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager_, int const value__)
 {
 
@@ -12,41 +54,10 @@ SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager_, int co
 	switch (value_)
 	{
 
-		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_INPUT_LIST:
-			{
-				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST,
-								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_INPUT_LIST),
-								   "MRU_INPUT_LIST",
-								   "");
-			}
-			break;
-
-		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_OUTPUT_LIST:
-			{
-				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST,
-								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_OUTPUT_LIST),
-								   "MRU_OUTPUT_LIST",
-								   "");
-			}
-			break;
-
-		case GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_LIST:
-			{
-				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST,
-								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_LIST),
-								   "OPEN_INPUT_LIST",
-								   "");
-			}
-			break;
-
-		case GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_LIST:
-			{
-				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST,
-								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_LIST),
-								   "OPEN_OUTPUT_LIST",
-								   "");
-			}
-			break;
+		GET_GLOBAL_UI_SETTING_INFO(MRU_INPUT_LIST, SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST, "MRU_INPUT_LIST", "")
+		GET_GLOBAL_UI_SETTING_INFO(MRU_OUTPUT_LIST, SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST, "MRU_OUTPUT_LIST", "")
+		GET_GLOBAL_UI_SETTING_INFO(OPEN_INPUT_LIST, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST, "OPEN_INPUT_LIST", "")
+		GET_GLOBAL_UI_SETTING_INFO(OPEN_OUTPUT_LIST, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST, "OPEN_OUTPUT_LIST", "")
 
 		default:
 			{
@@ -69,33 +80,10 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager_, Sett
 	switch (setting_info.setting_class)
 	{
 
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST:
-			{
-				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRU_Input_List>()(messager, string_setting));
-			}
-			break;
-
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST:
-			{
-				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRU_Output_List>()(messager, string_setting));
-			}
-			break;
-
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST:
-			{
-				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_OpenProject_Input_List>()(messager, string_setting));
-			}
-			break;
-
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST:
-			{
-				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_OpenProject_Output_List>()(messager, string_setting));
-			}
-			break;
+		GLOBAL_UI_SET_MAP_ENTRY__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST, UIGlobalSetting_MRU_Input_List)
+		GLOBAL_UI_SET_MAP_ENTRY__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST, UIGlobalSetting_MRU_Output_List)
+		GLOBAL_UI_SET_MAP_ENTRY__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST, UIGlobalSetting_OpenProject_Input_List)
+		GLOBAL_UI_SET_MAP_ENTRY__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST, UIGlobalSetting_OpenProject_Output_List)
 
 		default:
 			{
@@ -120,33 +108,10 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & m
 		switch (setting_info.setting_class)
 		{
 
-			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST:
-				{
-					UIGlobalSetting_MRU_Input_List * setting = dynamic_cast<UIGlobalSetting_MRU_Input_List*>(current_setting);
-					return new UIGlobalSetting_MRU_Input_List(messager, setting->getString());
-				}
-				break;
-
-			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST:
-				{
-					UIGlobalSetting_MRU_Output_List * setting = dynamic_cast<UIGlobalSetting_MRU_Output_List*>(current_setting);
-					return new UIGlobalSetting_MRU_Output_List(messager, setting->getString());
-				}
-				break;
-
-			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST:
-				{
-					UIGlobalSetting_OpenProject_Input_List * setting = dynamic_cast<UIGlobalSetting_OpenProject_Input_List*>(current_setting);
-					return new UIGlobalSetting_OpenProject_Input_List(messager, setting->getString());
-				}
-				break;
-
-			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST:
-				{
-					UIGlobalSetting_OpenProject_Output_List * setting = dynamic_cast<UIGlobalSetting_OpenProject_Output_List*>(current_setting);
-					return new UIGlobalSetting_OpenProject_Output_List(messager, setting->getString());
-				}
-				break;
+			GLOBAL_UI_CLONE_SETTING__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST, UIGlobalSetting_MRU_Input_List)
+			GLOBAL_UI_CLONE_SETTING__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST, UIGlobalSetting_MRU_Output_List)
+			GLOBAL_UI_CLONE_SETTING__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST, UIGlobalSetting_OpenProject_Input_List)
+			GLOBAL_UI_CLONE_SETTING__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST, UIGlobalSetting_OpenProject_Output_List)
 
 			default:
 				{
@@ -178,49 +143,10 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 	switch (setting_info.setting_class)
 	{
 
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST:
-			{
-				std::string string_setting = setting_info.default_val_string;
-				if (setting_value_void)
-				{
-					string_setting = *((std::string *)(setting_value_void));
-				}
-				return new UIGlobalSetting_MRU_Input_List(messager, string_setting);
-			}
-			break;
-
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST:
-			{
-				std::string string_setting = setting_info.default_val_string;
-				if (setting_value_void)
-				{
-					string_setting = *((std::string *)(setting_value_void));
-				}
-				return new UIGlobalSetting_MRU_Output_List(messager, string_setting);
-			}
-			break;
-
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST:
-			{
-				std::string string_setting = setting_info.default_val_string;
-				if (setting_value_void)
-				{
-					string_setting = *((std::string *)(setting_value_void));
-				}
-				return new UIGlobalSetting_OpenProject_Input_List(messager, string_setting);
-			}
-			break;
-
-		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST:
-			{
-				std::string string_setting = setting_info.default_val_string;
-				if (setting_value_void)
-				{
-					string_setting = *((std::string *)(setting_value_void));
-				}
-				return new UIGlobalSetting_OpenProject_Output_List(messager, string_setting);
-			}
-			break;
+		GLOBAL_UI_NEW_SETTING__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST, UIGlobalSetting_MRU_Input_List)
+		GLOBAL_UI_NEW_SETTING__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST, UIGlobalSetting_MRU_Output_List)
+		GLOBAL_UI_NEW_SETTING__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST, UIGlobalSetting_OpenProject_Input_List)
+		GLOBAL_UI_NEW_SETTING__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST, UIGlobalSetting_OpenProject_Output_List)
 
 		default:
 			{
