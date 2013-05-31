@@ -168,12 +168,6 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 
 }
 
-boost::filesystem::path UIAllGlobalSettings::UIOnlySettings::GetSettingsPath(Messager &, SettingInfo & /* setting_info */ )
-{
-	settingsManagerUI().ObtainGlobalSettingsPath();
-	return settingsManagerUI().getGlobalSettingsPath();
-}
-
 UIAllGlobalSettings::UIOnlySettings & UIAllGlobalSettings::getUISettings()
 {
 	if (!__impl)

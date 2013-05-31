@@ -115,18 +115,65 @@ class SettingsRepository
 		{
 			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
 			_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
-			//WriteSettingsToFile(Messager & messager);
+			WriteSettingsToFile(Messager & messager);
 		}
 
 	protected:
 
-		// TODO: THROW
-		virtual boost::filesystem::path GetSettingsPath(Messager & messager, SettingInfo & setting_info) { return boost::filesystem::path(); };
 		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt) {};
 		virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS * current_setting, SettingInfo & setting_info) const { return new SETTING_CLASS(); };
 		virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL) { return new SETTING_CLASS(); };
 
-		void LoadSettingsFromFile(Messager & messager, boost::filesystem::path const path_to_settings)
+		void LoadSettingsFromFile(Messager & messager)
+		{
+
+			boost::filesystem::path path_to_settings = _path_to_settings;
+
+			bool no_file = false;
+
+			if ( !boost::filesystem::exists(path_to_settings) )
+			{
+				no_file = true; // no file is fine
+			}
+
+			else if ( boost::filesystem::file_size(path_to_settings) == 0 )
+			{
+				no_file = true; // empty file is fine
+			}
+
+			else if ( !boost::filesystem::is_regular_file(path_to_settings) )
+			{
+				boost::format msg("Settings file %1% is not available.  Using default settings.");
+				msg % path_to_settings;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_DOES_NOT_EXIST, msg.str()));
+				no_file = true;
+			}
+
+			boost::property_tree::ptree pt;
+
+			if (!no_file)
+			{
+				try
+				{
+					boost::property_tree::xml_parser::read_xml(path_to_settings.string(), pt);
+				}
+				catch (const boost::property_tree::xml_parser_error & e)
+				{
+					boost::format msg("Settings file %1% is not in the correct format: %2%");
+					msg % path_to_settings % e.what();
+					messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_FORMAT, msg.str()));
+				}
+			}
+
+			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
+			{
+				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, static_cast<SETTINGS_ENUM>(n));
+				SetMapEntry(messager, setting_info, pt); // sets default value if not present in property tree at this point; i.e., if no path is present
+			}
+
+		}
+
+		void WriteSettingsToFile(Messager & messager)
 		{
 
 			bool no_file = false;
@@ -175,13 +222,22 @@ class SettingsRepository
 
 		SettingsMap _settings_map;
 
-		SettingsRepository(Messager &)
+		SettingsRepository(Messager &, boost::filesystem::path const path_to_settings)
+			: _path_to_settings(path_to_settings)
 		{
 		}
 
-		SettingsRepository(Messager &, boost::filesystem::path const path_to_settings)
+		void SetSettingsPath(boost::filesystem::path const path_to_settings)
 		{
+			_path_to_settings = path_to_settings;
 		}
+
+		boost::filesystem::path const GetSettingsPath()
+		{
+			return _path_to_settings;
+		}
+
+		boost::filesystem::path _path_to_settings;
 
 	private:
 
@@ -201,7 +257,7 @@ class SettingsRepositoryFactory
 		SETTINGS_REPOSITORY_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_settings)
 		{
 			SETTINGS_REPOSITORY_CLASS * new_settings_repository = new SETTINGS_REPOSITORY_CLASS(messager, path_to_settings);
-			new_settings_repository->LoadSettingsFromFile(messager, path_to_settings);
+			new_settings_repository->LoadSettingsFromFile(messager);
 			return new_settings_repository;
 		}
 

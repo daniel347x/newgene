@@ -125,11 +125,6 @@ BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingIn
 
 }
 
-boost::filesystem::path GlobalSettings::GetSettingsPath(Messager & messager, SettingInfo & setting_info)
-{
-	return boost::filesystem::path();
-}
-
 GlobalSettings::GlobalSettings(Messager & messager, boost::filesystem::path const global_settings_path)
 	: Settings(messager, global_settings_path)
 {

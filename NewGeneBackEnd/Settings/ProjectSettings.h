@@ -22,11 +22,6 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_S
 
 	protected:
 
-		boost::filesystem::path GetSettingsPath(Messager & messager, SettingInfo & setting_info)
-		{
-			return boost::filesystem::path();
-		}
-
 };
 
 #endif

@@ -32,12 +32,6 @@ class UIAllProjectSettings : public UIAllSettings
 
 			protected:
 
-				boost::filesystem::path GetSettingsPath(Messager & messager_, SettingInfo & setting_info)
-				{
-					UIMessager & messager = static_cast<UIMessager &>(messager_);
-					return boost::filesystem::path();
-				}
-
 		};
 
 	protected:
