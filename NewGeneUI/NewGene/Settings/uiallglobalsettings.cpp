@@ -30,6 +30,24 @@ SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager_, int co
 			}
 			break;
 
+		case GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_LIST:
+			{
+				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST,
+								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_LIST),
+								   "OPEN_INPUT_LIST",
+								   "");
+			}
+			break;
+
+		case GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_LIST:
+			{
+				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST,
+								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_LIST),
+								   "OPEN_OUTPUT_LIST",
+								   "");
+			}
+			break;
+
 		default:
 			{
 				boost::format msg("Settings information is not available for GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI value %1%.  Using empty setting.");
@@ -62,6 +80,20 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager_, Sett
 			{
 				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
 				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRU_Output_List>()(messager, string_setting));
+			}
+			break;
+
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST:
+			{
+				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
+				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_OpenProject_Input_List>()(messager, string_setting));
+			}
+			break;
+
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST:
+			{
+				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
+				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_OpenProject_Output_List>()(messager, string_setting));
 			}
 			break;
 
@@ -99,6 +131,20 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & m
 				{
 					UIGlobalSetting_MRU_Output_List * setting = dynamic_cast<UIGlobalSetting_MRU_Output_List*>(current_setting);
 					return new UIGlobalSetting_MRU_Output_List(messager, setting->getString());
+				}
+				break;
+
+			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST:
+				{
+					UIGlobalSetting_OpenProject_Input_List * setting = dynamic_cast<UIGlobalSetting_OpenProject_Input_List*>(current_setting);
+					return new UIGlobalSetting_OpenProject_Input_List(messager, setting->getString());
+				}
+				break;
+
+			case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST:
+				{
+					UIGlobalSetting_OpenProject_Output_List * setting = dynamic_cast<UIGlobalSetting_OpenProject_Output_List*>(current_setting);
+					return new UIGlobalSetting_OpenProject_Output_List(messager, setting->getString());
 				}
 				break;
 
@@ -151,6 +197,28 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 					string_setting = *((std::string *)(setting_value_void));
 				}
 				return new UIGlobalSetting_MRU_Output_List(messager, string_setting);
+			}
+			break;
+
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST:
+			{
+				std::string string_setting = setting_info.default_val_string;
+				if (setting_value_void)
+				{
+					string_setting = *((std::string *)(setting_value_void));
+				}
+				return new UIGlobalSetting_OpenProject_Input_List(messager, string_setting);
+			}
+			break;
+
+		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST:
+			{
+				std::string string_setting = setting_info.default_val_string;
+				if (setting_value_void)
+				{
+					string_setting = *((std::string *)(setting_value_void));
+				}
+				return new UIGlobalSetting_OpenProject_Output_List(messager, string_setting);
 			}
 			break;
 

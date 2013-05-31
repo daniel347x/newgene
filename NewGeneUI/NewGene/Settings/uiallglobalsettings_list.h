@@ -87,4 +87,58 @@ class UIGlobalSetting_MRU_Output_List : public UIGlobalSetting_MRU_List_base, pu
 
 };
 
+class UIGlobalSetting_OpenProject_List_base : public UIGlobalSetting_File_List_base
+{
+
+	public:
+
+		UIGlobalSetting_OpenProject_List_base(Messager & messager_, std::string const & setting)
+			: UIGlobalSetting_File_List_base(messager_, setting)
+		{}
+
+		virtual void DoSpecialParse(Messager & messager)
+		{
+			UIGlobalSetting_File_List_base::DoSpecialParse(messager);
+		}
+
+		//std::
+
+};
+
+class UIGlobalSetting_OpenProject_Input_List : public UIGlobalSetting_OpenProject_List_base, public SimpleAccessSetting<UIGlobalSetting_OpenProject_Input_List, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_LIST, UISettingsManager>
+{
+
+	public:
+
+		UIGlobalSetting_OpenProject_Input_List(Messager & messager_, std::string const & setting)
+			: UIGlobalSetting_OpenProject_List_base(messager_, setting)
+		{}
+
+		virtual void DoSpecialParse(Messager & messager)
+		{
+			UIGlobalSetting_OpenProject_List_base::DoSpecialParse(messager);
+		}
+
+		//std::
+
+};
+
+class UIGlobalSetting_OpenProject_Output_List : public UIGlobalSetting_OpenProject_List_base, public SimpleAccessSetting<UIGlobalSetting_OpenProject_Output_List, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_LIST, UISettingsManager>
+{
+
+	public:
+
+		UIGlobalSetting_OpenProject_Output_List(Messager & messager_, std::string const & setting)
+			: UIGlobalSetting_OpenProject_List_base(messager_, setting)
+		{}
+
+		virtual void DoSpecialParse(Messager & messager)
+		{
+			UIGlobalSetting_OpenProject_List_base::DoSpecialParse(messager);
+		}
+
+		//std::
+
+};
+
 #endif // UIALLGLOBALSETTINGS_LIST_H

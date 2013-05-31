@@ -31,18 +31,6 @@ class UIProject
 
 		}
 
-//		void apply_settings(UI_PROJECT_SETTINGS_CLASS * ui_settings)
-//		{
-//			_project_settings.reset(ui_settings);
-//			backend()._settings = _project_settings->getBackendSettingsSharedPtr(); // share the pointer to the backend settings with the backend project
-//		}
-
-//		void apply_model(UI_MODEL_CLASS * ui_model)
-//		{
-//			_model.reset(ui_model);
-//			backend()._model = _model->getBackendModelSharedPtr(); // share the pointer to the backend model with the backend project
-//		}
-
 		// TODO: Test for validity
 		UI_PROJECT_SETTINGS_CLASS & settings()
 		{

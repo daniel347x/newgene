@@ -22,9 +22,9 @@ UIProjectManager::UIProjectManager( QObject * parent )
 
 void UIProjectManager::LoadOpenProjects(UIMessager & messager)
 {
-	//GlobalSetting_Test::instance test = GlobalSetting_Test::get(messager);
-	//statusManagerUI().PostStatus(test->getString().c_str());
+	UIGlobalSetting_OpenProject_Input_List::instance input_project_list = UIGlobalSetting_OpenProject_Input_List::get(messager);
+	statusManagerUI().PostStatus(input_project_list->getString().c_str());
 
-	UIGlobalSetting_MRU_Input_List::instance mru = UIGlobalSetting_MRU_Input_List::get(messager);
-	statusManagerUI().PostStatus(mru->getString().c_str());
+	UIGlobalSetting_OpenProject_Output_List::instance output_project_list = UIGlobalSetting_OpenProject_Output_List::get(messager);
+	statusManagerUI().PostStatus(output_project_list->getString().c_str());
 }
