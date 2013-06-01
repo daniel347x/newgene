@@ -7,27 +7,35 @@ namespace MANAGER_DESCRIPTION_NAMESPACE
 	{
 		if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_DOCUMENTS)
 		{
-			return "UIDocumentManager";
+			return "DocumentManager";
 		}
 		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_LOGGING)
 		{
-			return "UILoggingManager";
+			return "LoggingManager";
 		}
 		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL)
 		{
-			return "UIModelManager";
+			return "ModelManager";
 		}
 		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT)
 		{
-			return "UIProjectManager";
+			return "ProjectManager";
 		}
 		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_SETTINGS)
 		{
-			return "UISettingsManager";
+			return "SettingsManager";
 		}
 		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_STATUS)
 		{
-			return "UIStatusManager";
+			return "StatusManager";
+		}
+		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS)
+		{
+			return "ThreadManager";
+		}
+		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS)
+		{
+			return "TriggerManager";
 		}
 		return std::string();
 	}

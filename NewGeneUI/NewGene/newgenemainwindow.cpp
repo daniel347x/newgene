@@ -11,6 +11,9 @@
 #include "uiprojectmanager.h"
 #include "uiinputproject.h"
 #include "uioutputproject.h"
+#ifndef Q_MOC_RUN
+#	include <boost/thread/thread.hpp>
+#endif
 
 NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	QMainWindow( parent ),
@@ -86,7 +89,7 @@ void NewGeneMainWindow::changeEvent( QEvent * e )
 
 void NewGeneMainWindow::doInitialize()
 {
-	// Instantiate Managers
+	// Instantiate Managers in main thread
 	UIStatusManager::getManager();
 	UIDocumentManager::getManager();
 	UILoggingManager::getManager();
@@ -96,7 +99,9 @@ void NewGeneMainWindow::doInitialize()
 
 	UIMessager messager;
 
-	settingsManagerUI().globalSettings().WriteSettingsToFile(messager);
+	// Load global settings in main thread
+	settingsManagerUI().globalSettings().WriteSettingsToFile(messager); // Write any defaults back to disk, along with values just read from disk
+
 
 	projectManagerUI().LoadOpenProjects(messager, this);
 

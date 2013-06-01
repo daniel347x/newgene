@@ -29,6 +29,14 @@ namespace MANAGER_DESCRIPTION_NAMESPACE
 		{
 			return "UIStatusManager";
 		}
+		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS_UI)
+		{
+			return "UIThreadManager";
+		}
+		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS_UI)
+		{
+			return "UITriggerManager";
+		}
 		return std::string();
 	}
 

@@ -61,6 +61,18 @@
     <Filter Include="Source Files\Status">
       <UniqueIdentifier>{04b74214-4862-4904-a53e-c5a59d4260d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Threads">
+      <UniqueIdentifier>{6fa10008-a0dd-413f-8e77-83a69e372735}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Threads">
+      <UniqueIdentifier>{48b74010-03d8-422a-84dd-8533d2ac9098}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Triggers">
+      <UniqueIdentifier>{78a4ae27-2b1e-43a3-adde-2d937d4ffece}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Triggers">
+      <UniqueIdentifier>{fa803b26-84b1-4302-a435-24890c5edebf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -147,6 +159,12 @@
     <ClInclude Include="Settings\OutputProjectSettings_list.h">
       <Filter>Header Files\Settings</Filter>
     </ClInclude>
+    <ClInclude Include="Threads\ThreadManager.h">
+      <Filter>Header Files\Threads</Filter>
+    </ClInclude>
+    <ClInclude Include="Triggers\TriggerManager.h">
+      <Filter>Header Files\Triggers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -229,6 +247,12 @@
     </ClCompile>
     <ClCompile Include="Settings\OutputProjectSettings.cpp">
       <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Threads\ThreadManager.cpp">
+      <Filter>Source Files\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="Triggers\TriggerManager.cpp">
+      <Filter>Source Files\Triggers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

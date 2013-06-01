@@ -100,6 +100,8 @@
     <ClInclude Include="Settings\SettingsRepository.h" />
     <ClInclude Include="Status\StatusManager.h" />
     <ClInclude Include="test.h" />
+    <ClInclude Include="Threads\ThreadManager.h" />
+    <ClInclude Include="Triggers\TriggerManager.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +131,8 @@
     <ClCompile Include="Settings\SettingsRepository.cpp" />
     <ClCompile Include="Status\StatusManager.cpp" />
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="Threads\ThreadManager.cpp" />
+    <ClCompile Include="Triggers\TriggerManager.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

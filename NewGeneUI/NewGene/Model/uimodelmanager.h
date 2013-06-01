@@ -19,7 +19,7 @@ class UIModelManager : public QObject, public UIManager<UIModelManager, ModelMan
 	public:
 		explicit UIModelManager( QObject * parent = 0 );
 
-		UIInputModel * loadDefaultModel();
+		//UIInputModel * loadDefaultModel();
 
 	signals:
 

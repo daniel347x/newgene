@@ -31,9 +31,7 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 	private:
 		Ui::NewGeneMainWindow * ui;
 
-		//std::unique_ptr<UIProject> _current_project;
-
-		friend class NewGeneWidget; // saved using Dropbox + SyncBack Pro - and a second time.  Now, editing it on the Xeon machine.
+		friend class NewGeneWidget;
 };
 
 #endif // NEWGENEMAINWINDOW_H

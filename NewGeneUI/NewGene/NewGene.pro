@@ -77,7 +77,10 @@ SOURCES += main.cpp\
     Settings/uiallglobalsettings.cpp \
     Settings/uiallglobalsettings_list.cpp \
     Settings/uiinputprojectsettings_list.cpp \
-    Settings/uioutputprojectsettings_list.cpp
+    Settings/uioutputprojectsettings_list.cpp \
+    Threads/ThreadManager.cpp \
+    Threads/uithreadmanager.cpp \
+    Triggers/uitriggermanager.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -143,7 +146,9 @@ HEADERS  += newgenemainwindow.h \
     Settings/uiallglobalsettings.h \
     Settings/uiallglobalsettings_list.h \
     Settings/uiinputprojectsettings_list.h \
-    Settings/uioutputprojectsettings_list.h
+    Settings/uioutputprojectsettings_list.h \
+    Threads/uithreadmanager.h \
+    Triggers/uitriggermanager.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \
