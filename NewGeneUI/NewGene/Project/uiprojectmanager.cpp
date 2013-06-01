@@ -22,8 +22,8 @@ UIProjectManager::UIProjectManager( QObject * parent )
 
 void UIProjectManager::LoadOpenProjects(UIMessager & messager)
 {
-	UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST>::instance input_project_list = UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST>::get(messager);
-	UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST>::instance output_project_list = UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST>::get(messager);
+	InputProjectFilesList::instance input_project_list = InputProjectFilesList::get(messager);
+	OutputProjectFilesList::instance output_project_list = OutputProjectFilesList::get(messager);
 
 	if (input_project_list->files.size() > 0)
 	{
