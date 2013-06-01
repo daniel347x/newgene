@@ -38,21 +38,29 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 					std::string settings = files_[0];
 					std::string model = files_[1];
 
-					if (boost::filesystem::portable_posix_name(settings) && boost::filesystem::windows_name(settings))
-					{
-						if (!boost::filesystem::exists(settings))
+#					ifdef Q_OS_WIN32
+						if (boost::filesystem::windows_name(settings))
+#					else
+						if (boost::filesystem::portable_posix_name(settings))
+#					endif
 						{
-							std::fstream _touch(settings);
+							if (!boost::filesystem::exists(settings))
+							{
+								std::fstream _touch(settings);
+							}
 						}
-					}
 
-					if (boost::filesystem::portable_posix_name(model) && boost::filesystem::windows_name(model))
-					{
-						if (!boost::filesystem::exists(model))
+#					ifdef Q_OS_WIN32
+						if (boost::filesystem::windows_name(settings))
+#					else
+						if (boost::filesystem::portable_posix_name(settings))
+#					endif
 						{
-							std::fstream _touch(model);
+							if (!boost::filesystem::exists(model))
+							{
+								std::fstream _touch(model);
+							}
 						}
-					}
 
 					if (boost::filesystem::is_regular_file(settings) && boost::filesystem::is_regular_file((model)))
 					{
