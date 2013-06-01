@@ -26,7 +26,7 @@ case GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_UI_SETTING_ENUM: \
 	case SettingInfo::SETTING_INFO_ENUM: \
 		{ \
 			SETTING_CLASS * setting = dynamic_cast<SETTING_CLASS*>(current_setting); \
-			return new SETTING_CLASS(messager, setting->getString()); \
+			return SettingFactory<SETTING_CLASS>()(messager, setting->getString()); \
 		} \
 		break; \
 
@@ -39,7 +39,7 @@ case GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_UI_SETTING_ENUM: \
 			{ \
 				string_setting = *((std::string *)(setting_value_void)); \
 			} \
-			return new SETTING_CLASS(messager, string_setting); \
+			return SettingFactory<SETTING_CLASS>()(messager, string_setting); \
 		} \
 		break; \
 

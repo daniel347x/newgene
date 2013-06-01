@@ -51,7 +51,12 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 							{
 								if (!boost::filesystem::exists(settings))
 								{
-									std::fstream _touch(settings.string());
+									std::ofstream _touch;
+									_touch.open(settings.string());
+									if (_touch.is_open())
+									{
+										_touch.close();
+									}
 								}
 							}
 
@@ -63,7 +68,12 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 							{
 								if (!boost::filesystem::exists(model))
 								{
-									std::fstream _touch(model.string());
+									std::ofstream _touch;
+									_touch.open(model.string());
+									if (_touch.is_open())
+									{
+										_touch.close();
+									}
 								}
 							}
 
