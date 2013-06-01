@@ -256,7 +256,11 @@ class StringSetting : virtual public Setting
 			, string_setting(setting)
 		{}
 
-		std::string getString() { return string_setting; }
+		std::string getString() const { return string_setting; }
+		void * getDefaultValue()
+		{
+			return (void*)(&string_setting);
+		}
 
 	protected:
 		std::string string_setting;
@@ -273,7 +277,11 @@ class Int32Setting : virtual public Setting
 			, int32_setting(setting)
 		{}
 
-		std::int32_t getInt32() { return int32_setting; }
+		std::int32_t getInt32() const { return int32_setting; }
+		void * getDefaultValue()
+		{
+			return (void*)(&int32_setting);
+		}
 
 	protected:
 		std::int32_t int32_setting;

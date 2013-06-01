@@ -72,7 +72,7 @@ SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager_, int co
 
 }
 
-void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+/*void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	UIMessager & messager = static_cast<UIMessager &>(messager_);
@@ -95,7 +95,7 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager_, Sett
 
 	}
 
-}
+}*/
 
 UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & messager_, UIGlobalSetting * current_setting, SettingInfo & setting_info) const
 {

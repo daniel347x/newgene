@@ -31,7 +31,7 @@ SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, in
 
 }
 
-void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+/*void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	switch (setting_info.setting_class)
@@ -54,7 +54,7 @@ void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info
 
 	}
 
-}
+}*/
 
 BackendGlobalSetting * GlobalSettings::CloneSetting(Messager & messager, BackendGlobalSetting * current_setting, SettingInfo & setting_info) const
 {
@@ -122,6 +122,42 @@ BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingIn
 	}
 
 	return NULL;
+
+}
+
+void GlobalSettings::SetPTreeEntry(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND which_setting, boost::property_tree::ptree & pt)
+{
+
+	SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
+	if (theSetting == _settings_map.cend())
+	{
+		return;
+	}
+
+	SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+
+	switch (setting_info.setting_class)
+	{
+
+	case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
+		{
+			GlobalSetting_Test const * setting = static_cast<GlobalSetting_Test const *>(_settings_map[which_setting].get());
+			if (setting)
+			{
+				pt.put(setting_info.text, setting->getString());
+			}
+		}
+		break;
+
+	default:
+		{
+			boost::format msg("Unknown backend global setting \"%1%\" (\"%2%\") being set.");
+			msg % setting_info.text % setting_info.setting_class;
+			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
+		}
+		break;
+
+	}
 
 }
 

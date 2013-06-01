@@ -31,7 +31,7 @@ SettingInfo BackendProjectOutputSetting::GetSettingInfoFromEnum(Messager & messa
 
 }
 
-void OutputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+/*void OutputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	switch (setting_info.setting_class)
@@ -54,7 +54,7 @@ void OutputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setti
 
 	}
 
-}
+}*/
 
 BackendProjectOutputSetting * OutputProjectSettings::CloneSetting(Messager & messager, BackendProjectOutputSetting * current_setting, SettingInfo & setting_info) const
 {

@@ -21,6 +21,13 @@ class SettingInfo
 
 public:
 
+	enum SETTING_CLASS_CATEGORY
+	{
+		  SETTING_CLASS_CATEGORY__UNKNOWN
+		, SETTING_CLASS_CATEGORY__STRING
+		, SETTING_CLASS_CATEGORY__INT32
+	};
+
 	enum SETTING_CLASS_ENUM
 	{
 
@@ -51,6 +58,7 @@ public:
 		, default_val_string("")
 		, default_val_int32(0)
 		, enum_index(0)
+		, setting_category(SETTING_CLASS_CATEGORY__UNKNOWN)
 	{
 
 	}
@@ -61,6 +69,7 @@ public:
 		, default_val_string(default_val_string_)
 		, default_val_int32(0)
 		, enum_index(enum_index_)
+		, setting_category(SETTING_CLASS_CATEGORY__STRING)
 	{
 
 	}
@@ -71,16 +80,46 @@ public:
 		, default_val_string("")
 		, default_val_int32(default_val_int32_)
 		, enum_index(enum_index_)
+		, setting_category(SETTING_CLASS_CATEGORY__INT32)
 	{
 
 	}
 
+	virtual void * getDefaultValue() {return NULL;};
+
 	SETTING_CLASS_ENUM setting_class;
+	SETTING_CLASS_CATEGORY setting_category;
 	std::string text;
 	std::string default_val_string;
 	std::int32_t default_val_int32;
 	int enum_index;
 
+};
+
+template<SettingInfo::SETTING_CLASS_ENUM setting_type>
+class SettingClassTypeTraits
+{
+public:
+	typedef void * type;
+};
+
+template<SettingInfo::SETTING_CLASS_CATEGORY setting_category>
+class SettingCategoryTypeTraits
+{
+};
+
+template<>
+class SettingCategoryTypeTraits<SettingInfo::SETTING_CLASS_CATEGORY__STRING>
+{
+public:
+	typedef std::string type;
+};
+
+template<>
+class SettingCategoryTypeTraits<SettingInfo::SETTING_CLASS_CATEGORY__INT32>
+{
+public:
+	typedef std::int32_t type;
 };
 
 template<typename SETTINGS_ENUM, typename SETTING_CLASS>
@@ -123,9 +162,15 @@ class SettingsRepository
 
 	protected:
 
-		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt) {};
+		void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+		{
+			typename SettingCategoryTypeTraits<setting_info.setting_category>::type setting = pt.get<typename SettingCategoryTypeTraits<setting_info.setting_category>::type>(setting_info.text, *(reinterpret_cast<typename SettingCategoryTypeTraits<setting_info.setting_category>::type *>(setting_info.getDefaultValue())));
+			_settings_map[static_cast<SETTINGS_ENUM>(setting_info.enum_index)] = std::unique_ptr<SETTING_CLASS>(SettingFactory<typename SettingClassTypeTraits<setting_info.setting_class>::type>()(messager, setting));
+		}
+
 		virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS * current_setting, SettingInfo & setting_info) const { return new SETTING_CLASS(messager); };
 		virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL) { return new SETTING_CLASS(messager); };
+		virtual void SetPTreeEntry(Messager & messager, SETTINGS_ENUM which_setting, boost::property_tree::ptree & pt) {};
 
 		void LoadSettingsFromFile(Messager & messager)
 		{
@@ -181,44 +226,35 @@ class SettingsRepository
 
 			bool no_file = false;
 
-			if ( !boost::filesystem::exists(path_to_settings) )
+			if ( !boost::filesystem::exists(_path_to_settings) )
 			{
 				no_file = true; // no file is fine
 			}
 
-			else if ( boost::filesystem::file_size(path_to_settings) == 0 )
+			else if ( boost::filesystem::file_size(_path_to_settings) == 0 )
 			{
 				no_file = true; // empty file is fine
 			}
 
-			else if ( !boost::filesystem::is_regular_file(path_to_settings) )
-			{
-				boost::format msg("Settings file %1% is not available.  Using default settings.");
-				msg % path_to_settings;
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_DOES_NOT_EXIST, msg.str()));
-				no_file = true;
-			}
-
 			boost::property_tree::ptree pt;
+
+			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
+			{
+				SetPTreeEntry(messager, static_cast<SETTINGS_ENUM>(n), pt);
+			}
 
 			if (!no_file)
 			{
 				try
 				{
-					boost::property_tree::xml_parser::read_xml(path_to_settings.string(), pt);
+					boost::property_tree::xml_parser::write_xml(_path_to_settings.string(), pt);
 				}
 				catch (const boost::property_tree::xml_parser_error & e)
 				{
-					boost::format msg("Settings file %1% is not in the correct format: %2%");
-					msg % path_to_settings % e.what();
+					boost::format msg("Settings file %1% cannot be written to disk: %2%");
+					msg % _path_to_settings % e.what();
 					messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_INVALID_FORMAT, msg.str()));
 				}
-			}
-
-			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
-			{
-				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, static_cast<SETTINGS_ENUM>(n));
-				SetMapEntry(messager, setting_info, pt); // sets default value if not present in property tree at this point
 			}
 
 		}
@@ -242,7 +278,7 @@ class SettingsRepository
 
 		boost::filesystem::path _path_to_settings;
 
-	private:
+	protected:
 
 		static SETTING_CLASS SettingInfoObject;
 

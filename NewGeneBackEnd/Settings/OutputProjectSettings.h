@@ -25,7 +25,7 @@ public:
 
 	virtual ~OutputProjectSettings() {}
 
-	void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
+	//void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 	BackendProjectOutputSetting * CloneSetting(Messager & messager, BackendProjectOutputSetting * current_setting, SettingInfo & setting_info) const;
 	BackendProjectOutputSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);
 

@@ -24,4 +24,11 @@ public:
 
 };
 
+template<>
+class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST>
+{
+public:
+	typedef GlobalSetting_Test type;
+};
+
 #endif
