@@ -4,140 +4,66 @@
 #include "uisettingsmanager.h"
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
+#	include <boost/regex.hpp>
+#	include <boost/algorithm/string/regex.hpp>
 #endif
+#include <fstream>
 
 
-class UIGlobalSetting_File_List_base : public UIGlobalSetting, public StringSetting
+template<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI SETTING>
+class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public StringSetting, public SimpleAccessSetting<UIGlobalSetting_Projects_Files_List<SETTING>, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, SETTING, UISettingsManager>
 {
 
 	public:
 
-		UIGlobalSetting_File_List_base(Messager & messager_, std::string const & setting)
-			: UIGlobalSetting()
-			, StringSetting(messager_, setting)
-		{}
-
-		virtual void DoSpecialParse(Messager & messager_)
-		{
-//			std::vector<std::string> strings;
-//			boost::split(strings, setting, boost::is_any_of(";"), boost::token_compress_on);
-//			for_each(collection.begin(), collection.end(), [](Element& e)
-//			{
-//			   foo(e);
-//			});
-		}
-
-		std::vector<boost::filesystem::path> files;
-
-};
-
-class UIGlobalSetting_MRU_List_base : public UIGlobalSetting_File_List_base
-{
-
-	public:
-
-		UIGlobalSetting_MRU_List_base(Messager & messager_, std::string const & setting)
-			: UIGlobalSetting_File_List_base(messager_, setting)
+		UIGlobalSetting_Projects_Files_List(Messager & messager, std::string const & setting)
+			: Setting(messager)
+			, UISetting(messager)
+			, GlobalSetting(messager)
+			, UIGlobalSetting(messager)
+			, StringSetting(messager, setting)
 		{}
 
 		virtual void DoSpecialParse(Messager & messager)
 		{
-			UIGlobalSetting_File_List_base::DoSpecialParse(messager);
+			std::vector<std::string> projects;
+			boost::split_regex(projects, string_setting, boost::regex(";;"));
+			std::for_each(projects.begin(), projects.end(), [this](std::string & spath)
+			{
+				std::vector<std::string> files_;
+				boost::split(files_, spath, boost::is_any_of(";"), boost::token_compress_on);
+
+				if (files_.size() == 2)
+				{
+					std::string settings = files_[0];
+					std::string model = files_[1];
+
+					if (boost::filesystem::portable_posix_name(settings) && boost::filesystem::windows_name(settings))
+					{
+						if (!boost::filesystem::exists(settings))
+						{
+							std::fstream _touch(settings);
+						}
+					}
+
+					if (boost::filesystem::portable_posix_name(model) && boost::filesystem::windows_name(model))
+					{
+						if (!boost::filesystem::exists(model))
+						{
+							std::fstream _touch(model);
+						}
+					}
+
+					if (boost::filesystem::is_regular_file(settings) && boost::filesystem::is_regular_file((model)))
+					{
+						this->files.push_back(std::make_pair<boost::filesystem::path, boost::filesystem::path>(settings, model));
+					}
+				}
+
+			});
 		}
 
-		//std::
-
-};
-
-class UIGlobalSetting_MRU_Input_List : public UIGlobalSetting_MRU_List_base, public SimpleAccessSetting<UIGlobalSetting_MRU_Input_List, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, GLOBAL_SETTINGS_UI_NAMESPACE::MRU_INPUT_LIST, UISettingsManager>
-{
-
-	public:
-
-		UIGlobalSetting_MRU_Input_List(Messager & messager_, std::string const & setting)
-			: UIGlobalSetting_MRU_List_base(messager_, setting)
-		{}
-
-		virtual void DoSpecialParse(Messager & messager)
-		{
-			UIGlobalSetting_MRU_List_base::DoSpecialParse(messager);
-		}
-
-		//std::
-
-};
-
-class UIGlobalSetting_MRU_Output_List : public UIGlobalSetting_MRU_List_base, public SimpleAccessSetting<UIGlobalSetting_MRU_Output_List, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, GLOBAL_SETTINGS_UI_NAMESPACE::MRU_OUTPUT_LIST, UISettingsManager>
-{
-
-	public:
-
-		UIGlobalSetting_MRU_Output_List(Messager & messager_, std::string const & setting)
-			: UIGlobalSetting_MRU_List_base(messager_, setting)
-		{}
-
-		virtual void DoSpecialParse(Messager & messager)
-		{
-			UIGlobalSetting_MRU_List_base::DoSpecialParse(messager);
-//			boost::format msg("Here is a message!");
-//			messager.AppendMessage(new UIMessagerErrorMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
-		}
-
-		//std::
-
-};
-
-class UIGlobalSetting_OpenProject_List_base : public UIGlobalSetting_File_List_base
-{
-
-	public:
-
-		UIGlobalSetting_OpenProject_List_base(Messager & messager_, std::string const & setting)
-			: UIGlobalSetting_File_List_base(messager_, setting)
-		{}
-
-		virtual void DoSpecialParse(Messager & messager)
-		{
-			UIGlobalSetting_File_List_base::DoSpecialParse(messager);
-		}
-
-		//std::
-
-};
-
-class UIGlobalSetting_OpenProject_Input_List : public UIGlobalSetting_OpenProject_List_base, public SimpleAccessSetting<UIGlobalSetting_OpenProject_Input_List, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_LIST, UISettingsManager>
-{
-
-	public:
-
-		UIGlobalSetting_OpenProject_Input_List(Messager & messager_, std::string const & setting)
-			: UIGlobalSetting_OpenProject_List_base(messager_, setting)
-		{}
-
-		virtual void DoSpecialParse(Messager & messager)
-		{
-			UIGlobalSetting_OpenProject_List_base::DoSpecialParse(messager);
-		}
-
-		//std::
-
-};
-
-class UIGlobalSetting_OpenProject_Output_List : public UIGlobalSetting_OpenProject_List_base, public SimpleAccessSetting<UIGlobalSetting_OpenProject_Output_List, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_LIST, UISettingsManager>
-{
-
-	public:
-
-		UIGlobalSetting_OpenProject_Output_List(Messager & messager_, std::string const & setting)
-			: UIGlobalSetting_OpenProject_List_base(messager_, setting)
-		{}
-
-		virtual void DoSpecialParse(Messager & messager)
-		{
-			UIGlobalSetting_OpenProject_List_base::DoSpecialParse(messager);
-		}
-
-		//std::
+		std::vector<std::pair<boost::filesystem::path, boost::filesystem::path> > files;
 
 };
 

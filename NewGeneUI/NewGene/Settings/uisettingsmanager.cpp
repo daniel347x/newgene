@@ -126,7 +126,7 @@ std::unique_ptr<BackendGlobalSetting> UISettingsManager::getSetting(Messager & m
 		boost::format msg("Cannot retrieve setting \"%1%\"");
 		msg % which_setting;
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
-		return std::unique_ptr<BackendGlobalSetting>(new BackendGlobalSetting());
+		return std::unique_ptr<BackendGlobalSetting>(new BackendGlobalSetting(messager));
 	}
 	return the_setting_;
 }
@@ -142,7 +142,7 @@ std::unique_ptr<UIGlobalSetting> UISettingsManager::getSetting(Messager & messag
 		boost::format msg("Cannot retrieve setting \"%1%\"");
 		msg % which_setting;
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
-		return std::unique_ptr<UIGlobalSetting>(new UIGlobalSetting());
+		return std::unique_ptr<UIGlobalSetting>(new UIGlobalSetting(messager));
 	}
 	return the_setting_;
 }
@@ -156,7 +156,7 @@ std::unique_ptr<BackendProjectInputSetting> UISettingsManager::getSetting(Messag
 		boost::format msg("Cannot retrieve setting (\"%1%\") for a NULL project.");
 		msg % which_setting;
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
-		return std::unique_ptr<BackendProjectInputSetting>(new BackendProjectInputSetting());
+		return std::unique_ptr<BackendProjectInputSetting>(new BackendProjectInputSetting(messager));
 	}
 	std::unique_ptr<BackendProjectInputSetting> the_setting_ = project->settings().getBackendSettings().GetSetting(messager, which_setting);
 	BackendProjectInputSetting * the_setting = the_setting_.get();
@@ -165,7 +165,7 @@ std::unique_ptr<BackendProjectInputSetting> UISettingsManager::getSetting(Messag
 		boost::format msg("Cannot retrieve setting \"%1%\"");
 		msg % which_setting;
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
-		return std::unique_ptr<BackendProjectInputSetting>(new BackendProjectInputSetting());
+		return std::unique_ptr<BackendProjectInputSetting>(new BackendProjectInputSetting(messager));
 	}
 	return the_setting_;
 }
@@ -179,7 +179,7 @@ std::unique_ptr<BackendProjectOutputSetting> UISettingsManager::getSetting(Messa
 		boost::format msg("Cannot retrieve setting (\"%1%\") for a NULL project.");
 		msg % which_setting;
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
-		return std::unique_ptr<BackendProjectOutputSetting>(new BackendProjectOutputSetting());
+		return std::unique_ptr<BackendProjectOutputSetting>(new BackendProjectOutputSetting(messager));
 	}
 	std::unique_ptr<BackendProjectOutputSetting> the_setting_ = project->settings().getBackendSettings().GetSetting(messager, which_setting);
 	BackendProjectOutputSetting * the_setting = the_setting_.get();
@@ -188,7 +188,7 @@ std::unique_ptr<BackendProjectOutputSetting> UISettingsManager::getSetting(Messa
 		boost::format msg("Cannot retrieve setting \"%1%\"");
 		msg % which_setting;
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
-		return std::unique_ptr<BackendProjectOutputSetting>(new BackendProjectOutputSetting());
+		return std::unique_ptr<BackendProjectOutputSetting>(new BackendProjectOutputSetting(messager));
 	}
 	return the_setting_;
 }
@@ -202,7 +202,7 @@ std::unique_ptr<UIProjectInputSetting> UISettingsManager::getSetting(Messager & 
 		boost::format msg("Cannot retrieve setting (\"%1%\") for a NULL project.");
 		msg % which_setting;
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
-		return std::unique_ptr<UIProjectInputSetting>(new UIProjectInputSetting());
+		return std::unique_ptr<UIProjectInputSetting>(new UIProjectInputSetting(messager));
 	}
 	std::unique_ptr<UIProjectInputSetting> the_setting_ = project->settings().getUISettings().GetSetting(messager, which_setting);
 	UIProjectInputSetting * the_setting = the_setting_.get();
@@ -211,7 +211,7 @@ std::unique_ptr<UIProjectInputSetting> UISettingsManager::getSetting(Messager & 
 		boost::format msg("Cannot retrieve setting \"%1%\"");
 		msg % which_setting;
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
-		return std::unique_ptr<UIProjectInputSetting>(new UIProjectInputSetting());
+		return std::unique_ptr<UIProjectInputSetting>(new UIProjectInputSetting(messager));
 	}
 	return the_setting_;
 }
@@ -225,7 +225,7 @@ std::unique_ptr<UIProjectOutputSetting> UISettingsManager::getSetting(Messager &
 		boost::format msg("Cannot retrieve setting (\"%1%\") for a NULL project.");
 		msg % which_setting;
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
-		return std::unique_ptr<UIProjectOutputSetting>(new UIProjectOutputSetting());
+		return std::unique_ptr<UIProjectOutputSetting>(new UIProjectOutputSetting(messager));
 	}
 	std::unique_ptr<UIProjectOutputSetting> the_setting_ = project->settings().getUISettings().GetSetting(messager, which_setting);
 	UIProjectOutputSetting * the_setting = the_setting_.get();
@@ -234,7 +234,7 @@ std::unique_ptr<UIProjectOutputSetting> UISettingsManager::getSetting(Messager &
 		boost::format msg("Cannot retrieve setting \"%1%\"");
 		msg % which_setting;
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
-		return std::unique_ptr<UIProjectOutputSetting>(new UIProjectOutputSetting());
+		return std::unique_ptr<UIProjectOutputSetting>(new UIProjectOutputSetting(messager));
 	}
 	return the_setting_;
 }

@@ -9,7 +9,10 @@ class GlobalSetting_Test : public BackendGlobalSetting, public StringSetting, pu
 public:
 
 	GlobalSetting_Test(Messager & messager, std::string const & setting)
-		: BackendGlobalSetting()
+		: Setting(messager)
+		, BackendSetting(messager)
+		, GlobalSetting(messager)
+		, BackendGlobalSetting(messager)
 		, StringSetting(messager, setting)
 	{}
 

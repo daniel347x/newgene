@@ -3,6 +3,9 @@
 
 NewGeneMainWindow * theMainWindow = NULL;
 
+UIMessager dummy_messager;
+Messager * dummy_messager_ptr = &dummy_messager;
+
 template<typename MANAGER_CLASS>
 MANAGER_CLASS & get_a_ui_manager()
 {

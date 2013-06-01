@@ -14,6 +14,7 @@
 #include <cstdint>
 
 class UIMessager;
+extern Messager * dummy_messager_ptr;
 
 class SettingInfo
 {
@@ -33,10 +34,10 @@ public:
 		, SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING
 
 		, SETTING_CLASS_UI_GLOBAL_SETTING
-		, SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_LIST
-		, SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_LIST
-		, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_LIST
-		, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_LIST
+		, SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_PROJECTS_LIST
+		, SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_PROJECTS_LIST
+		, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_PROJECTS_LIST
+		, SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_PROJECTS_LIST
 
 		, SETTING_CLASS_UI_PROJECT_INPUT_SETTING
 
@@ -106,7 +107,7 @@ class SettingsRepository
 				{
 					boost::format msg("Setting cannot be created.");
 					messager.AppendMessage(new MessagerCatastrophicErrorMessage(MESSAGER_MESSAGE__SETTING_NOT_CREATED, msg.str()));
-					return std::unique_ptr<SETTING_CLASS>(new SETTING_CLASS());
+					return std::unique_ptr<SETTING_CLASS>(new SETTING_CLASS(messager));
 				}
 			}
 			return std::unique_ptr<SETTING_CLASS>(CloneSetting(messager, theSetting->second.get(), setting_info));
@@ -123,8 +124,8 @@ class SettingsRepository
 	protected:
 
 		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt) {};
-		virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS * current_setting, SettingInfo & setting_info) const { return new SETTING_CLASS(); };
-		virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL) { return new SETTING_CLASS(); };
+		virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS * current_setting, SettingInfo & setting_info) const { return new SETTING_CLASS(messager); };
+		virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL) { return new SETTING_CLASS(messager); };
 
 		void LoadSettingsFromFile(Messager & messager)
 		{
@@ -224,7 +225,7 @@ class SettingsRepository
 
 		SettingsMap _settings_map;
 
-		SettingsRepository(Messager &, boost::filesystem::path const path_to_settings)
+		SettingsRepository(Messager & messager, boost::filesystem::path const path_to_settings)
 			: _path_to_settings(path_to_settings)
 		{
 		}
@@ -248,7 +249,7 @@ class SettingsRepository
 };
 
 template<typename SETTINGS_ENUM, typename SETTING_CLASS>
-SETTING_CLASS SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>::SettingInfoObject;
+SETTING_CLASS SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>::SettingInfoObject = SETTING_CLASS(*dummy_messager_ptr);
 
 template<typename SETTINGS_REPOSITORY_CLASS>
 class SettingsRepositoryFactory

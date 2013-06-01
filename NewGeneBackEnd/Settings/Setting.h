@@ -51,7 +51,7 @@ public:
 
 protected:
 
-	Setting() {} // must use factory function to create settings
+	Setting(Messager &) {} // must use factory function to create settings
 
 };
 
@@ -85,66 +85,144 @@ public:
 	}
 };
 
+class BackendSetting : virtual public Setting
+{
+	public:
+		BackendSetting(Messager & messager)
+			: Setting(messager)
+		{
+
+		}
+};
+
+class InputSetting : virtual public Setting
+{
+	public:
+		InputSetting(Messager & messager)
+			: Setting(messager)
+		{
+
+		}
+};
+
+class OutputSetting : virtual public Setting
+{
+	public:
+		OutputSetting(Messager & messager)
+			: Setting(messager)
+		{
+
+		}
+};
+
 class GlobalSetting : virtual public Setting
 {
 	public:
+		GlobalSetting(Messager & messager)
+			: Setting(messager)
+		{
+
+		}
 };
 
 class ProjectSetting : virtual public Setting
 {
 	public:
+		ProjectSetting(Messager & messager)
+			: Setting(messager)
+		{
+
+		}
 };
 
-class BackendSetting : virtual public Setting
+class BackendGlobalSetting : virtual public BackendSetting, virtual public GlobalSetting
 {
 	public:
-};
+		BackendGlobalSetting(Messager & messager)
+			: Setting(messager)
+			, BackendSetting(messager)
+			, GlobalSetting(messager)
+		{
 
-class InputSetting : virtual public Setting
-{
-public:
-};
-
-class OutputSetting : virtual public Setting
-{
-public:
-};
-
-class BackendGlobalSetting : public GlobalSetting, public BackendSetting
-{
-	public:
+		}
 		SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 		static SETTING_CATEGORY category;
 };
 
-class BackendProjectSetting : public ProjectSetting, public BackendSetting
+class BackendProjectSetting : virtual public BackendSetting, virtual public ProjectSetting
 {
 	public:
+		BackendProjectSetting(Messager & messager)
+			: Setting(messager)
+			, BackendSetting(messager)
+			, ProjectSetting(messager)
+		{
+
+		}
 };
 
 class BackendInputSetting : virtual public BackendSetting, virtual public InputSetting
 {
 public:
+	BackendInputSetting(Messager & messager)
+		: Setting(messager)
+		, BackendSetting(messager)
+		, InputSetting(messager)
+	{
+
+	}
 };
 
 class BackendOutputSetting : virtual public BackendSetting, virtual public OutputSetting
 {
 public:
+	BackendOutputSetting(Messager & messager)
+		: Setting(messager)
+		, BackendSetting(messager)
+		, OutputSetting(messager)
+	{
+
+	}
 };
 
 class ProjectInputSetting : virtual public ProjectSetting, virtual public InputSetting
 {
 public:
+	ProjectInputSetting(Messager & messager)
+		: Setting(messager)
+		, ProjectSetting(messager)
+		, InputSetting(messager)
+	{
+
+	}
 };
 
 class ProjectOutputSetting : virtual public ProjectSetting, virtual public OutputSetting
 {
 public:
+	ProjectOutputSetting(Messager & messager)
+		: Setting(messager)
+		, ProjectSetting(messager)
+		, OutputSetting(messager)
+	{
+
+	}
 };
 
 class BackendProjectInputSetting : public BackendProjectSetting, public BackendInputSetting, public ProjectInputSetting
 {
 public:
+	BackendProjectInputSetting(Messager & messager)
+		: Setting(messager)
+		, BackendSetting(messager)
+		, ProjectSetting(messager)
+		, InputSetting(messager)
+		, BackendProjectSetting(messager)
+		, BackendInputSetting(messager)
+		, ProjectInputSetting(messager)
+	{
+
+	}
 	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 	static SETTING_CATEGORY category;
 };
@@ -152,6 +230,17 @@ public:
 class BackendProjectOutputSetting : public BackendProjectSetting, public BackendOutputSetting, public ProjectOutputSetting
 {
 public:
+	BackendProjectOutputSetting(Messager & messager)
+		: Setting(messager)
+		, BackendSetting(messager)
+		, ProjectSetting(messager)
+		, OutputSetting(messager)
+		, BackendProjectSetting(messager)
+		, BackendOutputSetting(messager)
+		, ProjectOutputSetting(messager)
+	{
+
+	}
 	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 	static SETTING_CATEGORY category;
 };
@@ -162,8 +251,9 @@ class StringSetting : virtual public Setting
 
 		typedef std::string type;
 
-		StringSetting(Messager &, std::string const & setting)
-			: string_setting(setting)
+		StringSetting(Messager & messager, std::string const & setting)
+			: Setting(messager)
+			, string_setting(setting)
 		{}
 
 		std::string getString() { return string_setting; }
@@ -178,8 +268,9 @@ class Int32Setting : virtual public Setting
 
 		typedef std::int32_t type;
 
-		Int32Setting(Messager &, std::int32_t const & setting)
-			: int32_setting(setting)
+		Int32Setting(Messager & messager, std::int32_t const & setting)
+			: Setting(messager)
+			, int32_setting(setting)
 		{}
 
 		std::int32_t getInt32() { return int32_setting; }
