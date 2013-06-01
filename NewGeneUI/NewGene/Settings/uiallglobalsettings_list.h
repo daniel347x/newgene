@@ -28,44 +28,56 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 		{
 			std::vector<std::string> projects;
 			boost::split_regex(projects, string_setting, boost::regex(";;"));
-			std::for_each(projects.begin(), projects.end(), [this](std::string & spath)
+			std::for_each(projects.begin(), projects.end(), [this, &messager](std::string & spath)
 			{
 				std::vector<std::string> files_;
 				boost::split(files_, spath, boost::is_any_of(";"), boost::token_compress_on);
 
-				if (files_.size() == 2)
+				boost::filesystem::path settings;
+				boost::filesystem::path model;
+
+				try
 				{
-					std::string settings = files_[0];
-					std::string model = files_[1];
-
-#					ifdef Q_OS_WIN32
-						if (boost::filesystem::windows_name(settings))
-#					else
-						if (boost::filesystem::portable_posix_name(settings))
-#					endif
-						{
-							if (!boost::filesystem::exists(settings))
-							{
-								std::fstream _touch(settings);
-							}
-						}
-
-#					ifdef Q_OS_WIN32
-						if (boost::filesystem::windows_name(settings))
-#					else
-						if (boost::filesystem::portable_posix_name(settings))
-#					endif
-						{
-							if (!boost::filesystem::exists(model))
-							{
-								std::fstream _touch(model);
-							}
-						}
-
-					if (boost::filesystem::is_regular_file(settings) && boost::filesystem::is_regular_file((model)))
+					if (files_.size() == 2)
 					{
-						this->files.push_back(std::make_pair<boost::filesystem::path, boost::filesystem::path>(settings, model));
+						settings = files_[0];
+						model = files_[1];
+
+#						ifdef Q_OS_WIN32
+							if (boost::filesystem::is_directory(settings.parent_path()) && boost::filesystem::windows_name(settings.filename().string()))
+#						else
+							if (boost::filesystem::is_directory(settings.parent_path()) && boost::filesystem::portable_posix_name(settings.filename().string()))
+#						endif
+							{
+								if (!boost::filesystem::exists(settings))
+								{
+									std::fstream _touch(settings.string());
+								}
+							}
+
+#						ifdef Q_OS_WIN32
+							if (boost::filesystem::is_directory(model.parent_path()) && boost::filesystem::windows_name(model.filename().string()))
+#						else
+							if (boost::filesystem::is_directory(model.parent_path()) && boost::filesystem::portable_posix_name(model.filename().string()))
+#						endif
+							{
+								if (!boost::filesystem::exists(model))
+								{
+									std::fstream _touch(model.string());
+								}
+							}
+
+						if (boost::filesystem::is_regular_file(settings) && boost::filesystem::is_regular_file((model)))
+						{
+							this->files.push_back(std::make_pair<boost::filesystem::path, boost::filesystem::path>(settings.string(), model.string()));
+						}
 					}
+				}
+				catch(boost::filesystem::filesystem_error & e)
+				{
+					boost::format msg("Invalid path \"%1%\" or \"%2%\": %3%");
+					msg % settings.string() % model.string() % e.what();
+					messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__FILE_INVALID_FORMAT, msg.str()));
 				}
 
 			});
