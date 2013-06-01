@@ -214,6 +214,9 @@ class SettingsRepository
 				SetMapEntry(messager, setting_info, pt); // sets default value if not present in property tree at this point; i.e., if no path is present
 			}
 
+			// Write settings to file, since defaults may have been loaded
+			WriteSettingsToFile(messager);
+
 		}
 
 		void WriteSettingsToFile(Messager & messager)

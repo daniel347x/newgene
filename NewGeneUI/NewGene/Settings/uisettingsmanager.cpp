@@ -33,6 +33,7 @@ UISettingsManager::UISettingsManager( QObject * parent )
 		}
 		else
 		{
+			//statusManagerUI().PostStatus( getGlobalSettingsPath().string().c_str(), UIStatusManager::IMPORTANCE_HIGH );
 			_global_settings.reset( new UIAllGlobalSettings(messager, getGlobalSettingsPath()) );
 		}
 	}
