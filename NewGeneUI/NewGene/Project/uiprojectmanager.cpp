@@ -20,7 +20,7 @@ UIProjectManager::UIProjectManager( QObject * parent )
 
 }
 
-void UIProjectManager::LoadOpenProjects(UIMessager & messager)
+void UIProjectManager::LoadOpenProjects(UIMessager & messager, NewGeneMainWindow* mainWindow)
 {
 	InputProjectFilesList::instance input_project_list = InputProjectFilesList::get(messager);
 	OutputProjectFilesList::instance output_project_list = OutputProjectFilesList::get(messager);
@@ -29,6 +29,11 @@ void UIProjectManager::LoadOpenProjects(UIMessager & messager)
 	{
 		boost::filesystem::path input_project_settings_path = input_project_list->files[0].first;
 		boost::filesystem::path input_project_model_path = input_project_list->files[0].second;
+		if (input_projects.find(mainWindow) != input_projects.cend())
+		{
+			// trigger here
+		}
+		// Now add to map and trigger refresh...
 
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, input_project_settings_path.filename().string()));
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, input_project_model_path.filename().string()));
@@ -38,6 +43,11 @@ void UIProjectManager::LoadOpenProjects(UIMessager & messager)
 	{
 		boost::filesystem::path output_project_settings_path = output_project_list->files[0].first;
 		boost::filesystem::path output_project_model_path = output_project_list->files[0].second;
+		if (output_projects.find(mainWindow) != output_projects.cend())
+		{
+			// trigger here
+		}
+		// Now add to map and trigger refresh...
 
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, output_project_settings_path.filename().string()));
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, output_project_model_path.filename().string()));

@@ -23,7 +23,7 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 
 		explicit UIProjectManager( QObject * parent = 0 );
 
-		void LoadOpenProjects(UIMessager & messager);
+		void LoadOpenProjects(UIMessager & messager, NewGeneMainWindow*);
 
 	signals:
 

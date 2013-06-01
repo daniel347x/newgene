@@ -98,7 +98,7 @@ void NewGeneMainWindow::doInitialize()
 
 	settingsManagerUI().globalSettings().WriteSettingsToFile(messager);
 
-	projectManagerUI().LoadOpenProjects(messager);
+	projectManagerUI().LoadOpenProjects(messager, this);
 
 	// Test instantiating objects
 	//UIInputProject inp(messager);
