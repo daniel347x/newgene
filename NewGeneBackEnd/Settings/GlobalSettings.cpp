@@ -31,7 +31,7 @@ SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, in
 
 }
 
-/*void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+void GlobalSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	switch (setting_info.setting_class)
@@ -54,7 +54,7 @@ SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, in
 
 	}
 
-}*/
+}
 
 BackendGlobalSetting * GlobalSettings::CloneSetting(Messager & messager, BackendGlobalSetting * current_setting, SettingInfo & setting_info) const
 {

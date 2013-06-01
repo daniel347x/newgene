@@ -44,6 +44,18 @@ case GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_UI_SETTING_ENUM: \
 		break; \
 
 
+#define GLOBAL_UI_SET_PTREE_ENTRY__STRING(SETTING_INFO_ENUM, SETTING_CLASS) \
+	case SettingInfo::SETTING_INFO_ENUM: \
+		{ \
+			SETTING_CLASS const * setting = static_cast<SETTING_CLASS const *>(_settings_map[which_setting].get()); \
+			if (setting) \
+			{ \
+				pt.put(setting_info.text, setting->getString()); \
+			} \
+		} \
+		break; \
+
+
 SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager_, int const value__)
 {
 
@@ -72,7 +84,7 @@ SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager_, int co
 
 }
 
-/*void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	UIMessager & messager = static_cast<UIMessager &>(messager_);
@@ -95,7 +107,7 @@ SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager_, int co
 
 	}
 
-}*/
+}
 
 UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & messager_, UIGlobalSetting * current_setting, SettingInfo & setting_info) const
 {
@@ -159,6 +171,37 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 	}
 
 	return NULL;
+
+}
+
+void UIAllGlobalSettings::UIOnlySettings::SetPTreeEntry(Messager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI which_setting, boost::property_tree::ptree & pt)
+{
+
+	SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
+	if (theSetting == _settings_map.cend())
+	{
+		return;
+	}
+
+	SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+
+	switch (setting_info.setting_class)
+	{
+
+		GLOBAL_UI_SET_PTREE_ENTRY__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_PROJECTS_LIST, UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::MRU_INPUT_PROJECTS_LIST>)
+		GLOBAL_UI_SET_PTREE_ENTRY__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_PROJECTS_LIST, UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::MRU_OUTPUT_PROJECTS_LIST>)
+		GLOBAL_UI_SET_PTREE_ENTRY__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_PROJECTS_LIST, UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST>)
+		GLOBAL_UI_SET_PTREE_ENTRY__STRING(SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_PROJECTS_LIST, UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST>)
+
+		default:
+			{
+				boost::format msg("Unknown backend global setting \"%1%\" (\"%2%\") being set.");
+				msg % setting_info.text % setting_info.setting_class;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
+			}
+			break;
+
+	}
 
 }
 

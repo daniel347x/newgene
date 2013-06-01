@@ -33,32 +33,32 @@ SettingInfo UIProjectOutputSetting::GetSettingInfoFromEnum(Messager & messager_,
 
 }
 
-//void UIOutputProjectSettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
-//{
+void UIOutputProjectSettings::SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & /* pt */ )
+{
 
-//	UIMessager & messager = static_cast<UIMessager &>(messager_);
+	UIMessager & messager = static_cast<UIMessager &>(messager_);
 
-//	switch (setting_info.setting_class)
-//	{
+	switch (setting_info.setting_class)
+	{
 
-////		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
-////			{
-////				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-////				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList, true>()(messager, string_setting));
-////			}
-////			break;
-
-//		default:
+//		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
 //			{
-//				boost::format msg("Unknown UI Output project setting \"%1%\" (\"%2%\") being loaded.");
-//				msg % setting_info.text % setting_info.setting_class;
-//				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
+//				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
+//				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList, true>()(messager, string_setting));
 //			}
 //			break;
 
-//	}
+		default:
+			{
+				boost::format msg("Unknown UI Output project setting \"%1%\" (\"%2%\") being loaded.");
+				msg % setting_info.text % setting_info.setting_class;
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
+			}
+			break;
 
-//}
+	}
+
+}
 
 UIProjectOutputSetting * UIOutputProjectSettings::CloneSetting(Messager & messager_, UIProjectOutputSetting * /* current_setting */, SettingInfo & setting_info) const
 {
@@ -130,5 +130,10 @@ UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(Messager & messager
 	}
 
 	return NULL;
+
+}
+
+void UIOutputProjectSettings::SetPTreeEntry(Messager & messager, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI which_setting, boost::property_tree::ptree & pt)
+{
 
 }

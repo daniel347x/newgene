@@ -53,9 +53,10 @@ class UIAllGlobalSettings : public UIAllSettings
 
 			protected:
 
-				//void SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt);
+				void SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 				UIGlobalSetting * CloneSetting(Messager & messager_, UIGlobalSetting * current_setting, SettingInfo & setting_info) const;
 				UIGlobalSetting * NewSetting(Messager & messager_, SettingInfo & setting_info, void const * setting_value_void = NULL);
+				void SetPTreeEntry(Messager & messager, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI which_setting, boost::property_tree::ptree & pt);
 
 		};
 

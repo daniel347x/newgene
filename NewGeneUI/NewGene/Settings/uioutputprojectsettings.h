@@ -36,9 +36,11 @@ class UIOutputProjectSettings : public QObject, public UIAllProjectSettings<Outp
 
 		}
 
-		//void SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt);
+		void SetMapEntry(Messager & messager_, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 		UIProjectOutputSetting * CloneSetting(Messager & messager_, UIProjectOutputSetting * current_setting, SettingInfo & setting_info) const;
 		UIProjectOutputSetting * NewSetting(Messager & messager_, SettingInfo & setting_info, void const * setting_value_void = NULL);
+		void SetPTreeEntry(Messager & messager, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI which_setting, boost::property_tree::ptree & pt);
+
 };
 
 #endif // UIPROJECTOUTPUTSETTINGS_H

@@ -162,12 +162,7 @@ class SettingsRepository
 
 	protected:
 
-		void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
-		{
-			typename SettingCategoryTypeTraits<setting_info.setting_category>::type setting = pt.get<typename SettingCategoryTypeTraits<setting_info.setting_category>::type>(setting_info.text, *(reinterpret_cast<typename SettingCategoryTypeTraits<setting_info.setting_category>::type *>(setting_info.getDefaultValue())));
-			_settings_map[static_cast<SETTINGS_ENUM>(setting_info.enum_index)] = std::unique_ptr<SETTING_CLASS>(SettingFactory<typename SettingClassTypeTraits<setting_info.setting_class>::type>()(messager, setting));
-		}
-
+		virtual void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt) {}
 		virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS * current_setting, SettingInfo & setting_info) const { return new SETTING_CLASS(messager); };
 		virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL) { return new SETTING_CLASS(messager); };
 		virtual void SetPTreeEntry(Messager & messager, SETTINGS_ENUM which_setting, boost::property_tree::ptree & pt) {};

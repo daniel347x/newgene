@@ -31,7 +31,7 @@ SettingInfo BackendProjectInputSetting::GetSettingInfoFromEnum(Messager & messag
 
 }
 
-/*void InputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
+void InputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt)
 {
 
 	switch (setting_info.setting_class)
@@ -54,7 +54,7 @@ SettingInfo BackendProjectInputSetting::GetSettingInfoFromEnum(Messager & messag
 
 	}
 
-}*/
+}
 
 BackendProjectInputSetting * InputProjectSettings::CloneSetting(Messager & messager, BackendProjectInputSetting * current_setting, SettingInfo & setting_info) const
 {
@@ -122,5 +122,10 @@ BackendProjectInputSetting * InputProjectSettings::NewSetting(Messager & message
 	}
 
 	return NULL;
+
+}
+
+void InputProjectSettings::SetPTreeEntry(Messager & messager, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND which_setting, boost::property_tree::ptree & pt)
+{
 
 }
