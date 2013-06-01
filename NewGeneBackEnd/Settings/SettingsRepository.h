@@ -214,31 +214,36 @@ class SettingsRepository
 				SetMapEntry(messager, setting_info, pt); // sets default value if not present in property tree at this point; i.e., if no path is present
 			}
 
-			// Write settings to file, since defaults may have been loaded
-			WriteSettingsToFile(messager);
+			//// Write settings to file, since defaults may have been loaded
+			//WriteSettingsToFile(messager);
 
 		}
 
-		void WriteSettingsToFile(Messager & messager)
+	public:
+
+		void WriteSettingsToPtree(Messager & messager, boost::property_tree::ptree & pt)
+		{
+
+			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
+			{
+				SetPTreeEntry(messager, static_cast<SETTINGS_ENUM>(n), pt);
+			}
+
+		}
+
+		void WritePtreeToFile(Messager & messager, boost::property_tree::ptree & pt)
 		{
 
 			bool no_file = false;
 
 			if ( !boost::filesystem::exists(_path_to_settings) )
 			{
-				no_file = true; // no file is fine
+				no_file = true;
 			}
 
 			else if ( boost::filesystem::file_size(_path_to_settings) == 0 )
 			{
-				no_file = true; // empty file is fine
-			}
-
-			boost::property_tree::ptree pt;
-
-			for ( int n = static_cast<int>(SETTINGS_ENUM::SETTING_FIRST) + 1; n < static_cast<int>(SETTINGS_ENUM::SETTING_LAST); ++n)
-			{
-				SetPTreeEntry(messager, static_cast<SETTINGS_ENUM>(n), pt);
+				no_file = true;
 			}
 
 			if (!no_file)
@@ -256,6 +261,8 @@ class SettingsRepository
 			}
 
 		}
+
+	protected:
 
 		SettingsMap _settings_map;
 

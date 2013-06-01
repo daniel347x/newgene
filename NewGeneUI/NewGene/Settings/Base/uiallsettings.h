@@ -20,6 +20,8 @@ class UIAllSettings : public QObject
 
 		UIAllSettings(UIMessager & messager, QObject * parent = NULL);
 
+		virtual void WriteSettingsToFile() {}
+
 
 	signals:
 

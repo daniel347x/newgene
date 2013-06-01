@@ -41,6 +41,16 @@ class UIOutputProjectSettings : public QObject, public UIAllProjectSettings<Outp
 		UIProjectOutputSetting * NewSetting(Messager & messager_, SettingInfo & setting_info, void const * setting_value_void = NULL);
 		void SetPTreeEntry(Messager & messager, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI which_setting, boost::property_tree::ptree & pt);
 
+		virtual void WriteSettingsToFile(Messager & messager)
+		{
+			boost::property_tree::ptree pt;
+			UIOnlySettings & uisettings = getUISettings();
+			OutputProjectSettings & backendsettings = getBackendSettings();
+			uisettings.WriteSettingsToPtree(messager, pt);
+			backendsettings.WriteSettingsToPtree(messager, pt);
+			uisettings.WritePtreeToFile(messager, pt);
+		}
+
 };
 
 #endif // UIPROJECTOUTPUTSETTINGS_H

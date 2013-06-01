@@ -123,6 +123,16 @@ class UIAllGlobalSettings : public UIAllSettings
 		UIOnlySettings & getUISettings();
 		GlobalSettings & getBackendSettings();
 
+		virtual void WriteSettingsToFile(Messager & messager)
+		{
+			boost::property_tree::ptree pt;
+			UIOnlySettings & uisettings = getUISettings();
+			GlobalSettings & backendsettings = getBackendSettings();
+			uisettings.WriteSettingsToPtree(messager, pt);
+			backendsettings.WriteSettingsToPtree(messager, pt);
+			uisettings.WritePtreeToFile(messager, pt);
+		}
+
 };
 
 #endif // UIGLOBALSETTINGS_H

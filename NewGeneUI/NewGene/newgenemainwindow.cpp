@@ -96,6 +96,8 @@ void NewGeneMainWindow::doInitialize()
 
 	UIMessager messager;
 
+	settingsManagerUI().globalSettings().WriteSettingsToFile(messager);
+
 	projectManagerUI().LoadOpenProjects(messager);
 
 	// Test instantiating objects

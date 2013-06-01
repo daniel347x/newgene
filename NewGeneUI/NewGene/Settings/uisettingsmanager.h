@@ -42,6 +42,8 @@ class UISettingsManager : public QObject, public UIManager<UISettingsManager, Se
 		bool ObtainGlobalSettingsPath();
 		boost::filesystem::path getGlobalSettingsPath() { return global_settings_path; }
 
+		UIAllGlobalSettings & globalSettings() { return *_global_settings; }
+
 	signals:
 
 	public slots:
