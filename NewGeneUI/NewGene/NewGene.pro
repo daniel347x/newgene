@@ -80,7 +80,8 @@ SOURCES += main.cpp\
     Settings/uioutputprojectsettings_list.cpp \
     Threads/ThreadManager.cpp \
     Threads/uithreadmanager.cpp \
-    Triggers/uitriggermanager.cpp
+    Triggers/uitriggermanager.cpp \
+    Project/Base/workqueuemanager.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -148,7 +149,8 @@ HEADERS  += newgenemainwindow.h \
     Settings/uiinputprojectsettings_list.h \
     Settings/uioutputprojectsettings_list.h \
     Threads/uithreadmanager.h \
-    Triggers/uitriggermanager.h
+    Triggers/uitriggermanager.h \
+    Project/Base/workqueuemanager.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \

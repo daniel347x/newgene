@@ -12,6 +12,8 @@
 #include "../Model/Base/uimodel.h"
 #include "../../../NewGeneBackEnd/Threads/ThreadPool.h"
 #include "../../../NewGeneBackEnd/Threads/WorkerThread.h"
+#include "workqueuemanager.h"
+#include <QThread>
 
 class UIModelManager;
 class UISettingsManager;
@@ -36,7 +38,12 @@ class UIProject
 			, work(work_service)
 			, worker_pool_ui(work_service, number_worker_threads)
 		{
+			work_queue_manager.moveToThread(&work_queue_manager_thread);
+		}
 
+		~UIProject()
+		{
+			work_queue_manager_thread.quit();
 		}
 
 		// TODO: Test for validity
@@ -86,6 +93,9 @@ class UIProject
 		boost::asio::io_service work_service;
 		boost::asio::io_service::work work;
 		ThreadPool<WorkerThread> worker_pool_ui;
+
+		QThread work_queue_manager_thread;
+		WorkQueueManager work_queue_manager;
 
 };
 
