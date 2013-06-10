@@ -6,9 +6,12 @@
 #include <memory>
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>
+#	include <boost/asio/io_service.hpp>
 #endif
 #include "../../../NewGeneBackEnd/Project/Project.h"
 #include "../Model/Base/uimodel.h"
+#include "../../../NewGeneBackEnd/Threads/ThreadPool.h"
+#include "../../../NewGeneBackEnd/Threads/WorkerThread.h"
 
 class UIModelManager;
 class UISettingsManager;
@@ -23,10 +26,15 @@ template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typ
 class UIProject
 {
 	public:
+
+		static int const number_worker_threads = 1; // For now, single thread only in pool
+
 		UIProject(UIMessager & messager, UI_PROJECT_SETTINGS_CLASS * ui_settings, UI_MODEL_CLASS * ui_model)
 			: _project_settings(ui_settings)
 			, _model(ui_model)
 			, _backend_project( new BACKEND_PROJECT_CLASS(messager, _project_settings->getBackendSettingsSharedPtr(), _model->getBackendModelSharedPtr()) )
+			, work(work_service)
+			, worker_pool_ui(work_service, number_worker_threads)
 		{
 
 		}
@@ -74,6 +82,10 @@ class UIProject
 		// but not vice-versa (the backend project should not be, and is not,
 		// affected by the state of the user interface).
 		std::unique_ptr<BACKEND_PROJECT_CLASS> const _backend_project;
+
+		boost::asio::io_service work_service;
+		boost::asio::io_service::work work;
+		ThreadPool<WorkerThread> worker_pool_ui;
 
 };
 
