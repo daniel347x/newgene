@@ -41,3 +41,13 @@ UIStatusManager & statusManagerUI()
 {
 	return get_a_ui_manager<UIStatusManager>();
 }
+
+UITriggerManager & triggerManagerUI()
+{
+	return get_a_ui_manager<UITriggerManager>();
+}
+
+UIThreadManager & threadManagerUI()
+{
+	return get_a_ui_manager<UIThreadManager>();
+}

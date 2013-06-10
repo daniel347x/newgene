@@ -7,6 +7,8 @@
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
 #include "uiloggingmanager.h"
+#include "uitriggermanager.h"
+#include "uithreadmanager.h"
 #include <QMessageBox>
 #include "newgenefilenames.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
@@ -28,5 +30,7 @@ UILoggingManager & loggingManagerUI();
 UIModelManager & modelManagerUI();
 UIDocumentManager & documentManagerUI();
 UIStatusManager & statusManagerUI();
+UITriggerManager & triggerManagerUI();
+UIThreadManager & threadManagerUI();
 
 #endif // GLOBALS_H

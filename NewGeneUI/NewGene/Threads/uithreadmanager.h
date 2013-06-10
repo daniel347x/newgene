@@ -1,7 +1,6 @@
 #ifndef UITHREADMANAGER_H
 #define UITHREADMANAGER_H
 
-#include "globals.h"
 #include "uimanager.h"
 #include "..\..\..\NewGeneBackEnd\Threads\ThreadManager.h"
 

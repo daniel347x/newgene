@@ -35,3 +35,13 @@ StatusManager & statusManager()
 {
 	return get_a_manager<StatusManager>();
 }
+
+TriggerManager & triggerManager()
+{
+	return get_a_manager<TriggerManager>();
+}
+
+ThreadManager & threadManager()
+{
+	return get_a_manager<ThreadManager>();
+}

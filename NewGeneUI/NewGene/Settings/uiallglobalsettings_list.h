@@ -125,9 +125,9 @@ public:
 	typedef UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST> type;
 };
 
-typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_PROJECTS_LIST>::type InputProjectFilesList;
-typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_PROJECTS_LIST>::type OutputProjectFilesList;
-typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_PROJECTS_LIST>::type InputMRUFilesList;
-typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_PROJECTS_LIST>::type OutputMRUFilesList;
+typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_PROJECTS_LIST>::type InputMRUFilesList;
+typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_OUTPUT_PROJECTS_LIST>::type OutputMRUFilesList;
+typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_PROJECTS_LIST>::type InputProjectFilesList;
+typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_PROJECTS_LIST>::type OutputProjectFilesList;
 
 #endif // UIALLGLOBALSETTINGS_LIST_H

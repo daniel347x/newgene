@@ -7,6 +7,8 @@
 #include "Documents/documentmanager.h"
 #include "Status/statusmanager.h"
 #include "Logging/loggingmanager.h"
+#include "Triggers/triggermanager.h"
+#include "Threads/threadmanager.h"
 #include "Utilities\NewGeneException.h"
 #include <memory>
 #include <vector>
@@ -29,5 +31,7 @@ LoggingManager & loggingManager();
 ModelManager & modelManager();
 DocumentManager & documentManager();
 StatusManager & statusManager();
+TriggerManager & triggerManager();
+ThreadManager & threadManager();
 
 #endif

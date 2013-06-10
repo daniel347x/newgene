@@ -1,9 +1,9 @@
 #ifndef UITRIGGERMANAGER_H
 #define UITRIGGERMANAGER_H
 
-#include "globals.h"
 #include "uimanager.h"
 #include "..\..\..\NewGeneBackEnd\Triggers\TriggerManager.h"
+#include <QWidget>
 
 class UITriggerManager : public QObject, public UIManager<UITriggerManager, TriggerManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS>
 {
@@ -16,6 +16,13 @@ class UITriggerManager : public QObject, public UIManager<UITriggerManager, Trig
 	signals:
 
 	public slots:
+
+	public:
+
+		void ConnectTrigger(QWidget *);
+
+		void TriggerActiveInputProject(NewGeneMainWindow* /* to be filled in */);
+		void TriggerActiveOutputProject(NewGeneMainWindow* /* to be filled in */);
 
 	private:
 

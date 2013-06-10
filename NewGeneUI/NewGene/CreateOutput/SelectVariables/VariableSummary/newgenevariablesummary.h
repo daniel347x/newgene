@@ -18,6 +18,8 @@ class NewGeneVariableSummary : public QWidget, public NewGeneWidget // do not re
 		explicit NewGeneVariableSummary( QWidget * parent = 0 );
 		~NewGeneVariableSummary();
 
+	public slots:
+
 	protected:
 		void changeEvent( QEvent * e );
 

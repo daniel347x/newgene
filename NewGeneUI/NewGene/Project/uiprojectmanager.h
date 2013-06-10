@@ -22,10 +22,16 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		typedef std::map<NewGeneMainWindow*, std::unique_ptr<UIOutputProject> > OutputProjects;
 
 		explicit UIProjectManager( QObject * parent = 0 );
+		~UIProjectManager();
 
-		void LoadOpenProjects(UIMessager & messager, NewGeneMainWindow*);
+		void LoadOpenProjects(NewGeneMainWindow*);
+		void TriggerActiveInputProject(NewGeneMainWindow* /* to be filled in */);
+		void TriggerActiveOutputProject(NewGeneMainWindow* /* to be filled in */);
+		void ConnectTrigger(QWidget * w);
 
 	signals:
+		void TriggerInputProject();
+		void TriggerOutputProject();
 
 	public slots:
 

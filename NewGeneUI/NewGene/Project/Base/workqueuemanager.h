@@ -5,13 +5,15 @@
 
 class WorkQueueManager : public QObject
 {
-        Q_OBJECT
-    public:
-        explicit WorkQueueManager(QObject *parent = 0);
+		Q_OBJECT
+	public:
+		explicit WorkQueueManager(QObject *parent = 0);
 
-    signals:
+	signals:
+		void SendTrigger();
 
-    public slots:
+	public slots:
+		void ReceiveTrigger();
 
 };
 

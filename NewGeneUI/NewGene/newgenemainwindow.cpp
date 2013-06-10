@@ -22,6 +22,8 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	ui( new Ui::NewGeneMainWindow )
 {
 
+	NewGeneWidget::theMainWindow = this;
+
 	try
 	{
 
@@ -69,6 +71,7 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 
 NewGeneMainWindow::~NewGeneMainWindow()
 {
+	NewGeneWidget::theMainWindow = nullptr;
 	delete ui;
 }
 
@@ -103,7 +106,7 @@ void NewGeneMainWindow::doInitialize()
 	settingsManagerUI().globalSettings().WriteSettingsToFile(messager); // Write any defaults back to disk, along with values just read from disk
 
 
-	projectManagerUI().LoadOpenProjects(messager, this);
+	projectManagerUI().LoadOpenProjects(this);
 
 	// Test instantiating objects
 	//UIInputProject inp(messager);

@@ -16,6 +16,10 @@ class NewGeneWidget
 	private:
 		QWidget * self;
 
+	public:
+
+		static NewGeneMainWindow * theMainWindow;
+
 };
 
 #endif // NEWGENEWIDGET_H

@@ -39,12 +39,14 @@ class UIProject
 			, work(work_service)
 			, worker_pool_ui(work_service, number_worker_threads)
 		{
+			work_queue_manager_thread.start();
 			work_queue_manager.moveToThread(&work_queue_manager_thread);
 		}
 
 		~UIProject()
 		{
-			work_queue_manager_thread.quit();
+			//work_queue_manager_thread.quit();
+			//wait();
 		}
 
 		// TODO: Test for validity
@@ -63,6 +65,16 @@ class UIProject
 		BACKEND_PROJECT_CLASS & backend()
 		{
 			return *_backend_project;
+		}
+
+		WorkQueueManager & getQueueManager()
+		{
+			return work_queue_manager;
+		}
+
+		QThread & getQueueManagerThread()
+		{
+			return work_queue_manager_thread;
 		}
 
 	protected:
