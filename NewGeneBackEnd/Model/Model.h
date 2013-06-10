@@ -9,15 +9,22 @@
 #ifndef Q_MOC_RUN
 #	include <boost/property_tree/ptree.hpp>
 #	include <boost/property_tree/xml_parser.hpp>
+#	include <boost/asio/io_service.hpp>
 #endif
+#include "../Threads/ThreadPool.h"
+#include "../Threads/WorkerThread.h"
 
 class Model
 {
 
 	public:
 		
+		static int const number_worker_threads = 1; // For now, single thread only in pool
+
 		Model(Messager & messager, boost::filesystem::path const path_to_model)
 			: _path_to_model(path_to_model)
+			, work(work_service)
+			, worker_pool_model(work_service, number_worker_threads)
 		{
 
 		}
@@ -31,6 +38,10 @@ class Model
 	protected:
 
 		boost::filesystem::path const _path_to_model;
+
+		boost::asio::io_service work_service;
+		boost::asio::io_service::work work;
+		ThreadPool<WorkerThread> worker_pool_model;
 
 };
 
