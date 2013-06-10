@@ -9,10 +9,6 @@
 class ThreadManager : public Manager<ThreadManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS>
 {
 
-public:
-
-	std::queue<WorkItem*> WorkQueueBackend;
-
 };
 
 #endif

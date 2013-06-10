@@ -101,6 +101,7 @@
     <ClInclude Include="Status\StatusManager.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="Threads\ThreadManager.h" />
+    <ClInclude Include="Threads\ThreadPool.h" />
     <ClInclude Include="Threads\WorkerThread.h" />
     <ClInclude Include="Threads\WorkItem.h" />
     <ClInclude Include="Triggers\TriggerManager.h" />
@@ -134,6 +135,7 @@
     <ClCompile Include="Status\StatusManager.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Threads\ThreadManager.cpp" />
+    <ClCompile Include="Threads\ThreadPool.cpp" />
     <ClCompile Include="Threads\WorkerThread.cpp" />
     <ClCompile Include="Threads\WorkItem.cpp" />
     <ClCompile Include="Triggers\TriggerManager.cpp" />

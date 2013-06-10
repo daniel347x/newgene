@@ -171,6 +171,9 @@
     <ClInclude Include="Threads\WorkItem.h">
       <Filter>Header Files\Threads</Filter>
     </ClInclude>
+    <ClInclude Include="Threads\ThreadPool.h">
+      <Filter>Header Files\Threads</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -264,6 +267,9 @@
       <Filter>Source Files\Threads</Filter>
     </ClCompile>
     <ClCompile Include="Threads\WorkItem.cpp">
+      <Filter>Source Files\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="Threads\ThreadPool.cpp">
       <Filter>Source Files\Threads</Filter>
     </ClCompile>
   </ItemGroup>
