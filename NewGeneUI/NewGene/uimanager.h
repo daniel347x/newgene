@@ -82,6 +82,12 @@ class UIManager
 
 		}
 
+		static MANAGER_CLASS_BACKEND & getBackendManager()
+		{
+			MANAGER_CLASS_UI & ui_manager = getManager();
+			return MANAGER_CLASS_BACKEND::getManager();
+		}
+
 	protected:
 		MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER_UI which;
 		QString which_descriptor;

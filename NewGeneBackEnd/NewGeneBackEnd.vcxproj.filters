@@ -165,6 +165,12 @@
     <ClInclude Include="Triggers\TriggerManager.h">
       <Filter>Header Files\Triggers</Filter>
     </ClInclude>
+    <ClInclude Include="Threads\WorkerThread.h">
+      <Filter>Header Files\Threads</Filter>
+    </ClInclude>
+    <ClInclude Include="Threads\WorkItem.h">
+      <Filter>Header Files\Threads</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -253,6 +259,12 @@
     </ClCompile>
     <ClCompile Include="Triggers\TriggerManager.cpp">
       <Filter>Source Files\Triggers</Filter>
+    </ClCompile>
+    <ClCompile Include="Threads\WorkerThread.cpp">
+      <Filter>Source Files\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="Threads\WorkItem.cpp">
+      <Filter>Source Files\Threads</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

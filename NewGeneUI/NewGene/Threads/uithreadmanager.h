@@ -17,6 +17,10 @@ class UIThreadManager : public QObject, public UIManager<UIThreadManager, Thread
 
 	public slots:
 
+	public:
+
+		std::queue<WorkItem*> WorkQueueUI;
+
 	private:
 
 };

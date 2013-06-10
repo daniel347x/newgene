@@ -101,6 +101,8 @@
     <ClInclude Include="Status\StatusManager.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="Threads\ThreadManager.h" />
+    <ClInclude Include="Threads\WorkerThread.h" />
+    <ClInclude Include="Threads\WorkItem.h" />
     <ClInclude Include="Triggers\TriggerManager.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
   </ItemGroup>
@@ -132,6 +134,8 @@
     <ClCompile Include="Status\StatusManager.cpp" />
     <ClCompile Include="test.cpp" />
     <ClCompile Include="Threads\ThreadManager.cpp" />
+    <ClCompile Include="Threads\WorkerThread.cpp" />
+    <ClCompile Include="Threads\WorkItem.cpp" />
     <ClCompile Include="Triggers\TriggerManager.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
   </ItemGroup>
