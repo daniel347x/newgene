@@ -31,10 +31,11 @@ class UIProject
 
 		static int const number_worker_threads = 1; // For now, single thread only in pool
 
-		UIProject(UIMessager & messager, UI_PROJECT_SETTINGS_CLASS * ui_settings, UI_MODEL_CLASS * ui_model)
-			: _project_settings(ui_settings)
+		UIProject(UIMessager * messager, UI_PROJECT_SETTINGS_CLASS * ui_settings, UI_MODEL_CLASS * ui_model)
+			: project_messager(messager)
+			, _project_settings(ui_settings)
 			, _model(ui_model)
-			, _backend_project( new BACKEND_PROJECT_CLASS(messager, _project_settings->getBackendSettingsSharedPtr(), _model->getBackendModelSharedPtr()) )
+			, _backend_project( new BACKEND_PROJECT_CLASS(*project_messager, _project_settings->getBackendSettingsSharedPtr(), _model->getBackendModelSharedPtr()) )
 			, work(work_service)
 			, worker_pool_ui(work_service, number_worker_threads)
 		{
@@ -70,6 +71,8 @@ class UIProject
 		// C++ data members are initialized in the order they appear
 		// in the class declaration (this file).
 		// Do not reorder the declarations of these member variables.
+
+		std::unique_ptr<UIMessager> project_messager;
 
 		// The settings are distinguished from the model only by the fact
 		// that they are stored permanently in human-readable XML or text files

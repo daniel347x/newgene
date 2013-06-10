@@ -11,7 +11,7 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 		Q_OBJECT
 
 	public:
-		UIInputProject(UIMessager & messager, UIInputProjectSettings * settings, UIInputModel * model, QObject * parent = NULL)
+		UIInputProject(UIMessager * messager, UIInputProjectSettings * settings, UIInputModel * model, QObject * parent = NULL)
 			: QObject(parent)
 			, UIProject(messager, settings, model)
 		{

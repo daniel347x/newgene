@@ -29,11 +29,13 @@ void UIProjectManager::LoadOpenProjects(UIMessager & messager, NewGeneMainWindow
 	{
 		boost::filesystem::path input_project_settings_path = input_project_list->files[0].first;
 		boost::filesystem::path input_project_model_path = input_project_list->files[0].second;
-		if (input_projects.find(mainWindow) != input_projects.cend())
+		if (input_projects.find(mainWindow) == input_projects.cend())
 		{
-			// trigger here
+			std::unique_ptr<UIMessager> project_messager(new UIMessager());
+			std::unique_ptr<UIInputProjectSettings> project_settings(new UIInputProjectSettings(*project_messager, input_project_settings_path));
+			std::unique_ptr<UIInputModel> project_model(new UIInputModel(*project_messager, input_project_model_path));
+			input_projects[mainWindow] = std::unique_ptr<UIInputProject>(new UIInputProject(project_messager.release(), project_settings.release(), project_model.release()));
 		}
-		// Now add to map and trigger refresh...
 
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, input_project_settings_path.filename().string()));
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, input_project_model_path.filename().string()));
@@ -43,11 +45,13 @@ void UIProjectManager::LoadOpenProjects(UIMessager & messager, NewGeneMainWindow
 	{
 		boost::filesystem::path output_project_settings_path = output_project_list->files[0].first;
 		boost::filesystem::path output_project_model_path = output_project_list->files[0].second;
-		if (output_projects.find(mainWindow) != output_projects.cend())
+		if (output_projects.find(mainWindow) == output_projects.cend())
 		{
-			// trigger here
+			std::unique_ptr<UIMessager> project_messager(new UIMessager());
+			std::unique_ptr<UIOutputProjectSettings> project_settings(new UIOutputProjectSettings(*project_messager, output_project_settings_path));
+			std::unique_ptr<UIOutputModel> project_model(new UIOutputModel(*project_messager, output_project_model_path));
+			output_projects[mainWindow] = std::unique_ptr<UIOutputProject>(new UIOutputProject(project_messager.release(), project_settings.release(), project_model.release()));
 		}
-		// Now add to map and trigger refresh...
 
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, output_project_settings_path.filename().string()));
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, output_project_model_path.filename().string()));

@@ -3,7 +3,7 @@
 
 #include "globals.h"
 #include "uimanager.h"
-#include "..\..\..\NewGeneBackEnd\Status\ThreadManager.h"
+#include "..\..\..\NewGeneBackEnd\Threads\ThreadManager.h"
 
 class UIThreadManager : public QObject, public UIManager<UIThreadManager, ThreadManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS>
 {

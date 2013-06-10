@@ -3,7 +3,7 @@
 
 #include "globals.h"
 #include "uimanager.h"
-#include "..\..\..\NewGeneBackEnd\Status\ThreadManager.h"
+#include "..\..\..\NewGeneBackEnd\Triggers\TriggerManager.h"
 
 class UITriggerManager : public QObject, public UIManager<UITriggerManager, TriggerManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS>
 {
@@ -11,7 +11,7 @@ class UITriggerManager : public QObject, public UIManager<UITriggerManager, Trig
 
 	public:
 
-		explicit UIThreadManager( QObject * parent = 0 );
+		explicit UITriggerManager( QObject * parent = 0 );
 
 	signals:
 

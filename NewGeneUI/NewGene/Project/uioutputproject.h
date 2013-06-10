@@ -11,7 +11,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		Q_OBJECT
 
 	public:
-		UIOutputProject(UIMessager & messager, UIOutputProjectSettings * settings, UIOutputModel * model, QObject * parent = NULL)
+		UIOutputProject(UIMessager * messager, UIOutputProjectSettings * settings, UIOutputModel * model, QObject * parent = NULL)
 			: QObject(parent)
 			, UIProject(messager, settings, model)
 		{

@@ -72,16 +72,15 @@ SOURCES += main.cpp\
 	Settings/Project/uiallprojectsettings.cpp \
 	Model/Base/uimodel.cpp \
 	Project/Base/uiproject.cpp \
-    Settings/uiinputprojectsettings.cpp \
-    Settings/uioutputprojectsettings.cpp \
-    Settings/uiallglobalsettings.cpp \
-    Settings/uiallglobalsettings_list.cpp \
-    Settings/uiinputprojectsettings_list.cpp \
-    Settings/uioutputprojectsettings_list.cpp \
-    Threads/ThreadManager.cpp \
-    Threads/uithreadmanager.cpp \
-    Triggers/uitriggermanager.cpp \
-    Project/Base/workqueuemanager.cpp
+	Settings/uiinputprojectsettings.cpp \
+	Settings/uioutputprojectsettings.cpp \
+	Settings/uiallglobalsettings.cpp \
+	Settings/uiallglobalsettings_list.cpp \
+	Settings/uiinputprojectsettings_list.cpp \
+	Settings/uioutputprojectsettings_list.cpp \
+	Threads/uithreadmanager.cpp \
+	Triggers/uitriggermanager.cpp \
+	Project/Base/workqueuemanager.cpp
 
 HEADERS  += newgenemainwindow.h \
 	CreateOutput/newgenecreateoutput.h \
@@ -142,15 +141,15 @@ HEADERS  += newgenemainwindow.h \
 	Settings/Project/uiallprojectsettings.h \
 	Model/Base/uimodel.h \
 	Project/Base/uiproject.h \
-    Settings/uiinputprojectsettings.h \
-    Settings/uioutputprojectsettings.h \
-    Settings/uiallglobalsettings.h \
-    Settings/uiallglobalsettings_list.h \
-    Settings/uiinputprojectsettings_list.h \
-    Settings/uioutputprojectsettings_list.h \
-    Threads/uithreadmanager.h \
-    Triggers/uitriggermanager.h \
-    Project/Base/workqueuemanager.h
+	Settings/uiinputprojectsettings.h \
+	Settings/uioutputprojectsettings.h \
+	Settings/uiallglobalsettings.h \
+	Settings/uiallglobalsettings_list.h \
+	Settings/uiinputprojectsettings_list.h \
+	Settings/uioutputprojectsettings_list.h \
+	Threads/uithreadmanager.h \
+	Triggers/uitriggermanager.h \
+	Project/Base/workqueuemanager.h
 
 FORMS    += newgenemainwindow.ui \
 	CreateOutput/newgenecreateoutput.ui \
