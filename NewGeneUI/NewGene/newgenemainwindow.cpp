@@ -27,6 +27,14 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	try
 	{
 
+		// Instantiate Managers in main thread
+		UIStatusManager::getManager();
+		UIDocumentManager::getManager();
+		UILoggingManager::getManager();
+		UISettingsManager::getManager();
+		UIModelManager::getManager();
+		UIProjectManager::getManager();
+
 		ui->setupUi( this );
 
 		NewGeneTabWidget * pTWmain = findChild<NewGeneTabWidget *>( "tabWidgetMain" );
@@ -92,13 +100,6 @@ void NewGeneMainWindow::changeEvent( QEvent * e )
 
 void NewGeneMainWindow::doInitialize()
 {
-	// Instantiate Managers in main thread
-	UIStatusManager::getManager();
-	UIDocumentManager::getManager();
-	UILoggingManager::getManager();
-	UISettingsManager::getManager();
-	UIModelManager::getManager();
-	UIProjectManager::getManager();
 
 	UIMessager messager;
 
