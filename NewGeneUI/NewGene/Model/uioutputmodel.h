@@ -4,15 +4,16 @@
 #include "../../../NewGeneBackEnd/Model/OutputModel.h"
 #include "uimodel.h"
 
-class UIOutputModel : public UIModel
+class UIOutputModel : public QObject, public UIModel<OutputModelSettings>
 {
 
 	public:
 
-		UIOutputModel(UIMessager & messager, boost::filesystem::path const path_to_model = boost::filesystem::path(), QObject * parent = NULL)
-			: UIModel(messager, parent)
+		UIOutputModel(UIMessager & messager, OutputModelSettings * model_settings, QObject * parent = NULL)
+			: QObject(parent)
+			, UIModel(messager)
 		{
-			CreateImplementation(messager, path_to_model);
+			CreateImplementation(messager, model_settings);
 		}
 
 
@@ -23,9 +24,9 @@ class UIOutputModel : public UIModel
 
 			public:
 
-				_impl(UIMessager & messager, boost::filesystem::path const path_to_model = boost::filesystem::path()) : _impl_base(messager)
+				_impl(UIMessager & messager, OutputModelSettings * model_settings) : _impl_base(messager)
 				{
-					CreateInternalImplementations(messager, path_to_model);
+					CreateInternalImplementations(messager, model_settings);
 				}
 
 				class _RelatedImpl : public _RelatedImpl_base
@@ -33,8 +34,8 @@ class UIOutputModel : public UIModel
 
 					public:
 
-						_RelatedImpl(UIMessager & messager, boost::filesystem::path const path_to_model = boost::filesystem::path())
-							: _RelatedImpl_base(messager, path_to_model)
+						_RelatedImpl(UIMessager & messager, OutputModelSettings * model_settings)
+							: _RelatedImpl_base(messager, model_settings)
 						{
 
 						}
@@ -43,9 +44,9 @@ class UIOutputModel : public UIModel
 
 			protected:
 
-				void CreateInternalImplementations(UIMessager & messager, boost::filesystem::path const path_to_model = boost::filesystem::path())
+				void CreateInternalImplementations(UIMessager & messager, OutputModelSettings * model_settings)
 				{
-					__impl.reset(new _RelatedImpl(messager, path_to_model));
+					__impl.reset(new _RelatedImpl(messager, model_settings));
 				}
 
 		};
@@ -60,9 +61,9 @@ class UIOutputModel : public UIModel
 			return *__impl;
 		}
 
-		void CreateImplementation(UIMessager & messager, boost::filesystem::path const path_to_model = boost::filesystem::path())
+		void CreateImplementation(UIMessager & messager, OutputModelSettings * model_settings)
 		{
-			__impl.reset(new _impl(messager, path_to_model));
+			__impl.reset(new _impl(messager, model_settings));
 		}
 
 		std::unique_ptr<_impl> __impl;

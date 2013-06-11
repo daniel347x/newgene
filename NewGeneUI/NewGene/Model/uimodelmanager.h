@@ -11,8 +11,6 @@ class UIInputModel;
 
 class UIOutputModel;
 
-class UIModel;
-
 class UIModelManager : public QObject, public UIManager<UIModelManager, ModelManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL>
 {
 		Q_OBJECT

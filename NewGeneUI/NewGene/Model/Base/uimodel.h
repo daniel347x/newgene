@@ -6,20 +6,13 @@
 #include "uimessager.h"
 #include "../../../NewGeneBackEnd/globals.h"
 
-class UIModel : public QObject
+template<typename MODEL_SETTINGS_CLASS>
+class UIModel
 {
-
-		Q_OBJECT
-
 
 	public:
 
-		UIModel(UIMessager & messager, QObject * parent = NULL);
-
-
-	signals:
-
-	public slots:
+		UIModel(UIMessager & messager) {}
 
 
 	protected:
@@ -56,8 +49,8 @@ class UIModel : public QObject
 
 					protected:
 
-						_RelatedImpl_base(UIMessager & messager, boost::filesystem::path const path_to_model)
-							: _model(ModelFactory<BACKEND_MODEL_CLASS>()(messager, path_to_model))
+						_RelatedImpl_base(UIMessager & messager, MODEL_SETTINGS_CLASS * model_settings)
+							: _model(ModelFactory<BACKEND_MODEL_CLASS, MODEL_SETTINGS_CLASS>()(messager, model_settings))
 						{
 						}
 
@@ -88,12 +81,12 @@ class UIModel : public QObject
 	protected:
 
 		template<typename BACKEND_MODEL_CLASS>
-		Model &
+		BACKEND_MODEL_CLASS &
 		getBackendModel_base(_impl_base<BACKEND_MODEL_CLASS> & impl)
 		{
 			_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base & impl_backend = impl.getInternalImplementation();
 			BACKEND_MODEL_CLASS & model = impl_backend.getModel();
-			return static_cast<Model &>(model);
+			model;
 		}
 
 		template<typename BACKEND_MODEL_CLASS>

@@ -2,14 +2,16 @@
 #define INPUTMODEL_H
 
 #include "Model.h"
+#include "..\Settings\InputModelSettings.h"
+#include "..\Settings\Setting.h"
 
-class InputModel : public Model
+class InputModel : public Model<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS, InputModelSetting>
 {
 
 	public:
 
-		InputModel(Messager & messager, boost::filesystem::path const path_to_model)
-			: Model(messager, path_to_model)
+		InputModel(Messager & messager, InputModelSettings * model_settings)
+			: Model(messager, model_settings)
 		{
 
 		}

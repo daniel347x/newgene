@@ -135,6 +135,16 @@ class ProjectSetting : virtual public Setting
 		}
 };
 
+class ModelSetting : virtual public Setting
+{
+public:
+	ModelSetting(Messager & messager)
+		: Setting(messager)
+	{
+
+	}
+};
+
 class BackendGlobalSetting : virtual public BackendSetting, virtual public GlobalSetting
 {
 	public:
@@ -159,6 +169,18 @@ class BackendProjectSetting : virtual public BackendSetting, virtual public Proj
 		{
 
 		}
+};
+
+class BackendModelSetting : virtual public BackendSetting, virtual public ModelSetting
+{
+public:
+	BackendModelSetting(Messager & messager)
+		: Setting(messager)
+		, BackendSetting(messager)
+		, ModelSetting(messager)
+	{
+
+	}
 };
 
 class BackendInputSetting : virtual public BackendSetting, virtual public InputSetting
@@ -209,6 +231,32 @@ public:
 	}
 };
 
+// Regarding the underscore: Disambiguate from InputModelSetting to avoid careless, hard-to-debug mistakes
+class ModelInputSetting_ : virtual public ModelSetting, virtual public InputSetting
+{
+public:
+	ModelInputSetting_(Messager & messager)
+		: Setting(messager)
+		, ModelSetting(messager)
+		, InputSetting(messager)
+	{
+
+	}
+};
+
+// Regarding the underscore: Disambiguate from OutputModelSetting to avoid careless, hard-to-debug mistakes
+class ModelOutputSetting_ : virtual public ModelSetting, virtual public OutputSetting
+{
+public:
+	ModelOutputSetting_(Messager & messager)
+		: Setting(messager)
+		, ModelSetting(messager)
+		, OutputSetting(messager)
+	{
+
+	}
+};
+
 class BackendProjectInputSetting : public BackendProjectSetting, public BackendInputSetting, public ProjectInputSetting
 {
 public:
@@ -244,6 +292,45 @@ public:
 	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 	static SETTING_CATEGORY category;
 };
+
+class BackendModelInputSetting : public BackendModelSetting, public BackendInputSetting, public ModelInputSetting_
+{
+public:
+	BackendModelInputSetting(Messager & messager)
+		: Setting(messager)
+		, BackendSetting(messager)
+		, ModelSetting(messager)
+		, InputSetting(messager)
+		, BackendModelSetting(messager)
+		, BackendInputSetting(messager)
+		, ModelInputSetting_(messager)
+	{
+
+	}
+	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
+	static SETTING_CATEGORY category;
+};
+
+class BackendModelOutputSetting : public BackendModelSetting, public BackendOutputSetting, public ModelOutputSetting_
+{
+public:
+	BackendModelOutputSetting(Messager & messager)
+		: Setting(messager)
+		, BackendSetting(messager)
+		, ModelSetting(messager)
+		, OutputSetting(messager)
+		, BackendModelSetting(messager)
+		, BackendOutputSetting(messager)
+		, ModelOutputSetting_(messager)
+	{
+
+	}
+	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
+	static SETTING_CATEGORY category;
+};
+
+typedef BackendModelInputSetting InputModelSetting;
+typedef BackendModelOutputSetting OutputModelSetting;
 
 class StringSetting : virtual public Setting
 {

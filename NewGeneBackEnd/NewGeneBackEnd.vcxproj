@@ -89,8 +89,13 @@
     <ClInclude Include="Project\OutputProject.h" />
     <ClInclude Include="Settings\GlobalSettings.h" />
     <ClInclude Include="Settings\GlobalSettings_list.h" />
+    <ClInclude Include="Settings\InputModelSettings.h" />
+    <ClInclude Include="Settings\InputModelSettings_list.h" />
     <ClInclude Include="Settings\InputProjectSettings.h" />
     <ClInclude Include="Settings\InputProjectSettings_list.h" />
+    <ClInclude Include="Settings\ModelSettings.h" />
+    <ClInclude Include="Settings\OutputModelSettings.h" />
+    <ClInclude Include="Settings\OutputModelSettings_list.h" />
     <ClInclude Include="Settings\OutputProjectSettings.h" />
     <ClInclude Include="Settings\OutputProjectSettings_list.h" />
     <ClInclude Include="Settings\ProjectSettings.h" />
@@ -123,8 +128,13 @@
     <ClCompile Include="Project\OutputProject.cpp" />
     <ClCompile Include="Settings\GlobalSettings.cpp" />
     <ClCompile Include="Settings\GlobalSettings_list.cpp" />
+    <ClCompile Include="Settings\InputModelSettings.cpp" />
+    <ClCompile Include="Settings\InputModelSettings_list.cpp" />
     <ClCompile Include="Settings\InputProjectSettings.cpp" />
     <ClCompile Include="Settings\InputProjectSettings_list.cpp" />
+    <ClCompile Include="Settings\ModelSettings.cpp" />
+    <ClCompile Include="Settings\OutputModelSettings.cpp" />
+    <ClCompile Include="Settings\OutputModelSettings_list.cpp" />
     <ClCompile Include="Settings\OutputProjectSettings.cpp" />
     <ClCompile Include="Settings\OutputProjectSettings_list.cpp" />
     <ClCompile Include="Settings\ProjectSettings.cpp" />
