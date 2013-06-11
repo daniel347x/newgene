@@ -17,6 +17,13 @@ public:
 
 	}
 
+	void WriteSettingsToFile(Messager & messager)
+	{
+		boost::property_tree::ptree pt;
+		WriteSettingsToPtree(messager, pt);
+		WritePtreeToFile(messager, pt);
+	}
+
 	virtual ~ModelSettings() {}
 
 

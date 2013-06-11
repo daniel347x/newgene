@@ -51,11 +51,13 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 		{
 			std::unique_ptr<UIMessager> project_messager(new UIMessager());
 			std::unique_ptr<UIInputProjectSettings> project_settings(new UIInputProjectSettings(*project_messager, input_project_settings_path));
+			project_settings->WriteSettingsToFile(*project_messager);
 			std::unique_ptr<InputModelSettings> model_settings(SettingsRepositoryFactory<InputModelSettings>()(*project_messager, input_project_model_path));
+			model_settings->WriteSettingsToFile(*project_messager);
 			std::unique_ptr<UIInputModel> project_model(new UIInputModel(*project_messager, model_settings.release()));
 			input_projects[mainWindow] = std::unique_ptr<UIInputProject>(new UIInputProject(project_messager.release(), project_settings.release(), project_model.release()));
 			connect(this, SIGNAL(TriggerInputProject()), &input_projects[mainWindow]->getQueueManager(), SLOT(ReceiveTrigger()));
-			emit TriggerInputProject();
+			//emit TriggerInputProject();
 		}
 
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, input_project_settings_path.filename().string()));
@@ -70,7 +72,9 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 		{
 			std::unique_ptr<UIMessager> project_messager(new UIMessager());
 			std::unique_ptr<UIOutputProjectSettings> project_settings(new UIOutputProjectSettings(*project_messager, output_project_settings_path));
+			project_settings->WriteSettingsToFile(*project_messager);
 			std::unique_ptr<OutputModelSettings> model_settings(SettingsRepositoryFactory<OutputModelSettings>()(*project_messager, output_project_model_path));
+			model_settings->WriteSettingsToFile(*project_messager);
 			std::unique_ptr<UIOutputModel> project_model(new UIOutputModel(*project_messager, model_settings.release()));
 			output_projects[mainWindow] = std::unique_ptr<UIOutputProject>(new UIOutputProject(project_messager.release(), project_settings.release(), project_model.release()));
 			connect(this, SIGNAL(TriggerOutputProject()), &output_projects[mainWindow]->getQueueManager(), SLOT(ReceiveTrigger()));
