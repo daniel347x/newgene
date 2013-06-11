@@ -1,5 +1,5 @@
 #include "globals.h"
-#include "newgenemainwindow.h"
+#include "Widgets/newgenemainwindow.h"
 
 NewGeneMainWindow * theMainWindow = NULL;
 

@@ -3,8 +3,8 @@
 
 #include "uiinputproject.h"
 #include "uioutputproject.h"
-#include "uimanager.h"
-#include "uimessager.h"
+#include "Infrastructure/uimanager.h"
+#include "Infrastructure/Messager/uimessager.h"
 #include "..\..\..\NewGeneBackEnd\Project\ProjectManager.h"
 #include <memory>
 #include <map>

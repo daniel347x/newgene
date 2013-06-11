@@ -1,7 +1,7 @@
 #ifndef UITRIGGERMANAGER_H
 #define UITRIGGERMANAGER_H
 
-#include "uimanager.h"
+#include "Infrastructure/uimanager.h"
 #include "..\..\..\NewGeneBackEnd\Triggers\TriggerManager.h"
 #include <QWidget>
 

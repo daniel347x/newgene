@@ -1,13 +1,13 @@
-#include "newgenemainwindow.h"
+#include "Widgets/newgenemainwindow.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <QTimer>
 #include "..\..\NewGeneBackEnd\test.h"
-#include "uimodelmanager.h"
-#include "uisettingsmanager.h"
-#include "uidocumentmanager.h"
-#include "uistatusmanager.h"
-#include "uiloggingmanager.h"
+#include "Infrastructure/Model/uimodelmanager.h"
+#include "Infrastructure/Settings/uisettingsmanager.h"
+#include "Infrastructure/Documents/uidocumentmanager.h"
+#include "Infrastructure/Status/uistatusmanager.h"
+#include "Infrastructure/Logging/uiloggingmanager.h"
 #include "newgeneapplication.h"
 
 #ifdef QT_DEBUG

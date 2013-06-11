@@ -1,7 +1,7 @@
 #ifndef UITHREADMANAGER_H
 #define UITHREADMANAGER_H
 
-#include "uimanager.h"
+#include "Infrastructure/uimanager.h"
 #include "..\..\..\NewGeneBackEnd\Threads\ThreadManager.h"
 
 class UIThreadManager : public QObject, public UIManager<UIThreadManager, ThreadManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS>

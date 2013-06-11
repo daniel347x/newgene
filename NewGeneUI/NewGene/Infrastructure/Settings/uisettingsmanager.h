@@ -2,7 +2,7 @@
 #define UISETTINGSMANAGER_H
 
 #include "globals.h"
-#include "uimanager.h"
+#include "Infrastructure/uimanager.h"
 #include "..\..\..\NewGeneBackEnd\Settings\SettingsManager.h"
 #include <QString>
 #ifndef Q_MOC_RUN

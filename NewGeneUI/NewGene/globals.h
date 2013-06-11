@@ -18,7 +18,7 @@
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>
 #endif
-#include "Messager/uimessager.h"
+#include "Infrastructure/Messager/uimessager.h"
 
 class NewGeneMainWindow;
 

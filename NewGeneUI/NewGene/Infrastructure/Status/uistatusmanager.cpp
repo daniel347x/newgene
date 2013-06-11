@@ -2,7 +2,7 @@
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
 #include <QMessageBox>
 #include <QStatusBar>
-#include "newgenemainwindow.h"
+#include "Widgets/newgenemainwindow.h"
 
 UIStatusManager::UIStatusManager( QObject * parent )
 	: QObject(parent)

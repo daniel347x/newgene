@@ -1,7 +1,7 @@
 #ifndef UILOGGINGMANAGER_H
 #define UILOGGINGMANAGER_H
 
-#include "uimanager.h"
+#include "Infrastructure/uimanager.h"
 #include "..\..\..\NewGeneBackEnd\Logging\LoggingManager.h"
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>

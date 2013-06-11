@@ -2,7 +2,7 @@
 #define UISTATUSMANAGER_H
 
 #include "globals.h"
-#include "uimanager.h"
+#include "Infrastructure/uimanager.h"
 #include "..\..\..\NewGeneBackEnd\Status\StatusManager.h"
 
 class NewGeneMainWindow;
