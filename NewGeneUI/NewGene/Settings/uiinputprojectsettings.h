@@ -6,7 +6,6 @@
 #include "../../../NewGeneBackEnd/Project/InputProject.h"
 #include "uiallprojectsettings.h"
 #include "Base/UISetting.h"
-#include "../../../NewGeneBackEnd/Settings/SettingsRepository.h"
 
 namespace INPUT_PROJECT_SETTINGS_UI_NAMESPACE
 {
@@ -19,7 +18,7 @@ namespace INPUT_PROJECT_SETTINGS_UI_NAMESPACE
 
 }
 
-class UIInputProjectSettings : public QObject, public UIAllProjectSettings<InputProjectSettings, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI, BackendProjectInputSetting, UIProjectInputSetting>
+class UIInputProjectSettings : public UIAllProjectSettings<InputProjectSettings, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI, BackendProjectInputSetting, UIProjectInputSetting>
 {
 
 		Q_OBJECT
@@ -31,8 +30,7 @@ class UIInputProjectSettings : public QObject, public UIAllProjectSettings<Input
 
 	public:
 		UIInputProjectSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
-			: QObject(parent)
-			, UIAllProjectSettings(messager, path_to_settings)
+			: UIAllProjectSettings(messager, path_to_settings, parent)
 		{
 
 		}

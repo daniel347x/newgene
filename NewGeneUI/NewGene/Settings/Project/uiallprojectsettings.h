@@ -10,6 +10,9 @@ template<typename BACKEND_PROJECT_SETTINGS_CLASS, typename PROJECT_SETTINGS_ENUM
 class UIAllProjectSettings : public UIAllSettings
 {
 
+		// limitation of Qt - template classes cannot implement Q_OBJECT
+		//Q_OBJECT
+
 	public:
 
 		UIAllProjectSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
@@ -17,6 +20,8 @@ class UIAllProjectSettings : public UIAllSettings
 		{
 			CreateImplementation(messager, path_to_settings);
 		}
+
+
 
 		// The following is the equivalent of the backend's ProjectSettings class
 		class UIOnlySettings : public UIOnlySettings_base<UI_PROJECT_SETTINGS_ENUM, UI_PROJECT_SETTING_CLASS>
