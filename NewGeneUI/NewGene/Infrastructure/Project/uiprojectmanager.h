@@ -60,8 +60,6 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//
 		//              ModelSettings represents a single model settings file on disk.
 		//
-		//                        The UIProject possesses a shared_ptr to the backend Model Settings instance.
-		//
 		//                        The backend Model instance, below, possesses a shared_ptr to the backend Model Settings instance.
 		//
 		//          (list maintained by UIProjectManager)
@@ -82,7 +80,7 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//
 		//                      The backend model instance reads, writes, and caches the data in the database itself.
 		//
-		//                      The UIModel accesses the backend model via the backend Project, below.
+		//                      The UIModel possesses a shared_ptr to the backend model instance.
 		//
 		//          Backend Project:
 		//
