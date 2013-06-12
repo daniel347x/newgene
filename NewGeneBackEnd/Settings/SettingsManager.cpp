@@ -8,10 +8,10 @@ std::unique_ptr<BackendGlobalSetting> SettingsManager::getSetting(Messager & mes
 
 std::unique_ptr<BackendProjectInputSetting> SettingsManager::getSetting(Messager & messager, InputProject & project, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting)
 {
-	return project.settings().GetSetting(messager, which_setting);
+	return project.projectSettings().GetSetting(messager, which_setting);
 }
 
 std::unique_ptr<BackendProjectOutputSetting> SettingsManager::getSetting(Messager & messager, OutputProject & project, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting)
 {
-	return project.settings().GetSetting(messager, which_setting);
+	return project.projectSettings().GetSetting(messager, which_setting);
 }

@@ -3,17 +3,20 @@
 
 #include "uiproject.h"
 #include "../Settings/uioutputprojectsettings.h"
+#include "../../../../NewGeneBackEnd/Settings/OutputModelSettings.h"
 #include "uioutputmodel.h"
 
-class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, UIOutputModel>
+class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, OutputModelSettings, UIOutputModel>
 {
 
 		Q_OBJECT
 
 	public:
-		UIOutputProject(UIMessager * messager, UIOutputProjectSettings * settings, UIOutputModel * model, QObject * parent = NULL)
+		UIOutputProject(UIMessager * messager, std::shared_ptr<UIOutputProjectSettings> const & project_settings,
+											   std::shared_ptr<UIOutputModel> const & model,
+											   std::shared_ptr<OutputModelSettings> const & model_settings, QObject * parent = NULL)
 			: QObject(parent)
-			, UIProject(messager, settings, model)
+			, UIProject(messager, project_settings, model_settings, model)
 		{
 
 		}

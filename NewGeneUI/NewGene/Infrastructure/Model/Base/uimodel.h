@@ -6,9 +6,10 @@
 #include "uimessager.h"
 #include "../../../NewGeneBackEnd/globals.h"
 
-template<typename MODEL_SETTINGS_CLASS>
-class UIModel
+class UIModel : public QObject
 {
+
+	Q_OBJECT
 
 	public:
 
@@ -49,8 +50,8 @@ class UIModel
 
 					protected:
 
-						_RelatedImpl_base(UIMessager & messager, MODEL_SETTINGS_CLASS * model_settings)
-							: _model(ModelFactory<BACKEND_MODEL_CLASS, MODEL_SETTINGS_CLASS>()(messager, model_settings))
+						_RelatedImpl_base(UIMessager & messager, std::shared_ptr<BACKEND_MODEL_CLASS> const & backend_model_instance)
+							: _model(backend_model_instance)
 						{
 						}
 

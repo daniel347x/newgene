@@ -4,16 +4,17 @@
 #include "../../../NewGeneBackEnd/Model/OutputModel.h"
 #include "uimodel.h"
 
-class UIOutputModel : public QObject, public UIModel<OutputModelSettings>
+class UIOutputModel : public UIModel
 {
+
+	Q_OBJECT
 
 	public:
 
-		UIOutputModel(UIMessager & messager, OutputModelSettings * model_settings, QObject * parent = NULL)
-			: QObject(parent)
-			, UIModel(messager)
+		UIOutputModel(UIMessager & messager, std::shared_ptr<OutputModel> const & backend_model_instance, QObject * parent = NULL)
+			: UIModel(messager)
 		{
-			CreateImplementation(messager, model_settings);
+			CreateImplementation(messager, backend_model_instance);
 		}
 
 
@@ -24,9 +25,9 @@ class UIOutputModel : public QObject, public UIModel<OutputModelSettings>
 
 			public:
 
-				_impl(UIMessager & messager, OutputModelSettings * model_settings) : _impl_base(messager)
+				_impl(UIMessager & messager, std::shared_ptr<OutputModel> const & backend_model_instance) : _impl_base(messager)
 				{
-					CreateInternalImplementations(messager, model_settings);
+					CreateInternalImplementations(messager, backend_model_instance);
 				}
 
 				class _RelatedImpl : public _RelatedImpl_base
@@ -34,8 +35,8 @@ class UIOutputModel : public QObject, public UIModel<OutputModelSettings>
 
 					public:
 
-						_RelatedImpl(UIMessager & messager, OutputModelSettings * model_settings)
-							: _RelatedImpl_base(messager, model_settings)
+						_RelatedImpl(UIMessager & messager, std::shared_ptr<OutputModel> const & backend_model_instance)
+							: _RelatedImpl_base(messager, backend_model_instance)
 						{
 
 						}
@@ -44,9 +45,9 @@ class UIOutputModel : public QObject, public UIModel<OutputModelSettings>
 
 			protected:
 
-				void CreateInternalImplementations(UIMessager & messager, OutputModelSettings * model_settings)
+				void CreateInternalImplementations(UIMessager & messager, std::shared_ptr<OutputModel> const & backend_model_instance)
 				{
-					__impl.reset(new _RelatedImpl(messager, model_settings));
+					__impl.reset(new _RelatedImpl(messager, backend_model_instance));
 				}
 
 		};
@@ -61,9 +62,9 @@ class UIOutputModel : public QObject, public UIModel<OutputModelSettings>
 			return *__impl;
 		}
 
-		void CreateImplementation(UIMessager & messager, OutputModelSettings * model_settings)
+		void CreateImplementation(UIMessager & messager, std::shared_ptr<OutputModel> const & backend_model_instance)
 		{
-			__impl.reset(new _impl(messager, model_settings));
+			__impl.reset(new _impl(messager, backend_model_instance));
 		}
 
 		std::unique_ptr<_impl> __impl;

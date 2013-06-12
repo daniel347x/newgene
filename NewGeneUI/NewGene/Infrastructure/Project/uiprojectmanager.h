@@ -3,11 +3,17 @@
 
 #include "uiinputproject.h"
 #include "uioutputproject.h"
+#include "uiinputprojectsettings.h"
+#include "uioutputprojectsettings.h"
+#include "uiinputmodel.h"
+#include "uioutputmodel.h"
 #include "Infrastructure/uimanager.h"
 #include "Infrastructure/Messager/uimessager.h"
 #include "..\..\..\NewGeneBackEnd\Project\ProjectManager.h"
 #include <memory>
+#include <vector>
 #include <map>
+#include <tuple>
 
 class NewGeneMainWindow;
 
@@ -18,8 +24,90 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 
 	public:
 
-		typedef std::map<NewGeneMainWindow*, std::unique_ptr<UIInputProject> > InputProjects;
-		typedef std::map<NewGeneMainWindow*, std::unique_ptr<UIOutputProject> > OutputProjects;
+		//  (list maintained by UIProjectManager)
+		//  UIProject:
+		//
+		//      These represent a tab in the user interface (Create Output or Manage Data).
+		//
+		//          Event loop:
+		//
+		//              As a tab, they own a QThread event loop to allow for communication
+		//              between the tab and the rest of the application.
+		//
+		//          (list maintained by UIProjectManager)
+		//          UIProjectSettings:
+		//
+		//              UIProjectSettings represents a single project settings file on disk.
+		//
+		//                  Event loop:
+		//                      The UIProjectSettings internally owns a QThread event loop to allow for
+		//                      a single point of communication in the application
+		//                      when project settings in the settings file change.
+		//
+		//                  UI-layer Project Settings:
+		//                  Backend Project Settings:
+		//
+		//                        Internally, the UIProjectSettings decomposes the settings in the file
+		//                        into UI-layer settings, and backend settings, instantiating
+		//                        a separate class instance for each in the form of a SettingsRepository instance.
+		//
+		//                        The UIProjectSettings possesses a shared_ptr to the UI-layer Project Settings instance.
+		//
+		//                        The UIProjectSettings possesses a shared_ptr to the backend Project Settings instance.
+		//
+		//          (list maintained by UIProjectManager)
+		//          ModelSettings:
+		//
+		//              ModelSettings represents a single model settings file on disk.
+		//
+		//                        The UIProject possesses a shared_ptr to the backend Model Settings instance.
+		//
+		//                        The backend Model instance, below, possesses a shared_ptr to the backend Model Settings instance.
+		//
+		//          (list maintained by UIProjectManager)
+		//          UIModel:
+		//
+		//              The purpose of the UIModel is to represent the actual database for the model.
+		//
+		//                  Event loop:
+		//
+		//                      The UIModel owns (yet another) QThread event loop to manage
+		//                      a single point of communication in the application when
+		//                      any data in the database changes.
+		//
+		//                      The UIModel owns the QThread event loop via RAII.
+		//
+		//                  (list maintained by UIProjectManager)
+		//                  Backend Model instance:
+		//
+		//                      The backend model instance reads, writes, and caches the data in the database itself.
+		//
+		//                      The UIModel accesses the backend model via the backend Project, below.
+		//
+		//          Backend Project:
+		//
+		//              Convenience class accessible in the backend library.
+		//
+		//              (list maintained by UIProjectManager)
+		//              Backend Model instance:
+		//
+		//                  The backend Project possesses a shared_ptr to the Model Settings instance.
+		//                  The backend Project possesses a shared_ptr to the backend Project Settings instance.
+		//                  The backend Project possesses a shared_ptr to the Model instance.
+		//
+		//              The UIProject owns the backend project with a unique_ptr via RAII.
+		//
+		typedef std::vector<UIInputProject*> InputProjectsList;
+		typedef std::vector<UIOutputProject*> OutputProjectsList;
+		typedef std::vector<std::shared_ptr<UIInputProjectSettings>> InputProjectSettingsList;
+		typedef std::vector<std::shared_ptr<UIOutputProjectSettings>> OutputProjectSettingsList;
+		typedef std::vector<std::shared_ptr<UIInputModel>> InputModelsList;
+		typedef std::vector<std::shared_ptr<UIOutputModel>> OutputModelsList;
+		typedef std::vector<std::shared_ptr<InputModelSettings>> InputModelSettingsList;
+		typedef std::vector<std::shared_ptr<OutputModelSettings>> OutputModelSettingsList;
+		typedef std::map<NewGeneMainWindow*, InputProjectsList> InputProjectsMap;
+		typedef std::map<NewGeneMainWindow*, OutputProjectsList> OutputProjectsMap;
+		//typedef std::tuple<UIProjectSettings*
 
 		explicit UIProjectManager( QObject * parent = 0 );
 		~UIProjectManager();
@@ -37,8 +125,9 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 
 	private:
 
-		InputProjects input_projects;
-		OutputProjects output_projects;
+		std::unique_ptr<UIInputProject> input_project;
+		//InputProjects input_projects;
+		//OutputProjects output_projects;
 
 };
 

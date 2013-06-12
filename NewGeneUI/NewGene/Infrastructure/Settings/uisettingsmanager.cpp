@@ -159,7 +159,7 @@ std::unique_ptr<BackendProjectInputSetting> UISettingsManager::getSetting(Messag
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
 		return std::unique_ptr<BackendProjectInputSetting>(new BackendProjectInputSetting(messager));
 	}
-	std::unique_ptr<BackendProjectInputSetting> the_setting_ = project->settings().getBackendSettings().GetSetting(messager, which_setting);
+	std::unique_ptr<BackendProjectInputSetting> the_setting_ = project->projectSettings().getBackendSettings().GetSetting(messager, which_setting);
 	BackendProjectInputSetting * the_setting = the_setting_.get();
 	if (the_setting == NULL)
 	{
@@ -182,7 +182,7 @@ std::unique_ptr<BackendProjectOutputSetting> UISettingsManager::getSetting(Messa
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
 		return std::unique_ptr<BackendProjectOutputSetting>(new BackendProjectOutputSetting(messager));
 	}
-	std::unique_ptr<BackendProjectOutputSetting> the_setting_ = project->settings().getBackendSettings().GetSetting(messager, which_setting);
+	std::unique_ptr<BackendProjectOutputSetting> the_setting_ = project->projectSettings().getBackendSettings().GetSetting(messager, which_setting);
 	BackendProjectOutputSetting * the_setting = the_setting_.get();
 	if (the_setting == NULL)
 	{
@@ -205,7 +205,7 @@ std::unique_ptr<UIProjectInputSetting> UISettingsManager::getSetting(Messager & 
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
 		return std::unique_ptr<UIProjectInputSetting>(new UIProjectInputSetting(messager));
 	}
-	std::unique_ptr<UIProjectInputSetting> the_setting_ = project->settings().getUISettings().GetSetting(messager, which_setting);
+	std::unique_ptr<UIProjectInputSetting> the_setting_ = project->projectSettings().getUISettings().GetSetting(messager, which_setting);
 	UIProjectInputSetting * the_setting = the_setting_.get();
 	if (the_setting == NULL)
 	{
@@ -228,7 +228,7 @@ std::unique_ptr<UIProjectOutputSetting> UISettingsManager::getSetting(Messager &
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_NOT_AVAILABLE, msg.str()));
 		return std::unique_ptr<UIProjectOutputSetting>(new UIProjectOutputSetting(messager));
 	}
-	std::unique_ptr<UIProjectOutputSetting> the_setting_ = project->settings().getUISettings().GetSetting(messager, which_setting);
+	std::unique_ptr<UIProjectOutputSetting> the_setting_ = project->projectSettings().getUISettings().GetSetting(messager, which_setting);
 	UIProjectOutputSetting * the_setting = the_setting_.get();
 	if (the_setting == NULL)
 	{

@@ -4,16 +4,17 @@
 #include "../../../NewGeneBackEnd/Model/InputModel.h"
 #include "uimodel.h"
 
-class UIInputModel : public QObject, public UIModel<InputModelSettings>
+class UIInputModel : public UIModel
 {
+
+	Q_OBJECT
 
 	public:
 
-		UIInputModel(UIMessager & messager, InputModelSettings * model_settings, QObject * parent = NULL)
-			: QObject(parent)
-			, UIModel(messager)
+		UIInputModel(UIMessager & messager, std::shared_ptr<InputModel> const & backend_model_instance, QObject * parent = NULL)
+			: UIModel(messager)
 		{
-			CreateImplementation(messager, model_settings);
+			CreateImplementation(messager, backend_model_instance);
 		}
 
 
@@ -24,9 +25,9 @@ class UIInputModel : public QObject, public UIModel<InputModelSettings>
 
 			public:
 
-				_impl(UIMessager & messager, InputModelSettings * model_settings) : _impl_base(messager)
+				_impl(UIMessager & messager, std::shared_ptr<InputModel> const & backend_model_instance) : _impl_base(messager)
 				{
-					CreateInternalImplementations(messager, model_settings);
+					CreateInternalImplementations(messager, backend_model_instance);
 				}
 
 				class _RelatedImpl : public _RelatedImpl_base
@@ -34,8 +35,8 @@ class UIInputModel : public QObject, public UIModel<InputModelSettings>
 
 					public:
 
-						_RelatedImpl(UIMessager & messager, InputModelSettings * model_settings)
-							: _RelatedImpl_base(messager, model_settings)
+						_RelatedImpl(UIMessager & messager, std::shared_ptr<InputModel> const & backend_model_instance)
+							: _RelatedImpl_base(messager, backend_model_instance)
 						{
 
 						}
@@ -44,9 +45,9 @@ class UIInputModel : public QObject, public UIModel<InputModelSettings>
 
 			protected:
 
-				void CreateInternalImplementations(UIMessager & messager, InputModelSettings * model_settings)
+				void CreateInternalImplementations(UIMessager & messager, std::shared_ptr<InputModel> const & backend_model_instance)
 				{
-					__impl.reset(new _RelatedImpl(messager, model_settings));
+					__impl.reset(new _RelatedImpl(messager, backend_model_instance));
 				}
 
 		};
@@ -61,9 +62,9 @@ class UIInputModel : public QObject, public UIModel<InputModelSettings>
 			return *__impl;
 		}
 
-		void CreateImplementation(UIMessager & messager, InputModelSettings * model_settings)
+		void CreateImplementation(UIMessager & messager, std::shared_ptr<InputModel> const & backend_model_instance)
 		{
-			__impl.reset(new _impl(messager, model_settings));
+			__impl.reset(new _impl(messager, backend_model_instance));
 		}
 
 		std::unique_ptr<_impl> __impl;

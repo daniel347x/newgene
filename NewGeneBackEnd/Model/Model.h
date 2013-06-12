@@ -15,7 +15,7 @@
 #include "../Threads/WorkerThread.h"
 #include "../Settings/ModelSettings.h"
 
-template<typename MODEL_SETTINGS_ENUM, typename MODEL_SETTING_CLASS>
+template<typename MODEL_SETTINGS_ENUM>
 class Model
 {
 
@@ -23,8 +23,8 @@ class Model
 
 		static int const number_worker_threads = 1; // For now, single thread only in pool
 
-		Model(Messager & messager, ModelSettings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS> * model_settings)
-			: _settings(model_settings)
+		Model(Messager & messager, boost::filesystem::path const path_to_model_database)
+			: _path_to_model_database(path_to_model_database)
 			, work(work_service)
 			, worker_pool_model(work_service, number_worker_threads)
 		{
@@ -33,7 +33,7 @@ class Model
 
 	protected:
 
-		std::unique_ptr<ModelSettings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS> > const _settings;
+		boost::filesystem::path _path_to_model_database;
 
 		boost::asio::io_service work_service;
 		boost::asio::io_service::work work;
@@ -41,15 +41,15 @@ class Model
 
 };
 
-template<typename MODEL_CLASS, typename MODEL_SETTINGS_CLASS>
+template<typename MODEL_CLASS>
 class ModelFactory
 {
 
 	public:
 
-		MODEL_CLASS * operator()(Messager & messager, MODEL_SETTINGS_CLASS * model_settings)
+		MODEL_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_model_database)
 		{
-			MODEL_CLASS * new_model = new MODEL_CLASS(messager, model_settings);
+			MODEL_CLASS * new_model = new MODEL_CLASS(messager, path_to_model_database);
 			return new_model;
 		}
 

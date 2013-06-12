@@ -24,18 +24,20 @@ class NewGeneMainWindow;
 class UILoggingManager;
 class UIProjectManager;
 
-template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_CLASS>
+template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
 class UIProject
 {
 	public:
 
 		static int const number_worker_threads = 1; // For now, single thread only in pool
 
-		UIProject(UIMessager * messager, UI_PROJECT_SETTINGS_CLASS * ui_settings, UI_MODEL_CLASS * ui_model)
+		UIProject(UIMessager * messager, std::shared_ptr<UI_PROJECT_SETTINGS_CLASS> const & ui_settings,
+										 std::shared_ptr<MODEL_SETTINGS_CLASS> const & model_settings,
+										 std::shared_ptr<UI_MODEL_CLASS> const & ui_model)
 			: project_messager(messager)
 			, _project_settings(ui_settings)
 			, _model(ui_model)
-			, _backend_project( new BACKEND_PROJECT_CLASS(*project_messager, _project_settings->getBackendSettingsSharedPtr(), _model->getBackendModelSharedPtr()) )
+			, _backend_project( new BACKEND_PROJECT_CLASS(*project_messager, _project_settings->getBackendSettingsSharedPtr(), model_settings, _model->getBackendModelSharedPtr()) )
 			, work(work_service)
 			, worker_pool_ui(work_service, number_worker_threads)
 		{
@@ -50,9 +52,15 @@ class UIProject
 		}
 
 		// TODO: Test for validity
-		UI_PROJECT_SETTINGS_CLASS & settings()
+		UI_PROJECT_SETTINGS_CLASS & projectSettings()
 		{
 			return *_project_settings;
+		}
+
+		// TODO: Test for validity
+		UI_PROJECT_SETTINGS_CLASS & modelSettings()
+		{
+			return backend().modelSettings();
 		}
 
 		// TODO: Test for validity
@@ -85,24 +93,8 @@ class UIProject
 		// Do not reorder the declarations of these member variables.
 
 		std::unique_ptr<UIMessager> project_messager;
-
-		// The settings are distinguished from the model only by the fact
-		// that they are stored permanently in human-readable XML or text files
-		// in order to be more accessible to end-users, and hence readable and
-		// editable by knowledgeable users.
 		std::shared_ptr<UI_PROJECT_SETTINGS_CLASS> const _project_settings;
-
-		// The model represents the data and metadata itself.
-		// The model and the settings (below) form an unseparable pair
-		// that together define a single NewGene "project".
-		// The model definition is contained within a single database file,
-		// although the project may contain many database files.
 		std::shared_ptr<UI_MODEL_CLASS> const _model;
-
-		// The backend project is the backend equivalent of this UIProject,
-		// with the exception that this UIProject carries a shared_ptr to the backend project,
-		// but not vice-versa (the backend project should not be, and is not,
-		// affected by the state of the user interface).
 		std::unique_ptr<BACKEND_PROJECT_CLASS> const _backend_project;
 
 		boost::asio::io_service work_service;
