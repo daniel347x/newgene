@@ -95,16 +95,24 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//
 		//              The UIProject owns the backend project with a unique_ptr via RAII.
 		//
-		typedef std::vector<UIInputProject*> InputProjectsList;
-		typedef std::vector<UIOutputProject*> OutputProjectsList;
-		typedef std::vector<std::shared_ptr<UIInputProjectSettings>> InputProjectSettingsList;
-		typedef std::vector<std::shared_ptr<UIOutputProjectSettings>> OutputProjectSettingsList;
-		typedef std::vector<std::shared_ptr<UIInputModel>> InputModelsList;
-		typedef std::vector<std::shared_ptr<UIOutputModel>> OutputModelsList;
+		typedef std::vector<std::shared_ptr<UIInputProject>> UIInputProjectsList;
+		typedef std::vector<std::shared_ptr<UIOutputProject>> UIOutputProjectsList;
+
+		typedef std::vector<std::shared_ptr<UIInputProjectSettings>> UIInputProjectSettingsList;
+		typedef std::vector<std::shared_ptr<UIOutputProjectSettings>> UIOutputProjectSettingsList;
+
 		typedef std::vector<std::shared_ptr<InputModelSettings>> InputModelSettingsList;
 		typedef std::vector<std::shared_ptr<OutputModelSettings>> OutputModelSettingsList;
-		typedef std::map<NewGeneMainWindow*, InputProjectsList> InputProjectsMap;
-		typedef std::map<NewGeneMainWindow*, OutputProjectsList> OutputProjectsMap;
+
+		typedef std::vector<std::shared_ptr<UIInputModel>> UIInputModelsList;
+		typedef std::vector<std::shared_ptr<UIOutputModel>> UIOutputModelsList;
+
+		typedef std::vector<std::shared_ptr<InputModel>> BackendInputModelsList;
+		typedef std::vector<std::shared_ptr<OutputModel>> BackendOutputModelsList;
+
+		typedef std::map<NewGeneMainWindow*, UIInputProjectsList> InputProjectsMap;
+		typedef std::map<NewGeneMainWindow*, UIOutputProjectsList> OutputProjectsMap;
+
 		//typedef std::tuple<UIProjectSettings*
 
 		explicit UIProjectManager( QObject * parent = 0 );
