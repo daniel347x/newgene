@@ -21,13 +21,6 @@ class SettingInfo
 
 public:
 
-	enum SETTING_CLASS_CATEGORY
-	{
-		  SETTING_CLASS_CATEGORY__UNKNOWN
-		, SETTING_CLASS_CATEGORY__STRING
-		, SETTING_CLASS_CATEGORY__INT32
-	};
-
 	enum SETTING_CLASS_ENUM
 	{
 
@@ -50,6 +43,13 @@ public:
 
 		, SETTING_CLASS_UI_PROJECT_OUTPUT_SETTING
 
+	};
+
+	enum SETTING_CLASS_CATEGORY
+	{
+		SETTING_CLASS_CATEGORY__UNKNOWN
+		, SETTING_CLASS_CATEGORY__STRING
+		, SETTING_CLASS_CATEGORY__INT32
 	};
 
 	SettingInfo()
@@ -213,9 +213,6 @@ class SettingsRepository
 				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, static_cast<SETTINGS_ENUM>(n));
 				SetMapEntry(messager, setting_info, pt); // sets default value if not present in property tree at this point; i.e., if no path is present
 			}
-
-			//// Write settings to file, since defaults may have been loaded
-			//WriteSettingsToFile(messager);
 
 		}
 

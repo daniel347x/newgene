@@ -7,6 +7,7 @@
 #include "uioutputprojectsettings.h"
 #include "uiinputmodel.h"
 #include "uioutputmodel.h"
+#include "Base/uiproject.h"
 #include "Infrastructure/uimanager.h"
 #include "Infrastructure/Messager/uimessager.h"
 #include "..\..\..\NewGeneBackEnd\Project\ProjectManager.h"
@@ -24,7 +25,7 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 
 	public:
 
-		//  (list maintained by UIProjectManager)
+		//  (list to be maintained by UIProjectManager)
 		//  UIProject:
 		//
 		//      These represent a tab in the user interface (Create Output or Manage Data).
@@ -34,7 +35,7 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//              As a tab, they own a QThread event loop to allow for communication
 		//              between the tab and the rest of the application.
 		//
-		//          (list maintained by UIProjectManager)
+		//          (list to be maintained by UIProjectManager)
 		//          UIProjectSettings:
 		//
 		//              UIProjectSettings represents a single project settings file on disk.
@@ -55,14 +56,14 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//
 		//                        The UIProjectSettings possesses a shared_ptr to the backend Project Settings instance.
 		//
-		//          (list maintained by UIProjectManager)
+		//          (list to be maintained by UIProjectManager)
 		//          ModelSettings:
 		//
 		//              ModelSettings represents a single model settings file on disk.
 		//
 		//                        The backend Model instance, below, possesses a shared_ptr to the backend Model Settings instance.
 		//
-		//          (list maintained by UIProjectManager)
+		//          (list to be maintained by UIProjectManager)
 		//          UIModel:
 		//
 		//              The purpose of the UIModel is to represent the actual database for the model.
@@ -75,7 +76,7 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//
 		//                      The UIModel owns the QThread event loop via RAII.
 		//
-		//                  (list maintained by UIProjectManager)
+		//                  (list to be maintained by UIProjectManager)
 		//                  Backend Model instance:
 		//
 		//                      The backend model instance reads, writes, and caches the data in the database itself.
@@ -86,7 +87,7 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//
 		//              Convenience class accessible in the backend library.
 		//
-		//              (list maintained by UIProjectManager)
+		//              (list to be maintained by UIProjectManager)
 		//              Backend Model instance:
 		//
 		//                  The backend Project possesses a shared_ptr to the Model Settings instance.
@@ -95,6 +96,8 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//
 		//              The UIProject owns the backend project with a unique_ptr via RAII.
 		//
+
+#		if 0 // possibly to be implemented in a later version of NewGene to manage multiple tabs for input or output
 		typedef std::vector<std::shared_ptr<UIInputProject>> UIInputProjectsList;
 		typedef std::vector<std::shared_ptr<UIOutputProject>> UIOutputProjectsList;
 
@@ -112,8 +115,27 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 
 		typedef std::map<NewGeneMainWindow*, UIInputProjectsList> InputProjectsMap;
 		typedef std::map<NewGeneMainWindow*, UIOutputProjectsList> OutputProjectsMap;
+#		endif
 
-		//typedef std::tuple<UIProjectSettings*
+		typedef std::tuple<boost::filesystem::path, boost::filesystem::path, boost::filesystem::path> ProjectPaths; // project settings, model settings, model database
+
+		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
+		struct ProjectTab
+		{
+			typedef std::pair<ProjectPaths, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, MODEL_SETTINGS_CLASS, UI_MODEL_CLASS>>> type;
+		};
+
+		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
+		struct ProjectTabs
+		{
+			typedef std::vector<typename ProjectTab<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, MODEL_SETTINGS_CLASS, UI_MODEL_CLASS>::type> type;
+		};
+
+		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
+		struct Tabs
+		{
+			typedef std::map<NewGeneMainWindow *, typename ProjectTabs<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, MODEL_SETTINGS_CLASS, UI_MODEL_CLASS>::type> type;
+		};
 
 		explicit UIProjectManager( QObject * parent = 0 );
 		~UIProjectManager();
@@ -131,9 +153,17 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 
 	private:
 
-		std::unique_ptr<UIInputProject> input_project;
-		//InputProjects input_projects;
-		//OutputProjects output_projects;
+	typedef ProjectTabs<InputProject, UIInputProjectSettings, InputModelSettings, UIInputModel>::type InputProjectTabs;
+	typedef ProjectTabs<OutputProject, UIOutputProjectSettings, OutputModelSettings, UIOutputModel>::type OutputProjectTabs;
+
+	typedef ProjectTab<InputProject, UIInputProjectSettings, InputModelSettings, UIInputModel>::type InputProjectTab;
+	typedef ProjectTab<OutputProject, UIOutputProjectSettings, OutputModelSettings, UIOutputModel>::type OutputProjectTab;
+
+	typedef Tabs<InputProject, UIInputProjectSettings, InputModelSettings, UIInputModel>::type InputTabs;
+	typedef Tabs<OutputProject, UIOutputProjectSettings, OutputModelSettings, UIOutputModel>::type OutputTabs;
+
+	InputTabs input_tabs;
+	OutputTabs output_tabs;
 
 };
 
