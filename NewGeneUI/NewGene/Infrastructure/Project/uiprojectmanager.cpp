@@ -10,6 +10,8 @@
 #include "../../../NewGeneBackEnd/Settings/GlobalSettings_list.h"
 #include "../../../NewGeneBackEnd/Settings/InputProjectSettings_list.h"
 #include "../../../NewGeneBackEnd/Settings/OutputProjectSettings_list.h"
+#include "../../../NewGeneBackEnd/Settings/InputModelSettings_list.h"
+#include "../../../NewGeneBackEnd/Settings/OutputModelSettings_list.h"
 #include "../newgenewidget.h"
 
 UIProjectManager::UIProjectManager( QObject * parent )
@@ -89,12 +91,14 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 			std::shared_ptr<UIInputProjectSettings> project_settings(new UIInputProjectSettings(*project_messager, input_project_settings_path));
 			project_settings->WriteSettingsToFile(*project_messager); // Writes default settings for those settings not already present
 
-			auto path_to_model_setting = InputProjectPathToModel::get(messager, project_settings->getBackendSettings());
+			auto path_to_model_settings = InputProjectPathToModel::get(messager, project_settings->getBackendSettings());
 
-			std::shared_ptr<InputModelSettings> model_settings(SettingsRepositoryFactory<InputModelSettings>()(*project_messager, path_to_model_setting->getPath()));
+			std::shared_ptr<InputModelSettings> model_settings(SettingsRepositoryFactory<InputModelSettings>()(*project_messager, path_to_model_settings->getPath()));
 			model_settings->WriteSettingsToFile(*project_messager); // Writes default settings for those settings not already present
 
-			std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(*project_messager, input_project_settings_path));
+			auto path_to_model_database = InputModelPathToDatabase::get(messager, *model_settings);
+
+			std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(*project_messager, path_to_model_database->getPath()));
 
 			std::shared_ptr<UIInputModel> project_model(new UIInputModel(*project_messager, backend_model));
 
