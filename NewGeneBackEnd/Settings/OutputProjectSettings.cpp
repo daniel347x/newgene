@@ -57,7 +57,7 @@ case SettingInfo::SETTING_INFO_ENUM: \
 		SETTING_CLASS const * setting = static_cast<SETTING_CLASS const *>(_settings_map[which_setting].get()); \
 		if (setting) \
 		{ \
-			pt.put(newgene_output_project_backend_root_node + setting_info.text, setting->getString()); \
+			pt.put(setting_info.text, setting->getString()); \
 		} \
 	} \
 	break; \

@@ -241,14 +241,19 @@ class SettingsRepository
 
 			bool no_file = false;
 
-			if ( !boost::filesystem::exists(_path_to_settings) )
+			if ( !boost::filesystem::exists(_path_to_settings.parent_path()) )
 			{
 				no_file = true;
 			}
 
-			else if ( boost::filesystem::file_size(_path_to_settings) == 0 )
+			if ( boost::filesystem::is_directory(_path_to_settings) )
 			{
 				no_file = true;
+			}
+
+			//else if ( boost::filesystem::file_size(_path_to_settings) == 0 )
+			{
+				//no_file = true;
 			}
 
 			if (!no_file)

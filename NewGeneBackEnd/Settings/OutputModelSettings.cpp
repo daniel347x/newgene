@@ -5,7 +5,7 @@
 #define S_PATH_TO_MODEL_DATABASE__1 PATH_TO_MODEL_DATABASE
 #define S_PATH_TO_MODEL_DATABASE__2 SETTING_CLASS_MODEL_OUTPUT_SETTING__PATH_TO_MODEL_DATABASE
 #define S_PATH_TO_MODEL_DATABASE__3 "PATH_TO_MODEL_DATABASE"
-#define S_PATH_TO_MODEL_DATABASE__4 "L:\\daniel347x\\__DanExtras\\NewGene\\Models\\Input\\TestOutputModelDatabase.xml"
+#define S_PATH_TO_MODEL_DATABASE__4 "L:\\daniel347x\\__DanExtras\\NewGene\\Projects\\Input\\TestOutputModelDatabase.xml"
 #define S_PATH_TO_MODEL_DATABASE__5 OutputModelSetting__path<OUTPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE>
 
 std::string newgene_output_model_root_node("newgene.model.output.");
@@ -58,7 +58,7 @@ case SettingInfo::SETTING_INFO_ENUM: \
 		SETTING_CLASS const * setting = static_cast<SETTING_CLASS const *>(_settings_map[which_setting].get()); \
 		if (setting) \
 		{ \
-			pt.put(newgene_output_model_root_node + setting_info.text, setting->getString()); \
+			pt.put(setting_info.text, setting->getString()); \
 		} \
 	} \
 	break; \
