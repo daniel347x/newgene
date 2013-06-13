@@ -1,22 +1,81 @@
 #include "InputProjectSettings.h"
 #include "InputProjectSettings_list.h"
 
+#define S_PATH_TO_MODEL__1 PATH_TO_MODEL
+#define S_PATH_TO_MODEL__2 SETTING_CLASS_BACKEND_PROJECT_INPUT_SETTING__PATH_TO_MODEL_SETTINGS
+#define S_PATH_TO_MODEL__3 "PATH_TO_MODEL"
+#define S_PATH_TO_MODEL__4 "L:\\daniel347x\\__DanExtras\\NewGene\\Projects\\Input\\TestInputNModelSettings.xml"
+#define S_PATH_TO_MODEL__5 InputProjectBackendSetting__path<INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL>
+
+std::string newgene_input_project_backend_root_node("newgene.project.input.backend.");
+
+#define GET_INPUT_PROJECT_BACKEND_SETTING_INFO(INPUT_PROJECT_BACKEND_SETTING_ENUM, SETTING_INFO_ENUM, SETTING_STRING, SETTING_DEFAULT) \
+case INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_BACKEND_SETTING_ENUM: \
+	{ \
+		return SettingInfo(SettingInfo::SETTING_INFO_ENUM, \
+		static_cast<int>(INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_BACKEND_SETTING_ENUM), \
+		newgene_input_project_backend_root_node + SETTING_STRING, \
+		SETTING_DEFAULT); \
+	} \
+	break; \
+
+
+#define INPUT_PROJECT_BACKEND_SET_MAP_ENTRY__STRING(SETTING_INFO_ENUM, SETTING_CLASS) \
+case SettingInfo::SETTING_INFO_ENUM: \
+	{ \
+		std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string); \
+		_settings_map[static_cast<INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND>(setting_info.enum_index)] = std::unique_ptr<BackendProjectInputSetting>(SettingFactory<SETTING_CLASS>()(messager, string_setting)); \
+	} \
+	break; \
+
+
+#define INPUT_PROJECT_BACKEND_CLONE_SETTING__STRING(SETTING_INFO_ENUM, SETTING_CLASS) \
+case SettingInfo::SETTING_INFO_ENUM: \
+	{ \
+		SETTING_CLASS * setting = dynamic_cast<SETTING_CLASS*>(current_setting); \
+		return SettingFactory<SETTING_CLASS>()(messager, setting->getString()); \
+	} \
+	break; \
+
+
+#define INPUT_PROJECT_BACKEND_NEW_SETTING__STRING(SETTING_INFO_ENUM, SETTING_CLASS) \
+case SettingInfo::SETTING_INFO_ENUM: \
+	{ \
+		std::string string_setting = setting_info.default_val_string; \
+		if (setting_value_void) \
+		{ \
+			string_setting = *((std::string *)(setting_value_void)); \
+		} \
+		return SettingFactory<SETTING_CLASS>()(messager, string_setting); \
+	} \
+	break; \
+
+
+#define INPUT_PROJECT_BACKEND_SET_PTREE_ENTRY__STRING(SETTING_INFO_ENUM, SETTING_CLASS) \
+case SettingInfo::SETTING_INFO_ENUM: \
+	{ \
+		SETTING_CLASS const * setting = static_cast<SETTING_CLASS const *>(_settings_map[which_setting].get()); \
+		if (setting) \
+		{ \
+			pt.put(newgene_input_project_backend_root_node + setting_info.text, setting->getString()); \
+		} \
+	} \
+	break; \
+
+
 SettingInfo BackendProjectInputSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
 {
 
 	INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const value_ = static_cast<INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const>(value__);
 
+#undef G_
+
 	switch (value_)
 	{
 
-		//		case GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST:
-		//			{
-		//				return SettingInfo(SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST,
-		//								   static_cast<int>(GLOBAL_SETTINGS_UI_NAMESPACE::MRU_LIST),
-		//								   "MRU_LIST",
-		//								   "");
-		//			}
-		//			break;
+		#define G_(Y) S_PATH_TO_MODEL##Y
+		GET_INPUT_PROJECT_BACKEND_SETTING_INFO ( G_(__1), G_(__2), G_(__3), G_(__4) )
+		#undef G_
 
 	default:
 		{
@@ -37,16 +96,13 @@ void InputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & settin
 	switch (setting_info.setting_class)
 	{
 
-		//		case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
-		//			{
-		//				std::string string_setting = pt.get<std::string>(setting_info.text, setting_info.default_val_string);
-		//				_settings_map[static_cast<GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI>(setting_info.enum_index)] = std::unique_ptr<UIGlobalSetting>(SettingFactory<UIGlobalSetting_MRUList, false>()(messager, string_setting));
-		//			}
-		//			break;
+		#define G_(Y) S_PATH_TO_MODEL##Y
+		INPUT_PROJECT_BACKEND_SET_MAP_ENTRY__STRING ( G_(__2), G_(__5) )
+		#undef G_
 
 	default:
 		{
-			boost::format msg("Unknown backend input project setting \"%1%\" (\"%2%\") being loaded.");
+			boost::format msg("Unknown UI input project backend setting \"%1%\" (\"%2%\") being loaded.");
 			msg % setting_info.text % setting_info.setting_class;
 			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
 		}
@@ -65,16 +121,13 @@ BackendProjectInputSetting * InputProjectSettings::CloneSetting(Messager & messa
 		switch (setting_info.setting_class)
 		{
 
-			//case SettingInfo::SETTING_CLASS_UI_GLOBAL_SETTING__MRU_LIST:
-			//	{
-			//		UIGlobalSetting_MRUList * setting = dynamic_cast<UIGlobalSetting_MRUList*>(current_setting);
-			//		return new UIGlobalSetting_MRUList(messager, setting->getString());
-			//	}
-			//	break;
+			#define G_(Y) S_PATH_TO_MODEL##Y
+			INPUT_PROJECT_BACKEND_CLONE_SETTING__STRING ( G_(__2), G_(__5) )
+			#undef G_
 
 		default:
 			{
-				boost::format msg("Unknown backend input project setting \"%1%\" (\"%2%\") being requested.");
+				boost::format msg("Unknown input project backend setting \"%1%\" (\"%2%\") being requested.");
 				msg % setting_info.text % setting_info.setting_class;
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
 			}
@@ -100,20 +153,13 @@ BackendProjectInputSetting * InputProjectSettings::NewSetting(Messager & message
 	switch (setting_info.setting_class)
 	{
 
-	//case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
-	//	{
-	//		std::string string_setting = setting_info.default_val_string;
-	//		if (setting_value_void)
-	//		{
-	//			string_setting = *((std::string *)(setting_value_void));
-	//		}
-	//		return new GlobalSetting_Test(messager, string_setting);
-	//	}
-	//	break;
+		#define G_(Y) S_PATH_TO_MODEL##Y
+		INPUT_PROJECT_BACKEND_NEW_SETTING__STRING ( G_(__2), G_(__5) )
+		#undef G_
 
 	default:
 		{
-			boost::format msg("Unknown backend input project setting \"%1%\" (\"%2%\") being updated.");
+			boost::format msg("Unknown input project backend setting \"%1%\" (\"%2%\") being updated.");
 			msg % setting_info.text % setting_info.setting_class;
 			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
 		}
@@ -127,5 +173,30 @@ BackendProjectInputSetting * InputProjectSettings::NewSetting(Messager & message
 
 void InputProjectSettings::SetPTreeEntry(Messager & messager, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND which_setting, boost::property_tree::ptree & pt)
 {
+
+	SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
+	if (theSetting == _settings_map.cend())
+	{
+		return;
+	}
+
+	SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+
+	switch (setting_info.setting_class)
+	{
+
+		#define G_(Y) S_PATH_TO_MODEL##Y
+		INPUT_PROJECT_BACKEND_SET_PTREE_ENTRY__STRING ( G_(__2), G_(__5) )
+		#undef G_
+
+	default:
+		{
+			boost::format msg("Unknown input project backend setting \"%1%\" (\"%2%\") being set.");
+			msg % setting_info.text % setting_info.setting_class;
+			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INVALID_SETTING_INFO_OBJECT, msg.str()));
+		}
+		break;
+
+	}
 
 }

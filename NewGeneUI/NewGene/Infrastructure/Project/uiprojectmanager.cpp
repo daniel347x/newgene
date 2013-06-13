@@ -8,6 +8,8 @@
 #include "uiloggingmanager.h"
 #include "uiallglobalsettings_list.h"
 #include "../../../NewGeneBackEnd/Settings/GlobalSettings_list.h"
+#include "../../../NewGeneBackEnd/Settings/InputProjectSettings_list.h"
+#include "../../../NewGeneBackEnd/Settings/OutputProjectSettings_list.h"
 #include "../newgenewidget.h"
 
 UIProjectManager::UIProjectManager( QObject * parent )
@@ -83,16 +85,22 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 		if (create_new_instance)
 		{
 			std::unique_ptr<UIMessager> project_messager(new UIMessager());
+
 			std::shared_ptr<UIInputProjectSettings> project_settings(new UIInputProjectSettings(*project_messager, input_project_settings_path));
-			project_settings->WriteSettingsToFile(*project_messager);
-			std::shared_ptr<InputModelSettings> model_settings(SettingsRepositoryFactory<InputModelSettings>()(*project_messager, input_project_settings_path));
-			model_settings->WriteSettingsToFile(*project_messager);
+			project_settings->WriteSettingsToFile(*project_messager); // Writes default settings for those settings not already present
+
+			auto path_to_model_setting = InputProjectPathToModel::get(messager, project_settings->getBackendSettings());
+
+			std::shared_ptr<InputModelSettings> model_settings(SettingsRepositoryFactory<InputModelSettings>()(*project_messager, path_to_model_setting->getPath()));
+			model_settings->WriteSettingsToFile(*project_messager); // Writes default settings for those settings not already present
+
 			std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(*project_messager, input_project_settings_path));
+
 			std::shared_ptr<UIInputModel> project_model(new UIInputModel(*project_messager, backend_model));
-			//input_projects[mainWindow] = std::unique_ptr<UIInputProject>(new UIInputProject(project_messager.release(), project_settings.release(), model_settings.release(), project_model.release()));
-			//input_project.reset(new UIInputProject(project_messager.release(), project_settings, project_model, model_settings));
+
 			//connect(this, SIGNAL(TriggerInputProject()), &input_projects[mainWindow]->getQueueManager(), SLOT(ReceiveTrigger()));
 			//emit TriggerInputProject();
+
 			input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, input_project_settings_path, input_project_settings_path), std::unique_ptr<UIInputProject>(new UIInputProject(project_messager.release(), project_settings, project_model, model_settings))));
 		}
 

@@ -1,9 +1,6 @@
 #include "uiallglobalsettings.h"
 #include "uiallglobalsettings_list.h"
 #include "globals.h"
-#ifndef Q_MOC_RUN
-//#	include <boost/preprocessor/punctuation/comma_if.hpp>
-#endif
 
 #define S_MRU_INPUT_PROJECTS_LIST__1 MRU_INPUT_PROJECTS_LIST
 #define S_MRU_INPUT_PROJECTS_LIST__2 SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_PROJECTS_LIST

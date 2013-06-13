@@ -19,6 +19,11 @@
 #include "../../../NewGeneBackEnd/Settings/Settings.h"
 #include "../../../NewGeneBackEnd/Settings/GlobalSettings.h"
 #include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"
+#include "../../../NewGeneBackEnd/Settings/InputProjectSettings.h"
+#include "../../../NewGeneBackEnd/Settings/OutputProjectSettings.h"
+#include "../../../NewGeneBackEnd/Settings/ModelSettings.h"
+#include "../../../NewGeneBackEnd/Settings/InputModelSettings.h"
+#include "../../../NewGeneBackEnd/Settings/OutputModelSettings.h"
 
 class NewGeneMainWindow;
 
@@ -34,10 +39,12 @@ class UISettingsManager : public QObject, public UIManager<UISettingsManager, Se
 		std::unique_ptr<BackendGlobalSetting> getSetting(Messager & messager_, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting);
 		std::unique_ptr<UIGlobalSetting> getSetting(Messager & messager_, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const which_setting);
 
-		std::unique_ptr<BackendProjectInputSetting> getSetting(Messager & messager_, UIInputProject * project, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting);
-		std::unique_ptr<BackendProjectOutputSetting> getSetting(Messager & messager_, UIOutputProject * project, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting);
-		std::unique_ptr<UIProjectInputSetting> getSetting(Messager & messager_, UIInputProject * project, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const which_setting);
-		std::unique_ptr<UIProjectOutputSetting> getSetting(Messager & messager_, UIOutputProject * project, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const which_setting);
+		std::unique_ptr<BackendProjectInputSetting> getSetting(Messager & messager_, InputProjectSettings * project_settings, INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND const which_setting);
+		std::unique_ptr<BackendProjectOutputSetting> getSetting(Messager & messager_, OutputProjectSettings * project_settings, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting);
+		std::unique_ptr<InputModelSetting> getSetting(Messager & messager_, InputModelSettings * model_settings, INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS const which_setting);
+		std::unique_ptr<OutputModelSetting> getSetting(Messager & messager_, OutputModelSettings * model_settings, OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS const which_setting);
+		std::unique_ptr<UIProjectInputSetting> getSetting(Messager & messager_, UIInputProjectSettings * project_settings, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const which_setting);
+		std::unique_ptr<UIProjectOutputSetting> getSetting(Messager & messager_, UIOutputProjectSettings * project_settings, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const which_setting);
 
 		bool ObtainGlobalSettingsPath();
 		boost::filesystem::path getGlobalSettingsPath() { return global_settings_path; }

@@ -18,6 +18,8 @@ enum SETTING_CATEGORY
 	, SETTING_CATEGORY__PROJECT_INPUT_UI
 	, SETTING_CATEGORY__PROJECT_OUTPUT_BACKEND
 	, SETTING_CATEGORY__PROJECT_OUTPUT_UI
+	, SETTING_CATEGORY__MODEL_INPUT
+	, SETTING_CATEGORY__MODEL_OUTPUT
 };
 
 template<typename SETTING_CLASS, typename SETTING_VALUE_TYPE = SETTING_CLASS::type>
@@ -76,7 +78,30 @@ public:
 		}
 		catch (std::bad_cast & bc)
 		{
-			boost::format msg("Cannot convert from UIGlobalSetting to derived setting class: %1%");
+			boost::format msg("Cannot convert to derived setting class: %1%");
+			msg % bc.what();
+			messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
+			return instance();
+		}
+		return derived_setting;
+	}
+};
+
+template<typename DERIVED_SETTING_CLASS, typename SETTING_ENUM, SETTING_ENUM setting_enum, typename SETTINGS_MANAGER_CLASS, typename SETTINGS_CLASS>
+class SimpleAccessProjectModelSetting : public SimpleAccessSetting_base<DERIVED_SETTING_CLASS>
+{
+public:
+	static instance get(Messager & messager, SETTINGS_CLASS & settings)
+	{
+		instance derived_setting;
+		std::unique_ptr<Setting> setting = static_cast<SETTINGS_MANAGER_CLASS&>(SETTINGS_MANAGER_CLASS::getManager()).getSetting(messager, settings, setting_enum);
+		try
+		{
+			derived_setting.reset(dynamic_cast<DERIVED_SETTING_CLASS*>(setting.release()));
+		}
+		catch (std::bad_cast & bc)
+		{
+			boost::format msg("Cannot convert to derived setting class: %1%");
 			msg % bc.what();
 			messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
 			return instance();
@@ -372,6 +397,48 @@ class Int32Setting : virtual public Setting
 
 	protected:
 		std::int32_t int32_setting;
+};
+
+class PathSetting : public StringSetting
+{
+public:
+
+	typedef boost::filesystem::path type;
+
+	PathSetting(Messager & messager, boost::filesystem::path const & setting)
+		: Setting(messager)
+		, StringSetting(messager, setting.string())
+	{}
+
+	boost::filesystem::path getPath() const { return path_setting; }
+
+	void * getDefaultValue()
+	{
+		return (void*)(&path_setting);
+	}
+
+	virtual void DoSpecialParse(Messager & messager)
+	{
+		try
+		{
+			if (string_setting.empty())
+			{
+				return;
+			}
+
+			path_setting = string_setting;
+
+		}
+		catch(boost::filesystem::filesystem_error & e)
+		{
+			boost::format msg("Invalid path \"%1%\": %2%");
+			msg % string_setting % e.what();
+			messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__FILE_INVALID_FORMAT, msg.str()));
+		}
+	}
+
+protected:
+	boost::filesystem::path path_setting;
 };
 
 #endif
