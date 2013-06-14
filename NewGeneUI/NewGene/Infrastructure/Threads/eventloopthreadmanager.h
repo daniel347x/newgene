@@ -32,7 +32,10 @@ class EventLoopThreadManager : public QObject
 
 		void EndLoopAndBackgroundPool()
 		{
+			// First, kill the Boost thread pool (but complete pending tasks first)
 			StopPoolAndWaitForTasksToComplete(); // Do this here so that this complete object is valid, and Qt thread is still running, while background tasks run to completion
+
+			// Only now kill the Qt-layer event loop
 			getQueueManagerThread().quit();
 		}
 
