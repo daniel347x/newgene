@@ -66,6 +66,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 	if (input_project_list->files.size() == 1)
 	{
+
 		boost::filesystem::path input_project_settings_path = input_project_list->files[0];
 
 		bool create_new_instance = false;
@@ -102,9 +103,6 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 			std::shared_ptr<UIInputModel> project_model(new UIInputModel(*project_messager, backend_model));
 
-			//connect(this, SIGNAL(TriggerInputProject()), &input_projects[mainWindow]->getQueueManager(), SLOT(ReceiveTrigger()));
-			//emit TriggerInputProject();
-
 			input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, input_project_settings_path, input_project_settings_path), std::unique_ptr<UIInputProject>(new UIInputProject(project_messager.release(), project_settings, project_model, model_settings))));
 
 			UIInputProject * project = getActiveUIInputProject();
@@ -120,8 +118,69 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 		}
 
-		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, input_project_settings_path.filename().string()));
-		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, input_project_model_path.filename().string()));
+	}
+
+	if (output_project_list->files.size() == 1)
+	{
+
+		boost::filesystem::path output_project_settings_path = output_project_list->files[0];
+
+		bool create_new_instance = false;
+
+		if (output_tabs.find(mainWindow) == output_tabs.cend())
+		{
+			create_new_instance = true;
+		}
+		else
+		{
+			OutputProjectTabs & tabs = output_tabs[mainWindow];
+			for_each(tabs.begin(), tabs.end(), [](OutputProjectTab & tab)
+			{
+				ProjectPaths & paths = tab.first;
+				UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
+			});
+		}
+
+		if (create_new_instance)
+		{
+			std::unique_ptr<UIMessager> project_messager(new UIMessager());
+
+			std::shared_ptr<UIOutputProjectSettings> project_settings(new UIOutputProjectSettings(*project_messager, output_project_settings_path));
+			project_settings->WriteSettingsToFile(*project_messager); // Writes default settings for those settings not already present
+
+			auto path_to_model_settings = OutputProjectPathToModel::get(messager, project_settings->getBackendSettings());
+
+			std::shared_ptr<OutputModelSettings> model_settings(SettingsRepositoryFactory<OutputModelSettings>()(*project_messager, path_to_model_settings->getPath()));
+			model_settings->WriteSettingsToFile(*project_messager); // Writes default settings for those settings not already present
+
+			auto path_to_model_database = OutputModelPathToDatabase::get(messager, *model_settings);
+
+			UIInputProject * input_project = getActiveUIInputProject();
+			if (!input_project)
+			{
+				boost::format msg("NULL input project during attempt to instantiate output project.");
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+				return;
+			}
+			std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(*project_messager, path_to_model_database->getPath(), std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
+
+			std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(*project_messager, backend_model));
+
+			output_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(output_project_settings_path, output_project_settings_path, output_project_settings_path), std::unique_ptr<UIOutputProject>(new UIOutputProject(project_messager.release(), project_settings, project_model, model_settings))));
+
+			UIOutputProject * project = getActiveUIOutputProject();
+
+			if (!project)
+			{
+				boost::format msg("NULL output project during attempt to instantiate project.");
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+				return;
+			}
+
+			emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+
+		}
+
 	}
 
 }

@@ -45,6 +45,16 @@ class Project
 			return *_model;
 		}
 
+		std::shared_ptr<ModelSettings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>> const modelSettingsSharedPtr()
+		{
+			return _model_settings;
+		}
+
+		std::shared_ptr<MODEL_CLASS> const modelSharedPtr()
+		{
+			return _model;
+		}
+
 	protected:
 
 		std::shared_ptr<ProjectSettings<PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS>> const _project_settings;

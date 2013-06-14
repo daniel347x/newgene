@@ -21,8 +21,6 @@ class NewGeneVariableGroupsScrollArea : public QWidget, public NewGeneWidget // 
 
 	public slots:
 
-		void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
-
 	protected:
 		void changeEvent( QEvent * e );
 

@@ -3,8 +3,10 @@
 
 #include "uiproject.h"
 #include "../Settings/uioutputprojectsettings.h"
+#include "../../../../NewGeneBackEnd/Settings/InputModelSettings.h"
 #include "../../../../NewGeneBackEnd/Settings/OutputModelSettings.h"
 #include "uioutputmodel.h"
+#include <memory>
 
 class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, OutputModelSettings, UIOutputModel>
 {
@@ -24,6 +26,8 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 	signals:
 
 	public slots:
+
+	protected:
 
 };
 

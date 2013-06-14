@@ -15,6 +15,9 @@
 #include "../Threads/WorkerThread.h"
 #include "../Settings/ModelSettings.h"
 
+class InputModel;
+class InputModelSettings;
+
 template<typename MODEL_SETTINGS_ENUM>
 class Model
 {
@@ -50,6 +53,12 @@ class ModelFactory
 		MODEL_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_model_database)
 		{
 			MODEL_CLASS * new_model = new MODEL_CLASS(messager, path_to_model_database);
+			return new_model;
+		}
+
+		MODEL_CLASS * operator()(Messager & messager, boost::filesystem::path const path_to_model_database, std::shared_ptr<InputModelSettings> const input_model_settings_, std::shared_ptr<InputModel> const input_model_)
+		{
+			MODEL_CLASS * new_model = new MODEL_CLASS(messager, path_to_model_database, input_model_settings_, input_model_);
 			return new_model;
 		}
 
