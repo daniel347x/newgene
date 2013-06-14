@@ -30,6 +30,8 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//
 		//      These represent a tab in the user interface (Create Output or Manage Data).
 		//
+		//      The UIProject owns or contains the following components:
+		//
 		//          Event loop:
 		//
 		//              As a tab, they own a QThread event loop to allow for communication
