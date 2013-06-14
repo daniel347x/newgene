@@ -57,13 +57,22 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//                        The UIProjectSettings possesses a shared_ptr to the backend Project Settings instance.
 		//
 		//          (list to be maintained by UIProjectManager)
-		//          ModelSettings:
+		//          UIModelSettings:
 		//
-		//              ModelSettings represents a single model settings file on disk.
+		//              UIModelSettings represents a single model settings file on disk.
 		//
-		//                  ***No Event Loop***
+		//                  Event loop:
+		//                      The UIModelSettings internally owns a QThread event loop to allow for
+		//                      a single point of communication in the application
+		//                      when model settings in the settings file change.
 		//
-		//                  The backend Model instance, below, possesses a shared_ptr to the backend Model Settings instance.
+		//                  (No UI-layer Model Settings exists)
+		//                  Backend Model Settings:
+		//
+		//                        Internally, the UIModelSettings class instantiates an instance of
+		//                        a backend Model Settings class in the form of a SettingsRepository instance.
+		//
+		//                        The backend project possesses a shared_ptr to the backend Model Settings instance.
 		//
 		//          (list to be maintained by UIProjectManager)
 		//          UIModel:
