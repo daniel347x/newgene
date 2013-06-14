@@ -61,7 +61,9 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//
 		//              ModelSettings represents a single model settings file on disk.
 		//
-		//                        The backend Model instance, below, possesses a shared_ptr to the backend Model Settings instance.
+		//                  ***No Event Loop***
+		//
+		//                  The backend Model instance, below, possesses a shared_ptr to the backend Model Settings instance.
 		//
 		//          (list to be maintained by UIProjectManager)
 		//          UIModel:
@@ -114,8 +116,8 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		typedef std::vector<std::shared_ptr<UIInputProjectSettings>> UIInputProjectSettingsList;
 		typedef std::vector<std::shared_ptr<UIOutputProjectSettings>> UIOutputProjectSettingsList;
 
-		typedef std::vector<std::shared_ptr<InputModelSettings>> InputModelSettingsList;
-		typedef std::vector<std::shared_ptr<OutputModelSettings>> OutputModelSettingsList;
+		typedef std::vector<std::shared_ptr<UIInputModelSettings>> UIInputModelSettingsList;
+		typedef std::vector<std::shared_ptr<UIOutputModelSettings>> UIOutputModelSettingsList;
 
 		typedef std::vector<std::shared_ptr<UIInputModel>> UIInputModelsList;
 		typedef std::vector<std::shared_ptr<UIOutputModel>> UIOutputModelsList;
@@ -129,22 +131,22 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 
 		typedef std::tuple<boost::filesystem::path, boost::filesystem::path, boost::filesystem::path> ProjectPaths; // project settings, model settings, model database
 
-		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
+		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
 		struct ProjectTab
 		{
-			typedef std::pair<ProjectPaths, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, MODEL_SETTINGS_CLASS, UI_MODEL_CLASS>>> type;
+			typedef std::pair<ProjectPaths, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS>>> type;
 		};
 
-		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
+		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
 		struct ProjectTabs
 		{
-			typedef std::vector<typename ProjectTab<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, MODEL_SETTINGS_CLASS, UI_MODEL_CLASS>::type> type;
+			typedef std::vector<typename ProjectTab<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS>::type> type;
 		};
 
-		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
+		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
 		struct Tabs
 		{
-			typedef std::map<NewGeneMainWindow *, typename ProjectTabs<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, MODEL_SETTINGS_CLASS, UI_MODEL_CLASS>::type> type;
+			typedef std::map<NewGeneMainWindow *, typename ProjectTabs<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS>::type> type;
 		};
 
 		explicit UIProjectManager( QObject * parent = 0 );
@@ -163,14 +165,14 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 
 	private:
 
-	typedef ProjectTabs<InputProject, UIInputProjectSettings, InputModelSettings, UIInputModel>::type InputProjectTabs;
-	typedef ProjectTabs<OutputProject, UIOutputProjectSettings, OutputModelSettings, UIOutputModel>::type OutputProjectTabs;
+	typedef ProjectTabs<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel>::type InputProjectTabs;
+	typedef ProjectTabs<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel>::type OutputProjectTabs;
 
-	typedef ProjectTab<InputProject, UIInputProjectSettings, InputModelSettings, UIInputModel>::type InputProjectTab;
-	typedef ProjectTab<OutputProject, UIOutputProjectSettings, OutputModelSettings, UIOutputModel>::type OutputProjectTab;
+	typedef ProjectTab<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel>::type InputProjectTab;
+	typedef ProjectTab<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel>::type OutputProjectTab;
 
-	typedef Tabs<InputProject, UIInputProjectSettings, InputModelSettings, UIInputModel>::type InputTabs;
-	typedef Tabs<OutputProject, UIOutputProjectSettings, OutputModelSettings, UIOutputModel>::type OutputTabs;
+	typedef Tabs<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel>::type InputTabs;
+	typedef Tabs<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel>::type OutputTabs;
 
 	InputTabs input_tabs;
 	OutputTabs output_tabs;

@@ -87,23 +87,26 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 		if (create_new_instance)
 		{
+
 			std::unique_ptr<UIMessager> project_messager(new UIMessager());
 
+			// Internally creates both an instance of UI-layer project settings, and an instance of backend-layer project settings
+			// via SettingsRepositoryFactory
 			std::shared_ptr<UIInputProjectSettings> project_settings(new UIInputProjectSettings(*project_messager, input_project_settings_path));
 			project_settings->WriteSettingsToFile(*project_messager); // Writes default settings for those settings not already present
 
+			// Internally creates an instance of backend-layer model settings via SettingsRepositoryFactory
 			auto path_to_model_settings = InputProjectPathToModel::get(messager, project_settings->getBackendSettings());
-
-			std::shared_ptr<InputModelSettings> model_settings(SettingsRepositoryFactory<InputModelSettings>()(*project_messager, path_to_model_settings->getPath()));
+			std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(*project_messager, path_to_model_settings->getPath()));
 			model_settings->WriteSettingsToFile(*project_messager); // Writes default settings for those settings not already present
 
-			auto path_to_model_database = InputModelPathToDatabase::get(messager, *model_settings);
-
+			// Backend model does not know its settings, because multiple settings might point to the same model.
+			auto path_to_model_database = InputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
 			std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(*project_messager, path_to_model_database->getPath()));
-
 			std::shared_ptr<UIInputModel> project_model(new UIInputModel(*project_messager, backend_model));
 
-			input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, input_project_settings_path, input_project_settings_path), std::unique_ptr<UIInputProject>(new UIInputProject(project_messager.release(), project_settings, project_model, model_settings))));
+			input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, path_to_model_settings->getPath(), path_to_model_database->getPath()),
+															std::unique_ptr<UIInputProject>(new UIInputProject(project_messager.release(), project_settings, model_settings, project_model))));
 
 			UIInputProject * project = getActiveUIInputProject();
 
@@ -143,18 +146,20 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 		if (create_new_instance)
 		{
+
 			std::unique_ptr<UIMessager> project_messager(new UIMessager());
 
+			// Internally creates both an instance of UI-layer project settings, and an instance of backend-layer project settings
+			// via SettingsRepositoryFactory
 			std::shared_ptr<UIOutputProjectSettings> project_settings(new UIOutputProjectSettings(*project_messager, output_project_settings_path));
 			project_settings->WriteSettingsToFile(*project_messager); // Writes default settings for those settings not already present
 
+			// Internally creates an instance of backend-layer model settings via SettingsRepositoryFactory
 			auto path_to_model_settings = OutputProjectPathToModel::get(messager, project_settings->getBackendSettings());
-
-			std::shared_ptr<OutputModelSettings> model_settings(SettingsRepositoryFactory<OutputModelSettings>()(*project_messager, path_to_model_settings->getPath()));
+			std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(*project_messager, path_to_model_settings->getPath()));
 			model_settings->WriteSettingsToFile(*project_messager); // Writes default settings for those settings not already present
 
-			auto path_to_model_database = OutputModelPathToDatabase::get(messager, *model_settings);
-
+			// The input model and settings are necessary in order to instantiate the output model
 			UIInputProject * input_project = getActiveUIInputProject();
 			if (!input_project)
 			{
@@ -162,11 +167,14 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
 				return;
 			}
-			std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(*project_messager, path_to_model_database->getPath(), std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
 
+			// Backend model does not know its settings, because multiple settings might point to the same model.
+			auto path_to_model_database = OutputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
+			std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(*project_messager, path_to_model_database->getPath(), std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
 			std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(*project_messager, backend_model));
 
-			output_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(output_project_settings_path, output_project_settings_path, output_project_settings_path), std::unique_ptr<UIOutputProject>(new UIOutputProject(project_messager.release(), project_settings, project_model, model_settings))));
+			output_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(output_project_settings_path, path_to_model_settings->getPath(), path_to_model_database->getPath()),
+															std::unique_ptr<UIOutputProject>(new UIOutputProject(project_messager.release(), project_settings, model_settings, project_model))));
 
 			UIOutputProject * project = getActiveUIOutputProject();
 

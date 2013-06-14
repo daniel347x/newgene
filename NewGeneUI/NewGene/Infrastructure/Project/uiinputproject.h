@@ -3,18 +3,21 @@
 
 #include "uiproject.h"
 #include "../Settings/uiinputprojectsettings.h"
-#include "../../../../NewGeneBackEnd/Settings/OutputModelSettings.h"
+#include "../../../../NewGeneBackEnd/Settings/InputModelSettings.h"
 #include "uiinputmodel.h"
+#include "../Settings/uiinputmodelsettings.h"
 
-class UIInputProject : public QObject, public UIProject<InputProject, UIInputProjectSettings, InputModelSettings, UIInputModel>
+class UIInputProject : public QObject, public UIProject<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel>
 {
 
 		Q_OBJECT
 
 	public:
-		UIInputProject(UIMessager * messager, std::shared_ptr<UIInputProjectSettings> const & project_settings,
-											  std::shared_ptr<UIInputModel> const & model,
-											  std::shared_ptr<InputModelSettings> const & model_settings, QObject * parent = NULL)
+		UIInputProject(UIMessager * messager,
+					   std::shared_ptr<UIInputProjectSettings> const & project_settings,
+					   std::shared_ptr<UIInputModelSettings> const & model_settings,
+					   std::shared_ptr<UIInputModel> const & model,
+					   QObject * parent = NULL)
 			: QObject(parent)
 			, UIProject(messager, project_settings, model_settings, model)
 		{
