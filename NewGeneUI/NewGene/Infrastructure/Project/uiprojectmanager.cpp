@@ -36,7 +36,7 @@ UIProjectManager::~UIProjectManager()
 		{
 			ProjectPaths & paths = tab.first;
 			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
-			project_ptr->getQueueManagerThread().quit();
+			project_ptr->EndLoopAndBackgroundPool(); // blocks
 			project_ptr->deleteLater();
 		});
 
@@ -50,7 +50,7 @@ UIProjectManager::~UIProjectManager()
 		{
 			ProjectPaths & paths = tab.first;
 			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
-			project_ptr->getQueueManagerThread().quit();
+			project_ptr->EndLoopAndBackgroundPool(); // blocks
 			project_ptr->deleteLater();
 		});
 

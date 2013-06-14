@@ -18,6 +18,24 @@ class EventLoopThreadManager : public QObject
 
 	public slots:
 
+	public:
+
+		WorkQueueManager & getQueueManager()
+		{
+			return work_queue_manager;
+		}
+
+		QThread & getQueueManagerThread()
+		{
+			return work_queue_manager_thread;
+		}
+
+		void EndLoopAndBackgroundPool()
+		{
+			StopPoolAndWaitForTasksToComplete(); // Do this here so that this complete object is valid, and Qt thread is still running, while background tasks run to completion
+			getQueueManagerThread().quit();
+		}
+
 	protected:
 
 		// Boost-layer thread pool, which is accessible in both the UI layer
@@ -30,16 +48,12 @@ class EventLoopThreadManager : public QObject
 		QThread work_queue_manager_thread;
 		WorkQueueManager work_queue_manager;
 
-	public:
+	private:
 
-		WorkQueueManager & getQueueManager()
+		void StopPoolAndWaitForTasksToComplete()
 		{
-			return work_queue_manager;
-		}
-
-		QThread & getQueueManagerThread()
-		{
-			return work_queue_manager_thread;
+			// blocks
+			worker_pool_ui.StopPoolAndWaitForTasksToComplete();
 		}
 
 };

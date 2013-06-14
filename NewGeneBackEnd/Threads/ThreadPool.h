@@ -26,12 +26,18 @@ public:
 		}
 	}
 
+	void StopPoolAndWaitForTasksToComplete()
+	{
+		// blocks
+		for_each(threads.begin(), threads.end(), [](thread_worker & thread)
+		{
+			thread.second->stop(); // shuts down "work" so that the service will exit when all existing tasks are completed and will not accept new tasks
+			thread.first->join(); // Now wait for existing tasks to complete
+		});
+	}
+
 	~ThreadPool()
 	{
-		for_each(threads.begin(), threads.end(), [](thread_worker & thread){
-			thread.second->stop();
-			thread.first->join();
-		});
 	}
 
 protected:
