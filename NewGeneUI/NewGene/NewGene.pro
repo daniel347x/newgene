@@ -83,7 +83,8 @@ SOURCES += main.cpp\
 	Infrastructure/Project/Base/workqueuemanager.cpp \
     Infrastructure/Settings/Base/uimodelsettings.cpp \
     Infrastructure/Settings/uiinputmodelsettings.cpp \
-    Infrastructure/Settings/uioutputmodelsettings.cpp
+    Infrastructure/Settings/uioutputmodelsettings.cpp \
+    Infrastructure/Threads/eventloopthreadmanager.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -155,7 +156,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/Project/Base/workqueuemanager.h \
     Infrastructure/Settings/Base/uimodelsettings.h \
     Infrastructure/Settings/uiinputmodelsettings.h \
-    Infrastructure/Settings/uioutputmodelsettings.h
+    Infrastructure/Settings/uioutputmodelsettings.h \
+    Infrastructure/Threads/eventloopthreadmanager.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

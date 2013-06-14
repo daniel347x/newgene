@@ -7,7 +7,7 @@
 #include "uiinputmodel.h"
 #include "../Settings/uiinputmodelsettings.h"
 
-class UIInputProject : public QObject, public UIProject<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel>
+class UIInputProject : public UIProject<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel>
 {
 
 		Q_OBJECT
@@ -18,8 +18,7 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 					   std::shared_ptr<UIInputModelSettings> const & model_settings,
 					   std::shared_ptr<UIInputModel> const & model,
 					   QObject * parent = NULL)
-			: QObject(parent)
-			, UIProject(messager, project_settings, model_settings, model)
+			: UIProject(messager, project_settings, model_settings, model, parent)
 		{
 
 		}
