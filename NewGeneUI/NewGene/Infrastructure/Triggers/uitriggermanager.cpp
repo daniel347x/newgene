@@ -12,18 +12,3 @@ UITriggerManager::UITriggerManager( QObject * parent )
 	// *************************************************************************
 
 }
-
-void UITriggerManager::TriggerActiveInputProject(NewGeneMainWindow* newGeneMainWindow/* to be filled in */)
-{
-	projectManagerUI().TriggerActiveInputProject(newGeneMainWindow);
-}
-
-void UITriggerManager::TriggerActiveOutputProject(NewGeneMainWindow* newGeneMainWindow/* to be filled in */)
-{
-	projectManagerUI().TriggerActiveOutputProject(newGeneMainWindow);
-}
-
-void UITriggerManager::ConnectTrigger(QWidget * w)
-{
-	projectManagerUI().ConnectTrigger(w);
-}

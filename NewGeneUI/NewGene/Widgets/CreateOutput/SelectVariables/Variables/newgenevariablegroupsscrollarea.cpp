@@ -7,6 +7,7 @@ NewGeneVariableGroupsScrollArea::NewGeneVariableGroupsScrollArea( QWidget * pare
 	ui( new Ui::NewGeneVariableGroupsScrollArea )
 {
 	ui->setupUi( this );
+	PrepareInputWidget();
 }
 
 NewGeneVariableGroupsScrollArea::~NewGeneVariableGroupsScrollArea()
@@ -26,5 +27,16 @@ void NewGeneVariableGroupsScrollArea::changeEvent( QEvent * e )
 
 		default:
 			break;
+	}
+}
+
+void NewGeneVariableGroupsScrollArea::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
+	{
+		boost::format msg( "Made it to scroll area slot!" );
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
 	}
 }

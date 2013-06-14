@@ -10,6 +10,24 @@ NewGeneWidget::NewGeneWidget( QWidget * self_ ) :
 {
 }
 
+void NewGeneWidget::PrepareInputWidget()
+{
+	if (self == nullptr)
+	{
+		return;
+	}
+	self->connect(&projectManagerUI(), SIGNAL(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
+}
+
+void NewGeneWidget::PrepareOutputWidget()
+{
+	if (self == nullptr)
+	{
+		return;
+	}
+	self->connect(&projectManagerUI(), SIGNAL(UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
+}
+
 NewGeneMainWindow & NewGeneWidget::mainWindow()
 {
 //	QWidget * parent_ = self;
@@ -26,4 +44,14 @@ NewGeneMainWindow & NewGeneWidget::mainWindow()
 //	//NewGeneMainWindow * pNewGeneMainWindow = dynamic_cast<NewGeneMainWindow *>( parent_ );
 	//return *pNewGeneMainWindow;
 	return *theMainWindow; // FIX THIS!!!
+}
+
+void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+
+}
+
+void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+{
+
 }

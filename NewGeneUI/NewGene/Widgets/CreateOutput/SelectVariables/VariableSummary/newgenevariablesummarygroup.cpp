@@ -7,7 +7,6 @@ NewGeneVariableSummaryGroup::NewGeneVariableSummaryGroup( QWidget * parent ) :
 	ui( new Ui::NewGeneVariableSummaryGroup )
 {
 	ui->setupUi( this );
-	triggerManagerUI().ConnectTrigger(this);
 }
 
 NewGeneVariableSummaryGroup::~NewGeneVariableSummaryGroup()
@@ -28,12 +27,4 @@ void NewGeneVariableSummaryGroup::changeEvent( QEvent * e )
 		default:
 			break;
 	}
-}
-
-void NewGeneVariableSummaryGroup::ReceiveUpdate()
-{
-	boost::format msg( "Made it here, reall!" );
-	QMessageBox msgBox;
-	msgBox.setText( msg.str().c_str() );
-	msgBox.exec();
 }

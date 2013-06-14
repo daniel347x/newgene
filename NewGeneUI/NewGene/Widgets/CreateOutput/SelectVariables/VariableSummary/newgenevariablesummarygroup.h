@@ -17,8 +17,9 @@ class NewGeneVariableSummaryGroup : public QGroupBox, public NewGeneWidget // do
 		explicit NewGeneVariableSummaryGroup( QWidget * parent = 0 );
 		~NewGeneVariableSummaryGroup();
 
+	signals:
+
 	public slots:
-		void ReceiveUpdate();
 
 	protected:
 		void changeEvent( QEvent * e );

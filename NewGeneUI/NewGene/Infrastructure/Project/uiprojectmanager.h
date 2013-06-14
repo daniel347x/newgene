@@ -97,6 +97,16 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		//              The UIProject owns the backend project with a unique_ptr via RAII.
 		//
 
+	public:
+
+		enum UPDATE_CONNECTIONS_TYPE
+		{
+			  RELEASE_CONNECTIONS_INPUT_PROJECT
+			, ESTABLISH_CONNECTIONS_INPUT_PROJECT
+			, RELEASE_CONNECTIONS_OUTPUT_PROJECT
+			, ESTABLISH_CONNECTIONS_OUTPUT_PROJECT
+		};
+
 #		if 0 // possibly to be implemented in a later version of NewGene to manage multiple tabs for input or output
 		typedef std::vector<std::shared_ptr<UIInputProject>> UIInputProjectsList;
 		typedef std::vector<std::shared_ptr<UIOutputProject>> UIOutputProjectsList;
@@ -141,13 +151,13 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		~UIProjectManager();
 
 		void LoadOpenProjects(NewGeneMainWindow*);
-		void TriggerActiveInputProject(NewGeneMainWindow* /* to be filled in */);
-		void TriggerActiveOutputProject(NewGeneMainWindow* /* to be filled in */);
-		void ConnectTrigger(QWidget * w);
+
+		UIInputProject * getActiveUIInputProject();
+		UIOutputProject * getActiveUIOutputProject();
 
 	signals:
-		void TriggerInputProject();
-		void TriggerOutputProject();
+		void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
+		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 
 	public slots:
 

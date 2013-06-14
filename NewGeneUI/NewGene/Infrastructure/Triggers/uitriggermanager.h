@@ -19,11 +19,6 @@ class UITriggerManager : public QObject, public UIManager<UITriggerManager, Trig
 
 	public:
 
-		void ConnectTrigger(QWidget *);
-
-		void TriggerActiveInputProject(NewGeneMainWindow* /* to be filled in */);
-		void TriggerActiveOutputProject(NewGeneMainWindow* /* to be filled in */);
-
 	private:
 
 };

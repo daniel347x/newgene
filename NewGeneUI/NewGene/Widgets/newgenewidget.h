@@ -13,7 +13,16 @@ class NewGeneWidget
 
 		NewGeneMainWindow & mainWindow();
 
+		virtual void PrepareInputWidget();
+		virtual void PrepareOutputWidget();
+
+	protected:
+
+		virtual void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
+		virtual void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+
 	private:
+
 		QWidget * self;
 
 	public:

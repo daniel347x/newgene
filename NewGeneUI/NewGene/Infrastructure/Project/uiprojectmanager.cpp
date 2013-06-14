@@ -106,6 +106,18 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 			//emit TriggerInputProject();
 
 			input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, input_project_settings_path, input_project_settings_path), std::unique_ptr<UIInputProject>(new UIInputProject(project_messager.release(), project_settings, project_model, model_settings))));
+
+			UIInputProject * project = getActiveUIInputProject();
+
+			if (!project)
+			{
+				boost::format msg("NULL input project during attempt to instantiate project.");
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+				return;
+			}
+
+			emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
+
 		}
 
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE_ENUM::MESSAGER_MESSAGE__GENERAL_ERROR, input_project_settings_path.filename().string()));
@@ -114,36 +126,46 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 }
 
-void UIProjectManager::TriggerActiveInputProject(NewGeneMainWindow * newGeneMainWindow/* to be filled in */)
+UIInputProject * UIProjectManager::getActiveUIInputProject()
 {
-//	if (input_projects.find(newGeneMainWindow) != input_projects.cend())
-//	{
-//		UIInputProject & project = *input_projects[newGeneMainWindow];
+	// For now, just get the first main window
+	if (input_tabs.size() == 0)
+	{
+		return nullptr;
+	}
 
-//	}
+	InputProjectTabs & tabs = input_tabs.begin()->second;
+
+	if (tabs.size() == 0)
+	{
+		return nullptr;
+	}
+
+	InputProjectTab & tab = *tabs.begin();
+
+	UIInputProject * project = static_cast<UIInputProject *>(tab.second.get());
+
+	return project;
 }
 
-void UIProjectManager::TriggerActiveOutputProject(NewGeneMainWindow * newGeneMainWindow/* to be filled in */)
+UIOutputProject * UIProjectManager::getActiveUIOutputProject()
 {
-
-}
-
-void UIProjectManager::ConnectTrigger(QWidget * w)
-{
-	NewGeneMainWindow * mainWindow = nullptr;
-	try
+	// For now, just get the first main window
+	if (output_tabs.size() == 0)
 	{
-		NewGeneWidget * ngw = dynamic_cast<NewGeneWidget*>(w);
-		mainWindow = &ngw->mainWindow();
-	}
-	catch (std::bad_cast & bc)
-	{
-		return;
+		return nullptr;
 	}
 
-	//if (input_projects.find(mainWindow) != input_projects.cend())
+	OutputProjectTabs & tabs = output_tabs.begin()->second;
+
+	if (tabs.size() == 0)
 	{
-//		UIInputProject & project = *input_projects[mainWindow];
-//		connect(&project.getQueueManager(), SIGNAL(SendTrigger()), w, SLOT(ReceiveUpdate()));
+		return nullptr;
 	}
+
+	OutputProjectTab & tab = *tabs.begin();
+
+	UIOutputProject * project = static_cast<UIOutputProject *>(tab.second.get());
+
+	return project;
 }
