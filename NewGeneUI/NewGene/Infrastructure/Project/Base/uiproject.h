@@ -21,8 +21,8 @@ class NewGeneMainWindow;
 class UILoggingManager;
 class UIProjectManager;
 
-template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS>
-class UIProject : public EventLoopThreadManager
+template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 {
 	public:
 
@@ -33,7 +33,7 @@ class UIProject : public EventLoopThreadManager
 				  std::shared_ptr<UI_MODEL_SETTINGS_CLASS> const & ui_model_settings,
 				  std::shared_ptr<UI_MODEL_CLASS> const & ui_model,
 				  QObject * parent = NULL)
-			: EventLoopThreadManager(number_worker_threads, parent)
+			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
 			, project_messager(messager)
 			, _project_settings(ui_settings)
 			, _model_settings(ui_model_settings)
@@ -44,6 +44,21 @@ class UIProject : public EventLoopThreadManager
 
 		~UIProject()
 		{
+		}
+
+		QObject * GetProjectSettingsConnector()
+		{
+			return nullptr;
+		}
+
+		QObject * GetModelSettingsConnector()
+		{
+			return nullptr;
+		}
+
+		QObject * GetModelConnector()
+		{
+			return nullptr;
 		}
 
 		// TODO: Test for validity

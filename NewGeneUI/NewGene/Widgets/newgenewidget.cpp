@@ -5,8 +5,10 @@
 
 NewGeneMainWindow * NewGeneWidget::theMainWindow = nullptr;
 
-NewGeneWidget::NewGeneWidget( QWidget * self_ ) :
-	self( self_ )
+NewGeneWidget::NewGeneWidget( QWidget * self_ )
+	: self( self_ )
+	, inp(nullptr)
+	, outp(nullptr)
 {
 }
 
@@ -48,10 +50,10 @@ NewGeneMainWindow & NewGeneWidget::mainWindow()
 
 void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
-
+	inp = project;
 }
 
 void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
-
+	outp = project;
 }

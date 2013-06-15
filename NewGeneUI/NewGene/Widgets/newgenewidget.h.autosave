@@ -24,8 +24,8 @@ class NewGeneWidget
 	private:
 
 		QWidget * self;
-		UIInputProject * inp;
-		UIOutputProject * outp;
+		UIInputProject * ;
+		UIOutputProject * ui_output_project;
 
 	public:
 

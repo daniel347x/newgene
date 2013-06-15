@@ -1,26 +1,28 @@
 #ifndef EVENTLOOPTHREADMANAGER_H
 #define EVENTLOOPTHREADMANAGER_H
 
-#include <QObject>
 #include <QThread>
 #include "../../../NewGeneBackEnd/Threads/ThreadPool.h"
 #include "../../../NewGeneBackEnd/Threads/WorkerThread.h"
 #include "workqueuemanager.h"
 
-class EventLoopThreadManager : public QObject
+template<WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+class EventLoopThreadManager
 {
-		Q_OBJECT
-
-	public:
-		explicit EventLoopThreadManager(int const number_worker_threads, QObject *parent = 0);
-
-	signals:
-
-	public slots:
 
 	public:
 
-		WorkQueueManager & getQueueManager()
+		EventLoopThreadManager(int const number_worker_threads)
+			: work(work_service)
+			, worker_pool_ui(work_service, number_worker_threads)
+		{
+			work_queue_manager_thread.start();
+			work_queue_manager.moveToThread(&work_queue_manager_thread);
+		}
+
+	public:
+
+		WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> & getQueueManager()
 		{
 			return work_queue_manager;
 		}
@@ -39,6 +41,11 @@ class EventLoopThreadManager : public QObject
 			getQueueManagerThread().quit();
 		}
 
+		QObject * getConnector()
+		{
+			return &work_queue_manager;
+		}
+
 	protected:
 
 		// Boost-layer thread pool, which is accessible in both the UI layer
@@ -49,7 +56,7 @@ class EventLoopThreadManager : public QObject
 
 		// Qt-layer thread, which runs the event loop in a separate background thread
 		QThread work_queue_manager_thread;
-		WorkQueueManager work_queue_manager;
+		WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> work_queue_manager;
 
 	private:
 

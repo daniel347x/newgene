@@ -9,7 +9,7 @@
 #include <memory>
 #include "../Settings/uioutputmodelsettings.h"
 
-class UIOutputProject : public UIProject<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel>
+class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>
 {
 
 		Q_OBJECT
@@ -20,7 +20,8 @@ class UIOutputProject : public UIProject<OutputProject, UIOutputProjectSettings,
 						std::shared_ptr<UIOutputModelSettings> const & model_settings,
 						std::shared_ptr<UIOutputModel> const & model,
 						QObject * parent = NULL)
-			: UIProject(messager, project_settings, model_settings, model, parent)
+			: QObject(parent)
+			, UIProject(messager, project_settings, model_settings, model)
 		{
 
 		}
