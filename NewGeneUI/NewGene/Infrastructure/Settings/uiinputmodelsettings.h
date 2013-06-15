@@ -3,6 +3,7 @@
 
 #include "Base/uimodelsettings.h"
 #include "inputmodelsettingsworkqueue.h"
+#include "../../../../NewGeneBackEnd/Settings/inputmodelsettings.h"
 
 class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MODEL_SETTINGS>
 {

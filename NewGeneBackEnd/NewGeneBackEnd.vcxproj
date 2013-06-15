@@ -110,6 +110,7 @@
     <ClInclude Include="Threads\WorkerThread.h" />
     <ClInclude Include="Threads\WorkItem.h" />
     <ClInclude Include="Triggers\TriggerManager.h" />
+    <ClInclude Include="UIData\UIDataManager.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
   </ItemGroup>
   <ItemGroup>
@@ -149,6 +150,7 @@
     <ClCompile Include="Threads\WorkerThread.cpp" />
     <ClCompile Include="Threads\WorkItem.cpp" />
     <ClCompile Include="Triggers\TriggerManager.cpp" />
+    <ClCompile Include="UIData\UIDataManager.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

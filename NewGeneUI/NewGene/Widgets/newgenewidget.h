@@ -2,9 +2,12 @@
 #define NEWGENEWIDGET_H
 
 #include "globals.h"
+#include "uiprojectmanager.h"
 
 class QWidget;
 class NewGeneMainWindow;
+class UIInputProject;
+class UIOutputProject;
 
 class NewGeneWidget
 {

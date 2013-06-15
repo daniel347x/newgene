@@ -1,5 +1,14 @@
 #include "globals.h"
 #include "Widgets/newgenemainwindow.h"
+#include "uisettingsmanager.h"
+#include "uiloggingmanager.h"
+#include "uiprojectmanager.h"
+#include "uimodelmanager.h"
+#include "uidocumentmanager.h"
+#include "uistatusmanager.h"
+#include "uitriggermanager.h"
+#include "uithreadmanager.h"
+#include "uiuidatamanager.h"
 
 NewGeneMainWindow * theMainWindow = NULL;
 
@@ -50,4 +59,9 @@ UITriggerManager & triggerManagerUI()
 UIThreadManager & threadManagerUI()
 {
 	return get_a_ui_manager<UIThreadManager>();
+}
+
+UIUIDataManager & uidataManagerUI()
+{
+	return get_a_ui_manager<UIUIDataManager>();
 }

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "../../../NewGeneBackEnd/Settings/Settings.h"
+#include "../../../NewGeneBackEnd/Settings/SettingsManager.h"
 #include "../../../NewGeneBackEnd/Settings/SettingsRepository.h"
 #include "../../../NewGeneBackEnd/Settings/GlobalSettings.h"
 #include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"

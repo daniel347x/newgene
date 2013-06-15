@@ -5,6 +5,7 @@
 #include "../../Messager/uimessager.h"
 #include "../../../NewGeneBackEnd/globals.h"
 #include "eventloopthreadmanager.h"
+#include "../../../NewGeneBackEnd/Settings/Settings.h"
 
 template<WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
 class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>

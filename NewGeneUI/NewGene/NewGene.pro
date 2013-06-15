@@ -80,29 +80,30 @@ SOURCES += main.cpp\
 	Infrastructure/Settings/uioutputprojectsettings_list.cpp \
 	Infrastructure/Threads/uithreadmanager.cpp \
 	Infrastructure/Triggers/uitriggermanager.cpp \
-    Infrastructure/Settings/Base/uimodelsettings.cpp \
-    Infrastructure/Settings/uiinputmodelsettings.cpp \
-    Infrastructure/Settings/uioutputmodelsettings.cpp \
-    Infrastructure/Threads/eventloopthreadmanager.cpp \
-    Infrastructure/Threads/workqueuemanager.cpp \
-    Infrastructure/Project/Base/outputprojectworkqueue_base.cpp \
-    Infrastructure/Project/Base/inputprojectworkqueue_base.cpp \
-    Infrastructure/Project/inputprojectworkqueue.cpp \
-    Infrastructure/Project/outputprojectworkqueue.cpp \
-    Infrastructure/Model/Base/inputmodelworkqueue_base.cpp \
-    Infrastructure/Model/Base/outputmodelworkqueue_base.cpp \
-    Infrastructure/Model/inputmodelworkqueue.cpp \
-    Infrastructure/Model/outputmodelworkqueue.cpp \
-    Infrastructure/Settings/Base/inputprojectsettingsworkqueue_base.cpp \
-    Infrastructure/Settings/Base/outputprojectsettingsworkqueue_base.cpp \
-    Infrastructure/Settings/Base/globalsettingsworkqueue_base.cpp \
-    Infrastructure/Settings/Base/inputmodelsettingsworkqueue_base.cpp \
-    Infrastructure/Settings/Base/outputmodelsettingsworkqueue_base.cpp \
-    Infrastructure/Settings/globalsettingsworkqueue.cpp \
-    Infrastructure/Settings/inputmodelsettingsworkqueue.cpp \
-    Infrastructure/Settings/outputmodelsettingsworkqueue.cpp \
-    Infrastructure/Settings/inputprojectsettingsworkqueue.cpp \
-    Infrastructure/Settings/outputprojectsettingsworkqueue.cpp
+	Infrastructure/Settings/Base/uimodelsettings.cpp \
+	Infrastructure/Settings/uiinputmodelsettings.cpp \
+	Infrastructure/Settings/uioutputmodelsettings.cpp \
+	Infrastructure/Threads/eventloopthreadmanager.cpp \
+	Infrastructure/Threads/workqueuemanager.cpp \
+	Infrastructure/Project/Base/outputprojectworkqueue_base.cpp \
+	Infrastructure/Project/Base/inputprojectworkqueue_base.cpp \
+	Infrastructure/Project/inputprojectworkqueue.cpp \
+	Infrastructure/Project/outputprojectworkqueue.cpp \
+	Infrastructure/Model/Base/inputmodelworkqueue_base.cpp \
+	Infrastructure/Model/Base/outputmodelworkqueue_base.cpp \
+	Infrastructure/Model/inputmodelworkqueue.cpp \
+	Infrastructure/Model/outputmodelworkqueue.cpp \
+	Infrastructure/Settings/Base/inputprojectsettingsworkqueue_base.cpp \
+	Infrastructure/Settings/Base/outputprojectsettingsworkqueue_base.cpp \
+	Infrastructure/Settings/Base/globalsettingsworkqueue_base.cpp \
+	Infrastructure/Settings/Base/inputmodelsettingsworkqueue_base.cpp \
+	Infrastructure/Settings/Base/outputmodelsettingsworkqueue_base.cpp \
+	Infrastructure/Settings/globalsettingsworkqueue.cpp \
+	Infrastructure/Settings/inputmodelsettingsworkqueue.cpp \
+	Infrastructure/Settings/outputmodelsettingsworkqueue.cpp \
+	Infrastructure/Settings/inputprojectsettingsworkqueue.cpp \
+	Infrastructure/Settings/outputprojectsettingsworkqueue.cpp \
+	Infrastructure/UIData/uiuidatamanager.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -171,29 +172,30 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/Settings/uioutputprojectsettings_list.h \
 	Infrastructure/Threads/uithreadmanager.h \
 	Infrastructure/Triggers/uitriggermanager.h \
-    Infrastructure/Settings/Base/uimodelsettings.h \
-    Infrastructure/Settings/uiinputmodelsettings.h \
-    Infrastructure/Settings/uioutputmodelsettings.h \
-    Infrastructure/Threads/eventloopthreadmanager.h \
-    Infrastructure/Threads/workqueuemanager.h \
-    Infrastructure/Project/Base/outputprojectworkqueue_base.h \
-    Infrastructure/Project/Base/inputprojectworkqueue_base.h \
-    Infrastructure/Project/inputprojectworkqueue.h \
-    Infrastructure/Project/outputprojectworkqueue.h \
-    Infrastructure/Model/Base/inputmodelworkqueue_base.h \
-    Infrastructure/Model/Base/outputmodelworkqueue_base.h \
-    Infrastructure/Model/inputmodelworkqueue.h \
-    Infrastructure/Model/outputmodelworkqueue.h \
-    Infrastructure/Settings/Base/inputprojectsettingsworkqueue_base.h \
-    Infrastructure/Settings/Base/outputprojectsettingsworkqueue_base.h \
-    Infrastructure/Settings/Base/globalsettingsworkqueue_base.h \
-    Infrastructure/Settings/Base/inputmodelsettingsworkqueue_base.h \
-    Infrastructure/Settings/Base/outputmodelsettingsworkqueue_base.h \
-    Infrastructure/Settings/globalsettingsworkqueue.h \
-    Infrastructure/Settings/inputmodelsettingsworkqueue.h \
-    Infrastructure/Settings/outputmodelsettingsworkqueue.h \
-    Infrastructure/Settings/inputprojectsettingsworkqueue.h \
-    Infrastructure/Settings/outputprojectsettingsworkqueue.h
+	Infrastructure/Settings/Base/uimodelsettings.h \
+	Infrastructure/Settings/uiinputmodelsettings.h \
+	Infrastructure/Settings/uioutputmodelsettings.h \
+	Infrastructure/Threads/eventloopthreadmanager.h \
+	Infrastructure/Threads/workqueuemanager.h \
+	Infrastructure/Project/Base/outputprojectworkqueue_base.h \
+	Infrastructure/Project/Base/inputprojectworkqueue_base.h \
+	Infrastructure/Project/inputprojectworkqueue.h \
+	Infrastructure/Project/outputprojectworkqueue.h \
+	Infrastructure/Model/Base/inputmodelworkqueue_base.h \
+	Infrastructure/Model/Base/outputmodelworkqueue_base.h \
+	Infrastructure/Model/inputmodelworkqueue.h \
+	Infrastructure/Model/outputmodelworkqueue.h \
+	Infrastructure/Settings/Base/inputprojectsettingsworkqueue_base.h \
+	Infrastructure/Settings/Base/outputprojectsettingsworkqueue_base.h \
+	Infrastructure/Settings/Base/globalsettingsworkqueue_base.h \
+	Infrastructure/Settings/Base/inputmodelsettingsworkqueue_base.h \
+	Infrastructure/Settings/Base/outputmodelsettingsworkqueue_base.h \
+	Infrastructure/Settings/globalsettingsworkqueue.h \
+	Infrastructure/Settings/inputmodelsettingsworkqueue.h \
+	Infrastructure/Settings/outputmodelsettingsworkqueue.h \
+	Infrastructure/Settings/inputprojectsettingsworkqueue.h \
+	Infrastructure/Settings/outputprojectsettingsworkqueue.h \
+	Infrastructure/UIData/uiuidatamanager.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -241,10 +243,11 @@ INCLUDEPATH += $$PWD/Infrastructure/Status
 INCLUDEPATH += $$PWD/Infrastructure/Logging
 INCLUDEPATH += $$PWD/Infrastructure/Triggers
 INCLUDEPATH += $$PWD/Infrastructure/Threads
+INCLUDEPATH += $$PWD/Infrastructure/UIData
 INCLUDEPATH += $$PWD/Infrastructure/Utility
 INCLUDEPATH += $(BOOST_ROOT)
-ß
-##QMAKE_LFLAGS += /ignore:409ß9
+
+##QMAKE_LFLAGS += /ignore:4099
 #QMAKE_CFLAGS += /ignore:4503 # "decorated name length exceeded" (common for template instantiations)
 #QMAKE_CFLAGS += /ignore:4100 # "unreferenced formal parameter" (many "Messager & messager" parameters, with the token "messager" left on for uniformity and convenience
 #QMAKE_CXXFLAGS_WARN_OFF -= -Wunused-parameter

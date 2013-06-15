@@ -7,6 +7,9 @@
 #include "uisettingsmanager.h"
 #include "uimodelmanager.h"
 #include "uiloggingmanager.h"
+#include "uithreadmanager.h"
+#include "uitriggermanager.h"
+#include "uiuidatamanager.h"
 #include "uimodel.h"
 #include "uiprojectmanager.h"
 #include "uiinputproject.h"
@@ -34,6 +37,9 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 		UISettingsManager::getManager();
 		UIModelManager::getManager();
 		UIProjectManager::getManager();
+		UIThreadManager::getManager();
+		UIUIDataManager::getManager();
+		UITriggerManager::getManager();
 
 		ui->setupUi( this );
 
@@ -80,6 +86,7 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 NewGeneMainWindow::~NewGeneMainWindow()
 {
 
+	// Manage global settings in main thread
 	settingsManagerUI().globalSettings().EndLoopAndBackgroundPool();
 
 	NewGeneWidget::theMainWindow = nullptr;
@@ -106,26 +113,11 @@ void NewGeneMainWindow::doInitialize()
 
 	UIMessager messager;
 
-	settingsManagerUI().globalSettings().InitializeEventLoop(&settingsManagerUI().globalSettings());
-
 	// Load global settings in main thread
+	settingsManagerUI().globalSettings().InitializeEventLoop(&settingsManagerUI().globalSettings());
 	settingsManagerUI().globalSettings().WriteSettingsToFile(messager); // Write any defaults back to disk, along with values just read from disk
 
-
 	projectManagerUI().LoadOpenProjects(this);
-
-	// Test instantiating objects
-	//UIInputProject inp(messager);
-	//UIOutputProject outp(messager);
-	//UIAllGlobalSettings gset(messager);
-	// Use project or settings manager to obtain the path to the project settings,
-	// and pass as argument to the instantiation of the settings objects, below.
-	// Likewise for the input and output model.
-	//inp.apply_settings( new UIInputProjectSettings(messager) );
-	//outp.apply_settings( new UIOutputProjectSettings(messager) );
-
-
-	//_current_project.reset(projectManagerUI().LoadDefaultProject());
 
 }
 

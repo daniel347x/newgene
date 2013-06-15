@@ -1,4 +1,13 @@
 #include "globals.h"
+#include "Settings/SettingsManager.h"
+#include "Logging/LoggingManager.h"
+#include "Project/ProjectManager.h"
+#include "Model/ModelManager.h"
+#include "Documents/DocumentManager.h"
+#include "Status/StatusManager.h"
+#include "Triggers/TriggerManager.h"
+#include "Threads/ThreadManager.h"
+#include "UIData/UIDataManager.h"
 
 template<typename MANAGER_CLASS>
 MANAGER_CLASS & get_a_manager()
@@ -44,4 +53,9 @@ TriggerManager & triggerManager()
 ThreadManager & threadManager()
 {
 	return get_a_manager<ThreadManager>();
+}
+
+UIDataManager & uidataManager()
+{
+	return get_a_manager<UIDataManager>();
 }

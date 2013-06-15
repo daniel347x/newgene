@@ -3,6 +3,7 @@
 
 #include "Base/uimodelsettings.h"
 #include "outputmodelsettingsworkqueue.h"
+#include "../../../../NewGeneBackEnd/Settings/outputmodelsettings.h"
 
 class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_MODEL_SETTINGS>
 {

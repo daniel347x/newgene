@@ -1,14 +1,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "uiprojectmanager.h"
-#include "uimodelmanager.h"
-#include "uisettingsmanager.h"
-#include "uidocumentmanager.h"
-#include "uistatusmanager.h"
-#include "uiloggingmanager.h"
-#include "uitriggermanager.h"
-#include "uithreadmanager.h"
 #include <QMessageBox>
 #include "newgenefilenames.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
@@ -22,6 +14,16 @@
 
 class NewGeneMainWindow;
 
+class UIProjectManager;
+class UISettingsManager;
+class UILoggingManager;
+class UIModelManager;
+class UIDocumentManager;
+class UIStatusManager;
+class UITriggerManager;
+class UIThreadManager;
+class UIUIDataManager;
+
 extern NewGeneMainWindow * theMainWindow;
 
 UIProjectManager & projectManagerUI();
@@ -32,5 +34,6 @@ UIDocumentManager & documentManagerUI();
 UIStatusManager & statusManagerUI();
 UITriggerManager & triggerManagerUI();
 UIThreadManager & threadManagerUI();
+UIUIDataManager & uidataManagerUI();
 
 #endif // GLOBALS_H

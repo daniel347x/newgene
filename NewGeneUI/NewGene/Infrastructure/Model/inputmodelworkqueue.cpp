@@ -1,6 +1,7 @@
 #include "inputmodelworkqueue.h"
 #include "uiinputmodel.h"
 #include "globals.h"
+#include "uiprojectmanager.h"
 
 InputModelWorkQueue::InputModelWorkQueue(QObject * parent)
 	: WorkQueueManager<UI_INPUT_MODEL>(parent)

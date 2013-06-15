@@ -73,6 +73,12 @@
     <Filter Include="Source Files\Triggers">
       <UniqueIdentifier>{fa803b26-84b1-4302-a435-24890c5edebf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\UIData">
+      <UniqueIdentifier>{816ba8ea-d1d0-4a9b-a2a9-e42cb17bf81b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UIData">
+      <UniqueIdentifier>{9ba27cf2-69e5-4b95-ac5b-4ce65730516b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -189,6 +195,9 @@
     <ClInclude Include="Settings\OutputModelSettings_list.h">
       <Filter>Header Files\Settings</Filter>
     </ClInclude>
+    <ClInclude Include="UIData\UIDataManager.h">
+      <Filter>Header Files\UIData</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -301,6 +310,9 @@
     </ClCompile>
     <ClCompile Include="Settings\OutputModelSettings_list.cpp">
       <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="UIData\UIDataManager.cpp">
+      <Filter>Source Files\UIData</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

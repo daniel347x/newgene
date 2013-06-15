@@ -37,6 +37,10 @@ namespace MANAGER_DESCRIPTION_NAMESPACE
 		{
 			return "TriggerManager";
 		}
+		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_DATA)
+		{
+			return "UIDataManager";
+		}
 		return std::string();
 	}
 

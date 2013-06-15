@@ -1,6 +1,7 @@
 #include "outputmodelworkqueue.h"
 #include "uioutputmodel.h"
 #include "globals.h"
+#include "uiprojectmanager.h"
 
 OutputModelWorkQueue::OutputModelWorkQueue(QObject * parent)
 	: WorkQueueManager<UI_OUTPUT_MODEL>(parent)

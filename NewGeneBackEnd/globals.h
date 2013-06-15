@@ -1,14 +1,6 @@
 #ifndef GLOBALS_BACKEND_H
 #define GLOBALS_BACKEND_H
 
-#include "Project/projectmanager.h"
-#include "Model/modelmanager.h"
-#include "Settings/settingsmanager.h"
-#include "Documents/documentmanager.h"
-#include "Status/statusmanager.h"
-#include "Logging/loggingmanager.h"
-#include "Triggers/triggermanager.h"
-#include "Threads/threadmanager.h"
 #include "Utilities\NewGeneException.h"
 #include <memory>
 #include <vector>
@@ -24,6 +16,9 @@ class LoggingManager;
 class ModelManager;
 class DocumentManager;
 class StatusManager;
+class TriggerManager;
+class ThreadManager;
+class UIDataManager;
 
 ProjectManager & projectManager();
 SettingsManager & settingsManager();
@@ -33,5 +28,6 @@ DocumentManager & documentManager();
 StatusManager & statusManager();
 TriggerManager & triggerManager();
 ThreadManager & threadManager();
+UIDataManager & uidataManager();
 
 #endif
