@@ -11,10 +11,13 @@ template<WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
 class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 {
 
+	protected:
+		static int const number_of_pools;
+
 	public:
 
 		UIModel(UIMessager & messager, int const number_worker_threads)
-			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
+			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads, number_of_pools)
 		{
 
 		}
@@ -77,11 +80,6 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		};
 
-	public:
-
-
-	private:
-
 
 	protected:
 
@@ -103,5 +101,8 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		}
 
 };
+
+template<WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+int const UIModel<UI_THREAD_LOOP_CLASS_ENUM>::number_of_pools = 2;
 
 #endif // UImodel_H

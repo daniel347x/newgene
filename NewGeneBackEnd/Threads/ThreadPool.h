@@ -17,8 +17,14 @@ public:
 
 	typedef std::pair<std::shared_ptr<boost::thread>, std::shared_ptr<WORKER_THREAD_CLASS>> thread_worker; 
 
-	ThreadPool(boost::asio::io_service & work_service, int const nThreads)
+	ThreadPool(boost::asio::io_service & work_service, int const nThreads, bool const active_ = true)
+		: active(active_)
 	{
+		if (!active)
+		{
+			return;
+		}
+
 		for(int n=0; n<nThreads; ++n)
 		{
 			auto worker = std::make_shared<WORKER_THREAD_CLASS>(work_service);
@@ -28,6 +34,11 @@ public:
 
 	void StopPoolAndWaitForTasksToComplete()
 	{
+		if (!active)
+		{
+			return;
+		}
+
 		// blocks
 		for_each(threads.begin(), threads.end(), [](thread_worker & thread)
 		{
@@ -43,6 +54,7 @@ public:
 protected:
 
 	std::vector<thread_worker> threads;
+	bool const active;
 
 };
 

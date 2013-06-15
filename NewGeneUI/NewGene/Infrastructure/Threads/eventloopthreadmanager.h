@@ -12,9 +12,11 @@ class EventLoopThreadManager
 
 	public:
 
-		EventLoopThreadManager(int const number_worker_threads)
+		EventLoopThreadManager(int const number_worker_threads, int const number_pools = 1)
 			: work(work_service)
 			, worker_pool_ui(work_service, number_worker_threads)
+			, work_2(work_service_2)
+			, worker_pool_ui_2(work_service_2, number_worker_threads, number_pools == 2)
 			, work_queue_manager(nullptr)
 		{
 		}
@@ -65,6 +67,11 @@ class EventLoopThreadManager
 		boost::asio::io_service::work work;
 		ThreadPool<WorkerThread> worker_pool_ui;
 
+		// Secondary Boost-layer thread pool, when requested
+		boost::asio::io_service work_service_2;
+		boost::asio::io_service::work work_2;
+		ThreadPool<WorkerThread> worker_pool_ui_2;
+
 		// Qt-layer thread, which runs the event loop in a separate background thread
 		QThread work_queue_manager_thread;
 		std::unique_ptr<WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM>> work_queue_manager;
@@ -75,6 +82,7 @@ class EventLoopThreadManager
 		{
 			// blocks
 			worker_pool_ui.StopPoolAndWaitForTasksToComplete();
+			worker_pool_ui_2.StopPoolAndWaitForTasksToComplete();
 		}
 
 };
