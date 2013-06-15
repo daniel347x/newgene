@@ -10,6 +10,8 @@
 #include "uithreadmanager.h"
 #include "uitriggermanager.h"
 #include "uiuidatamanager.h"
+#include "uiuiactionmanager.h"
+#include "uimodelactionmanager.h"
 #include "uimodel.h"
 #include "uiprojectmanager.h"
 #include "uiinputproject.h"
@@ -38,8 +40,10 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 		UIModelManager::getManager();
 		UIProjectManager::getManager();
 		UIThreadManager::getManager();
-		UIUIDataManager::getManager();
 		UITriggerManager::getManager();
+		UIUIDataManager::getManager();
+		UIUIActionManager::getManager();
+		UIModelActionManager::getManager();
 
 		ui->setupUi( this );
 
