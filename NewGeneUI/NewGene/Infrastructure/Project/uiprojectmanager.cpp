@@ -110,6 +110,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 			UIInputProject * project = getActiveUIInputProject();
 
+			project->InitializeEventLoop();
+
 			if (!project)
 			{
 				boost::format msg("NULL input project during attempt to instantiate project.");
@@ -177,6 +179,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 															std::unique_ptr<UIOutputProject>(new UIOutputProject(project_messager.release(), project_settings, model_settings, project_model))));
 
 			UIOutputProject * project = getActiveUIOutputProject();
+
+			project->InitializeEventLoop();
 
 			if (!project)
 			{

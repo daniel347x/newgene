@@ -15,14 +15,25 @@ class EventLoopThreadManager
 		EventLoopThreadManager(int const number_worker_threads)
 			: work(work_service)
 			, worker_pool_ui(work_service, number_worker_threads)
+			, work_queue_manager(nullptr)
 		{
-			work_queue_manager_thread.start();
-			work_queue_manager.moveToThread(&work_queue_manager_thread);
 		}
 
 	public:
 
-		WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> & getQueueManager()
+		void InitializeEventLoop()
+		{
+			work_queue_manager.reset(InstantiateWorkQueue());
+			work_queue_manager_thread.start();
+			work_queue_manager->moveToThread(&work_queue_manager_thread);
+		}
+
+		QObject * getConnector()
+		{
+			return work_queue_manager;
+		}
+
+		WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * getQueueManager()
 		{
 			return work_queue_manager;
 		}
@@ -41,12 +52,12 @@ class EventLoopThreadManager
 			getQueueManagerThread().quit();
 		}
 
-		QObject * getConnector()
-		{
-			return &work_queue_manager;
-		}
-
 	protected:
+
+		virtual WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * InstantiateWorkQueue()
+		{
+			return nullptr;
+		}
 
 		// Boost-layer thread pool, which is accessible in both the UI layer
 		// and in the backend layer
@@ -56,7 +67,7 @@ class EventLoopThreadManager
 
 		// Qt-layer thread, which runs the event loop in a separate background thread
 		QThread work_queue_manager_thread;
-		WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> work_queue_manager;
+		std::unique_ptr<WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM>> work_queue_manager;
 
 	private:
 

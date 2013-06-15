@@ -1,18 +1,20 @@
 #ifndef INPUTPROJECTWORKQUEUE_H
 #define INPUTPROJECTWORKQUEUE_H
 
-#include "workqueuemanager.h"
+#include "Base/inputprojectworkqueue_base.h"
 
-template<>
-class WorkQueueManager<UI_INPUT_PROJECT> : public WorkQueueManagerBase
+class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 {
 
 	public:
 
-		WorkQueueManager(QObject *parent = 0)
-			: WorkQueueManagerBase(parent)
-		{
+		explicit InputProjectWorkQueue(QObject * parent = NULL);
 
+	protected:
+
+		virtual WorkQueueManager<UI_INPUT_PROJECT> * InstantiateWorkQueue()
+		{
+			return nullptr;
 		}
 
 };

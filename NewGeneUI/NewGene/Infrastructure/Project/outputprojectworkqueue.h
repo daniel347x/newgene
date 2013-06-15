@@ -1,19 +1,14 @@
 #ifndef OUTPUTPROJECTWORKQUEUE_H
 #define OUTPUTPROJECTWORKQUEUE_H
 
-#include "workqueuemanager.h"
+#include "Base/outputprojectworkqueue_base.h"
 
-template<>
-class WorkQueueManager<UI_OUTPUT_PROJECT> : public WorkQueueManagerBase
+class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 {
 
-	public:
+    public:
 
-		WorkQueueManager(QObject *parent = 0)
-			: WorkQueueManagerBase(parent)
-		{
-
-		}
+        explicit OutputProjectWorkQueue(QObject * parent = NULL);
 
 };
 

@@ -6,6 +6,7 @@
 #include "../../../../NewGeneBackEnd/Settings/InputModelSettings.h"
 #include "uiinputmodel.h"
 #include "../Settings/uiinputmodelsettings.h"
+#include "inputprojectworkqueue.h"
 
 class UIInputProject : public QObject, public UIProject<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>
 {
@@ -27,6 +28,13 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 	signals:
 
 	public slots:
+
+	protected:
+
+		virtual WorkQueueManager<UI_INPUT_PROJECT> * InstantiateWorkQueue()
+		{
+			return new InputProjectWorkQueue();
+		}
 
 };
 

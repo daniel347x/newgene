@@ -85,6 +85,8 @@ SOURCES += main.cpp\
     Infrastructure/Settings/uioutputmodelsettings.cpp \
     Infrastructure/Threads/eventloopthreadmanager.cpp \
     Infrastructure/Threads/workqueuemanager.cpp \
+    Infrastructure/Project/Base/outputprojectworkqueue_base.cpp \
+    Infrastructure/Project/Base/inputprojectworkqueue_base.cpp \
     Infrastructure/Project/inputprojectworkqueue.cpp \
     Infrastructure/Project/outputprojectworkqueue.cpp
 
@@ -160,6 +162,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
     Infrastructure/Settings/uioutputmodelsettings.h \
     Infrastructure/Threads/eventloopthreadmanager.h \
     Infrastructure/Threads/workqueuemanager.h \
+    Infrastructure/Project/Base/outputprojectworkqueue_base.h \
+    Infrastructure/Project/Base/inputprojectworkqueue_base.h \
     Infrastructure/Project/inputprojectworkqueue.h \
     Infrastructure/Project/outputprojectworkqueue.h
 

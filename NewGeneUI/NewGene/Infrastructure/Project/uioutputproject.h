@@ -8,6 +8,7 @@
 #include "uioutputmodel.h"
 #include <memory>
 #include "../Settings/uioutputmodelsettings.h"
+#include "outputprojectworkqueue.h"
 
 class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>
 {
@@ -31,6 +32,11 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 	public slots:
 
 	protected:
+
+		virtual WorkQueueManager<UI_OUTPUT_PROJECT> * InstantiateWorkQueue()
+		{
+			return new OutputProjectWorkQueue();
+		}
 
 };
 
