@@ -35,6 +35,7 @@ class WorkQueueManagerBase : public QObject
 		// and are all defined as virtual so that specializations of
 		// WorkQueueManager can override them
 		virtual void TestSlot() {}
+		virtual void LoadModel(void *) {};
 
 	public:
 		virtual void SetConnections() {}

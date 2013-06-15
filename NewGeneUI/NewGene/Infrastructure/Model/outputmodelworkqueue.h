@@ -28,6 +28,7 @@ class OutputModelWorkQueue : public WorkQueueManager<UI_OUTPUT_MODEL>
 		UIOutputModel * get();
 
 		void TestSlot();
+		void LoadModel(void *);
 
 };
 

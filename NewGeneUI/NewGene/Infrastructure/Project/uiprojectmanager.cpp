@@ -130,6 +130,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 			emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
 
+			emit LoadModel(&project->model());
+
 		}
 
 	}
@@ -202,6 +204,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 			project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
 
 			emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+
+			emit LoadModel(reinterpret_cast<void*>(&project->model()));
 
 		}
 

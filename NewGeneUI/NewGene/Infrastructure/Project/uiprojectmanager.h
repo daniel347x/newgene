@@ -171,6 +171,7 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 	signals:
 		void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void LoadModel(void *);
 
 	public slots:
 

@@ -1,5 +1,6 @@
 #include "outputmodelworkqueue.h"
 #include "uioutputmodel.h"
+#include "globals.h"
 
 OutputModelWorkQueue::OutputModelWorkQueue(QObject * parent)
 	: WorkQueueManager<UI_OUTPUT_MODEL>(parent)
@@ -20,4 +21,13 @@ void OutputModelWorkQueue::TestSlot()
 void OutputModelWorkQueue::SetConnections()
 {
 	connect(this, SIGNAL(SignalMessageBox(QString)), get(), SLOT(SignalMessageBox(QString)));
+	connect(&projectManagerUI(), SIGNAL(LoadModel(void*)), this, SLOT(LoadModel(void*)));
+}
+
+void OutputModelWorkQueue::LoadModel(void * model)
+{
+	if (model == get())
+	{
+		emit SignalMessageBox("Output model's \"LoadModel()\" successfully called and handled.");
+	}
 }
