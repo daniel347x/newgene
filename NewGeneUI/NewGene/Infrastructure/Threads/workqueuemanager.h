@@ -27,11 +27,16 @@ class WorkQueueManagerBase : public QObject
 	signals:
 		// Signals for ALL specializations of WorkQueueManager go here,
 		// and are NOT (and don't need to be) defined as virtual
+		void SignalMessageBox(QString);
 
 	public slots:
 		// Slots for ALL specializations go here,
 		// and are all defined as virtual so that specializations of
 		// WorkQueueManager can override them
+		virtual void TestSlot() {}
+
+	public:
+		virtual void SetConnections() {}
 
 };
 

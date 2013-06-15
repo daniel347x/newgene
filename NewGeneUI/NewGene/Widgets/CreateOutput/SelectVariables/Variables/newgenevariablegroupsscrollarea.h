@@ -18,8 +18,11 @@ class NewGeneVariableGroupsScrollArea : public QWidget, public NewGeneWidget // 
 		~NewGeneVariableGroupsScrollArea();
 
 	signals:
+		void TestSignal();
 
 	public slots:
+		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void TestSlot();
 
 	protected:
 		void changeEvent( QEvent * e );

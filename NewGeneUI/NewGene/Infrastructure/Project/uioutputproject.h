@@ -30,12 +30,16 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 	signals:
 
 	public slots:
+		void SignalMessageBox(QString msg);
 
 	protected:
 
-		virtual WorkQueueManager<UI_OUTPUT_PROJECT> * InstantiateWorkQueue()
+		WorkQueueManager<UI_OUTPUT_PROJECT> * InstantiateWorkQueue(void * ui_object)
 		{
-			return new OutputProjectWorkQueue();
+			OutputProjectWorkQueue * work_queue = new OutputProjectWorkQueue();
+			work_queue->SetUIObject(reinterpret_cast<UIOutputProject*>(ui_object));
+			work_queue->SetConnections();
+			return work_queue;
 		}
 
 };

@@ -24,6 +24,7 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 
 	public slots:
 		void doInitialize();
+		void SignalMessageBox(QString msg);
 
 	protected:
 		void changeEvent( QEvent * e );

@@ -3,6 +3,8 @@
 
 #include "Base/inputprojectworkqueue_base.h"
 
+class UIInputProject;
+
 class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 {
 
@@ -10,12 +12,22 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 
 		explicit InputProjectWorkQueue(QObject * parent = NULL);
 
+		void SetUIObject(void * ui_input_object_)
+		{
+			inp = ui_input_object_;
+		}
+
+		void SetConnections();
+
+	private:
+
+		void * inp;
+
 	protected:
 
-		virtual WorkQueueManager<UI_INPUT_PROJECT> * InstantiateWorkQueue()
-		{
-			return nullptr;
-		}
+		UIInputProject * get();
+
+		void TestSlot();
 
 };
 

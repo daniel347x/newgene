@@ -21,14 +21,11 @@ class NewGeneWidget
 		virtual void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 		virtual void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 
-	private:
+	public:
 
 		QWidget * self;
 		UIInputProject * inp;
 		UIOutputProject * outp;
-
-	public:
-
 		static NewGeneMainWindow * theMainWindow;
 
 };

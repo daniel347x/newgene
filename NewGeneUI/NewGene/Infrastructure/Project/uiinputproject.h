@@ -28,12 +28,18 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 	signals:
 
 	public slots:
+		void SignalMessageBox(QString msg);
+
+	public:
 
 	protected:
 
-		virtual WorkQueueManager<UI_INPUT_PROJECT> * InstantiateWorkQueue()
+		WorkQueueManager<UI_INPUT_PROJECT> * InstantiateWorkQueue(void * ui_object)
 		{
-			return new InputProjectWorkQueue();
+			InputProjectWorkQueue * work_queue = new InputProjectWorkQueue();
+			work_queue->SetUIObject(reinterpret_cast<UIInputProject*>(ui_object));
+			work_queue->SetConnections();
+			return work_queue;
 		}
 
 };

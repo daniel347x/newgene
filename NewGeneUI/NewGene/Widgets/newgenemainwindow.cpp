@@ -123,3 +123,10 @@ void NewGeneMainWindow::doInitialize()
 	//_current_project.reset(projectManagerUI().LoadDefaultProject());
 
 }
+
+void NewGeneMainWindow::SignalMessageBox(QString msg)
+{
+	QMessageBox msgBox;
+	msgBox.setText( msg );
+	msgBox.exec();
+}

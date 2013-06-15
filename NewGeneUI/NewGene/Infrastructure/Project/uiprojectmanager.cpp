@@ -110,7 +110,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 			UIInputProject * project = getActiveUIInputProject();
 
-			project->InitializeEventLoop();
+			project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
 
 			if (!project)
 			{
@@ -180,7 +180,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 			UIOutputProject * project = getActiveUIOutputProject();
 
-			project->InitializeEventLoop();
+			project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
 
 			if (!project)
 			{

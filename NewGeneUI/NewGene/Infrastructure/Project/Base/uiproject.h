@@ -11,6 +11,7 @@
 #include "../../../NewGeneBackEnd/Project/Project.h"
 #include "../Model/Base/uimodel.h"
 #include "eventloopthreadmanager.h"
+#include <QMessageBox>
 
 class UIModelManager;
 class UISettingsManager;

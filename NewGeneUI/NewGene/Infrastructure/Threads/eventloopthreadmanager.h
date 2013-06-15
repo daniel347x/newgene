@@ -21,21 +21,21 @@ class EventLoopThreadManager
 
 	public:
 
-		void InitializeEventLoop()
+		void InitializeEventLoop(void * me)
 		{
-			work_queue_manager.reset(InstantiateWorkQueue());
+			work_queue_manager.reset(InstantiateWorkQueue(me));
 			work_queue_manager_thread.start();
 			work_queue_manager->moveToThread(&work_queue_manager_thread);
 		}
 
 		QObject * getConnector()
 		{
-			return work_queue_manager;
+			return work_queue_manager.get();
 		}
 
 		WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * getQueueManager()
 		{
-			return work_queue_manager;
+			return work_queue_manager.get();
 		}
 
 		QThread & getQueueManagerThread()
@@ -54,7 +54,7 @@ class EventLoopThreadManager
 
 	protected:
 
-		virtual WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * InstantiateWorkQueue()
+		virtual WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * InstantiateWorkQueue(void * ui_object)
 		{
 			return nullptr;
 		}
