@@ -3,8 +3,9 @@
 
 #include "../../../NewGeneBackEnd/Model/OutputModel.h"
 #include "uimodel.h"
+#include "outputmodelworkqueue.h"
 
-class UIOutputModel : public UIModel
+class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 {
 
 	Q_OBJECT
@@ -12,7 +13,8 @@ class UIOutputModel : public UIModel
 	public:
 
 		UIOutputModel(UIMessager & messager, std::shared_ptr<OutputModel> const & backend_model_instance, QObject * parent = NULL)
-			: UIModel(messager)
+			: QObject(parent)
+			, UIModel<UI_OUTPUT_MODEL>(messager, OutputModel::number_worker_threads)
 		{
 			CreateImplementation(messager, backend_model_instance);
 		}
@@ -91,6 +93,19 @@ class UIOutputModel : public UIModel
 			}
 			return getBackendModelSharedPtr_base<OutputModel>(*__impl);
 		}
+
+	protected:
+
+		WorkQueueManager<UI_OUTPUT_MODEL> * InstantiateWorkQueue(void * ui_object)
+		{
+			OutputModelWorkQueue * work_queue = new OutputModelWorkQueue();
+			work_queue->SetUIObject(reinterpret_cast<UIOutputModel*>(ui_object));
+			work_queue->SetConnections();
+			return work_queue;
+		}
+
+	public slots:
+		void SignalMessageBox(QString msg);
 
 };
 

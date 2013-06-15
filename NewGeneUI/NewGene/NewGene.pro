@@ -88,7 +88,11 @@ SOURCES += main.cpp\
     Infrastructure/Project/Base/outputprojectworkqueue_base.cpp \
     Infrastructure/Project/Base/inputprojectworkqueue_base.cpp \
     Infrastructure/Project/inputprojectworkqueue.cpp \
-    Infrastructure/Project/outputprojectworkqueue.cpp
+    Infrastructure/Project/outputprojectworkqueue.cpp \
+    Infrastructure/Model/Base/inputmodelworkqueue_base.cpp \
+    Infrastructure/Model/Base/outputmodelworkqueue_base.cpp \
+    Infrastructure/Model/inputmodelworkqueue.cpp \
+    Infrastructure/Model/outputmodelworkqueue.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -165,7 +169,11 @@ HEADERS  += Widgets/newgenemainwindow.h \
     Infrastructure/Project/Base/outputprojectworkqueue_base.h \
     Infrastructure/Project/Base/inputprojectworkqueue_base.h \
     Infrastructure/Project/inputprojectworkqueue.h \
-    Infrastructure/Project/outputprojectworkqueue.h
+    Infrastructure/Project/outputprojectworkqueue.h \
+    Infrastructure/Model/Base/inputmodelworkqueue_base.h \
+    Infrastructure/Model/Base/outputmodelworkqueue_base.h \
+    Infrastructure/Model/inputmodelworkqueue.h \
+    Infrastructure/Model/outputmodelworkqueue.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

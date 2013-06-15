@@ -5,15 +5,19 @@
 #include "../../../NewGeneBackEnd/Model/Model.h"
 #include "uimessager.h"
 #include "../../../NewGeneBackEnd/globals.h"
+#include "eventloopthreadmanager.h"
 
-class UIModel : public QObject
+template<WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 {
-
-	Q_OBJECT
 
 	public:
 
-		UIModel(UIMessager & messager) {}
+		UIModel(UIMessager & messager, int const number_worker_threads)
+			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
+		{
+
+		}
 
 
 	protected:

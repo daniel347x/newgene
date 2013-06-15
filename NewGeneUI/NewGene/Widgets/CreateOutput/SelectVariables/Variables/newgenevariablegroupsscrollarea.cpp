@@ -33,7 +33,7 @@ void NewGeneVariableGroupsScrollArea::changeEvent( QEvent * e )
 void NewGeneVariableGroupsScrollArea::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
-	connect(this, SIGNAL(TestSignal()), outp->getConnector(), SLOT(TestSlot()));
+	connect(this, SIGNAL(TestSignal()), outp->GetModelConnector(), SLOT(TestSlot()));
 	QTimer::singleShot( 0, this, SLOT(TestSlot()) );
 }
 

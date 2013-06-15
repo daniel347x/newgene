@@ -36,6 +36,9 @@ UIProjectManager::~UIProjectManager()
 		{
 			ProjectPaths & paths = tab.first;
 			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
+			project_ptr->model().EndLoopAndBackgroundPool(); // blocks
+			//project_ptr->modelSettings().EndLoopAndBackgroundPool(); // blocks
+			//project_ptr->projectSettings().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->EndLoopAndBackgroundPool(); // blocks
 			project_ptr->deleteLater();
 		});
@@ -50,7 +53,9 @@ UIProjectManager::~UIProjectManager()
 		{
 			ProjectPaths & paths = tab.first;
 			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
-			project_ptr->EndLoopAndBackgroundPool(); // blocks
+			project_ptr->model().EndLoopAndBackgroundPool(); // blocks
+			//project_ptr->modelSettings().EndLoopAndBackgroundPool(); // blocks
+			//project_ptr->projectSettings().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->deleteLater();
 		});
 
@@ -110,14 +115,17 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 			UIInputProject * project = getActiveUIInputProject();
 
-			project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
-
 			if (!project)
 			{
 				boost::format msg("NULL input project during attempt to instantiate project.");
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
 				return;
 			}
+
+			project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
+			project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
+			//project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
+			//project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
 
 			emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
 
@@ -180,14 +188,17 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 			UIOutputProject * project = getActiveUIOutputProject();
 
-			project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
-
 			if (!project)
 			{
 				boost::format msg("NULL output project during attempt to instantiate project.");
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
 				return;
 			}
+
+			project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
+			project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
+			//project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
+			//project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
 
 			emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 

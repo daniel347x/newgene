@@ -3,8 +3,9 @@
 
 #include "../../../NewGeneBackEnd/Model/InputModel.h"
 #include "uimodel.h"
+#include "inputmodelworkqueue.h"
 
-class UIInputModel : public UIModel
+class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 {
 
 	Q_OBJECT
@@ -12,7 +13,8 @@ class UIInputModel : public UIModel
 	public:
 
 		UIInputModel(UIMessager & messager, std::shared_ptr<InputModel> const & backend_model_instance, QObject * parent = NULL)
-			: UIModel(messager)
+			: QObject(parent)
+			, UIModel<UI_INPUT_MODEL>(messager, InputModel::number_worker_threads)
 		{
 			CreateImplementation(messager, backend_model_instance);
 		}
@@ -91,6 +93,19 @@ class UIInputModel : public UIModel
 			}
 			return getBackendModelSharedPtr_base<InputModel>(*__impl);
 		}
+
+	protected:
+
+		WorkQueueManager<UI_INPUT_MODEL> * InstantiateWorkQueue(void * ui_object)
+		{
+			InputModelWorkQueue * work_queue = new InputModelWorkQueue();
+			work_queue->SetUIObject(reinterpret_cast<UIInputModel*>(ui_object));
+			work_queue->SetConnections();
+			return work_queue;
+		}
+
+	public slots:
+		void SignalMessageBox(QString msg);
 
 };
 

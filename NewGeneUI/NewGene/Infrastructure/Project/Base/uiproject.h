@@ -59,7 +59,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		QObject * GetModelConnector()
 		{
-			return nullptr;
+			return model().getConnector();
 		}
 
 		// TODO: Test for validity
