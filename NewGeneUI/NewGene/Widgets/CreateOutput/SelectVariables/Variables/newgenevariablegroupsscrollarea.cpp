@@ -6,6 +6,7 @@ NewGeneVariableGroupsScrollArea::NewGeneVariableGroupsScrollArea( QWidget * pare
 	NewGeneWidget( this ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 	ui( new Ui::NewGeneVariableGroupsScrollArea )
 {
+	PrepareInputWidget();
 	PrepareOutputWidget();
 	ui->setupUi( this );
 }
@@ -30,11 +31,25 @@ void NewGeneVariableGroupsScrollArea::changeEvent( QEvent * e )
 	}
 }
 
+void NewGeneVariableGroupsScrollArea::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+	NewGeneWidget::UpdateInputConnections(connection_type, project);
+	//connect(this, SIGNAL(TestSignal()), inp->getConnector(), SLOT(TestSlot()));
+	//connect(this, SIGNAL(TestSignal()), inp->GetModelConnector(), SLOT(TestSlot()));
+	//connect(this, SIGNAL(TestSignal()), inp->GetModelSettingsConnector(), SLOT(TestSlot()));
+	//connect(this, SIGNAL(TestSignal()), inp->GetProjectSettingsConnector(), SLOT(TestSlot()));
+	//connect(this, SIGNAL(TestSignal()), settingsManagerUI().globalSettings().getConnector(), SLOT(TestSlot()));
+	QTimer::singleShot( 0, this, SLOT(TestSlot()) );
+}
+
 void NewGeneVariableGroupsScrollArea::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
-	connect(this, SIGNAL(TestSignal()), outp->GetModelConnector(), SLOT(TestSlot()));
-	QTimer::singleShot( 0, this, SLOT(TestSlot()) );
+	//connect(this, SIGNAL(TestSignal()), outp->getConnector(), SLOT(TestSlot()));
+	//connect(this, SIGNAL(TestSignal()), outp->GetModelConnector(), SLOT(TestSlot()));
+	//connect(this, SIGNAL(TestSignal()), outp->GetModelSettingsConnector(), SLOT(TestSlot()));
+	//connect(this, SIGNAL(TestSignal()), outp->GetProjectSettingsConnector(), SLOT(TestSlot()));
+	//QTimer::singleShot( 0, this, SLOT(TestSlot()) );
 }
 
 void NewGeneVariableGroupsScrollArea::TestSlot()
