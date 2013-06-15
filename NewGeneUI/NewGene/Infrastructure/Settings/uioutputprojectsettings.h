@@ -6,6 +6,7 @@
 #include "../../../NewGeneBackEnd/Project/OutputProject.h"
 #include "uiallprojectsettings.h"
 #include "Base/UISetting.h"
+#include "outputprojectsettingsworkqueue.h"
 
 namespace OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE
 {
@@ -18,7 +19,7 @@ namespace OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE
 
 }
 
-class UIOutputProjectSettings : public UIAllProjectSettings<OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting>
+class UIOutputProjectSettings : public QObject, public UIAllProjectSettings<OutputProjectSettings, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, BackendProjectOutputSetting, UIProjectOutputSetting, UI_OUTPUT_PROJECT_SETTINGS>
 {
 
 		Q_OBJECT
@@ -30,7 +31,8 @@ class UIOutputProjectSettings : public UIAllProjectSettings<OutputProjectSetting
 
 	public:
 		UIOutputProjectSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
-			: UIAllProjectSettings(messager, path_to_settings, parent)
+			: QObject(parent)
+			, UIAllProjectSettings(messager, path_to_settings, OutputProjectSettings::number_worker_threads)
 		{
 
 		}
@@ -49,6 +51,19 @@ class UIOutputProjectSettings : public UIAllProjectSettings<OutputProjectSetting
 			backendsettings.WriteSettingsToPtree(messager, pt);
 			uisettings.WritePtreeToFile(messager, pt);
 		}
+
+	protected:
+
+		WorkQueueManager<UI_OUTPUT_PROJECT_SETTINGS> * InstantiateWorkQueue(void * ui_object)
+		{
+			OutputProjectSettingsWorkQueue * work_queue = new OutputProjectSettingsWorkQueue();
+			work_queue->SetUIObject(reinterpret_cast<UIOutputProjectSettings*>(ui_object));
+			work_queue->SetConnections();
+			return work_queue;
+		}
+
+	public slots:
+		void SignalMessageBox(QString msg);
 
 };
 

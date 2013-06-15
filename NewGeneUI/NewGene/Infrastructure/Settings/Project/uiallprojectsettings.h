@@ -6,17 +6,14 @@
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"
 
-template<typename BACKEND_PROJECT_SETTINGS_CLASS, typename PROJECT_SETTINGS_ENUM, typename UI_PROJECT_SETTINGS_ENUM, typename BACKEND_PROJECT_SETTING_CLASS, typename UI_PROJECT_SETTING_CLASS>
-class UIAllProjectSettings : public UIAllSettings
+template<typename BACKEND_PROJECT_SETTINGS_CLASS, typename PROJECT_SETTINGS_ENUM, typename UI_PROJECT_SETTINGS_ENUM, typename BACKEND_PROJECT_SETTING_CLASS, typename UI_PROJECT_SETTING_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+class UIAllProjectSettings : public UIAllSettings<UI_THREAD_LOOP_CLASS_ENUM>
 {
-
-		// limitation of Qt - template classes cannot implement Q_OBJECT
-		//Q_OBJECT
 
 	public:
 
-		UIAllProjectSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
-			: UIAllSettings(messager, parent)
+		UIAllProjectSettings(UIMessager & messager, boost::filesystem::path const path_to_settings, int const number_worker_threads)
+			: UIAllSettings(messager, number_worker_threads)
 		{
 			CreateImplementation(messager, path_to_settings);
 		}

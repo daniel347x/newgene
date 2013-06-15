@@ -2,8 +2,9 @@
 #define UIOUTPUTMODELSETTINGS_H
 
 #include "Base/uimodelsettings.h"
+#include "outputmodelsettingsworkqueue.h"
 
-class UIOutputModelSettings : public UIModelSettings
+class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_MODEL_SETTINGS>
 {
 
 		Q_OBJECT
@@ -11,7 +12,8 @@ class UIOutputModelSettings : public UIModelSettings
 	public:
 
 		UIOutputModelSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
-			: UIModelSettings(messager, parent)
+			: QObject(parent)
+			, UIModelSettings(messager, OutputModelSettings::number_worker_threads)
 			{
 				CreateImplementation(messager, path_to_settings);
 			}
@@ -101,6 +103,19 @@ class UIOutputModelSettings : public UIModelSettings
 			backendsettings.WriteSettingsToPtree(messager, pt);
 			backendsettings.WritePtreeToFile(messager, pt);
 		}
+
+	protected:
+
+		WorkQueueManager<UI_OUTPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object)
+		{
+			OutputModelSettingsWorkQueue * work_queue = new OutputModelSettingsWorkQueue();
+			work_queue->SetUIObject(reinterpret_cast<UIOutputModelSettings*>(ui_object));
+			work_queue->SetConnections();
+			return work_queue;
+		}
+
+	public slots:
+		void SignalMessageBox(QString msg);
 
 };
 

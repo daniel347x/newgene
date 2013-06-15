@@ -5,6 +5,7 @@
 #include "../../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "uiallsettings.h"
 #include "../../../NewGeneBackEnd/Settings/GlobalSettings.h"
+#include "globalsettingsworkqueue.h"
 
 namespace GLOBAL_SETTINGS_UI_NAMESPACE
 {
@@ -23,7 +24,7 @@ namespace GLOBAL_SETTINGS_UI_NAMESPACE
 
 }
 
-class UIAllGlobalSettings : public UIAllSettings
+class UIAllGlobalSettings : public QObject, public UIAllSettings<UI_GLOBAL_SETTINGS>
 {
 
 		Q_OBJECT
@@ -132,6 +133,19 @@ class UIAllGlobalSettings : public UIAllSettings
 			backendsettings.WriteSettingsToPtree(messager, pt);
 			uisettings.WritePtreeToFile(messager, pt);
 		}
+
+	protected:
+
+		WorkQueueManager<UI_GLOBAL_SETTINGS> * InstantiateWorkQueue(void * ui_object)
+		{
+			GlobalSettingsWorkQueue * work_queue = new GlobalSettingsWorkQueue();
+			work_queue->SetUIObject(reinterpret_cast<UIAllGlobalSettings*>(ui_object));
+			work_queue->SetConnections();
+			return work_queue;
+		}
+
+	public slots:
+		void SignalMessageBox(QString msg);
 
 };
 

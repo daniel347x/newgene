@@ -22,6 +22,8 @@ class OutputProjectSettings : public ProjectSettings<OUTPUT_PROJECT_SETTINGS_BAC
 
 public:
 
+	static int const number_worker_threads = 1; // For now, single thread only in pool
+
 	OutputProjectSettings(Messager & messager, boost::filesystem::path const project_settings_path)
 		: ProjectSettings(messager, project_settings_path)
 	{}

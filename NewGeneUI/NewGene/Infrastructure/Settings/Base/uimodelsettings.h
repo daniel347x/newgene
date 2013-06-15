@@ -2,24 +2,21 @@
 #define UIMODELSETTINGS_H
 
 #include <QObject>
-//#include "../../../NewGeneBackEnd/Settings/Settings.h"
-//#include "../../../NewGeneBackEnd/Settings/SettingsRepository.h"
-//#include "../../../NewGeneBackEnd/Settings/GlobalSettings.h"
-//#include "../../../NewGeneBackEnd/Settings/ProjectSettings.h"
-//#include "../../../NewGeneBackEnd/Project/Project.h"
 #include "../../Messager/uimessager.h"
 #include "../../../NewGeneBackEnd/globals.h"
-//#include "uisetting.h"
+#include "eventloopthreadmanager.h"
 
-class UIModelSettings : public QObject
+template<WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 {
-
-		Q_OBJECT
-
 
 	public:
 
-		UIModelSettings(UIMessager & messager, QObject * parent = NULL);
+		UIModelSettings(UIMessager & messager, int const number_worker_threads)
+			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
+		{
+
+		}
 
 
 	signals:

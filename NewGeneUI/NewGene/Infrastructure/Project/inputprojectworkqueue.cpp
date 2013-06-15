@@ -14,6 +14,7 @@ UIInputProject * InputProjectWorkQueue::get()
 
 void InputProjectWorkQueue::TestSlot()
 {
+	emit SignalMessageBox("Input project's \"TestSlot()\" successfully called and handled.");
 }
 
 void InputProjectWorkQueue::SetConnections()

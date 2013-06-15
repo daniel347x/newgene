@@ -1,5 +1,6 @@
 #include "uioutputprojectsettings.h"
 #include "uioutputprojectsettings_list.h"
+#include <QMessageBox>
 
 SettingInfo UIProjectOutputSetting::GetSettingInfoFromEnum(Messager & messager_, int const value__)
 {
@@ -136,4 +137,11 @@ UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(Messager & messager
 void UIOutputProjectSettings::SetPTreeEntry(Messager & messager, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI which_setting, boost::property_tree::ptree & pt)
 {
 
+}
+
+void UIOutputProjectSettings::SignalMessageBox(QString msg)
+{
+	QMessageBox msgBox;
+	msgBox.setText( msg );
+	msgBox.exec();
 }

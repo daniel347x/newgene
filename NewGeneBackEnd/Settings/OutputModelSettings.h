@@ -22,6 +22,8 @@ class OutputModelSettings : public ModelSettings<OUTPUT_MODEL_SETTINGS_NAMESPACE
 
 public:
 
+	static int const number_worker_threads = 1; // For now, single thread only in pool
+
 	OutputModelSettings(Messager & messager, boost::filesystem::path const model_settings_path)
 		: ModelSettings(messager, model_settings_path)
 	{}

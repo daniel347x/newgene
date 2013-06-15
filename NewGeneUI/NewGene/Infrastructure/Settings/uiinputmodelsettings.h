@@ -2,8 +2,9 @@
 #define UIINPUTMODELSETTINGS_H
 
 #include "Base/uimodelsettings.h"
+#include "inputmodelsettingsworkqueue.h"
 
-class UIInputModelSettings : public UIModelSettings
+class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MODEL_SETTINGS>
 {
 
 		Q_OBJECT
@@ -11,7 +12,8 @@ class UIInputModelSettings : public UIModelSettings
 	public:
 
 		UIInputModelSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL)
-			: UIModelSettings(messager, parent)
+			: QObject(parent)
+			, UIModelSettings(messager, InputModelSettings::number_worker_threads)
 			{
 				CreateImplementation(messager, path_to_settings);
 			}
@@ -102,6 +104,19 @@ class UIInputModelSettings : public UIModelSettings
 			backendsettings.WriteSettingsToPtree(messager, pt);
 			backendsettings.WritePtreeToFile(messager, pt);
 		}
+
+	protected:
+
+		WorkQueueManager<UI_INPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object)
+		{
+			InputModelSettingsWorkQueue * work_queue = new InputModelSettingsWorkQueue();
+			work_queue->SetUIObject(reinterpret_cast<UIInputModelSettings*>(ui_object));
+			work_queue->SetConnections();
+			return work_queue;
+		}
+
+	public slots:
+		void SignalMessageBox(QString msg);
 
 };
 

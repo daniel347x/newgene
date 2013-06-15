@@ -24,6 +24,8 @@ class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL
 
 	public:
 
+		static int const number_worker_threads = 1; // For now, single thread only in pool
+
 		GlobalSettings(Messager & messager, boost::filesystem::path const global_settings_path);
 		virtual ~GlobalSettings() {}
 

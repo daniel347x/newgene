@@ -1,6 +1,7 @@
 #include "uiallglobalsettings.h"
 #include "uiallglobalsettings_list.h"
 #include "globals.h"
+#include <QMessageBox>
 
 #define S_MRU_INPUT_PROJECTS_LIST__1 MRU_INPUT_PROJECTS_LIST
 #define S_MRU_INPUT_PROJECTS_LIST__2 SETTING_CLASS_UI_GLOBAL_SETTING__MRU_INPUT_PROJECTS_LIST
@@ -314,8 +315,9 @@ GlobalSettings & UIAllGlobalSettings::getBackendSettings()
 	return static_cast<GlobalSettings &>(getBackendSettings_base<GlobalSettings, UIOnlySettings, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND, BackendGlobalSetting>(*__impl));
 }
 
-UIAllGlobalSettings::UIAllGlobalSettings(UIMessager & messager, boost::filesystem::path const path_to_settings, QObject * parent) :
-	UIAllSettings(messager, parent)
+UIAllGlobalSettings::UIAllGlobalSettings(UIMessager & messager, boost::filesystem::path const path_to_settings, QObject * parent)
+	: QObject(parent)
+	, UIAllSettings<UI_GLOBAL_SETTINGS>(messager, GlobalSettings::number_worker_threads)
 {
 	CreateImplementation(messager, path_to_settings);
 }
@@ -329,4 +331,11 @@ void UIAllGlobalSettings::_impl::CreateInternalImplementations(UIMessager & mess
 void UIAllGlobalSettings::CreateImplementation(UIMessager & messager, boost::filesystem::path const path_to_settings)
 {
 	__impl.reset(new _impl(messager, path_to_settings));
+}
+
+void UIAllGlobalSettings::SignalMessageBox(QString msg)
+{
+	QMessageBox msgBox;
+	msgBox.setText( msg );
+	msgBox.exec();
 }

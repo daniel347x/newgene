@@ -9,16 +9,19 @@
 #include "../../../NewGeneBackEnd/Project/Project.h"
 #include "../../../NewGeneBackEnd/globals.h"
 #include "uisetting.h"
+#include "eventloopthreadmanager.h"
 
-class UIAllSettings : public QObject
+template<WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 {
-
-		Q_OBJECT
-
 
 	public:
 
-		UIAllSettings(UIMessager & messager, QObject * parent = NULL);
+		UIAllSettings(UIMessager & messager, int const number_worker_threads)
+			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
+		{
+
+		}
 
 		virtual void WriteSettingsToFile() {}
 

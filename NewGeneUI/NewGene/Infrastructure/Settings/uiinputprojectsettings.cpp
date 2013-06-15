@@ -1,5 +1,6 @@
 #include "uiinputprojectsettings.h"
 #include "uiinputprojectsettings_list.h"
+#include <QMessageBox>
 
 SettingInfo UIProjectInputSetting::GetSettingInfoFromEnum(Messager & messager_, int const value__)
 {
@@ -136,4 +137,11 @@ UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager_,
 void UIInputProjectSettings::SetPTreeEntry(Messager & messager, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI which_setting, boost::property_tree::ptree & pt)
 {
 
+}
+
+void UIInputProjectSettings::SignalMessageBox(QString msg)
+{
+	QMessageBox msgBox;
+	msgBox.setText( msg );
+	msgBox.exec();
 }

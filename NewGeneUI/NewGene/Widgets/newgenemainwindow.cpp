@@ -79,6 +79,9 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 
 NewGeneMainWindow::~NewGeneMainWindow()
 {
+
+	settingsManagerUI().globalSettings().EndLoopAndBackgroundPool();
+
 	NewGeneWidget::theMainWindow = nullptr;
 	delete ui;
 }
@@ -102,6 +105,8 @@ void NewGeneMainWindow::doInitialize()
 {
 
 	UIMessager messager;
+
+	settingsManagerUI().globalSettings().InitializeEventLoop(&settingsManagerUI().globalSettings());
 
 	// Load global settings in main thread
 	settingsManagerUI().globalSettings().WriteSettingsToFile(messager); // Write any defaults back to disk, along with values just read from disk

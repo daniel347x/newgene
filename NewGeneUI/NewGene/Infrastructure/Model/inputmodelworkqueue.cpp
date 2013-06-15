@@ -14,6 +14,7 @@ UIInputModel * InputModelWorkQueue::get()
 
 void InputModelWorkQueue::TestSlot()
 {
+	emit SignalMessageBox("Input model's \"TestSlot()\" successfully called and handled.");
 }
 
 void InputModelWorkQueue::SetConnections()

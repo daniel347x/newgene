@@ -49,12 +49,12 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		QObject * GetProjectSettingsConnector()
 		{
-			return nullptr;
+			return projectSettings().getConnector();
 		}
 
 		QObject * GetModelSettingsConnector()
 		{
-			return nullptr;
+			return modelSettings().getConnector();
 		}
 
 		QObject * GetModelConnector()
@@ -69,9 +69,9 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		}
 
 		// TODO: Test for validity
-		UI_PROJECT_SETTINGS_CLASS & modelSettings()
+		UI_MODEL_SETTINGS_CLASS & modelSettings()
 		{
-			return backend().modelSettings();
+			return *_model_settings;
 		}
 
 		// TODO: Test for validity

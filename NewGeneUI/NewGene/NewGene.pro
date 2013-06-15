@@ -92,7 +92,17 @@ SOURCES += main.cpp\
     Infrastructure/Model/Base/inputmodelworkqueue_base.cpp \
     Infrastructure/Model/Base/outputmodelworkqueue_base.cpp \
     Infrastructure/Model/inputmodelworkqueue.cpp \
-    Infrastructure/Model/outputmodelworkqueue.cpp
+    Infrastructure/Model/outputmodelworkqueue.cpp \
+    Infrastructure/Settings/Base/inputprojectsettingsworkqueue_base.cpp \
+    Infrastructure/Settings/Base/outputprojectsettingsworkqueue_base.cpp \
+    Infrastructure/Settings/Base/globalsettingsworkqueue_base.cpp \
+    Infrastructure/Settings/Base/inputmodelsettingsworkqueue_base.cpp \
+    Infrastructure/Settings/Base/outputmodelsettingsworkqueue_base.cpp \
+    Infrastructure/Settings/globalsettingsworkqueue.cpp \
+    Infrastructure/Settings/inputmodelsettingsworkqueue.cpp \
+    Infrastructure/Settings/outputmodelsettingsworkqueue.cpp \
+    Infrastructure/Settings/inputprojectsettingsworkqueue.cpp \
+    Infrastructure/Settings/outputprojectsettingsworkqueue.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -173,7 +183,17 @@ HEADERS  += Widgets/newgenemainwindow.h \
     Infrastructure/Model/Base/inputmodelworkqueue_base.h \
     Infrastructure/Model/Base/outputmodelworkqueue_base.h \
     Infrastructure/Model/inputmodelworkqueue.h \
-    Infrastructure/Model/outputmodelworkqueue.h
+    Infrastructure/Model/outputmodelworkqueue.h \
+    Infrastructure/Settings/Base/inputprojectsettingsworkqueue_base.h \
+    Infrastructure/Settings/Base/outputprojectsettingsworkqueue_base.h \
+    Infrastructure/Settings/Base/globalsettingsworkqueue_base.h \
+    Infrastructure/Settings/Base/inputmodelsettingsworkqueue_base.h \
+    Infrastructure/Settings/Base/outputmodelsettingsworkqueue_base.h \
+    Infrastructure/Settings/globalsettingsworkqueue.h \
+    Infrastructure/Settings/inputmodelsettingsworkqueue.h \
+    Infrastructure/Settings/outputmodelsettingsworkqueue.h \
+    Infrastructure/Settings/inputprojectsettingsworkqueue.h \
+    Infrastructure/Settings/outputprojectsettingsworkqueue.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
