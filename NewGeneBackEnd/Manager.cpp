@@ -41,6 +41,14 @@ namespace MANAGER_DESCRIPTION_NAMESPACE
 		{
 			return "UIDataManager";
 		}
+		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_ACTION)
+		{
+			return "UIActionManager";
+		}
+		else if (which_manager == MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL_ACTION)
+		{
+			return "ModelActionManager";
+		}
 		return std::string();
 	}
 

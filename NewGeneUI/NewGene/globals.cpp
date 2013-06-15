@@ -9,6 +9,8 @@
 #include "uitriggermanager.h"
 #include "uithreadmanager.h"
 #include "uiuidatamanager.h"
+#include "uiuiactionmanager.h"
+#include "uimodelactionmanager.h"
 
 NewGeneMainWindow * theMainWindow = NULL;
 
@@ -64,4 +66,14 @@ UIThreadManager & threadManagerUI()
 UIUIDataManager & uidataManagerUI()
 {
 	return get_a_ui_manager<UIUIDataManager>();
+}
+
+UIUIActionManager & uiactionManagerUI()
+{
+	return get_a_ui_manager<UIUIActionManager>();
+}
+
+UIModelActionManager & modelactionManagerUI()
+{
+	return get_a_ui_manager<UIModelActionManager>();
 }

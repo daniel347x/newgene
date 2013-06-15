@@ -103,7 +103,9 @@ SOURCES += main.cpp\
 	Infrastructure/Settings/outputmodelsettingsworkqueue.cpp \
 	Infrastructure/Settings/inputprojectsettingsworkqueue.cpp \
 	Infrastructure/Settings/outputprojectsettingsworkqueue.cpp \
-	Infrastructure/UIData/uiuidatamanager.cpp
+	Infrastructure/UIData/uiuidatamanager.cpp \
+	Infrastructure/UIAction/uiuiactionmanager.cpp \
+	Infrastructure/ModelAction/uimodelactionmanager.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -195,7 +197,9 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/Settings/outputmodelsettingsworkqueue.h \
 	Infrastructure/Settings/inputprojectsettingsworkqueue.h \
 	Infrastructure/Settings/outputprojectsettingsworkqueue.h \
-	Infrastructure/UIData/uiuidatamanager.h
+	Infrastructure/UIData/uiuidatamanager.h \
+	Infrastructure/UIAction/uiuiactionmanager.h \
+	Infrastructure/ModelAction/uimodelactionmanager.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -244,6 +248,8 @@ INCLUDEPATH += $$PWD/Infrastructure/Logging
 INCLUDEPATH += $$PWD/Infrastructure/Triggers
 INCLUDEPATH += $$PWD/Infrastructure/Threads
 INCLUDEPATH += $$PWD/Infrastructure/UIData
+INCLUDEPATH += $$PWD/Infrastructure/UIAction
+INCLUDEPATH += $$PWD/Infrastructure/ModelAction
 INCLUDEPATH += $$PWD/Infrastructure/Utility
 INCLUDEPATH += $(BOOST_ROOT)
 

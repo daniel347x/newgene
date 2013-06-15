@@ -19,6 +19,8 @@ class StatusManager;
 class TriggerManager;
 class ThreadManager;
 class UIDataManager;
+class UIActionManager;
+class ModelActionManager;
 
 ProjectManager & projectManager();
 SettingsManager & settingsManager();
@@ -29,5 +31,7 @@ StatusManager & statusManager();
 TriggerManager & triggerManager();
 ThreadManager & threadManager();
 UIDataManager & uidataManager();
+UIActionManager & uiactionManager();
+ModelActionManager & modelactionManager();
 
 #endif

@@ -79,6 +79,7 @@
     <ClInclude Include="Logging\LoggingManager.h" />
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Messager\Messager.h" />
+    <ClInclude Include="ModelAction\ModelActionManager.h" />
     <ClInclude Include="Model\InputModel.h" />
     <ClInclude Include="Model\Model.h" />
     <ClInclude Include="Model\ModelManager.h" />
@@ -110,6 +111,7 @@
     <ClInclude Include="Threads\WorkerThread.h" />
     <ClInclude Include="Threads\WorkItem.h" />
     <ClInclude Include="Triggers\TriggerManager.h" />
+    <ClInclude Include="UIAction\UIActionManager.h" />
     <ClInclude Include="UIData\UIDataManager.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
   </ItemGroup>
@@ -119,6 +121,7 @@
     <ClCompile Include="Logging\LoggingManager.cpp" />
     <ClCompile Include="Manager.cpp" />
     <ClCompile Include="Messager\Messager.cpp" />
+    <ClCompile Include="ModelAction\ModelActionManager.cpp" />
     <ClCompile Include="Model\InputModel.cpp" />
     <ClCompile Include="Model\Model.cpp" />
     <ClCompile Include="Model\ModelManager.cpp" />
@@ -150,6 +153,7 @@
     <ClCompile Include="Threads\WorkerThread.cpp" />
     <ClCompile Include="Threads\WorkItem.cpp" />
     <ClCompile Include="Triggers\TriggerManager.cpp" />
+    <ClCompile Include="UIAction\UIActionManager.cpp" />
     <ClCompile Include="UIData\UIDataManager.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
   </ItemGroup>

@@ -6,9 +6,6 @@
 #include "../Settings/ModelSettings.h"
 #include "../Threads/ThreadPool.h"
 #include "../Threads/WorkerThread.h"
-#ifndef Q_MOC_RUN
-#	include <boost/asio/io_service.hpp>
-#endif
 
 template<typename PROJECT_SETTINGS_ENUM, typename BACKEND_PROJECT_SETTING_CLASS, typename MODEL_SETTINGS_ENUM, typename MODEL_SETTING_CLASS, typename MODEL_CLASS>
 class Project
@@ -24,8 +21,6 @@ class Project
 			: _project_settings(project_settings)
 			, _model_settings(model_settings)
 			, _model(model)
-			, work(work_service)
-			, worker_pool_backend(work_service, number_worker_threads)
 		{
 
 		}
@@ -60,10 +55,6 @@ class Project
 		std::shared_ptr<ProjectSettings<PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS>> const _project_settings;
 		std::shared_ptr<ModelSettings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>> const _model_settings;
 		std::shared_ptr<MODEL_CLASS> const _model;
-
-		boost::asio::io_service work_service;
-		boost::asio::io_service::work work;
-		ThreadPool<WorkerThread> worker_pool_backend;
 
 };
 

@@ -23,6 +23,8 @@ class UIStatusManager;
 class UITriggerManager;
 class UIThreadManager;
 class UIUIDataManager;
+class UIUIActionManager;
+class UIModelActionManager;
 
 extern NewGeneMainWindow * theMainWindow;
 
@@ -35,5 +37,7 @@ UIStatusManager & statusManagerUI();
 UITriggerManager & triggerManagerUI();
 UIThreadManager & threadManagerUI();
 UIUIDataManager & uidataManagerUI();
+UIUIActionManager & uiactionManagerUI();
+UIModelActionManager & modelactionManagerUI();
 
 #endif // GLOBALS_H

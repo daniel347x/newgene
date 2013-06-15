@@ -8,6 +8,8 @@
 #include "Triggers/TriggerManager.h"
 #include "Threads/ThreadManager.h"
 #include "UIData/UIDataManager.h"
+#include "UIAction/UIActionManager.h"
+#include "ModelAction/ModelActionManager.h"
 
 template<typename MANAGER_CLASS>
 MANAGER_CLASS & get_a_manager()
@@ -58,4 +60,14 @@ ThreadManager & threadManager()
 UIDataManager & uidataManager()
 {
 	return get_a_manager<UIDataManager>();
+}
+
+UIActionManager & uiactionManager()
+{
+	return get_a_manager<UIActionManager>();
+}
+
+ModelActionManager & modelactionManager()
+{
+	return get_a_manager<ModelActionManager>();
 }

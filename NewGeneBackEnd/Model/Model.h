@@ -9,7 +9,6 @@
 #ifndef Q_MOC_RUN
 #	include <boost/property_tree/ptree.hpp>
 #	include <boost/property_tree/xml_parser.hpp>
-#	include <boost/asio/io_service.hpp>
 #endif
 #include "../Threads/ThreadPool.h"
 #include "../Threads/WorkerThread.h"
@@ -28,8 +27,6 @@ class Model
 
 		Model(Messager & messager, boost::filesystem::path const path_to_model_database)
 			: _path_to_model_database(path_to_model_database)
-			, work(work_service)
-			, worker_pool_model(work_service, number_worker_threads)
 		{
 
 		}
@@ -37,10 +34,6 @@ class Model
 	protected:
 
 		boost::filesystem::path _path_to_model_database;
-
-		boost::asio::io_service work_service;
-		boost::asio::io_service::work work;
-		ThreadPool<WorkerThread> worker_pool_model;
 
 };
 

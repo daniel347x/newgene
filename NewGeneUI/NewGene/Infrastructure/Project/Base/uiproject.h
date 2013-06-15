@@ -6,7 +6,6 @@
 #include <memory>
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>
-#	include <boost/asio/io_service.hpp>
 #endif
 #include "../../../NewGeneBackEnd/Project/Project.h"
 #include "../Model/Base/uimodel.h"

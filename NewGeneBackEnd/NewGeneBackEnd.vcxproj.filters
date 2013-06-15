@@ -79,6 +79,18 @@
     <Filter Include="Source Files\UIData">
       <UniqueIdentifier>{9ba27cf2-69e5-4b95-ac5b-4ce65730516b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\UIAction">
+      <UniqueIdentifier>{f377155c-41d9-4f8b-b176-75cd60615275}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UIAction">
+      <UniqueIdentifier>{417b8480-26b2-4c25-8b15-b1712dda5f01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\ModelAction">
+      <UniqueIdentifier>{e13c9061-10a8-4c8b-9d53-3201836e71c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ModelAction">
+      <UniqueIdentifier>{5684c7b2-d3ec-4c0a-b6be-4a07bf9731f7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -198,6 +210,12 @@
     <ClInclude Include="UIData\UIDataManager.h">
       <Filter>Header Files\UIData</Filter>
     </ClInclude>
+    <ClInclude Include="UIAction\UIActionManager.h">
+      <Filter>Header Files\UIAction</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelAction\ModelActionManager.h">
+      <Filter>Header Files\ModelAction</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -313,6 +331,12 @@
     </ClCompile>
     <ClCompile Include="UIData\UIDataManager.cpp">
       <Filter>Source Files\UIData</Filter>
+    </ClCompile>
+    <ClCompile Include="UIAction\UIActionManager.cpp">
+      <Filter>Source Files\UIAction</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelAction\ModelActionManager.cpp">
+      <Filter>Source Files\ModelAction</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
