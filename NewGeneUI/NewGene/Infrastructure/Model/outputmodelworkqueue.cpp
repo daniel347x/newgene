@@ -2,6 +2,7 @@
 #include "uioutputmodel.h"
 #include "globals.h"
 #include "uiprojectmanager.h"
+#include "uimessagersingleshot.h"
 
 OutputModelWorkQueue::OutputModelWorkQueue(bool isPool2_, QObject * parent)
 	: ModelWorkQueue<UI_OUTPUT_MODEL>(isPool2_, parent)
@@ -22,13 +23,29 @@ void OutputModelWorkQueue::TestSlot()
 void OutputModelWorkQueue::SetConnections()
 {
 	connect(this, SIGNAL(SignalMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
-	connect(&projectManagerUI(), SIGNAL(LoadFromDatabase(UI_OUTPUT_MODEL_PTR)), this, SLOT(LoadFromDatabase(UI_OUTPUT_MODEL_PTR)));
+
+	if (IsDatabasePool())
+	{
+		connect(&projectManagerUI(), SIGNAL(LoadFromDatabase(UI_OUTPUT_MODEL_PTR)), this, SLOT(LoadFromDatabase(UI_OUTPUT_MODEL_PTR)));
+		connect(this, SIGNAL(DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR)), static_cast<QObject *>(&projectManagerUI()), SLOT(DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR)));
+	}
 }
 
 void OutputModelWorkQueue::LoadFromDatabase(UI_OUTPUT_MODEL_PTR model)
 {
-	if (model == get())
+	UIMessagerSingleShot messager;
+	if (!get()->is_model_equivalent(messager.get(), model))
 	{
-		//emit SignalMessageBox("Output model's \"LoadFromDatabase()\" successfully called and handled.");
+		return;
 	}
+
+	emit SignalMessageBox("Output model's \"LoadFromDatabase()\" successfully called and handled.");
+
+	// Lock model and load all from database here
+	{
+
+		get()->loaded(true);
+	}
+
+	emit DoneLoadingFromDatabase(model);
 }

@@ -34,8 +34,10 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		void loaded(bool const loaded__)
 		{
-			loaded_.store(loaded_);
+			loaded_.store(loaded__);
 		}
+
+		virtual void UpdateConnections() {}
 
 	protected:
 

@@ -19,6 +19,7 @@ class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MOD
 				CreateImplementation(messager, path_to_settings);
 			}
 
+		void UpdateConnections();
 
 	signals:
 

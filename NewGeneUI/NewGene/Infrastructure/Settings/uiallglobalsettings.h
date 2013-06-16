@@ -33,6 +33,7 @@ class UIAllGlobalSettings : public QObject, public UIAllSettings<UI_GLOBAL_SETTI
 
 		UIAllGlobalSettings(UIMessager & messager, boost::filesystem::path const path_to_settings = boost::filesystem::path(), QObject * parent = NULL);
 
+		void UpdateConnections();
 
 	signals:
 

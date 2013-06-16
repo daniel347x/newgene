@@ -1,4 +1,6 @@
 #include "uiinputmodel.h"
+#include "globals.h"
+#include "uiprojectmanager.h"
 #include <QMessageBox>
 
 void UIInputModel::SignalMessageBox(STD_STRING msg)
@@ -44,4 +46,8 @@ bool UIInputModel::is_model_equivalent(UIMessager & messager, UIInputModel * mod
 	}
 
 	return true;
+}
+
+void UIInputModel::UpdateConnections()
+{
 }

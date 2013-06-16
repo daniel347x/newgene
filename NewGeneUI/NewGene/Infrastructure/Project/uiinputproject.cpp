@@ -44,3 +44,8 @@ bool UIInputProject::is_model_equivalent(UIMessager & messager, UIInputModel * m
 
 	return true;
 }
+
+void UIInputProject::UpdateConnections()
+{
+
+}

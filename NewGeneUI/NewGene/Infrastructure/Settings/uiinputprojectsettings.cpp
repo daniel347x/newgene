@@ -145,3 +145,8 @@ void UIInputProjectSettings::SignalMessageBox(STD_STRING msg)
 	msgBox.setText( msg.c_str() );
 	msgBox.exec();
 }
+
+void UIInputProjectSettings::UpdateConnections()
+{
+
+}

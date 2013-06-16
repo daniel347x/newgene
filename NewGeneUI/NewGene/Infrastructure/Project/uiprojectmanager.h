@@ -175,13 +175,17 @@ class UIProjectManager : public QObject,
 		UIOutputProject * getActiveUIOutputProject();
 
 	signals:
+
 		void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void LoadFromDatabase(UI_INPUT_MODEL_PTR);
 		void LoadFromDatabase(UI_OUTPUT_MODEL_PTR);
 
 	public slots:
+
 		void SignalMessageBox(STD_STRING);
+		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR);
+		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR);
 
 	private:
 

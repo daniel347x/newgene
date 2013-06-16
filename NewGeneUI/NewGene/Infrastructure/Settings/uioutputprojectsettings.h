@@ -52,6 +52,8 @@ class UIOutputProjectSettings : public QObject, public UIAllProjectSettings<Outp
 			uisettings.WritePtreeToFile(messager, pt);
 		}
 
+		void UpdateConnections();
+
 	protected:
 
 		WorkQueueManager<UI_OUTPUT_PROJECT_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)

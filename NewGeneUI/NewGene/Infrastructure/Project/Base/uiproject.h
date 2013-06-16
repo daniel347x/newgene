@@ -83,6 +83,8 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			return *_backend_project;
 		}
 
+		virtual void UpdateConnections() {}
+
 	protected:
 
 		// The order of initialization is important.

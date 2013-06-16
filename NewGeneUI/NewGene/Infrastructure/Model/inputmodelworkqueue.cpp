@@ -27,6 +27,7 @@ void InputModelWorkQueue::SetConnections()
 	if (IsDatabasePool())
 	{
 		connect(&projectManagerUI(), SIGNAL(LoadFromDatabase(UI_INPUT_MODEL_PTR)), this, SLOT(LoadFromDatabase(UI_INPUT_MODEL_PTR)));
+		connect(this, SIGNAL(DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR)), static_cast<QObject *>(&projectManagerUI()), SLOT(DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR)));
 	}
 }
 
@@ -46,6 +47,6 @@ void InputModelWorkQueue::LoadFromDatabase(UI_INPUT_MODEL_PTR model)
 		get()->loaded(true);
 	}
 
-	// emit signal to trigger loading of output model here
+	emit DoneLoadingFromDatabase(model);
 }
 

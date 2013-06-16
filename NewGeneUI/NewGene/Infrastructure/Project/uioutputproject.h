@@ -27,6 +27,8 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 
 		}
 
+		void UpdateConnections();
+
 	signals:
 
 	public slots:

@@ -133,6 +133,11 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 			project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
 			project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
 
+			project_settings->UpdateConnections();
+			model_settings->UpdateConnections();
+			project_model->UpdateConnections();
+			project->UpdateConnections();
+
 			emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
 
 			emit LoadFromDatabase(&project->model());
@@ -206,6 +211,11 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 			project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
 			project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
 
+			project_settings->UpdateConnections();
+			model_settings->UpdateConnections();
+			project_model->UpdateConnections();
+			project->UpdateConnections();
+
 			emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 
 		}
@@ -263,4 +273,48 @@ void UIProjectManager::SignalMessageBox(STD_STRING msg)
 	QMessageBox msgBox;
 	msgBox.setText( msg.c_str() );
 	msgBox.exec();
+}
+
+void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_)
+{
+
+	UIMessagerSingleShot messager;
+
+	if (!getActiveUIInputProject()->is_model_equivalent(messager.get(), model_))
+	{
+		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODELS_DO_NOT_MATCH, "Input model has completed loading from database, but does not match current input model."));
+		return;
+	}
+
+	if (!model_->loaded())
+	{
+		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_NOT_LOADED, "Input model has completed loading from database, but is marked as not loaded."));
+		return;
+	}
+
+	SignalMessageBox("Input model is fully loaded.  Ready to refresh all widgets.");
+
+	emit LoadFromDatabase(&getActiveUIOutputProject()->model());
+
+}
+
+void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_)
+{
+
+	UIMessagerSingleShot messager;
+
+	if (!getActiveUIOutputProject()->is_model_equivalent(messager.get(), model_))
+	{
+		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODELS_DO_NOT_MATCH, "Output model has completed loading from database, but does not match current output model."));
+		return;
+	}
+
+	if (!model_->loaded())
+	{
+		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_NOT_LOADED, "Output model has completed loading from database, but is marked as not loaded."));
+		return;
+	}
+
+	SignalMessageBox("Both input and output models are fully loaded.  Ready to refresh all widgets.");
+
 }

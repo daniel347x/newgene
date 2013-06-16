@@ -19,6 +19,7 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 			CreateImplementation(messager, backend_model_instance);
 		}
 
+		void UpdateConnections();
 
 	protected:
 
@@ -101,6 +102,11 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 
 		bool is_model_equivalent(UIMessager & messager, UIInputModel * model);
 
+		QObject * getConnectorDatabase()
+		{
+			return getConnectorTwo();
+		}
+
 	protected:
 
 		WorkQueueManager<UI_INPUT_MODEL> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
@@ -111,7 +117,12 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 			return work_queue;
 		}
 
+	signals:
+
+		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR);
+
 	public slots:
+
 		void SignalMessageBox(STD_STRING);
 
 };

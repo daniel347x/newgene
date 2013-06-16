@@ -25,6 +25,8 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 
 		}
 
+		void UpdateConnections();
+
 	signals:
 
 	public slots:

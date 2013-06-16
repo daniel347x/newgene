@@ -7,3 +7,8 @@ void UIOutputModelSettings::SignalMessageBox(STD_STRING msg)
 	msgBox.setText( msg.c_str() );
 	msgBox.exec();
 }
+
+void UIOutputModelSettings::UpdateConnections()
+{
+
+}

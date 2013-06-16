@@ -19,6 +19,7 @@ class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_M
 				CreateImplementation(messager, path_to_settings);
 			}
 
+		void UpdateConnections();
 
 	signals:
 
