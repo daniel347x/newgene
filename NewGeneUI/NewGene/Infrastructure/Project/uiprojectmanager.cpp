@@ -17,11 +17,14 @@
 UIProjectManager::UIProjectManager( QObject * parent )
 	: QObject(parent)
 	, UIManager()
+	, EventLoopThreadManager<UI_PROJECT_MANAGER>(number_worker_threads)
 {
 
 	// *************************************************************************
 	// All Managers are instantiated AFTER the application event loop is running
 	// *************************************************************************
+
+	InitializeEventLoop(this);
 
 }
 
@@ -61,6 +64,8 @@ UIProjectManager::~UIProjectManager()
 		});
 
 	});
+
+	EndLoopAndBackgroundPool();
 
 }
 
@@ -255,4 +260,11 @@ UIOutputProject * UIProjectManager::getActiveUIOutputProject()
 	UIOutputProject * project = static_cast<UIOutputProject *>(tab.second.get());
 
 	return project;
+}
+
+void UIProjectManager::SignalMessageBox(QString msg)
+{
+	QMessageBox msgBox;
+	msgBox.setText( msg );
+	msgBox.exec();
 }

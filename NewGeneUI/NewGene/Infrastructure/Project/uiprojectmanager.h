@@ -11,6 +11,8 @@
 #include "Infrastructure/uimanager.h"
 #include "Infrastructure/Messager/uimessager.h"
 #include "..\..\..\NewGeneBackEnd\Project\ProjectManager.h"
+#include "eventloopthreadmanager.h"
+#include "uiprojectmanagerworkqueue.h"
 #include <memory>
 #include <vector>
 #include <map>
@@ -18,10 +20,14 @@
 
 class NewGeneMainWindow;
 
-class UIProjectManager : public QObject, public UIManager<UIProjectManager, ProjectManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT>
+class UIProjectManager : public QObject,
+						 public UIManager<UIProjectManager, ProjectManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT>,
+						 public EventLoopThreadManager<UI_PROJECT_MANAGER>
 {
 
 		Q_OBJECT
+
+		static int const number_worker_threads = 1;
 
 	public:
 
@@ -174,20 +180,31 @@ class UIProjectManager : public QObject, public UIManager<UIProjectManager, Proj
 		void LoadModel(void *);
 
 	public slots:
+		void SignalMessageBox(QString msg);
 
 	private:
 
-	typedef ProjectTabs<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>::type InputProjectTabs;
-	typedef ProjectTabs<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>::type OutputProjectTabs;
+		typedef ProjectTabs<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>::type InputProjectTabs;
+		typedef ProjectTabs<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>::type OutputProjectTabs;
 
-	typedef ProjectTab<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>::type InputProjectTab;
-	typedef ProjectTab<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>::type OutputProjectTab;
+		typedef ProjectTab<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>::type InputProjectTab;
+		typedef ProjectTab<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>::type OutputProjectTab;
 
-	typedef Tabs<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>::type InputTabs;
-	typedef Tabs<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>::type OutputTabs;
+		typedef Tabs<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>::type InputTabs;
+		typedef Tabs<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>::type OutputTabs;
 
-	InputTabs input_tabs;
-	OutputTabs output_tabs;
+		InputTabs input_tabs;
+		OutputTabs output_tabs;
+
+	protected:
+
+		WorkQueueManager<UI_PROJECT_MANAGER> * InstantiateWorkQueue(void * ui_object)
+		{
+			UIProjectManagerWorkQueue * work_queue = new UIProjectManagerWorkQueue();
+			work_queue->SetUIObject(reinterpret_cast<UIProjectManager*>(ui_object));
+			work_queue->SetConnections();
+			return work_queue;
+		}
 
 };
 
