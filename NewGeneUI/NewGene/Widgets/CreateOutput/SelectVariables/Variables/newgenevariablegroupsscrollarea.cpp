@@ -58,9 +58,10 @@ void NewGeneVariableGroupsScrollArea::TestSlot()
 	emit RefreshWidget(VARIABLE_GROUPS_SCROLL_AREA);
 }
 
-void NewGeneVariableGroupsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)
+void NewGeneVariableGroupsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA widget_data)
 {
-	boost::format msg( "Made it BACK to the scroll area widget with refresh data!!" );
+	boost::format msg( "Made it BACK to the scroll area widget with refresh data!! Here's the data: %1%" );
+	msg % widget_data.n;
 	QMessageBox msgBox;
 	msgBox.setText( msg.str().c_str() );
 	msgBox.exec();

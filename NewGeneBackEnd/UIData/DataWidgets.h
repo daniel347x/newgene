@@ -22,7 +22,12 @@ class WidgetDataItem
 template<>
 class WidgetDataItem<VARIABLE_GROUPS_SCROLL_AREA>
 {
-
+public:
+	WidgetDataItem<VARIABLE_GROUPS_SCROLL_AREA>()
+		: n(0)
+	{
+	}
+	int n;
 };
 typedef WidgetDataItem<VARIABLE_GROUPS_SCROLL_AREA> WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA;
 
