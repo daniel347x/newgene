@@ -1,4 +1,7 @@
 #include "newgeneapplication.h"
+#include "./Infrastructure/UIData/widgetdatarefresh.h"
+
+Q_DECLARE_METATYPE(DATA_WIDGETS);
 
 NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QApplication( argc, argv )
@@ -9,6 +12,8 @@ bool NewGeneApplication::notify( QObject * receiver, QEvent * e )
 {
 
 	bool returnVal = false;
+
+	qRegisterMetaType<DATA_WIDGETS>();
 
 	try
 	{

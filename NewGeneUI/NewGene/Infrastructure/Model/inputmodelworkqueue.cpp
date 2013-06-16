@@ -29,7 +29,7 @@ void InputModelWorkQueue::LoadModel(void * model)
 {
 	if (model == get())
 	{
-		emit SignalMessageBox("Input model's \"LoadModel()\" successfully called and handled.");
+		//emit SignalMessageBox("Input model's \"LoadModel()\" successfully called and handled.");
 	}
 }
 

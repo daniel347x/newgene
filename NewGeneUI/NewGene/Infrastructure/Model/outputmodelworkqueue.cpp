@@ -29,6 +29,6 @@ void OutputModelWorkQueue::LoadModel(void * model)
 {
 	if (model == get())
 	{
-		emit SignalMessageBox("Output model's \"LoadModel()\" successfully called and handled.");
+		//emit SignalMessageBox("Output model's \"LoadModel()\" successfully called and handled.");
 	}
 }

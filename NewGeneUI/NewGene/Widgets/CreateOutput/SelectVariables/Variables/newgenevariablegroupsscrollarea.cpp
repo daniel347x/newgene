@@ -39,7 +39,6 @@ void NewGeneVariableGroupsScrollArea::UpdateInputConnections(UIProjectManager::U
 	//connect(this, SIGNAL(TestSignal()), inp->GetProjectSettingsConnector(), SLOT(TestSlot()));
 	//connect(this, SIGNAL(TestSignal()), settingsManagerUI().globalSettings().getConnector(), SLOT(TestSlot()));
 	//connect(this, SIGNAL(TestSignal()), projectManagerUI().getConnector(), SLOT(TestSlot()));
-	QTimer::singleShot( 0, this, SLOT(TestSlot()) );
 }
 
 void NewGeneVariableGroupsScrollArea::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
@@ -50,6 +49,7 @@ void NewGeneVariableGroupsScrollArea::UpdateOutputConnections(UIProjectManager::
 	//connect(this, SIGNAL(TestSignal()), outp->GetModelSettingsConnector(), SLOT(TestSlot()));
 	//connect(this, SIGNAL(TestSignal()), outp->GetProjectSettingsConnector(), SLOT(TestSlot()));
 	//QTimer::singleShot( 0, this, SLOT(TestSlot()) );
+	QTimer::singleShot( 0, this, SLOT(TestSlot()) );
 }
 
 void NewGeneVariableGroupsScrollArea::TestSlot()
