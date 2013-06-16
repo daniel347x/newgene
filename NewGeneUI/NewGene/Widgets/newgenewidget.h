@@ -17,8 +17,8 @@ class NewGeneWidget
 
 		NewGeneMainWindow & mainWindow();
 
-		virtual void PrepareInputWidget();
-		virtual void PrepareOutputWidget();
+		virtual void PrepareInputWidget(DATA_WIDGETS widget_type_);
+		virtual void PrepareOutputWidget(DATA_WIDGETS widget_type_);
 
 	protected:
 
@@ -44,6 +44,7 @@ class NewGeneWidget
 		QWidget * self;
 		UIInputProject * inp;
 		UIOutputProject * outp;
+		DATA_WIDGETS widget_type;
 		static NewGeneMainWindow * theMainWindow;
 
 };

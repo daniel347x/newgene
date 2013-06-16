@@ -10,14 +10,14 @@
 bool UIMessager::ManagersInitialized = false;
 
 UIMessager::UIMessager(QObject *parent) :
-    QObject(parent)
+	QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , singleShotActive(false)
 {
-    if (ManagersInitialized)
-    {
-        QObject::connect(this, SIGNAL(PostStatus(STD_STRING, int, bool)), &statusManagerUI(), SLOT(ReceiveStatus(STD_STRING, int, bool)));
-    }
+	if (ManagersInitialized)
+	{
+		QObject::connect(this, SIGNAL(PostStatus(STD_STRING, int, bool)), &statusManagerUI(), SLOT(ReceiveStatus(STD_STRING, int, bool)));
+	}
 }
 
 UIMessager::~UIMessager()
@@ -102,4 +102,9 @@ void UIMessagerInputProject::ShowMessageBox(std::string msg)
 void UIMessagerOutputProject::ShowMessageBox(std::string msg)
 {
 	emit DisplayMessageBox(msg);
+}
+
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData)
+{
+	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }

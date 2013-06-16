@@ -5,6 +5,8 @@
 #include <QObject>
 #include "../../../../NewGeneBackEnd/UIData/DataWidgets.h"
 
+Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
+
 enum WORK_QUEUE_THREAD_LOOP_CLASS_ENUM
 {
 	  UI_INPUT_PROJECT
@@ -28,10 +30,13 @@ class WorkQueueManagerBase : public QObject
 
 		explicit WorkQueueManagerBase(bool isPool2_ = false, QObject *parent = 0);
 
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}
+
 	signals:
 		// Signals for ALL specializations of WorkQueueManager go here,
 		// and are NOT (and don't need to be) defined as virtual
 		void SignalMessageBox(STD_STRING);
+		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 
 	public slots:
 		// Slots for ALL specializations go here,

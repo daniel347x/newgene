@@ -20,6 +20,10 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		void SetConnections();
 
 		void EmitMessage(std::string msg);
+		void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData)
+		{
+			emit WidgetDataRefresh(widgetData);
+		}
 
 		UIOutputProject * get();
 

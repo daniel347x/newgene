@@ -8,4 +8,6 @@ void UIDataManager::DoRefreshInputWidget(Messager & messager, DATA_WIDGETS widge
 void UIDataManager::DoRefreshOutputWidget(Messager & messager, DATA_WIDGETS widget)
 {
 	messager.ShowMessageBox("Successfully called a message box from within the BACKEND worker thread!");
+	WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA test_response;
+	messager.EmitOutputWidgetDataRefresh(test_response);
 }

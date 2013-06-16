@@ -128,6 +128,8 @@ class UIMessagerOutputProject : public UIMessager
 
 		void ShowMessageBox(std::string);
 
+		void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData);
+
 	protected:
 
 		UIOutputProject * outp;

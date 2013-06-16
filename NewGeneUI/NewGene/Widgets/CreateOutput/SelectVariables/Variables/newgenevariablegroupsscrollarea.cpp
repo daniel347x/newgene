@@ -6,7 +6,7 @@ NewGeneVariableGroupsScrollArea::NewGeneVariableGroupsScrollArea( QWidget * pare
 	NewGeneWidget( this ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 	ui( new Ui::NewGeneVariableGroupsScrollArea )
 {
-	PrepareOutputWidget();
+	PrepareOutputWidget(VARIABLE_GROUPS_SCROLL_AREA);
 	ui->setupUi( this );
 }
 
@@ -56,4 +56,12 @@ void NewGeneVariableGroupsScrollArea::TestSlot()
 {
 	//emit TestSignal();
 	emit RefreshWidget(VARIABLE_GROUPS_SCROLL_AREA);
+}
+
+void NewGeneVariableGroupsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)
+{
+	boost::format msg( "Made it BACK to the scroll area widget with refresh data!!" );
+	QMessageBox msgBox;
+	msgBox.setText( msg.str().c_str() );
+	msgBox.exec();
 }

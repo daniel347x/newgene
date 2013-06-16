@@ -56,6 +56,11 @@ class EventLoopThreadManager
 			return work_queue_manager.get();
 		}
 
+		WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * getQueueManagerTwo()
+		{
+			return work_queue_manager_2.get();
+		}
+
 		QThread & getQueueManagerThread()
 		{
 			return work_queue_manager_thread;

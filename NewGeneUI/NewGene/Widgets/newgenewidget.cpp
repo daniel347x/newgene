@@ -9,24 +9,27 @@ NewGeneWidget::NewGeneWidget( QWidget * self_ )
 	: self( self_ )
 	, inp(nullptr)
 	, outp(nullptr)
+	, widget_type(WIDGET_TYPE_NONE)
 {
 }
 
-void NewGeneWidget::PrepareInputWidget()
+void NewGeneWidget::PrepareInputWidget(DATA_WIDGETS widget_type_)
 {
 	if (self == nullptr)
 	{
 		return;
 	}
+	widget_type = widget_type_;
 	self->connect(&projectManagerUI(), SIGNAL(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
 }
 
-void NewGeneWidget::PrepareOutputWidget()
+void NewGeneWidget::PrepareOutputWidget(DATA_WIDGETS widget_type_)
 {
 	if (self == nullptr)
 	{
 		return;
 	}
+	widget_type = widget_type_;
 	self->connect(&projectManagerUI(), SIGNAL(UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
 }
 
@@ -58,4 +61,5 @@ void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS
 {
 	outp = project;
 	self->connect(self, SIGNAL(RefreshWidget(DATA_WIDGETS)), outp->getConnector(), SLOT(RefreshWidget(DATA_WIDGETS)));
+	self->connect(outp->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)), self, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)));
 }

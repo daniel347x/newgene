@@ -5,6 +5,7 @@
 #include <set>
 #include <memory>
 #include <cstdint>
+#include "../UIData/DataWidgets.h"
 
 #ifndef Q_MOC_RUN
 #endif
@@ -136,6 +137,8 @@ class Messager
 		bool IsErrorCatastrophic();
 
 		virtual void ShowMessageBox(std::string) {}
+		
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}
 
 	protected:
 
