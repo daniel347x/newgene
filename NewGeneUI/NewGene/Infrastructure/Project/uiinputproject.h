@@ -34,6 +34,8 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 
 		UIMessagerInputProject messager;
 
+		bool is_model_equivalent(UIMessager & messager, UIInputModel * model);
+
 	protected:
 
 		WorkQueueManager<UI_INPUT_PROJECT> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)

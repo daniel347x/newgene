@@ -7,6 +7,7 @@ class UIMessagerSingleShot
 {
     public:
         UIMessagerSingleShot(UIMessager & messager_);
+        UIMessagerSingleShot();
         virtual ~UIMessagerSingleShot();
 
         UIMessager & get()
@@ -14,7 +15,13 @@ class UIMessagerSingleShot
             return messager;
         }
 
+    private:
+        std::unique_ptr<UIMessager> p_messager;
+
+        // order of initialization important; do not reorder
+    public:
         UIMessager & messager;
+
 };
 
 #endif // UIMESSAGERSINGLESHOT_H

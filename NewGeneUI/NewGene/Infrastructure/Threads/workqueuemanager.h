@@ -4,6 +4,7 @@
 #include "globals.h"
 #include <QObject>
 #include "../../../../NewGeneBackEnd/UIData/DataWidgets.h"
+#include "uimodelmanager.h"
 
 Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 
@@ -43,7 +44,8 @@ class WorkQueueManagerBase : public QObject
 		// and are all defined as virtual so that specializations of
 		// WorkQueueManager can override them
 		virtual void TestSlot() {}
-		virtual void LoadModel(void *) {};
+		virtual void LoadFromDatabase(UI_INPUT_MODEL_PTR) {};
+		virtual void LoadFromDatabase(UI_OUTPUT_MODEL_PTR) {};
 		virtual void RefreshWidget(DATA_WIDGETS) {};
 
 	public:

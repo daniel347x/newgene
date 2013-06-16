@@ -31,6 +31,11 @@ class Model
 
 		}
 
+		boost::filesystem::path getPathToDatabaseFile()
+		{
+			return _path_to_model_database;
+		}
+
 	protected:
 
 		boost::filesystem::path _path_to_model_database;

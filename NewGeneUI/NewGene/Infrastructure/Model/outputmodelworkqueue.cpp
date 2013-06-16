@@ -22,13 +22,13 @@ void OutputModelWorkQueue::TestSlot()
 void OutputModelWorkQueue::SetConnections()
 {
 	connect(this, SIGNAL(SignalMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
-	connect(&projectManagerUI(), SIGNAL(LoadModel(void*)), this, SLOT(LoadModel(void*)));
+	connect(&projectManagerUI(), SIGNAL(LoadFromDatabase(UI_OUTPUT_MODEL_PTR)), this, SLOT(LoadFromDatabase(UI_OUTPUT_MODEL_PTR)));
 }
 
-void OutputModelWorkQueue::LoadModel(void * model)
+void OutputModelWorkQueue::LoadFromDatabase(UI_OUTPUT_MODEL_PTR model)
 {
 	if (model == get())
 	{
-		//emit SignalMessageBox("Output model's \"LoadModel()\" successfully called and handled.");
+		//emit SignalMessageBox("Output model's \"LoadFromDatabase()\" successfully called and handled.");
 	}
 }

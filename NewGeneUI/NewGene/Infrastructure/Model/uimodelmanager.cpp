@@ -1,5 +1,10 @@
 #include "uimodelmanager.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "uiinputmodel.h"
+#include "uioutputmodel.h"
+
+Q_DECLARE_METATYPE(UI_INPUT_MODEL_PTR);
+Q_DECLARE_METATYPE(UI_OUTPUT_MODEL_PTR);
 
 UIModelManager::UIModelManager( QObject * parent )
 	: QObject(parent)
@@ -9,6 +14,9 @@ UIModelManager::UIModelManager( QObject * parent )
 	// *************************************************************************
 	// All Managers are instantiated AFTER the application event loop is running
 	// *************************************************************************
+
+	qRegisterMetaType<UI_INPUT_MODEL_PTR>();
+	qRegisterMetaType<UI_OUTPUT_MODEL_PTR>();
 
 }
 

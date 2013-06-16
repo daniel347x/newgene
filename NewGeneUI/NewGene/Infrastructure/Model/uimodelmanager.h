@@ -8,8 +8,10 @@
 class NewGeneMainWindow;
 
 class UIInputModel;
-
 class UIOutputModel;
+
+typedef UIInputModel * UI_INPUT_MODEL_PTR;
+typedef UIOutputModel * UI_OUTPUT_MODEL_PTR;
 
 class UIModelManager : public QObject, public UIManager<UIModelManager, ModelManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL>
 {

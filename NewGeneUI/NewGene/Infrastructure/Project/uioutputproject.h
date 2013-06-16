@@ -36,6 +36,8 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 
 		UIMessagerOutputProject messager;
 
+		bool is_model_equivalent(UIMessager & messager, UIOutputModel * model);
+
 	protected:
 
 		WorkQueueManager<UI_OUTPUT_PROJECT> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)

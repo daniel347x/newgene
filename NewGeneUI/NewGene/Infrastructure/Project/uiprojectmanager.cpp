@@ -7,12 +7,13 @@
 #include "uistatusmanager.h"
 #include "uiloggingmanager.h"
 #include "uiallglobalsettings_list.h"
-#include "../../../NewGeneBackEnd/Settings/GlobalSettings_list.h"
-#include "../../../NewGeneBackEnd/Settings/InputProjectSettings_list.h"
-#include "../../../NewGeneBackEnd/Settings/OutputProjectSettings_list.h"
-#include "../../../NewGeneBackEnd/Settings/InputModelSettings_list.h"
-#include "../../../NewGeneBackEnd/Settings/OutputModelSettings_list.h"
+#include "../../../../NewGeneBackEnd/Settings/GlobalSettings_list.h"
+#include "../../../../NewGeneBackEnd/Settings/InputProjectSettings_list.h"
+#include "../../../../NewGeneBackEnd/Settings/OutputProjectSettings_list.h"
+#include "../../../../NewGeneBackEnd/Settings/InputModelSettings_list.h"
+#include "../../../../NewGeneBackEnd/Settings/OutputModelSettings_list.h"
 #include "../newgenewidget.h"
+#include "uimessagersingleshot.h"
 
 UIProjectManager::UIProjectManager( QObject * parent )
 	: QObject(parent)
@@ -72,6 +73,7 @@ UIProjectManager::~UIProjectManager()
 void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 {
 	UIMessager messager;
+	UIMessagerSingleShot messager_(messager);
 	InputProjectFilesList::instance input_project_list = InputProjectFilesList::get(messager);
 	OutputProjectFilesList::instance output_project_list = OutputProjectFilesList::get(messager);
 
@@ -133,7 +135,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 			emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
 
-			emit LoadModel(&project->model());
+			emit LoadFromDatabase(&project->model());
 
 		}
 
@@ -205,8 +207,6 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 			project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
 
 			emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
-
-			emit LoadModel(reinterpret_cast<void*>(&project->model()));
 
 		}
 

@@ -28,7 +28,7 @@ class InputModelWorkQueue : public WorkQueueManager<UI_INPUT_MODEL>
 		UIInputModel * get();
 
 		void TestSlot();
-		void LoadModel(void *);
+		void LoadFromDatabase(UI_INPUT_MODEL_PTR);
 
 };
 

@@ -6,6 +6,10 @@
 #include "uimessager.h"
 #include "../../../NewGeneBackEnd/globals.h"
 #include "eventloopthreadmanager.h"
+#ifndef Q_MOC_RUN
+#	include <boost/atomic.hpp>
+#endif
+
 
 template<WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
 class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
@@ -18,10 +22,20 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		UIModel(UIMessager & messager, int const number_worker_threads)
 			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads, number_of_pools)
+			, loaded_(false)
 		{
 
 		}
 
+		bool loaded()
+		{
+			return loaded_.load();
+		}
+
+		void loaded(bool const loaded__)
+		{
+			loaded_.store(loaded_);
+		}
 
 	protected:
 
@@ -89,7 +103,7 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		{
 			_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base & impl_backend = impl.getInternalImplementation();
 			BACKEND_MODEL_CLASS & model = impl_backend.getModel();
-			model;
+			return model;
 		}
 
 		template<typename BACKEND_MODEL_CLASS>
@@ -99,6 +113,8 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base & impl_backend = impl.getInternalImplementation();
 			return impl_backend.getModelSharedPtr();
 		}
+
+		boost::atomic<bool> loaded_;
 
 };
 

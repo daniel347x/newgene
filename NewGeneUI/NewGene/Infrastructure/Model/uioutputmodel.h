@@ -1,7 +1,7 @@
 #ifndef UIOUTPUTMODEL_H
 #define UIOUTPUTMODEL_H
 
-#include "../../../NewGeneBackEnd/Model/OutputModel.h"
+#include "../../../../NewGeneBackEnd/Model/OutputModel.h"
 #include "uimodel.h"
 #include "outputmodelworkqueue.h"
 
@@ -84,6 +84,11 @@ class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 			return static_cast<OutputModel &>(getBackendModel_base<OutputModel>(*__impl));
 		}
 
+		OutputModel & backend()
+		{
+			return getBackendModel();
+		}
+
 		std::shared_ptr<OutputModel> & getBackendModelSharedPtr()
 		{
 			if (!__impl)
@@ -93,6 +98,8 @@ class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 			}
 			return getBackendModelSharedPtr_base<OutputModel>(*__impl);
 		}
+
+		bool is_model_equivalent(UIMessager & messager, UIOutputModel * model);
 
 	protected:
 

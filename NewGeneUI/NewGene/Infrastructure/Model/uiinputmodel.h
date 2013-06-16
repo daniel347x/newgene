@@ -1,7 +1,7 @@
 #ifndef UIINPUTMODEL_H
 #define UIINPUTMODEL_H
 
-#include "../../../NewGeneBackEnd/Model/InputModel.h"
+#include "../../../../NewGeneBackEnd/Model/InputModel.h"
 #include "uimodel.h"
 #include "inputmodelworkqueue.h"
 
@@ -84,6 +84,11 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 			return static_cast<InputModel &>(getBackendModel_base<InputModel>(*__impl));
 		}
 
+		InputModel & backend()
+		{
+			return getBackendModel();
+		}
+
 		std::shared_ptr<InputModel> & getBackendModelSharedPtr()
 		{
 			if (!__impl)
@@ -93,6 +98,8 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 			}
 			return getBackendModelSharedPtr_base<InputModel>(*__impl);
 		}
+
+		bool is_model_equivalent(UIMessager & messager, UIInputModel * model);
 
 	protected:
 
