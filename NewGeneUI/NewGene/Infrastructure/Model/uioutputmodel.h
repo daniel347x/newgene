@@ -96,9 +96,9 @@ class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 
 	protected:
 
-		WorkQueueManager<UI_OUTPUT_MODEL> * InstantiateWorkQueue(void * ui_object)
+		WorkQueueManager<UI_OUTPUT_MODEL> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
 		{
-			OutputModelWorkQueue * work_queue = new OutputModelWorkQueue();
+			OutputModelWorkQueue * work_queue = new OutputModelWorkQueue(isPool2_);
 			work_queue->SetUIObject(reinterpret_cast<UIOutputModel*>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;

@@ -3,8 +3,8 @@
 #include "globals.h"
 #include "uiprojectmanager.h"
 
-OutputModelWorkQueue::OutputModelWorkQueue(QObject * parent)
-	: WorkQueueManager<UI_OUTPUT_MODEL>(parent)
+OutputModelWorkQueue::OutputModelWorkQueue(bool isPool2_, QObject * parent)
+	: WorkQueueManager<UI_OUTPUT_MODEL>(isPool2_, parent)
 	, inp(nullptr)
 {
 }

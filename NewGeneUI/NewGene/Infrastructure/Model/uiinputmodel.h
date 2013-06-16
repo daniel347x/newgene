@@ -96,9 +96,9 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 
 	protected:
 
-		WorkQueueManager<UI_INPUT_MODEL> * InstantiateWorkQueue(void * ui_object)
+		WorkQueueManager<UI_INPUT_MODEL> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
 		{
-			InputModelWorkQueue * work_queue = new InputModelWorkQueue();
+			InputModelWorkQueue * work_queue = new InputModelWorkQueue(isPool2_);
 			work_queue->SetUIObject(reinterpret_cast<UIInputModel*>(ui_object));
 			work_queue->SetConnections();
 			return work_queue;

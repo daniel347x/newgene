@@ -54,7 +54,7 @@ class UIInputProjectSettings : public QObject, public UIAllProjectSettings<Input
 
 	protected:
 
-		WorkQueueManager<UI_INPUT_PROJECT_SETTINGS> * InstantiateWorkQueue(void * ui_object)
+		WorkQueueManager<UI_INPUT_PROJECT_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
 		{
 			InputProjectSettingsWorkQueue * work_queue = new InputProjectSettingsWorkQueue();
 			work_queue->SetUIObject(reinterpret_cast<UIInputProjectSettings*>(ui_object));

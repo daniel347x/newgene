@@ -107,7 +107,7 @@ class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_M
 
 	protected:
 
-		WorkQueueManager<UI_OUTPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object)
+		WorkQueueManager<UI_OUTPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
 		{
 			OutputModelSettingsWorkQueue * work_queue = new OutputModelSettingsWorkQueue();
 			work_queue->SetUIObject(reinterpret_cast<UIOutputModelSettings*>(ui_object));

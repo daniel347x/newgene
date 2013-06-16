@@ -24,7 +24,7 @@ class WorkQueueManagerBase : public QObject
 
 	public:
 
-		explicit WorkQueueManagerBase(QObject *parent = 0);
+		explicit WorkQueueManagerBase(bool isPool2_ = false, QObject *parent = 0);
 
 	signals:
 		// Signals for ALL specializations of WorkQueueManager go here,
@@ -41,6 +41,10 @@ class WorkQueueManagerBase : public QObject
 	public:
 		virtual void SetConnections() {}
 
+	protected:
+
+		bool isPool2;
+
 };
 
 template<WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
@@ -49,8 +53,8 @@ class WorkQueueManager : public WorkQueueManagerBase
 
 	public:
 
-		explicit WorkQueueManager(QObject *parent = 0)
-			: WorkQueueManagerBase(parent)
+		explicit WorkQueueManager(bool isPool2_ = false, QObject *parent = 0)
+			: WorkQueueManagerBase(isPool2_, parent)
 		{
 
 		}

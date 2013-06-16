@@ -198,7 +198,7 @@ class UIProjectManager : public QObject,
 
 	protected:
 
-		WorkQueueManager<UI_PROJECT_MANAGER> * InstantiateWorkQueue(void * ui_object)
+		WorkQueueManager<UI_PROJECT_MANAGER> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
 		{
 			UIProjectManagerWorkQueue * work_queue = new UIProjectManagerWorkQueue();
 			work_queue->SetUIObject(reinterpret_cast<UIProjectManager*>(ui_object));

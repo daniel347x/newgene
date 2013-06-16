@@ -9,8 +9,8 @@ class WorkQueueManager<UI_OUTPUT_MODEL> : public WorkQueueManagerBase
 
 	public:
 
-		WorkQueueManager(QObject *parent = 0)
-			: WorkQueueManagerBase(parent)
+		WorkQueueManager(bool isPool2_ = false, QObject *parent = 0)
+			: WorkQueueManagerBase(isPool2_, parent)
 		{
 
 		}

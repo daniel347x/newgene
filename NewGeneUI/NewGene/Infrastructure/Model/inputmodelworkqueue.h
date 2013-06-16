@@ -10,7 +10,7 @@ class InputModelWorkQueue : public WorkQueueManager<UI_INPUT_MODEL>
 
 	public:
 
-		explicit InputModelWorkQueue(QObject * parent = NULL);
+		explicit InputModelWorkQueue(bool isPool2_ = false, QObject * parent = NULL);
 
 		void SetUIObject(void * ui_input_object_)
 		{

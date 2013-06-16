@@ -1,6 +1,7 @@
 #include "workqueuemanager.h"
 
-WorkQueueManagerBase::WorkQueueManagerBase(QObject *parent) :
-    QObject(parent)
+WorkQueueManagerBase::WorkQueueManagerBase(bool isPool2_, QObject *parent)
+  : QObject(parent)
+  , isPool2(isPool2_)
 {
 }

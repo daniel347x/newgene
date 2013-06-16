@@ -18,6 +18,7 @@ class EventLoopThreadManager
 			, work_2(work_service_2)
 			, worker_pool_ui_2(work_service_2, number_worker_threads, number_pools == 2)
 			, work_queue_manager(nullptr)
+			, work_queue_manager_2(nullptr)
 		{
 		}
 
@@ -26,8 +27,18 @@ class EventLoopThreadManager
 		void InitializeEventLoop(void * me)
 		{
 			work_queue_manager.reset(InstantiateWorkQueue(me));
+			if (worker_pool_ui_2.isActive())
+			{
+				work_queue_manager_2.reset(InstantiateWorkQueue(me, true));
+			}
+
 			work_queue_manager_thread.start();
+
 			work_queue_manager->moveToThread(&work_queue_manager_thread);
+			if (worker_pool_ui_2.isActive())
+			{
+				work_queue_manager_2->moveToThread(&work_queue_manager_thread);
+			}
 		}
 
 		QObject * getConnector()
@@ -56,7 +67,7 @@ class EventLoopThreadManager
 
 	protected:
 
-		virtual WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * InstantiateWorkQueue(void * ui_object)
+		virtual WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
 		{
 			return nullptr;
 		}
@@ -72,9 +83,10 @@ class EventLoopThreadManager
 		boost::asio::io_service::work work_2;
 		ThreadPool<WorkerThread> worker_pool_ui_2;
 
-		// Qt-layer thread, which runs the event loop in a separate background thread
+		// Qt-layer thread, which runs the event loop/s in a separate background thread
 		QThread work_queue_manager_thread;
 		std::unique_ptr<WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM>> work_queue_manager;
+		std::unique_ptr<WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM>> work_queue_manager_2;
 
 	private:
 

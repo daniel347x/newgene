@@ -51,6 +51,11 @@ public:
 	{
 	}
 
+	bool isActive()
+	{
+		return active;
+	}
+
 protected:
 
 	std::vector<thread_worker> threads;

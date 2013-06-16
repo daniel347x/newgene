@@ -136,7 +136,7 @@ class UIAllGlobalSettings : public QObject, public UIAllSettings<UI_GLOBAL_SETTI
 
 	protected:
 
-		WorkQueueManager<UI_GLOBAL_SETTINGS> * InstantiateWorkQueue(void * ui_object)
+		WorkQueueManager<UI_GLOBAL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
 		{
 			GlobalSettingsWorkQueue * work_queue = new GlobalSettingsWorkQueue();
 			work_queue->SetUIObject(reinterpret_cast<UIAllGlobalSettings*>(ui_object));
