@@ -1,11 +1,11 @@
 #ifndef OUTPUTMODELWORKQUEUE_H
 #define OUTPUTMODELWORKQUEUE_H
 
-#include "Base/outputmodelworkqueue_base.h"
+#include "Base/modelworkqueue.h"
 
 class UIOutputModel;
 
-class OutputModelWorkQueue : public WorkQueueManager<UI_OUTPUT_MODEL>
+class OutputModelWorkQueue : public ModelWorkQueue<UI_OUTPUT_MODEL>
 {
 
 	public:

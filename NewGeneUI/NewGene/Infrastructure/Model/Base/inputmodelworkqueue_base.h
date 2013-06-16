@@ -2,6 +2,7 @@
 #define INPUTMODELWORKQUEUE_BASE_H
 
 #include "workqueuemanager.h"
+#include "modelworkqueue.h"
 
 template<>
 class WorkQueueManager<UI_INPUT_MODEL> : public WorkQueueManagerBase

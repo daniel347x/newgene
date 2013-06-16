@@ -1,11 +1,11 @@
 #ifndef INPUTMODELWORKQUEUE_H
 #define INPUTMODELWORKQUEUE_H
 
-#include "Base/inputmodelworkqueue_base.h"
+#include "Base/modelworkqueue.h"
 
 class UIInputModel;
 
-class InputModelWorkQueue : public WorkQueueManager<UI_INPUT_MODEL>
+class InputModelWorkQueue : public ModelWorkQueue<UI_INPUT_MODEL>
 {
 
 	public:

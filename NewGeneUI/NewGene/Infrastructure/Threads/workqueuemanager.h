@@ -51,6 +51,11 @@ class WorkQueueManagerBase : public QObject
 	public:
 		virtual void SetConnections() {}
 
+		bool IsPoolTwo()
+		{
+			return isPool2;
+		}
+
 	protected:
 
 		bool isPool2;

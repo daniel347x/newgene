@@ -4,7 +4,7 @@
 #include "uiprojectmanager.h"
 
 OutputModelWorkQueue::OutputModelWorkQueue(bool isPool2_, QObject * parent)
-	: WorkQueueManager<UI_OUTPUT_MODEL>(isPool2_, parent)
+	: ModelWorkQueue<UI_OUTPUT_MODEL>(isPool2_, parent)
 	, inp(nullptr)
 {
 }
