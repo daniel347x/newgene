@@ -1,0 +1,27 @@
+#ifndef DATAWIDGETS_H
+#define DATAWIDGETS_H
+
+enum DATA_WIDGETS
+{
+
+	  DATA_WIDGETS_FIRST = 0
+
+	, VARIABLE_GROUPS_SCROLL_AREA = DATA_WIDGETS_FIRST
+	
+	, DATA_WIDGETS_LAST
+
+};
+
+template<DATA_WIDGETS WIDGET>
+class WidgetDataItem
+{
+
+};
+
+template<>
+class WidgetDataItem<VARIABLE_GROUPS_SCROLL_AREA>
+{
+
+};
+
+#endif

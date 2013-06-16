@@ -19,6 +19,8 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 
 		void SetConnections();
 
+		void EmitMessage(std::string msg);
+
 	private:
 
 		void * outp;
@@ -27,7 +29,12 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 
 		UIOutputProject * get();
 
+	// ********************************* //
+	// Slot Overrides
+	// ********************************* //
+
 		void TestSlot();
+		void RefreshWidget(DATA_WIDGETS);
 
 };
 

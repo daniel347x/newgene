@@ -112,6 +112,7 @@
     <ClInclude Include="Threads\WorkItem.h" />
     <ClInclude Include="Triggers\TriggerManager.h" />
     <ClInclude Include="UIAction\UIActionManager.h" />
+    <ClInclude Include="UIData\DataWidgets.h" />
     <ClInclude Include="UIData\UIDataManager.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
   </ItemGroup>

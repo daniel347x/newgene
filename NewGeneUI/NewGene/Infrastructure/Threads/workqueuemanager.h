@@ -2,6 +2,7 @@
 #define WORKQUEUEMANAGER_H
 
 #include <QObject>
+#include "../../../../NewGeneBackEnd/UIData/DataWidgets.h"
 
 enum WORK_QUEUE_THREAD_LOOP_CLASS_ENUM
 {
@@ -37,6 +38,7 @@ class WorkQueueManagerBase : public QObject
 		// WorkQueueManager can override them
 		virtual void TestSlot() {}
 		virtual void LoadModel(void *) {};
+		virtual void RefreshWidget(DATA_WIDGETS) {};
 
 	public:
 		virtual void SetConnections() {}

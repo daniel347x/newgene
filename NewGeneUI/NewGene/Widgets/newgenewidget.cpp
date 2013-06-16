@@ -51,9 +51,11 @@ NewGeneMainWindow & NewGeneWidget::mainWindow()
 void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 	inp = project;
+	self->connect(self, SIGNAL(RefreshWidget(DATA_WIDGETS)), inp->getConnector(), SLOT(RefreshWidget(DATA_WIDGETS)));
 }
 
 void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 	outp = project;
+	self->connect(self, SIGNAL(RefreshWidget(DATA_WIDGETS)), outp->getConnector(), SLOT(RefreshWidget(DATA_WIDGETS)));
 }

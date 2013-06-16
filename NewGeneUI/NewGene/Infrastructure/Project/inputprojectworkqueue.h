@@ -27,7 +27,12 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 
 		UIInputProject * get();
 
+	// ********************************* //
+	// Slot Overrides
+	// ********************************* //
+
 		void TestSlot();
+		void RefreshWidget(DATA_WIDGETS);
 
 };
 

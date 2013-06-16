@@ -6,7 +6,6 @@ NewGeneVariableGroupsScrollArea::NewGeneVariableGroupsScrollArea( QWidget * pare
 	NewGeneWidget( this ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 	ui( new Ui::NewGeneVariableGroupsScrollArea )
 {
-	PrepareInputWidget();
 	PrepareOutputWidget();
 	ui->setupUi( this );
 }
@@ -39,7 +38,7 @@ void NewGeneVariableGroupsScrollArea::UpdateInputConnections(UIProjectManager::U
 	//connect(this, SIGNAL(TestSignal()), inp->GetModelSettingsConnector(), SLOT(TestSlot()));
 	//connect(this, SIGNAL(TestSignal()), inp->GetProjectSettingsConnector(), SLOT(TestSlot()));
 	//connect(this, SIGNAL(TestSignal()), settingsManagerUI().globalSettings().getConnector(), SLOT(TestSlot()));
-	connect(this, SIGNAL(TestSignal()), projectManagerUI().getConnector(), SLOT(TestSlot()));
+	//connect(this, SIGNAL(TestSignal()), projectManagerUI().getConnector(), SLOT(TestSlot()));
 	QTimer::singleShot( 0, this, SLOT(TestSlot()) );
 }
 
@@ -55,5 +54,6 @@ void NewGeneVariableGroupsScrollArea::UpdateOutputConnections(UIProjectManager::
 
 void NewGeneVariableGroupsScrollArea::TestSlot()
 {
-	emit TestSignal();
+	//emit TestSignal();
+	emit RefreshWidget(VARIABLE_GROUPS_SCROLL_AREA);
 }

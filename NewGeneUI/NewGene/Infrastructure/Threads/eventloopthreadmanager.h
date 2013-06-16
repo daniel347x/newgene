@@ -46,6 +46,11 @@ class EventLoopThreadManager
 			return work_queue_manager.get();
 		}
 
+		QObject * getConnectorTwo()
+		{
+			return work_queue_manager_2.get();
+		}
+
 		WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * getQueueManager()
 		{
 			return work_queue_manager.get();
@@ -63,6 +68,16 @@ class EventLoopThreadManager
 
 			// Only now kill the Qt-layer event loop
 			getQueueManagerThread().quit();
+		}
+
+		boost::asio::io_service & getWorkService()
+		{
+			return work_service;
+		}
+
+		boost::asio::io_service & getWorkServiceTwo()
+		{
+			return work_service_2;
 		}
 
 	protected:

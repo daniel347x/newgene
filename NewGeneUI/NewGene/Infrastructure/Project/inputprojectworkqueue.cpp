@@ -21,3 +21,8 @@ void InputProjectWorkQueue::SetConnections()
 {
 	connect(this, SIGNAL(SignalMessageBox(QString)), get(), SLOT(SignalMessageBox(QString)));
 }
+
+void InputProjectWorkQueue::RefreshWidget(DATA_WIDGETS widget)
+{
+
+}
