@@ -105,7 +105,7 @@ class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 		}
 
 	public slots:
-		void SignalMessageBox(QString msg);
+		void SignalMessageBox(STD_STRING);
 
 };
 

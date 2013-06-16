@@ -44,3 +44,9 @@ void UIStatusManager::PostStatus( QString const & _status, UIStatusManager::IMPO
 	mainWindow.statusBar()->showMessage( _status );
 
 }
+
+void UIStatusManager::ReceiveStatus(STD_STRING msg, int importance_, bool forbid_log)
+{
+	IMPORTANCE importance = (IMPORTANCE)(importance_);
+	PostStatus(msg.c_str(), importance, forbid_log);
+}

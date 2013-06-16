@@ -145,7 +145,7 @@ class UIAllGlobalSettings : public QObject, public UIAllSettings<UI_GLOBAL_SETTI
 		}
 
 	public slots:
-		void SignalMessageBox(QString msg);
+		void SignalMessageBox(STD_STRING);
 
 };
 

@@ -1,6 +1,9 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <string>
+typedef std::string STD_STRING;
+
 #include <QMessageBox>
 #include "newgenefilenames.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"

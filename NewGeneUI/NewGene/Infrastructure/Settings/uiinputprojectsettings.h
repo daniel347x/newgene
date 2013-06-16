@@ -63,7 +63,7 @@ class UIInputProjectSettings : public QObject, public UIAllProjectSettings<Input
 		}
 
 	public slots:
-		void SignalMessageBox(QString msg);
+		void SignalMessageBox(STD_STRING);
 
 };
 

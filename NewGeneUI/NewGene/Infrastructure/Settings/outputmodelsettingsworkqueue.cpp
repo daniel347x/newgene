@@ -19,5 +19,5 @@ void OutputModelSettingsWorkQueue::TestSlot()
 
 void OutputModelSettingsWorkQueue::SetConnections()
 {
-	connect(this, SIGNAL(SignalMessageBox(QString)), get(), SLOT(SignalMessageBox(QString)));
+	connect(this, SIGNAL(SignalMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
 }

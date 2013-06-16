@@ -1,8 +1,8 @@
 #include "uiinputproject.h"
 
-void UIInputProject::SignalMessageBox(QString msg)
+void UIInputProject::SignalMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg );
+	msgBox.setText( msg.c_str() );
 	msgBox.exec();
 }

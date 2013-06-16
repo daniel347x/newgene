@@ -1,6 +1,7 @@
 #ifndef WORKQUEUEMANAGER_H
 #define WORKQUEUEMANAGER_H
 
+#include "globals.h"
 #include <QObject>
 #include "../../../../NewGeneBackEnd/UIData/DataWidgets.h"
 
@@ -30,7 +31,7 @@ class WorkQueueManagerBase : public QObject
 	signals:
 		// Signals for ALL specializations of WorkQueueManager go here,
 		// and are NOT (and don't need to be) defined as virtual
-		void SignalMessageBox(QString);
+		void SignalMessageBox(STD_STRING);
 
 	public slots:
 		// Slots for ALL specializations go here,

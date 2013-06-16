@@ -29,8 +29,6 @@ class DoRefreshWidget
 
 		virtual void operator()() {};
 
-	protected:
-
 		DATA_WIDGETS const widget;
 
 

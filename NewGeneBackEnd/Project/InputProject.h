@@ -10,10 +10,10 @@
 class InputProject : public Project<INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND, BackendProjectInputSetting, INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS, InputModelSetting, InputModel>
 {
 public:
-	InputProject(Messager & messager, std::shared_ptr<ProjectSettings<INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND, BackendProjectInputSetting>> const & project_settings,
+	InputProject(std::shared_ptr<ProjectSettings<INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND, BackendProjectInputSetting>> const & project_settings,
 									  std::shared_ptr<ModelSettings<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS, InputModelSetting>> const & model_settings,
 									  std::shared_ptr<InputModel> const & model)
-		: Project(messager, project_settings, model_settings, model)
+		: Project(project_settings, model_settings, model)
 	{
 
 	}

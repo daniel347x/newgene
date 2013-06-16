@@ -16,13 +16,13 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		Q_OBJECT
 
 	public:
-		UIOutputProject(UIMessager * messager,
-						std::shared_ptr<UIOutputProjectSettings> const & project_settings,
+		UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const & project_settings,
 						std::shared_ptr<UIOutputModelSettings> const & model_settings,
 						std::shared_ptr<UIOutputModel> const & model,
 						QObject * parent = NULL)
 			: QObject(parent)
-			, UIProject(messager, project_settings, model_settings, model)
+			, UIProject(project_settings, model_settings, model)
+			, messager(this)
 		{
 
 		}
@@ -30,7 +30,11 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 	signals:
 
 	public slots:
-		void SignalMessageBox(QString msg);
+		void SignalMessageBox(STD_STRING);
+
+	public:
+
+		UIMessagerOutputProject messager;
 
 	protected:
 

@@ -14,13 +14,13 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 		Q_OBJECT
 
 	public:
-		UIInputProject(UIMessager * messager,
-					   std::shared_ptr<UIInputProjectSettings> const & project_settings,
+		UIInputProject(std::shared_ptr<UIInputProjectSettings> const & project_settings,
 					   std::shared_ptr<UIInputModelSettings> const & model_settings,
 					   std::shared_ptr<UIInputModel> const & model,
 					   QObject * parent = NULL)
 			: QObject(parent)
-			, UIProject(messager, project_settings, model_settings, model)
+			, UIProject(project_settings, model_settings, model)
+			, messager(this)
 		{
 
 		}
@@ -28,9 +28,11 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 	signals:
 
 	public slots:
-		void SignalMessageBox(QString msg);
+		void SignalMessageBox(STD_STRING);
 
 	public:
+
+		UIMessagerInputProject messager;
 
 	protected:
 

@@ -29,6 +29,7 @@ class UIStatusManager : public QObject, public UIManager<UIStatusManager, Status
 	signals:
 
 	public slots:
+		void ReceiveStatus(STD_STRING, int, bool);
 
 	private:
 

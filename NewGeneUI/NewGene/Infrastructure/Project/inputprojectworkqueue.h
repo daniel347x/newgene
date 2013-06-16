@@ -19,13 +19,13 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 
 		void SetConnections();
 
+		UIInputProject * get();
+
 	private:
 
 		void * inp;
 
 	protected:
-
-		UIInputProject * get();
 
 	// ********************************* //
 	// Slot Overrides

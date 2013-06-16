@@ -139,9 +139,9 @@ void UIOutputProjectSettings::SetPTreeEntry(Messager & messager, OUTPUT_PROJECT_
 
 }
 
-void UIOutputProjectSettings::SignalMessageBox(QString msg)
+void UIOutputProjectSettings::SignalMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg );
+	msgBox.setText( msg.c_str() );
 	msgBox.exec();
 }

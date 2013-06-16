@@ -108,7 +108,8 @@ SOURCES += main.cpp\
 	Infrastructure/ModelAction/uimodelactionmanager.cpp \
     Infrastructure/Project/Base/uiprojectmanagerworkqueue_base.cpp \
     Infrastructure/Project/uiprojectmanagerworkqueue.cpp \
-    Infrastructure/UIData/widgetdatarefresh.cpp
+    Infrastructure/UIData/uiwidgetdatarefresh.cpp \
+    Infrastructure/Messager/uimessagersingleshot.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -205,7 +206,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/ModelAction/uimodelactionmanager.h \
     Infrastructure/Project/Base/uiprojectmanagerworkqueue_base.h \
     Infrastructure/Project/uiprojectmanagerworkqueue.h \
-    Infrastructure/UIData/widgetdatarefresh.h
+    Infrastructure/UIData/uiwidgetdatarefresh.h \
+    Infrastructure/Messager/uimessagersingleshot.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

@@ -139,9 +139,9 @@ void UIInputProjectSettings::SetPTreeEntry(Messager & messager, INPUT_PROJECT_SE
 
 }
 
-void UIInputProjectSettings::SignalMessageBox(QString msg)
+void UIInputProjectSettings::SignalMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg );
+	msgBox.setText( msg.c_str() );
 	msgBox.exec();
 }

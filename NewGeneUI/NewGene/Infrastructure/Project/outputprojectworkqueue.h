@@ -21,13 +21,13 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 
 		void EmitMessage(std::string msg);
 
+		UIOutputProject * get();
+
 	private:
 
 		void * outp;
 
 	protected:
-
-		UIOutputProject * get();
 
 	// ********************************* //
 	// Slot Overrides

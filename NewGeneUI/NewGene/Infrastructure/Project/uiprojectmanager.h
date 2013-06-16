@@ -180,7 +180,7 @@ class UIProjectManager : public QObject,
 		void LoadModel(void *);
 
 	public slots:
-		void SignalMessageBox(QString msg);
+		void SignalMessageBox(STD_STRING);
 
 	private:
 

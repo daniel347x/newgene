@@ -45,6 +45,8 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 		UIUIActionManager::getManager();
 		UIModelActionManager::getManager();
 
+		UIMessager::ManagersInitialized = true;
+
 		ui->setupUi( this );
 
 		NewGeneTabWidget * pTWmain = findChild<NewGeneTabWidget *>( "tabWidgetMain" );
@@ -125,9 +127,9 @@ void NewGeneMainWindow::doInitialize()
 
 }
 
-void NewGeneMainWindow::SignalMessageBox(QString msg)
+void NewGeneMainWindow::SignalMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg );
+	msgBox.setText( msg.c_str() );
 	msgBox.exec();
 }

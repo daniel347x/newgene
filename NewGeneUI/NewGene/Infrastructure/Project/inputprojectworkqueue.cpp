@@ -19,7 +19,7 @@ void InputProjectWorkQueue::TestSlot()
 
 void InputProjectWorkQueue::SetConnections()
 {
-	connect(this, SIGNAL(SignalMessageBox(QString)), get(), SLOT(SignalMessageBox(QString)));
+	connect(this, SIGNAL(SignalMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
 }
 
 void InputProjectWorkQueue::RefreshWidget(DATA_WIDGETS widget)

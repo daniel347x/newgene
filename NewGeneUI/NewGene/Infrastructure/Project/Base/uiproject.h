@@ -28,17 +28,15 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		static int const number_worker_threads = 1; // For now, single thread only in pool
 
-		UIProject(UIMessager * messager,
-				  std::shared_ptr<UI_PROJECT_SETTINGS_CLASS> const & ui_settings,
+		UIProject(std::shared_ptr<UI_PROJECT_SETTINGS_CLASS> const & ui_settings,
 				  std::shared_ptr<UI_MODEL_SETTINGS_CLASS> const & ui_model_settings,
 				  std::shared_ptr<UI_MODEL_CLASS> const & ui_model,
 				  QObject * parent = NULL)
 			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
-			, project_messager(messager)
 			, _project_settings(ui_settings)
 			, _model_settings(ui_model_settings)
 			, _model(ui_model)
-			, _backend_project( new BACKEND_PROJECT_CLASS(*project_messager, _project_settings->getBackendSettingsSharedPtr(), _model_settings->getBackendSettingsSharedPtr(), _model->getBackendModelSharedPtr()) )
+			, _backend_project( new BACKEND_PROJECT_CLASS(_project_settings->getBackendSettingsSharedPtr(), _model_settings->getBackendSettingsSharedPtr(), _model->getBackendModelSharedPtr()) )
 		{
 		}
 
@@ -92,7 +90,6 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		// in the class declaration (this file).
 		// Do not reorder the declarations of these member variables.
 
-		std::unique_ptr<UIMessager> project_messager;
 		std::shared_ptr<UI_PROJECT_SETTINGS_CLASS> const _project_settings;
 		std::shared_ptr<UI_MODEL_SETTINGS_CLASS> const _model_settings;
 		std::shared_ptr<UI_MODEL_CLASS> const _model;

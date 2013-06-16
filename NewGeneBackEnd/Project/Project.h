@@ -15,7 +15,7 @@ class Project
 
 		static int const number_worker_threads = 1; // For now, single thread only in pool
 
-		Project(Messager & messager, std::shared_ptr<ProjectSettings<PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS> > const & project_settings,
+		Project(std::shared_ptr<ProjectSettings<PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS> > const & project_settings,
 									 std::shared_ptr<ModelSettings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>> const & model_settings,
 									 std::shared_ptr<MODEL_CLASS> const & model)
 			: _project_settings(project_settings)

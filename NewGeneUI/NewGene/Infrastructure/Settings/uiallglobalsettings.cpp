@@ -333,9 +333,9 @@ void UIAllGlobalSettings::CreateImplementation(UIMessager & messager, boost::fil
 	__impl.reset(new _impl(messager, path_to_settings));
 }
 
-void UIAllGlobalSettings::SignalMessageBox(QString msg)
+void UIAllGlobalSettings::SignalMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg );
+	msgBox.setText( msg.c_str() );
 	msgBox.exec();
 }

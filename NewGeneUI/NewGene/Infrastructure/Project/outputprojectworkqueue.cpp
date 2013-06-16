@@ -2,7 +2,7 @@
 #include "uioutputproject.h"
 #include "Widgets/newgenemainwindow.h"
 #include <QTimer>
-#include "../UIData/widgetdatarefresh.h"
+#include "../UIData/uiwidgetdatarefresh.h"
 
 OutputProjectWorkQueue::OutputProjectWorkQueue(QObject * parent)
 	: WorkQueueManager(parent)
@@ -22,7 +22,7 @@ void OutputProjectWorkQueue::TestSlot()
 
 void OutputProjectWorkQueue::SetConnections()
 {
-	connect(this, SIGNAL(SignalMessageBox(QString)), get(), SLOT(SignalMessageBox(QString)));
+	connect(this, SIGNAL(SignalMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
 }
 
 void OutputProjectWorkQueue::EmitMessage(std::string msg)

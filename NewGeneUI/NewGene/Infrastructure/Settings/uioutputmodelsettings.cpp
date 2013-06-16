@@ -1,9 +1,9 @@
 #include "uioutputmodelsettings.h"
 #include <QMessageBox>
 
-void UIOutputModelSettings::SignalMessageBox(QString msg)
+void UIOutputModelSettings::SignalMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
-	msgBox.setText( msg );
+	msgBox.setText( msg.c_str() );
 	msgBox.exec();
 }

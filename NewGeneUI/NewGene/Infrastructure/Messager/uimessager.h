@@ -1,10 +1,10 @@
 #ifndef UIMESSAGER_H
 #define UIMESSAGER_H
 
+#include "globals.h"
 #include <QObject>
 #include <QTimer>
 #include <QCoreApplication>
-//#include "newgeneapplication.h"
 #include "..\..\NewGeneBackEnd\Messager\Messager.h"
 
 class UISettingsManager;
@@ -13,6 +13,9 @@ class UILoggingManager;
 class UIModelManager;
 class UIDocumentManager;
 class UIStatusManager;
+
+class UIInputProject;
+class UIOutputProject;
 
 class UIMessagerStatusMessage : public MessagerStatusMessage
 {
@@ -54,8 +57,6 @@ class UIMessagerErrorMessage : public QObject, public MessagerErrorMessage
 								  QCoreApplication::instance(), SLOT(showErrorBox(std::string const)));
 
 			emit sendErrorMessageToBeDisplayed(TheMessageText);
-
-			//QTimer::singleShot( 0, static_cast<NewGeneApplication*>(QCoreApplication::instance()), SLOT(showErrorBox(TheMessageText) ) );
 		}
 
 	signals:
@@ -73,18 +74,63 @@ class UIMessager : public QObject, public Messager
 
 		void displayStatusMessages();
 
+		void InitializeSingleShot();
+		void FinalizeSingleShot();
+
 	signals:
+		void PostStatus(STD_STRING, int, bool);
+		void DisplayMessageBox(STD_STRING);
 
 	public slots:
 
 	public:
 
 		bool do_not_handle_messages_on_destruction;
+		static bool ManagersInitialized;
+
+	protected:
+
+		bool singleShotActive;
 
 	private:
 
 		UIMessager(UIMessager const &) {}
 
+};
+
+class UIMessagerInputProject : public UIMessager
+{
+	public:
+
+		UIMessagerInputProject(UIInputProject * inp_, QObject * parent = 0);
+
+		UIInputProject * get()
+		{
+			return inp;
+		}
+
+		void ShowMessageBox(std::string);
+
+	protected:
+
+		UIInputProject * inp;
+};
+
+class UIMessagerOutputProject : public UIMessager
+{
+	public:
+		UIMessagerOutputProject(UIOutputProject * outp_, QObject * parent = 0);
+
+		UIOutputProject * get()
+		{
+			return outp;
+		}
+
+		void ShowMessageBox(std::string);
+
+	protected:
+
+		UIOutputProject * outp;
 };
 
 #endif // UIMESSAGER_H

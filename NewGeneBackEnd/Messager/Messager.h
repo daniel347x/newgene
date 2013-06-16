@@ -135,6 +135,8 @@ class Messager
 		bool IsError();
 		bool IsErrorCatastrophic();
 
+		virtual void ShowMessageBox(std::string) {}
+
 	protected:
 
 		MessagesVector _messages;
