@@ -4,8 +4,6 @@
 #include "Table.h"
 #include <vector>
 
-typedef std::vector<Table> Tables;
-
 class TableManager
 {
 
@@ -16,9 +14,7 @@ public:
 
 	}
 
-
-
-	Tables tables;
+	void LoadTable(TABLE_TYPES table_type);
 
 	// Todo: fill in directed acyclic graph table dependencies
 

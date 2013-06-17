@@ -3,58 +3,8 @@
 
 #include <tuple>
 #include <vector>
-#include <cstdint>
 
 #include "TableTypes.h"
-
-template<FIELD_TYPE THE_FIELD_TYPE>
-struct FieldTypeTraits
-{
-	typedef void * type;
-};
-
-template<>
-struct FieldTypeTraits<FIELD_TYPE_INT32>
-{
-	typedef std::int32_t type;
-};
-
-template<>
-struct FieldTypeTraits<FIELD_TYPE_INT64>
-{
-	typedef std::int64_t type;
-};
-
-template<>
-struct FieldTypeTraits<FIELD_TYPE_UINT32>
-{
-	typedef std::uint32_t type;
-};
-
-template<>
-struct FieldTypeTraits<FIELD_TYPE_UINT64>
-{
-	typedef std::uint64_t type;
-};
-
-template<>
-struct FieldTypeTraits<FIELD_TYPE_STRING_FIXED>
-{
-	// TODO: make this somehow fixed size at initialization?
-	typedef std::string type;
-};
-
-template<>
-struct FieldTypeTraits<FIELD_TYPE_STRING_VAR>
-{
-	typedef std::string type;
-};
-
-template<>
-struct FieldTypeTraits<FIELD_TYPE_UUOA>
-{
-	typedef std::string type;
-};
 
 template<FIELD_TYPE THE_FIELD_TYPE>
 class FieldValue
@@ -126,13 +76,24 @@ public:
 
 };
 
+template<TABLE_TYPES TABLE_TYPE>
 class Table
 {
 
-public:
-	std::vector<BaseField> fields;
-	TableMetadata metadata;
+	public:
+
+		TableMetadata metadata;
+
+		static std::vector<FIELD_TYPE> const types;
+		static std::vector<std::string> const names;
+
+		std::vector<BaseField> fields;
 
 };
+
+template<TABLE_TYPES TABLE_TYPE>
+std::vector<FIELD_TYPE> Table<TABLE_TYPE>::types = TableTypeTraits<TABLE_TYPE>::types;
+template<TABLE_TYPES TABLE_TYPE>
+std::vector<std::string> Table<TABLE_TYPE>::names = TableTypeTraits<TABLE_TYPE>::names;
 
 #endif

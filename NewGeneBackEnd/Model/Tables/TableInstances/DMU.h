@@ -3,16 +3,29 @@
 
 #include "../Table.h"
 
-class Table_DMU : public Table
+class Table_DMU_Identifier : public Table<TABLE_TYPE_DMU_IDENTIFIER>
 {
 
-	public:
+public:
 
-		Table_DMU()
-			: Table()
-		{
+	Table_DMU_Identifier()
+		: Table<TABLE_TYPE_DMU_IDENTIFIER>()
+	{
 
-		}
+	}
+
+};
+
+class Table_DMU_Instance : public Table<TABLE_TYPE_DMU_INSTANCE>
+{
+
+public:
+
+	Table_DMU_Instance()
+		: Table<TABLE_TYPE_DMU_INSTANCE>()
+	{
+
+	}
 
 };
 
