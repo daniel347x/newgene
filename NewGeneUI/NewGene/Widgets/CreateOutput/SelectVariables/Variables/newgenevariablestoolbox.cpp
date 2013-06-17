@@ -23,11 +23,18 @@ void NewGeneVariablesToolbox::RefreshAllWidgets()
 
 void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX widget_data)
 {
+	int nItems = count();
+	for (int n = 0; n < nItems; ++n)
+	{
+		removeItem(0);
+	}
+
 	std::for_each(widget_data.variable_group_long_names.cbegin(), widget_data.variable_group_long_names.cend(), [&](std::string const & variable_group_long_name)
 	{
 		NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this );
 		addItem( tmpGrp, variable_group_long_name.c_str() );
 	});
+
 //	groups = new NewGeneVariableGroup( this );
 //	addItem( groups, "Country Variables" );
 
