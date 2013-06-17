@@ -39,7 +39,7 @@ void InputModelWorkQueue::LoadFromDatabase(UI_INPUT_MODEL_PTR model)
 		return;
 	}
 
-	emit SignalMessageBox("Input model's \"LoadFromDatabase()\" successfully called and handled.");
+	//emit SignalMessageBox("Input model's \"LoadFromDatabase()\" successfully called and handled.");
 
 	// Lock model and load all from database here
 	{

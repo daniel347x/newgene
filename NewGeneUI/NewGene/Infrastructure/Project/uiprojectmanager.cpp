@@ -292,7 +292,7 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_)
 		return;
 	}
 
-	SignalMessageBox("Input model is fully loaded.  Ready to refresh all widgets.");
+	//SignalMessageBox("Input model is fully loaded.  Ready to refresh all widgets.");
 
 	emit LoadFromDatabase(&getActiveUIOutputProject()->model());
 
@@ -315,6 +315,9 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_)
 		return;
 	}
 
-	SignalMessageBox("Both input and output models are fully loaded.  Ready to refresh all widgets.");
+	getActiveUIInputProject()->DoRefreshAllWidgets();
+	getActiveUIOutputProject()->DoRefreshAllWidgets();
+
+	//SignalMessageBox("Both input and output models are fully loaded.  Ready to refresh all widgets.");
 
 }

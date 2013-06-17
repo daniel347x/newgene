@@ -39,7 +39,7 @@ void OutputModelWorkQueue::LoadFromDatabase(UI_OUTPUT_MODEL_PTR model)
 		return;
 	}
 
-	emit SignalMessageBox("Output model's \"LoadFromDatabase()\" successfully called and handled.");
+	//emit SignalMessageBox("Output model's \"LoadFromDatabase()\" successfully called and handled.");
 
 	// Lock model and load all from database here
 	{
