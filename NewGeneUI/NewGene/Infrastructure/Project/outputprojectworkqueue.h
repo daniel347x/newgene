@@ -24,6 +24,10 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		{
 			emit WidgetDataRefresh(widgetData);
 		}
+		void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData)
+		{
+			emit WidgetDataRefresh(widgetData);
+		}
 
 		UIOutputProject * get();
 
