@@ -8,13 +8,13 @@ NewGeneVariableSummaryScrollArea::NewGeneVariableSummaryScrollArea( QWidget * pa
 {
 	ui->setupUi( this );
 
-	groups = new NewGeneVariableSummaryGroup( this );
-	groups->setTitle( "Country Variables" );
-	layout()->addWidget( groups );
+//	groups = new NewGeneVariableSummaryGroup( this );
+//	groups->setTitle( "Country Variables" );
+//	layout()->addWidget( groups );
 
-	NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup( this );
-	tmpGrp->setTitle( "MID Detail Variables" );
-	layout()->addWidget( tmpGrp );
+//	NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup( this );
+//	tmpGrp->setTitle( "MID Detail Variables" );
+//	layout()->addWidget( tmpGrp );
 }
 
 NewGeneVariableSummaryScrollArea::~NewGeneVariableSummaryScrollArea()

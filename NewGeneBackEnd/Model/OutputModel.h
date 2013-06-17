@@ -31,7 +31,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 			return *input_model;
 		}
 
-	protected:
+		void LoadTables();
+
+protected:
 
 		std::shared_ptr<InputModelSettings> input_model_settings;
 		std::shared_ptr<InputModel> input_model;

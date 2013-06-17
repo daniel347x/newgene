@@ -2,6 +2,10 @@
 #define TABLE_MANAGER_H
 
 #include "Table.h"
+#include "TableInstances/DMU.h"
+#include "TableInstances/CMU.h"
+#include "TableInstances/UOA.h"
+#include "TableInstances/VariableGroup.h"
 #include <vector>
 
 class TableManager

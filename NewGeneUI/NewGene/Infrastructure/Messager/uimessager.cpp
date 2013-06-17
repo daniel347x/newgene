@@ -108,3 +108,8 @@ void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABL
 {
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }
+
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData)
+{
+	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
+}

@@ -5,7 +5,7 @@
 #define S_PATH_TO_MODEL_DATABASE__1 PATH_TO_MODEL_DATABASE
 #define S_PATH_TO_MODEL_DATABASE__2 SETTING_CLASS_MODEL_INPUT_SETTING__PATH_TO_MODEL_DATABASE
 #define S_PATH_TO_MODEL_DATABASE__3 "PATH_TO_MODEL_DATABASE"
-#define S_PATH_TO_MODEL_DATABASE__4 "L:\\daniel347x\\__DanExtras\\NewGene\\Projects\\Input\\TestInputModelDatabase.xml"
+#define S_PATH_TO_MODEL_DATABASE__4 "L:\\daniel347x\\__DanExtras\\NewGene\\Projects\\Input\\TestInputModel.db"
 #define S_PATH_TO_MODEL_DATABASE__5 InputModelSetting__path<INPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE>
 
 std::string newgene_input_model_root_node("newgene.model.input.");

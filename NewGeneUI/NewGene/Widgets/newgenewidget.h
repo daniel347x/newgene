@@ -30,6 +30,7 @@ class NewGeneWidget
 		virtual void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		virtual void RefreshAllWidgets() {};
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA) {};
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX) {};
 		// ****************************************************************************************************************************
 
 

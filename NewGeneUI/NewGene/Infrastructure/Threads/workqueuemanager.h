@@ -7,6 +7,7 @@
 #include "uimodelmanager.h"
 
 Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
+Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
 
 enum WORK_QUEUE_THREAD_LOOP_CLASS_ENUM
 {
@@ -32,6 +33,7 @@ class WorkQueueManagerBase : public QObject
 		explicit WorkQueueManagerBase(bool isPool2_ = false, QObject *parent = 0);
 
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData) {}
 
 	signals:
 		// Signals for ALL specializations of WorkQueueManager go here,
@@ -40,6 +42,7 @@ class WorkQueueManagerBase : public QObject
 		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR);
 		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
+		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
 
 	public slots:
 		// Slots for ALL specializations go here,

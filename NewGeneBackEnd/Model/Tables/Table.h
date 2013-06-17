@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "TableTypes.h"
+#include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
 template<FIELD_TYPE THE_FIELD_TYPE>
 class FieldValue
@@ -88,6 +89,9 @@ class Table
 		static std::vector<std::string> const names;
 
 		std::vector<BaseField> fields;
+
+		virtual void Load(sqlite3 * db) {};
+		//virtual void Load(sqlite3 * db) = 0;
 
 };
 

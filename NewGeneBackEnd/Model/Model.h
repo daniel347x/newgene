@@ -13,6 +13,7 @@
 #include "../Threads/ThreadPool.h"
 #include "../Threads/WorkerThread.h"
 #include "../Settings/ModelSettings.h"
+#include "../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
 class InputModel;
 class InputModelSettings;
@@ -27,8 +28,14 @@ class Model
 
 		Model(Messager & messager, boost::filesystem::path const path_to_model_database)
 			: _path_to_model_database(path_to_model_database)
+			, db(NULL)
 		{
 
+		}
+
+		~Model()
+		{
+			UnloadDatabase();
 		}
 
 		boost::filesystem::path getPathToDatabaseFile()
@@ -36,9 +43,40 @@ class Model
 			return _path_to_model_database;
 		}
 
+		void LoadDatabase()
+		{
+			if (db == nullptr)
+			{
+				sqlite3 * db_ = nullptr;
+				int err = sqlite3_open(getPathToDatabaseFile().string().c_str(), &db_);
+				if (err)
+				{
+					return;
+				}
+				db = db_;
+			}
+		}
+
+		void UnloadDatabase()
+		{
+			if (db != nullptr)
+			{
+				sqlite3_close(db);
+			}
+		}
+
+		virtual void LoadTables()
+		{
+			if (db == nullptr)
+			{
+				LoadDatabase();
+			}
+		}
+
 	protected:
 
 		boost::filesystem::path _path_to_model_database;
+		sqlite3 * db;
 
 };
 

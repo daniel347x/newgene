@@ -14,6 +14,9 @@ class Table_VariableGroupIdentifier : public Table<TABLE_TYPE_VARIABLE_GROUP_IDE
 
 		}
 
+		void Load(sqlite3 * db);
+
+		std::vector<std::string> identifiers;
 };
 
 class Table_VariableIdentifier : public Table<TABLE_TYPE_VARIABLE_IDENTIFIER>

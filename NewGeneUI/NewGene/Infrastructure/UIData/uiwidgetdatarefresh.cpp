@@ -16,7 +16,7 @@ void DoRefreshInputWidget::operator()()
 void DoRefreshOutputWidget::operator()()
 {
 	UIMessagerSingleShot messager(queue->get()->messager);
-	uidataManagerUI().getBackendManager().DoRefreshOutputWidget(messager.get(), widget);
+	uidataManagerUI().getBackendManager().DoRefreshOutputWidget(messager.get(), widget, queue->get()->backend());
 
 	//queue->EmitMessage("Successfully posted a message from the DoRefresh() handler.");
 }

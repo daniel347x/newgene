@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include "..\..\..\newgenewidget.h"
-#include "../../../../../../NewGeneBackEnd/UIData/DataWidgets.h"
 
 namespace Ui
 {

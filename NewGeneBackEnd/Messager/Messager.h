@@ -143,6 +143,7 @@ class Messager
 		virtual void ShowMessageBox(std::string) {}
 
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData) {}
 
 	protected:
 

@@ -5,4 +5,5 @@ WorkQueueManagerBase::WorkQueueManagerBase(bool isPool2_, QObject *parent)
   , isPool2(isPool2_)
 {
     qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>();
+    qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>();
 }
