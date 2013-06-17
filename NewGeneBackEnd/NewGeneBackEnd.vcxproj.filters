@@ -97,6 +97,18 @@
     <Filter Include="Source Files\SQLite">
       <UniqueIdentifier>{aa4baa0a-25b7-4bf2-85a6-555b27060fcf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Model\Tables">
+      <UniqueIdentifier>{2c4cf3d9-9389-443b-b45c-9e9136142df4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model\Tables">
+      <UniqueIdentifier>{c1f89d43-d25e-4afe-9bb6-76306a9a8ce1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Model\Tables\TableInstances">
+      <UniqueIdentifier>{282cae00-baff-4798-8002-3aa48a57e9f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model\Tables\TableInstances">
+      <UniqueIdentifier>{76962a23-08d6-4767-9b2c-34f248484088}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -228,6 +240,27 @@
     <ClInclude Include="sqlite\sqlite-amalgamation-3071700\sqlite3.h">
       <Filter>Header Files\SQLite</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Tables\Table.h">
+      <Filter>Header Files\Model\Tables</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\TableManager.h">
+      <Filter>Header Files\Model\Tables</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\TableInstances\DMU.h">
+      <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\TableInstances\CMU.h">
+      <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\TableInstances\UOA.h">
+      <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\TableInstances\VariableGroup.h">
+      <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\TableTypes.h">
+      <Filter>Header Files\Model\Tables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -352,6 +385,27 @@
     </ClCompile>
     <ClCompile Include="sqlite\sqlite-amalgamation-3071700\sqlite3.c">
       <Filter>Source Files\SQLite</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\Table.cpp">
+      <Filter>Source Files\Model\Tables</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableManager.cpp">
+      <Filter>Source Files\Model\Tables</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableInstances\DMU.cpp">
+      <Filter>Source Files\Model\Tables\TableInstances</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableInstances\CMU.cpp">
+      <Filter>Source Files\Model\Tables\TableInstances</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableInstances\UOA.cpp">
+      <Filter>Source Files\Model\Tables\TableInstances</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableInstances\VariableGroup.cpp">
+      <Filter>Source Files\Model\Tables\TableInstances</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableTypes.cpp">
+      <Filter>Source Files\Model\Tables</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
