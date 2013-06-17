@@ -91,6 +91,12 @@
     <Filter Include="Source Files\ModelAction">
       <UniqueIdentifier>{5684c7b2-d3ec-4c0a-b6be-4a07bf9731f7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SQLite">
+      <UniqueIdentifier>{d21adc30-0291-4e0b-baea-032a5762ae70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SQLite">
+      <UniqueIdentifier>{aa4baa0a-25b7-4bf2-85a6-555b27060fcf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -219,6 +225,9 @@
     <ClInclude Include="UIData\DataWidgets.h">
       <Filter>Header Files\UIData</Filter>
     </ClInclude>
+    <ClInclude Include="sqlite\sqlite-amalgamation-3071700\sqlite3.h">
+      <Filter>Header Files\SQLite</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -340,6 +349,9 @@
     </ClCompile>
     <ClCompile Include="ModelAction\ModelActionManager.cpp">
       <Filter>Source Files\ModelAction</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite\sqlite-amalgamation-3071700\sqlite3.c">
+      <Filter>Source Files\SQLite</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
