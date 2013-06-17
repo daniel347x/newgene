@@ -174,6 +174,9 @@ class UIProjectManager : public QObject,
 		UIInputProject * getActiveUIInputProject();
 		UIOutputProject * getActiveUIOutputProject();
 
+		void DoRefreshAllInputModelWidgets();
+		void DoRefreshAllOutputModelWidgets();
+
 	signals:
 
 		void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);

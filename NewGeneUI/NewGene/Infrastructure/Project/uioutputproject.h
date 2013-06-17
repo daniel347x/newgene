@@ -28,8 +28,10 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		}
 
 		void UpdateConnections();
+		void DoRefreshAllWidgets();
 
 	signals:
+		void RefreshAllWidgets();
 
 	public slots:
 		void SignalMessageBox(STD_STRING);

@@ -37,9 +37,9 @@ class WorkQueueManagerBase : public QObject
 		// Signals for ALL specializations of WorkQueueManager go here,
 		// and are NOT (and don't need to be) defined as virtual
 		void SignalMessageBox(STD_STRING);
-		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR);
 		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR);
+		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 
 	public slots:
 		// Slots for ALL specializations go here,

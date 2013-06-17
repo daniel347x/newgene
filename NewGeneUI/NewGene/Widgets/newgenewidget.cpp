@@ -55,11 +55,12 @@ void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_
 {
 	inp = project;
 	self->connect(self, SIGNAL(RefreshWidget(DATA_WIDGETS)), inp->getConnector(), SLOT(RefreshWidget(DATA_WIDGETS)));
+	self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
 }
 
 void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 	outp = project;
 	self->connect(self, SIGNAL(RefreshWidget(DATA_WIDGETS)), outp->getConnector(), SLOT(RefreshWidget(DATA_WIDGETS)));
-	self->connect(outp->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)), self, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)));
+	self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
 }

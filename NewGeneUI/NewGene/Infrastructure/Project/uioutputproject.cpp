@@ -86,3 +86,8 @@ void UIOutputProject::UpdateConnections()
 {
 
 }
+
+void UIOutputProject::DoRefreshAllWidgets()
+{
+	emit RefreshAllWidgets();
+}

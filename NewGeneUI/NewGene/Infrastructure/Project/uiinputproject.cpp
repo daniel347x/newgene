@@ -49,3 +49,9 @@ void UIInputProject::UpdateConnections()
 {
 
 }
+
+void UIInputProject::DoRefreshAllWidgets()
+{
+	emit RefreshAllWidgets();
+}
+

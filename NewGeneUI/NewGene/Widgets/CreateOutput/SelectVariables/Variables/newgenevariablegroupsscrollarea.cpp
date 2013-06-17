@@ -44,18 +44,17 @@ void NewGeneVariableGroupsScrollArea::UpdateInputConnections(UIProjectManager::U
 void NewGeneVariableGroupsScrollArea::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
+	connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)));
 	//connect(this, SIGNAL(TestSignal()), outp->getConnector(), SLOT(TestSlot()));
 	//connect(this, SIGNAL(TestSignal()), outp->GetModelConnector(), SLOT(TestSlot()));
 	//connect(this, SIGNAL(TestSignal()), outp->GetModelSettingsConnector(), SLOT(TestSlot()));
 	//connect(this, SIGNAL(TestSignal()), outp->GetProjectSettingsConnector(), SLOT(TestSlot()));
 	//QTimer::singleShot( 0, this, SLOT(TestSlot()) );
-	QTimer::singleShot( 0, this, SLOT(TestSlot()) );
 }
 
 void NewGeneVariableGroupsScrollArea::TestSlot()
 {
 	//emit TestSignal();
-	emit RefreshWidget(VARIABLE_GROUPS_SCROLL_AREA);
 }
 
 void NewGeneVariableGroupsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA widget_data)
@@ -65,4 +64,9 @@ void NewGeneVariableGroupsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_VA
 	QMessageBox msgBox;
 	msgBox.setText( msg.str().c_str() );
 	msgBox.exec();
+}
+
+void NewGeneVariableGroupsScrollArea::RefreshAllWidgets()
+{
+	emit RefreshWidget(VARIABLE_GROUPS_SCROLL_AREA);
 }

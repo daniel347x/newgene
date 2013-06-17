@@ -26,8 +26,10 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 		}
 
 		void UpdateConnections();
+		void DoRefreshAllWidgets();
 
 	signals:
+		void RefreshAllWidgets();
 
 	public slots:
 		void SignalMessageBox(STD_STRING);

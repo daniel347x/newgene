@@ -84,6 +84,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		}
 
 		virtual void UpdateConnections() {}
+		virtual void DoRefreshAllWidgets() {}
 
 	protected:
 

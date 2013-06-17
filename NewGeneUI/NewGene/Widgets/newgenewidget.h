@@ -28,6 +28,8 @@ class NewGeneWidget
 		//     that calls PrepareInputWidget() or PrepareOutputWidget() during construction.
 		virtual void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 		virtual void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		virtual void RefreshAllWidgets() {};
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA) {};
 		// ****************************************************************************************************************************
 
 
