@@ -261,6 +261,9 @@
     <ClInclude Include="Model\Tables\TableTypes.h">
       <Filter>Header Files\Model\Tables</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\UUID.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -406,6 +409,9 @@
     </ClCompile>
     <ClCompile Include="Model\Tables\TableTypes.cpp">
       <Filter>Source Files\Model\Tables</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\UUID.cpp">
+      <Filter>Source Files\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

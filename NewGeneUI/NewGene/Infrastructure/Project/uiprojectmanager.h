@@ -64,6 +64,8 @@ class UIProjectManager : public QObject,
 		//
 		//                        The UIProjectSettings possesses a shared_ptr to the backend Project Settings instance.
 		//
+		//                        The backend project possesses a shared_ptr to the backend Project Settings instance.
+		//
 		//          (list to be maintained by UIProjectManager)
 		//          UIModelSettings:
 		//
@@ -95,16 +97,27 @@ class UIProjectManager : public QObject,
 		//
 		//                      The UIModel owns the QThread event loop via RAII.
 		//
+		//                        The UIModel's QThread event loop manages *two* Boost thread worker pools
+		//                        (all other UI objects that manage a QThread event loop manage 1 corresponding
+		//                        Boost worker thread pool).
+		//                            (1) Model Action worker thread pool to handle updates to the in-memory
+		//                                cache of the model data.
+		//                            (2) Model Database worker thread pool to handle reading/writing to the
+		//                                database itself (and correspondingly, writing/reading from the
+		//                                cache of the model data).
+		//
 		//                  (list to be maintained by UIProjectManager)
 		//                  Backend Model instance:
 		//
-		//                      The backend model instance reads, writes, and caches the data in the database itself.
+		//                      The backend model instance processes and updates the model data (in worker thread pool #1).
+		//                      The backend model instance reads, writes, and caches the data in the database itself (in worker thread pool #2).
 		//
 		//                      The UIModel possesses a shared_ptr to the backend model instance.
 		//
 		//          Backend Project:
 		//
-		//              Convenience class accessible in the backend library.
+		//              Convenience class accessible in the backend library, corresponding to, and owned by, the UIProject instance
+		//              (and tied to the lifetime of the UIProject instance; i.e., to the lifetime of the tab in the user interface).
 		//
 		//              (list to be maintained by UIProjectManager)
 		//              Backend Model instance:
@@ -113,7 +126,7 @@ class UIProjectManager : public QObject,
 		//                  The backend Project possesses a shared_ptr to the backend Project Settings instance.
 		//                  The backend Project possesses a shared_ptr to the Model instance.
 		//
-		//              The UIProject owns the backend project with a unique_ptr via RAII.
+		//              As noted, the UIProject owns the backend project with a unique_ptr via RAII.
 		//
 
 	public:
