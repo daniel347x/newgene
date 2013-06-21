@@ -4,6 +4,7 @@
 #include <string>
 typedef std::string STD_STRING;
 
+#include "../../NewGeneBackEnd/globals.h"
 #include <QMessageBox>
 #include "newgenefilenames.h"
 #include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
