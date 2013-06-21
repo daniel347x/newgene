@@ -12,8 +12,19 @@ class UIOutputProject;
 
 class NewGeneWidget
 {
+
 	public:
-		explicit NewGeneWidget( QWidget * self_ = 0 );
+
+		enum WIDGET_NATURE
+		{
+			  WIDGET_NATURE_UNKNOWN
+			, WIDGET_NATURE_GENERAL
+			, WIDGET_NATURE_INPUT_WIDGET
+			, WIDGET_NATURE_OUTPUT_WIDGET
+		};
+
+	public:
+		explicit NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self_ = 0 );
 
 		NewGeneMainWindow & mainWindow();
 
@@ -45,6 +56,7 @@ class NewGeneWidget
 	public:
 
 		QWidget * self;
+		WIDGET_NATURE widget_nature;
 		UUID uuid;
 		UIInputProject * inp;
 		UIOutputProject * outp;

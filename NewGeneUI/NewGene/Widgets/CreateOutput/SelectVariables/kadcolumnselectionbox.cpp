@@ -3,7 +3,7 @@
 
 KAdColumnSelectionBox::KAdColumnSelectionBox( QWidget * parent ) :
 	QFrame( parent ),
-	NewGeneWidget( this ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	NewGeneWidget( NewGeneWidget::WIDGET_NATURE_OUTPUT_WIDGET, this ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 	ui( new Ui::KAdColumnSelectionBox )
 {
 	ui->setupUi( this );

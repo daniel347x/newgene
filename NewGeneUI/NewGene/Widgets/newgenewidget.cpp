@@ -6,12 +6,13 @@
 
 NewGeneMainWindow * NewGeneWidget::theMainWindow = nullptr;
 
-NewGeneWidget::NewGeneWidget( QWidget * self_ )
+NewGeneWidget::NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self_ )
 	: self( self_ )
 	, inp(nullptr)
 	, outp(nullptr)
 	, widget_type(WIDGET_TYPE_NONE)
 	, uuid(newUUID())
+	, widget_nature(widget_nature_)
 {
 }
 
