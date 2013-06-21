@@ -2,6 +2,7 @@
 #include <QWidget>
 #include "newgenemainwindow.h"
 #include "newgenewidget.h"
+#include "../../../NewGeneBackEnd/Utilities/UUID.h"
 
 NewGeneMainWindow * NewGeneWidget::theMainWindow = nullptr;
 
@@ -10,6 +11,7 @@ NewGeneWidget::NewGeneWidget( QWidget * self_ )
 	, inp(nullptr)
 	, outp(nullptr)
 	, widget_type(WIDGET_TYPE_NONE)
+	, uuid(newUUID())
 {
 }
 

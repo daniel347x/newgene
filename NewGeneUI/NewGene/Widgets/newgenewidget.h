@@ -45,7 +45,7 @@ class NewGeneWidget
 	public:
 
 		QWidget * self;
-
+		UUID uuid;
 		UIInputProject * inp;
 		UIOutputProject * outp;
 		DATA_WIDGETS widget_type;

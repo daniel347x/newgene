@@ -10,6 +10,8 @@
 #endif
 #include "Messager/Messager.h"
 
+typedef std::string UUID;
+
 class ProjectManager;
 class SettingsManager;
 class LoggingManager;
