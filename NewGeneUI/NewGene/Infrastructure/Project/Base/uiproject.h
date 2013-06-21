@@ -26,6 +26,8 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 {
 	public:
 
+		typedef std::map<UUID, NewGeneWidget *> UUIDWidgetMap;
+
 		static int const number_worker_threads = 1; // For now, single thread only in pool
 
 		UIProject(std::shared_ptr<UI_PROJECT_SETTINGS_CLASS> const & ui_settings,
@@ -97,6 +99,8 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		std::shared_ptr<UI_MODEL_SETTINGS_CLASS> const _model_settings;
 		std::shared_ptr<UI_MODEL_CLASS> const _model;
 		std::unique_ptr<BACKEND_PROJECT_CLASS> const _backend_project;
+
+		UUIDWidgetMap uuid_widget_map;
 
 };
 
