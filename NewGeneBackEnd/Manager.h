@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include "globals.h"
 
 namespace MANAGER_DESCRIPTION_NAMESPACE
 {

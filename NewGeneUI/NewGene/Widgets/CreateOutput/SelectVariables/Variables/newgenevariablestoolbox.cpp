@@ -26,10 +26,17 @@ void NewGeneVariablesToolbox::RefreshAllWidgets()
 
 void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX widget_data)
 {
+
 	int nItems = count();
 	for (int n = 0; n < nItems; ++n)
 	{
+		QWidget * child = find(n);
 		removeItem(0);
+		if (child)
+		{
+			delete child;
+			child = nullptr;
+		}
 	}
 
 	std::for_each(widget_data.variable_group_long_names.cbegin(), widget_data.variable_group_long_names.cend(), [&](std::string const & variable_group_long_name)
@@ -43,4 +50,5 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 
 //	NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this );
 //	addItem( tmpGrp, "MID Detail Variables" );
+
 }

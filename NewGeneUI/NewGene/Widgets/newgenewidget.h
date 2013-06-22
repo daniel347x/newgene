@@ -68,6 +68,7 @@ class NewGeneWidget
 		UIInputProject * inp;
 		UIOutputProject * outp;
 		DATA_WIDGETS widget_type;
+		std::shared_ptr<DataInstanceIdentifier> instance_identifier;
 		bool top_level;
 		static NewGeneMainWindow * theMainWindow;
 

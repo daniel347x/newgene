@@ -1,6 +1,8 @@
 #ifndef DATAWIDGETS_H
 #define DATAWIDGETS_H
 
+#include "../globals.h"
+
 enum DATA_WIDGETS
 {
 
@@ -22,41 +24,85 @@ enum WIDGET_DATA_ITEM_REQUEST_REASON
 
 };
 
+class DataInstanceIdentifier
+{
+
+public:
+
+	class Notes
+	{
+	public:
+		Notes()
+		{
+
+		}
+		std::shared_ptr<std::string> notes1;
+		std::shared_ptr<std::string> notes2;
+		std::shared_ptr<std::string> notes3;
+	};
+
+	DataInstanceIdentifier()
+	{
+
+	}
+
+	std::shared_ptr<UUID> uuid;
+	std::shared_ptr<std::string> code;
+	std::shared_ptr<std::string> description;
+	Notes notes;
+
+};
+
 class WidgetDataItemRequest_base
 {
+
 public:
+
 	WidgetDataItemRequest_base(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN)
 		: reason(reason_)
 	{
 
 	}
+
 	WidgetDataItemRequest_base(WidgetDataItemRequest_base const & rhs)
 		: reason(rhs.reason)
+		, identifier(rhs.identifier)
 	{
 
 	}
+
 	WIDGET_DATA_ITEM_REQUEST_REASON reason;
+	std::shared_ptr<DataInstanceIdentifier> identifier;
+
 };
 
 class WidgetDataItem_base
 {
+
 public:
+
 	WidgetDataItem_base(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN)
 		: request_reason(request_reason_)
 	{
 
 	}
+
 	WidgetDataItem_base(WidgetDataItemRequest_base const & request_obj)
 		: request_reason(request_obj.reason)
 	{
 
 	}
+
 	WidgetDataItem_base(WidgetDataItem_base const & rhs)
 		: request_reason(rhs.request_reason)
+		, identifier(rhs.identifier)
 	{
 
 	}
+
 	WIDGET_DATA_ITEM_REQUEST_REASON request_reason;
+	std::shared_ptr<DataInstanceIdentifier> identifier;
+
 };
 
 template<DATA_WIDGETS WIDGET>
