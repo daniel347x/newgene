@@ -20,15 +20,30 @@ NewGeneWidget::NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self
 		if (!inp)
 		{
 			statusManagerUI().PostStatus( "Input project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
-			//inp->
+			return;
 		}
+		inp->AddWidgetToUUIDMap(this, uuid);
 	}
 	if (IsOutputProjectWidget())
 	{
 		if (!outp)
 		{
 			statusManagerUI().PostStatus( "Output project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
+			return;
 		}
+		outp->AddWidgetToUUIDMap(this, uuid);
+	}
+}
+
+NewGeneWidget::~NewGeneWidget()
+{
+	if (IsInputProjectWidget())
+	{
+		inp->RemoveWidgetFromUUIDMap(uuid);
+	}
+	if (IsOutputProjectWidget())
+	{
+		outp->RemoveWidgetFromUUIDMap(uuid);
 	}
 }
 

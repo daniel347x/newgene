@@ -24,7 +24,9 @@ class NewGeneWidget
 		};
 
 	public:
-		explicit NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self_ = 0 );
+		NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self_ = 0 );
+
+		virtual ~NewGeneWidget();
 
 		NewGeneMainWindow & mainWindow();
 
