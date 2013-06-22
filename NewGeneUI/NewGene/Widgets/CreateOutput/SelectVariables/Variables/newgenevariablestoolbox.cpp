@@ -27,8 +27,6 @@ void NewGeneVariablesToolbox::RefreshAllWidgets()
 void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX widget_data)
 {
 
-	static bool first = true;
-
 	int nItems = count();
 	for (int n = 0; n < nItems; ++n)
 	{
@@ -46,19 +44,5 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 		NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this );
 		addItem( tmpGrp, variable_group_long_name.c_str() );
 	});
-
-	if (first)
-	{
-		first = false;
-		WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
-		request.s = "And a SECOND TRIP custom group!!!";
-		emit RefreshWidget(request);
-	}
-
-//	groups = new NewGeneVariableGroup( this );
-//	addItem( groups, "Country Variables" );
-
-//	NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this );
-//	addItem( tmpGrp, "MID Detail Variables" );
 
 }
