@@ -71,5 +71,5 @@ void NewGeneVariableGroupsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_VA
 
 void NewGeneVariableGroupsScrollArea::RefreshAllWidgets()
 {
-	emit RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA());
+	emit RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS));
 }

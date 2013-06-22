@@ -19,7 +19,7 @@ void NewGeneVariablesToolbox::UpdateOutputConnections(UIProjectManager::UPDATE_C
 
 void NewGeneVariablesToolbox::RefreshAllWidgets()
 {
-	WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX request;
+	WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	request.s = "And another custom group!!!";
 	emit RefreshWidget(request);
 }
