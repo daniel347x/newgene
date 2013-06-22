@@ -32,14 +32,15 @@ UIProjectManager::UIProjectManager( QObject * parent )
 UIProjectManager::~UIProjectManager()
 {
 
-	for_each(input_tabs.begin(), input_tabs.end(), [](std::pair<NewGeneMainWindow * const, InputProjectTabs> & windows)
+	for_each(input_tabs.begin(), input_tabs.end(), [this](std::pair<NewGeneMainWindow * const, InputProjectTabs> & windows)
 	{
 
 		InputProjectTabs & tabs = windows.second;
-		for_each(tabs.begin(), tabs.end(), [](InputProjectTab & tab)
+		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
 			ProjectPaths & paths = tab.first;
 			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
+			emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, project_ptr);
 			project_ptr->model().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->modelSettings().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->projectSettings().EndLoopAndBackgroundPool(); // blocks
@@ -49,14 +50,15 @@ UIProjectManager::~UIProjectManager()
 
 	});
 
-	for_each(output_tabs.begin(), output_tabs.end(), [](std::pair<NewGeneMainWindow * const, OutputProjectTabs> & windows)
+	for_each(output_tabs.begin(), output_tabs.end(), [this](std::pair<NewGeneMainWindow * const, OutputProjectTabs> & windows)
 	{
 
 		OutputProjectTabs & tabs = windows.second;
-		for_each(tabs.begin(), tabs.end(), [](OutputProjectTab & tab)
+		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
 			ProjectPaths & paths = tab.first;
 			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
+			emit this->UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, project_ptr);
 			project_ptr->model().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->modelSettings().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->projectSettings().EndLoopAndBackgroundPool(); // blocks

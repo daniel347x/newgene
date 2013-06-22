@@ -15,56 +15,10 @@ NewGeneWidget::NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self
 	, uuid(newUUID())
 	, widget_nature(widget_nature_)
 {
-	if (IsInputProjectWidget())
-	{
-		if (!inp)
-		{
-			statusManagerUI().PostStatus( "Input project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
-			return;
-		}
-		try
-		{
-			inp->AddWidgetToUUIDMap(dynamic_cast<NewGeneWidget*>(self_), uuid);
-		}
-		catch (std::bad_cast & bc)
-		{
-			boost::format msg("Unable to obtain proper widget during construction: %1%");
-			msg % bc.what();
-			statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
-			return;
-		}
-	}
-	if (IsOutputProjectWidget())
-	{
-		if (!outp)
-		{
-			statusManagerUI().PostStatus( "Output project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
-			return;
-		}
-		try
-		{
-			outp->AddWidgetToUUIDMap(dynamic_cast<NewGeneWidget*>(self_), uuid);
-		}
-		catch (std::bad_cast & bc)
-		{
-			boost::format msg("Unable to obtain proper widget during construction: %1%");
-			msg % bc.what();
-			statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
-			return;
-		}
-	}
 }
 
 NewGeneWidget::~NewGeneWidget()
 {
-	if (IsInputProjectWidget())
-	{
-		inp->RemoveWidgetFromUUIDMap(uuid);
-	}
-	if (IsOutputProjectWidget())
-	{
-		outp->RemoveWidgetFromUUIDMap(uuid);
-	}
 }
 
 void NewGeneWidget::PrepareInputWidget(DATA_WIDGETS widget_type_)
@@ -107,16 +61,99 @@ NewGeneMainWindow & NewGeneWidget::mainWindow()
 
 void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
-	inp = project;
-	self->connect(self, SIGNAL(RefreshWidget(DATA_WIDGETS)), inp->getConnector(), SLOT(RefreshWidget(DATA_WIDGETS)));
-	self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
+
+	if (!IsInputProjectWidget())
+	{
+		boost::format msg("Attempting to connect an input project to a widget that has not registered as an input widget.");
+		statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
+		return;
+	}
+
+	if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_INPUT_PROJECT)
+	{
+		if (project && project == inp)
+		{
+			inp->RemoveWidgetFromUUIDMap(uuid);
+		}
+		inp = nullptr;
+
+		// TODO: release connections here
+	}
+
+	else if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
+	{
+		inp = project;
+
+		if (!inp)
+		{
+			statusManagerUI().PostStatus( "Input project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
+			return;
+		}
+		try
+		{
+			inp->AddWidgetToUUIDMap(dynamic_cast<NewGeneWidget*>(self), uuid);
+		}
+		catch (std::bad_cast & bc)
+		{
+			boost::format msg("Unable to obtain proper widget during construction: %1%");
+			msg % bc.what();
+			statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
+			return;
+		}
+
+		self->connect(self, SIGNAL(RefreshWidget(DATA_WIDGETS)), inp->getConnector(), SLOT(RefreshWidget(DATA_WIDGETS)));
+		self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
+	}
+
 }
 
 void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
-	outp = project;
-	self->connect(self, SIGNAL(RefreshWidget(DATA_WIDGETS)), outp->getConnector(), SLOT(RefreshWidget(DATA_WIDGETS)));
-	self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
+
+	if (!IsOutputProjectWidget())
+	{
+		boost::format msg("Attempting to connect an output project to a widget that has not registered as an output widget.");
+		statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
+		return;
+	}
+
+	if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		if (project && project == outp)
+		{
+			outp->RemoveWidgetFromUUIDMap(uuid);
+		}
+		outp = nullptr;
+
+		// TODO: release connections here
+	}
+
+	else if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		outp = project;
+
+		if (!outp)
+		{
+			statusManagerUI().PostStatus( "Output project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
+			return;
+		}
+		try
+		{
+			outp->AddWidgetToUUIDMap(dynamic_cast<NewGeneWidget*>(self), uuid);
+		}
+		catch (std::bad_cast & bc)
+		{
+			boost::format msg("Unable to obtain proper widget during construction: %1%");
+			msg % bc.what();
+			statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
+			return;
+		}
+
+		self->connect(self, SIGNAL(RefreshWidget(DATA_WIDGETS)), outp->getConnector(), SLOT(RefreshWidget(DATA_WIDGETS)));
+		self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
+	}
+
+
 }
 
 bool NewGeneWidget::IsInputProjectWidget() const
