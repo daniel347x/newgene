@@ -3,7 +3,7 @@
 
 NewGeneVariableSummaryGroup::NewGeneVariableSummaryGroup( QWidget * parent ) :
 	QGroupBox( parent ),
-	NewGeneWidget( NewGeneWidget::WIDGET_NATURE_OUTPUT_WIDGET, this ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_OUTPUT_WIDGET) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 	ui( new Ui::NewGeneVariableSummaryGroup )
 {
 	ui->setupUi( this );

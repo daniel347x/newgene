@@ -10,6 +10,8 @@ class NewGeneMainWindow;
 class UIInputProject;
 class UIOutputProject;
 
+class WidgetCreationInfo;
+
 class NewGeneWidget
 {
 
@@ -24,14 +26,14 @@ class NewGeneWidget
 		};
 
 	public:
-		NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self_ = 0 );
+		NewGeneWidget( WidgetCreationInfo const & creation_info );
 
 		virtual ~NewGeneWidget();
 
 		NewGeneMainWindow & mainWindow();
 
-		virtual void PrepareInputWidget(DATA_WIDGETS widget_type_);
-		virtual void PrepareOutputWidget(DATA_WIDGETS widget_type_);
+		virtual void PrepareInputWidget();
+		virtual void PrepareOutputWidget();
 
 	protected:
 
@@ -71,6 +73,24 @@ class NewGeneWidget
 		bool IsInputProjectWidget() const;
 		bool IsOutputProjectWidget() const;
 
+};
+
+class WidgetCreationInfo
+{
+	public:
+		WidgetCreationInfo(QWidget * const self_, NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN, DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE, bool const top_level_ = false)
+			: self(self_)
+			, widget_nature(widget_nature_)
+			, widget_type(widget_type_)
+			, top_level(top_level_)
+		{
+
+		}
+
+		QWidget * self;
+		NewGeneWidget::WIDGET_NATURE widget_nature;
+		DATA_WIDGETS widget_type;
+		bool top_level;
 };
 
 #endif // NEWGENEWIDGET_H

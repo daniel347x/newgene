@@ -7,13 +7,13 @@
 
 NewGeneMainWindow * NewGeneWidget::theMainWindow = nullptr;
 
-NewGeneWidget::NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self_ )
-	: self( self_ )
+NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
+	: self( creation_info.self )
 	, inp(nullptr)
 	, outp(nullptr)
-	, widget_type(WIDGET_TYPE_NONE)
+	, widget_type(creation_info.widget_type)
 	, uuid(newUUID())
-	, widget_nature(widget_nature_)
+	, widget_nature(creation_info.widget_nature)
 {
 }
 
@@ -21,23 +21,21 @@ NewGeneWidget::~NewGeneWidget()
 {
 }
 
-void NewGeneWidget::PrepareInputWidget(DATA_WIDGETS widget_type_)
+void NewGeneWidget::PrepareInputWidget()
 {
 	if (self == nullptr)
 	{
 		return;
 	}
-	widget_type = widget_type_;
 	self->connect(&projectManagerUI(), SIGNAL(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
 }
 
-void NewGeneWidget::PrepareOutputWidget(DATA_WIDGETS widget_type_)
+void NewGeneWidget::PrepareOutputWidget()
 {
 	if (self == nullptr)
 	{
 		return;
 	}
-	widget_type = widget_type_;
 	self->connect(&projectManagerUI(), SIGNAL(UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
 }
 
