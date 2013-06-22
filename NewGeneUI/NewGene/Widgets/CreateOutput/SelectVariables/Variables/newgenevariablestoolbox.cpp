@@ -4,7 +4,7 @@
 
 NewGeneVariablesToolbox::NewGeneVariablesToolbox( QWidget * parent ) :
 	QToolBox( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_TOOLBOX) ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_TOOLBOX, true) ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
 	PrepareOutputWidget();
 	layout()->setSpacing( 1 );

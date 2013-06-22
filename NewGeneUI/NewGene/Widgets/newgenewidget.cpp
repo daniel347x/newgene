@@ -14,6 +14,7 @@ NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
 	, widget_type(creation_info.widget_type)
 	, uuid(newUUID())
 	, widget_nature(creation_info.widget_nature)
+	, top_level(creation_info.top_level)
 {
 }
 
@@ -99,7 +100,10 @@ void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_
 			return;
 		}
 
-		self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
+		if (IsTopLevel())
+		{
+			self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
+		}
 	}
 
 }
@@ -146,7 +150,10 @@ void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS
 			return;
 		}
 
-		self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
+		if (IsTopLevel())
+		{
+			self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
+		}
 	}
 
 

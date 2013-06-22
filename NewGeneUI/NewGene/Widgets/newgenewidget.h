@@ -32,6 +32,8 @@ class NewGeneWidget
 
 		NewGeneMainWindow & mainWindow();
 
+		bool IsTopLevel() { return top_level; }
+
 		virtual void PrepareInputWidget();
 		virtual void PrepareOutputWidget();
 
@@ -66,6 +68,7 @@ class NewGeneWidget
 		UIInputProject * inp;
 		UIOutputProject * outp;
 		DATA_WIDGETS widget_type;
+		bool top_level;
 		static NewGeneMainWindow * theMainWindow;
 
 	public:
