@@ -88,6 +88,20 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		virtual void UpdateConnections() {}
 		virtual void DoRefreshAllWidgets() {}
 
+		void AddWidgetToUUIDMap(NewGeneWidget * widget, UUID & uuid)
+		{
+			uuid_widget_map[uuid] = widget;
+		}
+
+		void RemoveWidgetFromUUIDMap(UUID & uuid)
+		{
+			auto position = uuid_widget_map.find(uuid);
+			if (position != uuid_widget_map.cend())
+			{
+				uuid_widget_map.erase(position);
+			}
+		}
+
 	protected:
 
 		// The order of initialization is important.

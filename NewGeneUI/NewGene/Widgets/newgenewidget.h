@@ -63,6 +63,11 @@ class NewGeneWidget
 		DATA_WIDGETS widget_type;
 		static NewGeneMainWindow * theMainWindow;
 
+	public:
+
+		bool IsInputProjectWidget() const;
+		bool IsOutputProjectWidget() const;
+
 };
 
 #endif // NEWGENEWIDGET_H

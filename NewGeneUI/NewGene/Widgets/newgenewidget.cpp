@@ -2,6 +2,7 @@
 #include <QWidget>
 #include "newgenemainwindow.h"
 #include "newgenewidget.h"
+#include "uistatusmanager.h"
 #include "../../../NewGeneBackEnd/Utilities/UUID.h"
 
 NewGeneMainWindow * NewGeneWidget::theMainWindow = nullptr;
@@ -14,6 +15,21 @@ NewGeneWidget::NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self
 	, uuid(newUUID())
 	, widget_nature(widget_nature_)
 {
+	if (IsInputProjectWidget())
+	{
+		if (!inp)
+		{
+			statusManagerUI().PostStatus( "Input project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
+			//inp->
+		}
+	}
+	if (IsOutputProjectWidget())
+	{
+		if (!outp)
+		{
+			statusManagerUI().PostStatus( "Output project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
+		}
+	}
 }
 
 void NewGeneWidget::PrepareInputWidget(DATA_WIDGETS widget_type_)
@@ -66,4 +82,14 @@ void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS
 	outp = project;
 	self->connect(self, SIGNAL(RefreshWidget(DATA_WIDGETS)), outp->getConnector(), SLOT(RefreshWidget(DATA_WIDGETS)));
 	self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
+}
+
+bool NewGeneWidget::IsInputProjectWidget() const
+{
+	return widget_nature == WIDGET_NATURE_INPUT_WIDGET;
+}
+
+bool NewGeneWidget::IsOutputProjectWidget() const
+{
+	return widget_nature == WIDGET_NATURE_OUTPUT_WIDGET;
 }
