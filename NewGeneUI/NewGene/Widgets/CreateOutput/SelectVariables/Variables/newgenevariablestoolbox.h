@@ -12,7 +12,7 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 		explicit NewGeneVariablesToolbox( QWidget * parent = 0 );
 
 	signals:
-		void RefreshWidget(DATA_WIDGETS);
+		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX);
 
 	public slots:
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);

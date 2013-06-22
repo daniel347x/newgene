@@ -1,8 +1,12 @@
 #include "newgeneapplication.h"
 #include "./Infrastructure/UIData/uiwidgetdatarefresh.h"
 
-Q_DECLARE_METATYPE(DATA_WIDGETS);
+
 Q_DECLARE_METATYPE(STD_STRING);
+
+Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA);
+Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX);
+
 
 NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QApplication( argc, argv )
@@ -14,8 +18,12 @@ bool NewGeneApplication::notify( QObject * receiver, QEvent * e )
 
 	bool returnVal = false;
 
-	qRegisterMetaType<DATA_WIDGETS>();
+
 	qRegisterMetaType<STD_STRING>();
+
+	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA>();
+	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX>();
+
 
 	try
 	{

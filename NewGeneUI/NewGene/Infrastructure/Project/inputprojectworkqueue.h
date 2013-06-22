@@ -32,7 +32,8 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 	// ********************************* //
 
 		void TestSlot();
-		void RefreshWidget(DATA_WIDGETS);
+
+		//void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA);
 
 };
 

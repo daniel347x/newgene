@@ -13,12 +13,15 @@ NewGeneVariablesToolbox::NewGeneVariablesToolbox( QWidget * parent ) :
 void NewGeneVariablesToolbox::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
+	connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX)));
 	connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX)));
 }
 
 void NewGeneVariablesToolbox::RefreshAllWidgets()
 {
-	emit RefreshWidget(VARIABLE_GROUPS_SCROLL_AREA);
+	WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX request;
+	request.s = "And another custom group!!!";
+	emit RefreshWidget(request);
 }
 
 void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX widget_data)

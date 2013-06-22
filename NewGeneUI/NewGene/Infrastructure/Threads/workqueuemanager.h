@@ -49,9 +49,10 @@ class WorkQueueManagerBase : public QObject
 		// and are all defined as virtual so that specializations of
 		// WorkQueueManager can override them
 		virtual void TestSlot() {}
-		virtual void LoadFromDatabase(UI_INPUT_MODEL_PTR) {};
-		virtual void LoadFromDatabase(UI_OUTPUT_MODEL_PTR) {};
-		virtual void RefreshWidget(DATA_WIDGETS) {};
+		virtual void LoadFromDatabase(UI_INPUT_MODEL_PTR) {}
+		virtual void LoadFromDatabase(UI_OUTPUT_MODEL_PTR) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {}
 
 	public:
 		virtual void SetConnections() {}

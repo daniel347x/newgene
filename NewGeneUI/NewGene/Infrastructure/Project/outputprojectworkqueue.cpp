@@ -30,7 +30,20 @@ void OutputProjectWorkQueue::EmitMessage(std::string msg)
 	emit SignalMessageBox(msg.c_str());
 }
 
-void OutputProjectWorkQueue::RefreshWidget(DATA_WIDGETS widget)
+
+/************************************************************************/
+// VARIABLE_GROUPS_SCROLL_AREA
+/************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA widget)
 {
-	get()->getWorkService().post(DoRefreshOutputWidget(widget, this));
+	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUPS_SCROLL_AREA>(widget, this));
 }
+
+/************************************************************************/
+// VARIABLE_GROUPS_TOOLBOX
+/************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUPS_TOOLBOX>(widget, this));
+}
+

@@ -42,7 +42,8 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 	// ********************************* //
 
 		void TestSlot();
-		void RefreshWidget(DATA_WIDGETS);
+		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA widget);
+		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX widget);
 
 };
 

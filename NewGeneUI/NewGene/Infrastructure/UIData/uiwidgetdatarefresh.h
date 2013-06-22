@@ -2,58 +2,68 @@
 #define WIDGETDATAREFRESH_H
 
 #include "../../../../NewGeneBackEnd/UIData/DataWidgets.h"
+#include "../Project/inputprojectworkqueue.h"
+#include "../Project/outputprojectworkqueue.h"
+#include "../Messager/uimessager.h"
+#include "../Messager/uimessagersingleshot.h"
+#include "../UIData/uiuidatamanager.h"
 
-class InputProjectWorkQueue;
-class OutputProjectWorkQueue;
+//class InputProjectWorkQueue;
+//class OutputProjectWorkQueue;
 
-template<DATA_WIDGETS WIDGET>
-void WidgetDataRefresh()
-{}
+//template<DATA_WIDGETS WIDGET>
+//void WidgetDataRefresh()
+//{}
 
+template<DATA_WIDGETS DATA_WIDGET>
 class DoRefreshWidget
 {
 
 	public:
 
-		DoRefreshWidget(DATA_WIDGETS const widget_)
-			: widget(widget_)
+		DoRefreshWidget(WidgetDataItemRequest<DATA_WIDGET> const & widget_refresh_request_)
+			: widget_refresh_request(widget_refresh_request_)
 		{
 
 		}
 
 		DoRefreshWidget(DoRefreshWidget const & rhs)
-			: widget(rhs.widget)
+			: widget_refresh_request(rhs.widget_refresh_request)
 		{
 
 		}
 
 		virtual void operator()() {};
 
-		DATA_WIDGETS const widget;
+		WidgetDataItemRequest<DATA_WIDGET> const widget_refresh_request;
 
 
 };
 
-class DoRefreshInputWidget : public DoRefreshWidget
+template<DATA_WIDGETS DATA_WIDGET>
+class DoRefreshInputWidget : public DoRefreshWidget<DATA_WIDGET>
 {
 
 	public:
 
-		DoRefreshInputWidget(DATA_WIDGETS const widget_, InputProjectWorkQueue * queue_)
-			: DoRefreshWidget(widget_)
+		DoRefreshInputWidget(WidgetDataItemRequest<DATA_WIDGET> const & widget_refresh_request_, InputProjectWorkQueue * queue_)
+			: DoRefreshWidget<DATA_WIDGET>(widget_refresh_request_)
 			, queue(queue_)
 		{
 
 		}
 
 		DoRefreshInputWidget(DoRefreshInputWidget const & rhs)
-			: DoRefreshWidget(rhs)
+			: DoRefreshWidget<DATA_WIDGET>(rhs)
 			, queue(rhs.queue)
 		{
 
 		}
 
-		void operator()();
+		void operator()()
+		{
+
+		}
 
 	protected:
 
@@ -61,26 +71,31 @@ class DoRefreshInputWidget : public DoRefreshWidget
 
 };
 
-class DoRefreshOutputWidget : public DoRefreshWidget
+template<DATA_WIDGETS DATA_WIDGET>
+class DoRefreshOutputWidget : public DoRefreshWidget<DATA_WIDGET>
 {
 
 	public:
 
-		DoRefreshOutputWidget(DATA_WIDGETS const widget_, OutputProjectWorkQueue * queue_)
-			: DoRefreshWidget(widget_)
+		DoRefreshOutputWidget(WidgetDataItemRequest<DATA_WIDGET> const & widget_, OutputProjectWorkQueue * queue_)
+			: DoRefreshWidget<DATA_WIDGET>(widget_)
 			, queue(queue_)
 		{
 
 		}
 
 		DoRefreshOutputWidget(DoRefreshOutputWidget const & rhs)
-			: DoRefreshWidget(rhs)
+			: DoRefreshWidget<DATA_WIDGET>(rhs)
 			, queue(rhs.queue)
 		{
 
 		}
 
-		void operator()();
+		void operator()()
+		{
+			UIMessagerSingleShot messager(queue->get()->messager);
+			uidataManagerUI().getBackendManager().DoRefreshOutputWidget(messager.get(), widget_refresh_request, queue->get()->backend());
+		}
 
 	protected:
 

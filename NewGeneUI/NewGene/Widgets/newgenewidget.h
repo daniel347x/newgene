@@ -51,7 +51,8 @@ class NewGeneWidget
 		// Pseudo-signals.
 		//     There will be a compile-time error if the following functions are not given a declaration in every widget
 		//     that calls PrepareInputWidget() or PrepareOutputWidget() during construction.
-		virtual void RefreshWidget(DATA_WIDGETS) {};
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {};
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {};
 		// ****************************************************************************************************************************
 
 

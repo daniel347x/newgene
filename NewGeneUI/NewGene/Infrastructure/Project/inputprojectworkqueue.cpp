@@ -22,7 +22,12 @@ void InputProjectWorkQueue::SetConnections()
 	connect(this, SIGNAL(SignalMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
 }
 
-void InputProjectWorkQueue::RefreshWidget(DATA_WIDGETS widget)
-{
 
-}
+///************************************************************************/
+//// VARIABLE_GROUPS_SCROLL_AREA
+///************************************************************************/
+//void InputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA)
+//{
+//		get()->getWorkService().post(DoRefreshOutputWidget(widget, this));
+//}
+
