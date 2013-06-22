@@ -22,7 +22,17 @@ NewGeneWidget::NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self
 			statusManagerUI().PostStatus( "Input project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
 			return;
 		}
-		inp->AddWidgetToUUIDMap(this, uuid);
+		try
+		{
+			inp->AddWidgetToUUIDMap(dynamic_cast<NewGeneWidget*>(self_), uuid);
+		}
+		catch (std::bad_cast & bc)
+		{
+			boost::format msg("Unable to obtain proper widget during construction: %1%");
+			msg % bc.what();
+			statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
+			return;
+		}
 	}
 	if (IsOutputProjectWidget())
 	{
@@ -31,7 +41,17 @@ NewGeneWidget::NewGeneWidget( WIDGET_NATURE const widget_nature_, QWidget * self
 			statusManagerUI().PostStatus( "Output project is unavailable.", UIStatusManager::IMPORTANCE_HIGH, true );
 			return;
 		}
-		outp->AddWidgetToUUIDMap(this, uuid);
+		try
+		{
+			outp->AddWidgetToUUIDMap(dynamic_cast<NewGeneWidget*>(self_), uuid);
+		}
+		catch (std::bad_cast & bc)
+		{
+			boost::format msg("Unable to obtain proper widget during construction: %1%");
+			msg % bc.what();
+			statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
+			return;
+		}
 	}
 }
 
