@@ -1,3 +1,4 @@
+#include "../../../globals.h"
 #include "VariableGroup.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
@@ -31,6 +32,7 @@ void Table_VG_CATEGORY::Load(sqlite3 * db)
 		return;
 	}
 	int step_result = 0;
+	//DataInstanceIdentifiers identifiers;
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		char const * variable_group_code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_STRING_CODE));

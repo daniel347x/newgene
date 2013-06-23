@@ -37,4 +37,6 @@ UIDataManager & uidataManager();
 UIActionManager & uiactionManager();
 ModelActionManager & modelactionManager();
 
+#include "UIData\DataWidgets.h"
+
 #endif
