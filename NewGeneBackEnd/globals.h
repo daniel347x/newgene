@@ -1,9 +1,6 @@
 #ifndef GLOBALS_BACKEND_H
 #define GLOBALS_BACKEND_H
 
-#include <string>
-typedef std::string UUID;
-
 #include "Utilities\NewGeneException.h"
 #include <memory>
 #include <vector>

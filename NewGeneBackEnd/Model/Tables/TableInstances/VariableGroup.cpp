@@ -1,4 +1,3 @@
-#include "../../../globals.h"
 #include "VariableGroup.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
@@ -22,6 +21,9 @@ std::string const Table_VG_SET_MEMBER::VG_SET_MEMBER_FLAGS = "VG_SET_MEMBER_FLAG
 
 void Table_VG_CATEGORY::Load(sqlite3 * db)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	identifiers.clear();
 
 	sqlite3_stmt * stmt = NULL;
@@ -32,21 +34,24 @@ void Table_VG_CATEGORY::Load(sqlite3 * db)
 		return;
 	}
 	int step_result = 0;
-	//DataInstanceIdentifiers identifiers;
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
-		char const * variable_group_code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_STRING_CODE));
-		char const * variable_group_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_STRING_LONGHAND));
-		if (variable_group_code && strlen(variable_group_code))
+		char const * uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_UUID));
+		char const * code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_STRING_CODE));
+		char const * longhand = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_STRING_LONGHAND));
+		char const * notes1 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_NOTES1));
+		char const * notes2 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_NOTES2));
+		char const * notes3 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_NOTES3));
+		char const * fk_uoa = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_FK_UOA_CATEGORY_UUID));
+		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_FLAGS));
+		if (uuid && strlen(uuid) == UUID_LENGTH && code && strlen(code) && longhand && strlen(longhand) && fk_uoa && strlen(fk_uoa) == UUID_LENGTH)
 		{
-			if (variable_group_name && strlen(variable_group_name) > 0)
-			{
-				std::string variable_group = variable_group_name;
-				if (!variable_group.empty())
-				{
-					identifiers.push_back(variable_group);
-				}
-			}
+			identifiers.push_back(DataInstanceIdentifier(uuid, code, longhand, MakeNotes(notes1, notes2, notes3)));
 		}
 	}
+}
+
+DataInstanceIdentifiers Table_VG_CATEGORY::getIdentifiers()
+{
+	return identifiers;
 }

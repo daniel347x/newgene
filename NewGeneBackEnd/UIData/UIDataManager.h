@@ -1,9 +1,9 @@
 #ifndef UIDATAMANAGER_H
 #define UIDATAMANAGER_H
 
+#include "../globals.h"
 #include "..\Manager.h"
 #include "../Messager/Messager.h"
-#include "DataWidgets.h"
 
 class InputProject;
 class OutputProject;

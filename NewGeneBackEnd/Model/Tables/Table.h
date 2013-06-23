@@ -6,6 +6,7 @@
 
 #include "TableTypes.h"
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
+#include <mutex>
 
 template<FIELD_TYPE THE_FIELD_TYPE>
 class FieldValue
@@ -71,33 +72,42 @@ public:
 	typename FieldData<THE_FIELD_TYPE>::type const data;
 };
 
-class TableMetadata
+class TableMetadata_base
 {
 public:
 
 };
 
 template<TABLE_TYPES TABLE_TYPE>
-class Table
+class TableMetadata : public TableMetadata_base
+{
+
+};
+
+class Table_base
 {
 
 	public:
 
-		TableMetadata metadata;
+		std::recursive_mutex data_mutex;
+	
+		Table_base()
+		{
 
-		static std::vector<FIELD_TYPE> const types;
-		static std::vector<std::string> const names;
-
-		std::vector<BaseField> fields;
+		}
 
 		virtual void Load(sqlite3 * db) {};
-		//virtual void Load(sqlite3 * db) = 0;
 
 };
 
 template<TABLE_TYPES TABLE_TYPE>
-std::vector<FIELD_TYPE> Table<TABLE_TYPE>::types = TableTypeTraits<TABLE_TYPE>::types;
-template<TABLE_TYPES TABLE_TYPE>
-std::vector<std::string> Table<TABLE_TYPE>::names = TableTypeTraits<TABLE_TYPE>::names;
+class Table : public Table_base
+{
+
+	public:
+
+		TableMetadata<TABLE_TYPE> metadata;
+
+};
 
 #endif

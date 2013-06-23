@@ -1,7 +1,13 @@
 #ifndef DATAWIDGETS_H
 #define DATAWIDGETS_H
 
-#include "../globals.h"
+#include <memory>
+#include <vector>
+#include <string>
+
+typedef std::string UUID;
+
+int const UUID_LENGTH = 36;
 
 enum DATA_WIDGETS
 {
@@ -36,15 +42,37 @@ public:
 		{
 
 		}
+		Notes(Notes const & rhs)
+			: notes1(rhs.notes1)
+			, notes2(rhs.notes2)
+			, notes3(rhs.notes3)
+		{
+
+		}
+		Notes(std::string notes1, std::string notes2, std::string notes3)
+			: notes1(std::make_shared<std::string>(notes1))
+			, notes2(std::make_shared<std::string>(notes2))
+			, notes3(std::make_shared<std::string>(notes3))
+		{
+
+		}
+		Notes(std::shared_ptr<std::string> notes1, std::shared_ptr<std::string> notes2, std::shared_ptr<std::string> notes3)
+			: notes1(notes1)
+			, notes2(notes2)
+			, notes3(notes3)
+		{
+
+		}
 		std::shared_ptr<std::string> notes1;
 		std::shared_ptr<std::string> notes2;
 		std::shared_ptr<std::string> notes3;
 	};
 
-	DataInstanceIdentifier(UUID uuid_, std::string code_, std::string description_)
+	DataInstanceIdentifier(UUID uuid_, std::string code_, std::string description_, Notes notes_ = Notes())
 		: uuid(std::make_shared<UUID>(uuid_))
 		, code(std::make_shared<std::string>(code_))
-		, description(std::make_shared<std::string>(description_))
+		, longhand(std::make_shared<std::string>(description_))
+		, notes(notes_)
 	{
 
 	}
@@ -55,21 +83,25 @@ public:
 
 	}
 
-	DataInstanceIdentifier(std::string code_, std::string description_)
+	DataInstanceIdentifier(std::string code_, std::string description_, Notes notes_ = Notes())
 		: code(std::make_shared<std::string>(code_))
-		, description(std::make_shared<std::string>(description_))
+		, longhand(std::make_shared<std::string>(description_))
+		, notes(notes_)
 	{
 
 	}
 
 	std::shared_ptr<UUID> uuid;
 	std::shared_ptr<std::string> code;
-	std::shared_ptr<std::string> description;
+	std::shared_ptr<std::string> longhand;
 	Notes notes;
 
 };
 
 typedef std::vector<DataInstanceIdentifier> DataInstanceIdentifiers;
+
+DataInstanceIdentifier::Notes MakeNotes(char const * const notes1, char const * const notes2, char const * const notes3);
+DataInstanceIdentifier::Notes MakeNotes(std::string notes1, std::string notes2, std::string notes3);
 
 class WidgetDataItemRequest_base
 {
@@ -186,10 +218,8 @@ public:
 	}
 	WidgetDataItemRequest<VARIABLE_GROUPS_TOOLBOX>(WidgetDataItemRequest<VARIABLE_GROUPS_TOOLBOX> const & rhs)
 		: WidgetDataItemRequest_base(rhs)
-		, s(rhs.s)
 	{
 	}
-	std::string s;
 };
 typedef WidgetDataItemRequest<VARIABLE_GROUPS_TOOLBOX> WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX;
 
@@ -207,10 +237,10 @@ public:
 	}
 	WidgetDataItem<VARIABLE_GROUPS_TOOLBOX>(WidgetDataItem<VARIABLE_GROUPS_TOOLBOX> const & rhs)
 		: WidgetDataItem_base(rhs)
-		, variable_group_long_names(rhs.variable_group_long_names)
+		, identifiers(rhs.identifiers)
 	{
 	}
-	std::vector<std::string> variable_group_long_names;
+	DataInstanceIdentifiers identifiers;
 };
 typedef WidgetDataItem<VARIABLE_GROUPS_TOOLBOX> WidgetDataItem_VARIABLE_GROUPS_TOOLBOX;
 

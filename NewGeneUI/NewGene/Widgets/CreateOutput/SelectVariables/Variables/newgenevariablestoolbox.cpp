@@ -39,10 +39,13 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 		}
 	}
 
-	std::for_each(widget_data.variable_group_long_names.cbegin(), widget_data.variable_group_long_names.cend(), [&](std::string const & variable_group_long_name)
+	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](DataInstanceIdentifier const & identifier)
 	{
-		NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this );
-		addItem( tmpGrp, variable_group_long_name.c_str() );
+		if (identifier.uuid && identifier.code && identifier.longhand)
+		{
+			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this );
+			addItem( tmpGrp, identifier.longhand->c_str() );
+		}
 	});
 
 }

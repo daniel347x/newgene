@@ -1,6 +1,7 @@
 #ifndef VARIABLEGROUP_H
 #define VARIABLEGROUP_H
 
+#include "../../../globals.h"
 #include "../Table.h"
 
 class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY>
@@ -39,7 +40,11 @@ class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY>
 
 		void Load(sqlite3 * db);
 
-		std::vector<std::string> identifiers;
+		DataInstanceIdentifiers getIdentifiers();
+
+	protected:
+
+		DataInstanceIdentifiers identifiers;
 };
 
 class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER>
