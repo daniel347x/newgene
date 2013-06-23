@@ -41,7 +41,23 @@ public:
 		std::shared_ptr<std::string> notes3;
 	};
 
-	DataInstanceIdentifier()
+	DataInstanceIdentifier(UUID uuid_, std::string code_, std::string description_)
+		: uuid(std::make_shared<UUID>(uuid_))
+		, code(std::make_shared<std::string>(code_))
+		, description(std::make_shared<std::string>(description_))
+	{
+
+	}
+
+	DataInstanceIdentifier(UUID uuid_)
+		: uuid(std::make_shared<UUID>(uuid_))
+	{
+
+	}
+
+	DataInstanceIdentifier(std::string code_, std::string description_)
+		: code(std::make_shared<std::string>(code_))
+		, description(std::make_shared<std::string>(description_))
 	{
 
 	}
@@ -52,6 +68,8 @@ public:
 	Notes notes;
 
 };
+
+typedef std::vector<DataInstanceIdentifier> DataInstanceIdentifiers;
 
 class WidgetDataItemRequest_base
 {
