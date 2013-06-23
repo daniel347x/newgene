@@ -3,13 +3,36 @@
 
 #include "../Table.h"
 
-class Table_VariableGroupIdentifier : public Table<TABLE_TYPE_VARIABLE_GROUP_IDENTIFIER>
+class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY>
 {
 
 	public:
 
-		Table_VariableGroupIdentifier()
-			: Table<TABLE_TYPE_VARIABLE_GROUP_IDENTIFIER>()
+		static std::string const VG_CATEGORY_UUID;
+		static std::string const VG_CATEGORY_STRING_CODE;
+		static std::string const VG_CATEGORY_STRING_LONGHAND;
+		static std::string const VG_CATEGORY_NOTES1;
+		static std::string const VG_CATEGORY_NOTES2;
+		static std::string const VG_CATEGORY_NOTES3;
+		static std::string const VG_CATEGORY_FK_UOA_CATEGORY_UUID;
+		static std::string const VG_CATEGORY_FLAGS;
+
+		enum COLUMN_INDEX
+		{
+			  INDEX__VG_CATEGORY_UUID = 0
+			, INDEX__VG_CATEGORY_STRING_CODE
+			, INDEX__VG_CATEGORY_STRING_LONGHAND
+			, INDEX__VG_CATEGORY_NOTES1
+			, INDEX__VG_CATEGORY_NOTES2
+			, INDEX__VG_CATEGORY_NOTES3
+			, INDEX__VG_CATEGORY_FK_UOA_CATEGORY_UUID
+			, INDEX__VG_CATEGORY_FLAGS
+		};
+
+	public:
+
+		Table_VG_CATEGORY()
+			: Table<TABLE__VG_CATEGORY>()
 		{
 
 		}
@@ -19,16 +42,39 @@ class Table_VariableGroupIdentifier : public Table<TABLE_TYPE_VARIABLE_GROUP_IDE
 		std::vector<std::string> identifiers;
 };
 
-class Table_VariableIdentifier : public Table<TABLE_TYPE_VARIABLE_IDENTIFIER>
+class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER>
 {
 
-public:
+	public:
 
-	Table_VariableIdentifier()
-		: Table<TABLE_TYPE_VARIABLE_IDENTIFIER>()
-	{
+		static std::string const VG_SET_MEMBER_UUID;
+		static std::string const VG_SET_MEMBER_STRING_CODE;
+		static std::string const VG_SET_MEMBER_STRING_LONGHAND;
+		static std::string const VG_SET_MEMBER_NOTES1;
+		static std::string const VG_SET_MEMBER_NOTES2;
+		static std::string const VG_SET_MEMBER_NOTES3;
+		static std::string const VG_SET_MEMBER_FK_VG_CATEGORY_UUID;
+		static std::string const VG_SET_MEMBER_FLAGS;
 
-	}
+		enum COLUMN_INDEX
+		{
+			  INDEX__VG_SET_MEMBER_UUID = 0
+			, INDEX__VG_SET_MEMBER_STRING_CODE
+			, INDEX__VG_SET_MEMBER_STRING_LONGHAND
+			, INDEX__VG_SET_MEMBER_NOTES1
+			, INDEX__VG_SET_MEMBER_NOTES2
+			, INDEX__VG_SET_MEMBER_NOTES3
+			, INDEX__VG_SET_MEMBER_FK_VG_CATEGORY_UUID
+			, INDEX__VG_SET_MEMBER_FLAGS
+		};
+
+	public:
+
+		Table_VG_SET_MEMBER()
+			: Table<TABLE__VG_SET_MEMBER>()
+		{
+
+		}
 
 };
 

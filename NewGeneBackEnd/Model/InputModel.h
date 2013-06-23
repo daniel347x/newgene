@@ -19,7 +19,7 @@ class InputModel : public Model<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETT
 
 		void LoadTables();
 
-		Table_VariableGroupIdentifier t_vgp_identifiers;
+		Table_VG_CATEGORY t_vgp_identifiers;
 		//Table_VariableIdentifier t_var_identifiers;
 
 };
