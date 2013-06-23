@@ -19,7 +19,10 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	InputModel & input_model = project.model().getInputModel();
 	WidgetDataItem_VARIABLE_GROUPS_TOOLBOX variable_groups(widget_request);
 	variable_groups.variable_group_long_names = input_model.t_vgp_identifiers.identifiers;
-	variable_groups.variable_group_long_names.push_back(widget_request.s);
+	if (!widget_request.s.empty())
+	{
+		variable_groups.variable_group_long_names.push_back(widget_request.s);
+	}
 	messager.EmitOutputWidgetDataRefresh(variable_groups);
 }
 
