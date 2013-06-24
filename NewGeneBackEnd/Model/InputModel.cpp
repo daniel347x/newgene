@@ -9,6 +9,7 @@ void InputModel::LoadTables()
 	if (db != nullptr)
 	{
 		t_vgp_identifiers.Load(db);
+		t_vgp_setmembers.Load(db);
 	}
 
 }

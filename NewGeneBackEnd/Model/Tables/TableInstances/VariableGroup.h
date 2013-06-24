@@ -40,11 +40,16 @@ class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY>
 
 		void Load(sqlite3 * db);
 
-		DataInstanceIdentifiers getIdentifiers();
+		DataInstanceIdentifiers getIdentifiers()
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			return identifiers;
+		}
 
 	protected:
 
 		DataInstanceIdentifiers identifiers;
+
 };
 
 class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER>
@@ -80,6 +85,18 @@ class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER>
 		{
 
 		}
+
+		void Load(sqlite3 * db);
+
+		DataInstanceIdentifiers getIdentifiers(UUID const & uuid)
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			return identifiers_map[uuid];
+		}
+
+	protected:
+
+		std::map<UUID, DataInstanceIdentifiers> identifiers_map;
 
 };
 

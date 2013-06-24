@@ -22,8 +22,8 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, DataInstanceIdenti
 
 	PrepareOutputWidget();
 
-	//WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
-	//emit RefreshWidget(request);
+	WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
+	emit RefreshWidget(request);
 
 }
 
@@ -62,4 +62,25 @@ void NewGeneVariableGroup::RefreshAllWidgets()
 
 void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE widget_data)
 {
+
+	std::string variables("Variables: ");
+
+	bool first = true;
+	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&variables, &first](DataInstanceIdentifier const & identifier)
+	{
+		if (identifier.longhand)
+		{
+			if (!first)
+			{
+				variables += ", ";
+			}
+			variables += *identifier.longhand;
+			first = false;
+		}
+	});
+
+	QMessageBox msgBox;
+	msgBox.setText( variables.c_str() );
+	msgBox.exec();
+
 }
