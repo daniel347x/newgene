@@ -156,6 +156,7 @@ public:
 
 	WidgetDataItem_base(WidgetDataItemRequest_base const & request_obj)
 		: request_reason(request_obj.reason)
+		, identifier(request_obj.identifier)
 	{
 
 	}
