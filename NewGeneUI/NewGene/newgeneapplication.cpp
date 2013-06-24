@@ -4,26 +4,32 @@
 
 Q_DECLARE_METATYPE(STD_STRING);
 
+Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
+Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
+Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
+
 Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA);
 Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX);
-
+Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
 
 NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QApplication( argc, argv )
 {
+	qRegisterMetaType<STD_STRING>();
+
+	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>();
+	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>();
+	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>();
+
+	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA>();
+	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX>();
+	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>();
 }
 
 bool NewGeneApplication::notify( QObject * receiver, QEvent * e )
 {
 
 	bool returnVal = false;
-
-
-	qRegisterMetaType<STD_STRING>();
-
-	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA>();
-	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX>();
-
 
 	try
 	{

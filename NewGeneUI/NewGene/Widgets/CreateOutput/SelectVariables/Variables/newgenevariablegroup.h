@@ -14,11 +14,11 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		Q_OBJECT
 
 	public:
-		explicit NewGeneVariableGroup( QWidget * parent = 0, DataInstanceIdentifier data_instance = DataInstanceIdentifier() );
+		explicit NewGeneVariableGroup( QWidget * parent = 0, DataInstanceIdentifier data_instance = DataInstanceIdentifier(), UIOutputProject * project = nullptr );
 		~NewGeneVariableGroup();
 
 	signals:
-		void RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
+		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
 
 	public slots:
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);

@@ -123,8 +123,9 @@ class WidgetDataItemRequest_base
 
 public:
 
-	WidgetDataItemRequest_base(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN)
+	WidgetDataItemRequest_base(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, DataInstanceIdentifier identifier_ = DataInstanceIdentifier())
 		: reason(reason_)
+		, identifier(std::make_shared<DataInstanceIdentifier>(identifier_))
 	{
 
 	}
@@ -146,8 +147,9 @@ class WidgetDataItem_base
 
 public:
 
-	WidgetDataItem_base(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN)
+	WidgetDataItem_base(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, DataInstanceIdentifier identifier_ = DataInstanceIdentifier())
 		: request_reason(request_reason_)
+		, identifier(std::make_shared<DataInstanceIdentifier>(identifier_))
 	{
 
 	}
@@ -189,8 +191,8 @@ template<>
 class WidgetDataItemRequest<VARIABLE_GROUPS_SCROLL_AREA> : public WidgetDataItemRequest_base
 {
 public:
-	WidgetDataItemRequest<VARIABLE_GROUPS_SCROLL_AREA>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN)
-		: WidgetDataItemRequest_base(reason_)
+	WidgetDataItemRequest<VARIABLE_GROUPS_SCROLL_AREA>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, DataInstanceIdentifier identifier_ = DataInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
 	{
 	}
 	WidgetDataItemRequest<VARIABLE_GROUPS_SCROLL_AREA>(WidgetDataItemRequest<VARIABLE_GROUPS_SCROLL_AREA> const & rhs)
@@ -204,8 +206,8 @@ template<>
 class WidgetDataItem<VARIABLE_GROUPS_SCROLL_AREA> : public WidgetDataItem_base
 {
 public:
-	WidgetDataItem<VARIABLE_GROUPS_SCROLL_AREA>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN)
-		: WidgetDataItem_base(request_reason_)
+	WidgetDataItem<VARIABLE_GROUPS_SCROLL_AREA>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, DataInstanceIdentifier identifier_ = DataInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
 	{
 	}
 	WidgetDataItem<VARIABLE_GROUPS_SCROLL_AREA>(WidgetDataItemRequest_base const & request_obj)
@@ -227,8 +229,8 @@ template<>
 class WidgetDataItemRequest<VARIABLE_GROUPS_TOOLBOX> : public WidgetDataItemRequest_base
 {
 public:
-	WidgetDataItemRequest<VARIABLE_GROUPS_TOOLBOX>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN)
-		: WidgetDataItemRequest_base(reason_)
+	WidgetDataItemRequest<VARIABLE_GROUPS_TOOLBOX>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, DataInstanceIdentifier identifier_ = DataInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
 	{
 	}
 	WidgetDataItemRequest<VARIABLE_GROUPS_TOOLBOX>(WidgetDataItemRequest<VARIABLE_GROUPS_TOOLBOX> const & rhs)
@@ -242,8 +244,8 @@ template<>
 class WidgetDataItem<VARIABLE_GROUPS_TOOLBOX> : public WidgetDataItem_base
 {
 public:
-	WidgetDataItem<VARIABLE_GROUPS_TOOLBOX>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN)
-		: WidgetDataItem_base(request_reason_)
+	WidgetDataItem<VARIABLE_GROUPS_TOOLBOX>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, DataInstanceIdentifier identifier_ = DataInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
 	{
 	}
 	WidgetDataItem<VARIABLE_GROUPS_TOOLBOX>(WidgetDataItemRequest_base const & request_obj)
@@ -267,8 +269,8 @@ template<>
 class WidgetDataItemRequest<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE> : public WidgetDataItemRequest_base
 {
 public:
-	WidgetDataItemRequest<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN)
-		: WidgetDataItemRequest_base(reason_)
+	WidgetDataItemRequest<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, DataInstanceIdentifier identifier_ = DataInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
 	{
 	}
 	WidgetDataItemRequest<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>(WidgetDataItemRequest<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE> const & rhs)
@@ -282,8 +284,8 @@ template<>
 class WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE> : public WidgetDataItem_base
 {
 public:
-	WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN)
-		: WidgetDataItem_base(request_reason_)
+	WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, DataInstanceIdentifier identifier_ = DataInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
 	{
 	}
 	WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>(WidgetDataItemRequest_base const & request_obj)

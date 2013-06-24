@@ -47,3 +47,10 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS
 	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUPS_TOOLBOX>(widget, this));
 }
 
+/************************************************************************/
+// VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE
+/************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>(widget, this));
+}

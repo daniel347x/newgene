@@ -1,7 +1,7 @@
 #include "newgenevariablegroup.h"
 #include "ui_newgenevariablegroup.h"
 
-NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, DataInstanceIdentifier data_instance ) :
+NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, DataInstanceIdentifier data_instance_, UIOutputProject * project ) :
 
 	QWidget( parent ),
 
@@ -10,7 +10,7 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, DataInstanceIdenti
 										WIDGET_NATURE_OUTPUT_WIDGET,
 										VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE,
 										false,
-										data_instance
+										data_instance_
 									 )
 				 ),
 
@@ -22,8 +22,12 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, DataInstanceIdenti
 
 	PrepareOutputWidget();
 
-	WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
-	emit RefreshWidget(request);
+	if (data_instance.uuid && project)
+	{
+		UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+		WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
+		emit RefreshWidget(request);
+	}
 
 }
 
@@ -35,7 +39,7 @@ NewGeneVariableGroup::~NewGeneVariableGroup()
 void NewGeneVariableGroup::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
-	connect(this, SIGNAL(RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
+	connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 	connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 }
 
@@ -56,7 +60,7 @@ void NewGeneVariableGroup::changeEvent( QEvent * e )
 
 void NewGeneVariableGroup::RefreshAllWidgets()
 {
-	WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
+	WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
 

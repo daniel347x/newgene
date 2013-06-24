@@ -6,10 +6,6 @@
 #include "../../../../NewGeneBackEnd/UIData/DataWidgets.h"
 #include "uimodelmanager.h"
 
-Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
-Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
-Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
-
 enum WORK_QUEUE_THREAD_LOOP_CLASS_ENUM
 {
 	  UI_INPUT_PROJECT
@@ -57,7 +53,6 @@ class WorkQueueManagerBase : public QObject
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
-		virtual void RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
 
 	public:
 		virtual void SetConnections() {}

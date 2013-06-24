@@ -42,9 +42,9 @@ void Table_VG_CATEGORY::Load(sqlite3 * db)
 		char const * notes1 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_NOTES1));
 		char const * notes2 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_NOTES2));
 		char const * notes3 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_NOTES3));
-		char const * fk_uoa = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_FK_UOA_CATEGORY_UUID));
+		char const * fk_uoa_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_FK_UOA_CATEGORY_UUID));
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_FLAGS));
-		if (uuid && strlen(uuid) == UUID_LENGTH && code && strlen(code) && longhand && strlen(longhand) && fk_uoa && strlen(fk_uoa) == UUID_LENGTH)
+		if (uuid && strlen(uuid) == UUID_LENGTH && code && strlen(code) && longhand && strlen(longhand) && fk_uoa_uuid && strlen(fk_uoa_uuid) == UUID_LENGTH)
 		{
 			identifiers.push_back(DataInstanceIdentifier(uuid, code, longhand, MakeNotes(notes1, notes2, notes3)));
 		}
@@ -75,11 +75,11 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db)
 		char const * notes1 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_NOTES1));
 		char const * notes2 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_NOTES2));
 		char const * notes3 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_NOTES3));
-		char const * fk_vg = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_FK_VG_CATEGORY_UUID));
+		char const * fk_vg_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_FK_VG_CATEGORY_UUID));
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_FLAGS));
-		if (uuid && strlen(uuid) == UUID_LENGTH && code && strlen(code) && longhand && strlen(longhand) && fk_vg && strlen(fk_vg) == UUID_LENGTH)
+		if (uuid && strlen(uuid) == UUID_LENGTH && code && strlen(code) && longhand && strlen(longhand) && fk_vg_uuid && strlen(fk_vg_uuid) == UUID_LENGTH)
 		{
-			identifiers_map[uuid].push_back(DataInstanceIdentifier(uuid, code, longhand, MakeNotes(notes1, notes2, notes3)));
+			identifiers_map[fk_vg_uuid].push_back(DataInstanceIdentifier(uuid, code, longhand, MakeNotes(notes1, notes2, notes3)));
 		}
 	}
 }

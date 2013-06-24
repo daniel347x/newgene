@@ -38,5 +38,6 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	{
 		variable_group.identifiers = input_model.t_vgp_setmembers.getIdentifiers(*widget_request.identifier->uuid);
 	}
+	messager.EmitOutputWidgetDataRefresh(variable_group);
 }
 
