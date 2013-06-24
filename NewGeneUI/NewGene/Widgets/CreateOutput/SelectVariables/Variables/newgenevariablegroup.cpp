@@ -20,6 +20,8 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, DataInstanceIdenti
 
 	ui->setupUi( this );
 
+	PrepareOutputWidget();
+
 	//WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	//emit RefreshWidget(request);
 
@@ -28,6 +30,13 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, DataInstanceIdenti
 NewGeneVariableGroup::~NewGeneVariableGroup()
 {
 	delete ui;
+}
+
+void NewGeneVariableGroup::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+{
+	NewGeneWidget::UpdateOutputConnections(connection_type, project);
+	connect(this, SIGNAL(RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
+	connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 }
 
 void NewGeneVariableGroup::changeEvent( QEvent * e )
@@ -43,4 +52,14 @@ void NewGeneVariableGroup::changeEvent( QEvent * e )
 		default:
 			break;
 	}
+}
+
+void NewGeneVariableGroup::RefreshAllWidgets()
+{
+	WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
+	emit RefreshWidget(request);
+}
+
+void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE widget_data)
+{
 }

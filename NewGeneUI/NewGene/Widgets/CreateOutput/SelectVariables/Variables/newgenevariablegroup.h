@@ -17,6 +17,14 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		explicit NewGeneVariableGroup( QWidget * parent = 0, DataInstanceIdentifier data_instance = DataInstanceIdentifier() );
 		~NewGeneVariableGroup();
 
+	signals:
+		void RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
+
+	public slots:
+		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void RefreshAllWidgets();
+		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
+
 	protected:
 		void changeEvent( QEvent * e );
 

@@ -8,6 +8,7 @@
 
 Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
+Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
 
 enum WORK_QUEUE_THREAD_LOOP_CLASS_ENUM
 {
@@ -34,6 +35,7 @@ class WorkQueueManagerBase : public QObject
 
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE & widgetData) {}
 
 	signals:
 		// Signals for ALL specializations of WorkQueueManager go here,
@@ -43,6 +45,7 @@ class WorkQueueManagerBase : public QObject
 		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
+		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
 
 	public slots:
 		// Slots for ALL specializations go here,
@@ -53,6 +56,8 @@ class WorkQueueManagerBase : public QObject
 		virtual void LoadFromDatabase(UI_OUTPUT_MODEL_PTR) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
+		virtual void RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
 
 	public:
 		virtual void SetConnections() {}

@@ -48,6 +48,7 @@ class NewGeneWidget
 		virtual void RefreshAllWidgets() {};
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA) {};
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX) {};
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {};
 		// ****************************************************************************************************************************
 
 
@@ -57,6 +58,7 @@ class NewGeneWidget
 		//     that calls PrepareInputWidget() or PrepareOutputWidget() during construction.
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {};
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {};
+		virtual void RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {};
 		// ****************************************************************************************************************************
 
 

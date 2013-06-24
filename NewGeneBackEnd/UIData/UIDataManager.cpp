@@ -22,3 +22,10 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	messager.EmitOutputWidgetDataRefresh(variable_groups);
 }
 
+/************************************************************************/
+// VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE
+/************************************************************************/
+void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE const & widget_request, OutputProject & project)
+{
+}
+
