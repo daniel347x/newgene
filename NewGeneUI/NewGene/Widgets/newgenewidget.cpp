@@ -15,6 +15,7 @@ NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
 	, uuid(newUUID())
 	, widget_nature(creation_info.widget_nature)
 	, top_level(creation_info.top_level)
+	, data_instance(creation_info.data_instance)
 {
 }
 

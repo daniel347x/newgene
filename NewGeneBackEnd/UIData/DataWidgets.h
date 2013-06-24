@@ -17,7 +17,8 @@ enum DATA_WIDGETS
 
 	, VARIABLE_GROUPS_SCROLL_AREA
 	, VARIABLE_GROUPS_TOOLBOX
-	
+	, VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE
+
 	, DATA_WIDGETS_LAST
 
 };
@@ -68,6 +69,11 @@ public:
 		std::shared_ptr<std::string> notes3;
 	};
 
+	DataInstanceIdentifier()
+	{
+
+	}
+
 	DataInstanceIdentifier(UUID uuid_, std::string code_, std::string description_, Notes notes_ = Notes())
 		: uuid(std::make_shared<UUID>(uuid_))
 		, code(std::make_shared<std::string>(code_))
@@ -87,6 +93,15 @@ public:
 		: code(std::make_shared<std::string>(code_))
 		, longhand(std::make_shared<std::string>(description_))
 		, notes(notes_)
+	{
+
+	}
+
+	DataInstanceIdentifier(DataInstanceIdentifier const & rhs)
+		: uuid(rhs.uuid)
+		, code(rhs.code)
+		, longhand(rhs.longhand)
+		, notes(rhs.notes)
 	{
 
 	}

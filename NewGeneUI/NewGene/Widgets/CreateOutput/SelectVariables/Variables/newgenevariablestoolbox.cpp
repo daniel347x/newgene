@@ -43,7 +43,7 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 	{
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
-			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this );
+			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, identifier );
 			addItem( tmpGrp, identifier.longhand->c_str() );
 		}
 	});

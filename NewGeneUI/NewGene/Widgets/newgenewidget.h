@@ -68,7 +68,7 @@ class NewGeneWidget
 		UIInputProject * inp;
 		UIOutputProject * outp;
 		DATA_WIDGETS widget_type;
-		std::shared_ptr<DataInstanceIdentifier> instance_identifier;
+		DataInstanceIdentifier data_instance;
 		bool top_level;
 		static NewGeneMainWindow * theMainWindow;
 
@@ -82,11 +82,18 @@ class NewGeneWidget
 class WidgetCreationInfo
 {
 	public:
-		WidgetCreationInfo(QWidget * const self_, NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN, DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE, bool const top_level_ = false)
+		WidgetCreationInfo(
+							   QWidget * const self_,
+							   NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN,
+							   DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE,
+							   bool const top_level_ = false,
+							   DataInstanceIdentifier data_instance_ = DataInstanceIdentifier()
+						   )
 			: self(self_)
 			, widget_nature(widget_nature_)
 			, widget_type(widget_type_)
 			, top_level(top_level_)
+			, data_instance(data_instance_)
 		{
 
 		}
@@ -95,6 +102,7 @@ class WidgetCreationInfo
 		NewGeneWidget::WIDGET_NATURE widget_nature;
 		DATA_WIDGETS widget_type;
 		bool top_level;
+		DataInstanceIdentifier data_instance;
 };
 
 #endif // NEWGENEWIDGET_H

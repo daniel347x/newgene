@@ -14,7 +14,7 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		Q_OBJECT
 
 	public:
-		explicit NewGeneVariableGroup( QWidget * parent = 0 );
+		explicit NewGeneVariableGroup( QWidget * parent = 0, DataInstanceIdentifier data_instance = DataInstanceIdentifier() );
 		~NewGeneVariableGroup();
 
 	protected:
