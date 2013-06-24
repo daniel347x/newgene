@@ -89,27 +89,54 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		virtual void UpdateConnections() {}
 		virtual void DoRefreshAllWidgets() {}
 
-		void AddWidgetToUUIDMap(NewGeneWidget * widget, UUID & uuid)
+		void AddWidgetUUIDToUUIDMap(NewGeneWidget * widget, UUID & uuid)
 		{
-			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_map_mutex);
-			uuid_widget_map[uuid] = widget;
+			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_map_mutex);
+			widget_uuid_widget_map[uuid] = widget;
 		}
 
 		void RemoveWidgetFromUUIDMap(UUID const & uuid)
 		{
-			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_map_mutex);
-			auto position = uuid_widget_map.find(uuid);
-			if (position != uuid_widget_map.cend())
+			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_map_mutex);
+			auto position = widget_uuid_widget_map.find(uuid);
+			if (position != widget_uuid_widget_map.cend())
 			{
-				uuid_widget_map.erase(position);
+				widget_uuid_widget_map.erase(position);
 			}
 		}
 
 		NewGeneWidget * FindWidget(UUID const & uuid)
 		{
-			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_map_mutex);
-			auto position = uuid_widget_map.find(uuid);
-			if (position != uuid_widget_map.cend())
+			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_uuid_map_mutex);
+			auto position = widget_uuid_widget_map.find(uuid);
+			if (position != widget_uuid_widget_map.cend())
+			{
+				return position->second;
+			}
+			return nullptr;
+		}
+
+		void AddWidgetDataItemUUIDToUUIDMap(NewGeneWidget * widget, UUID & uuid)
+		{
+			std::lock_guard<std::recursive_mutex> widget_map_guard(data_item_uuid_map_mutex);
+			data_item_uuid_widget_map[uuid] = widget;
+		}
+
+		void RemoveWidgetDataItemFromUUIDMap(UUID const & uuid)
+		{
+			std::lock_guard<std::recursive_mutex> widget_map_guard(data_item_uuid_map_mutex);
+			auto position = data_item_uuid_widget_map.find(uuid);
+			if (position != data_item_uuid_widget_map.cend())
+			{
+				data_item_uuid_widget_map.erase(position);
+			}
+		}
+
+		NewGeneWidget * FindWidgetFromDataItem(UUID const & uuid)
+		{
+			std::lock_guard<std::recursive_mutex> widget_map_guard(data_item_uuid_map_mutex);
+			auto position = data_item_uuid_widget_map.find(uuid);
+			if (position != data_item_uuid_widget_map.cend())
 			{
 				return position->second;
 			}
@@ -128,8 +155,11 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		std::shared_ptr<UI_MODEL_CLASS> const _model;
 		std::unique_ptr<BACKEND_PROJECT_CLASS> const _backend_project;
 
-		std::recursive_mutex widget_map_mutex;
-		UUIDWidgetMap uuid_widget_map;
+		std::recursive_mutex widget_uuid_map_mutex;
+		UUIDWidgetMap widget_uuid_widget_map;
+
+		std::recursive_mutex data_item_uuid_map_mutex;
+		UUIDWidgetMap data_item_uuid_widget_map;
 
 };
 

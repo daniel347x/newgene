@@ -15,6 +15,9 @@ void NewGeneVariablesToolbox::UpdateOutputConnections(UIProjectManager::UPDATE_C
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 	connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX)));
 	connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX)));
+
+	// *** Child widget, so refer refresh signals directed at child to be received by us, the parent *** //
+	connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 }
 
 void NewGeneVariablesToolbox::RefreshAllWidgets()
@@ -53,7 +56,7 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 {
 	if (widget_data.identifier && widget_data.identifier->uuid)
 	{
-		NewGeneWidget * child = outp->FindWidget(*widget_data.identifier->uuid);
+		NewGeneWidget * child = outp->FindWidgetFromDataItem(*widget_data.identifier->uuid);
 		if (child)
 		{
 			child->WidgetDataRefreshReceive(widget_data);
