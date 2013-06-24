@@ -48,3 +48,15 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 	});
 
 }
+
+void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE widget_data)
+{
+	if (widget_data.identifier && widget_data.identifier->uuid)
+	{
+		NewGeneWidget * child = outp->FindWidget(*widget_data.identifier->uuid);
+		if (child)
+		{
+			child->WidgetDataRefreshReceive(widget_data);
+		}
+	}
+}

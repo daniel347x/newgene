@@ -40,7 +40,9 @@ void NewGeneVariableGroup::UpdateOutputConnections(UIProjectManager::UPDATE_CONN
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 	connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
-	connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
+
+	// *** Child widget, so refer refresh signals directed at us to be received by our parent widget *** //
+	connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), parentWidget(), SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 }
 
 void NewGeneVariableGroup::changeEvent( QEvent * e )

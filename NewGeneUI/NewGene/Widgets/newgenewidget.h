@@ -46,11 +46,15 @@ class NewGeneWidget
 		virtual void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 		virtual void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		virtual void RefreshAllWidgets() {};
+		//
+	public:
+		//
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA) {};
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX) {};
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {};
 		// ****************************************************************************************************************************
 
+	protected:
 
 		// ****************************************************************************************************************************
 		// Pseudo-signals.

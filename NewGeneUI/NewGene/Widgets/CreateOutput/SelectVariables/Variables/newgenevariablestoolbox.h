@@ -18,6 +18,7 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
+		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
 
 	private:
 		NewGeneVariableGroup * groups;

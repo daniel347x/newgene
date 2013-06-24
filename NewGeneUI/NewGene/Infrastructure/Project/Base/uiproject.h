@@ -11,6 +11,7 @@
 #include "../Model/Base/uimodel.h"
 #include "eventloopthreadmanager.h"
 #include <QMessageBox>
+#include <mutex>
 
 class UIModelManager;
 class UISettingsManager;
@@ -90,16 +91,29 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		void AddWidgetToUUIDMap(NewGeneWidget * widget, UUID & uuid)
 		{
+			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_map_mutex);
 			uuid_widget_map[uuid] = widget;
 		}
 
-		void RemoveWidgetFromUUIDMap(UUID & uuid)
+		void RemoveWidgetFromUUIDMap(UUID const & uuid)
 		{
+			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_map_mutex);
 			auto position = uuid_widget_map.find(uuid);
 			if (position != uuid_widget_map.cend())
 			{
 				uuid_widget_map.erase(position);
 			}
+		}
+
+		NewGeneWidget * FindWidget(UUID const & uuid)
+		{
+			std::lock_guard<std::recursive_mutex> widget_map_guard(widget_map_mutex);
+			auto position = uuid_widget_map.find(uuid);
+			if (position != uuid_widget_map.cend())
+			{
+				return position->second;
+			}
+			return nullptr;
 		}
 
 	protected:
@@ -114,6 +128,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		std::shared_ptr<UI_MODEL_CLASS> const _model;
 		std::unique_ptr<BACKEND_PROJECT_CLASS> const _backend_project;
 
+		std::recursive_mutex widget_map_mutex;
 		UUIDWidgetMap uuid_widget_map;
 
 };
