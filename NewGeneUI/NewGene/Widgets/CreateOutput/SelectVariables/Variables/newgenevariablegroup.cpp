@@ -20,6 +20,9 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, DataInstanceIdenti
 
 	ui->setupUi( this );
 
+	//WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
+	//emit RefreshWidget(request);
+
 }
 
 NewGeneVariableGroup::~NewGeneVariableGroup()
