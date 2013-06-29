@@ -6,6 +6,7 @@
 #include <string>
 
 typedef std::string UUID;
+typedef std::vector<UUID> UUIDVector;
 
 int const UUID_LENGTH = 36;
 
@@ -38,45 +39,60 @@ public:
 
 	class Notes
 	{
-	public:
-		Notes()
-		{
 
-		}
-		Notes(Notes const & rhs)
-			: notes1(rhs.notes1)
-			, notes2(rhs.notes2)
-			, notes3(rhs.notes3)
-		{
+		public:
+			Notes()
+			{
 
-		}
-		Notes(std::string notes1, std::string notes2, std::string notes3)
-			: notes1(std::make_shared<std::string>(notes1))
-			, notes2(std::make_shared<std::string>(notes2))
-			, notes3(std::make_shared<std::string>(notes3))
-		{
+			}
+			Notes(Notes const & rhs)
+				: notes1(rhs.notes1)
+				, notes2(rhs.notes2)
+				, notes3(rhs.notes3)
+			{
 
-		}
-		Notes(std::shared_ptr<std::string> notes1, std::shared_ptr<std::string> notes2, std::shared_ptr<std::string> notes3)
-			: notes1(notes1)
-			, notes2(notes2)
-			, notes3(notes3)
-		{
+			}
+			Notes(std::string notes1, std::string notes2, std::string notes3)
+				: notes1(std::make_shared<std::string>(notes1))
+				, notes2(std::make_shared<std::string>(notes2))
+				, notes3(std::make_shared<std::string>(notes3))
+			{
 
-		}
-		std::shared_ptr<std::string> notes1;
-		std::shared_ptr<std::string> notes2;
-		std::shared_ptr<std::string> notes3;
+			}
+			Notes(std::shared_ptr<std::string> notes1, std::shared_ptr<std::string> notes2, std::shared_ptr<std::string> notes3)
+				: notes1(notes1)
+				, notes2(notes2)
+				, notes3(notes3)
+			{
+
+			}
+			Notes & operator=(Notes const & rhs)
+			{
+				if (&rhs == this)
+				{
+					return *this;
+				}
+				notes1 = rhs.notes1;
+				notes2 = rhs.notes2;
+				notes3 = rhs.notes3;
+				return *this;
+			}
+			std::shared_ptr<std::string> notes1;
+			std::shared_ptr<std::string> notes2;
+			std::shared_ptr<std::string> notes3;
+
 	};
 
 	DataInstanceIdentifier()
+		: sequence_number(0)
 	{
 
 	}
 
-	DataInstanceIdentifier(UUID uuid_, std::string code_, std::string description_, Notes notes_ = Notes())
+	DataInstanceIdentifier(UUID const uuid_, std::string const code_, std::string const description_, int const sequence_number_, Notes notes_ = Notes())
 		: uuid(std::make_shared<UUID>(uuid_))
 		, code(std::make_shared<std::string>(code_))
+		, sequence_number(sequence_number_)
 		, longhand(std::make_shared<std::string>(description_))
 		, notes(notes_)
 	{
@@ -85,12 +101,14 @@ public:
 
 	DataInstanceIdentifier(UUID uuid_)
 		: uuid(std::make_shared<UUID>(uuid_))
+		, sequence_number(0)
 	{
 
 	}
 
-	DataInstanceIdentifier(std::string code_, std::string description_, Notes notes_ = Notes())
+	DataInstanceIdentifier(std::string code_, std::string description_, int const sequence_number_, Notes notes_ = Notes())
 		: code(std::make_shared<std::string>(code_))
+		, sequence_number(sequence_number_)
 		, longhand(std::make_shared<std::string>(description_))
 		, notes(notes_)
 	{
@@ -100,15 +118,33 @@ public:
 	DataInstanceIdentifier(DataInstanceIdentifier const & rhs)
 		: uuid(rhs.uuid)
 		, code(rhs.code)
+		, sequence_number(rhs.sequence_number)
 		, longhand(rhs.longhand)
 		, notes(rhs.notes)
 	{
 
 	}
 
+	DataInstanceIdentifier & operator=(DataInstanceIdentifier const & rhs)
+	{
+		if (&rhs == this)
+		{
+			return *this;
+		}
+		uuid = rhs.uuid;
+		fkuuids = rhs.fkuuids;
+		code = rhs.code;
+		longhand = rhs.longhand;
+		sequence_number = rhs.sequence_number;
+		notes = rhs.notes;
+		return *this;
+	}
+
 	std::shared_ptr<UUID> uuid;
+	std::shared_ptr<UUIDVector> fkuuids;
 	std::shared_ptr<std::string> code;
 	std::shared_ptr<std::string> longhand;
+	int sequence_number;
 	Notes notes;
 
 };

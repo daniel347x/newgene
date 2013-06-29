@@ -60,6 +60,7 @@ class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER>
 		static std::string const VG_SET_MEMBER_UUID;
 		static std::string const VG_SET_MEMBER_STRING_CODE;
 		static std::string const VG_SET_MEMBER_STRING_LONGHAND;
+		static std::string const VG_SET_MEMBER_SEQUENCE_NUMBER;
 		static std::string const VG_SET_MEMBER_NOTES1;
 		static std::string const VG_SET_MEMBER_NOTES2;
 		static std::string const VG_SET_MEMBER_NOTES3;
@@ -71,6 +72,7 @@ class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER>
 			  INDEX__VG_SET_MEMBER_UUID = 0
 			, INDEX__VG_SET_MEMBER_STRING_CODE
 			, INDEX__VG_SET_MEMBER_STRING_LONGHAND
+			, INDEX__VG_SET_MEMBER_SEQUENCE_NUMBER
 			, INDEX__VG_SET_MEMBER_NOTES1
 			, INDEX__VG_SET_MEMBER_NOTES2
 			, INDEX__VG_SET_MEMBER_NOTES3
