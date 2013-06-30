@@ -35,5 +35,6 @@ UIActionManager & uiactionManager();
 ModelActionManager & modelactionManager();
 
 #include "UIData\DataWidgets.h"
+#include "UIAction\ActionWidgets.h"
 
 #endif

@@ -110,7 +110,9 @@ SOURCES += main.cpp\
     Infrastructure/Project/uiprojectmanagerworkqueue.cpp \
     Infrastructure/UIData/uiwidgetdatarefresh.cpp \
     Infrastructure/Messager/uimessagersingleshot.cpp \
-    Infrastructure/Model/Base/modelworkqueue.cpp
+    Infrastructure/Model/Base/modelworkqueue.cpp \
+    Infrastructure/UIAction/uiaction.cpp \
+    Infrastructure/UIAction/variablegroupsetmemberselectionchange.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -209,7 +211,10 @@ HEADERS  += Widgets/newgenemainwindow.h \
     Infrastructure/Project/uiprojectmanagerworkqueue.h \
     Infrastructure/UIData/uiwidgetdatarefresh.h \
     Infrastructure/Messager/uimessagersingleshot.h \
-    Infrastructure/Model/Base/modelworkqueue.h
+    Infrastructure/Model/Base/modelworkqueue.h \
+    Infrastructure/UIAction/uiaction.h \
+    Infrastructure/UIAction/uiuiactionmanager.h \
+    Infrastructure/UIAction/variablegroupsetmemberselectionchange.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

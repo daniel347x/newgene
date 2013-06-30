@@ -3,6 +3,7 @@
 #include "Widgets/newgenemainwindow.h"
 #include <QTimer>
 #include "../UIData/uiwidgetdatarefresh.h"
+#include "../UIAction/variablegroupsetmemberselectionchange.h"
 
 OutputProjectWorkQueue::OutputProjectWorkQueue(QObject * parent)
 	: WorkQueueManager(parent)
@@ -53,4 +54,13 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS
 void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE widget)
 {
 	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>(widget, this));
+}
+
+/************************************************************************/
+// ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
+/************************************************************************/
+void OutputProjectWorkQueue::ReceiveVariableItemChanged(QListWidgetItem *)
+{
+	WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request;
+	get()->getWorkService().post(VariableGroupSetMemberSelectionChange(action_request, this));
 }

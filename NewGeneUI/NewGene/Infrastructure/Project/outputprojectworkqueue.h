@@ -1,6 +1,8 @@
 #ifndef OUTPUTPROJECTWORKQUEUE_H
 #define OUTPUTPROJECTWORKQUEUE_H
 
+#include <QListWidgetItem>
+
 #include "Base/outputprojectworkqueue_base.h"
 
 class UIOutputProject;
@@ -50,6 +52,7 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA widget);
 		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX widget);
 		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE widget);
+		void ReceiveVariableItemChanged(QListWidgetItem *);
 
 };
 

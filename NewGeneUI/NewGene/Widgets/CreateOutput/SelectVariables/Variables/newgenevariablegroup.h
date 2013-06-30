@@ -24,7 +24,6 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
-		void ReceiveClick();
 
 	protected:
 		void changeEvent( QEvent * e );

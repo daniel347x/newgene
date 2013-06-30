@@ -20,6 +20,8 @@ enum WORK_QUEUE_THREAD_LOOP_CLASS_ENUM
 	, UI_PROJECT_MANAGER
 };
 
+class QListWidgetItem;
+
 class WorkQueueManagerBase : public QObject
 {
 
@@ -53,6 +55,7 @@ class WorkQueueManagerBase : public QObject
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
+		virtual void ReceiveVariableItemChanged(QListWidgetItem *) {}
 
 	public:
 		virtual void SetConnections() {}

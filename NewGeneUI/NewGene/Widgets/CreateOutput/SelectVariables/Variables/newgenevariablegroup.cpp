@@ -1,6 +1,8 @@
 #include "newgenevariablegroup.h"
 #include "ui_newgenevariablegroup.h"
 
+#include <QStandardItem>
+
 NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
 
 	QWidget( parent ),
@@ -75,23 +77,43 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 		return;
 	}
 
-	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [this](WidgetInstanceIdentifier const & identifier)
+	if (!ui->listView)
 	{
-		if (identifier.longhand && !identifier.longhand->empty() && ui->listWidget)
+		boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QItemSelectionModel * oldModel = ui->listView->selectionModel();
+	QStandardItemModel * model = new QStandardItemModel();
+
+	int index = 0;
+	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [this, &index, &model](WidgetInstanceIdentifier const & identifier)
+	{
+		if (identifier.longhand && !identifier.longhand->empty())
 		{
 
-			QListWidgetItem * variable_name_item = new QListWidgetItem(QString(identifier.longhand->c_str()), ui->listWidget);
-			variable_name_item->setCheckState(Qt::Unchecked);
-			connect(ui->listWidget, SIGNAL(itemSelectionChanged()), this, SLOT(ReceiveClick()));
-			ui->listWidget->addItem(variable_name_item);
+			QStandardItem * item = new QStandardItem();
+			item->setText(QString(identifier.longhand->c_str()));
+			item->setCheckable( true );
+			item->setCheckState(Qt::Unchecked);
+			model->setItem( index, item );
+
+			//connect(ui->listView, SIGNAL(itemChanged(QListWidgetItem *)), outp->getQueueManager(), SLOT(ReceiveVariableItemChanged(QListWidgetItem *)));
+
+			//QListWidgetItem * variable_name_item = new QListWidgetItem(QString(identifier.longhand->c_str()), ui->listWidget);
+			//variable_name_item->setCheckState(Qt::Unchecked);
+			//connect(ui->listWidget, SIGNAL(itemChanged(QListWidgetItem *)), outp->getQueueManager(), SLOT(ReceiveVariableItemChanged(QListWidgetItem *)));
+			//ui->listWidget->addItem(variable_name_item);
+
+			++index;
+
 		}
 	});
 
-}
-
-void NewGeneVariableGroup::ReceiveClick()
-{
-
-
+	ui->listView->setModel(model);
+	if (oldModel) delete oldModel;
 
 }

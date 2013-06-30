@@ -8,13 +8,6 @@
 #include "../Messager/uimessagersingleshot.h"
 #include "../UIData/uiuidatamanager.h"
 
-//class InputProjectWorkQueue;
-//class OutputProjectWorkQueue;
-
-//template<DATA_WIDGETS WIDGET>
-//void WidgetDataRefresh()
-//{}
-
 template<DATA_WIDGETS DATA_WIDGET>
 class DoRefreshWidget
 {

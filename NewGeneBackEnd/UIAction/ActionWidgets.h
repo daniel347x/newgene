@@ -3,15 +3,15 @@
 
 #include "..\Utilities\WidgetIdentifier.h"
 
-enum ACTION_WIDGETS
+enum WIDGET_ACTIONS
 {
 
-	  ACTION_WIDGETS_FIRST = 0
-	, ACTION_TYPE_NONE = ACTION_WIDGETS_FIRST
+	  WIDGET_ACTIONS_FIRST = 0
+	, ACTION_TYPE_NONE = WIDGET_ACTIONS_FIRST
 
 	, ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
 
-	, ACTION_WIDGETS_LAST
+	, WIDGET_ACTIONS_LAST
 
 };
 
@@ -78,13 +78,13 @@ public:
 
 };
 
-template<ACTION_WIDGETS WIDGET>
+template<WIDGET_ACTIONS WIDGET>
 class WidgetActionItemRequest : public WidgetActionItemRequest_base
 {
 
 };
 
-template<ACTION_WIDGETS WIDGET>
+template<WIDGET_ACTIONS WIDGET>
 class WidgetActionItem : public WidgetActionItem_base
 {
 
@@ -106,7 +106,7 @@ public:
 	{
 	}
 };
-typedef WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED> WidgetActionItemRequest_VARIABLE_GROUPS_SCROLL_AREA;
+typedef WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED> WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED;
 
 template<>
 class WidgetActionItem<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED> : public WidgetActionItem_base
@@ -125,7 +125,7 @@ public:
 	{
 	}
 };
-typedef WidgetActionItem<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED> WidgetActionItem_VARIABLE_GROUPS_SCROLL_AREA;
+typedef WidgetActionItem<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED> WidgetActionItem_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED;
 
 
 #endif
