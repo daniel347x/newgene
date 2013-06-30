@@ -66,7 +66,7 @@ class WidgetActionItem__Checkbox : public WidgetActionItem
 			checked = checked_;
 		}
 
-		bool isChecked()
+		bool isChecked() const
 		{
 			return checked;
 		}

@@ -50,8 +50,13 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 				{
 					itemCode = *identifier.code;
 				}
-				boost::format msg("UUID = %1%, code = %2%");
-				msg % itemUUID % itemCode;
+				bool checked = false;
+				if (actionItemCheckbox.isChecked())
+				{
+					checked = true;
+				}
+				boost::format msg("UUID = %1%, code = %2%, checked = %3%");
+				msg % itemUUID % itemCode % checked;
 				messager.ShowMessageBox(msg.str());
 			});
 		}
