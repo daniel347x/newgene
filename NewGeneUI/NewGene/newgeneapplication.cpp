@@ -4,6 +4,8 @@
 
 Q_DECLARE_METATYPE(STD_STRING);
 
+Q_DECLARE_METATYPE(QVector<int>);
+
 Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
 Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
@@ -16,6 +18,8 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QApplication( argc, argv )
 {
 	qRegisterMetaType<STD_STRING>();
+
+	qRegisterMetaType<QVector<int>>();
 
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>();
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>();

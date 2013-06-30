@@ -16,6 +16,6 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 
 	//messager.EmitOutputWidgetDataRefresh(variable_groups);
 
-	messager.ShowMessageBox("Crazy crap");
+	//messager.ShowMessageBox("Crazy crap");
 
 }

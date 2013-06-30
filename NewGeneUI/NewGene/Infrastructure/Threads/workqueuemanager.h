@@ -55,7 +55,7 @@ class WorkQueueManagerBase : public QObject
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
-		virtual void ReceiveVariableItemChanged(QListWidgetItem *) {}
+		virtual void ReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>) {}
 
 	public:
 		virtual void SetConnections() {}

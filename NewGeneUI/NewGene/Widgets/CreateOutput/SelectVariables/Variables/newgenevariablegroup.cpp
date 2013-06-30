@@ -42,6 +42,7 @@ void NewGeneVariableGroup::UpdateOutputConnections(UIProjectManager::UPDATE_CONN
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 	connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
+	connect(this, SIGNAL(SignalReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)));
 }
 
 void NewGeneVariableGroup::changeEvent( QEvent * e )
@@ -86,8 +87,14 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 		return;
 	}
 
-	QItemSelectionModel * oldModel = ui->listView->selectionModel();
-	QStandardItemModel * model = new QStandardItemModel();
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
+	if (oldModel != nullptr)
+	{
+		delete oldModel;
+	}
+
+	QItemSelectionModel * oldSelectionModel = ui->listView->selectionModel();
+	QStandardItemModel * model = new QStandardItemModel(ui->listView);
 
 	int index = 0;
 	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [this, &index, &model](WidgetInstanceIdentifier const & identifier)
@@ -101,12 +108,7 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 			item->setCheckState(Qt::Unchecked);
 			model->setItem( index, item );
 
-			//connect(ui->listView, SIGNAL(itemChanged(QListWidgetItem *)), outp->getQueueManager(), SLOT(ReceiveVariableItemChanged(QListWidgetItem *)));
-
-			//QListWidgetItem * variable_name_item = new QListWidgetItem(QString(identifier.longhand->c_str()), ui->listWidget);
-			//variable_name_item->setCheckState(Qt::Unchecked);
-			//connect(ui->listWidget, SIGNAL(itemChanged(QListWidgetItem *)), outp->getQueueManager(), SLOT(ReceiveVariableItemChanged(QListWidgetItem *)));
-			//ui->listWidget->addItem(variable_name_item);
+			connect(model, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)), this, SLOT(ReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)));
 
 			++index;
 
@@ -114,6 +116,26 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 	});
 
 	ui->listView->setModel(model);
-	if (oldModel) delete oldModel;
+	if (oldSelectionModel) delete oldSelectionModel;
 
+}
+
+void NewGeneVariableGroup::ReceiveVariableItemChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight, const QVector<int> roles)
+{
+	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+	if (model == nullptr)
+	{
+		// Todo: messager error
+		return;
+	}
+
+	QStandardItem * topLeftItem = (model->itemFromIndex(topLeft));
+	QStandardItem * bottomRighItem = (model->itemFromIndex(bottomRight));
+	if (topLeftItem == nullptr || bottomRighItem == nullptr)
+	{
+		// Todo: messager error
+		return;
+	}
+
+	emit SignalReceiveVariableItemChanged(topLeft, bottomRight, roles);
 }

@@ -4,6 +4,7 @@
 #include <QTimer>
 #include "../UIData/uiwidgetdatarefresh.h"
 #include "../UIAction/variablegroupsetmemberselectionchange.h"
+#include <QStandardItem>
 
 OutputProjectWorkQueue::OutputProjectWorkQueue(QObject * parent)
 	: WorkQueueManager(parent)
@@ -59,7 +60,7 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_
 /************************************************************************/
 // ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
 /************************************************************************/
-void OutputProjectWorkQueue::ReceiveVariableItemChanged(QListWidgetItem *)
+void OutputProjectWorkQueue::ReceiveVariableItemChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight, const QVector<int> roles)
 {
 	WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request;
 	get()->getWorkService().post(VariableGroupSetMemberSelectionChange(action_request, this));
