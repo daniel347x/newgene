@@ -47,7 +47,7 @@ void Table_VG_CATEGORY::Load(sqlite3 * db)
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_FLAGS));
 		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand) && fk_uoa_uuid /* && strlen(fk_uoa_uuid) == UUID_LENGTH */ )
 		{
-			identifiers.push_back(DataInstanceIdentifier(uuid, code, longhand, 0, MakeNotes(notes1, notes2, notes3)));
+			identifiers.push_back(WidgetInstanceIdentifier(uuid, code, longhand, 0, MakeNotes(notes1, notes2, notes3)));
 		}
 	}
 }
@@ -81,7 +81,7 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db)
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_FLAGS));
 		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand) && fk_vg_uuid /* && strlen(fk_vg_uuid) == UUID_LENGTH */ )
 		{
-			identifiers_map[fk_vg_uuid].push_back(DataInstanceIdentifier(uuid, code, longhand, seqnumber, MakeNotes(notes1, notes2, notes3)));
+			identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, code, longhand, seqnumber, MakeNotes(notes1, notes2, notes3)));
 		}
 	}
 }

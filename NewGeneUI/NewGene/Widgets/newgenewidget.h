@@ -74,7 +74,7 @@ class NewGeneWidget
 		UIInputProject * inp;
 		UIOutputProject * outp;
 		DATA_WIDGETS widget_type;
-		DataInstanceIdentifier data_instance;
+		WidgetInstanceIdentifier data_instance;
 		bool top_level;
 		static NewGeneMainWindow * theMainWindow;
 
@@ -93,7 +93,7 @@ class WidgetCreationInfo
 							   NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN,
 							   DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE,
 							   bool const top_level_ = false,
-							   DataInstanceIdentifier data_instance_ = DataInstanceIdentifier()
+							   WidgetInstanceIdentifier data_instance_ = WidgetInstanceIdentifier()
 						   )
 			: self(self_)
 			, widget_nature(widget_nature_)
@@ -108,7 +108,7 @@ class WidgetCreationInfo
 		NewGeneWidget::WIDGET_NATURE widget_nature;
 		DATA_WIDGETS widget_type;
 		bool top_level;
-		DataInstanceIdentifier data_instance;
+		WidgetInstanceIdentifier data_instance;
 };
 
 #endif // NEWGENEWIDGET_H

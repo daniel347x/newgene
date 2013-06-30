@@ -41,7 +41,7 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 		}
 	}
 
-	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](DataInstanceIdentifier const & identifier)
+	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](WidgetInstanceIdentifier const & identifier)
 	{
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{

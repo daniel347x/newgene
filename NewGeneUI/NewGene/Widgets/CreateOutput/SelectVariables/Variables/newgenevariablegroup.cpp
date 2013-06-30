@@ -1,7 +1,7 @@
 #include "newgenevariablegroup.h"
 #include "ui_newgenevariablegroup.h"
 
-NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, DataInstanceIdentifier data_instance_, UIOutputProject * project ) :
+NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
 
 	QWidget( parent ),
 
@@ -75,30 +75,23 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 		return;
 	}
 
-	//std::string variables("Variables: ");
-
-	//bool first = true;
-	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [this /* , &variables, &first */ ](DataInstanceIdentifier const & identifier)
+	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [this](WidgetInstanceIdentifier const & identifier)
 	{
 		if (identifier.longhand && !identifier.longhand->empty() && ui->listWidget)
 		{
 
 			QListWidgetItem * variable_name_item = new QListWidgetItem(QString(identifier.longhand->c_str()), ui->listWidget);
 			variable_name_item->setCheckState(Qt::Unchecked);
+			connect(ui->listWidget, SIGNAL(itemSelectionChanged()), this, SLOT(ReceiveClick()));
 			ui->listWidget->addItem(variable_name_item);
-
-			//if (!first)
-			//{
-			//	variables += ", ";
-			//}
-			//variables += *identifier.longhand;
-			//first = false;
-
 		}
 	});
 
-	//QMessageBox msgBox;
-	//msgBox.setText( variables.c_str() );
-	//msgBox.exec();
+}
+
+void NewGeneVariableGroup::ReceiveClick()
+{
+
+
 
 }

@@ -121,11 +121,13 @@
     <ClInclude Include="Threads\WorkerThread.h" />
     <ClInclude Include="Threads\WorkItem.h" />
     <ClInclude Include="Triggers\TriggerManager.h" />
+    <ClInclude Include="UIAction\ActionWidgets.h" />
     <ClInclude Include="UIAction\UIActionManager.h" />
     <ClInclude Include="UIData\DataWidgets.h" />
     <ClInclude Include="UIData\UIDataManager.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
     <ClInclude Include="Utilities\UUID.h" />
+    <ClInclude Include="Utilities\WidgetIdentifier.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Documents\DocumentManager.cpp" />
@@ -173,11 +175,13 @@
     <ClCompile Include="Threads\WorkerThread.cpp" />
     <ClCompile Include="Threads\WorkItem.cpp" />
     <ClCompile Include="Triggers\TriggerManager.cpp" />
+    <ClCompile Include="UIAction\ActionWidgets.cpp" />
     <ClCompile Include="UIAction\UIActionManager.cpp" />
     <ClCompile Include="UIData\DataWidgets.cpp" />
     <ClCompile Include="UIData\UIDataManager.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
     <ClCompile Include="Utilities\UUID.cpp" />
+    <ClCompile Include="Utilities\WidgetIdentifier.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
