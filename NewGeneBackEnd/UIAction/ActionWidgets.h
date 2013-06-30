@@ -19,6 +19,11 @@ enum WIDGET_ACTION_ITEM_REQUEST_REASON
 {
 
 	  WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN
+
+	, WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS
+	, WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS
+	, WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS
+
 	, WIDGET_ACTION_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS
 
 };
@@ -28,22 +33,22 @@ class WidgetActionItemRequest_base
 
 public:
 
-	WidgetActionItemRequest_base(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+	WidgetActionItemRequest_base(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifiers identifiers_ = WidgetInstanceIdentifiers())
 		: reason(reason_)
-		, identifier(std::make_shared<WidgetInstanceIdentifier>(identifier_))
+		, identifiers(std::make_shared<WidgetInstanceIdentifiers>(identifiers_))
 	{
 
 	}
 
 	WidgetActionItemRequest_base(WidgetActionItemRequest_base const & rhs)
 		: reason(rhs.reason)
-		, identifier(rhs.identifier)
+		, identifiers(rhs.identifiers)
 	{
 
 	}
 
 	WIDGET_ACTION_ITEM_REQUEST_REASON reason;
-	std::shared_ptr<WidgetInstanceIdentifier> identifier;
+	std::shared_ptr<WidgetInstanceIdentifiers> identifiers;
 
 };
 
@@ -52,29 +57,29 @@ class WidgetActionItem_base
 
 public:
 
-	WidgetActionItem_base(WIDGET_ACTION_ITEM_REQUEST_REASON const request_reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+	WidgetActionItem_base(WIDGET_ACTION_ITEM_REQUEST_REASON const request_reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifiers identifiers_ = WidgetInstanceIdentifiers())
 		: request_reason(request_reason_)
-		, identifier(std::make_shared<WidgetInstanceIdentifier>(identifier_))
+		, identifiers(std::make_shared<WidgetInstanceIdentifiers>(identifiers_))
 	{
 
 	}
 
 	WidgetActionItem_base(WidgetActionItemRequest_base const & request_obj)
 		: request_reason(request_obj.reason)
-		, identifier(request_obj.identifier)
+		, identifiers(request_obj.identifiers)
 	{
 
 	}
 
 	WidgetActionItem_base(WidgetActionItem_base const & rhs)
 		: request_reason(rhs.request_reason)
-		, identifier(rhs.identifier)
+		, identifiers(rhs.identifiers)
 	{
 
 	}
 
 	WIDGET_ACTION_ITEM_REQUEST_REASON request_reason;
-	std::shared_ptr<WidgetInstanceIdentifier> identifier;
+	std::shared_ptr<WidgetInstanceIdentifiers> identifiers;
 
 };
 
@@ -97,8 +102,8 @@ template<>
 class WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED> : public WidgetActionItemRequest_base
 {
 public:
-	WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
-		: WidgetActionItemRequest_base(reason_, identifier_)
+	WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifiers identifiers_ = WidgetInstanceIdentifiers())
+		: WidgetActionItemRequest_base(reason_, identifiers_)
 	{
 	}
 	WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>(WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED> const & rhs)
@@ -112,8 +117,8 @@ template<>
 class WidgetActionItem<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED> : public WidgetActionItem_base
 {
 public:
-	WidgetActionItem<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>(WIDGET_ACTION_ITEM_REQUEST_REASON const request_reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
-		: WidgetActionItem_base(request_reason_, identifier_)
+	WidgetActionItem<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>(WIDGET_ACTION_ITEM_REQUEST_REASON const request_reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifiers identifiers_ = WidgetInstanceIdentifiers())
+		: WidgetActionItem_base(request_reason_, identifiers_)
 	{
 	}
 	WidgetActionItem<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>(WidgetActionItemRequest_base const & request_obj)

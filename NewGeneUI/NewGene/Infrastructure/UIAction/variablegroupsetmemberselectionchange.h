@@ -8,6 +8,8 @@
 #include "../Messager/uimessagersingleshot.h"
 #include "../UIAction/uiuiactionmanager.h"
 #include "uiaction.h"
+#include "../Project/uiinputproject.h"
+#include "../Project/uioutputproject.h"
 
 class VariableGroupSetMemberSelectionChange : public DoOutputAction<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>
 {

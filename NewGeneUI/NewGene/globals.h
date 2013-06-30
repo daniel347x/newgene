@@ -44,4 +44,23 @@ UIUIDataManager & uidataManagerUI();
 UIUIActionManager & uiactionManagerUI();
 UIModelActionManager & modelactionManagerUI();
 
+Q_DECLARE_METATYPE(STD_STRING);
+
+Q_DECLARE_METATYPE(QVector<int>);
+
+Q_DECLARE_METATYPE(WidgetInstanceIdentifier);
+
+// Widget refresh request data
+Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA);
+Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX);
+Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
+
+// Widget refresh data
+Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
+Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
+Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
+
+// Widget action data
+Q_DECLARE_METATYPE(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED);
+
 #endif // GLOBALS_H

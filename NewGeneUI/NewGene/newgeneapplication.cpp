@@ -1,18 +1,4 @@
 #include "newgeneapplication.h"
-#include "./Infrastructure/UIData/uiwidgetdatarefresh.h"
-
-
-Q_DECLARE_METATYPE(STD_STRING);
-
-Q_DECLARE_METATYPE(QVector<int>);
-
-Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
-Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
-Q_DECLARE_METATYPE(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
-
-Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA);
-Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX);
-Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
 
 NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QApplication( argc, argv )
@@ -21,13 +7,17 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 
 	qRegisterMetaType<QVector<int>>();
 
-	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>();
-	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>();
-	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>();
+	qRegisterMetaType<WidgetInstanceIdentifier>();
 
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA>();
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX>();
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>();
+
+	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>();
+	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>();
+	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>();
+
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>();
 }
 
 bool NewGeneApplication::notify( QObject * receiver, QEvent * e )

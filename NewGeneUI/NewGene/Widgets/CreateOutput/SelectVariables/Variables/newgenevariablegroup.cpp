@@ -42,7 +42,7 @@ void NewGeneVariableGroup::UpdateOutputConnections(UIProjectManager::UPDATE_CONN
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 	connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
-	connect(this, SIGNAL(SignalReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)));
+	connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)));
 }
 
 void NewGeneVariableGroup::changeEvent( QEvent * e )
@@ -106,6 +106,9 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 			item->setText(QString(identifier.longhand->c_str()));
 			item->setCheckable( true );
 			item->setCheckState(Qt::Unchecked);
+			QVariant v;
+			v.setValue(identifier);
+			item->setData(v);
 			model->setItem( index, item );
 
 			connect(model, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)), this, SLOT(ReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)));
@@ -122,6 +125,7 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 
 void NewGeneVariableGroup::ReceiveVariableItemChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight, const QVector<int> roles)
 {
+
 	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
 	if (model == nullptr)
 	{
@@ -130,12 +134,30 @@ void NewGeneVariableGroup::ReceiveVariableItemChanged(const QModelIndex & topLef
 	}
 
 	QStandardItem * topLeftItem = (model->itemFromIndex(topLeft));
-	QStandardItem * bottomRighItem = (model->itemFromIndex(bottomRight));
-	if (topLeftItem == nullptr || bottomRighItem == nullptr)
+	QStandardItem * bottomRightItem = (model->itemFromIndex(bottomRight));
+	if (topLeftItem == nullptr || bottomRightItem == nullptr)
 	{
 		// Todo: messager error
 		return;
 	}
 
-	emit SignalReceiveVariableItemChanged(topLeft, bottomRight, roles);
+	int topLeftRow = topLeftItem->row();
+	int bottomRightRow = bottomRightItem->row();
+
+	WidgetInstanceIdentifiers identifiers;
+
+	for (int row = topLeftRow; row <= bottomRightRow; ++row)
+	{
+		QStandardItem * currentItem = model->item(row);
+		if (currentItem)
+		{
+			QVariant currentIdentifier = currentItem->data();
+			WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
+			identifiers.push_back(identifier);
+		}
+	}
+
+	WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, identifiers);
+	emit SignalReceiveVariableItemChanged(action_request);
+
 }

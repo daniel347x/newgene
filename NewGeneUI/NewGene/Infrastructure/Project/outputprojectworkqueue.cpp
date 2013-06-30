@@ -60,8 +60,7 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_
 /************************************************************************/
 // ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
 /************************************************************************/
-void OutputProjectWorkQueue::ReceiveVariableItemChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight, const QVector<int> roles)
+void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request)
 {
-	WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request;
 	get()->getWorkService().post(VariableGroupSetMemberSelectionChange(action_request, this));
 }
