@@ -4,6 +4,8 @@
 #include <QWidget>
 #include "..\..\..\newgenewidget.h"
 
+class QStandardItem;
+
 namespace Ui
 {
 	class NewGeneVariableGroup;
@@ -26,6 +28,7 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
 		void ReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>);
+		void ReceiveVariableItemChanged(QStandardItem*);
 
 	protected:
 		void changeEvent( QEvent * e );

@@ -111,12 +111,13 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 			item->setData(v);
 			model->setItem( index, item );
 
-			connect(model, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)), this, SLOT(ReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)));
-
 			++index;
 
 		}
 	});
+
+	//connect(model, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)), this, SLOT(ReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)));
+	connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
 
 	ui->listView->setModel(model);
 	if (oldSelectionModel) delete oldSelectionModel;
@@ -160,6 +161,35 @@ void NewGeneVariableGroup::ReceiveVariableItemChanged(const QModelIndex & topLef
 			WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
 			actionItems.push_back(std::make_pair(identifier, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(checked)))));
 		}
+	}
+
+	WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
+	emit SignalReceiveVariableItemChanged(action_request);
+
+}
+
+void NewGeneVariableGroup::ReceiveVariableItemChanged(QStandardItem * currentItem)
+{
+
+	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+	if (model == nullptr)
+	{
+		// Todo: messager error
+		return;
+	}
+
+	InstanceActionItems actionItems;
+
+	if (currentItem)
+	{
+		bool checked = false;
+		if (currentItem->checkState() == Qt::Checked)
+		{
+			checked = true;
+		}
+		QVariant currentIdentifier = currentItem->data();
+		WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
+		actionItems.push_back(std::make_pair(identifier, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(checked)))));
 	}
 
 	WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);

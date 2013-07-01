@@ -38,6 +38,11 @@ class WidgetActionItem
 
 		}
 
+		virtual ~WidgetActionItem()
+		{
+
+		}
+
 		WidgetActionItem(WidgetActionItem const & rhs)
 		{
 
@@ -57,6 +62,18 @@ class WidgetActionItem__Checkbox : public WidgetActionItem
 		WidgetActionItem__Checkbox(bool const checked_)
 			: WidgetActionItem()
 			, checked(checked_)
+		{
+
+		}
+
+		WidgetActionItem__Checkbox(WidgetActionItem__Checkbox const & rhs)
+			: WidgetActionItem(rhs)
+			, checked(rhs.checked)
+		{
+
+		}
+
+		~WidgetActionItem__Checkbox()
 		{
 
 		}

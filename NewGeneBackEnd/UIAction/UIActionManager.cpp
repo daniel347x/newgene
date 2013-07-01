@@ -2,6 +2,8 @@
 
 #include "../Project/InputProject.h"
 #include "../Project/OutputProject.h"
+#include "../UIData/DataChanges.h"
+#include "../UIAction/ActionChanges.h"
 
 /************************************************************************/
 // ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
@@ -31,6 +33,9 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 		break;
 	case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 		{
+
+			DataChangeMessage change_response(&project);
+
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager](InstanceActionItem const & instanceActionItem)
 			{
 				if (!instanceActionItem.second)
@@ -55,9 +60,9 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 				{
 					checked = true;
 				}
-				boost::format msg("UUID = %1%, code = %2%, checked = %3%");
-				msg % itemUUID % itemCode % checked;
-				messager.ShowMessageBox(msg.str());
+				//boost::format msg("UUID = %1%, code = %2%, checked = %3%");
+				//msg % itemUUID % itemCode % checked;
+				//messager.ShowMessageBox(msg.str());
 			});
 		}
 		break;

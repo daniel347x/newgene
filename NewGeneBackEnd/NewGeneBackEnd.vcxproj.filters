@@ -270,6 +270,12 @@
     <ClInclude Include="Utilities\WidgetIdentifier.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="UIData\DataChanges.h">
+      <Filter>Header Files\UIData</Filter>
+    </ClInclude>
+    <ClInclude Include="UIAction\ActionChanges.h">
+      <Filter>Header Files\UIAction</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -427,6 +433,12 @@
     </ClCompile>
     <ClCompile Include="Utilities\WidgetIdentifier.cpp">
       <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="UIData\DataChanges.cpp">
+      <Filter>Source Files\UIData</Filter>
+    </ClCompile>
+    <ClCompile Include="UIAction\ActionChanges.cpp">
+      <Filter>Source Files\UIAction</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
