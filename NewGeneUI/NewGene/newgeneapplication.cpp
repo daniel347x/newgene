@@ -7,6 +7,8 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 
 	qRegisterMetaType<QVector<int>>();
 
+	qRegisterMetaType<WidgetChangeMessage>();
+
 	qRegisterMetaType<WidgetInstanceIdentifier>();
 
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA>();

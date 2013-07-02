@@ -16,6 +16,9 @@ typedef std::string STD_STRING;
 #endif
 #include "Infrastructure/Messager/uimessager.h"
 
+class NewGeneWidget;
+typedef std::pair<NewGeneWidget *, DataChangeMessage> WidgetChangeMessage;
+
 class NewGeneMainWindow;
 
 class UIProjectManager;
@@ -47,6 +50,8 @@ UIModelActionManager & modelactionManagerUI();
 Q_DECLARE_METATYPE(STD_STRING);
 
 Q_DECLARE_METATYPE(QVector<int>);
+
+Q_DECLARE_METATYPE(WidgetChangeMessage);
 
 Q_DECLARE_METATYPE(WidgetInstanceIdentifier);
 
