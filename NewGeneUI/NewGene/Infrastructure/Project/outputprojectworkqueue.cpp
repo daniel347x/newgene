@@ -36,7 +36,10 @@ void OutputProjectWorkQueue::EmitMessage(std::string msg)
 void OutputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
 {
 	WidgetChangeMessages widget_change_messages = get()->HandleChanges(changes);
-	emit DataChangeMessageSignal(widget_change_messages);
+	if (!widget_change_messages.empty())
+	{
+		emit DataChangeMessageSignal(widget_change_messages);
+	}
 }
 
 

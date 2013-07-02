@@ -27,8 +27,33 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 {
 	public:
 
+		class DataChangeInterest
+		{
+			public:
+				DATA_CHANGE_TYPE type;
+				bool match_uuid;
+				UUID uuid_to_match;
+				DataChangeInterest(DATA_CHANGE_TYPE type_, bool match_uuid_, UUID const uuid_to_match_ = "")
+					: type(type_)
+					, match_uuid(match_uuid_)
+					, uuid_to_match(uuid_to_match_)
+				{
+					if (match_uuid && uuid_to_match.empty())
+					{
+						match_uuid = false;
+					}
+				}
+				DataChangeInterest(DataChangeInterest const & rhs)
+					: type(rhs.type)
+					, match_uuid(rhs.match_uuid)
+					, uuid_to_match(rhs.uuid_to_match)
+				{
+
+				}
+		};
+
 		typedef std::map<UUID, NewGeneWidget *> UUIDWidgetMap;
-		typedef std::multimap<NewGeneWidget * const, DATA_CHANGE_TYPE const> WidgetDataChangeInterestMap;
+		typedef std::multimap<NewGeneWidget * const, DataChangeInterest const> WidgetDataChangeInterestMap;
 
 		static int const number_worker_threads = 1; // For now, single thread only in pool
 
@@ -144,10 +169,10 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			return nullptr;
 		}
 
-		void RegisterInterestInChange(NewGeneWidget * widget, DATA_CHANGE_TYPE const type)
+		void RegisterInterestInChange(NewGeneWidget * widget, DATA_CHANGE_TYPE const type, bool const match_uuid, UUID const & uuid_to_match)
 		{
 			std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
-			data_change_interest_map.insert(std::make_pair(widget, type));
+			data_change_interest_map.insert(std::make_pair(widget, DataChangeInterest(type, match_uuid, uuid_to_match)));
 		}
 
 		void UnregisterInterestInChanges(NewGeneWidget * widget)
@@ -169,6 +194,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 					NewGeneWidget * const & widget = widget_change_message.first;
 					DataChangeMessage const & change_message = widget_change_message.second;
 
+					if (!change_message.changes.empty())
 					{
 						std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
 						WidgetDataChangeInterestMap::const_iterator found_iterator = data_change_interest_map.find(widget);
@@ -200,17 +226,50 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 			{
 				std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
-				std::for_each(data_change_interest_map.cbegin(), data_change_interest_map.cend(), [&changes, &widget_change_message_map](std::pair<NewGeneWidget * const, DATA_CHANGE_TYPE const> const & pair_)
+				std::for_each(data_change_interest_map.cbegin(), data_change_interest_map.cend(), [&changes, &widget_change_message_map](std::pair<NewGeneWidget * const, DataChangeInterest const> const & pair_)
 				{
+					// todo: create widget-to-uuid map, populate it above at same time as reverse map,
+					// get uuid from map here in this function using the following widget pointer,
+					// if found then test against all uuid's in the DataChange message (parent and all children)
+					// for a match and only add to subset_of_changes_message if there's a match,
+					// then below only push_back the change message if there are more than 0 changes in it.
 					NewGeneWidget * const & widget = pair_.first;
-					DATA_CHANGE_TYPE const & type = pair_.second;
+					DataChangeInterest const & interest = pair_.second;
 					DataChangeMessage & subset_of_changes_message = widget_change_message_map[widget];
 
-					std::for_each(changes.changes.cbegin(), changes.changes.cend(), [&widget, &type, &subset_of_changes_message](DataChange const & change)
+					std::for_each(changes.changes.cbegin(), changes.changes.cend(), [&widget, &interest, &subset_of_changes_message](DataChange const & change)
 					{
-						if (change.change_type == type)
+						if (change.change_type == interest.type)
 						{
-							subset_of_changes_message.changes.push_back(change);
+							if (interest.match_uuid)
+							{
+								// send only if a UUID matches
+								bool matches = false;
+								if (change.parent_identifier.uuid && *change.parent_identifier.uuid == interest.uuid_to_match)
+								{
+									matches = true;
+								}
+								else
+								{
+									std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&interest, &matches, &change](WidgetInstanceIdentifier const & child_identifier)
+									{
+										if (change.parent_identifier.uuid && *change.parent_identifier.uuid == interest.uuid_to_match)
+										{
+											matches = true;
+										}
+									});
+								}
+								if (matches)
+								{
+									// Only send if a UUID matches
+									subset_of_changes_message.changes.push_back(change);
+								}
+							}
+							else
+							{
+								// Always send
+								subset_of_changes_message.changes.push_back(change);
+							}
 						}
 					});
 

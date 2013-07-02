@@ -27,7 +27,7 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIden
 	if (data_instance.uuid && project)
 	{
 
-		project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION);
+		project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, true, *data_instance.uuid);
 
 		UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 		WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
@@ -203,11 +203,12 @@ void NewGeneVariableGroup::ReceiveVariableItemChanged(QStandardItem * currentIte
 
 void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_message)
 {
+	ShowMessageBox("Made it into the group box with data changes, NOT testing for UUID.");
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
 	{
 		if (change.parent_identifier.uuid && *change.parent_identifier.uuid == *data_instance.uuid)
 		{
-			ShowMessageBox("Made it into the group box with data changes.");
+			ShowMessageBox("Made it into the group box with data changes, testing for UUID.");
 		}
 	});
 }
