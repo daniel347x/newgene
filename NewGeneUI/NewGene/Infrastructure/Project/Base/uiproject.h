@@ -185,6 +185,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			{
 				NewGeneWidget * const & widget = pair_.first;
 				DataChangeMessage const & change_message = pair_.second;
+				WidgetChangeMessage widget_change_message = std::make_pair(widget, change_message);
 			});
 
 		}
