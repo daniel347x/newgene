@@ -47,7 +47,11 @@ void Table_VG_CATEGORY::Load(sqlite3 * db)
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_FLAGS));
 		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand) && fk_uoa_uuid /* && strlen(fk_uoa_uuid) == UUID_LENGTH */ )
 		{
-			identifiers.push_back(WidgetInstanceIdentifier(uuid, code, longhand, 0, MakeNotes(notes1, notes2, notes3)));
+			WidgetInstanceIdentifier vg_category_identifier(uuid, code, longhand, 0, MakeNotes(notes1, notes2, notes3));
+			std::shared_ptr<UUIDVector> fkeys = std::make_shared<UUIDVector>();
+			fkeys->push_back(fk_uoa_uuid);
+			vg_category_identifier.fkuuids = fkeys;
+			identifiers.push_back(vg_category_identifier);
 		}
 	}
 }
@@ -81,7 +85,7 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db)
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_FLAGS));
 		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand) && fk_vg_uuid /* && strlen(fk_vg_uuid) == UUID_LENGTH */ )
 		{
-			identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, code, longhand, seqnumber, MakeNotes(notes1, notes2, notes3)));
+			identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, fk_vg_uuid, code, longhand, seqnumber, MakeNotes(notes1, notes2, notes3)));
 		}
 	}
 }

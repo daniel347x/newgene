@@ -6,6 +6,7 @@
 #include <memory>
 #include <cstdint>
 #include "../UIData/DataWidgets.h"
+#include "../UIAction/ActionChanges.h"
 
 #ifndef Q_MOC_RUN
 #endif
@@ -139,6 +140,8 @@ class Messager
 		bool IsWarning();
 		bool IsError();
 		bool IsErrorCatastrophic();
+
+		virtual void EmitChangeMessage(DataChangeMessage & changes) {}
 
 		virtual void ShowMessageBox(std::string) {}
 

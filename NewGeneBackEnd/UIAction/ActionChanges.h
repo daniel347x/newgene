@@ -15,8 +15,11 @@ class DataChangeMessage
 
 		DataChangeMessage(InputProject *);
 		DataChangeMessage(OutputProject *);
+		DataChangeMessage();
 		DataChangeMessage(DataChangeMessage const & rhs);
 
+		InputProject * inp;
+		OutputProject * outp;
 		std::shared_ptr<std::lock_guard<std::recursive_timed_mutex>> data_lock;
 		DataChanges changes;
 

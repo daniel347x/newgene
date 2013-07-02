@@ -10,7 +10,7 @@
 bool UIMessager::ManagersInitialized = false;
 
 UIMessager::UIMessager(QObject *parent) :
-    QObject(parent)
+	QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , singleShotActive(false)
 {
@@ -74,6 +74,18 @@ void UIMessager::FinalizeSingleShot()
 	singleShotActive = false;
 }
 
+void UIMessager::EmitChangeMessage(DataChangeMessage & changes)
+{
+	if (changes.outp)
+	{
+		this->EmitOutputProjectChangeMessage(changes);
+	}
+	if (changes.inp)
+	{
+		this->EmitInputProjectChangeMessage(changes);
+	}
+}
+
 UIMessagerInputProject::UIMessagerInputProject(UIInputProject * inp_, QObject * parent)
 	: UIMessager(parent)
 	, inp(inp_)
@@ -99,9 +111,19 @@ void UIMessagerInputProject::ShowMessageBox(std::string msg)
 	emit DisplayMessageBox(msg);
 }
 
+void UIMessagerInputProject::EmitInputProjectChangeMessage(DataChangeMessage & changes)
+{
+	get()->getQueueManager()->HandleChanges(changes);
+}
+
 void UIMessagerOutputProject::ShowMessageBox(std::string msg)
 {
 	emit DisplayMessageBox(msg);
+}
+
+void UIMessagerOutputProject::EmitOutputProjectChangeMessage(DataChangeMessage & changes)
+{
+	get()->getQueueManager()->HandleChanges(changes);
 }
 
 void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData)

@@ -77,6 +77,11 @@ class UIMessager : public QObject, public Messager
 		void InitializeSingleShot();
 		void FinalizeSingleShot();
 
+		void EmitChangeMessage(DataChangeMessage & widgetData);
+
+		virtual void EmitInputProjectChangeMessage(DataChangeMessage & changes) {}
+		virtual void EmitOutputProjectChangeMessage(DataChangeMessage & changes) {}
+
 	signals:
 		void PostStatus(STD_STRING, int, bool);
 		void DisplayMessageBox(STD_STRING);
@@ -111,6 +116,8 @@ class UIMessagerInputProject : public UIMessager
 
 		void ShowMessageBox(std::string);
 
+		void EmitInputProjectChangeMessage(DataChangeMessage & changes);
+
 	protected:
 
 		UIInputProject * inp;
@@ -127,6 +134,8 @@ class UIMessagerOutputProject : public UIMessager
 		}
 
 		void ShowMessageBox(std::string);
+
+		void EmitOutputProjectChangeMessage(DataChangeMessage & changes);
 
 		void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData);
 		void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData);

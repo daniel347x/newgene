@@ -36,7 +36,7 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 
 			DataChangeMessage change_response(&project);
 
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager](InstanceActionItem const & instanceActionItem)
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 				if (!instanceActionItem.second)
 				{
@@ -47,6 +47,10 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 				{
 					return;
 				}
+
+				// ************************************* //
+				// Retrieve data sent by user interface
+				// ************************************* //
 				WidgetActionItem const & actionItem = *instanceActionItem.second;
 				WidgetActionItem__Checkbox const & actionItemCheckbox = static_cast<WidgetActionItem__Checkbox const &>(actionItem);
 				UUID itemUUID = *identifier.uuid;
@@ -60,10 +64,28 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 				{
 					checked = true;
 				}
+
+				// ***************************************** //
+				// Prepare data to send back to user interface
+				// ***************************************** //
+				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION;
+				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
+				if (!checked)
+				{
+					intention = DATA_CHANGE_INTENTION__REMOVE;
+				}
+				WidgetInstanceIdentifiers child_identifiers;
+				child_identifiers.push_back(identifier);
+				DataChange change(type, intention, WidgetInstanceIdentifier(*identifier.uuid_parent), child_identifiers);
+				change_response.changes.push_back(change);
+
 				//boost::format msg("UUID = %1%, code = %2%, checked = %3%");
 				//msg % itemUUID % itemCode % checked;
 				//messager.ShowMessageBox(msg.str());
 			});
+
+			messager.EmitChangeMessage(change_response);
+
 		}
 		break;
 	}

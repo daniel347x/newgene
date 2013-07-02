@@ -23,6 +23,13 @@ void InputProjectWorkQueue::SetConnections()
 }
 
 
+// Called in context of Boost WORK POOL threads - NOT in context of this work queue manager's event loop thread
+void InputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
+{
+	get()->HandleChanges(changes);
+}
+
+
 ///************************************************************************/
 //// VARIABLE_GROUPS_SCROLL_AREA
 ///************************************************************************/

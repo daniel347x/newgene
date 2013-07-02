@@ -21,6 +21,9 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 
 		UIInputProject * get();
 
+		// Called in context of Boost WORK POOL threads - NOT in context of this work queue manager's event loop thread
+		void HandleChanges(DataChangeMessage & changes);
+
 	private:
 
 		void * inp;

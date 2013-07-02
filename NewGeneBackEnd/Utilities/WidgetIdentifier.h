@@ -77,8 +77,27 @@ public:
 
 	}
 
+	WidgetInstanceIdentifier(UUID const uuid_, UUID const uuid_parent_, std::string const code_, std::string const description_, int const sequence_number_, Notes notes_ = Notes())
+		: uuid(std::make_shared<UUID>(uuid_))
+		, uuid_parent(std::make_shared<UUID>(uuid_parent_))
+		, code(std::make_shared<std::string>(code_))
+		, sequence_number(sequence_number_)
+		, longhand(std::make_shared<std::string>(description_))
+		, notes(notes_)
+	{
+
+	}
+
 	WidgetInstanceIdentifier(UUID uuid_)
 		: uuid(std::make_shared<UUID>(uuid_))
+		, sequence_number(0)
+	{
+
+	}
+
+	WidgetInstanceIdentifier(UUID uuid_, UUID uuid_parent_)
+		: uuid(std::make_shared<UUID>(uuid_))
+		, uuid_parent(std::make_shared<UUID>(uuid_parent_))
 		, sequence_number(0)
 	{
 
@@ -95,6 +114,7 @@ public:
 
 	WidgetInstanceIdentifier(WidgetInstanceIdentifier const & rhs)
 		: uuid(rhs.uuid)
+		, uuid_parent(rhs.uuid_parent)
 		, code(rhs.code)
 		, sequence_number(rhs.sequence_number)
 		, longhand(rhs.longhand)
@@ -110,6 +130,7 @@ public:
 			return *this;
 		}
 		uuid = rhs.uuid;
+		uuid_parent = rhs.uuid;
 		fkuuids = rhs.fkuuids;
 		code = rhs.code;
 		longhand = rhs.longhand;
@@ -119,6 +140,7 @@ public:
 	}
 
 	std::shared_ptr<UUID> uuid;
+	std::shared_ptr<UUID> uuid_parent;
 	std::shared_ptr<UUIDVector> fkuuids;
 	std::shared_ptr<std::string> code;
 	std::shared_ptr<std::string> longhand;

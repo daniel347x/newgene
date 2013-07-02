@@ -21,6 +21,11 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 
 		void SetConnections();
 
+		UIOutputProject * get();
+
+		// Called in context of Boost WORK POOL threads - NOT in context of this work queue manager's event loop thread
+		void HandleChanges(DataChangeMessage & changes);
+
 		void EmitMessage(std::string msg);
 
 		void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData)
@@ -35,8 +40,6 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		{
 			emit WidgetDataRefresh(widgetData);
 		}
-
-		UIOutputProject * get();
 
 	private:
 

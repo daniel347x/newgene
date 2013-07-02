@@ -28,6 +28,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 	public:
 
 		typedef std::map<UUID, NewGeneWidget *> UUIDWidgetMap;
+		typedef std::multimap<NewGeneWidget * const, DATA_CHANGE_TYPE const> WidgetDataChangeInterestMap;
 
 		static int const number_worker_threads = 1; // For now, single thread only in pool
 
@@ -143,6 +144,51 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			return nullptr;
 		}
 
+		virtual void RegisterInterestInChange(NewGeneWidget * widget, DATA_CHANGE_TYPE const type)
+		{
+			std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
+			data_change_interest_map.insert(std::make_pair(widget, type));
+		}
+
+		// ********************************************************** //
+		// This function is called in the context of the work queue.
+		// ********************************************************** //
+		virtual void HandleChanges(DataChangeMessage & changes)
+		{
+
+			// 'changes' has a list of change items, each with a DATA_CHANGE_TYPE.
+			// 'data_change_interest_map' has a list of widgets, each interested in a list of changes.
+			// Todo: Send only one message, with only and all the changes of interest, to each widget.
+
+			std::map<NewGeneWidget *, DataChangeMessage> widget_change_message_map;
+
+			{
+				std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
+				std::for_each(data_change_interest_map.cbegin(), data_change_interest_map.cend(), [&changes, &widget_change_message_map](std::pair<NewGeneWidget * const, DATA_CHANGE_TYPE const> const & pair_)
+				{
+					NewGeneWidget * const & widget = pair_.first;
+					DATA_CHANGE_TYPE const & type = pair_.second;
+					DataChangeMessage & subset_of_changes_message = widget_change_message_map[widget];
+
+					std::for_each(changes.changes.cbegin(), changes.changes.cend(), [&widget, &type, &subset_of_changes_message](DataChange const & change)
+					{
+						if (change.change_type == type)
+						{
+							subset_of_changes_message.changes.push_back(change);
+						}
+					});
+
+				});
+			}
+
+			std::for_each(widget_change_message_map.cbegin(), widget_change_message_map.cend(), [](std::pair<NewGeneWidget *, DataChangeMessage> const pair_)
+			{
+				NewGeneWidget * const & widget = pair_.first;
+				DataChangeMessage const & change_message = pair_.second;
+			});
+
+		}
+
 	protected:
 
 		// The order of initialization is important.
@@ -160,6 +206,9 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		std::recursive_mutex data_item_uuid_map_mutex;
 		UUIDWidgetMap data_item_uuid_widget_map;
+
+		std::recursive_mutex data_change_interest_map_mutex;
+		WidgetDataChangeInterestMap data_change_interest_map;
 
 };
 
