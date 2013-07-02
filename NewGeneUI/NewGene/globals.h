@@ -18,6 +18,7 @@ typedef std::string STD_STRING;
 
 class NewGeneWidget;
 typedef std::pair<NewGeneWidget *, DataChangeMessage> WidgetChangeMessage;
+typedef std::vector<WidgetChangeMessage> WidgetChangeMessages;
 
 class NewGeneMainWindow;
 
@@ -52,6 +53,7 @@ Q_DECLARE_METATYPE(STD_STRING);
 Q_DECLARE_METATYPE(QVector<int>);
 
 Q_DECLARE_METATYPE(WidgetChangeMessage);
+Q_DECLARE_METATYPE(WidgetChangeMessages);
 
 Q_DECLARE_METATYPE(WidgetInstanceIdentifier);
 

@@ -47,7 +47,7 @@ bool UIInputProject::is_model_equivalent(UIMessager & messager, UIInputModel * m
 
 void UIInputProject::UpdateConnections()
 {
-
+	connect(getConnector(), SIGNAL(DataChangeMessageSignal(WidgetChangeMessages)), this, SLOT(DataChangeMessageSlot(WidgetChangeMessages)));
 }
 
 void UIInputProject::DoRefreshAllWidgets()
@@ -55,3 +55,6 @@ void UIInputProject::DoRefreshAllWidgets()
 	emit RefreshAllWidgets();
 }
 
+void UIInputProject::DataChangeMessageSlot(WidgetChangeMessages)
+{
+}

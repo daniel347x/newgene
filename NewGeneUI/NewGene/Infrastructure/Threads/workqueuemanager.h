@@ -44,6 +44,7 @@ class WorkQueueManagerBase : public QObject
 		void SignalMessageBox(STD_STRING);
 		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR);
 		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR);
+		void DataChangeMessageSignal(WidgetChangeMessages);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);

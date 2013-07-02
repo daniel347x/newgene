@@ -153,7 +153,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		// ********************************************************** //
 		// This function is called in the context of the work queue.
 		// ********************************************************** //
-		virtual void HandleChanges(DataChangeMessage & changes)
+		WidgetChangeMessages HandleChanges(DataChangeMessage & changes)
 		{
 
 			// 'changes' has a list of change items, each with a DATA_CHANGE_TYPE.
@@ -181,12 +181,14 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				});
 			}
 
-			std::for_each(widget_change_message_map.cbegin(), widget_change_message_map.cend(), [](std::pair<NewGeneWidget *, DataChangeMessage> const pair_)
+			WidgetChangeMessages widget_change_messages;
+			std::for_each(widget_change_message_map.cbegin(), widget_change_message_map.cend(), [&widget_change_messages](std::pair<NewGeneWidget *, DataChangeMessage> const pair_)
 			{
 				NewGeneWidget * const & widget = pair_.first;
 				DataChangeMessage const & change_message = pair_.second;
-				WidgetChangeMessage widget_change_message = std::make_pair(widget, change_message);
+				widget_change_messages.push_back(std::make_pair(widget, change_message));
 			});
+			return widget_change_messages;
 
 		}
 

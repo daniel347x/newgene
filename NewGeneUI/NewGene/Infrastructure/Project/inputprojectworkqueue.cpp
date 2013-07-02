@@ -26,7 +26,8 @@ void InputProjectWorkQueue::SetConnections()
 // Called in context of Boost WORK POOL threads - NOT in context of this work queue manager's event loop thread
 void InputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
 {
-	get()->HandleChanges(changes);
+	 WidgetChangeMessages widget_change_messages = get()->HandleChanges(changes);
+	 emit DataChangeMessageSignal(widget_change_messages);
 }
 
 

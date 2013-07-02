@@ -84,10 +84,15 @@ bool UIOutputProject::is_model_equivalent(UIMessager & messager, UIOutputModel *
 
 void UIOutputProject::UpdateConnections()
 {
-
+	connect(getConnector(), SIGNAL(DataChangeMessageSignal(WidgetChangeMessages)), this, SLOT(DataChangeMessageSlot(WidgetChangeMessages)));
 }
 
 void UIOutputProject::DoRefreshAllWidgets()
 {
 	emit RefreshAllWidgets();
+}
+
+void UIOutputProject::DataChangeMessageSlot(WidgetChangeMessages)
+{
+	SignalMessageBox("WidgetChangeMessages received.");
 }

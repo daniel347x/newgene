@@ -34,6 +34,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		void RefreshAllWidgets();
 
 	public slots:
+		void DataChangeMessageSlot(WidgetChangeMessages);
 		void SignalMessageBox(STD_STRING);
 
 	public:

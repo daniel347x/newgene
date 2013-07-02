@@ -8,6 +8,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<QVector<int>>();
 
 	qRegisterMetaType<WidgetChangeMessage>();
+	qRegisterMetaType<WidgetChangeMessages>();
 
 	qRegisterMetaType<WidgetInstanceIdentifier>();
 
