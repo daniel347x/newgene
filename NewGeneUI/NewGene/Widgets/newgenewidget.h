@@ -36,6 +36,10 @@ class NewGeneWidget
 
 		virtual void PrepareInputWidget();
 		virtual void PrepareOutputWidget();
+		virtual void HandleChanges(DataChangeMessage const &) {}
+
+		// Be sure to call this only in the context of the UI thread
+		void ShowMessageBox(std::string msg);
 
 	protected:
 

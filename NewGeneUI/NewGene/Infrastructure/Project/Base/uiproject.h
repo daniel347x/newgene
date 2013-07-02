@@ -144,10 +144,46 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			return nullptr;
 		}
 
-		virtual void RegisterInterestInChange(NewGeneWidget * widget, DATA_CHANGE_TYPE const type)
+		void RegisterInterestInChange(NewGeneWidget * widget, DATA_CHANGE_TYPE const type)
 		{
 			std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
 			data_change_interest_map.insert(std::make_pair(widget, type));
+		}
+
+		void UnregisterInterestInChanges(NewGeneWidget * widget)
+		{
+			std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
+			data_change_interest_map.erase(widget);
+		}
+
+		virtual void PassChangeMessageToWidget(NewGeneWidget * widget, DataChangeMessage const & change_message) {}
+
+		// ********************************************************** //
+		// This function is called in the context of the UI thread.
+		// ********************************************************** //
+		void DisplayChanges(WidgetChangeMessages widget_change_messages)
+		{
+			std::for_each(widget_change_messages.cbegin(), widget_change_messages.cend(), [this](WidgetChangeMessage const & widget_change_message)
+			{
+				{
+					NewGeneWidget * const & widget = widget_change_message.first;
+					DataChangeMessage const & change_message = widget_change_message.second;
+
+					{
+						std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
+						WidgetDataChangeInterestMap::const_iterator found_iterator = data_change_interest_map.find(widget);
+						if (found_iterator != data_change_interest_map.cend())
+						{
+							// The widget is still alive
+							// (it will only be destroyed by this current thread,
+							// so it can't be destroyed right now)
+							this->PassChangeMessageToWidget(widget, change_message);
+						}
+					}
+
+				}
+
+			});
 		}
 
 		// ********************************************************** //

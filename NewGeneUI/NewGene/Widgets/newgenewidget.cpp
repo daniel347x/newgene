@@ -46,6 +46,14 @@ NewGeneMainWindow & NewGeneWidget::mainWindow()
 	return *theMainWindow; // FIX THIS!!!
 }
 
+// Be sure to call this only in the context of the UI thread
+void NewGeneWidget::ShowMessageBox(std::string msg)
+{
+	QMessageBox msgBox;
+	msgBox.setText( msg.c_str() );
+	msgBox.exec();
+}
+
 void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 

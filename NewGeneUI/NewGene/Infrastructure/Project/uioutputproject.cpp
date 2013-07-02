@@ -1,5 +1,6 @@
 #include "uioutputproject.h"
 #include "uiinputmodel.h"
+#include "../../Widgets/newgenewidget.h"
 
 void UIOutputProject::SignalMessageBox(STD_STRING msg)
 {
@@ -92,7 +93,14 @@ void UIOutputProject::DoRefreshAllWidgets()
 	emit RefreshAllWidgets();
 }
 
-void UIOutputProject::DataChangeMessageSlot(WidgetChangeMessages)
+// Called in UI thread
+void UIOutputProject::DataChangeMessageSlot(WidgetChangeMessages widget_change_messages)
 {
-	SignalMessageBox("WidgetChangeMessages received.");
+	//SignalMessageBox("WidgetChangeMessages received.");
+	DisplayChanges(widget_change_messages);
+}
+
+void UIOutputProject::PassChangeMessageToWidget(NewGeneWidget * widget, DataChangeMessage const & change_message)
+{
+	widget->HandleChanges(change_message);
 }

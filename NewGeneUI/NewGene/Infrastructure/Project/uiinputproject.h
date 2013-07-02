@@ -27,6 +27,7 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 
 		void UpdateConnections();
 		void DoRefreshAllWidgets();
+		void PassChangeMessageToWidget(NewGeneWidget * widget, DataChangeMessage const & change_message);
 
 	signals:
 		void RefreshAllWidgets();

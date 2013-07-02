@@ -26,6 +26,7 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIden
 
 	if (data_instance.uuid && project)
 	{
+		project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION);
 		UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 		WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
 		emit RefreshWidget(request);
@@ -35,6 +36,7 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIden
 
 NewGeneVariableGroup::~NewGeneVariableGroup()
 {
+	outp->UnregisterInterestInChanges(this);
 	delete ui;
 }
 
@@ -195,4 +197,9 @@ void NewGeneVariableGroup::ReceiveVariableItemChanged(QStandardItem * currentIte
 	WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 	emit SignalReceiveVariableItemChanged(action_request);
 
+}
+
+void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_message)
+{
+	ShowMessageBox("Made it into the group box with data changes.");
 }

@@ -1,4 +1,5 @@
 #include "uiinputproject.h"
+#include "../../Widgets/newgenewidget.h"
 
 void UIInputProject::SignalMessageBox(STD_STRING msg)
 {
@@ -55,6 +56,13 @@ void UIInputProject::DoRefreshAllWidgets()
 	emit RefreshAllWidgets();
 }
 
-void UIInputProject::DataChangeMessageSlot(WidgetChangeMessages)
+// Called in UI thread
+void UIInputProject::DataChangeMessageSlot(WidgetChangeMessages widget_change_messages)
 {
+	DisplayChanges(widget_change_messages);
+}
+
+void UIInputProject::PassChangeMessageToWidget(NewGeneWidget * widget, DataChangeMessage const & change_message)
+{
+	widget->HandleChanges(change_message);
 }

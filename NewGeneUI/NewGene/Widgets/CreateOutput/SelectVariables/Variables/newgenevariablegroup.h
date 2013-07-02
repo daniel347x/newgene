@@ -19,6 +19,8 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		explicit NewGeneVariableGroup( QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr );
 		~NewGeneVariableGroup();
 
+		void HandleChanges(DataChangeMessage const &);
+
 	signals:
 		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
 		void SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED);
