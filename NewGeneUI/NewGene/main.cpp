@@ -21,7 +21,7 @@ int main( int argc, char * argv[] )
 {
 
 #	ifdef QT_DEBUG
-		//boost::this_thread::sleep(boost::posix_time::seconds(20));
+		boost::this_thread::sleep(boost::posix_time::seconds(15));
 #	endif
 
 	NewGeneApplication a( argc, argv );

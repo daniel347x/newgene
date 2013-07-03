@@ -82,7 +82,7 @@ void NewGeneVariableSummaryScrollArea::WidgetDataRefreshReceive(WidgetDataItem_V
 {
 	if (widget_data.identifier && widget_data.identifier->uuid)
 	{
-		NewGeneWidget * child = outp->FindWidgetFromDataItem(*widget_data.identifier->uuid);
+		NewGeneWidget * child = outp->FindWidgetFromDataItem(uuid, *widget_data.identifier->uuid);
 		if (child)
 		{
 			child->WidgetDataRefreshReceive(widget_data);
