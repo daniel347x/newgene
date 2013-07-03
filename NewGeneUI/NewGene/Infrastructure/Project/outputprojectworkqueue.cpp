@@ -68,6 +68,22 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_
 }
 
 /************************************************************************/
+// VARIABLE_GROUPS_SUMMARY
+/************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUPS_SUMMARY>(widget, this));
+}
+
+/************************************************************************/
+// VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE
+/************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>(widget, this));
+}
+
+/************************************************************************/
 // ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
 /************************************************************************/
 void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request)

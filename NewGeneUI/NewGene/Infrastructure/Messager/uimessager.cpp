@@ -10,7 +10,7 @@
 bool UIMessager::ManagersInitialized = false;
 
 UIMessager::UIMessager(QObject *parent) :
-	QObject(parent)
+    QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , singleShotActive(false)
 {
@@ -137,6 +137,16 @@ void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABL
 }
 
 void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE & widgetData)
+{
+	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
+}
+
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY & widgetData)
+{
+	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
+}
+
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE & widgetData)
 {
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }

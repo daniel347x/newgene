@@ -15,10 +15,14 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA>();
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX>();
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>();
+	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY>();
+	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>();
 
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>();
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>();
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>();
+	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SUMMARY>();
+	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>();
 
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>();
 }

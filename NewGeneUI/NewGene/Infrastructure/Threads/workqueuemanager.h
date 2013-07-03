@@ -37,6 +37,8 @@ class WorkQueueManagerBase : public QObject
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE & widgetData) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY & widgetData) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE & widgetData) {}
 
 	signals:
 		// Signals for ALL specializations of WorkQueueManager go here,
@@ -48,6 +50,8 @@ class WorkQueueManagerBase : public QObject
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE);
+		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY);
+		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE);
 
 	public slots:
 		// Slots for ALL specializations go here,
@@ -59,6 +63,8 @@ class WorkQueueManagerBase : public QObject
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED) {}
 
 	public:

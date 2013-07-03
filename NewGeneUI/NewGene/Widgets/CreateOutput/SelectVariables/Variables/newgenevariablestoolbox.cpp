@@ -14,9 +14,11 @@ void NewGeneVariablesToolbox::UpdateOutputConnections(UIProjectManager::UPDATE_C
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 	connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX)));
+
+	// *** This is a parent (top-level) widget, so connect to refreshes here (... child widgets don't connect to refreshes) *** //
 	connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX)));
 
-	// *** Child widget, so refer refresh signals directed at child to be received by us, the parent *** //
+	// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
 	connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 }
 

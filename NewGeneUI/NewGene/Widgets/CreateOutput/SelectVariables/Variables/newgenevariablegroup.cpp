@@ -32,6 +32,7 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIden
 		UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 		WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
 		emit RefreshWidget(request);
+
 	}
 
 }

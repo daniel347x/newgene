@@ -18,6 +18,8 @@ class NewGeneVariableSummary : public QWidget, public NewGeneWidget // do not re
 		explicit NewGeneVariableSummary( QWidget * parent = 0 );
 		~NewGeneVariableSummary();
 
+	signals:
+
 	public slots:
 
 	protected:
@@ -26,12 +28,6 @@ class NewGeneVariableSummary : public QWidget, public NewGeneWidget // do not re
 	private:
 		Ui::NewGeneVariableSummary * ui;
 
-	protected:
-		QStringListModel model1;
-		QStringListModel model2;
-		QStringListModel model3;
-		QStringListModel model4;
-		QStringListModel model5;
 };
 
 #endif // NEWGENEVARIABLESUMMARY_H

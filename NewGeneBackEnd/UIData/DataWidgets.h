@@ -13,6 +13,8 @@ enum DATA_WIDGETS
 	, VARIABLE_GROUPS_SCROLL_AREA
 	, VARIABLE_GROUPS_TOOLBOX
 	, VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE
+	, VARIABLE_GROUPS_SUMMARY
+	, VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE
 
 	// Input project
 
@@ -212,5 +214,84 @@ public:
 };
 typedef WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE> WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE;
 
+
+/************************************************************************/
+// VARIABLE_GROUPS_SUMMARY
+/************************************************************************/
+template<>
+class WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY> : public WidgetDataItemRequest_base
+{
+public:
+	WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
+	{
+	}
+	WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY>(WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY> const & rhs)
+		: WidgetDataItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY> WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY;
+
+template<>
+class WidgetDataItem<VARIABLE_GROUPS_SUMMARY> : public WidgetDataItem_base
+{
+public:
+	WidgetDataItem<VARIABLE_GROUPS_SUMMARY>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
+	{
+	}
+	WidgetDataItem<VARIABLE_GROUPS_SUMMARY>(WidgetDataItemRequest_base const & request_obj)
+		: WidgetDataItem_base(request_obj)
+	{
+	}
+	WidgetDataItem<VARIABLE_GROUPS_SUMMARY>(WidgetDataItem<VARIABLE_GROUPS_SUMMARY> const & rhs)
+		: WidgetDataItem_base(rhs)
+		, identifiers(rhs.identifiers)
+	{
+	}
+	WidgetInstanceIdentifiers identifiers;
+};
+typedef WidgetDataItem<VARIABLE_GROUPS_SUMMARY> WidgetDataItem_VARIABLE_GROUPS_SUMMARY;
+
+
+/************************************************************************/
+// VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE
+/************************************************************************/
+template<>
+class WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE> : public WidgetDataItemRequest_base
+{
+public:
+	WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
+	{
+	}
+	WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>(WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE> const & rhs)
+		: WidgetDataItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE> WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE;
+
+template<>
+class WidgetDataItem<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE> : public WidgetDataItem_base
+{
+public:
+	WidgetDataItem<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
+	{
+	}
+	WidgetDataItem<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>(WidgetDataItemRequest_base const & request_obj)
+		: WidgetDataItem_base(request_obj)
+	{
+	}
+	WidgetDataItem<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>(WidgetDataItem<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE> const & rhs)
+		: WidgetDataItem_base(rhs)
+		, identifiers(rhs.identifiers)
+	{
+	}
+	WidgetInstanceIdentifiers identifiers;
+};
+typedef WidgetDataItem<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE> WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE;
 
 #endif
