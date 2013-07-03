@@ -47,7 +47,9 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 	{
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
-			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, identifier, outp );
+			WidgetInstanceIdentifier new_identifier(identifier);
+			new_identifier.uuid_parent = std::make_shared<UUID>(uuid);
+			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, new_identifier, outp );
 			addItem( tmpGrp, identifier.longhand->c_str() );
 		}
 	});

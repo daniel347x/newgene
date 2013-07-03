@@ -70,7 +70,9 @@ void NewGeneVariableSummaryScrollArea::WidgetDataRefreshReceive(WidgetDataItem_V
 	{
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
-			NewGeneVariableSummaryGroup * group = new NewGeneVariableSummaryGroup( this, identifier, outp );
+			WidgetInstanceIdentifier new_identifier(identifier);
+			new_identifier.uuid_parent = std::make_shared<UUID>(uuid);
+			NewGeneVariableSummaryGroup * group = new NewGeneVariableSummaryGroup( this, new_identifier, outp );
 			group->setTitle(identifier.longhand->c_str());
 			layout()->addWidget(group);
 		}
