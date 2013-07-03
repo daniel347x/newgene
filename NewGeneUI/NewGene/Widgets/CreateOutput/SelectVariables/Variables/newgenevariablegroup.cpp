@@ -203,12 +203,88 @@ void NewGeneVariableGroup::ReceiveVariableItemChanged(QStandardItem * currentIte
 
 void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_message)
 {
-	ShowMessageBox("Made it into the group box with data changes, NOT testing for UUID.");
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
 	{
-		if (change.parent_identifier.uuid && *change.parent_identifier.uuid == *data_instance.uuid)
+		switch (change.change_type)
 		{
-			ShowMessageBox("Made it into the group box with data changes, testing for UUID.");
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION:
+				{
+					switch (change.change_intention)
+					{
+						case DATA_CHANGE_INTENTION__ADD:
+						case DATA_CHANGE_INTENTION__REMOVE:
+							{
+								// This is the OUTPUT model changing.
+								// "Add" means to simply add an item that is CHECKED (previously unchecked) -
+								// NOT to add a new variable.  That would be input model change type.
+
+								QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+								if (model == nullptr)
+								{
+									return; // from lambda
+								}
+
+								UUID uuid_child;
+								if (change.child_identifiers.size() == 0)
+								{
+									return; // from lambda
+								}
+
+								std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&model, &change, this](WidgetInstanceIdentifier const & child_identifier)
+								{
+									int number_variables = model->rowCount();
+									for (int n=0; n<number_variables; ++n)
+									{
+										QStandardItem * currentItem = model->item(n);
+										if (currentItem)
+										{
+											bool checked = false;
+											if (currentItem->checkState() == Qt::Checked)
+											{
+												checked = true;
+											}
+											QVariant currentIdentifier = currentItem->data();
+											WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
+											if (identifier.uuid && child_identifier.uuid && *identifier.uuid == *child_identifier.uuid)
+											{
+
+												if (change.change_intention == DATA_CHANGE_INTENTION__ADD)
+												{
+													//ShowMessageBox("Should hit this message once per check - checking.");
+													if (!checked)
+													{
+														currentItem->setCheckState(Qt::Checked);
+													}
+												}
+												else if (change.change_intention == DATA_CHANGE_INTENTION__REMOVE)
+												{
+													//ShowMessageBox("Should hit this message once per uncheck - unchecking.");
+													if (checked)
+													{
+														currentItem->setCheckState(Qt::Unchecked);
+													}
+												}
+
+											}
+
+										}
+									}
+								});
+
+							}
+							break;
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								// Should never receive this.
+							}
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+								// Ditto above.
+							}
+							break;
+					}
+				}
+				break;
 		}
 	});
 }
