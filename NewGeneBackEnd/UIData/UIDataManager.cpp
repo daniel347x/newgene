@@ -43,10 +43,10 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 /************************************************************************/
 // VARIABLE_GROUPS_SUMMARY
 /************************************************************************/
-void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY const & widget_request, OutputProject & project)
+void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA const & widget_request, OutputProject & project)
 {
 	InputModel & input_model = project.model().getInputModel();
-	WidgetDataItem_VARIABLE_GROUPS_SUMMARY variable_groups(widget_request);
+	WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA variable_groups(widget_request);
 	variable_groups.identifiers = input_model.t_vgp_identifiers.getIdentifiers();
 	messager.EmitOutputWidgetDataRefresh(variable_groups);
 }

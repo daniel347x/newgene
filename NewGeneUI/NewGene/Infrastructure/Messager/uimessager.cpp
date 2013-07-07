@@ -141,7 +141,7 @@ void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABL
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }
 
-void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY & widgetData)
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA & widgetData)
 {
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }

@@ -25,14 +25,17 @@ class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget //
 		Ui::NewGeneVariableSummaryScrollArea * ui;
 
 	public:
+
 	signals:
-		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY);
+
+		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA);
 
 	public slots:
+
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
-		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY);
-		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE);
+		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA); // us, parent
+		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE); // child
 
 	private:
 		NewGeneVariableSummaryGroup * groups;

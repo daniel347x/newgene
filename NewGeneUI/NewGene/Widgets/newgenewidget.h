@@ -56,7 +56,7 @@ class NewGeneWidget
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA) {};
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX) {};
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {};
-		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY) {};
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA) {};
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE) {};
 		// ****************************************************************************************************************************
 
@@ -69,7 +69,7 @@ class NewGeneWidget
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {};
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {};
 		virtual void RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {};
-		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY) {};
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA) {};
 		virtual void RefreshWidget(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE) {};
 		// ****************************************************************************************************************************
 

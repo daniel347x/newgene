@@ -14,6 +14,7 @@ enum DATA_WIDGETS
 	, VARIABLE_GROUPS_TOOLBOX
 	, VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE
 	, VARIABLE_GROUPS_SUMMARY
+	, VARIABLE_GROUPS_SUMMARY_SCROLL_AREA
 	, VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE
 
 	// Input project
@@ -231,7 +232,7 @@ public:
 	{
 	}
 };
-typedef WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY> WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY;
+typedef WidgetDataItemRequest<VARIABLE_GROUPS_SUMMARY> WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA;
 
 template<>
 class WidgetDataItem<VARIABLE_GROUPS_SUMMARY> : public WidgetDataItem_base
@@ -252,7 +253,7 @@ public:
 	}
 	WidgetInstanceIdentifiers identifiers;
 };
-typedef WidgetDataItem<VARIABLE_GROUPS_SUMMARY> WidgetDataItem_VARIABLE_GROUPS_SUMMARY;
+typedef WidgetDataItem<VARIABLE_GROUPS_SUMMARY> WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA;
 
 
 /************************************************************************/
