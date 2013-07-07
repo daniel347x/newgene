@@ -3,6 +3,9 @@
 
 #include "../../../globals.h"
 #include "../Table.h"
+#ifndef Q_MOC_RUN
+#	include <boost/algorithm/string.hpp>
+#endif
 
 class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY>
 {
@@ -44,6 +47,26 @@ class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY>
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			return identifiers;
+		}
+
+		bool getIdentifierFromStringCode(std::string const code, WidgetInstanceIdentifier & the_identifier)
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			bool found = false;
+			std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &found, &the_identifier](WidgetInstanceIdentifier const & identifier)
+			{
+				if (found)
+				{
+					return;
+				}
+				if (identifier.code && boost::iequals(code, *identifier.code))
+				{
+					the_identifier = identifier;
+					found = true;
+					return;
+				}
+			});
+			return found;
 		}
 
 	protected:
@@ -88,12 +111,42 @@ class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER>
 
 		}
 
-		void Load(sqlite3 * db);
+		void Load(sqlite3 * db, InputModel * input_model_ = nullptr);
 
 		WidgetInstanceIdentifiers getIdentifiers(UUID const & uuid)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			return identifiers_map[uuid];
+		}
+
+		bool getIdentifierFromStringCodeAndParentUUID(std::string const code, UUID parent_uuid, WidgetInstanceIdentifier & the_identifier)
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			bool found = false;
+			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&code, &parent_uuid, &found, &the_identifier](std::pair<UUID, WidgetInstanceIdentifiers> const & identifiers_)
+			{
+				if (found)
+				{
+					return;
+				}
+				if (boost::iequals(parent_uuid, identifiers_.first))
+				{
+
+					// The variable group matches
+					
+					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&code, &parent_uuid, &found, &the_identifier](WidgetInstanceIdentifier const & identifier_)
+					{
+						if (identifier_.code && boost::iequals(code, *identifier_.code) && identifier_.uuid_parent && boost::iequals(parent_uuid, *identifier_.uuid_parent))
+						{
+							the_identifier = identifier_;
+							found = true;
+							return;
+						}
+					});
+
+				}
+			});
+			return found;
 		}
 
 	protected:

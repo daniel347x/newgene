@@ -43,6 +43,9 @@ void OutputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
 }
 
 
+
+// Refreshes
+
 /************************************************************************/
 // VARIABLE_GROUPS_SCROLL_AREA
 /************************************************************************/
@@ -76,12 +79,16 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS
 }
 
 /************************************************************************/
-// VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE
+// VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE
 /************************************************************************/
 void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE widget)
 {
 	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>(widget, this));
 }
+
+
+
+// Actions
 
 /************************************************************************/
 // ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED

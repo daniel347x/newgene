@@ -6,6 +6,7 @@
 #include "..\Settings\InputModelSettings.h"
 #include "InputModel.h"
 #include "..\Settings\Setting.h"
+#include "Tables/TableManager.h"
 #include <memory>
 
 class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS>
@@ -32,6 +33,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 		}
 
 		void LoadTables();
+
+		Table_VARIABLES_SELECTED t_variables_selected_identifiers;
 
 protected:
 

@@ -6,6 +6,7 @@
 #include "TableInstances/CMU.h"
 #include "TableInstances/UOA.h"
 #include "TableInstances/VariableGroup.h"
+#include "TableInstances/VariablesSelected.h"
 #include <vector>
 
 class TableManager

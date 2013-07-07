@@ -8,6 +8,8 @@
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 #include <mutex>
 
+class InputModel;
+
 template<FIELD_TYPE THE_FIELD_TYPE>
 class FieldValue
 {
@@ -96,7 +98,7 @@ class Table_base
 
 		}
 
-		virtual void Load(sqlite3 * db) {};
+		virtual void Load(sqlite3 * db, InputModel * input_model_ = nullptr) {};
 
 };
 

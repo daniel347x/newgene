@@ -56,7 +56,7 @@ void Table_VG_CATEGORY::Load(sqlite3 * db)
 	}
 }
 
-void Table_VG_SET_MEMBER::Load(sqlite3 * db)
+void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);

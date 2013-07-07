@@ -6,8 +6,8 @@ NewGeneVariablesToolbox::NewGeneVariablesToolbox( QWidget * parent ) :
 	QToolBox( parent ),
 	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_TOOLBOX, true) ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
-	PrepareOutputWidget();
 	layout()->setSpacing( 1 );
+	PrepareOutputWidget();
 }
 
 void NewGeneVariablesToolbox::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
@@ -35,12 +35,14 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 	for (int n = 0; n < nItems; ++n)
 	{
 		QWidget * child = find(n);
-		removeItem(0);
+		removeItem(n);
 		if (child)
 		{
 			delete child;
 			child = nullptr;
 		}
+		--n;
+		--nItems;
 	}
 
 	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](WidgetInstanceIdentifier const & identifier)

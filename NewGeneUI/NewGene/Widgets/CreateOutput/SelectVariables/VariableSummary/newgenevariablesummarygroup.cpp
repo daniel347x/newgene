@@ -82,112 +82,66 @@ void NewGeneVariableSummaryGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIAB
 	  return;
   }
 
-	ShowMessageBox("Refreshing SUMMARY GROUP (should appear 3 times");
+   if (!ui->listView)
+   {
+	   boost::format msg("Invalid list view in NewGeneVariableSummaryGroup widget.");
+	   QMessageBox msgBox;
+	   msgBox.setText( msg.str().c_str() );
+	   msgBox.exec();
+	   return;
+   }
 
-//   if (!ui->listView)
-//   {
-//       boost::format msg("Invalid list view in NewGeneVariableSummary widget.");
-//       QMessageBox msgBox;
-//       msgBox.setText( msg.str().c_str() );
-//       msgBox.exec();
-//       return;
-//   }
+   QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
+   if (oldModel != nullptr)
+   {
+	   delete oldModel;
+   }
 
-//   QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
-//   if (oldModel != nullptr)
-//   {
-//       delete oldModel;
-//   }
+   QItemSelectionModel * oldSelectionModel = ui->listView->selectionModel();
+   QStandardItemModel * model = new QStandardItemModel(ui->listView);
 
-//   QItemSelectionModel * oldSelectionModel = ui->listView->selectionModel();
-//   QStandardItemModel * model = new QStandardItemModel(ui->listView);
+   int index = 0;
+   std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [this, &index, &model](WidgetInstanceIdentifier const & identifier)
+   {
+	   if (identifier.longhand && !identifier.longhand->empty())
+	   {
 
-//   int index = 0;
-//   std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [this, &index, &model](WidgetInstanceIdentifier const & identifier)
-//   {
-//       if (identifier.longhand && !identifier.longhand->empty())
-//       {
+		   QStandardItem * item = new QStandardItem();
+		   item->setText(QString(identifier.longhand->c_str()));
+		   QVariant v;
+		   v.setValue(identifier);
+		   item->setData(v);
+		   model->setItem( index, item );
 
-//           QStandardItem * item = new QStandardItem();
-//           item->setText(QString(identifier.longhand->c_str()));
-//           item->setCheckable( true );
-//           item->setCheckState(Qt::Unchecked);
-//           QVariant v;
-//           v.setValue(identifier);
-//           item->setData(v);
-//           model->setItem( index, item );
+		   ++index;
 
-//           ++index;
+	   }
+   });
 
-//       }
-//   });
+   // Since these are not checkboxes yet, the following signal will never currently be called
+   connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
 
-//   //connect(model, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)), this, SLOT(ReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>)));
-//   connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
-
-//   ui->listView->setModel(model);
-//   if (oldSelectionModel) delete oldSelectionModel;
-
-}
-
-void NewGeneVariableSummaryGroup::ReceiveVariableItemChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight, const QVector<int> roles)
-{
-
-//  QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-//  if (model == nullptr)
-//  {
-//      // Todo: messager error
-//      return;
-//  }
-
-//  QStandardItem * topLeftItem = (model->itemFromIndex(topLeft));
-//  QStandardItem * bottomRightItem = (model->itemFromIndex(bottomRight));
-//  if (topLeftItem == nullptr || bottomRightItem == nullptr)
-//  {
-//	  // Todo: messager error
-//	  return;
-//  }
-
-//  int topLeftRow = topLeftItem->row();
-//  int bottomRightRow = bottomRightItem->row();
-
-//  InstanceActionItems actionItems;
-
-//  for (int row = topLeftRow; row <= bottomRightRow; ++row)
-//  {
-//	  QStandardItem * currentItem = model->item(row);
-//	  if (currentItem)
-//	  {
-////           bool checked = false;
-////           if (currentItem->checkState() == Qt::Checked)
-////           {
-////               checked = true;
-////           }
-////           QVariant currentIdentifier = currentItem->data();
-////           WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
-////           actionItems.push_back(std::make_pair(identifier, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(checked)))));
-//	  }
-//  }
-
-//  WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
-//  emit SignalReceiveVariableItemChanged(action_request);
+   ui->listView->setModel(model);
+   if (oldSelectionModel) delete oldSelectionModel;
 
 }
 
 void NewGeneVariableSummaryGroup::ReceiveVariableItemChanged(QStandardItem * currentItem)
 {
 
-//  QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-//  if (model == nullptr)
-//  {
-//	  // Todo: messager error
-//	  return;
-//  }
+	// Since the items are not checkboxes yet, the following signal will never currently be called
+
+	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+  if (model == nullptr)
+  {
+	  // Todo: messager error
+	  return;
+  }
 
   InstanceActionItems actionItems;
 
-  if (currentItem)
-  {
+//  if (currentItem)
+//  {
 //       bool checked = false;
 //       if (currentItem->checkState() == Qt::Checked)
 //       {
@@ -196,7 +150,7 @@ void NewGeneVariableSummaryGroup::ReceiveVariableItemChanged(QStandardItem * cur
 //       QVariant currentIdentifier = currentItem->data();
 //       WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
 //       actionItems.push_back(std::make_pair(identifier, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(checked)))));
-  }
+//  }
 
   WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
   emit SignalReceiveVariableItemChanged(action_request);
@@ -218,13 +172,13 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 						  {
 							  // This is the OUTPUT model changing.
 							  // "Add" means to simply add an item that is CHECKED (previously unchecked) -
-							  // NOT to add a new variable.  That would be input model change type.
+							  // NOT to add a new variable.  That would be an input model change type.
 
-//							  QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-//							  if (model == nullptr)
-//							  {
-//								  return; // from lambda
-//							  }
+							  QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
+							  if (model == nullptr)
+							  {
+								  return; // from lambda
+							  }
 
 							  UUID uuid_child;
 							  if (change.child_identifiers.size() == 0)
@@ -232,46 +186,53 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 								  return; // from lambda
 							  }
 
-//							  std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&model, &change, this](WidgetInstanceIdentifier const & child_identifier)
-//							  {
-////                                   int number_variables = model->rowCount();
-////                                   for (int n=0; n<number_variables; ++n)
-////                                   {
-////                                       QStandardItem * currentItem = model->item(n);
-////                                       if (currentItem)
-////                                       {
-////                                           bool checked = false;
-////                                           if (currentItem->checkState() == Qt::Checked)
-////                                           {
-////                                               checked = true;
-////                                           }
-////                                           QVariant currentIdentifier = currentItem->data();
-////                                           WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
-////                                           if (identifier.uuid && child_identifier.uuid && *identifier.uuid == *child_identifier.uuid)
-////                                           {
+							  std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&model, &change, this](WidgetInstanceIdentifier const & child_identifier)
+							  {
+								   int number_variables = model->rowCount();
+								   bool found = false;
+								   for (int n=0; n<number_variables; ++n)
+								   {
+									   QStandardItem * currentItem = model->item(n);
+									   if (currentItem)
+									   {
+										   QVariant currentIdentifier = currentItem->data();
+										   WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
+										   if (identifier.uuid && child_identifier.uuid && *identifier.uuid == *child_identifier.uuid)
+										   {
 
-////                                               if (change.change_intention == DATA_CHANGE_INTENTION__ADD)
-////                                               {
-////                                                   //ShowMessageBox("Should hit this message once per check - checking.");
-////                                                   if (!checked)
-////                                                   {
-////                                                       currentItem->setCheckState(Qt::Checked);
-////                                                   }
-////                                               }
-////                                               else if (change.change_intention == DATA_CHANGE_INTENTION__REMOVE)
-////                                               {
-////                                                   //ShowMessageBox("Should hit this message once per uncheck - unchecking.");
-////                                                   if (checked)
-////                                                   {
-////                                                       currentItem->setCheckState(Qt::Unchecked);
-////                                                   }
-////                                               }
+											   // Existing item found - remove it
 
-////                                           }
+											   if (change.change_intention == DATA_CHANGE_INTENTION__REMOVE)
+											   {
+												   model->removeRow(n);
+												   --n;
+												   --number_variables;
+												   found = true;
+											   }
 
-////                                       }
-////                                   }
-//							  });
+										   }
+
+									   }
+								   }
+
+								   if (!found)
+								   {
+
+									   // Item not found - add it
+
+									   if (change.change_intention == DATA_CHANGE_INTENTION__ADD)
+									   {
+										   QStandardItem * item = new QStandardItem();
+										   item->setText(QString(child_identifier.longhand->c_str()));
+										   QVariant v;
+										   v.setValue(child_identifier);
+										   item->setData(v);
+										   model->insertRow( number_variables, item );
+
+									   }
+								   }
+
+							  });
 
 						  }
 						  break;

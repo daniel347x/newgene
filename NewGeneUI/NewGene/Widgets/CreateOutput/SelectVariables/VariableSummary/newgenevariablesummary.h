@@ -12,20 +12,31 @@ namespace Ui
 
 class NewGeneVariableSummary : public QWidget, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
+
 		Q_OBJECT
 
 	public:
+
 		explicit NewGeneVariableSummary( QWidget * parent = 0 );
 		~NewGeneVariableSummary();
 
 	signals:
 
+		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY);
+
 	public slots:
 
+		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void RefreshAllWidgets();
+		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY); // us, parent
+		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE); // child
+
 	protected:
+
 		void changeEvent( QEvent * e );
 
 	private:
+
 		Ui::NewGeneVariableSummary * ui;
 
 };

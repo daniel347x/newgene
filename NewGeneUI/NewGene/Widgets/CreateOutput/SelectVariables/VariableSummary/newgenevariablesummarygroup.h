@@ -29,7 +29,6 @@ class NewGeneVariableSummaryGroup : public QGroupBox, public NewGeneWidget // do
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE);
-		void ReceiveVariableItemChanged(const QModelIndex &, const QModelIndex &, const QVector<int>);
 		void ReceiveVariableItemChanged(QStandardItem*);
 
 	protected:

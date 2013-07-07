@@ -276,6 +276,9 @@
     <ClInclude Include="UIAction\ActionChanges.h">
       <Filter>Header Files\UIAction</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Tables\TableInstances\VariablesSelected.h">
+      <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -439,6 +442,9 @@
     </ClCompile>
     <ClCompile Include="UIAction\ActionChanges.cpp">
       <Filter>Source Files\UIAction</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableInstances\VariablesSelected.cpp">
+      <Filter>Source Files\Model\Tables\TableInstances</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

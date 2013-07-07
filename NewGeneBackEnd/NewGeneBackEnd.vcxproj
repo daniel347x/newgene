@@ -91,6 +91,7 @@
     <ClInclude Include="Model\Tables\TableInstances\DMU.h" />
     <ClInclude Include="Model\Tables\TableInstances\UOA.h" />
     <ClInclude Include="Model\Tables\TableInstances\VariableGroup.h" />
+    <ClInclude Include="Model\Tables\TableInstances\VariablesSelected.h" />
     <ClInclude Include="Model\Tables\TableManager.h" />
     <ClInclude Include="Model\Tables\TableTypes.h" />
     <ClInclude Include="Project\Project.h" />
@@ -147,6 +148,7 @@
     <ClCompile Include="Model\Tables\TableInstances\DMU.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\UOA.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\VariableGroup.cpp" />
+    <ClCompile Include="Model\Tables\TableInstances\VariablesSelected.cpp" />
     <ClCompile Include="Model\Tables\TableManager.cpp" />
     <ClCompile Include="Model\Tables\TableTypes.cpp" />
     <ClCompile Include="Project\Project.cpp" />
