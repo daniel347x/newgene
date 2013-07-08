@@ -35,3 +35,8 @@ void NewGeneVariableSummary::changeEvent( QEvent * e )
 			break;
 	}
 }
+
+void NewGeneVariableSummary::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+{
+	NewGeneWidget::UpdateOutputConnections(connection_type, project);
+}

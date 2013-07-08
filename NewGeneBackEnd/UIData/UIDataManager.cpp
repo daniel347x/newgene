@@ -56,11 +56,11 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 /************************************************************************/
 void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE const & widget_request, OutputProject & project)
 {
-	InputModel & input_model = project.model().getInputModel();
+	OutputModel & output_model = project.model();
 	WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE variable_group(widget_request);
 	if (widget_request.identifier && widget_request.identifier->uuid)
 	{
-		variable_group.identifiers = input_model.t_vgp_setmembers.getIdentifiers(*widget_request.identifier->uuid);
+		variable_group.identifiers = output_model.t_variables_selected_identifiers.getIdentifiers(*widget_request.identifier->uuid);
 	}
 	messager.EmitOutputWidgetDataRefresh(variable_group);
 }

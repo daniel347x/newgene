@@ -24,6 +24,8 @@ class NewGeneVariableSummary : public QWidget, public NewGeneWidget // do not re
 
 	public slots:
 
+		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+
 	protected:
 
 		void changeEvent( QEvent * e );
