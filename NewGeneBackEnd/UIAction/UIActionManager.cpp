@@ -76,12 +76,8 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 				}
 				WidgetInstanceIdentifiers child_identifiers;
 				child_identifiers.push_back(identifier);
-				DataChange change(type, intention, WidgetInstanceIdentifier(*identifier.uuid_parent), child_identifiers);
+				DataChange change(type, intention, WidgetInstanceIdentifier(*identifier.identifier_parent), child_identifiers);
 				change_response.changes.push_back(change);
-
-				//boost::format msg("UUID = %1%, code = %2%, checked = %3%");
-				//msg % itemUUID % itemCode % checked;
-				//messager.ShowMessageBox(msg.str());
 			});
 
 			messager.EmitChangeMessage(change_response);

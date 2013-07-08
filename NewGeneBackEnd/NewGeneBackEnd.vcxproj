@@ -94,6 +94,7 @@
     <ClInclude Include="Model\Tables\TableInstances\VariablesSelected.h" />
     <ClInclude Include="Model\Tables\TableManager.h" />
     <ClInclude Include="Model\Tables\TableTypes.h" />
+    <ClInclude Include="Model\TimeGranularity.h" />
     <ClInclude Include="Project\Project.h" />
     <ClInclude Include="Project\InputProject.h" />
     <ClInclude Include="Project\ProjectManager.h" />
@@ -151,6 +152,7 @@
     <ClCompile Include="Model\Tables\TableInstances\VariablesSelected.cpp" />
     <ClCompile Include="Model\Tables\TableManager.cpp" />
     <ClCompile Include="Model\Tables\TableTypes.cpp" />
+    <ClCompile Include="Model\TimeGranularity.cpp" />
     <ClCompile Include="Project\Project.cpp" />
     <ClCompile Include="Project\InputProject.cpp" />
     <ClCompile Include="Project\ProjectManager.cpp" />

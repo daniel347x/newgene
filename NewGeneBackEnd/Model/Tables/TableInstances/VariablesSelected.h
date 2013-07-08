@@ -4,7 +4,7 @@
 #include "../../../globals.h"
 #include "../Table.h"
 
-class Table_VARIABLES_SELECTED : public Table<TABLE__VG_SET_MEMBER_SELECTED>
+class Table_VARIABLES_SELECTED : public Table<TABLE__VG_SET_MEMBER_SELECTED, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>
 {
 
 public:
@@ -21,22 +21,12 @@ public:
 public:
 
 	Table_VARIABLES_SELECTED()
-		: Table<TABLE__VG_SET_MEMBER_SELECTED>()
+		: Table<TABLE__VG_SET_MEMBER_SELECTED, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>()
 	{
 
 	}
 
-	void Load(sqlite3 * db, InputModel * input_model_);
-
-	WidgetInstanceIdentifiers getIdentifiers(UUID const & uuid)
-	{
-		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-		return identifiers_map[uuid];
-	}
-
-protected:
-
-	std::map<UUID, WidgetInstanceIdentifiers> identifiers_map;
+	void Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
 
 };
 

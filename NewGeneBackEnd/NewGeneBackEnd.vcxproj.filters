@@ -279,6 +279,9 @@
     <ClInclude Include="Model\Tables\TableInstances\VariablesSelected.h">
       <Filter>Header Files\Model\Tables\TableInstances</Filter>
     </ClInclude>
+    <ClInclude Include="Model\TimeGranularity.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -445,6 +448,9 @@
     </ClCompile>
     <ClCompile Include="Model\Tables\TableInstances\VariablesSelected.cpp">
       <Filter>Source Files\Model\Tables\TableInstances</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\TimeGranularity.cpp">
+      <Filter>Source Files\Model</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,6 +1,11 @@
 #include "VariableGroup.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
+#ifndef Q_MOC_RUN
+#	include <boost/algorithm/string.hpp>
+#endif
+#include "../../InputModel.h"
+
 std::string const Table_VG_CATEGORY::VG_CATEGORY_UUID = "VG_CATEGORY_UUID";
 std::string const Table_VG_CATEGORY::VG_CATEGORY_STRING_CODE = "VG_CATEGORY_STRING_CODE";
 std::string const Table_VG_CATEGORY::VG_CATEGORY_STRING_LONGHAND = "VG_CATEGORY_STRING_LONGHAND";
@@ -20,7 +25,7 @@ std::string const Table_VG_SET_MEMBER::VG_SET_MEMBER_NOTES3 = "VG_SET_MEMBER_NOT
 std::string const Table_VG_SET_MEMBER::VG_SET_MEMBER_FK_VG_CATEGORY_UUID = "VG_SET_MEMBER_FK_VG_CATEGORY_UUID";
 std::string const Table_VG_SET_MEMBER::VG_SET_MEMBER_FLAGS = "VG_SET_MEMBER_FLAGS";
 
-void Table_VG_CATEGORY::Load(sqlite3 * db)
+void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -47,10 +52,8 @@ void Table_VG_CATEGORY::Load(sqlite3 * db)
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_FLAGS));
 		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand) && fk_uoa_uuid /* && strlen(fk_uoa_uuid) == UUID_LENGTH */ )
 		{
-			WidgetInstanceIdentifier vg_category_identifier(uuid, code, longhand, 0, MakeNotes(notes1, notes2, notes3));
-			std::shared_ptr<UUIDVector> fkeys = std::make_shared<UUIDVector>();
-			fkeys->push_back(fk_uoa_uuid);
-			vg_category_identifier.fkuuids = fkeys;
+			WidgetInstanceIdentifier uoa_identifier = input_model_->t_uoa_category.getIdentifier(fk_uoa_uuid);
+			WidgetInstanceIdentifier vg_category_identifier(uuid, uoa_identifier, code, longhand, 0, flags, uoa_identifier.time_granularity, MakeNotes(notes1, notes2, notes3));
 			identifiers.push_back(vg_category_identifier);
 		}
 	}
@@ -85,7 +88,8 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_FLAGS));
 		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand) && fk_vg_uuid /* && strlen(fk_vg_uuid) == UUID_LENGTH */ )
 		{
-			identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, fk_vg_uuid, code, longhand, seqnumber, MakeNotes(notes1, notes2, notes3)));
+			WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(fk_vg_uuid);
+			identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, vg_category_identifier, code, longhand, seqnumber, flags, vg_category_identifier.time_granularity, MakeNotes(notes1, notes2, notes3)));
 		}
 	}
 }

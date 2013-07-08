@@ -1,13 +1,12 @@
 #ifndef VARIABLEGROUP_H
 #define VARIABLEGROUP_H
 
-#include "../../../globals.h"
 #include "../Table.h"
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #endif
 
-class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY>
+class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR>
 {
 
 	public:
@@ -36,46 +35,16 @@ class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY>
 	public:
 
 		Table_VG_CATEGORY()
-			: Table<TABLE__VG_CATEGORY>()
+			: Table<TABLE__VG_CATEGORY, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR>()
 		{
 
 		}
 
-		void Load(sqlite3 * db);
-
-		WidgetInstanceIdentifiers getIdentifiers()
-		{
-			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-			return identifiers;
-		}
-
-		bool getIdentifierFromStringCode(std::string const code, WidgetInstanceIdentifier & the_identifier)
-		{
-			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-			bool found = false;
-			std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &found, &the_identifier](WidgetInstanceIdentifier const & identifier)
-			{
-				if (found)
-				{
-					return;
-				}
-				if (identifier.code && boost::iequals(code, *identifier.code))
-				{
-					the_identifier = identifier;
-					found = true;
-					return;
-				}
-			});
-			return found;
-		}
-
-	protected:
-
-		WidgetInstanceIdentifiers identifiers;
+		void Load(sqlite3 * db, InputModel * input_model_);
 
 };
 
-class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER>
+class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>
 {
 
 	public:
@@ -106,52 +75,12 @@ class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER>
 	public:
 
 		Table_VG_SET_MEMBER()
-			: Table<TABLE__VG_SET_MEMBER>()
+			: Table<TABLE__VG_SET_MEMBER, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>()
 		{
 
 		}
 
 		void Load(sqlite3 * db, InputModel * input_model_ = nullptr);
-
-		WidgetInstanceIdentifiers getIdentifiers(UUID const & uuid)
-		{
-			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-			return identifiers_map[uuid];
-		}
-
-		bool getIdentifierFromStringCodeAndParentUUID(std::string const code, UUID parent_uuid, WidgetInstanceIdentifier & the_identifier)
-		{
-			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-			bool found = false;
-			std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&code, &parent_uuid, &found, &the_identifier](std::pair<UUID, WidgetInstanceIdentifiers> const & identifiers_)
-			{
-				if (found)
-				{
-					return;
-				}
-				if (boost::iequals(parent_uuid, identifiers_.first))
-				{
-
-					// The variable group matches
-					
-					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&code, &parent_uuid, &found, &the_identifier](WidgetInstanceIdentifier const & identifier_)
-					{
-						if (identifier_.code && boost::iequals(code, *identifier_.code) && identifier_.uuid_parent && boost::iequals(parent_uuid, *identifier_.uuid_parent))
-						{
-							the_identifier = identifier_;
-							found = true;
-							return;
-						}
-					});
-
-				}
-			});
-			return found;
-		}
-
-	protected:
-
-		std::map<UUID, WidgetInstanceIdentifiers> identifiers_map;
 
 };
 

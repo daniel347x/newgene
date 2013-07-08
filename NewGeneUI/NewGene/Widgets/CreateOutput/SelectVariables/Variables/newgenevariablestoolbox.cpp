@@ -4,7 +4,7 @@
 
 NewGeneVariablesToolbox::NewGeneVariablesToolbox( QWidget * parent ) :
 	QToolBox( parent ),
-	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_TOOLBOX, true) ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_TOOLBOX, true) ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
 	layout()->setSpacing( 1 );
 	PrepareOutputWidget();
@@ -50,7 +50,7 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
 			WidgetInstanceIdentifier new_identifier(identifier);
-			new_identifier.uuid_parent = std::make_shared<UUID>(uuid);
+			//new_identifier.identifier_parent = std::make_shared<WidgetInstanceIdentifier>(uuid);
 			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, new_identifier, outp );
 			addItem( tmpGrp, identifier.longhand->c_str() );
 		}

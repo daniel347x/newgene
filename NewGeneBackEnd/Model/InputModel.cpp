@@ -8,8 +8,12 @@ void InputModel::LoadTables()
 
 	if (db != nullptr)
 	{
-		t_vgp_identifiers.Load(db);
-		t_vgp_setmembers.Load(db);
+		t_dmu_category.Load(db, this);
+		t_dmu_setmembers.Load(db, this);
+		t_uoa_category.Load(db, this);
+		t_uoa_setmemberlookup.Load(db, this);
+		t_vgp_identifiers.Load(db, this);
+		t_vgp_setmembers.Load(db, this);
 	}
 
 }

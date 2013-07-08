@@ -13,6 +13,7 @@ NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
 	, outp(nullptr)
 	, widget_type(creation_info.widget_type)
 	, uuid(newUUID())
+	, uuid_parent(creation_info.uuid_parent)
 	, widget_nature(creation_info.widget_nature)
 	, top_level(creation_info.top_level)
 	, data_instance(creation_info.data_instance)
@@ -71,7 +72,8 @@ void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_
 			inp->RemoveWidgetFromUUIDMap(uuid);
 			if (data_instance.uuid)
 			{
-				inp->RemoveWidgetDataItemFromUUIDMap(uuid, *data_instance.uuid);
+				//inp->RemoveWidgetDataItemFromUUIDMap(uuid, *data_instance.uuid);
+				inp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
 			}
 		}
 		inp = nullptr;
@@ -93,14 +95,15 @@ void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_
 			inp->AddWidgetUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), uuid);
 			if (data_instance.uuid)
 			{
-				if (data_instance.uuid_parent)
-				{
-					inp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), *data_instance.uuid_parent, *data_instance.uuid);
-				}
-				else
-				{
-					inp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), "", *data_instance.uuid);
-				}
+				inp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), uuid_parent, *data_instance.uuid);
+				//if (data_instance.uuid_parent)
+				//{
+				//	inp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), *data_instance.uuid_parent, *data_instance.uuid);
+				//}
+				//else
+				//{
+				//	inp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), "", *data_instance.uuid);
+				//}
 			}
 		}
 		catch (std::bad_cast & bc)
@@ -136,7 +139,8 @@ void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS
 			outp->RemoveWidgetFromUUIDMap(uuid);
 			if (data_instance.uuid)
 			{
-				inp->RemoveWidgetDataItemFromUUIDMap(uuid, *data_instance.uuid);
+				//inp->RemoveWidgetDataItemFromUUIDMap(uuid, *data_instance.uuid);
+				inp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
 			}
 		}
 		outp = nullptr;
@@ -158,14 +162,15 @@ void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS
 			outp->AddWidgetUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), uuid);
 			if (data_instance.uuid)
 			{
-				if (data_instance.uuid_parent)
-				{
-					outp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), *data_instance.uuid_parent, *data_instance.uuid);
-				}
-				else
-				{
-					outp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), "", *data_instance.uuid);
-				}
+				outp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), uuid_parent, *data_instance.uuid);
+				//if (data_instance.uuid_parent)
+				//{
+				//	outp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), *data_instance.uuid_parent, *data_instance.uuid);
+				//}
+				//else
+				//{
+				//	outp->AddWidgetDataItemUUIDToUUIDMap(dynamic_cast<NewGeneWidget*>(self), "", *data_instance.uuid);
+				//}
 			}
 		}
 		catch (std::bad_cast & bc)

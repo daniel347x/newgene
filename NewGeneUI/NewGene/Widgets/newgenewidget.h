@@ -79,6 +79,7 @@ class NewGeneWidget
 		QWidget * self;
 		WIDGET_NATURE widget_nature;
 		UUID uuid;
+		UUID uuid_parent;
 		UIInputProject * inp;
 		UIOutputProject * outp;
 		DATA_WIDGETS widget_type;
@@ -96,8 +97,28 @@ class NewGeneWidget
 class WidgetCreationInfo
 {
 	public:
+
 		WidgetCreationInfo(
 							   QWidget * const self_,
+							   NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN,
+							   DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE,
+							   UUID const & uuid_parent_ = "",
+							   bool const top_level_ = false,
+							   WidgetInstanceIdentifier data_instance_ = WidgetInstanceIdentifier()
+						   )
+			: self(self_)
+			, widget_nature(widget_nature_)
+			, widget_type(widget_type_)
+			, uuid_parent(uuid_parent_)
+			, top_level(top_level_)
+			, data_instance(data_instance_)
+		{
+
+		}
+
+		WidgetCreationInfo(
+							   QWidget * const self_,
+							   QWidget * parent,
 							   NewGeneWidget::WIDGET_NATURE const widget_nature_ = NewGeneWidget::WIDGET_NATURE::WIDGET_NATURE_UNKNOWN,
 							   DATA_WIDGETS const widget_type_ = WIDGET_TYPE_NONE,
 							   bool const top_level_ = false,
@@ -109,12 +130,27 @@ class WidgetCreationInfo
 			, top_level(top_level_)
 			, data_instance(data_instance_)
 		{
-
+			if (parent)
+			{
+				try
+				{
+					NewGeneWidget * newgene_parent_widget = dynamic_cast<NewGeneWidget*>(parent);
+					if (newgene_parent_widget)
+					{
+						uuid_parent = newgene_parent_widget->uuid;
+					}
+				}
+				catch (std::bad_cast & bc)
+				{
+					// nothing to do
+				}
+			}
 		}
 
 		QWidget * self;
 		NewGeneWidget::WIDGET_NATURE widget_nature;
 		DATA_WIDGETS widget_type;
+		UUID uuid_parent;
 		bool top_level;
 		WidgetInstanceIdentifier data_instance;
 };

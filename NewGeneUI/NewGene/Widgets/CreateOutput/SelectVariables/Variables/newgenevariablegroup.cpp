@@ -9,6 +9,7 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIden
 
 	NewGeneWidget( WidgetCreationInfo(
 										this, // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
+										parent,
 										WIDGET_NATURE_OUTPUT_WIDGET,
 										VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE,
 										false,
