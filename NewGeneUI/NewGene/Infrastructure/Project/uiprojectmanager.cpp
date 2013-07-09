@@ -40,7 +40,7 @@ UIProjectManager::~UIProjectManager()
 		{
 			ProjectPaths & paths = tab.first;
 			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
-			emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, project_ptr);
+			emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 			project_ptr->model().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->modelSettings().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->projectSettings().EndLoopAndBackgroundPool(); // blocks
@@ -58,7 +58,7 @@ UIProjectManager::~UIProjectManager()
 		{
 			ProjectPaths & paths = tab.first;
 			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
-			emit this->UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, project_ptr);
+			emit this->UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 			project_ptr->model().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->modelSettings().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->projectSettings().EndLoopAndBackgroundPool(); // blocks
@@ -140,7 +140,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 			project_model->UpdateConnections();
 			project->UpdateConnections();
 
-			emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
+			emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 
 			emit LoadFromDatabase(&project->model());
 
@@ -218,7 +218,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 			project_model->UpdateConnections();
 			project->UpdateConnections();
 
-			emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+			emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 
 		}
 
@@ -228,6 +228,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 
 UIInputProject * UIProjectManager::getActiveUIInputProject()
 {
+
 	// For now, just get the first main window
 	if (input_tabs.size() == 0)
 	{
@@ -246,10 +247,12 @@ UIInputProject * UIProjectManager::getActiveUIInputProject()
 	UIInputProject * project = static_cast<UIInputProject *>(tab.second.get());
 
 	return project;
+
 }
 
 UIOutputProject * UIProjectManager::getActiveUIOutputProject()
 {
+
 	// For now, just get the first main window
 	if (output_tabs.size() == 0)
 	{
@@ -268,13 +271,16 @@ UIOutputProject * UIProjectManager::getActiveUIOutputProject()
 	UIOutputProject * project = static_cast<UIOutputProject *>(tab.second.get());
 
 	return project;
+
 }
 
 void UIProjectManager::SignalMessageBox(STD_STRING msg)
 {
+
 	QMessageBox msgBox;
 	msgBox.setText( msg.c_str() );
 	msgBox.exec();
+
 }
 
 void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_)
@@ -293,8 +299,6 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_)
 		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_NOT_LOADED, "Input model has completed loading from database, but is marked as not loaded."));
 		return;
 	}
-
-	//SignalMessageBox("Input model is fully loaded.  Ready to refresh all widgets.");
 
 	emit LoadFromDatabase(&getActiveUIOutputProject()->model());
 
@@ -319,7 +323,5 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_)
 
 	getActiveUIInputProject()->DoRefreshAllWidgets();
 	getActiveUIOutputProject()->DoRefreshAllWidgets();
-
-	//SignalMessageBox("Both input and output models are fully loaded.  Ready to refresh all widgets.");
 
 }

@@ -106,13 +106,15 @@ SOURCES += main.cpp\
 	Infrastructure/UIData/uiuidatamanager.cpp \
 	Infrastructure/UIAction/uiuiactionmanager.cpp \
 	Infrastructure/ModelAction/uimodelactionmanager.cpp \
-    Infrastructure/Project/Base/uiprojectmanagerworkqueue_base.cpp \
-    Infrastructure/Project/uiprojectmanagerworkqueue.cpp \
-    Infrastructure/UIData/uiwidgetdatarefresh.cpp \
-    Infrastructure/Messager/uimessagersingleshot.cpp \
-    Infrastructure/Model/Base/modelworkqueue.cpp \
-    Infrastructure/UIAction/uiaction.cpp \
-    Infrastructure/UIAction/variablegroupsetmemberselectionchange.cpp
+	Infrastructure/Project/Base/uiprojectmanagerworkqueue_base.cpp \
+	Infrastructure/Project/uiprojectmanagerworkqueue.cpp \
+	Infrastructure/UIData/uiwidgetdatarefresh.cpp \
+	Infrastructure/Messager/uimessagersingleshot.cpp \
+	Infrastructure/Model/Base/modelworkqueue.cpp \
+	Infrastructure/UIAction/uiaction.cpp \
+	Infrastructure/UIAction/variablegroupsetmemberselectionchange.cpp \
+	Widgets/CreateOutput/SelectVariables/KadWidget/kadwidgetsscrollarea.cpp \
+    Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -207,14 +209,16 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/UIData/uiuidatamanager.h \
 	Infrastructure/UIAction/uiuiactionmanager.h \
 	Infrastructure/ModelAction/uimodelactionmanager.h \
-    Infrastructure/Project/Base/uiprojectmanagerworkqueue_base.h \
-    Infrastructure/Project/uiprojectmanagerworkqueue.h \
-    Infrastructure/UIData/uiwidgetdatarefresh.h \
-    Infrastructure/Messager/uimessagersingleshot.h \
-    Infrastructure/Model/Base/modelworkqueue.h \
-    Infrastructure/UIAction/uiaction.h \
-    Infrastructure/UIAction/uiuiactionmanager.h \
-    Infrastructure/UIAction/variablegroupsetmemberselectionchange.h
+	Infrastructure/Project/Base/uiprojectmanagerworkqueue_base.h \
+	Infrastructure/Project/uiprojectmanagerworkqueue.h \
+	Infrastructure/UIData/uiwidgetdatarefresh.h \
+	Infrastructure/Messager/uimessagersingleshot.h \
+	Infrastructure/Model/Base/modelworkqueue.h \
+	Infrastructure/UIAction/uiaction.h \
+	Infrastructure/UIAction/uiuiactionmanager.h \
+	Infrastructure/UIAction/variablegroupsetmemberselectionchange.h \
+	Widgets/CreateOutput/SelectVariables/KadWidget/kadwidgetsscrollarea.h \
+    Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -244,6 +248,7 @@ INCLUDEPATH += $$PWD/Widgets/CreateOutput
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/VariableSummary
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/Variables
+INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/KadWidget
 INCLUDEPATH += $$PWD/Infrastructure/Model
 INCLUDEPATH += $$PWD/Infrastructure/Model/Base
 INCLUDEPATH += $$PWD/Infrastructure/Model/Indicator
