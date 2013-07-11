@@ -10,6 +10,7 @@ enum WIDGET_ACTIONS
 	, ACTION_TYPE_NONE = WIDGET_ACTIONS_FIRST
 
 	, ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
+	, ACTION_KAD_COUNT_CHANGE
 
 	, WIDGET_ACTIONS_LAST
 
@@ -89,7 +90,7 @@ class WidgetActionItem__Checkbox : public WidgetActionItem
 		}
 
 	protected:
-	
+
 		bool checked;
 
 };
@@ -141,5 +142,23 @@ class WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
 		}
 };
 typedef WidgetActionItemRequest<ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED> WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED;
+
+/************************************************************************/
+// ACTION_KAD_COUNT_CHANGE
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE> : public WidgetActionItemRequest_base
+{
+	public:
+		WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE>(WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
+};
+typedef WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE> WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE;
 
 #endif

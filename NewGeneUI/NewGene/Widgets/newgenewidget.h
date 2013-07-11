@@ -58,6 +58,8 @@ class NewGeneWidget
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {};
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA) {};
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE) {};
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROLS_AREA) {};
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET) {};
 		// ****************************************************************************************************************************
 
 	protected:
@@ -71,6 +73,8 @@ class NewGeneWidget
 		virtual void RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {};
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA) {};
 		virtual void RefreshWidget(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE) {};
+		virtual void RefreshWidget(WidgetDataItem_KAD_SPIN_CONTROLS_AREA) {};
+		virtual void RefreshWidget(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET) {};
 		// ****************************************************************************************************************************
 
 

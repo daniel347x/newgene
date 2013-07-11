@@ -64,3 +64,28 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	}
 	messager.EmitOutputWidgetDataRefresh(variable_group);
 }
+
+/************************************************************************/
+// KAD_SPIN_CONTROLS_AREA
+/************************************************************************/
+void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA const & widget_request, OutputProject & project)
+{
+	InputModel & input_model = project.model().getInputModel();
+	WidgetDataItem_KAD_SPIN_CONTROLS_AREA variable_groups(widget_request);
+	variable_groups.identifiers = input_model.t_vgp_identifiers.getIdentifiers();
+	messager.EmitOutputWidgetDataRefresh(variable_groups);
+}
+
+/************************************************************************/
+// KAD_SPIN_CONTROL_WIDGET
+/************************************************************************/
+void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET const & widget_request, OutputProject & project)
+{
+	OutputModel & output_model = project.model();
+	WidgetDataItem_KAD_SPIN_CONTROL_WIDGET kad_spincontrol(widget_request);
+	if (widget_request.identifier && widget_request.identifier->uuid)
+	{
+		//variable_group.identifiers = output_model.t_variables_selected_identifiers.getIdentifiers(*widget_request.identifier->uuid);
+	}
+	messager.EmitOutputWidgetDataRefresh(kad_spincontrol);
+}

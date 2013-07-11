@@ -86,6 +86,22 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS
 	get()->getWorkService().post(DoRefreshOutputWidget<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>(widget, this));
 }
 
+/************************************************************************/
+// KAD_SPIN_CONTROLS_AREA
+/************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<KAD_SPIN_CONTROLS_AREA>(widget, this));
+}
+
+/************************************************************************/
+//
+/************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<KAD_SPIN_CONTROL_WIDGET>(widget, this));
+}
+
 
 
 // Actions

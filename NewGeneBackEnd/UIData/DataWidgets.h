@@ -16,6 +16,8 @@ enum DATA_WIDGETS
 	, VARIABLE_GROUPS_SUMMARY
 	, VARIABLE_GROUPS_SUMMARY_SCROLL_AREA
 	, VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE
+	, KAD_SPIN_CONTROLS_AREA
+	, KAD_SPIN_CONTROL_WIDGET
 
 	// Input project
 
@@ -294,5 +296,82 @@ public:
 	WidgetInstanceIdentifiers identifiers;
 };
 typedef WidgetDataItem<VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE> WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE;
+
+/************************************************************************/
+// KAD_SPIN_CONTROLS_AREA
+/************************************************************************/
+template<>
+class WidgetDataItemRequest<KAD_SPIN_CONTROLS_AREA> : public WidgetDataItemRequest_base
+{
+public:
+	WidgetDataItemRequest<KAD_SPIN_CONTROLS_AREA>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
+	{
+	}
+	WidgetDataItemRequest<KAD_SPIN_CONTROLS_AREA>(WidgetDataItemRequest<KAD_SPIN_CONTROLS_AREA> const & rhs)
+		: WidgetDataItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItemRequest<KAD_SPIN_CONTROLS_AREA> WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA;
+
+template<>
+class WidgetDataItem<KAD_SPIN_CONTROLS_AREA> : public WidgetDataItem_base
+{
+public:
+	WidgetDataItem<KAD_SPIN_CONTROLS_AREA>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
+	{
+	}
+	WidgetDataItem<KAD_SPIN_CONTROLS_AREA>(WidgetDataItemRequest_base const & request_obj)
+		: WidgetDataItem_base(request_obj)
+	{
+	}
+	WidgetDataItem<KAD_SPIN_CONTROLS_AREA>(WidgetDataItem<KAD_SPIN_CONTROLS_AREA> const & rhs)
+		: WidgetDataItem_base(rhs)
+		, identifiers(rhs.identifiers)
+	{
+	}
+	WidgetInstanceIdentifiers identifiers;
+};
+typedef WidgetDataItem<KAD_SPIN_CONTROLS_AREA> WidgetDataItem_KAD_SPIN_CONTROLS_AREA;
+
+
+/************************************************************************/
+// KAD_SPIN_CONTROL_WIDGET
+/************************************************************************/
+template<>
+class WidgetDataItemRequest<KAD_SPIN_CONTROL_WIDGET> : public WidgetDataItemRequest_base
+{
+public:
+	WidgetDataItemRequest<KAD_SPIN_CONTROL_WIDGET>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
+	{
+	}
+	WidgetDataItemRequest<KAD_SPIN_CONTROL_WIDGET>(WidgetDataItemRequest<KAD_SPIN_CONTROL_WIDGET> const & rhs)
+		: WidgetDataItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItemRequest<KAD_SPIN_CONTROL_WIDGET> WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET;
+
+template<>
+class WidgetDataItem<KAD_SPIN_CONTROL_WIDGET> : public WidgetDataItem_base
+{
+public:
+	WidgetDataItem<KAD_SPIN_CONTROL_WIDGET>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
+	{
+	}
+	WidgetDataItem<KAD_SPIN_CONTROL_WIDGET>(WidgetDataItemRequest_base const & request_obj)
+		: WidgetDataItem_base(request_obj)
+	{
+	}
+	WidgetDataItem<KAD_SPIN_CONTROL_WIDGET>(WidgetDataItem<KAD_SPIN_CONTROL_WIDGET> const & rhs)
+		: WidgetDataItem_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItem<KAD_SPIN_CONTROL_WIDGET> WidgetDataItem_KAD_SPIN_CONTROL_WIDGET;
 
 #endif

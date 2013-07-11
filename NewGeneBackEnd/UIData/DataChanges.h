@@ -28,6 +28,7 @@ enum DATA_CHANGE_TYPE
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__FIRST
 
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION
+	, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE
 
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__LAST
 
@@ -85,30 +86,5 @@ class DataChange
 };
 
 typedef std::vector<DataChange> DataChanges;
-
-//class DataChange__DATA_CHANGES__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION : virtual public DataChange
-//{
-//
-//	public:
-//
-//		DataChange__DATA_CHANGES__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION()
-//			: DataChange()
-//		{
-//
-//		}
-//
-//		DataChange__DATA_CHANGES__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION(DATA_CHANGE_TYPE const & type, DATA_CHANGE_INTENTION const & intention, WidgetInstanceIdentifier const & parent_identifier_, WidgetInstanceIdentifiers const & child_identifiers_)
-//			: DataChange(type, intention, parent_identifier_, child_identifiers_)
-//		{
-//
-//		}
-//
-//		DataChange__DATA_CHANGES__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION(DataChange__DATA_CHANGES__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION const & rhs)
-//			: DataChange(rhs)
-//		{
-//
-//		}
-//
-//};
 
 #endif

@@ -150,3 +150,13 @@ void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABL
 {
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }
+
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROLS_AREA & widgetData)
+{
+	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
+}
+
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET & widgetData)
+{
+	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
+}

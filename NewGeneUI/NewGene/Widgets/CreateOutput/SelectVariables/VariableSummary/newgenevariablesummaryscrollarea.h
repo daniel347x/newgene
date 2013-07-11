@@ -15,13 +15,16 @@ class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget //
 		Q_OBJECT
 
 	public:
+
 		explicit NewGeneVariableSummaryScrollArea( QWidget * parent = 0 );
 		~NewGeneVariableSummaryScrollArea();
 
 	protected:
+
 		void changeEvent( QEvent * e );
 
 	private:
+
 		Ui::NewGeneVariableSummaryScrollArea * ui;
 
 	public:
@@ -38,6 +41,7 @@ class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget //
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE); // child
 
 	private:
+
 		NewGeneVariableSummaryGroup * groups;
 
 };
