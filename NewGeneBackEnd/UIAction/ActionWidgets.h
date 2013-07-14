@@ -95,6 +95,46 @@ class WidgetActionItem__Checkbox : public WidgetActionItem
 
 };
 
+class WidgetActionItem__Spinbox : public WidgetActionItem
+{
+
+	public:
+
+		WidgetActionItem__Spinbox(int const value__)
+			: WidgetActionItem()
+			, value_(value__)
+		{
+
+		}
+
+		WidgetActionItem__Spinbox(WidgetActionItem__Spinbox const & rhs)
+			: WidgetActionItem(rhs)
+			, value_(rhs.value_)
+		{
+
+		}
+
+		~WidgetActionItem__Spinbox()
+		{
+
+		}
+
+		void setValue(int const value__)
+		{
+			value_ = value__;
+		}
+
+		int getValue() const
+		{
+			return value_;
+		}
+
+	protected:
+
+		int value_;
+
+};
+
 class WidgetActionItemRequest_base
 {
 

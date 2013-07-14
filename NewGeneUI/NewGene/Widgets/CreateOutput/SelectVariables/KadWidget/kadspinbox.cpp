@@ -47,16 +47,25 @@ void KadSpinBox::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TY
 void KadSpinBox::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET widget_data)
 {
 
-  if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid) )
-  {
-      boost::format msg("Invalid widget refresh in NewGeneVariableSummary widget.");
-      QMessageBox msgBox;
-      msgBox.setText( msg.str().c_str() );
-      msgBox.exec();
-      return;
-  }
+    if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid) )
+    {
+        boost::format msg("Invalid widget refresh in NewGeneVariableSummary widget.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
 
-   // Since these are not checkboxes yet, the following signal will never currently be called
-   //connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
+    connect(this, SIGNAL(valueChanged(int)), this, SLOT(ReceiveVariableItemChanged(int)));
+
+}
+
+void KadSpinBox::ReceiveVariableItemChanged(int newValue)
+{
+
+	InstanceActionItems actionItems;
+	actionItems.push_back(std::make_pair(data_instance, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Spinbox(newValue)))));
+	WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
+	emit SignalReceiveVariableItemChanged(action_request);
 
 }

@@ -14,6 +14,10 @@ int const UUID_LENGTH = 36;
 class WidgetInstanceIdentifier
 {
 
+	// ***************************************************************************//
+	// A class corresponding to one or more rows in the NewGene backend model tables
+	// ***************************************************************************//
+
 public:
 
 	class Notes
@@ -91,7 +95,6 @@ public:
 	//WidgetInstanceIdentifier(UUID const uuid_, UUID const uuid_parent_, std::string const code_, std::string const description_, int const sequence_number_, Notes notes_ = Notes())
 	WidgetInstanceIdentifier(UUID const uuid_, WidgetInstanceIdentifier const & identifier_parent_, std::string const code_, std::string const description_, int const sequence_number_, char const * const flags_ = "", TIME_GRANULARITY time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
 		: uuid(std::make_shared<UUID>(uuid_))
-		//, uuid_parent(std::make_shared<UUID>(uuid_parent_))
 		, identifier_parent(std::make_shared<WidgetInstanceIdentifier>(identifier_parent_))
 		, code(std::make_shared<std::string>(code_))
 		, sequence_number(sequence_number_)
@@ -101,21 +104,6 @@ public:
 	{
 
 	}
-
-	//WidgetInstanceIdentifier(UUID uuid_)
-	//	: uuid(std::make_shared<UUID>(uuid_))
-	//	, sequence_number(0)
-	//{
-
-	//}
-
-	//WidgetInstanceIdentifier(UUID uuid_, UUID uuid_parent_)
-	//	: uuid(std::make_shared<UUID>(uuid_))
-	//	, uuid_parent(std::make_shared<UUID>(uuid_parent_))
-	//	, sequence_number(0)
-	//{
-
-	//}
 
 	WidgetInstanceIdentifier(std::string code_, std::string description_, int const sequence_number_, char const * const flags_ = "", TIME_GRANULARITY const time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
 		: code(std::make_shared<std::string>(code_))
@@ -130,8 +118,6 @@ public:
 
 	WidgetInstanceIdentifier(WidgetInstanceIdentifier const & rhs)
 		: uuid(rhs.uuid)
-		//, uuid_parent(rhs.uuid_parent)
-		//, fkuuids(rhs.fkuuids)
 		, identifier_parent(rhs.identifier_parent)
 		, foreign_key_identifiers(rhs.foreign_key_identifiers)
 		, code(rhs.code)
@@ -151,8 +137,6 @@ public:
 			return *this;
 		}
 		uuid = rhs.uuid;
-		//uuid_parent = rhs.uuid;
-		//fkuuids = rhs.fkuuids;
 		identifier_parent = rhs.identifier_parent;
 		foreign_key_identifiers = rhs.foreign_key_identifiers;
 		code = rhs.code;
@@ -164,11 +148,16 @@ public:
 		return *this;
 	}
 
-	std::shared_ptr<UUID> uuid;
-	//std::shared_ptr<UUID> uuid_parent;
-	std::shared_ptr<WidgetInstanceIdentifier> identifier_parent;
-	//std::shared_ptr<UUIDVector> fkuuids;
-	std::shared_ptr<std::vector<WidgetInstanceIdentifier>> foreign_key_identifiers;
+	std::shared_ptr<UUID> uuid; // In case of ambiguity, sometimes identifier_parent or foreign_key_identifiers are necessary to disambiguate this identifier
+
+	std::shared_ptr<WidgetInstanceIdentifier> identifier_parent; // Parent in the data model (i.e., foreign key in the case of a simple parent-child data relationship), not parent widget in the user interface
+
+	// Regarding comments for this data member: This class is named "WidgetInstanceIdentifier", not just "InstanceIdentifier".
+	// The "Instance" in the class name corresponds to a row in the backend model tables.
+	// But the "Widget" in the class name corresponds to a widget in the user interface, which usually corresponds to a single instance (row) of a backend model table, but might correspond to a number of different rows from one or more tables.
+	std::shared_ptr<std::vector<WidgetInstanceIdentifier>> foreign_key_identifiers; // For more complex foreign key relationships required by this identifier than simple parent-child data relationships, this vector of identifiers can be used.  Note: these identifiers can be used for any application-specific purpose, either directly modeling a row in a backend table, modeling multiple rows in one identifier, representing one or more user-interface widget UUID's, or any other purpose.
+
+	// For simple identifiers, these are frequently used.  Simple identifiers cover the bulk of uses of this class.
 	std::shared_ptr<std::string> code;
 	std::shared_ptr<std::string> longhand;
 	int sequence_number;

@@ -50,7 +50,6 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
 			WidgetInstanceIdentifier new_identifier(identifier);
-			//new_identifier.identifier_parent = std::make_shared<WidgetInstanceIdentifier>(uuid);
 			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, new_identifier, outp );
 			addItem( tmpGrp, identifier.longhand->c_str() );
 		}

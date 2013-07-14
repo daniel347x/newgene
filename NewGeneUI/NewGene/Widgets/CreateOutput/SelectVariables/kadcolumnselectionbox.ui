@@ -29,6 +29,15 @@
    </item>
    <item>
     <widget class="QScrollArea" name="scrollArea">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
      <property name="horizontalScrollBarPolicy">
       <enum>Qt::ScrollBarAsNeeded</enum>
      </property>
@@ -40,8 +49,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>378</width>
-        <height>259</height>
+        <width>380</width>
+        <height>261</height>
        </rect>
       </property>
      </widget>

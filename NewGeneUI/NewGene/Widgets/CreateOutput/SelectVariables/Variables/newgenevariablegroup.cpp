@@ -129,50 +129,6 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 
 }
 
-void NewGeneVariableGroup::ReceiveVariableItemChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight, const QVector<int> roles)
-{
-
-	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
-	if (model == nullptr)
-	{
-		// Todo: messager error
-		return;
-	}
-
-	QStandardItem * topLeftItem = (model->itemFromIndex(topLeft));
-	QStandardItem * bottomRightItem = (model->itemFromIndex(bottomRight));
-	if (topLeftItem == nullptr || bottomRightItem == nullptr)
-	{
-		// Todo: messager error
-		return;
-	}
-
-	int topLeftRow = topLeftItem->row();
-	int bottomRightRow = bottomRightItem->row();
-
-	InstanceActionItems actionItems;
-
-	for (int row = topLeftRow; row <= bottomRightRow; ++row)
-	{
-		QStandardItem * currentItem = model->item(row);
-		if (currentItem)
-		{
-			bool checked = false;
-			if (currentItem->checkState() == Qt::Checked)
-			{
-				checked = true;
-			}
-			QVariant currentIdentifier = currentItem->data();
-			WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
-			actionItems.push_back(std::make_pair(identifier, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(checked)))));
-		}
-	}
-
-	WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
-	emit SignalReceiveVariableItemChanged(action_request);
-
-}
-
 void NewGeneVariableGroup::ReceiveVariableItemChanged(QStandardItem * currentItem)
 {
 
