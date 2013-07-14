@@ -109,6 +109,18 @@
     <Filter Include="Source Files\Model\Tables\TableInstances">
       <UniqueIdentifier>{76962a23-08d6-4767-9b2c-34f248484088}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\UIData\Controllers">
+      <UniqueIdentifier>{94dc26b3-2ea7-4730-9217-225374daa268}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\UIAction\Controllers">
+      <UniqueIdentifier>{6a7054e6-db0d-429c-bbdb-6213cd31c6f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UIAction\Controllers">
+      <UniqueIdentifier>{1dc6ebb8-1f3f-4cf5-9b52-a6ea879dddc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UIData\Controllers">
+      <UniqueIdentifier>{1f46343f-32d6-4e28-a979-7f129c26599d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
