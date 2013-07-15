@@ -60,6 +60,11 @@ class DataChangePacket
 
 		}
 
+		DataChangePacket(DataChangePacket const & rhs)
+		{
+
+		}
+
 };
 
 class DataChangePacket_int : public DataChangePacket
@@ -70,6 +75,13 @@ class DataChangePacket_int : public DataChangePacket
 		DataChangePacket_int(int const n_)
 			: DataChangePacket()
 			, n(n_)
+		{
+
+		}
+
+		DataChangePacket_int(DataChangePacket_int const & rhs)
+			: DataChangePacket(rhs)
+			, n(rhs.n)
 		{
 
 		}
@@ -112,6 +124,7 @@ class DataChange
 			, change_intention(rhs.change_intention)
 			, parent_identifier(rhs.parent_identifier)
 			, child_identifiers(rhs.child_identifiers)
+			, change_packet(rhs.change_packet)
 		{
 
 		}

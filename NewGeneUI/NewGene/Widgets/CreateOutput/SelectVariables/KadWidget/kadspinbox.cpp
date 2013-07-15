@@ -81,7 +81,7 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 	{
 		switch (change.change_type)
 		{
-			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION:
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE:
 				{
 					switch (change.change_intention)
 					{
