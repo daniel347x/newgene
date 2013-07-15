@@ -29,6 +29,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItem_KAD_SPIN_CONTROL_WIDGET>();
 
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>();
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE>();
 }
 
 bool NewGeneApplication::notify( QObject * receiver, QEvent * e )

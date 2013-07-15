@@ -53,7 +53,6 @@ void UIActionManager::DoKAdCountChange(Messager & messager, WidgetActionItemRequ
 				// ************************************* //
 				WidgetActionItem const & actionItem = *instanceActionItem.second;
 				WidgetActionItem__Spinbox const & actionItemSpinbox = static_cast<WidgetActionItem__Spinbox const &>(actionItem);
-				UUID itemUUID = *identifier.uuid;
 
 				// ***************************************** //
 				// Prepare data to send back to user interface
@@ -62,7 +61,7 @@ void UIActionManager::DoKAdCountChange(Messager & messager, WidgetActionItemRequ
 				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
 				WidgetInstanceIdentifiers child_identifiers;
 				child_identifiers.push_back(identifier);
-				DataChange change(type, intention, WidgetInstanceIdentifier(*identifier.identifier_parent), child_identifiers);
+				DataChange change(type, intention, WidgetInstanceIdentifier(identifier), child_identifiers);
 				change.SetPacket(std::make_shared<DataChangePacket_int>(actionItemSpinbox.getValue()));
 				change_response.changes.push_back(change);
 			});
