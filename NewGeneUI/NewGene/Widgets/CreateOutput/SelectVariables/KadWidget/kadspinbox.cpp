@@ -21,7 +21,7 @@ KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance
    if (data_instance.uuid && project)
    {
 
-	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE, true, *data_instance.uuid);
+       project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE, true, *data_instance.uuid);
 
 	   UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 	   WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
@@ -116,10 +116,6 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 												if (value_ != packet->getValue())
 												{
 													setValue(packet->getValue());
-												}
-												else
-												{
-													ShowMessageBox("Made it with a round-trip action handler update for the spin box!");
 												}
 											}
 											else

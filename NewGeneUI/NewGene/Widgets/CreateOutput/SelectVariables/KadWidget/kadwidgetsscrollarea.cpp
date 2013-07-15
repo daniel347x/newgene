@@ -2,16 +2,18 @@
 
 #include "kadspinbox.h"
 #include <QLayout>
+#include <QFont>
+#include <QGraphicsColorizeEffect>
 
 KadWidgetsScrollArea::KadWidgetsScrollArea( QWidget * parent ) :
 	QWidget( parent ),
 	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, KAD_SPIN_CONTROLS_AREA, true) ) // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
 {
 
-    QLayout * layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
-    this->setLayout(layout);
+	QLayout * layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+	this->setLayout(layout);
 
-    PrepareOutputWidget();
+	PrepareOutputWidget();
 
 }
 
@@ -47,8 +49,23 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
 			WidgetInstanceIdentifier new_identifier(identifier);
-			QWidget * newSpinBox = new KadSpinBox(this, new_identifier, outp);
-			//newSpinBox->setTitle(identifier.longhand->c_str());
+			QSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
+			newSpinBox->setFixedHeight(50);
+			newSpinBox->setFixedWidth(400);
+			//QGraphicsColorizeEffect * backColor = new QGraphicsColorizeEffect();
+			//QColor color_("yellow");
+			//backColor->setColor(color_);
+			//newSpinBox->setGraphicsEffect(backColor); // takes ownership
+			QFont currFont = newSpinBox->font();
+			currFont.setPixelSize(24);
+			newSpinBox->setFont(currFont);
+			if (identifier.longhand)
+			{
+				std::string prefixText(" ");
+				prefixText += *identifier.longhand;
+				prefixText += " columns: ";
+				newSpinBox->setPrefix(prefixText.c_str());
+			}
 			layout()->addWidget(newSpinBox);
 		}
 	});

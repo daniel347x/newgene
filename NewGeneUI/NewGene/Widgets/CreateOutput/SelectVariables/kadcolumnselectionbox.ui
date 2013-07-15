@@ -23,7 +23,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>K-ad primary column selections</string>
+      <string/>
      </property>
     </widget>
    </item>
