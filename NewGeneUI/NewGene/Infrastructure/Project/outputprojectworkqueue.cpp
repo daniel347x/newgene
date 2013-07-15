@@ -4,6 +4,7 @@
 #include <QTimer>
 #include "../UIData/uiwidgetdatarefresh.h"
 #include "../UIAction/variablegroupsetmemberselectionchange.h"
+#include "../UIAction/KAdCountChange.h"
 #include <QStandardItem>
 
 OutputProjectWorkQueue::OutputProjectWorkQueue(QObject * parent)
@@ -121,5 +122,5 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 /************************************************************************/
 void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE action_request)
 {
-	get()->getWorkService().post(VariableGroupSetMemberSelectionChange(action_request, this));
+	get()->getWorkService().post(KAdCountChange(action_request, this));
 }

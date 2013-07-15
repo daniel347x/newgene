@@ -1,9 +1,9 @@
 #include "../UIActionManager.h"
 
-#include "../Project/InputProject.h"
-#include "../Project/OutputProject.h"
-#include "../UIData/DataChanges.h"
-#include "../UIAction/ActionChanges.h"
+#include "../../Project/InputProject.h"
+#include "../../Project/OutputProject.h"
+#include "../../UIData/DataChanges.h"
+#include "../../UIAction/ActionChanges.h"
 
 /************************************************************************/
 // ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED

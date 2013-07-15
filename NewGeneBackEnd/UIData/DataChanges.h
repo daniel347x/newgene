@@ -121,7 +121,7 @@ class DataChange
 			change_packet = packet_;
 		}
 
-		DataChangePacket * getPacket()
+		DataChangePacket * getPacket() const
 		{
 			if (change_packet)
 			{

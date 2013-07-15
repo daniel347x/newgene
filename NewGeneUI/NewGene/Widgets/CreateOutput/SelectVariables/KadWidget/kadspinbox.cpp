@@ -21,7 +21,7 @@ KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance
    if (data_instance.uuid && project)
    {
 
-       project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE, true, *data_instance.uuid);
+	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE, true, *data_instance.uuid);
 
 	   UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 	   WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
@@ -52,16 +52,16 @@ void KadSpinBox::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TY
 void KadSpinBox::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET widget_data)
 {
 
-    if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid) )
-    {
-        boost::format msg("Invalid widget refresh in NewGeneVariableSummary widget.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid) )
+	{
+		boost::format msg("Invalid widget refresh in NewGeneVariableSummary widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
 
-    connect(this, SIGNAL(valueChanged(int)), this, SLOT(ReceiveVariableItemChanged(int)));
+	connect(this, SIGNAL(valueChanged(int)), this, SLOT(ReceiveVariableItemChanged(int)));
 
 }
 
@@ -102,7 +102,7 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 									return; // from lambda
 								}
 
-								std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&model, &change, this](WidgetInstanceIdentifier const & child_identifier)
+								std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&change, this](WidgetInstanceIdentifier const & child_identifier)
 								{
 									int value_ = value();
 									if (data_instance.uuid && child_identifier.uuid && *data_instance.uuid == *child_identifier.uuid)
@@ -110,8 +110,8 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 
 										if (change.change_intention == DATA_CHANGE_INTENTION__UPDATE)
 										{
-											DataChangePacket_int * packet = change.getPacket();
-											if (packet))
+											DataChangePacket_int * packet = static_cast<DataChangePacket_int *>(change.getPacket());
+											if (packet)
 											{
 												if (value_ != packet->getValue())
 												{
