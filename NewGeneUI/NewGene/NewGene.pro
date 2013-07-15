@@ -114,7 +114,8 @@ SOURCES += main.cpp\
 	Infrastructure/UIAction/uiaction.cpp \
 	Infrastructure/UIAction/variablegroupsetmemberselectionchange.cpp \
 	Widgets/CreateOutput/SelectVariables/KadWidget/kadwidgetsscrollarea.cpp \
-    Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.cpp
+    Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.cpp \
+    Infrastructure/UIAction/kadcountchange.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -218,7 +219,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/UIAction/uiuiactionmanager.h \
 	Infrastructure/UIAction/variablegroupsetmemberselectionchange.h \
 	Widgets/CreateOutput/SelectVariables/KadWidget/kadwidgetsscrollarea.h \
-    Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.h
+    Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.h \
+    Infrastructure/UIAction/kadcountchange.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

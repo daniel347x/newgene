@@ -464,5 +464,11 @@
     <ClCompile Include="Model\TimeGranularity.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
+    <ClCompile Include="UIAction\Controllers\Controller_KAdCountChange.cpp">
+      <Filter>Header Files\UIAction\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="UIAction\Controllers\Controller_VariableGroupSetMemberSelectionChange.cpp">
+      <Filter>Header Files\UIAction\Controllers</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

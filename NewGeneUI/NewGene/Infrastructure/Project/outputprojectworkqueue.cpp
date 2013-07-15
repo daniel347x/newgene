@@ -115,3 +115,11 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 {
 	get()->getWorkService().post(VariableGroupSetMemberSelectionChange(action_request, this));
 }
+
+/************************************************************************/
+// ACTION_KAD_COUNT_CHANGE
+/************************************************************************/
+void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE action_request)
+{
+	get()->getWorkService().post(VariableGroupSetMemberSelectionChange(action_request, this));
+}

@@ -12,10 +12,14 @@ class KadSpinBox : public QSpinBox, public NewGeneWidget // do not reorder base 
 	public:
 
 		explicit KadSpinBox( QWidget *parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr );
+		~KadSpinBox();
+
+		void HandleChanges(DataChangeMessage const &);
 
 	signals:
 
 		void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET);
+		void SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE);
 
 	public slots:
 

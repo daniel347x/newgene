@@ -50,6 +50,44 @@ enum DATA_CHANGE_INTENTION
 
 };
 
+class DataChangePacket
+{
+
+	public:
+
+		DataChangePacket()
+		{
+
+		}
+
+};
+
+class DataChangePacket_int : public DataChangePacket
+{
+
+	public:
+
+		DataChangePacket_int(int const n_)
+			: DataChangePacket()
+			, n(n_)
+		{
+
+		}
+
+		void setValue(int const n_)
+		{
+			n = n_;
+		}
+
+		int getValue() const
+		{
+			return n;
+		}
+
+		int n;
+
+};
+
 class DataChange
 {
 
@@ -78,10 +116,26 @@ class DataChange
 
 		}
 
+		void SetPacket(std::shared_ptr<DataChangePacket> packet_)
+		{
+			change_packet = packet_;
+		}
+
+		DataChangePacket * getPacket()
+		{
+			if (change_packet)
+			{
+				return change_packet.get();
+			}
+			return nullptr;
+		}
+
 		DATA_CHANGE_TYPE change_type;
 		DATA_CHANGE_INTENTION change_intention;
 		WidgetInstanceIdentifier parent_identifier;
 		WidgetInstanceIdentifiers child_identifiers;
+
+		std::shared_ptr<DataChangePacket> change_packet;
 
 };
 
