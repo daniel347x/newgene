@@ -59,11 +59,14 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 			QFont currFont = newSpinBox->font();
 			currFont.setPixelSize(24);
 			newSpinBox->setFont(currFont);
+			//std::string stylesheet(" QSpinBox { color: #d006bc; font-weight: bold; } ");
+			std::string stylesheet(" QSpinBox { color: #960488; font-weight: bold; } ");
+			newSpinBox->setStyleSheet(stylesheet.c_str());
 			if (identifier.longhand)
 			{
-				std::string prefixText(" ");
+				std::string prefixText(" #");
 				prefixText += *identifier.longhand;
-				prefixText += " columns: ";
+				prefixText += " columns:  ";
 				newSpinBox->setPrefix(prefixText.c_str());
 			}
 			layout()->addWidget(newSpinBox);
