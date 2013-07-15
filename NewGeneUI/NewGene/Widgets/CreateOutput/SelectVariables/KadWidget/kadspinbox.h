@@ -22,6 +22,10 @@ class KadSpinBox : public QSpinBox, public NewGeneWidget // do not reorder base 
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET);
+
+		// *********************************//
+		// Directly receive the OS-level event
+		// *********************************//
 		void ReceiveVariableItemChanged(int);
 
 };

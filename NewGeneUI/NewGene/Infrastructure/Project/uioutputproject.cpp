@@ -96,7 +96,6 @@ void UIOutputProject::DoRefreshAllWidgets()
 // Called in UI thread
 void UIOutputProject::DataChangeMessageSlot(WidgetChangeMessages widget_change_messages)
 {
-	//SignalMessageBox("WidgetChangeMessages received.");
 	DisplayChanges(widget_change_messages);
 }
 

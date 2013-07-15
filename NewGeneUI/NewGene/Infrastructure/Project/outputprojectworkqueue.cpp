@@ -32,7 +32,9 @@ void OutputProjectWorkQueue::EmitMessage(std::string msg)
 	emit SignalMessageBox(msg.c_str());
 }
 
+// **********************************************************************************************************//
 // Called in context of Boost WORK POOL threads - NOT in context of this work queue manager's event loop thread
+// **********************************************************************************************************//
 void OutputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
 {
 	WidgetChangeMessages widget_change_messages = get()->HandleChanges(changes);

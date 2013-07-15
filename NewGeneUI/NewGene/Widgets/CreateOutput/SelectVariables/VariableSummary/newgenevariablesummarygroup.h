@@ -20,11 +20,18 @@ class NewGeneVariableSummaryGroup : public QGroupBox, public NewGeneWidget // do
 		explicit NewGeneVariableSummaryGroup( QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr );
 		~NewGeneVariableSummaryGroup();
 
+		// ****************************************//
+		// Implement DATA CHANGE SIGNAL handling here
+		// ****************************************//
 		void HandleChanges(DataChangeMessage const &);
 
 	signals:
 
 		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE);
+
+		// *********************************//
+		// Directly receive the OS-level event
+		// *********************************//
 		void SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED);
 
 	public slots:
@@ -32,6 +39,10 @@ class NewGeneVariableSummaryGroup : public QGroupBox, public NewGeneWidget // do
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE);
+
+		// *********************************//
+		// Directly receive the OS-level event
+		// *********************************//
 		void ReceiveVariableItemChanged(QStandardItem*);
 
 	protected:

@@ -31,7 +31,9 @@ class WorkQueueManagerBase : public QObject
 
 		explicit WorkQueueManagerBase(bool isPool2_ = false, QObject *parent = 0);
 
+		// **********************************************************************************************************//
 		// Called in context of Boost WORK POOL threads - NOT in context of this work queue manager's event loop thread
+		// **********************************************************************************************************//
 		virtual void HandleChanges(DataChangeMessage & changes) {}
 
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}

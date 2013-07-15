@@ -22,8 +22,9 @@ void InputProjectWorkQueue::SetConnections()
 	connect(this, SIGNAL(SignalMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
 }
 
-
+// **********************************************************************************************************//
 // Called in context of Boost WORK POOL threads - NOT in context of this work queue manager's event loop thread
+// **********************************************************************************************************//
 void InputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
 {
 	 WidgetChangeMessages widget_change_messages = get()->HandleChanges(changes);

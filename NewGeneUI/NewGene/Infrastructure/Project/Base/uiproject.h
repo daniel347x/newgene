@@ -229,7 +229,8 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
 				std::for_each(data_change_interest_map.cbegin(), data_change_interest_map.cend(), [&changes, &widget_change_message_map](std::pair<NewGeneWidget * const, DataChangeInterest const> const & pair_)
 				{
-					// todo: create widget-to-uuid map, populate it above at same time as reverse map,
+					// This function does the following:
+					// create widget-to-uuid map, populate it above at same time as reverse map,
 					// get uuid from map here in this function using the following widget pointer,
 					// if found then test against all uuid's in the DataChange message (parent and all children)
 					// for a match and only add to subset_of_changes_message if there's a match,

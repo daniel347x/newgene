@@ -141,6 +141,10 @@ class Messager
 		bool IsError();
 		bool IsErrorCatastrophic();
 
+		// ***************************************************************************************************************//
+		// The following functions are all overridden in [Input|Output]-specific Messager class that derives from this class
+		// ***************************************************************************************************************//
+
 		virtual void EmitChangeMessage(DataChangeMessage & changes) {}
 
 		virtual void ShowMessageBox(std::string) {}

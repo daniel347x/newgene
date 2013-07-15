@@ -207,7 +207,6 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 
 												if (change.change_intention == DATA_CHANGE_INTENTION__ADD)
 												{
-													//ShowMessageBox("Should hit this message once per check - checking.");
 													if (!checked)
 													{
 														currentItem->setCheckState(Qt::Checked);
@@ -215,7 +214,6 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 												}
 												else if (change.change_intention == DATA_CHANGE_INTENTION__REMOVE)
 												{
-													//ShowMessageBox("Should hit this message once per uncheck - unchecking.");
 													if (checked)
 													{
 														currentItem->setCheckState(Qt::Unchecked);
