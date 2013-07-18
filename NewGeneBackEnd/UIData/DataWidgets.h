@@ -52,6 +52,11 @@ public:
 
 	}
 
+	virtual ~WidgetDataItemRequest_base()
+	{
+
+	}
+
 	WIDGET_DATA_ITEM_REQUEST_REASON reason;
 	std::shared_ptr<WidgetInstanceIdentifier> identifier;
 
@@ -372,10 +377,10 @@ public:
 	{
 		try
 		{
-			WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET & spinRequest = dynamic_cast<WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET &>(WidgetDataItemRequest_base);
+			WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET const & spinRequest = dynamic_cast<WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET const &>(request_obj);
 			count = spinRequest.count;
 		}
-		catch (std::bad_cast & bc)
+		catch (std::bad_cast &)
 		{
 			count = 0;
 		}
