@@ -18,6 +18,8 @@ KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance
 
    PrepareOutputWidget();
 
+   connect(this, SIGNAL(valueChanged(int)), this, SLOT(ReceiveVariableItemChanged(int)));
+
    if (data_instance.uuid && project)
    {
 
@@ -38,7 +40,7 @@ KadSpinBox::~KadSpinBox()
 
 void KadSpinBox::RefreshAllWidgets()
 {
-	WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
+	WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(getValue(), WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
 
@@ -61,7 +63,10 @@ void KadSpinBox::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET
 		return;
 	}
 
-	connect(this, SIGNAL(valueChanged(int)), this, SLOT(ReceiveVariableItemChanged(int)));
+	if (getValue() != widget_data.count)
+	{
+		setValue(widget_data.count);
+	}
 
 }
 

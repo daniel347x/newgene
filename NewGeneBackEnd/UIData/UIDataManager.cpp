@@ -81,13 +81,12 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 /************************************************************************/
 void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET const & widget_request, OutputProject & project)
 {
-#	if 1
-		OutputModel & output_model = project.model();
-		WidgetDataItem_KAD_SPIN_CONTROL_WIDGET kad_spincontrol(widget_request);
-		if (widget_request.identifier && widget_request.identifier->uuid)
-		{
-			//variable_group.identifiers = output_model.t_variables_selected_identifiers.getIdentifiers(*widget_request.identifier->uuid);
-		}
-		messager.EmitOutputWidgetDataRefresh(kad_spincontrol);
-#	endif
+	OutputModel & output_model = project.model();
+	WidgetDataItem_KAD_SPIN_CONTROL_WIDGET kad_spincontrol(widget_request);
+	if (widget_request.identifier && widget_request.identifier->uuid)
+	{
+		WidgetInstanceIdentifier_Int_Pair spinControlData = output_model.t_kad_count.getIdentifier(*widget_request.identifier->uuid);
+		kad_spincontrol.count = spinControlData.second;
+	}
+	messager.EmitOutputWidgetDataRefresh(kad_spincontrol);
 }
