@@ -43,7 +43,7 @@ void OutputModelWorkQueue::LoadFromDatabase(UI_OUTPUT_MODEL_PTR model)
 
 	// Lock model and load all from database here
 	{
-
+		model->backend().LoadTables();
 		get()->loaded(true);
 	}
 

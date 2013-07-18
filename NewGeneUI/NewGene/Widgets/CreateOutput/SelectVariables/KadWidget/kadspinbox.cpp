@@ -26,7 +26,7 @@ KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance
        project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE, true, *data_instance.uuid);
 
 	   UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
-	   WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
+	   WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(0, WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
 	   emit RefreshWidget(request);
 
    }
@@ -40,7 +40,7 @@ KadSpinBox::~KadSpinBox()
 
 void KadSpinBox::RefreshAllWidgets()
 {
-	WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(getValue(), WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
+	WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(value(), WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }
 
@@ -63,7 +63,7 @@ void KadSpinBox::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET
 		return;
 	}
 
-	if (getValue() != widget_data.count)
+	if (value() != widget_data.count)
 	{
 		setValue(widget_data.count);
 	}
