@@ -16,7 +16,7 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	identifiers_map.clear();
+	identifiers.clear();
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM KAD_COUNT");	
