@@ -349,7 +349,7 @@ template<>
 class WidgetDataItemRequest<KAD_SPIN_CONTROL_WIDGET> : public WidgetDataItemRequest_base
 {
 public:
-	WidgetDataItemRequest<KAD_SPIN_CONTROL_WIDGET>(int const count_, WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+	WidgetDataItemRequest<KAD_SPIN_CONTROL_WIDGET>(int const count_ = 0, WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
 		: WidgetDataItemRequest_base(reason_, identifier_)
 		, count(count_)
 	{
@@ -367,7 +367,7 @@ template<>
 class WidgetDataItem<KAD_SPIN_CONTROL_WIDGET> : public WidgetDataItem_base
 {
 public:
-	WidgetDataItem<KAD_SPIN_CONTROL_WIDGET>(int count_ = 0, WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+	WidgetDataItem<KAD_SPIN_CONTROL_WIDGET>(int count_, WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
 		: WidgetDataItem_base(request_reason_, identifier_)
 		, count(count_)
 	{
