@@ -7,6 +7,7 @@
 #include "TableInstances/UOA.h"
 #include "TableInstances/VariableGroup.h"
 #include "TableInstances/VariablesSelected.h"
+#include "TableInstances/KAdCount.h"
 #include <vector>
 
 class TableManager

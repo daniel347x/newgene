@@ -35,6 +35,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 		void LoadTables();
 
 		Table_VARIABLES_SELECTED t_variables_selected_identifiers;
+		Table_KAD_COUNT t_kad_count;
 
 protected:
 
