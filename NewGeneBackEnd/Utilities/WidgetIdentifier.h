@@ -67,37 +67,28 @@ public:
 	};
 
 	WidgetInstanceIdentifier()
-		: sequence_number(0)
+		: sequence_number_or_count(0)
 		, time_granularity(TIME_GRANULARITY__NONE)
 	{
 
 	}
 
-	WidgetInstanceIdentifier(UUID const uuid_, std::string const code_, std::string const description_, int const sequence_number_, char const * const flags_ = "", TIME_GRANULARITY time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
+	WidgetInstanceIdentifier(UUID const uuid_, std::string const code_, std::string const description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
 		: uuid(std::make_shared<UUID>(uuid_))
 		, code(std::make_shared<std::string>(code_))
-		, sequence_number(sequence_number_)
+		, sequence_number_or_count(sequence_number_or_count_)
 		, longhand(std::make_shared<std::string>(description_))
 		, flags(flags_ ? flags_ : "")
 		, time_granularity(time_granularity_)
 		, notes(notes_)
 	{
-//		if (flags_)
-//		{
-//			flags = flags_;
-//		}
-//		else
-//		{
-//			flags = "";
-//		}
 	}
 
-	//WidgetInstanceIdentifier(UUID const uuid_, UUID const uuid_parent_, std::string const code_, std::string const description_, int const sequence_number_, Notes notes_ = Notes())
-	WidgetInstanceIdentifier(UUID const uuid_, WidgetInstanceIdentifier const & identifier_parent_, std::string const code_, std::string const description_, int const sequence_number_, char const * const flags_ = "", TIME_GRANULARITY time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
+	WidgetInstanceIdentifier(UUID const uuid_, WidgetInstanceIdentifier const & identifier_parent_, std::string const code_, std::string const description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
 		: uuid(std::make_shared<UUID>(uuid_))
 		, identifier_parent(std::make_shared<WidgetInstanceIdentifier>(identifier_parent_))
 		, code(std::make_shared<std::string>(code_))
-		, sequence_number(sequence_number_)
+		, sequence_number_or_count(sequence_number_or_count_)
 		, longhand(std::make_shared<std::string>(description_))
 		, flags(flags_ ? flags_ : "")
 		, notes(notes_)
@@ -105,9 +96,9 @@ public:
 
 	}
 
-	WidgetInstanceIdentifier(std::string code_, std::string description_, int const sequence_number_, char const * const flags_ = "", TIME_GRANULARITY const time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
+	WidgetInstanceIdentifier(std::string code_, std::string description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY const time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
 		: code(std::make_shared<std::string>(code_))
-		, sequence_number(sequence_number_)
+		, sequence_number_or_count(sequence_number_or_count_)
 		, longhand(std::make_shared<std::string>(description_))
 		, flags(flags_ ? flags_ : "")
 		, time_granularity(time_granularity_)
@@ -121,7 +112,7 @@ public:
 		, identifier_parent(rhs.identifier_parent)
 		, foreign_key_identifiers(rhs.foreign_key_identifiers)
 		, code(rhs.code)
-		, sequence_number(rhs.sequence_number)
+		, sequence_number_or_count(rhs.sequence_number_or_count)
 		, longhand(rhs.longhand)
 		, flags(rhs.flags)
 		, time_granularity(rhs.time_granularity)
@@ -141,7 +132,7 @@ public:
 		foreign_key_identifiers = rhs.foreign_key_identifiers;
 		code = rhs.code;
 		longhand = rhs.longhand;
-		sequence_number = rhs.sequence_number;
+		sequence_number_or_count = rhs.sequence_number_or_count;
 		flags = rhs.flags;
 		time_granularity = rhs.time_granularity;
 		notes = rhs.notes;
@@ -160,7 +151,7 @@ public:
 	// For simple identifiers, these are frequently used.  Simple identifiers cover the bulk of uses of this class.
 	std::shared_ptr<std::string> code;
 	std::shared_ptr<std::string> longhand;
-	int sequence_number;
+	int sequence_number_or_count;
 	std::string flags;
 	TIME_GRANULARITY time_granularity;
 	Notes notes;
@@ -168,6 +159,8 @@ public:
 };
 
 typedef std::vector<WidgetInstanceIdentifier> WidgetInstanceIdentifiers;
+typedef std::pair<WidgetInstanceIdentifier, int> WidgetInstanceIdentifier_Int_Pair;
+typedef std::vector<WidgetInstanceIdentifier_Int_Pair> WidgetInstanceIdentifiers_WithInts;
 
 WidgetInstanceIdentifier::Notes MakeNotes(char const * const notes1, char const * const notes2, char const * const notes3);
 WidgetInstanceIdentifier::Notes MakeNotes(std::string notes1, std::string notes2, std::string notes3);

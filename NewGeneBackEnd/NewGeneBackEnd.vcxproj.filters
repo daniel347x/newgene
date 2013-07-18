@@ -294,6 +294,9 @@
     <ClInclude Include="Model\TimeGranularity.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Tables\TableInstances\KAdCount.h">
+      <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -465,10 +468,13 @@
       <Filter>Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="UIAction\Controllers\Controller_KAdCountChange.cpp">
-      <Filter>Header Files\UIAction\Controllers</Filter>
+      <Filter>Source Files\UIAction\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="UIAction\Controllers\Controller_VariableGroupSetMemberSelectionChange.cpp">
-      <Filter>Header Files\UIAction\Controllers</Filter>
+      <Filter>Source Files\UIAction\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableInstances\KAdCount.cpp">
+      <Filter>Source Files\Model\Tables\TableInstances</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

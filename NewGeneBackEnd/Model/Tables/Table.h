@@ -98,6 +98,7 @@ enum TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE
 
 	  TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP
+	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT
 
 };
 
@@ -170,18 +171,18 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR> : public Tabl
 			return found;
 		}
 
-		WidgetInstanceIdentifier getIdentifier(UUID const & dmu_category_uuid_)
+		WidgetInstanceIdentifier getIdentifier(UUID const & uuid_)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 			WidgetInstanceIdentifier the_identifier;
 			bool found = false;
-			std::for_each(identifiers.cbegin(), identifiers.cend(), [&dmu_category_uuid_, &found, &the_identifier](WidgetInstanceIdentifier const & identifier)
+			std::for_each(identifiers.cbegin(), identifiers.cend(), [&uuid_, &found, &the_identifier](WidgetInstanceIdentifier const & identifier)
 			{
 				if (found)
 				{
 					return;
 				}
-				if (identifier.uuid && boost::iequals(dmu_category_uuid_, *identifier.uuid))
+				if (identifier.uuid && boost::iequals(uuid_, *identifier.uuid))
 				{
 					the_identifier = identifier;
 					found = true;
@@ -233,7 +234,6 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&code, &parent_uuid, &found, &the_identifier](WidgetInstanceIdentifier const & identifier_)
 					{
 						if (identifier_.code && boost::iequals(code, *identifier_.code) && identifier_.identifier_parent && identifier_.identifier_parent->uuid && boost::iequals(parent_uuid, *identifier_.identifier_parent->uuid))
-							//if (identifier_.code && boost::iequals(code, *identifier_.code) && identifier_.uuid_parent && boost::iequals(parent_uuid, *identifier_.uuid_parent))
 						{
 							the_identifier = identifier_;
 							found = true;
@@ -265,7 +265,6 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&uuid_, &parent_uuid, &found, &the_identifier](WidgetInstanceIdentifier const & identifier_)
 					{
 						if (identifier_.uuid && boost::iequals(uuid_, *identifier_.uuid) && identifier_.identifier_parent && identifier_.identifier_parent->uuid && boost::iequals(parent_uuid, *identifier_.identifier_parent->uuid))
-						//if (identifier_.code && boost::iequals(code, *identifier_.code) && identifier_.uuid_parent && boost::iequals(parent_uuid, *identifier_.uuid_parent))
 						{
 							the_identifier = identifier_;
 							found = true;
@@ -297,6 +296,71 @@ class Table : public Table_base<CONTAINER_TYPE>
 		}
 
 		TableMetadata<TABLE_TYPE> metadata;
+
+};
+
+template<>
+class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT> : public Table_basemost
+{
+
+	public:
+
+		Table_base()
+			: Table_basemost()
+		{
+
+		}
+
+		WidgetInstanceIdentifiers_WithInts getIdentifiers()
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			return identifiers;
+		}
+
+		bool getIdentifierFromStringCode(std::string const code, WidgetInstanceIdentifier_Int_Pair & the_identifier)
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			bool found = false;
+			std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &found, &the_identifier](WidgetInstanceIdentifier_Int_Pair const & identifier)
+			{
+				if (found)
+				{
+					return;
+				}
+				if (identifier.first.code && boost::iequals(code, *identifier.first.code))
+				{
+					the_identifier = identifier;
+					found = true;
+					return;
+				}
+			});
+			return found;
+		}
+
+		WidgetInstanceIdentifier_Int_Pair getIdentifier(UUID const & uuid_)
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			WidgetInstanceIdentifier_Int_Pair the_identifier;
+			bool found = false;
+			std::for_each(identifiers.cbegin(), identifiers.cend(), [&uuid_, &found, &the_identifier](WidgetInstanceIdentifier_Int_Pair const & identifier)
+			{
+				if (found)
+				{
+					return;
+				}
+				if (identifier.first.uuid && boost::iequals(uuid_, *identifier.first.uuid))
+				{
+					the_identifier = identifier;
+					found = true;
+					return;
+				}
+			});
+			return the_identifier;
+		}
+
+	protected:
+
+		WidgetInstanceIdentifiers_WithInts identifiers;
 
 };
 
