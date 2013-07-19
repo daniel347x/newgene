@@ -27,6 +27,12 @@ public:
 	}
 
 	void Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
+	bool Update(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
+
+private:
+
+	void Add(sqlite3 * db, std::string const & vg_set_member_code, std::string const & vg_category_code);
+	void Remove(sqlite3 * db, std::string const & vg_set_member_code, std::string const & vg_category_code);
 
 };
 

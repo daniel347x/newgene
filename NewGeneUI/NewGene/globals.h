@@ -56,6 +56,7 @@ Q_DECLARE_METATYPE(WidgetChangeMessage);
 Q_DECLARE_METATYPE(WidgetChangeMessages);
 
 Q_DECLARE_METATYPE(WidgetInstanceIdentifier);
+Q_DECLARE_METATYPE(WidgetInstanceIdentifier_Bool_Pair);
 
 // Widget refresh request data
 Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA);

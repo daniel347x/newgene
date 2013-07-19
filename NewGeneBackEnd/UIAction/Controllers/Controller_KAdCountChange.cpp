@@ -55,6 +55,10 @@ void UIActionManager::DoKAdCountChange(Messager & messager, WidgetActionItemRequ
 				WidgetActionItem__Spinbox const & actionItemSpinbox = static_cast<WidgetActionItem__Spinbox const &>(actionItem);
 
 				// ***************************************** //
+				// Update database and cache
+				// ***************************************** //
+
+				// ***************************************** //
 				// Prepare data to send back to user interface
 				// ***************************************** //
 				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE;

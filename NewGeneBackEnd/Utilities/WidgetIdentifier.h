@@ -6,6 +6,10 @@
 #include <string>
 #include "../Model/TimeGranularity.h"
 
+#ifndef Q_MOC_RUN
+#	include <boost/algorithm/string.hpp>
+#endif
+
 typedef std::string UUID;
 typedef std::vector<UUID> UUIDVector;
 
@@ -19,6 +23,13 @@ class WidgetInstanceIdentifier
 	// ***************************************************************************//
 
 public:
+
+	enum EQUALITY_CHECK_TYPE
+	{
+		  EQUALITY_CHECK_TYPE__UUID
+		, EQUALITY_CHECK_TYPE__STRING_CODE
+		, EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE
+	};
 
 	class Notes
 	{
@@ -137,6 +148,47 @@ public:
 		time_granularity = rhs.time_granularity;
 		notes = rhs.notes;
 		return *this;
+	}
+
+	bool IsEqual(EQUALITY_CHECK_TYPE const check_type, WidgetInstanceIdentifier const & rhs) const
+	{
+		switch (check_type)
+		{
+		case EQUALITY_CHECK_TYPE__UUID:
+			{
+				if (uuid && uuid->size() != 0 && rhs.uuid && rhs.uuid->size() != 0)
+				{
+					if (boost::iequals(*uuid, *rhs.uuid))
+					{
+						return true;
+					}
+				}
+			}
+			break;
+		case EQUALITY_CHECK_TYPE__STRING_CODE:
+			{
+				if (code && code->size() != 0 && rhs.code && rhs.code != 0)
+				{
+					if (boost::iequals(*code, *rhs.code))
+					{
+						return true;
+					}
+				}
+			}
+			break;
+		case EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE:
+			{
+				if (uuid && uuid->size() != 0 && rhs.uuid && rhs.uuid->size() != 0 && code && code->size() != 0 && rhs.code && rhs.code != 0)
+				{
+					if (boost::iequals(*uuid, *rhs.uuid) && boost::iequals(*code, *rhs.code))
+					{
+						return true;
+					}
+				}
+			}
+			break;
+		}
+		return false;
 	}
 
 	std::shared_ptr<UUID> uuid; // In case of ambiguity, sometimes identifier_parent or foreign_key_identifiers are necessary to disambiguate this identifier

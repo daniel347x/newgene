@@ -103,15 +103,22 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 	QStandardItemModel * model = new QStandardItemModel(ui->listView);
 
 	int index = 0;
-	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [this, &index, &model](WidgetInstanceIdentifier const & identifier)
+	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [this, &index, &model](WidgetInstanceIdentifier_Bool_Pair const & identifier)
 	{
-		if (identifier.longhand && !identifier.longhand->empty())
+		if (identifier.first.longhand && !identifier.first.longhand->empty())
 		{
 
 			QStandardItem * item = new QStandardItem();
-			item->setText(QString(identifier.longhand->c_str()));
+			item->setText(QString(identifier.first.longhand->c_str()));
 			item->setCheckable( true );
-			item->setCheckState(Qt::Unchecked);
+			if (identifier.second)
+			{
+				item->setCheckState(Qt::Checked);
+			}
+			else
+			{
+				item->setCheckState(Qt::Unchecked);
+			}
 			QVariant v;
 			v.setValue(identifier);
 			item->setData(v);

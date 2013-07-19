@@ -169,7 +169,6 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 								  return; // from lambda
 							  }
 
-							  UUID uuid_child;
 							  if (change.child_identifiers.size() == 0)
 							  {
 								  return; // from lambda

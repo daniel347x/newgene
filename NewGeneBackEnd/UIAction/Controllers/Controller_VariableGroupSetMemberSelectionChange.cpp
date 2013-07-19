@@ -73,6 +73,12 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 				child_identifiers.push_back(identifier);
 				DataChange change(type, intention, WidgetInstanceIdentifier(*identifier.identifier_parent), child_identifiers);
 				change_response.changes.push_back(change);
+
+				// ***************************************** //
+				// Update database and cache
+				// ***************************************** //
+				output_model.t_variables_selected_identifiers.Update(output_model.getDb(), output_model, input_model, change_response);
+
 			});
 
 			messager.EmitChangeMessage(change_response);

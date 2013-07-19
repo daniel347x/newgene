@@ -27,6 +27,7 @@ public:
 	}
 
 	void Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_);
+	bool Update(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message);
 
 };
 

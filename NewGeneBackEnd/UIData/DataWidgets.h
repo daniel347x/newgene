@@ -182,6 +182,7 @@ public:
 };
 typedef WidgetDataItem<VARIABLE_GROUPS_TOOLBOX> WidgetDataItem_VARIABLE_GROUPS_TOOLBOX;
 
+typedef std::pair<WidgetInstanceIdentifier, bool> WidgetInstanceIdentifier_Bool_Pair;
 
 /************************************************************************/
 // VARIABLE_GROUPS_VARIABLE_GROUP_INSTANCE
@@ -215,10 +216,9 @@ public:
 	}
 	WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>(WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE> const & rhs)
 		: WidgetDataItem_base(rhs)
-		, identifiers(rhs.identifiers)
 	{
 	}
-	WidgetInstanceIdentifiers identifiers;
+	std::vector<WidgetInstanceIdentifier_Bool_Pair> identifiers;
 };
 typedef WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE> WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE;
 

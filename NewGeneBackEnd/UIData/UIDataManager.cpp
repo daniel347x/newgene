@@ -32,10 +32,32 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE const & widget_request, OutputProject & project)
 {
 	InputModel & input_model = project.model().getInputModel();
+	OutputModel & output_model = project.model();
 	WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE variable_group(widget_request);
 	if (widget_request.identifier && widget_request.identifier->uuid)
 	{
-		variable_group.identifiers = input_model.t_vgp_setmembers.getIdentifiers(*widget_request.identifier->uuid);
+		WidgetInstanceIdentifiers identifiers = input_model.t_vgp_setmembers.getIdentifiers(*widget_request.identifier->uuid);
+		WidgetInstanceIdentifiers selectedIdentifiers = output_model.t_variables_selected_identifiers.getIdentifiers(*widget_request.identifier->uuid);
+		std::for_each(identifiers.cbegin(), identifiers.cend(), [&selectedIdentifiers, &variable_group](WidgetInstanceIdentifier const & identifier)
+		{
+			bool found = false;
+			std::for_each(selectedIdentifiers.cbegin(), selectedIdentifiers.cend(), [&identifier, &found, &variable_group](WidgetInstanceIdentifier const & selectedIdentifier)
+			{
+				if (identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, selectedIdentifier))
+				{
+					found = true;
+					return; // from lambda
+				}
+			});
+			if (found)
+			{
+				variable_group.identifiers.push_back(std::make_pair(identifier, true));
+			}
+			else
+			{
+				variable_group.identifiers.push_back(std::make_pair(identifier, false));
+			}
+		});
 	}
 	messager.EmitOutputWidgetDataRefresh(variable_group);
 }

@@ -73,6 +73,16 @@ class Model
 			}
 		}
 
+		sqlite3 * getDb()
+		{
+			return db;
+		}
+
+		sqlite3 const * getDb() const
+		{
+			return db;
+		}
+
 	protected:
 
 		boost::filesystem::path _path_to_model_database;
