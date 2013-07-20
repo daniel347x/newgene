@@ -216,6 +216,7 @@ public:
 	}
 	WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>(WidgetDataItem<VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE> const & rhs)
 		: WidgetDataItem_base(rhs)
+		, identifiers(rhs.identifiers)
 	{
 	}
 	std::vector<WidgetInstanceIdentifier_Bool_Pair> identifiers;

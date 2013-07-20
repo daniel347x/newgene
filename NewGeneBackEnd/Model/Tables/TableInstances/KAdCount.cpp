@@ -3,7 +3,7 @@
 #include "../../OutputModel.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
-std::string const Table_KAD_COUNT::KAD_COUNT__DMU_CATEGORY_STRING_CODE = "DMU_CATEGORY_UUID";
+std::string const Table_KAD_COUNT::KAD_COUNT__DMU_CATEGORY_STRING_CODE = "DMU_CATEGORY_STRING_CODE";
 std::string const Table_KAD_COUNT::KAD_COUNT__COUNT = "COUNT";
 
 void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
@@ -45,4 +45,140 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 		}
 
 	}
+}
+
+bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
+{
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor theExecutor(db);
+	
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [&db, &input_model_, this](DataChange const & change)
+	{
+		switch (change.change_type)
+		{
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE:
+				{
+					switch (change.change_intention)
+					{
+						case DATA_CHANGE_INTENTION__ADD:
+						case DATA_CHANGE_INTENTION__REMOVE:
+							{
+								// Should never receive this.
+							}
+							break;
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								// This is the OUTPUT model changing.
+								// "Add" means to simply add an item that is CHECKED (previously unchecked) -
+								// NOT to add a new variable.  That would be input model change type.
+
+								if (change.child_identifiers.size() == 0)
+								{
+									return; // from lambda
+								}
+
+								std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&db, &input_model_, &change, this](WidgetInstanceIdentifier const & child_identifier)
+								{
+									if (child_identifier.code && child_identifier.code->size() != 0)
+									{
+										if (change.change_intention == DATA_CHANGE_INTENTION__UPDATE)
+										{
+											DataChangePacket_int * packet = static_cast<DataChangePacket_int *>(change.getPacket());
+											if (packet)
+											{
+												std::for_each(this->identifiers.begin(), this->identifiers.end(), [&packet, &child_identifier](WidgetInstanceIdentifier_Int_Pair & cache_identifier)
+												{
+													if (boost::iequals(*child_identifier.uuid, *cache_identifier.first.uuid))
+													{
+														if (packet->getValue() != cache_identifier.second)
+														{
+															cache_identifier.second = packet->getValue();
+														}
+														return; // from lambda
+													}
+												});
+												Modify(db, *child_identifier.code, packet->getValue());
+											}
+											else
+											{
+												// error condition ... todo
+											}
+										}
+									}
+								});
+
+							}
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+								// Ditto above.
+							}
+							break;
+					}
+				}
+				break;
+		}
+	});
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
+
+}
+
+void Table_KAD_COUNT::Add(sqlite3 * db, std::string const & dmu_category_code, int const value_)
+{
+	std::string sqlAdd("INSERT INTO KAD_COUNT (");
+	sqlAdd += KAD_COUNT__DMU_CATEGORY_STRING_CODE;
+	sqlAdd += ",";
+	sqlAdd += KAD_COUNT__COUNT;
+	sqlAdd += ") VALUES ('";
+	sqlAdd += dmu_category_code;
+	sqlAdd += "',";
+	sqlAdd += value_;
+	sqlAdd += ")";
+	sqlite3_stmt * stmt = NULL;
+	sqlite3_prepare_v2(db, sqlAdd.c_str(), sqlAdd.size() + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		return;
+	}
+	sqlite3_step(stmt);
+}
+
+void Table_KAD_COUNT::Remove(sqlite3 * db, std::string const & dmu_category_code)
+{
+	std::string sqlRemove("DELETE FROM VG_SET_MEMBERS_SELECTED WHERE ");
+	sqlRemove += KAD_COUNT__DMU_CATEGORY_STRING_CODE;
+	sqlRemove += "='";
+	sqlRemove += dmu_category_code;
+	sqlRemove += "'";
+	sqlite3_stmt * stmt = NULL;
+	sqlite3_prepare_v2(db, sqlRemove.c_str(), sqlRemove.size() + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		return;
+	}
+	sqlite3_step(stmt);
+}
+
+void Table_KAD_COUNT::Modify(sqlite3 * db, std::string const & dmu_category_code, int const value_)
+{
+	char c_[64];
+	std::string sqlAdd("UPDATE KAD_COUNT SET ");
+	sqlAdd += KAD_COUNT__COUNT;
+	sqlAdd += "=";
+	sqlAdd += itoa(value_, c_, 10);
+	sqlAdd += " WHERE ";
+	sqlAdd += KAD_COUNT__DMU_CATEGORY_STRING_CODE;
+	sqlAdd += "='";
+	sqlAdd += dmu_category_code;
+	sqlAdd += "'";
+	sqlite3_stmt * stmt = NULL;
+	sqlite3_prepare_v2(db, sqlAdd.c_str(), sqlAdd.size() + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		return;
+	}
+	sqlite3_step(stmt);
 }

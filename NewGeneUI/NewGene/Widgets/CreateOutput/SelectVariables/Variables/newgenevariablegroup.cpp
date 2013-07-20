@@ -156,7 +156,8 @@ void NewGeneVariableGroup::ReceiveVariableItemChanged(QStandardItem * currentIte
 			checked = true;
 		}
 		QVariant currentIdentifier = currentItem->data();
-		WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
+        WidgetInstanceIdentifier_Bool_Pair identifier_bool = currentIdentifier.value<WidgetInstanceIdentifier_Bool_Pair>();
+        WidgetInstanceIdentifier identifier = identifier_bool.first;
 		actionItems.push_back(std::make_pair(identifier, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(checked)))));
 	}
 
