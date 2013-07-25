@@ -86,6 +86,11 @@
     <ClInclude Include="Model\Model.h" />
     <ClInclude Include="Model\ModelManager.h" />
     <ClInclude Include="Model\OutputModel.h" />
+    <ClInclude Include="Model\Tables\Executor.h" />
+    <ClInclude Include="Model\Tables\Fields.h" />
+    <ClInclude Include="Model\Tables\FieldTypes.h" />
+    <ClInclude Include="Model\Tables\Import\Import.h" />
+    <ClInclude Include="Model\Tables\Schema.h" />
     <ClInclude Include="Model\Tables\Table.h" />
     <ClInclude Include="Model\Tables\TableInstances\CMU.h" />
     <ClInclude Include="Model\Tables\TableInstances\DMU.h" />
@@ -145,7 +150,8 @@
     <ClCompile Include="Model\Model.cpp" />
     <ClCompile Include="Model\ModelManager.cpp" />
     <ClCompile Include="Model\OutputModel.cpp" />
-    <ClCompile Include="Model\Tables\Table.cpp" />
+    <ClCompile Include="Model\Tables\Import\Import.cpp" />
+    <ClCompile Include="Model\Tables\Schema.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\CMU.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\DMU.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\KAdCount.cpp" />

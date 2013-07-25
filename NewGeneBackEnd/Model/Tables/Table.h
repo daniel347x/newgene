@@ -9,6 +9,10 @@
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 #include <mutex>
 #include "../TimeGranularity.h"
+#include "Executor.h"
+#include "Import\Import.h"
+#include "Fields.h"
+#include "Schema.h"
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
@@ -16,113 +20,6 @@
 
 class InputModel;
 class OutputModel;
-
-class Executor
-{
-	public:
-	
-		Executor(sqlite3 * db_)
-			: db(db_)
-			, good(false)
-		{
-			if (db)
-			{
-				sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
-			}
-		}
-
-		~Executor()
-		{
-			if (db)
-			{
-				if (good)
-				{
-					sqlite3_exec(db, "END TRANSACTION;", NULL, NULL, NULL);
-				}
-				else
-				{
-					sqlite3_exec(db, "ROLLBACK TRANSACTION;", NULL, NULL, NULL);
-				}
-			}
-		}
-
-		void success(bool const good_ = true)
-		{
-			good = good_;
-		}
-
-		bool succeeded()
-		{
-			return good;
-		}
-
-		sqlite3 * db;
-		bool good;
-};
-
-template<FIELD_TYPE THE_FIELD_TYPE>
-class FieldValue
-{
-public:
-	FieldValue()
-	{
-
-	}
-	FieldValue(typename FieldTypeTraits<THE_FIELD_TYPE>::type & value_)
-		: value(value_)
-	{
-
-	}
-	typename FieldTypeTraits<THE_FIELD_TYPE>::type value;
-};
-
-template <FIELD_TYPE THE_FIELD_TYPE>
-struct FieldData
-{
-	typedef std::tuple<FIELD_TYPE, std::string, FieldValue<THE_FIELD_TYPE>> type;
-};
-
-class BaseField
-{
-public:
-	virtual FIELD_TYPE GetType() = 0;
-	virtual std::string GetName() = 0;
-};
-
-template <FIELD_TYPE THE_FIELD_TYPE>
-class Field : public BaseField
-{
-
-public:
-
-	Field(std::string const field_name, FieldValue<THE_FIELD_TYPE> const & field_value)
-		: BaseField()
-		, data(std::make_tuple(THE_FIELD_TYPE, field_name, field_value))
-
-	Field(FieldData<field_type>::type const & data_)
-		: BaseField()
-		, data_(data_)
-	{
-
-	}
-
-	FIELD_TYPE GetType()
-	{
-		return THE_FIELD_TYPE;
-	}
-
-	std::string GetName()
-	{
-		return data.get<1>(data);
-	}
-
-	typename FieldTypeTraits<THE_FIELD_TYPE>::type GetValue()
-	{
-		return data.get<2>(data);
-	}
-
-	typename FieldData<THE_FIELD_TYPE>::type const data;
-};
 
 class TableMetadata_base
 {
@@ -157,6 +54,8 @@ class Table_basemost
 
 		virtual void Load(sqlite3 * db, InputModel * input_model_ = nullptr) {};
 		virtual void Load(sqlite3 * db, OutputModel * output_model_ = nullptr, InputModel * input_model_ = nullptr) {};
+
+
 
 		std::recursive_mutex data_mutex;
 

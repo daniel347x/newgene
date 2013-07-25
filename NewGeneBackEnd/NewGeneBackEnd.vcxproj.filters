@@ -121,6 +121,12 @@
     <Filter Include="Source Files\UIData\Controllers">
       <UniqueIdentifier>{1f46343f-32d6-4e28-a979-7f129c26599d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Model\Tables\Import">
+      <UniqueIdentifier>{92c346fe-37df-44ee-9294-159fcfe51e2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model\Tables\Import">
+      <UniqueIdentifier>{d8e12115-5dbd-4a1b-bae8-c296c6f15123}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -297,6 +303,21 @@
     <ClInclude Include="Model\Tables\TableInstances\KAdCount.h">
       <Filter>Header Files\Model\Tables\TableInstances</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Tables\Import\Import.h">
+      <Filter>Header Files\Model\Tables\Import</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\Schema.h">
+      <Filter>Header Files\Model\Tables</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\FieldTypes.h">
+      <Filter>Header Files\Model\Tables</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\Executor.h">
+      <Filter>Header Files\Model\Tables</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\Tables\Fields.h">
+      <Filter>Header Files\Model\Tables</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -422,9 +443,6 @@
     <ClCompile Include="sqlite\sqlite-amalgamation-3071700\sqlite3.c">
       <Filter>Source Files\SQLite</Filter>
     </ClCompile>
-    <ClCompile Include="Model\Tables\Table.cpp">
-      <Filter>Source Files\Model\Tables</Filter>
-    </ClCompile>
     <ClCompile Include="Model\Tables\TableManager.cpp">
       <Filter>Source Files\Model\Tables</Filter>
     </ClCompile>
@@ -475,6 +493,12 @@
     </ClCompile>
     <ClCompile Include="Model\Tables\TableInstances\KAdCount.cpp">
       <Filter>Source Files\Model\Tables\TableInstances</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\Import\Import.cpp">
+      <Filter>Source Files\Model\Tables\Import</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\Schema.cpp">
+      <Filter>Source Files\Model\Tables</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
