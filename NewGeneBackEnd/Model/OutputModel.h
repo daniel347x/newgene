@@ -44,4 +44,6 @@ protected:
 
 };
 
+bool OutputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, Importer::DataBlock const & table_block, int const number_rows);
+
 #endif

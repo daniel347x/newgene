@@ -47,17 +47,24 @@ class Table_basemost
 	 
 	public:
 
-		Table_basemost()
+		enum TABLE_MODEL_TYPE
+		{
+			  TABLE_MODEL_TYPE__INPUT_MODEL
+			, TABLE_MODEL_TYPE__OUTPUT_MODEL
+		};
+
+		Table_basemost(TABLE_MODEL_TYPE const table_model_type_)
+			: table_model_type(table_model_type_)
 		{
 
 		}
 
 		virtual void Load(sqlite3 * db, InputModel * input_model_ = nullptr) {};
 		virtual void Load(sqlite3 * db, OutputModel * output_model_ = nullptr, InputModel * input_model_ = nullptr) {};
-
-
+		virtual void Import(sqlite3 * db, OutputModel * output_model_ = nullptr, InputModel * input_model_ = nullptr) {};
 
 		std::recursive_mutex data_mutex;
+		TABLE_MODEL_TYPE table_model_type;
 
 };
 
@@ -67,8 +74,8 @@ class Table_base : public Table_basemost
 
 	public:
 
-		Table_base<CONTAINER_TYPE>()
-			: Table_basemost()
+		Table_base<CONTAINER_TYPE>(TABLE_MODEL_TYPE const table_model_type_)
+			: Table_basemost(table_model_type_)
 		{
 
 		}
@@ -81,8 +88,8 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR> : public Tabl
 
 	public:
 
-		Table_base()
-			: Table_basemost()
+		Table_base(TABLE_MODEL_TYPE const table_model_type_)
+			: Table_basemost(table_model_type_)
 		{
 
 		}
@@ -146,8 +153,8 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 
 	public:
 
-		Table_base()
-			: Table_basemost()
+		Table_base(TABLE_MODEL_TYPE const table_model_type_)
+			: Table_basemost(table_model_type_)
 		{
 
 		}
@@ -231,8 +238,8 @@ class Table : public Table_base<CONTAINER_TYPE>
 
 	public:
 
-		Table<TABLE_TYPE, CONTAINER_TYPE>()
-			: Table_base<CONTAINER_TYPE>()
+		Table<TABLE_TYPE, CONTAINER_TYPE>(TABLE_MODEL_TYPE const table_model_type_)
+			: Table_base<CONTAINER_TYPE>(table_model_type_)
 		{
 
 		}
@@ -247,8 +254,8 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT> : pu
 
 	public:
 
-		Table_base()
-			: Table_basemost()
+		Table_base(TABLE_MODEL_TYPE const table_model_type_)
+			: Table_basemost(table_model_type_)
 		{
 
 		}

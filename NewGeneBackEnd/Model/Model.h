@@ -18,24 +18,21 @@
 class InputModel;
 class InputModelSettings;
 
-template<typename MODEL_SETTINGS_ENUM>
-class Model
+class Model_basemost
 {
 
 	public:
 
-		static int const number_worker_threads = 1; // For now, single thread only in pool
-
-		Model(Messager & messager, boost::filesystem::path const path_to_model_database)
+		Model_basemost(Messager & messager, boost::filesystem::path const & path_to_model_database)
 			: _path_to_model_database(path_to_model_database)
 			, db(NULL)
 		{
 
 		}
 
-		~Model()
+		virtual ~Model_basemost()
 		{
-			UnloadDatabase();
+
 		}
 
 		boost::filesystem::path getPathToDatabaseFile()
@@ -65,14 +62,6 @@ class Model
 			}
 		}
 
-		virtual void LoadTables()
-		{
-			if (db == nullptr)
-			{
-				LoadDatabase();
-			}
-		}
-
 		sqlite3 * getDb()
 		{
 			return db;
@@ -87,6 +76,27 @@ class Model
 
 		boost::filesystem::path _path_to_model_database;
 		sqlite3 * db;
+
+};
+
+template<typename MODEL_SETTINGS_ENUM>
+class Model : public Model_basemost
+{
+
+	public:
+
+		static int const number_worker_threads = 1; // For now, single thread only in pool
+
+		Model(Messager & messager, boost::filesystem::path const & path_to_model_database)
+			: Model_basemost(messager, path_to_model_database)
+		{
+
+		}
+
+		~Model()
+		{
+			UnloadDatabase();
+		}
 
 };
 

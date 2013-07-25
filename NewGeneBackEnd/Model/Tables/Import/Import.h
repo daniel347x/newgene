@@ -98,6 +98,8 @@ class TimeRangeFieldMapping : public RowFieldMapping
 
 };
 
+class Table_basemost;
+
 class ImportDefinition
 {
 
@@ -125,8 +127,6 @@ class ImportDefinition
 
 		ImportMappings mappings;
 		boost::filesystem::path input_file;
-		IMPORT_TYPE input_or_output;
-		std::string table_name;
 		bool first_row_is_header_row;
 		Schema input_schema;
 		Schema output_schema;
@@ -135,6 +135,8 @@ class ImportDefinition
 };
 
 #define MAX_LINE_SIZE 32768
+class Table_basemost;
+class Model_basemost;
 class Importer
 {
 
@@ -142,23 +144,28 @@ class Importer
 
 		typedef std::vector<std::shared_ptr<BaseField>> DataFields;
 		typedef std::vector<DataFields> DataBlock;
+		typedef bool (*TableImportCallbackFn)(Model_basemost * model_, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
 
 		static int const block_size = 1024;
 
-		Importer(ImportDefinition const & import_definition_);
+		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, TableImportCallbackFn table_write_callback_);
 
 		bool DoImport();
 
+	protected:
+	
 		ImportDefinition import_definition;
 		DataBlock input_block;
 		DataBlock output_block;
-
+		Model_basemost * model;
+		Table_basemost * table;
+		TableImportCallbackFn table_write_callback;
+		
 	protected:
-
+	
 		bool ValidateMapping();
 		void InitializeFields();
-		void ReadBlockFromFile();
-		void WriteBlockToTable();
+		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline);
 		void RetrieveStringField(char const * current_line_ptr, char * parsed_line_ptr, bool & stop);
 
 };

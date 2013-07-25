@@ -1,6 +1,7 @@
 #ifndef TABLE_MANAGER_H
 #define TABLE_MANAGER_H
 
+#include "Import/Import.h"
 #include "Table.h"
 #include "TableInstances/DMU.h"
 #include "TableInstances/CMU.h"
@@ -19,10 +20,6 @@ public:
 	{
 
 	}
-
-	void LoadTable(TABLE_TYPES table_type);
-
-	// Todo: fill in directed acyclic graph table dependencies
 
 };
 
