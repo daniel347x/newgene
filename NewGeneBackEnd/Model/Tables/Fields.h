@@ -2,6 +2,7 @@
 #define FIELDS_H
 
 #include "FieldTypes.h"
+#include <tuple>
 
 template<FIELD_TYPE THE_FIELD_TYPE>
 class FieldValue
@@ -11,7 +12,7 @@ public:
 	{
 
 	}
-	FieldValue(typename FieldTypeTraits<THE_FIELD_TYPE>::type & value_)
+	FieldValue(typename FieldTypeTraits<THE_FIELD_TYPE>::type const & value_)
 		: value(value_)
 	{
 
@@ -28,8 +29,8 @@ struct FieldData
 class BaseField
 {
 public:
-	virtual FIELD_TYPE GetType() = 0;
-	virtual std::string GetName() = 0;
+	virtual FIELD_TYPE GetType() { return FIELD_TYPE_UNKNOWN; };
+	virtual std::string GetName() { return ""; };
 };
 
 template <FIELD_TYPE THE_FIELD_TYPE>
@@ -38,38 +39,39 @@ class Field : public BaseField
 
 public:
 
-	Field(std::string const field_name, FieldValue<THE_FIELD_TYPE> const & field_value = FieldTypeTraits<THE_FIELD_TYPE>::default)
+	Field(std::string const field_name, FieldValue<THE_FIELD_TYPE> const & field_value = FieldValue<THE_FIELD_TYPE>(FieldTypeTraits<THE_FIELD_TYPE>::default))
 		: BaseField()
 		, data(std::make_tuple(THE_FIELD_TYPE, field_name, field_value))
-
-	Field(FieldData<field_type>::type const & data_)
-		: BaseField()
-		, data_(data_)
 	{
 
 	}
 
-	inline FIELD_TYPE GetType()
+	FIELD_TYPE GetType() const
 	{
 		return THE_FIELD_TYPE;
 	}
 
-	inline std::string GetName()
+	std::string GetName() const
 	{
 		return data.get<1>(data);
 	}
 
-	inline typename FieldTypeTraits<THE_FIELD_TYPE>::type GetValue()
+	inline typename FieldTypeTraits<THE_FIELD_TYPE>::type GetValue() const
 	{
-		return data.get<2>(data);
+		return std::get<2>(data).value;
 	}
 
-	inline void SetValue(typename FieldTypeTraits<THE_FIELD_TYPE>::type & value_)
+	inline typename FieldTypeTraits<THE_FIELD_TYPE>::type & GetValueReference()
 	{
-		data.set<2>(value_);
+		return std::get<2>(data).value;
 	}
 
-	typename FieldData<THE_FIELD_TYPE>::type const data;
+	inline void SetValue(typename FieldTypeTraits<THE_FIELD_TYPE>::type const & value_)
+	{
+		std::get<2>(data).value = value_;
+	}
+
+	typename FieldData<THE_FIELD_TYPE>::type data;
 
 };
 

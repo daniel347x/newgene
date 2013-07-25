@@ -109,6 +109,15 @@ class ImportDefinition
 			, IMPORT_TYPE__OUTPUT_MODEL
 		};
 
+		enum FORMAT_QUALIFIERS
+		{
+			  FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED = 0X01
+			, FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED = 0X02
+			, FORMAT_QUALIFIERS__COMMA_DELIMITED = 0X04
+			, FORMAT_QUALIFIERS__TAB_DELIMITED = 0X08
+			, FORMAT_QUALIFIERS__BACKSLASH_ESCAPE_CHAR = 0x10
+		};
+
 		typedef std::vector<std::shared_ptr<FieldMapping>> ImportMappings;
 
 		ImportDefinition();
@@ -121,6 +130,7 @@ class ImportDefinition
 		bool first_row_is_header_row;
 		Schema input_schema;
 		Schema output_schema;
+		int format_qualifiers;
 
 };
 
@@ -149,6 +159,7 @@ class Importer
 		void InitializeFields();
 		void ReadBlockFromFile();
 		void WriteBlockToTable();
+		void RetrieveStringField(char const * current_line_ptr, char * parsed_line_ptr, bool & stop);
 
 };
 

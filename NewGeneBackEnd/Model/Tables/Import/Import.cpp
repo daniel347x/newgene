@@ -22,6 +22,7 @@ ImportDefinition::ImportDefinition(ImportDefinition const & rhs)
 	, first_row_is_header_row(rhs.first_row_is_header_row)
 	, input_schema(rhs.input_schema)
 	, output_schema(rhs.output_schema)
+	, format_qualifiers(FORMAT_QUALIFIERS__COMMA_DELIMITED | FORMAT_QUALIFIERS__BACKSLASH_ESCAPE_CHAR)
 {
 }
 
@@ -393,6 +394,119 @@ bool Importer::ValidateMapping()
 
 }
 
+void Importer::RetrieveStringField(char const * current_line_ptr, char * parsed_line_ptr, bool & stop)
+{
+	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED)
+	{
+		if (*current_line_ptr != '\'')
+		{
+			// Todo: warning
+			stop = true;
+			return; // from lambda
+		}
+		++current_line_ptr;
+	}
+	else if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED)
+	{
+		if (*current_line_ptr != '"')
+		{
+			// Todo: warning
+			stop = true;
+			return; // from lambda
+		}
+		++current_line_ptr;
+	}
+	if (*current_line_ptr == '\0')
+	{
+		// Todo: warning
+		stop = true;
+		return; // from lambda
+	}
+	bool escapemode = false;
+	bool done = false;
+	while (!done)
+	{
+		if (*current_line_ptr == '\0')
+		{
+			// Whitespace on right
+			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
+			{
+				while (*parsed_line_ptr == ' ' || *parsed_line_ptr == '\t')
+				{
+					--parsed_line_ptr;
+				}
+			}
+			else
+			{
+				while (*parsed_line_ptr == ' ')
+				{
+					--parsed_line_ptr;
+				}
+			}
+			++parsed_line_ptr;
+			*parsed_line_ptr = '\0';
+			done = true;
+			continue;
+		}
+		if (escapemode)
+		{
+			*parsed_line_ptr = *current_line_ptr;
+			escapemode = false;
+		}
+		else
+		{
+			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__BACKSLASH_ESCAPE_CHAR)
+			{
+				if (*current_line_ptr == '\\')
+				{
+					escapemode = true;
+					++current_line_ptr;
+					continue;
+				}
+			}
+			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED)
+			{
+				if (*current_line_ptr == '\'')
+				{
+					done = true;
+				}
+			}
+			else if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED)
+			{
+				if (*current_line_ptr == '"')
+				{
+					done = true;
+				}
+			}
+			if (!done)
+			{
+				*parsed_line_ptr = *current_line_ptr;
+			}
+		}
+		++current_line_ptr;
+		if (done)
+		{
+			// Whitespace on right
+			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
+			{
+				while (*parsed_line_ptr == ' ' || *parsed_line_ptr == '\t')
+				{
+					--parsed_line_ptr;
+				}
+			}
+			else
+			{
+				while (*parsed_line_ptr == ' ')
+				{
+					--parsed_line_ptr;
+				}
+			}
+			++parsed_line_ptr;
+			*parsed_line_ptr = '\0';
+		}
+	}
+}
+
 bool Importer::DoImport()
 {
 
@@ -411,25 +525,232 @@ bool Importer::DoImport()
 	{
 
 		char line[MAX_LINE_SIZE];
-		bool read_line = true;
+		char parsedline[MAX_LINE_SIZE];
 
 		// skip first row if necessary
 		if (import_definition.first_row_is_header_row && data_file.good())
 		{
 			// TODO: Validate column headers
-			read_line = data_file.getline(line, MAX_LINE_SIZE - 1);
+			data_file.getline(line, MAX_LINE_SIZE - 1);
+		}
+
+		if (!data_file.good())
+		{
+			data_file.close();
+			return true;
 		}
 
 		int current_lines_read = 0;
 		while (data_file.getline(line, MAX_LINE_SIZE - 1) && data_file.good())
 		{
 
-			++current_lines_read;
-
 			char * current_line_ptr = line;
-			std::for_each(import_definition.input_schema.schema.cbegin(), import_definition.input_schema.schema.cend(), [this, &current_line_ptr, &current_lines_read](SchemaEntry const & column)
+			char * parsed_line_ptr = parsedline;
+			*parsed_line_ptr = '\0';
+			int current_column_index = 0;
+			bool stop = false;
+			std::for_each(import_definition.input_schema.schema.cbegin(), import_definition.input_schema.schema.cend(), [this, &current_line_ptr, &current_lines_read, &current_column_index, &parsed_line_ptr, &stop](SchemaEntry const & column)
 			{
+				if (stop)
+				{
+					return; // from lambda
+				}
+
 				// use sscanf to read in the type, based on switch on "column"'s type type-traits... read it into input_block[current_lines_read]
+				std::shared_ptr<BaseField> field_entry = input_block[current_lines_read][current_column_index];
+				if (!field_entry)
+				{
+					// Todo: warning log here
+					stop = true;
+					return; // from lambda
+				}
+				++current_column_index;
+				BaseField & theField = *field_entry;
+
+				// whitespace
+				if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
+				{
+					while (*current_line_ptr == ' ') ++current_line_ptr;
+				}
+				else
+				{
+					while (*current_line_ptr == ' ' || *current_line_ptr == '\t') ++current_line_ptr;
+				}
+				if (*current_line_ptr == '\0')
+				{
+					// Todo: warning
+					stop = true;
+					return; // from lambda
+				}
+
+				try
+				{
+					switch (column.field_type)
+					{
+						case FIELD_TYPE_INT32:
+							{
+								Field<FIELD_TYPE_INT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT32>&>(theField);
+								sscanf(current_line_ptr, "%d", data_entry.GetValueReference());
+							}
+							break;
+						case FIELD_TYPE_INT64:
+							{
+								Field<FIELD_TYPE_INT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT64>&>(theField);
+								sscanf(current_line_ptr, "%I64d", data_entry.GetValueReference());
+							}
+							break;
+						case FIELD_TYPE_UINT32:
+							{
+								Field<FIELD_TYPE_UINT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(theField);
+								sscanf(current_line_ptr, "%d", data_entry.GetValueReference());
+							}
+							break;
+						case FIELD_TYPE_UINT64:
+							{
+								Field<FIELD_TYPE_UINT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(theField);
+								sscanf(current_line_ptr, "%I64d", data_entry.GetValueReference());
+							}
+							break;
+						case FIELD_TYPE_STRING_FIXED:
+							{
+								Field<FIELD_TYPE_STRING_FIXED> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(parsed_line_ptr);
+							}
+							break;
+						case FIELD_TYPE_STRING_VAR:
+							{
+								Field<FIELD_TYPE_STRING_VAR> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(parsed_line_ptr);
+							}
+							break;
+						case FIELD_TYPE_TIMESTAMP:
+							{
+								Field<FIELD_TYPE_TIMESTAMP> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(0);
+							}
+							break;
+						case FIELD_TYPE_UUID:
+							{
+								Field<FIELD_TYPE_UUID> & data_entry = dynamic_cast<Field<FIELD_TYPE_UUID>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(parsed_line_ptr);
+							}
+							break;
+						case FIELD_TYPE_UUID_FOREIGN:
+							{
+								Field<FIELD_TYPE_UUID_FOREIGN> & data_entry = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(parsed_line_ptr);
+							}
+							break;
+						case FIELD_TYPE_STRING_CODE:
+							{
+								Field<FIELD_TYPE_STRING_CODE> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(parsed_line_ptr);
+							}
+							break;
+						case FIELD_TYPE_STRING_LONGHAND:
+							{
+								Field<FIELD_TYPE_STRING_LONGHAND> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(parsed_line_ptr);
+							}
+							break;
+						case FIELD_TYPE_TIME_RANGE:
+							{
+								Field<FIELD_TYPE_TIME_RANGE> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(parsed_line_ptr);
+							}
+							break;
+						case FIELD_TYPE_NOTES_1:
+							{
+								Field<FIELD_TYPE_NOTES_1> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(parsed_line_ptr);
+							}
+							break;
+						case FIELD_TYPE_NOTES_2:
+							{
+								Field<FIELD_TYPE_NOTES_2> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(parsed_line_ptr);
+							}
+							break;
+						case FIELD_TYPE_NOTES_3:
+							{
+								Field<FIELD_TYPE_NOTES_3> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(theField);
+								RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+								if (stop)
+								{
+									return; // from lambda
+								}
+								data_entry.SetValue(parsed_line_ptr);
+							}
+							break;
+					}
+				}
+				catch (std::bad_cast &)
+				{
+					// Todo: log warning here
+					stop = true;
+					return; // from lambda
+				}
+
+				// whitespace
+				if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
+				{
+					while (*current_line_ptr == ' ') ++current_line_ptr;
+				}
+				else
+				{
+					while (*current_line_ptr == ' ' || *current_line_ptr == '\t') ++current_line_ptr;
+				}
+
 			});
 
 			// loop through mappings to generate output
@@ -491,6 +812,7 @@ bool Importer::DoImport()
 				}
 			});
 
+			++current_lines_read;
 			if (current_lines_read == block_size)
 			{
 				// Write rows to database here
@@ -506,5 +828,6 @@ bool Importer::DoImport()
 		data_file.close();
 	}
 
+	return true;
 
 }
