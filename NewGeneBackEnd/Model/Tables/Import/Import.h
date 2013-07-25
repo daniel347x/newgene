@@ -140,7 +140,8 @@ class Importer
 		bool DoImport();
 
 		ImportDefinition import_definition;
-		DataBlock block;
+		DataBlock input_block;
+		DataBlock output_block;
 
 	protected:
 

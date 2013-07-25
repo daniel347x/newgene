@@ -137,7 +137,115 @@ void Importer::InitializeFields()
 			}
 		});
 
-		block.push_back(fields);
+		input_block.push_back(fields);
+
+	}
+
+	for (int n=0; n<block_size; ++n)
+	{
+
+		DataFields fields;
+
+		std::for_each(import_definition.output_schema.schema.cbegin(), import_definition.output_schema.schema.cend(), [&fields](SchemaEntry const & column)
+		{
+			FIELD_TYPE field_type = column.field_type;
+			std::string field_name = column.field_name;
+			switch (field_type)
+			{
+			case FIELD_TYPE_INT32:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_INT32>> field = std::make_shared<Field<FIELD_TYPE_INT32>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_INT64:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_INT64>> field = std::make_shared<Field<FIELD_TYPE_INT64>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_UINT32:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_UINT32>> field = std::make_shared<Field<FIELD_TYPE_UINT32>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_UINT64:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_UINT64>> field = std::make_shared<Field<FIELD_TYPE_UINT64>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_STRING_FIXED:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_STRING_FIXED>> field = std::make_shared<Field<FIELD_TYPE_STRING_FIXED>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_STRING_VAR:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_STRING_VAR>> field = std::make_shared<Field<FIELD_TYPE_STRING_VAR>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_TIMESTAMP:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_TIMESTAMP>> field = std::make_shared<Field<FIELD_TYPE_TIMESTAMP>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_UUID:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_UUID>> field = std::make_shared<Field<FIELD_TYPE_UUID>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_UUID_FOREIGN:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_UUID_FOREIGN>> field = std::make_shared<Field<FIELD_TYPE_UUID_FOREIGN>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_STRING_CODE:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_STRING_CODE>> field = std::make_shared<Field<FIELD_TYPE_STRING_CODE>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_STRING_LONGHAND:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_STRING_LONGHAND>> field = std::make_shared<Field<FIELD_TYPE_STRING_LONGHAND>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_TIME_RANGE:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_TIME_RANGE>> field = std::make_shared<Field<FIELD_TYPE_TIME_RANGE>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_NOTES_1:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_NOTES_1>> field = std::make_shared<Field<FIELD_TYPE_NOTES_1>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_NOTES_2:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_NOTES_2>> field = std::make_shared<Field<FIELD_TYPE_NOTES_2>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_NOTES_3:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_NOTES_3>> field = std::make_shared<Field<FIELD_TYPE_NOTES_3>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			}
+		});
+
+		output_block.push_back(fields);
 
 	}
 
@@ -319,11 +427,12 @@ bool Importer::DoImport()
 			++current_lines_read;
 
 			char * current_line_ptr = line;
-			std::for_each(import_definition.input_schema.schema.cbegin(), import_definition.input_schema.schema.cend(), [this, &current_line_ptr](SchemaEntry const & column)
+			std::for_each(import_definition.input_schema.schema.cbegin(), import_definition.input_schema.schema.cend(), [this, &current_line_ptr, &current_lines_read](SchemaEntry const & column)
 			{
+				// use sscanf to read in the type, based on switch on "column"'s type type-traits... read it into input_block[current_lines_read]
 			});
 
-			// loop through mappings
+			// loop through mappings to generate output
 			std::for_each(import_definition.mappings.cbegin(), import_definition.mappings.cend(), [this](std::shared_ptr<FieldMapping> const & field_mapping)
 			{
 				if (!field_mapping)
