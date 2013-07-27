@@ -1023,6 +1023,8 @@ bool Importer::DoImport()
 
 		std::int64_t current_lines_read = 0;
 
+		//bool 
+
 		int currently_read_lines = ReadBlockFromFile(data_file, line, parsedline);
 		if (currently_read_lines == -1)
 		{

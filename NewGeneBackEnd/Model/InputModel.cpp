@@ -31,12 +31,26 @@ void InputModel::LoadTables()
 					ImportDefinition new_definition = ImportDefinitions::CreateImportDefinition(*variable_group_identifier.code);
 					if (new_definition.IsEmpty())
 					{
+						// Todo: log warning
 						return; // from lambda
 					}
 					Importer table_importer(new_definition, this, vg_instance_data.get(), InputModelImportTableFn);
-					bool success = table_importer.DoImport();
+					bool success = vg_instance_data->ImportStart(db, *variable_group_identifier.code, new_definition, nullptr, this);
 					if (!success)
 					{
+						// Todo: log warning
+						return; // from lambda
+					}
+					success = table_importer.DoImport();
+					if (!success)
+					{
+						// Todo: log warning
+						return; // from lambda
+					}
+					success = vg_instance_data->ImportEnd(db, *variable_group_identifier.code, new_definition, nullptr, this);
+					if (!success)
+					{
+						// Todo: log warning
 						return; // from lambda
 					}
 				}
