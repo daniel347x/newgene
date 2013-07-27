@@ -21,7 +21,7 @@ ImportDefinition::ImportDefinition(ImportDefinition const & rhs)
 	, input_schema(rhs.input_schema)
 	, output_schema(rhs.output_schema)
 	, format_qualifiers(FORMAT_QUALIFIERS__COMMA_DELIMITED | FORMAT_QUALIFIERS__BACKSLASH_ESCAPE_CHAR)
-	//, import_type(rhs.import_type)
+	, import_type(rhs.import_type)
 {
 }
 

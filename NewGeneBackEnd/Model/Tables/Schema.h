@@ -16,7 +16,7 @@ class SchemaEntry
 		{
 		}
 
-		SchemaEntry(FIELD_TYPE const field_type_, std::string const & field_name_, bool const required_ = false)
+		SchemaEntry(FIELD_TYPE const field_type_, std::string const & field_name_ = std::string(), bool const required_ = false)
 			: field_type(field_type_)
 			, field_name(field_name_)
 			, required(required_)

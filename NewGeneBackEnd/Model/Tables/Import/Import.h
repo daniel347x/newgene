@@ -54,6 +54,26 @@ class FieldMapping
 			, FIELD_MAPPING_TYPE__TIME_RANGE
 		};
 
+		FieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_)
+			: field_mapping_type(field_mapping_type_)
+		{
+
+		}
+
+		FieldMapping(FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
+			: field_mapping_type(FIELD_MAPPING_TYPE__ONE_TO_ONE)
+		{
+			input_file_fields.push_back(input_field_entry);
+			output_table_fields.push_back(output_table_entry);
+		}
+
+		FieldMapping(FieldMapping const & rhs)
+			: field_mapping_type(rhs.field_mapping_type)
+			, input_file_fields(rhs.input_file_fields)
+			, output_table_fields(rhs.output_table_fields)
+		{
+
+		}
 		FIELD_MAPPING_TYPE field_mapping_type;
 		FieldTypeEntries input_file_fields;
 		FieldTypeEntries output_table_fields;
@@ -133,7 +153,7 @@ class ImportDefinition
 		Schema input_schema;
 		Schema output_schema;
 		int format_qualifiers;
-		//IMPORT_TYPE import_type;
+		IMPORT_TYPE import_type;
 
 };
 
