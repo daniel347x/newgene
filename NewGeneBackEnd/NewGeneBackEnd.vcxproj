@@ -92,6 +92,7 @@
     <ClInclude Include="Model\Tables\Fields.h" />
     <ClInclude Include="Model\Tables\FieldTypes.h" />
     <ClInclude Include="Model\Tables\Import\Import.h" />
+    <ClInclude Include="Model\Tables\Import\ImportDefinitions.h" />
     <ClInclude Include="Model\Tables\Schema.h" />
     <ClInclude Include="Model\Tables\Table.h" />
     <ClInclude Include="Model\Tables\TableInstances\CMU.h" />
@@ -154,6 +155,7 @@
     <ClCompile Include="Model\ModelManager.cpp" />
     <ClCompile Include="Model\OutputModel.cpp" />
     <ClCompile Include="Model\Tables\Import\Import.cpp" />
+    <ClCompile Include="Model\Tables\Import\ImportDefinitions.cpp" />
     <ClCompile Include="Model\Tables\Schema.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\CMU.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\DMU.cpp" />

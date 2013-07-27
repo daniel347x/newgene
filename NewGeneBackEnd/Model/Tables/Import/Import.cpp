@@ -21,7 +21,17 @@ ImportDefinition::ImportDefinition(ImportDefinition const & rhs)
 	, input_schema(rhs.input_schema)
 	, output_schema(rhs.output_schema)
 	, format_qualifiers(FORMAT_QUALIFIERS__COMMA_DELIMITED | FORMAT_QUALIFIERS__BACKSLASH_ESCAPE_CHAR)
+	//, import_type(rhs.import_type)
 {
+}
+
+bool ImportDefinition::IsEmpty()
+{
+	if (mappings.size() == 0)
+	{
+		return true;
+	}
+	return false;
 }
 
 Importer::Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, TableImportCallbackFn table_write_callback_)

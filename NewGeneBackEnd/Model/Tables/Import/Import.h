@@ -125,12 +125,15 @@ class ImportDefinition
 		ImportDefinition();
 		ImportDefinition(ImportDefinition const & rhs);
 
+		bool IsEmpty();
+
 		ImportMappings mappings;
 		boost::filesystem::path input_file;
 		bool first_row_is_header_row;
 		Schema input_schema;
 		Schema output_schema;
 		int format_qualifiers;
+		//IMPORT_TYPE import_type;
 
 };
 

@@ -22,6 +22,15 @@ public:
 
 	}
 
+	bool TableExists(sqlite3 * db, std::string table_name);
+
+	static TableManager tableManager;
+
 };
+
+TableManager & tableManager()
+{
+	return TableManager::tableManager;
+}
 
 #endif

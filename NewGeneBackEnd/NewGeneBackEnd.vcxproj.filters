@@ -321,6 +321,9 @@
     <ClInclude Include="Model\Tables\TableInstances\VariableGroupData.h">
       <Filter>Header Files\Model\Tables\TableInstances</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Tables\Import\ImportDefinitions.h">
+      <Filter>Header Files\Model\Tables\Import</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -505,6 +508,9 @@
     </ClCompile>
     <ClCompile Include="Model\Tables\TableInstances\VariableGroupData.cpp">
       <Filter>Source Files\Model\Tables\TableInstances</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\Import\ImportDefinitions.cpp">
+      <Filter>Source Files\Model\Tables\Import</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
