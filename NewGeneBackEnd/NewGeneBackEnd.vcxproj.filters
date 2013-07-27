@@ -318,6 +318,9 @@
     <ClInclude Include="Model\Tables\Fields.h">
       <Filter>Header Files\Model\Tables</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Tables\TableInstances\VariableGroupData.h">
+      <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -499,6 +502,9 @@
     </ClCompile>
     <ClCompile Include="Model\Tables\Schema.cpp">
       <Filter>Source Files\Model\Tables</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableInstances\VariableGroupData.cpp">
+      <Filter>Source Files\Model\Tables\TableInstances</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

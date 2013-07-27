@@ -12,6 +12,18 @@ void InputModel::LoadTables()
 		t_uoa_setmemberlookup.Load(db, this);
 		t_vgp_identifiers.Load(db, this);
 		t_vgp_setmembers.Load(db, this);
+
+		WidgetInstanceIdentifiers variable_group_identifiers = t_vgp_identifiers.getIdentifiers();
+		std::for_each(variable_group_identifiers.cbegin(), variable_group_identifiers.cend(), [this](WidgetInstanceIdentifier const & variable_group_identifier)
+		{
+			if (variable_group_identifier.code)
+			{
+				std::string variable_group_name = *variable_group_identifier.code;
+				std::string variable_group_data_table_name("VG_INSTANCE_DATA_");
+				variable_group_data_table_name += variable_group_name;
+				std::unique_ptr<Table_VariableGroupData> vg_instance_data(new Table_VariableGroupData(variable_group_name, variable_group_data_table_name));
+			}
+		});
 	}
 
 }

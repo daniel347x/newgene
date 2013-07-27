@@ -20,6 +20,7 @@ bool ModelManager::ImportRawData(Messager & messager, Model_basemost * model_, T
 			case TABLE__UOA_MEMBER:
 			case TABLE__VG_CATEGORY:
 			case TABLE__VG_SET_MEMBER:
+			case TABLE__VG_INPUT_DATA:
 				{
 					input_model = dynamic_cast<InputModel*>(model_);
 					if (!input_model)
@@ -80,6 +81,10 @@ bool ModelManager::ImportRawData(Messager & messager, Model_basemost * model_, T
 			}
 			break;
 		case TABLE__VG_SET_MEMBER:
+			{
+			}
+			break;
+		case TABLE__VG_INPUT_DATA:
 			{
 			}
 			break;

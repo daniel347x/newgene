@@ -7,13 +7,18 @@
 
 enum FIELD_TYPE
 {
+
 	  FIELD_TYPE_UNKNOWN = 0
+
 	, FIELD_TYPE_INT32
 	, FIELD_TYPE_INT64
 	, FIELD_TYPE_UINT32
 	, FIELD_TYPE_UINT64
 	, FIELD_TYPE_STRING_FIXED
 	, FIELD_TYPE_STRING_VAR
+
+	// Special - typically for internal NewGene use, and not available in the user interface directly,
+	// but only as translated from user interface options such as "primary key" being selected for a column
 	, FIELD_TYPE_TIMESTAMP
 	, FIELD_TYPE_UUID
 	, FIELD_TYPE_UUID_FOREIGN
@@ -24,6 +29,7 @@ enum FIELD_TYPE
 	, FIELD_TYPE_NOTES_2
 	, FIELD_TYPE_NOTES_3
 	, FIELD_TYPE_FIELD_TYPE // Yes, a field type defined to represent a field type (must not itself be "FIELD_TYPE_FIELD_TYPE" or that would be circular)
+
 };
 
 template<FIELD_TYPE THE_FIELD_TYPE>

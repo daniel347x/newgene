@@ -35,8 +35,8 @@ class TableMetadata : public TableMetadata_base
 
 enum TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE
 {
-
-	  TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR
+	  TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__NONE
+	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT
 
@@ -75,6 +75,20 @@ class Table_base : public Table_basemost
 	public:
 
 		Table_base<CONTAINER_TYPE>(TABLE_MODEL_TYPE const table_model_type_)
+			: Table_basemost(table_model_type_)
+		{
+
+		}
+
+};
+
+template<>
+class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__NONE> : public Table_basemost
+{
+
+	public:
+
+		Table_base(TABLE_MODEL_TYPE const table_model_type_)
 			: Table_basemost(table_model_type_)
 		{
 

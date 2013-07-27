@@ -5,6 +5,9 @@
 #include "..\Settings\InputModelSettings.h"
 #include "..\Settings\Setting.h"
 #include "Tables/TableManager.h"
+#include <memory>
+
+typedef std::vector<std::unique_ptr<Table_VariableGroupData>> VariableGroup_DataTables;
 
 class InputModel : public Model<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS>
 {
@@ -25,6 +28,7 @@ class InputModel : public Model<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETT
 		Table_UOA_Member t_uoa_setmemberlookup;
 		Table_VG_CATEGORY t_vgp_identifiers;
 		Table_VG_SET_MEMBER t_vgp_setmembers;
+		VariableGroup_DataTables t_vgp_data_vector;
 
 };
 

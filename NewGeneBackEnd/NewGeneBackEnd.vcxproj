@@ -65,6 +65,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -98,6 +99,7 @@
     <ClInclude Include="Model\Tables\TableInstances\KAdCount.h" />
     <ClInclude Include="Model\Tables\TableInstances\UOA.h" />
     <ClInclude Include="Model\Tables\TableInstances\VariableGroup.h" />
+    <ClInclude Include="Model\Tables\TableInstances\VariableGroupData.h" />
     <ClInclude Include="Model\Tables\TableInstances\VariablesSelected.h" />
     <ClInclude Include="Model\Tables\TableManager.h" />
     <ClInclude Include="Model\Tables\TableTypes.h" />
@@ -158,6 +160,7 @@
     <ClCompile Include="Model\Tables\TableInstances\KAdCount.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\UOA.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\VariableGroup.cpp" />
+    <ClCompile Include="Model\Tables\TableInstances\VariableGroupData.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\VariablesSelected.cpp" />
     <ClCompile Include="Model\Tables\TableManager.cpp" />
     <ClCompile Include="Model\Tables\TableTypes.cpp" />

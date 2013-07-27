@@ -19,6 +19,9 @@ enum TABLE_TYPES
 	, TABLE__VG_CATEGORY
 	, TABLE__VG_SET_MEMBER
 
+	// Raw input data tables
+	, TABLE__VG_INPUT_DATA // special case
+
 	// Output model tables
 	, TABLE__VG_SET_MEMBER_SELECTED
 	, TABLE__KAD_COUNT
