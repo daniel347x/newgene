@@ -61,6 +61,11 @@ public:
 		return std::get<2>(data).value;
 	}
 
+	inline typename FieldTypeTraits<THE_FIELD_TYPE>::type const & GetValueReference() const
+	{
+		return std::get<2>(data).value;
+	}
+
 	inline typename FieldTypeTraits<THE_FIELD_TYPE>::type & GetValueReference()
 	{
 		return std::get<2>(data).value;

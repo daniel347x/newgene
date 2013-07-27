@@ -1,6 +1,10 @@
 #include "VariableGroupData.h"
 #include "..\TableManager.h"
 
+#ifndef Q_MOC_RUN
+#	include <boost/lexical_cast.hpp>
+#endif
+
 void Table_VariableGroupData::Load(sqlite3 * db, InputModel * input_model_)
 {
 }
@@ -9,6 +13,8 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string vg_code, Imp
 {
 	
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor executor(db);
 
 	if (db)
 	{
@@ -85,6 +91,156 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, Imp
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor executor(db);
+
+	std::string sql_insert;
+
+	sql_insert += "INSERT OR FAIL INTO ";
+	sql_insert += table_name;
+	sql_insert += " (";
+
+	bool first = true;
+	std::for_each(import_definition.output_schema.schema.cbegin(), import_definition.output_schema.schema.cend(), [&import_definition, &sql_insert, &first](SchemaEntry const & schema_entry)
+	{
+		if (!first)
+		{
+			sql_insert += ",";
+		}
+		first = false;
+
+		sql_insert += schema_entry.field_name;
+	});
+
+	sql_insert += ") VALUES (";
+
+	bool failed = false;
+	for (int row = 0; row < number_rows_in_block; ++row)
+	{
+		Importer::DataFields const & row_fields = block[row];
+		first = true;
+		std::for_each(row_fields.cbegin(), row_fields.cend(), [&import_definition, &sql_insert, &first, &failed](std::shared_ptr<BaseField> const & field_data)
+		{
+			if (failed)
+			{
+				return; // from lambda
+			}
+
+			if (!first)
+			{
+				sql_insert += ",";
+			}
+			first = false;
+
+			if (!field_data)
+			{
+				// Todo: log error
+				failed = true;
+				return; // from lambda
+			}
+
+			switch (field_data->GetType())
+			{
+			case FIELD_TYPE_INT32:
+				{
+					Field<FIELD_TYPE_INT32> const & field = static_cast<Field<FIELD_TYPE_INT32> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_INT64:
+				{
+					Field<FIELD_TYPE_INT64> field = static_cast<Field<FIELD_TYPE_INT64> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_UINT32:
+				{
+					Field<FIELD_TYPE_UINT32> field = static_cast<Field<FIELD_TYPE_UINT32> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_UINT64:
+				{
+					Field<FIELD_TYPE_UINT64> field = static_cast<Field<FIELD_TYPE_UINT64> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_STRING_FIXED:
+				{
+					Field<FIELD_TYPE_STRING_FIXED> field = static_cast<Field<FIELD_TYPE_STRING_FIXED> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_STRING_VAR:
+				{
+					Field<FIELD_TYPE_STRING_VAR> field = static_cast<Field<FIELD_TYPE_STRING_VAR> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_TIMESTAMP:
+				{
+					Field<FIELD_TYPE_TIMESTAMP> field = static_cast<Field<FIELD_TYPE_TIMESTAMP> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_UUID:
+				{
+					Field<FIELD_TYPE_UUID> field = static_cast<Field<FIELD_TYPE_UUID> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_UUID_FOREIGN:
+				{
+					Field<FIELD_TYPE_UUID_FOREIGN> field = static_cast<Field<FIELD_TYPE_UUID_FOREIGN> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_STRING_CODE:
+				{
+					Field<FIELD_TYPE_STRING_CODE> field = static_cast<Field<FIELD_TYPE_STRING_CODE> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_STRING_LONGHAND:
+				{
+					Field<FIELD_TYPE_STRING_LONGHAND> field = static_cast<Field<FIELD_TYPE_STRING_LONGHAND> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_TIME_RANGE:
+				{
+					Field<FIELD_TYPE_TIME_RANGE> field = static_cast<Field<FIELD_TYPE_TIME_RANGE> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_NOTES_1:
+				{
+					Field<FIELD_TYPE_NOTES_1> field = static_cast<Field<FIELD_TYPE_NOTES_1> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_NOTES_2:
+				{
+					Field<FIELD_TYPE_NOTES_2> field = static_cast<Field<FIELD_TYPE_NOTES_2> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_NOTES_3:
+				{
+					Field<FIELD_TYPE_NOTES_3> field = static_cast<Field<FIELD_TYPE_NOTES_3> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			}
+		});
+	}
+
+	if (failed)
+	{
+		return false;
+	}
+
+	sql_insert += ")";
 
 	return true;
 

@@ -23,6 +23,7 @@ public:
 	}
 
 	bool TableExists(sqlite3 * db, std::string table_name);
+	std::string EscapeDatabaseStringField(std::string const field);
 
 	static TableManager tableManager;
 
