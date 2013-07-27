@@ -3,6 +3,8 @@
 void OutputModel::LoadTables()
 {
 
+	LoadDatabase();
+
 	if (db != nullptr)
 	{
 		t_variables_selected_identifiers.Load(db, this, input_model.get());

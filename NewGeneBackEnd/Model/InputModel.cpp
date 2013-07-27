@@ -4,6 +4,8 @@
 void InputModel::LoadTables()
 {
 
+	LoadDatabase();
+
 	if (db != nullptr)
 	{
 		t_dmu_category.Load(db, this);
