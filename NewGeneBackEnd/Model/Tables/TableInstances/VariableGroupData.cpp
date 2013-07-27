@@ -112,11 +112,21 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, Imp
 		sql_insert += schema_entry.field_name;
 	});
 
-	sql_insert += ") VALUES (";
+	sql_insert += ") VALUES ";
 
 	bool failed = false;
+	bool first_row = true;
 	for (int row = 0; row < number_rows_in_block; ++row)
 	{
+
+		if (!first_row)
+		{
+			sql_insert += ",";
+		}
+		first_row = false;
+
+		sql_insert += "(";
+
 		Importer::DataFields const & row_fields = block[row];
 		first = true;
 		std::for_each(row_fields.cbegin(), row_fields.cend(), [&import_definition, &sql_insert, &first, &failed](std::shared_ptr<BaseField> const & field_data)
@@ -233,14 +243,15 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, Imp
 				break;
 			}
 		});
+
+		sql_insert += ")";
+
 	}
 
 	if (failed)
 	{
 		return false;
 	}
-
-	sql_insert += ")";
 
 	return true;
 
