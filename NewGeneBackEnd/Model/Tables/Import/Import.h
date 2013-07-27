@@ -74,11 +74,12 @@ class FieldMapping
 		{
 
 		}
+
+		virtual bool Validate() { return true; }
+
 		FIELD_MAPPING_TYPE field_mapping_type;
 		FieldTypeEntries input_file_fields;
 		FieldTypeEntries output_table_fields;
-
-		virtual bool Validate() { return true; }
 
 };
 
@@ -109,12 +110,13 @@ class TimeRangeFieldMapping : public RowFieldMapping
 		};
 
 		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_);
-		TIME_RANGE_FIELD_MAPPING_TYPE time_range_type;
 		
 		bool Validate()
 		{
 			return true;
 		}
+
+		TIME_RANGE_FIELD_MAPPING_TYPE time_range_type;
 
 };
 
