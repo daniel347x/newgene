@@ -244,12 +244,31 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, Imp
 			}
 		});
 
+		if (failed)
+		{
+			break;
+		}
+
 		sql_insert += ")";
 
 	}
 
 	if (failed)
 	{
+		return false;
+	}
+
+	sqlite3_stmt * stmt = NULL;
+	sqlite3_prepare_v2(db, sql_insert.c_str(), sql_insert.size() + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		// TODO: Log error
+		return false;
+	}
+	int step_result = 0;
+	if ((step_result = sqlite3_step(stmt)) != SQLITE_ROW)
+	{
+		// TODO: Log error
 		return false;
 	}
 
