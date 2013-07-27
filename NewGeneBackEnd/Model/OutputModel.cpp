@@ -30,7 +30,7 @@ bool OutputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, 
 				// Todo: log warning
 				return false;
 			}
-			table_->Import(output_model->getDb(), output_model, &output_model->getInputModel());
+			table_->ImportBlock(output_model->getDb(), output_model, &output_model->getInputModel(), table_block, number_rows);
 		}
 		else
 		{

@@ -25,5 +25,5 @@ ImportDefinition ImportDefinitions::CreateImportDefinition(std::string const & v
 
 ImportDefinition Development__CreateImportDefinition_Maoz()
 {
-
+	return ImportDefinition();
 }

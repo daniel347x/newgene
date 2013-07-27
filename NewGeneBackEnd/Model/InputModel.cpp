@@ -40,7 +40,7 @@ void InputModel::LoadTables()
 						return; // from lambda
 					}
 				}
-				t_vgp_data_vector.push_back(vg_instance_data);
+				t_vgp_data_vector.push_back(std::move(vg_instance_data));
 			}
 		});
 	}
@@ -65,7 +65,7 @@ bool InputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, I
 				// Todo: log warning
 				return false;
 			}
-			table_->Import(input_model->getDb(), nullptr, input_model);
+			table_->ImportBlock(input_model->getDb(), nullptr, input_model, table_block, number_rows);
 		}
 		else
 		{
