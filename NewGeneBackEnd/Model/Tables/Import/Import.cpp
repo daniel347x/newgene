@@ -975,6 +975,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 						// perform the mapping here
 
+
 					}
 					catch (std::bad_cast &)
 					{
