@@ -494,7 +494,7 @@ void Importer::RetrieveStringField(char const * current_line_ptr, char * parsed_
 		}
 		if (escapemode)
 		{
-			*parsed_line_ptr = *current_line_ptr;
+			*(++parsed_line_ptr) = *current_line_ptr;
 			escapemode = false;
 		}
 		else
@@ -522,9 +522,26 @@ void Importer::RetrieveStringField(char const * current_line_ptr, char * parsed_
 					done = true;
 				}
 			}
+			else
+			{
+				if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
+				{
+					if (*current_line_ptr == '\t')
+					{
+						done = true;
+					}
+				}
+				else
+				{
+					if (*current_line_ptr == ',')
+					{
+						done = true;
+					}
+				}
+			}
 			if (!done)
 			{
-				*parsed_line_ptr = *current_line_ptr;
+				*(++parsed_line_ptr) = *current_line_ptr;
 			}
 		}
 		++current_line_ptr;
@@ -782,6 +799,16 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 			else
 			{
 				while (*current_line_ptr == ' ' || *current_line_ptr == '\t') ++current_line_ptr;
+			}
+
+			// eat separator
+			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
+			{
+				if (*current_line_ptr == '\t') ++current_line_ptr; 
+			}
+			else
+			{
+				if (*current_line_ptr == ',') ++current_line_ptr; 
 			}
 
 		});
