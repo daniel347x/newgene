@@ -134,6 +134,8 @@ class TimeRangeFieldMapping : public RowFieldMapping
 			return true;
 		}
 
+		typename FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type PerformMapping();
+
 		TIME_RANGE_FIELD_MAPPING_TYPE time_range_type;
 
 };

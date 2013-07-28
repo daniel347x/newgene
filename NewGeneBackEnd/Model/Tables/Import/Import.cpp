@@ -4,10 +4,25 @@
 #	include <boost/algorithm/string.hpp>
 #endif
 #include <fstream>
+#include <cstdint>
 
 TimeRangeFieldMapping::TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_)
 	: time_range_type(time_range_type_)
 {
+}
+
+FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type TimeRangeFieldMapping::PerformMapping()
+{
+	std::uint64_t result = 0;
+	switch(time_range_type)
+	{
+		case TIME_RANGE_FIELD_MAPPING_TYPE__DAY_MONTH_YEAR:
+			{
+
+			}
+			break;
+	}
+	return result;
 }
 
 ImportDefinition::ImportDefinition()

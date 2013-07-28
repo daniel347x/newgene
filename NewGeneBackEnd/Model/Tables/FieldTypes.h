@@ -122,7 +122,7 @@ struct FieldTypeTraits<FIELD_TYPE_STRING_LONGHAND>
 template<>
 struct FieldTypeTraits<FIELD_TYPE_TIME_RANGE>
 {
-	typedef std::string type;
+	typedef std::uint64_t type;
 	static type const default;
 };
 
