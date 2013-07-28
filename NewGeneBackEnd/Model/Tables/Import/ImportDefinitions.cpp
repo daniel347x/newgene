@@ -223,5 +223,7 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	import_definition__maoz.input_schema = schema_input;
 	import_definition__maoz.output_schema = schema_output;
 
+	import_definition__maoz.mappings = mappings;
+
 	return import_definition__maoz;
 }
