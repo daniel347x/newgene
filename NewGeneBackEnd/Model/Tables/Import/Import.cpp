@@ -440,6 +440,7 @@ bool Importer::ValidateMapping()
 
 void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop)
 {
+	char * starting_parsed_pointer = parsed_line_ptr;
 	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED)
 	{
 		if (*current_line_ptr != '\'')
@@ -475,26 +476,44 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 			// Whitespace on right
 			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
 			{
-				while (*parsed_line_ptr == ' ' || *parsed_line_ptr == '\t')
+				while (parsed_line_ptr > starting_parsed_pointer)
 				{
 					--parsed_line_ptr;
+					if (*parsed_line_ptr == ' ')
+					{
+						*parsed_line_ptr = '\0';
+					}
+					else
+					{
+						++parsed_line_ptr;
+						break;
+					}
 				}
 			}
 			else
 			{
-				while (*parsed_line_ptr == ' ')
+				while (parsed_line_ptr > starting_parsed_pointer)
 				{
 					--parsed_line_ptr;
+					if (*parsed_line_ptr == ' ' || *parsed_line_ptr == '\t')
+					{
+						*parsed_line_ptr = '\0';
+					}
+					else
+					{
+						++parsed_line_ptr;
+						break;
+					}
 				}
 			}
-			++parsed_line_ptr;
-			*parsed_line_ptr = '\0';
 			done = true;
 			continue;
 		}
 		if (escapemode)
 		{
-			*(++parsed_line_ptr) = *current_line_ptr;
+			*(parsed_line_ptr) = *current_line_ptr;
+			++parsed_line_ptr;
+			*parsed_line_ptr = '\0';
 			escapemode = false;
 		}
 		else
@@ -541,7 +560,9 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 			}
 			if (!done)
 			{
-				*(++parsed_line_ptr) = *current_line_ptr;
+				*(parsed_line_ptr) = *current_line_ptr;
+				++parsed_line_ptr;
+				*parsed_line_ptr = '\0';
 			}
 		}
 		++current_line_ptr;
@@ -550,16 +571,34 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 			// Whitespace on right
 			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
 			{
-				while (*parsed_line_ptr == ' ' || *parsed_line_ptr == '\t')
+				while (parsed_line_ptr > starting_parsed_pointer)
 				{
 					--parsed_line_ptr;
+					if (*parsed_line_ptr == ' ')
+					{
+						*parsed_line_ptr = '\0';
+					}
+					else
+					{
+						++parsed_line_ptr;
+						break;
+					}
 				}
 			}
 			else
 			{
-				while (*parsed_line_ptr == ' ')
+				while (parsed_line_ptr > starting_parsed_pointer)
 				{
 					--parsed_line_ptr;
+					if (*parsed_line_ptr == ' ' || *parsed_line_ptr == '\t')
+					{
+						*parsed_line_ptr = '\0';
+					}
+					else
+					{
+						++parsed_line_ptr;
+						break;
+					}
 				}
 			}
 			++parsed_line_ptr;
