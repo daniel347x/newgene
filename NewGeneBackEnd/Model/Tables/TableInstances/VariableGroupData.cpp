@@ -76,8 +76,9 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string vg_code, Imp
 				return false;
 			}
 			int step_result = 0;
-			if ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+			if ((step_result = sqlite3_step(stmt)) == SQLITE_DONE)
 			{
+				executor.success();
 				return true;
 			}
 		}
@@ -272,6 +273,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, Imp
 		return false;
 	}
 
+	executor.success();
 	return true;
 
 }
