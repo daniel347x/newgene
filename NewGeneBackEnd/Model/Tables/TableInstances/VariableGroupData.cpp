@@ -160,85 +160,85 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 				break;
 			case FIELD_TYPE_INT64:
 				{
-					Field<FIELD_TYPE_INT64> field = static_cast<Field<FIELD_TYPE_INT64> const & >(*field_data);
+					Field<FIELD_TYPE_INT64> const & field = static_cast<Field<FIELD_TYPE_INT64> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_UINT32:
 				{
-					Field<FIELD_TYPE_UINT32> field = static_cast<Field<FIELD_TYPE_UINT32> const & >(*field_data);
+					Field<FIELD_TYPE_UINT32> const & field = static_cast<Field<FIELD_TYPE_UINT32> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_UINT64:
 				{
-					Field<FIELD_TYPE_UINT64> field = static_cast<Field<FIELD_TYPE_UINT64> const & >(*field_data);
+					Field<FIELD_TYPE_UINT64> const & field = static_cast<Field<FIELD_TYPE_UINT64> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_STRING_FIXED:
 				{
-					Field<FIELD_TYPE_STRING_FIXED> field = static_cast<Field<FIELD_TYPE_STRING_FIXED> const & >(*field_data);
+					Field<FIELD_TYPE_STRING_FIXED> const & field = static_cast<Field<FIELD_TYPE_STRING_FIXED> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_STRING_VAR:
 				{
-					Field<FIELD_TYPE_STRING_VAR> field = static_cast<Field<FIELD_TYPE_STRING_VAR> const & >(*field_data);
+					Field<FIELD_TYPE_STRING_VAR> const & field = static_cast<Field<FIELD_TYPE_STRING_VAR> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_TIMESTAMP:
 				{
-					Field<FIELD_TYPE_TIMESTAMP> field = static_cast<Field<FIELD_TYPE_TIMESTAMP> const & >(*field_data);
+					Field<FIELD_TYPE_TIMESTAMP> const & field = static_cast<Field<FIELD_TYPE_TIMESTAMP> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_UUID:
 				{
-					Field<FIELD_TYPE_UUID> field = static_cast<Field<FIELD_TYPE_UUID> const & >(*field_data);
+					Field<FIELD_TYPE_UUID> const & field = static_cast<Field<FIELD_TYPE_UUID> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_UUID_FOREIGN:
 				{
-					Field<FIELD_TYPE_UUID_FOREIGN> field = static_cast<Field<FIELD_TYPE_UUID_FOREIGN> const & >(*field_data);
+					Field<FIELD_TYPE_UUID_FOREIGN> const & field = static_cast<Field<FIELD_TYPE_UUID_FOREIGN> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_STRING_CODE:
 				{
-					Field<FIELD_TYPE_STRING_CODE> field = static_cast<Field<FIELD_TYPE_STRING_CODE> const & >(*field_data);
+					Field<FIELD_TYPE_STRING_CODE> const & field = static_cast<Field<FIELD_TYPE_STRING_CODE> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_STRING_LONGHAND:
 				{
-					Field<FIELD_TYPE_STRING_LONGHAND> field = static_cast<Field<FIELD_TYPE_STRING_LONGHAND> const & >(*field_data);
+					Field<FIELD_TYPE_STRING_LONGHAND> const & field = static_cast<Field<FIELD_TYPE_STRING_LONGHAND> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_TIME_RANGE:
 				{
-					Field<FIELD_TYPE_TIME_RANGE> field = static_cast<Field<FIELD_TYPE_TIME_RANGE> const & >(*field_data);
+					Field<FIELD_TYPE_TIME_RANGE> const & field = static_cast<Field<FIELD_TYPE_TIME_RANGE> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_NOTES_1:
 				{
-					Field<FIELD_TYPE_NOTES_1> field = static_cast<Field<FIELD_TYPE_NOTES_1> const & >(*field_data);
+					Field<FIELD_TYPE_NOTES_1> const & field = static_cast<Field<FIELD_TYPE_NOTES_1> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_NOTES_2:
 				{
-					Field<FIELD_TYPE_NOTES_2> field = static_cast<Field<FIELD_TYPE_NOTES_2> const & >(*field_data);
+					Field<FIELD_TYPE_NOTES_2> const & field = static_cast<Field<FIELD_TYPE_NOTES_2> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;
 			case FIELD_TYPE_NOTES_3:
 				{
-					Field<FIELD_TYPE_NOTES_3> field = static_cast<Field<FIELD_TYPE_NOTES_3> const & >(*field_data);
+					Field<FIELD_TYPE_NOTES_3> const & field = static_cast<Field<FIELD_TYPE_NOTES_3> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;

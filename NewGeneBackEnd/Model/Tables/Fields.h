@@ -31,6 +31,12 @@ class BaseField
 public:
 	virtual FIELD_TYPE GetType() { return FIELD_TYPE_UNKNOWN; };
 	virtual std::string GetName() { return ""; };
+	BaseField(bool dummy)
+	{
+
+	}
+private:
+	BaseField(BaseField const & rhs) {}
 };
 
 template <FIELD_TYPE THE_FIELD_TYPE>
@@ -39,8 +45,8 @@ class Field : public BaseField
 
 public:
 
-	Field(std::string const field_name, FieldValue<THE_FIELD_TYPE> const & field_value = FieldValue<THE_FIELD_TYPE>(FieldTypeTraits<THE_FIELD_TYPE>::default))
-		: BaseField()
+	Field<THE_FIELD_TYPE>(std::string const field_name, FieldValue<THE_FIELD_TYPE> const & field_value = FieldValue<THE_FIELD_TYPE>(FieldTypeTraits<THE_FIELD_TYPE>::default))
+		: BaseField(true)
 		, data(std::make_tuple(THE_FIELD_TYPE, field_name, field_value))
 	{
 
@@ -77,6 +83,10 @@ public:
 	}
 
 	typename FieldData<THE_FIELD_TYPE>::type data;
+
+private:
+	 
+	Field<THE_FIELD_TYPE>(Field<THE_FIELD_TYPE> const & rhs) {}
 
 };
 
