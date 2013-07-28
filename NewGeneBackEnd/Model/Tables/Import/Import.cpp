@@ -622,30 +622,35 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 			try
 			{
+				int number_chars_read = 0;
 				switch (column.field_type)
 				{
 				case FIELD_TYPE_INT32:
 					{
 						Field<FIELD_TYPE_INT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT32>&>(theField);
-						sscanf(current_line_ptr, "%d", &data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%d%n", &data_entry.GetValueReference(), &number_chars_read);
+						current_line_ptr += number_chars_read;
 					}
 					break;
 				case FIELD_TYPE_INT64:
 					{
 						Field<FIELD_TYPE_INT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT64>&>(theField);
-						sscanf(current_line_ptr, "%I64d", &data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
+						current_line_ptr += number_chars_read;
 					}
 					break;
 				case FIELD_TYPE_UINT32:
 					{
 						Field<FIELD_TYPE_UINT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(theField);
-						sscanf(current_line_ptr, "%d", &data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%d%n", &data_entry.GetValueReference(), &number_chars_read);
+						current_line_ptr += number_chars_read;
 					}
 					break;
 				case FIELD_TYPE_UINT64:
 					{
 						Field<FIELD_TYPE_UINT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(theField);
-						sscanf(current_line_ptr, "%I64d", &data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
+						current_line_ptr += number_chars_read;
 					}
 					break;
 				case FIELD_TYPE_STRING_FIXED:
@@ -673,7 +678,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 				case FIELD_TYPE_TIMESTAMP:
 					{
 						Field<FIELD_TYPE_TIMESTAMP> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(theField);
-						sscanf(current_line_ptr, "%I64d", &data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference());
+						current_line_ptr += number_chars_read;
 					}
 					break;
 				case FIELD_TYPE_UUID:
@@ -723,7 +729,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 				case FIELD_TYPE_TIME_RANGE:
 					{
 						Field<FIELD_TYPE_TIME_RANGE> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(theField);
-						sscanf(current_line_ptr, "%I64d", &data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
 					}
 					break;
 				case FIELD_TYPE_NOTES_1:

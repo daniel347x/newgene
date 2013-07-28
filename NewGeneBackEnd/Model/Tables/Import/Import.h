@@ -72,7 +72,7 @@ class FieldMapping
 		}
 
 		FieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_, FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
-			: field_mapping_type(FIELD_MAPPING_TYPE__UNKNOWN)
+			: field_mapping_type(field_mapping_type_)
 		{
 			input_file_fields.push_back(input_field_entry);
 			output_table_fields.push_back(output_table_entry);
