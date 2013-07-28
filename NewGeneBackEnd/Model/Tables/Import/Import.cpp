@@ -447,7 +447,7 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 		{
 			// Todo: warning
 			stop = true;
-			return; // from lambda
+			return;
 		}
 		++current_line_ptr;
 	}
@@ -605,6 +605,7 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 			*parsed_line_ptr = '\0';
 		}
 	}
+	parsed_line_ptr = starting_parsed_pointer;
 }
 
 std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_entry, DataFields const & data_fields)
