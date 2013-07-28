@@ -144,17 +144,15 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	// Time-range mapping
 	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>();
 	time_range_mapping->field_mapping_type = FieldMapping::FIELD_MAPPING_TYPE__TIME_RANGE;
-	time_range_mapping->time_range_type = TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY_MONTH_YEAR;
+	time_range_mapping->time_range_type = TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR;
 	FieldTypeEntries input_file_fields;
 	FieldTypeEntries output_table_fields;
-	FieldTypeEntry input_time_field__Day = std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTDAY"), FIELD_TYPE_INT32);
-	FieldTypeEntry input_time_field__Month = std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTMNTH"), FIELD_TYPE_INT32);
-	FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTYR"), FIELD_TYPE_INT32);
-	input_file_fields.push_back(input_time_field__Day);
-	input_file_fields.push_back(input_time_field__Month);
+	FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32);
 	input_file_fields.push_back(input_time_field__Year);
-	FieldTypeEntry output_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32);
-	output_table_fields.push_back(output_time_field__Year);
+	FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR-ROW-START"), FIELD_TYPE_INT32);
+	FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR-ROW-END"), FIELD_TYPE_INT32);
+	output_table_fields.push_back(output_time_field__YearStart);
+	output_table_fields.push_back(output_time_field__YearEnd);
 	time_range_mapping->input_file_fields = input_file_fields;
 	time_range_mapping->output_table_fields = output_table_fields;
 	mappings.push_back(time_range_mapping);

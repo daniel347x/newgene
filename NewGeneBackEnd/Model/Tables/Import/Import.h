@@ -54,6 +54,11 @@ class FieldMapping
 			, FIELD_MAPPING_TYPE__TIME_RANGE
 		};
 
+		FieldMapping()
+		{
+
+		}
+
 		FieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_)
 			: field_mapping_type(field_mapping_type_)
 		{
@@ -85,6 +90,14 @@ class FieldMapping
 
 class RowFieldMapping : public FieldMapping
 {
+	
+	public:
+
+		RowFieldMapping()
+		{
+
+		}
+
 };
 
 class OneToOneFieldMapping : public RowFieldMapping
@@ -106,8 +119,13 @@ class TimeRangeFieldMapping : public RowFieldMapping
 
 		enum TIME_RANGE_FIELD_MAPPING_TYPE
 		{
-			TIME_RANGE_FIELD_MAPPING_TYPE__DAY_MONTH_YEAR
+			TIME_RANGE_FIELD_MAPPING_TYPE__YEAR
 		};
+
+		TimeRangeFieldMapping()
+		{
+
+		}
 
 		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_);
 		
