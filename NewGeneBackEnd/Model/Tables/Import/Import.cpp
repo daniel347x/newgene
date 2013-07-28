@@ -12,16 +12,16 @@ TimeRangeFieldMapping::TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const
 {
 }
 
-FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type TimeRangeFieldMapping::PerformMapping(Importer const & importer, Importer::DataFields const & data_fields)
+FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type TimeRangeFieldMapping::PerformMapping(DataFields const & data_fields)
 {
 	std::int64_t result = 0;
 	switch(time_range_type)
 	{
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR:
 		{
-			std::shared_ptr<BaseField> const the_input_field = importer.RetrieveDataField(input_file_fields[0], data_fields);
-			std::shared_ptr<BaseField> the_output_field_year_start = importer.RetrieveDataField(output_table_fields[0], data_fields);
-			std::shared_ptr<BaseField> the_output_field_year_end = importer.RetrieveDataField(output_table_fields[1], data_fields);
+			std::shared_ptr<BaseField> const the_input_field = RetrieveDataField(input_file_fields[0], data_fields);
+			std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], data_fields);
+			std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], data_fields);
 
 			if (!the_input_field || !the_output_field_year_start || !the_output_field_year_end)
 			{
@@ -558,7 +558,7 @@ void Importer::RetrieveStringField(char const * current_line_ptr, char * parsed_
 	}
 }
 
-std::shared_ptr<BaseField> const Importer::RetrieveDataField(FieldTypeEntry const & field_type_entry, Importer::DataFields const & data_fields) const
+std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_entry, DataFields const & data_fields)
 {
 	std::shared_ptr<BaseField> the_field;
 	if (field_type_entry.first.name_or_index == NameOrIndex::NAME)
@@ -579,32 +579,7 @@ std::shared_ptr<BaseField> const Importer::RetrieveDataField(FieldTypeEntry cons
 			the_field = data_fields[field_type_entry.first.index];
 		}
 	}
-	return the_field
-}
-
-std::shared_ptr<BaseField> Importer::RetrieveDataField(FieldTypeEntry const & field_type_entry, Importer::DataFields const & data_fields)
-{
-	std::shared_ptr<BaseField> the_field;
-	if (field_type_entry.first.name_or_index == NameOrIndex::NAME)
-	{
-		std::string const & input_field_name = field_type_entry.first.name;
-		std::for_each(data_fields.cbegin(), data_fields.cend(), [&input_field_name, &the_field](std::shared_ptr<BaseField> const & input_field)
-		{
-			if (input_field && boost::iequals(input_field->GetName(), input_field_name))
-			{
-				the_field = input_field;
-			}
-		});
-	}
-	else
-	{
-		if (field_type_entry.first.index < (int)data_fields.size())
-		{
-			the_field = data_fields[field_type_entry.first.index];
-		}
-	}
-	return the_field
-
+	return the_field;
 }
 
 int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline)
@@ -760,12 +735,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 				case FIELD_TYPE_TIME_RANGE:
 					{
 						Field<FIELD_TYPE_TIME_RANGE> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(parsed_line_ptr);
+						sscanf(current_line_ptr, "%I64d", data_entry.GetValueReference());
 					}
 					break;
 				case FIELD_TYPE_NOTES_1:

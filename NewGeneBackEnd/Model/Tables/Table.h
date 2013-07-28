@@ -62,7 +62,7 @@ class Table_basemost
 		virtual void Load(sqlite3 * db, InputModel * input_model_ = nullptr) {};
 		virtual void Load(sqlite3 * db, OutputModel * output_model_ = nullptr, InputModel * input_model_ = nullptr) {};
 		virtual bool ImportStart(sqlite3 * db, OutputModel * output_model_ = nullptr, InputModel * input_model_ = nullptr) { return true; };
-		virtual bool ImportBlock(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_, Importer::DataBlock const & block, int const number_rows_in_block) { return true; };
+		virtual bool ImportBlock(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block, int const number_rows_in_block) { return true; };
 		virtual bool ImportEnd(sqlite3 * db, OutputModel * output_model_ = nullptr, InputModel * input_model_ = nullptr) { return true; };
 
 		std::recursive_mutex data_mutex;

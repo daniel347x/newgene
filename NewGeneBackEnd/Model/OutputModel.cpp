@@ -13,7 +13,7 @@ void OutputModel::LoadTables()
 
 }
 
-bool OutputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, Importer::DataBlock const & table_block, int const number_rows)
+bool OutputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
 {
 	try
 	{

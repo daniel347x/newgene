@@ -10,9 +10,6 @@
 #	include <boost/filesystem.hpp>
 #endif
 
-class Importer;
-class Importer::DataFields;
-
 class NameOrIndex
 {
 
@@ -45,6 +42,10 @@ class NameOrIndex
 
 typedef std::pair<NameOrIndex, FIELD_TYPE> FieldTypeEntry;
 typedef std::vector<FieldTypeEntry> FieldTypeEntries;
+class BaseField;
+typedef std::vector<std::shared_ptr<BaseField>> DataFields;
+typedef std::vector<DataFields> DataBlock;
+std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_entry, DataFields const & data_fields);
 
 class FieldMapping
 {
@@ -137,7 +138,7 @@ class TimeRangeFieldMapping : public RowFieldMapping
 			return true;
 		}
 
-		typename FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type PerformMapping(Importer const & importer, Importer::DataFields const & data_fields);
+		FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type PerformMapping(DataFields const & data_fields);
 
 		TIME_RANGE_FIELD_MAPPING_TYPE time_range_type;
 
@@ -190,8 +191,6 @@ class Importer
 
 	public:
 
-		typedef std::vector<std::shared_ptr<BaseField>> DataFields;
-		typedef std::vector<DataFields> DataBlock;
 		typedef bool (*TableImportCallbackFn)(Model_basemost * model_, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
 
 		static int const block_size = 1024;
@@ -208,11 +207,6 @@ class Importer
 		Model_basemost * model;
 		Table_basemost * table;
 		TableImportCallbackFn table_write_callback;
-	
-	public:
-
-		std::shared_ptr<BaseField> const RetrieveDataField(FieldTypeEntry const & field_type_entry, Importer::DataFields const & data_fields) const;
-		std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_entry, Importer::DataFields const & data_fields);
 
 	protected:
 	

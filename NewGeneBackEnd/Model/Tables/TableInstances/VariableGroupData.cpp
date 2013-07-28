@@ -87,7 +87,7 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string vg_code, Imp
 
 }
 
-bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, Importer::DataBlock const & block, int const number_rows_in_block)
+bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block, int const number_rows_in_block)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -127,7 +127,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, Imp
 
 		sql_insert += "(";
 
-		Importer::DataFields const & row_fields = block[row];
+		DataFields const & row_fields = block[row];
 		first = true;
 		std::for_each(row_fields.cbegin(), row_fields.cend(), [&import_definition, &sql_insert, &first, &failed](std::shared_ptr<BaseField> const & field_data)
 		{

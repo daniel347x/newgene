@@ -61,7 +61,7 @@ void InputModel::LoadTables()
 
 }
 
-bool InputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, Importer::DataBlock const & table_block, int const number_rows)
+bool InputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
 {
 
 	try
