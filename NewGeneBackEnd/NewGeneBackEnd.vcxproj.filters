@@ -512,5 +512,8 @@
     <ClCompile Include="Model\Tables\Import\ImportDefinitions.cpp">
       <Filter>Source Files\Model\Tables\Import</Filter>
     </ClCompile>
+    <ClCompile Include="Model\Tables\FieldTypes.cpp">
+      <Filter>Source Files\Model\Tables</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -123,7 +123,7 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_TIME_RANGE>
 {
 	typedef std::uint64_t type;
-	static type const default;
+	static type const default = 0;
 };
 
 template<>

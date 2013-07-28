@@ -29,9 +29,6 @@ public:
 
 };
 
-TableManager & tableManager()
-{
-	return TableManager::tableManager;
-}
+TableManager & tableManager();
 
 #endif

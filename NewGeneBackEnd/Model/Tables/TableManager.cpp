@@ -61,3 +61,8 @@ std::string TableManager::EscapeDatabaseStringField(std::string const field)
 
 	return return_string;
 }
+
+TableManager & tableManager()
+{
+	return TableManager::tableManager;
+}

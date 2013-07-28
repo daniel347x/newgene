@@ -283,7 +283,7 @@ bool Table_VariableGroupData::ImportEnd(sqlite3 * db, std::string vg_code, Impor
 
 }
 
-std::string TableNameFromVGcode(std::string variable_group_code)
+std::string Table_VariableGroupData::TableNameFromVGCode(std::string variable_group_code)
 {
 	std::string variable_group_data_table_name("VG_INSTANCE_DATA_");
 	variable_group_data_table_name += variable_group_code;
