@@ -30,7 +30,7 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string vg_code, Imp
 			{
 				if (!first)
 				{
-					sql_create += ",";
+					sql_create += ", ";
 				}
 				first = false;
 				sql_create += table_schema_entry.field_name;
@@ -121,7 +121,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, Imp
 
 		if (!first_row)
 		{
-			sql_insert += ",";
+			sql_insert += ", ";
 		}
 		first_row = false;
 
@@ -138,7 +138,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, Imp
 
 			if (!first)
 			{
-				sql_insert += ",";
+				sql_insert += ", ";
 			}
 			first = false;
 
