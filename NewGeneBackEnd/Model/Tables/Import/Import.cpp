@@ -7,31 +7,25 @@
 #include <fstream>
 #include <cstdint>
 
-TimeRangeFieldMapping::TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_)
-	: time_range_type(time_range_type_)
+void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields, DataFields const & output_data_fields)
 {
-}
-
-FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type TimeRangeFieldMapping::PerformMapping(DataFields const & data_fields)
-{
-	std::int64_t result = 0;
 	switch(time_range_type)
 	{
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR:
 		{
-			std::shared_ptr<BaseField> const the_input_field = RetrieveDataField(input_file_fields[0], data_fields);
-			std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], data_fields);
-			std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], data_fields);
+			std::shared_ptr<BaseField> const the_input_field = RetrieveDataField(input_file_fields[0], input_data_fields);
+			std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+			std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
 			if (!the_input_field || !the_output_field_year_start || !the_output_field_year_end)
 			{
 				// Todo: log warning
-				return 0;
+				return;
 			}
 
 			Field<FIELD_TYPE_INT32> const & the_input_field_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field);
-			Field<FIELD_TYPE_TIMESTAMP> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_TIMESTAMP> &>(*the_input_field);
-			Field<FIELD_TYPE_TIMESTAMP> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_TIMESTAMP> &>(*the_input_field);
+			Field<FIELD_TYPE_TIMESTAMP> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_TIMESTAMP> &>(*the_output_field_year_start);
+			Field<FIELD_TYPE_TIMESTAMP> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_TIMESTAMP> &>(*the_output_field_year_end);
 
 			// convert year to ms since jan 1, 1970 00:00:00.000
 			boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
@@ -47,7 +41,6 @@ FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type TimeRangeFieldMapping::PerformMappi
 		}
 		break;
 	}
-	return result;
 }
 
 ImportDefinition::ImportDefinition()
@@ -634,25 +627,25 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 				case FIELD_TYPE_INT32:
 					{
 						Field<FIELD_TYPE_INT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT32>&>(theField);
-						sscanf(current_line_ptr, "%d", data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%d", &data_entry.GetValueReference());
 					}
 					break;
 				case FIELD_TYPE_INT64:
 					{
 						Field<FIELD_TYPE_INT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT64>&>(theField);
-						sscanf(current_line_ptr, "%I64d", data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%I64d", &data_entry.GetValueReference());
 					}
 					break;
 				case FIELD_TYPE_UINT32:
 					{
 						Field<FIELD_TYPE_UINT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(theField);
-						sscanf(current_line_ptr, "%d", data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%d", &data_entry.GetValueReference());
 					}
 					break;
 				case FIELD_TYPE_UINT64:
 					{
 						Field<FIELD_TYPE_UINT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(theField);
-						sscanf(current_line_ptr, "%I64d", data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%I64d", &data_entry.GetValueReference());
 					}
 					break;
 				case FIELD_TYPE_STRING_FIXED:
@@ -680,12 +673,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 				case FIELD_TYPE_TIMESTAMP:
 					{
 						Field<FIELD_TYPE_TIMESTAMP> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(0);
+						sscanf(current_line_ptr, "%I64d", &data_entry.GetValueReference());
 					}
 					break;
 				case FIELD_TYPE_UUID:
@@ -735,7 +723,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 				case FIELD_TYPE_TIME_RANGE:
 					{
 						Field<FIELD_TYPE_TIME_RANGE> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(theField);
-						sscanf(current_line_ptr, "%I64d", data_entry.GetValueReference());
+						sscanf(current_line_ptr, "%I64d", &data_entry.GetValueReference());
 					}
 					break;
 				case FIELD_TYPE_NOTES_1:
@@ -801,7 +789,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 		DataFields & input_data_fields = input_block[current_lines_read];
 		DataFields & output_data_fields = output_block[current_lines_read];
 		stop = false;
-		std::for_each(import_definition.mappings.cbegin(), import_definition.mappings.cend(), [this, &input_data_fields, &output_data_fields, &stop](std::shared_ptr<FieldMapping> const & field_mapping)
+		std::for_each(import_definition.mappings.begin(), import_definition.mappings.end(), [this, &input_data_fields, &output_data_fields, &stop](std::shared_ptr<FieldMapping> & field_mapping)
 		{
 			if (!field_mapping)
 			{
@@ -978,14 +966,14 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 					try
 					{
 
-						TimeRangeFieldMapping const & the_mapping = dynamic_cast<TimeRangeFieldMapping const &>(*field_mapping);
+						TimeRangeFieldMapping & the_mapping = dynamic_cast<TimeRangeFieldMapping &>(*field_mapping);
 
 						// perform the mapping here
 						switch (the_mapping.time_range_type)
 						{
 						case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR:
 							{
-
+								the_mapping.PerformMapping(input_data_fields, output_data_fields);
 							}
 							break;
 						}
@@ -1022,6 +1010,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 bool Importer::DoImport()
 {
 
+	InitializeFields();
+
 	// validate
 	if (!ValidateMapping())
 	{
@@ -1054,27 +1044,29 @@ bool Importer::DoImport()
 
 		std::int64_t current_lines_read = 0;
 
-		//bool 
-
-		int currently_read_lines = ReadBlockFromFile(data_file, line, parsedline);
-		if (currently_read_lines == -1)
+		int currently_read_lines = 0;
+		while (true)
 		{
-			// Todo: log warning
-			return false;
-		}
-		else if (currently_read_lines == 0)
-		{
-			// nothing to do
-			return true;
-		}
-		else
-		{
-			// Write rows to database here
-			bool write_succeeded = table_write_callback(model, table, output_block, currently_read_lines);
-			if (!write_succeeded)
+			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline);
+			if (currently_read_lines == -1)
 			{
 				// Todo: log warning
 				return false;
+			}
+			else if (currently_read_lines == 0)
+			{
+				// nothing to do
+				break;
+			}
+			else
+			{
+				// Write rows to database here
+				bool write_succeeded = table_write_callback(model, table, output_block, currently_read_lines);
+				if (!write_succeeded)
+				{
+					// Todo: log warning
+					return false;
+				}
 			}
 		}
 

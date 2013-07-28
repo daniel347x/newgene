@@ -54,7 +54,9 @@ class FieldMapping
 
 		enum FIELD_MAPPING_TYPE
 		{
-			  FIELD_MAPPING_TYPE__ONE_TO_ONE
+			  FIELD_MAPPING_TYPE__UNKNOWN
+			, FIELD_MAPPING_TYPE__ROW
+			, FIELD_MAPPING_TYPE__ONE_TO_ONE
 			, FIELD_MAPPING_TYPE__TIME_RANGE
 		};
 
@@ -69,8 +71,15 @@ class FieldMapping
 
 		}
 
+		FieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_, FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
+			: field_mapping_type(FIELD_MAPPING_TYPE__UNKNOWN)
+		{
+			input_file_fields.push_back(input_field_entry);
+			output_table_fields.push_back(output_table_entry);
+		}
+
 		FieldMapping(FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
-			: field_mapping_type(FIELD_MAPPING_TYPE__ONE_TO_ONE)
+			: field_mapping_type(FIELD_MAPPING_TYPE__UNKNOWN)
 		{
 			input_file_fields.push_back(input_field_entry);
 			output_table_fields.push_back(output_table_entry);
@@ -98,6 +107,29 @@ class RowFieldMapping : public FieldMapping
 	public:
 
 		RowFieldMapping()
+			: FieldMapping(FIELD_MAPPING_TYPE__ROW)
+		{
+
+		}
+
+		RowFieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_)
+			: FieldMapping(field_mapping_type_)
+		{
+
+		}
+
+		RowFieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_, FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
+			: FieldMapping(field_mapping_type_, input_field_entry, output_table_entry)
+		{
+		}
+
+		RowFieldMapping(FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
+			: FieldMapping(FIELD_MAPPING_TYPE__ROW, input_field_entry, output_table_entry)
+		{
+		}
+
+		RowFieldMapping(RowFieldMapping const & rhs)
+			: FieldMapping(rhs)
 		{
 
 		}
@@ -108,6 +140,34 @@ class OneToOneFieldMapping : public RowFieldMapping
 {
 
 	public:
+
+		OneToOneFieldMapping()
+			: RowFieldMapping(FIELD_MAPPING_TYPE__ONE_TO_ONE)
+		{
+
+		}
+
+		OneToOneFieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_)
+			: RowFieldMapping(field_mapping_type_)
+		{
+
+		}
+
+		OneToOneFieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_, FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
+			: RowFieldMapping(field_mapping_type_, input_field_entry, output_table_entry)
+		{
+		}
+
+		OneToOneFieldMapping(FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
+			: RowFieldMapping(FIELD_MAPPING_TYPE__ONE_TO_ONE, input_field_entry, output_table_entry)
+		{
+		}
+
+		OneToOneFieldMapping(OneToOneFieldMapping const & rhs)
+			: RowFieldMapping(rhs)
+		{
+
+		}
 
 		bool Validate()
 		{
@@ -126,19 +186,45 @@ class TimeRangeFieldMapping : public RowFieldMapping
 			TIME_RANGE_FIELD_MAPPING_TYPE__YEAR
 		};
 
-		TimeRangeFieldMapping()
+		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_, FIELD_MAPPING_TYPE const field_mapping_type_)
+			: RowFieldMapping(field_mapping_type_)
+			, time_range_type(time_range_type_)
 		{
 
 		}
 
-		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_);
+		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_, FIELD_MAPPING_TYPE const field_mapping_type_, FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
+			: RowFieldMapping(field_mapping_type_, input_field_entry, output_table_entry)
+			, time_range_type(time_range_type_)
+		{
+		}
+
+		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_, FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
+			: RowFieldMapping(FIELD_MAPPING_TYPE__TIME_RANGE, input_field_entry, output_table_entry)
+			, time_range_type(time_range_type_)
+		{
+		}
+
+		TimeRangeFieldMapping(TimeRangeFieldMapping const & rhs)
+			: RowFieldMapping(rhs)
+			, time_range_type(rhs.time_range_type)
+		{
+
+		}
+
+		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_)
+			: RowFieldMapping(FIELD_MAPPING_TYPE__TIME_RANGE)
+			, time_range_type(time_range_type_)
+		{
+
+		}
 		
 		bool Validate()
 		{
 			return true;
 		}
 
-		FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type PerformMapping(DataFields const & data_fields);
+		void PerformMapping(DataFields const & input_data_fields, DataFields const & output_data_fields);
 
 		TIME_RANGE_FIELD_MAPPING_TYPE time_range_type;
 
