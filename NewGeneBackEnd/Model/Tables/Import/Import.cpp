@@ -438,7 +438,7 @@ bool Importer::ValidateMapping()
 
 }
 
-void Importer::RetrieveStringField(char const * current_line_ptr, char * parsed_line_ptr, bool & stop)
+void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop)
 {
 	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED)
 	{

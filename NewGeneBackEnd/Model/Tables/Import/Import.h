@@ -299,7 +299,7 @@ class Importer
 		bool ValidateMapping();
 		void InitializeFields();
 		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline);
-		void RetrieveStringField(char const * current_line_ptr, char * parsed_line_ptr, bool & stop);
+		void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop);
 
 };
 
