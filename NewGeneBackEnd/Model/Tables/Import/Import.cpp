@@ -1061,7 +1061,7 @@ bool Importer::DoImport()
 			else
 			{
 				// Write rows to database here
-				bool write_succeeded = table_write_callback(model, table, output_block, currently_read_lines);
+				bool write_succeeded = table_write_callback(model, import_definition, table, output_block, currently_read_lines);
 				if (!write_succeeded)
 				{
 					// Todo: log warning

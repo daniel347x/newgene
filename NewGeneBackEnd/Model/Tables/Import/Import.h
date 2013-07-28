@@ -277,7 +277,7 @@ class Importer
 
 	public:
 
-		typedef bool (*TableImportCallbackFn)(Model_basemost * model_, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
+		typedef bool (*TableImportCallbackFn)(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
 
 		static int const block_size = 1024;
 

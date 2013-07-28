@@ -47,7 +47,7 @@ void InputModel::LoadTables()
 						// Todo: log warning
 						return; // from lambda
 					}
-					success = vg_instance_data->ImportEnd(db, *variable_group_identifier.code, new_definition, nullptr, this);
+					success = vg_instance_data->ImportEnd(db, new_definition, nullptr, this);
 					if (!success)
 					{
 						// Todo: log warning
@@ -61,7 +61,7 @@ void InputModel::LoadTables()
 
 }
 
-bool InputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
+bool InputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
 {
 
 	try
@@ -79,7 +79,7 @@ bool InputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, D
 				// Todo: log warning
 				return false;
 			}
-			table_->ImportBlock(input_model->getDb(), nullptr, input_model, table_block, number_rows);
+			table_->ImportBlock(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows);
 		}
 		else
 		{

@@ -9,7 +9,7 @@ void Table_VariableGroupData::Load(sqlite3 * db, InputModel * input_model_)
 {
 }
 
-bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string vg_code, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_)
+bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string code, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_)
 {
 	
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -18,7 +18,7 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string vg_code, Imp
 
 	if (db)
 	{
-		if (!tableManager().TableExists(db, TableNameFromVGCode(vg_code)))
+		if (!tableManager().TableExists(db, TableNameFromVGCode(code)))
 		{
 			std::string sql_create;
 			sql_create += "CREATE TABLE ";
@@ -88,7 +88,7 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string vg_code, Imp
 
 }
 
-bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block, int const number_rows_in_block)
+bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block, int const number_rows_in_block)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -278,7 +278,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, std::string vg_code, Imp
 
 }
 
-bool Table_VariableGroupData::ImportEnd(sqlite3 * db, std::string vg_code, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_)
+bool Table_VariableGroupData::ImportEnd(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_)
 {
 
 	return true;

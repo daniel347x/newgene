@@ -33,6 +33,6 @@ class InputModel : public Model<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETT
 
 };
 
-bool InputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
+bool InputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
 
 #endif
