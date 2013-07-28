@@ -179,13 +179,17 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 			case FIELD_TYPE_STRING_FIXED:
 				{
 					Field<FIELD_TYPE_STRING_FIXED> const & field = static_cast<Field<FIELD_TYPE_STRING_FIXED> const & >(*field_data);
+					sql_insert += '\'';
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += '\'';
 				}
 				break;
 			case FIELD_TYPE_STRING_VAR:
 				{
 					Field<FIELD_TYPE_STRING_VAR> const & field = static_cast<Field<FIELD_TYPE_STRING_VAR> const & >(*field_data);
+					sql_insert += '\'';
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += '\'';
 				}
 				break;
 			case FIELD_TYPE_TIMESTAMP:
@@ -197,25 +201,33 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 			case FIELD_TYPE_UUID:
 				{
 					Field<FIELD_TYPE_UUID> const & field = static_cast<Field<FIELD_TYPE_UUID> const & >(*field_data);
+					sql_insert += '\'';
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += '\'';
 				}
 				break;
 			case FIELD_TYPE_UUID_FOREIGN:
 				{
 					Field<FIELD_TYPE_UUID_FOREIGN> const & field = static_cast<Field<FIELD_TYPE_UUID_FOREIGN> const & >(*field_data);
+					sql_insert += '\'';
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += '\'';
 				}
 				break;
 			case FIELD_TYPE_STRING_CODE:
 				{
 					Field<FIELD_TYPE_STRING_CODE> const & field = static_cast<Field<FIELD_TYPE_STRING_CODE> const & >(*field_data);
+					sql_insert += '\'';
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += '\'';
 				}
 				break;
 			case FIELD_TYPE_STRING_LONGHAND:
 				{
 					Field<FIELD_TYPE_STRING_LONGHAND> const & field = static_cast<Field<FIELD_TYPE_STRING_LONGHAND> const & >(*field_data);
+					sql_insert += '\'';
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += '\'';
 				}
 				break;
 			case FIELD_TYPE_TIME_RANGE:
@@ -227,19 +239,25 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 			case FIELD_TYPE_NOTES_1:
 				{
 					Field<FIELD_TYPE_NOTES_1> const & field = static_cast<Field<FIELD_TYPE_NOTES_1> const & >(*field_data);
+					sql_insert += '\'';
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += '\'';
 				}
 				break;
 			case FIELD_TYPE_NOTES_2:
 				{
 					Field<FIELD_TYPE_NOTES_2> const & field = static_cast<Field<FIELD_TYPE_NOTES_2> const & >(*field_data);
+					sql_insert += '\'';
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += '\'';
 				}
 				break;
 			case FIELD_TYPE_NOTES_3:
 				{
 					Field<FIELD_TYPE_NOTES_3> const & field = static_cast<Field<FIELD_TYPE_NOTES_3> const & >(*field_data);
+					sql_insert += '\'';
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += '\'';
 				}
 				break;
 			}
@@ -267,7 +285,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 		return false;
 	}
 	int step_result = 0;
-	if ((step_result = sqlite3_step(stmt)) != SQLITE_ROW)
+	if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
 	{
 		// TODO: Log error
 		return false;

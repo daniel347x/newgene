@@ -279,7 +279,7 @@ class Importer
 
 		typedef bool (*TableImportCallbackFn)(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
 
-		static int const block_size = 1024;
+		static int const block_size = 500; // Maximum number of rows supported for block insert by SQLite
 
 		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, TableImportCallbackFn table_write_callback_);
 

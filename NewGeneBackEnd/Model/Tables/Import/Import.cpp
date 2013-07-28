@@ -24,8 +24,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 
 			Field<FIELD_TYPE_INT32> const & the_input_field_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field);
-			Field<FIELD_TYPE_TIMESTAMP> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_TIMESTAMP> &>(*the_output_field_year_start);
-			Field<FIELD_TYPE_TIMESTAMP> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_TIMESTAMP> &>(*the_output_field_year_end);
+			Field<FIELD_TYPE_INT32> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_INT32> &>(*the_output_field_year_start);
+			Field<FIELD_TYPE_INT32> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_INT32> &>(*the_output_field_year_end);
 
 			// convert year to ms since jan 1, 1970 00:00:00.000
 			boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
@@ -116,7 +116,12 @@ void Importer::InitializeFields()
 			case FIELD_TYPE_STRING_FIXED:
 				{
 					std::shared_ptr<Field<FIELD_TYPE_STRING_FIXED>> field = std::make_shared<Field<FIELD_TYPE_STRING_FIXED>>(field_name);
+					std::string testname1 = field->GetName();
 					fields.push_back(field);
+					std::shared_ptr<BaseField> test = fields[fields.size()-1];
+					std::string testname = test->GetName();
+					BaseField * testcase = test.get();
+					std::string testname3 = testcase->GetName();
 				}
 				break;
 			case FIELD_TYPE_STRING_VAR:

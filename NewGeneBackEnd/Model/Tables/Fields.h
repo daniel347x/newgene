@@ -3,6 +3,7 @@
 
 #include "FieldTypes.h"
 #include <tuple>
+#include <memory>
 
 template<FIELD_TYPE THE_FIELD_TYPE>
 class FieldValue
@@ -29,8 +30,8 @@ struct FieldData
 class BaseField
 {
 public:
-	virtual FIELD_TYPE GetType() { return FIELD_TYPE_UNKNOWN; };
-	virtual std::string GetName() { return ""; };
+	virtual FIELD_TYPE GetType() const { return FIELD_TYPE_UNKNOWN; };
+	virtual std::string GetName() const { return ""; };
 	BaseField(bool dummy)
 	{
 
@@ -59,7 +60,7 @@ public:
 
 	std::string GetName() const
 	{
-		return data.get<1>(data);
+		return std::get<1>(data);
 	}
 
 	inline typename FieldTypeTraits<THE_FIELD_TYPE>::type GetValue() const
