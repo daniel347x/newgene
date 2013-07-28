@@ -13,7 +13,7 @@ void OutputModel::LoadTables()
 
 }
 
-bool OutputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
+bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
 {
 	try
 	{
@@ -30,7 +30,7 @@ bool OutputModelImportTableFn(Model_basemost * model_, Table_basemost * table_, 
 				// Todo: log warning
 				return false;
 			}
-			table_->ImportBlock(output_model->getDb(), output_model, &output_model->getInputModel(), table_block, number_rows);
+			table_->ImportBlock(output_model->getDb(), import_definition, output_model, &output_model->getInputModel(), table_block, number_rows);
 		}
 		else
 		{
