@@ -10,6 +10,9 @@
 #	include <boost/filesystem.hpp>
 #endif
 
+class Importer;
+class Importer::DataFields;
+
 class NameOrIndex
 {
 
@@ -134,7 +137,7 @@ class TimeRangeFieldMapping : public RowFieldMapping
 			return true;
 		}
 
-		typename FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type PerformMapping();
+		typename FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type PerformMapping(Importer const & importer, Importer::DataFields const & data_fields);
 
 		TIME_RANGE_FIELD_MAPPING_TYPE time_range_type;
 
@@ -205,7 +208,12 @@ class Importer
 		Model_basemost * model;
 		Table_basemost * table;
 		TableImportCallbackFn table_write_callback;
-		
+	
+	public:
+
+		std::shared_ptr<BaseField> const RetrieveDataField(FieldTypeEntry const & field_type_entry, Importer::DataFields const & data_fields) const;
+		std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_entry, Importer::DataFields const & data_fields);
+
 	protected:
 	
 		bool ValidateMapping();

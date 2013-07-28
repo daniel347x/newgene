@@ -2,6 +2,7 @@
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
+#	include <boost/date_time/local_time/local_time.hpp>
 #endif
 #include <fstream>
 #include <cstdint>
@@ -11,16 +12,40 @@ TimeRangeFieldMapping::TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const
 {
 }
 
-FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type TimeRangeFieldMapping::PerformMapping()
+FieldTypeTraits<FIELD_TYPE_TIME_RANGE>::type TimeRangeFieldMapping::PerformMapping(Importer const & importer, Importer::DataFields const & data_fields)
 {
-	std::uint64_t result = 0;
+	std::int64_t result = 0;
 	switch(time_range_type)
 	{
-		case TIME_RANGE_FIELD_MAPPING_TYPE__DAY_MONTH_YEAR:
-			{
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR:
+		{
+			std::shared_ptr<BaseField> const the_input_field = importer.RetrieveDataField(input_file_fields[0], data_fields);
+			std::shared_ptr<BaseField> the_output_field_year_start = importer.RetrieveDataField(output_table_fields[0], data_fields);
+			std::shared_ptr<BaseField> the_output_field_year_end = importer.RetrieveDataField(output_table_fields[1], data_fields);
 
+			if (!the_input_field || !the_output_field_year_start || !the_output_field_year_end)
+			{
+				// Todo: log warning
+				return 0;
 			}
-			break;
+
+			Field<FIELD_TYPE_INT32> const & the_input_field_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field);
+			Field<FIELD_TYPE_TIMESTAMP> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_TIMESTAMP> &>(*the_input_field);
+			Field<FIELD_TYPE_TIMESTAMP> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_TIMESTAMP> &>(*the_input_field);
+
+			// convert year to ms since jan 1, 1970 00:00:00.000
+			boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+			boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field_int32.GetValueReference(), 1, 1));
+			boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field_int32.GetValueReference() + 1, 1, 1));
+
+			boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+			boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+
+			the_output_field_year_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
+			the_output_field_year_end_int64.SetValue(diff_end_from_1970.total_milliseconds() - 1);
+
+		}
+		break;
 	}
 	return result;
 }
@@ -280,7 +305,7 @@ void Importer::InitializeFields()
 
 bool Importer::ValidateMapping()
 {
-	
+
 	std::vector<std::pair<int, bool>> indices_required_are_matched;
 
 	// loop through input schema pushing back required indices
@@ -336,66 +361,66 @@ bool Importer::ValidateMapping()
 		switch (field_mapping->field_mapping_type)
 		{
 
-			case FieldMapping::FIELD_MAPPING_TYPE__ONE_TO_ONE:
+		case FieldMapping::FIELD_MAPPING_TYPE__ONE_TO_ONE:
+			{
+				try
 				{
-					try
-					{
-						OneToOneFieldMapping const & the_mapping = dynamic_cast<OneToOneFieldMapping const &>(*field_mapping);
-						FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
+					OneToOneFieldMapping const & the_mapping = dynamic_cast<OneToOneFieldMapping const &>(*field_mapping);
+					FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
 
-						// search the output schema to see what numeric index this corresponds to, and set it in indices_required_are_matched
-						int current_index = 0;
-						std::for_each(import_definition.output_schema.schema.cbegin(), import_definition.output_schema.schema.cend(), [this, &output_entry, &indices_required_are_matched, &current_index](SchemaEntry const & output_schema_entry)
+					// search the output schema to see what numeric index this corresponds to, and set it in indices_required_are_matched
+					int current_index = 0;
+					std::for_each(import_definition.output_schema.schema.cbegin(), import_definition.output_schema.schema.cend(), [this, &output_entry, &indices_required_are_matched, &current_index](SchemaEntry const & output_schema_entry)
+					{
+						bool match = false;
+						if (output_entry.first.name_or_index == NameOrIndex::NAME)
 						{
-							bool match = false;
-							if (output_entry.first.name_or_index == NameOrIndex::NAME)
+							if (boost::iequals(output_entry.first.name, output_schema_entry.field_name))
 							{
-								if (boost::iequals(output_entry.first.name, output_schema_entry.field_name))
+								match = true;
+							}
+						}
+						else
+						{
+							if (output_entry.first.index == current_index)
+							{
+								match = true;
+							}
+						}
+						if (match)
+						{
+							std::for_each(indices_required_are_matched.begin(), indices_required_are_matched.end(), [&current_index](std::pair<int, bool> & the_pair)
+							{
+								if (the_pair.first == current_index)
 								{
-									match = true;
+									the_pair.second = true;
 								}
-							}
-							else
-							{
-								if (output_entry.first.index == current_index)
-								{
-									match = true;
-								}
-							}
-							if (match)
-							{
-								std::for_each(indices_required_are_matched.begin(), indices_required_are_matched.end(), [&current_index](std::pair<int, bool> & the_pair)
-								{
-									if (the_pair.first == current_index)
-									{
-										the_pair.second = true;
-									}
-								});
-							}
-							++current_index;
-						});
-					}
-					catch (std::bad_cast &)
-					{
-						// TODO: Import problem warning
-						return; // from lambda
-					}
+							});
+						}
+						++current_index;
+					});
 				}
-				break;
-
-			case FieldMapping::FIELD_MAPPING_TYPE__TIME_RANGE:
+				catch (std::bad_cast &)
 				{
-					try
-					{
-						TimeRangeFieldMapping const & the_mapping = dynamic_cast<TimeRangeFieldMapping const &>(*field_mapping);
-					}
-					catch (std::bad_cast &)
-					{
-						// TODO: Import problem warning
-						return; // from lambda
-					}
+					// TODO: Import problem warning
+					return; // from lambda
 				}
-				break;
+			}
+			break;
+
+		case FieldMapping::FIELD_MAPPING_TYPE__TIME_RANGE:
+			{
+				try
+				{
+					TimeRangeFieldMapping const & the_mapping = dynamic_cast<TimeRangeFieldMapping const &>(*field_mapping);
+				}
+				catch (std::bad_cast &)
+				{
+					// TODO: Import problem warning
+					return; // from lambda
+				}
+			}
+			break;
 
 		}
 	});
@@ -531,6 +556,55 @@ void Importer::RetrieveStringField(char const * current_line_ptr, char * parsed_
 			*parsed_line_ptr = '\0';
 		}
 	}
+}
+
+std::shared_ptr<BaseField> const Importer::RetrieveDataField(FieldTypeEntry const & field_type_entry, Importer::DataFields const & data_fields) const
+{
+	std::shared_ptr<BaseField> the_field;
+	if (field_type_entry.first.name_or_index == NameOrIndex::NAME)
+	{
+		std::string const & input_field_name = field_type_entry.first.name;
+		std::for_each(data_fields.cbegin(), data_fields.cend(), [&input_field_name, &the_field](std::shared_ptr<BaseField> const & input_field)
+		{
+			if (input_field && boost::iequals(input_field->GetName(), input_field_name))
+			{
+				the_field = input_field;
+			}
+		});
+	}
+	else
+	{
+		if (field_type_entry.first.index < (int)data_fields.size())
+		{
+			the_field = data_fields[field_type_entry.first.index];
+		}
+	}
+	return the_field
+}
+
+std::shared_ptr<BaseField> Importer::RetrieveDataField(FieldTypeEntry const & field_type_entry, Importer::DataFields const & data_fields)
+{
+	std::shared_ptr<BaseField> the_field;
+	if (field_type_entry.first.name_or_index == NameOrIndex::NAME)
+	{
+		std::string const & input_field_name = field_type_entry.first.name;
+		std::for_each(data_fields.cbegin(), data_fields.cend(), [&input_field_name, &the_field](std::shared_ptr<BaseField> const & input_field)
+		{
+			if (input_field && boost::iequals(input_field->GetName(), input_field_name))
+			{
+				the_field = input_field;
+			}
+		});
+	}
+	else
+	{
+		if (field_type_entry.first.index < (int)data_fields.size())
+		{
+			the_field = data_fields[field_type_entry.first.index];
+		}
+	}
+	return the_field
+
 }
 
 int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline)
@@ -794,45 +868,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 						// perform the mapping here
 
-						std::shared_ptr<BaseField> the_input_field;
-						if (input_entry.first.name_or_index == NameOrIndex::NAME)
-						{
-							std::string const & input_field_name = input_entry.first.name;
-							std::for_each(input_data_fields.cbegin(), input_data_fields.cend(), [&input_field_name, &the_input_field](std::shared_ptr<BaseField> const & input_field)
-							{
-								if (input_field && boost::iequals(input_field->GetName(), input_field_name))
-								{
-									the_input_field = input_field;
-								}
-							});
-						}
-						else
-						{
-							if (input_entry.first.index < (int)input_data_fields.size())
-							{
-								the_input_field = input_data_fields[input_entry.first.index];
-							}
-						}
-
-						std::shared_ptr<BaseField> the_output_field;
-						if (output_entry.first.name_or_index == NameOrIndex::NAME)
-						{
-							std::string const & output_field_name = output_entry.first.name;
-							std::for_each(output_data_fields.cbegin(), output_data_fields.cend(), [&output_field_name, &the_output_field](std::shared_ptr<BaseField> const & output_field)
-							{
-								if (output_field && boost::iequals(output_field->GetName(), output_field_name))
-								{
-									the_output_field = output_field;
-								}
-							});
-						}
-						else
-						{
-							if (output_entry.first.index < (int)output_data_fields.size())
-							{
-								the_output_field = output_data_fields[output_entry.first.index];
-							}
-						}
+						std::shared_ptr<BaseField> the_input_field = RetrieveDataField(input_entry, input_data_fields);
+						std::shared_ptr<BaseField> the_output_field = RetrieveDataField(output_entry, output_data_fields);;
 
 						if (the_input_field && the_output_field)
 						{
@@ -974,6 +1011,14 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 						TimeRangeFieldMapping const & the_mapping = dynamic_cast<TimeRangeFieldMapping const &>(*field_mapping);
 
 						// perform the mapping here
+						switch (the_mapping.time_range_type)
+						{
+						case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR:
+							{
+
+							}
+							break;
+						}
 
 
 					}

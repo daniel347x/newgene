@@ -87,7 +87,7 @@ struct FieldTypeTraits<FIELD_TYPE_STRING_VAR>
 template<>
 struct FieldTypeTraits<FIELD_TYPE_TIMESTAMP>
 {
-	typedef std::uint64_t type;
+	typedef std::int64_t type;
 	static type const default = 0;
 };
 

@@ -100,7 +100,8 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTDAY", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTMNTH", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTYR", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "YEAR", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "YEAR-ROW-START", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "YEAR-ROW-END", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "ENDDAY", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "ENDMNTH", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "ENDYEAR", true));
