@@ -24,8 +24,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 
 			Field<FIELD_TYPE_INT32> const & the_input_field_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field);
-			Field<FIELD_TYPE_INT32> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_INT32> &>(*the_output_field_year_start);
-			Field<FIELD_TYPE_INT32> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_INT32> &>(*the_output_field_year_end);
+			Field<FIELD_TYPE_INT64> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_start);
+			Field<FIELD_TYPE_INT64> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_end);
 
 			// convert year to ms since jan 1, 1970 00:00:00.000
 			boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
