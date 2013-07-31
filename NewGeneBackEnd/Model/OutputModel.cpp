@@ -49,10 +49,20 @@ bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import
 void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 {
 
-	// How many variable groups have at least 1 variable selected?
+	InputModel & input_model = getInputModel();
 
-
+	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map = t_variables_selected_identifiers.GetSelectedVariablesByUOA(getDb(), this, &input_model);
 
 	// Check for overlap in UOA's
+
+	// Place UOA's and their associated DMU categories into a vector for convenience
+	WidgetInstanceIdentifiers UOAs;
+	std::for_each(the_map.cbegin(), the_map.cend(), [this, &UOAs](std::pair<WidgetInstanceIdentifier, Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map> const & uoa__to__variable_groups__pair)
+	{
+		WidgetInstanceIdentifier const & uoa = uoa__to__variable_groups__pair.first;
+		UOAs.push_back(uoa);
+	});
+
+
 
 }

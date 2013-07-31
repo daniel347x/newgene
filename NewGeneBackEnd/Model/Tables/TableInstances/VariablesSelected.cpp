@@ -217,7 +217,7 @@ void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_m
 	sqlite3_step(stmt);
 }
 
-Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSelectedVariables(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
+Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSelectedVariablesByUOA(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
 {
 	
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
