@@ -150,6 +150,79 @@ public:
 		return *this;
 	}
 
+	bool operator<(WidgetInstanceIdentifier const & rhs) const
+	{
+
+		if (identifier_parent && rhs.identifier_parent)
+		{
+			bool test_sequence_number = false;
+			if (identifier_parent->code && rhs.identifier_parent->code && identifier_parent->uuid && rhs.identifier_parent->uuid)
+			{
+				if (*identifier_parent->code == *rhs.identifier_parent->code && *identifier_parent->uuid == *rhs.identifier_parent->uuid)
+				{
+					test_sequence_number = true;
+				}
+			}
+			else if (identifier_parent->code && rhs.identifier_parent->code)
+			{
+				if (*identifier_parent->code == *rhs.identifier_parent->code)
+				{
+					test_sequence_number = true;
+				}
+			}
+			else if (identifier_parent->uuid && rhs.identifier_parent->uuid)
+			{
+				if (*identifier_parent->uuid == *rhs.identifier_parent->uuid)
+				{
+					test_sequence_number = true;
+				}
+			}
+
+			if (test_sequence_number)
+			{
+				if (sequence_number_or_count < rhs.sequence_number_or_count)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else
+			{
+				return *identifier_parent < *rhs.identifier_parent;
+			}
+		}
+
+		if (code && rhs.code)
+		{
+			if (*code < *rhs.code)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		if (uuid && rhs.uuid)
+		{
+			if (*uuid < *rhs.uuid)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		return false;
+
+	}
+
 	bool IsEqual(EQUALITY_CHECK_TYPE const check_type, WidgetInstanceIdentifier const & rhs) const
 	{
 		switch (check_type)

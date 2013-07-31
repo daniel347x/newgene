@@ -36,7 +36,7 @@ void Table_VARIABLES_SELECTED::Load(sqlite3 * db, OutputModel * output_model_, I
 		char const * code_variable_group = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_STRING_CODE));
 		if (code_variable && strlen(code_variable) && code_variable_group && strlen(code_variable_group))
 		{
-			WidgetInstanceIdentifier identifier_parent;
+			WidgetInstanceIdentifier identifier_parent; // This is the variable group of which the variable selection is a member
 			bool found_parent = input_model_->t_vgp_identifiers.getIdentifierFromStringCode(code_variable_group, identifier_parent);
 			if (found_parent && identifier_parent.uuid && identifier_parent.uuid->size() > 0)
 			{
@@ -44,6 +44,7 @@ void Table_VARIABLES_SELECTED::Load(sqlite3 * db, OutputModel * output_model_, I
 				bool found = input_model_->t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(code_variable, *identifier_parent.uuid, identifier);
 				if (found && identifier.uuid && identifier.uuid->size())
 				{
+					// Variable group => Variable instance mapping
 					identifiers_map[*identifier_parent.uuid].push_back(identifier);
 				}
 			}
@@ -214,4 +215,60 @@ void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_m
 		return;
 	}
 	sqlite3_step(stmt);
+}
+
+Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSelectedVariables(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
+{
+	
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	if (input_model_ == nullptr)
+	{
+		return UOA_To_Variables_Map();
+	}
+
+	if (output_model_ == nullptr)
+	{
+		return UOA_To_Variables_Map();
+	}
+
+	UOA_To_Variables_Map the_map;
+	bool failed = false;
+	// Iterate through variable group => variables selected map
+	std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [this, &input_model_, &failed, &the_map](std::pair<UUID, WidgetInstanceIdentifiers> const & variable_group__variables__pair)
+	{
+
+		if (failed)
+		{
+			return; // from lambda
+		}
+		// Get the UOA corresponding to the variable group.
+		// This is the *parent* WidgetInstanceIdentifier of the variable group's WidgetInstanceIdentifier
+		WidgetInstanceIdentifier variable_group = input_model_->t_vgp_identifiers.getIdentifier(variable_group__variables__pair.first);
+		if (!variable_group.identifier_parent)
+		{
+			failed = true;
+			return; // from lambda
+		}
+		WidgetInstanceIdentifier uoa = *variable_group.identifier_parent;
+
+		VariableGroup_To_VariableSelections_Map & variable_groups_same_uoa = the_map[uoa]; // create or obtain the map of variable groups corresponding to the same UOA
+		WidgetInstanceIdentifiers & variable_group__variables = variable_groups_same_uoa[variable_group]; // create or obtain the vector of selected variables in the variable group
+
+		// ********************************************************************************* //
+		// Todo: Add safety check that the current variable does not already exist in the vector
+		// ********************************************************************************* //
+
+		// Copy the selected variables in this variable group to the data structure being returned from this function
+		variable_group__variables = variable_group__variables__pair.second;
+
+	});
+
+	if (failed)
+	{
+		return UOA_To_Variables_Map();
+	}
+
+	return the_map;
+
 }

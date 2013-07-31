@@ -49,4 +49,10 @@ bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import
 void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 {
 
+	// How many variable groups have at least 1 variable selected?
+
+
+
+	// Check for overlap in UOA's
+
 }

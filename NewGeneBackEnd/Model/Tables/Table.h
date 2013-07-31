@@ -256,11 +256,13 @@ class Table : public Table_base<CONTAINER_TYPE>
 
 		Table<TABLE_TYPE, CONTAINER_TYPE>(TABLE_MODEL_TYPE const table_model_type_)
 			: Table_base<CONTAINER_TYPE>(table_model_type_)
+			, table_type(TABLE_TYPE)
 		{
 
 		}
 
 		TableMetadata<TABLE_TYPE> metadata;
+		TABLE_TYPES table_type;
 
 };
 
