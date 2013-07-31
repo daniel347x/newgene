@@ -11,6 +11,7 @@ enum WIDGET_ACTIONS
 
 	, ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
 	, ACTION_KAD_COUNT_CHANGE
+	, ACTION_GENERATE_OUTPUT
 
 	, WIDGET_ACTIONS_LAST
 
@@ -24,6 +25,7 @@ enum WIDGET_ACTION_ITEM_REQUEST_REASON
 	, WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS
 	, WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS
 	, WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS
+	, WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION // for actions not associated with an item
 
 	, WIDGET_ACTION_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS
 
@@ -135,6 +137,30 @@ class WidgetActionItem__Spinbox : public WidgetActionItem
 
 };
 
+class WidgetActionItem__GenerateOutput : public WidgetActionItem
+{
+
+public:
+
+	WidgetActionItem__GenerateOutput()
+		: WidgetActionItem()
+	{
+
+	}
+
+	WidgetActionItem__GenerateOutput(WidgetActionItem__GenerateOutput const & rhs)
+		: WidgetActionItem(rhs)
+	{
+
+	}
+
+	~WidgetActionItem__GenerateOutput()
+	{
+
+	}
+
+};
+
 class WidgetActionItemRequest_base
 {
 
@@ -200,5 +226,23 @@ class WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE> : public WidgetActionItem
 		}
 };
 typedef WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE> WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE;
+
+/************************************************************************/
+// ACTION_GENERATE_OUTPUT
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> : public WidgetActionItemRequest_base
+{
+public:
+	WidgetActionItemRequest<ACTION_GENERATE_OUTPUT>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
+		: WidgetActionItemRequest_base(reason_, items_)
+	{
+	}
+	WidgetActionItemRequest<ACTION_GENERATE_OUTPUT>(WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> const & rhs)
+		: WidgetActionItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> WidgetActionItemRequest_ACTION_GENERATE_OUTPUT;
 
 #endif

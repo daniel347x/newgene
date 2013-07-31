@@ -31,6 +31,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>();
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE>();
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_GENERATE_OUTPUT>();
 }
 
 bool NewGeneApplication::notify( QObject * receiver, QEvent * e )

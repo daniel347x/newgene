@@ -45,3 +45,8 @@ bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import
 	}
 	return true;
 }
+
+void OutputModel::GenerateOutput(DataChangeMessage & change_response)
+{
+
+}

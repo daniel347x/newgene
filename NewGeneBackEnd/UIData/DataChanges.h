@@ -29,6 +29,7 @@ enum DATA_CHANGE_TYPE
 
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE
+	, DATA_CHANGE_TYPE__OUTPUT_MODEL__GENERATE_OUTPUT
 
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__LAST
 
@@ -47,6 +48,7 @@ enum DATA_CHANGE_INTENTION
 	, DATA_CHANGE_INTENTION__REMOVE
 	, DATA_CHANGE_INTENTION__UPDATE
 	, DATA_CHANGE_INTENTION__RESET_ALL
+	, DATA_CHANGE_INTENTION__NONE
 
 };
 
@@ -100,6 +102,25 @@ class DataChangePacket_int : public DataChangePacket
 
 };
 
+class DataChangePacket_GenerateOutput : public DataChangePacket
+{
+
+public:
+
+	DataChangePacket_GenerateOutput()
+		: DataChangePacket()
+	{
+
+	}
+
+	DataChangePacket_GenerateOutput(DataChangePacket_GenerateOutput const & rhs)
+		: DataChangePacket(rhs)
+	{
+
+	}
+
+};
+
 class DataChange
 {
 
@@ -110,7 +131,7 @@ class DataChange
 
 		}
 
-		DataChange(DATA_CHANGE_TYPE const & type, DATA_CHANGE_INTENTION const & intention, WidgetInstanceIdentifier const & parent_identifier_, WidgetInstanceIdentifiers const & child_identifiers_)
+		DataChange(DATA_CHANGE_TYPE const & type, DATA_CHANGE_INTENTION const & intention, WidgetInstanceIdentifier const & parent_identifier_ = WidgetInstanceIdentifier(), WidgetInstanceIdentifiers const & child_identifiers_ = WidgetInstanceIdentifiers())
 			: change_type(type)
 			, change_intention(intention)
 			, parent_identifier(parent_identifier_)

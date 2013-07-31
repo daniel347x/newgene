@@ -198,6 +198,7 @@
     <ClCompile Include="Triggers\TriggerManager.cpp" />
     <ClCompile Include="UIAction\ActionChanges.cpp" />
     <ClCompile Include="UIAction\ActionWidgets.cpp" />
+    <ClCompile Include="UIAction\Controllers\Controller_GenerateOutput.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_KAdCountChange.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_VariableGroupSetMemberSelectionChange.cpp" />
     <ClCompile Include="UIAction\UIActionManager.cpp" />

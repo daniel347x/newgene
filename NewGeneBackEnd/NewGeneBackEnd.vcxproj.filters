@@ -515,5 +515,8 @@
     <ClCompile Include="Model\Tables\FieldTypes.cpp">
       <Filter>Source Files\Model\Tables</Filter>
     </ClCompile>
+    <ClCompile Include="UIAction\Controllers\Controller_GenerateOutput.cpp">
+      <Filter>Source Files\UIAction\Controllers</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
