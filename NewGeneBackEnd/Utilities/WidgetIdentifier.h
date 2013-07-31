@@ -264,6 +264,15 @@ public:
 		return false;
 	}
 
+	bool IsEmpty()
+	{
+		if (!uuid && !code)
+		{
+			return true;
+		}
+		return false;
+	}
+
 	std::shared_ptr<UUID> uuid; // In case of ambiguity, sometimes identifier_parent or foreign_key_identifiers are necessary to disambiguate this identifier
 
 	std::shared_ptr<WidgetInstanceIdentifier> identifier_parent; // Parent in the data model (i.e., foreign key in the case of a simple parent-child data relationship), not parent widget in the user interface

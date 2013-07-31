@@ -17,6 +17,9 @@ class Table_UOA_Identifier : public Table<TABLE__UOA_IDENTIFIER, TABLE_INSTANCE_
 		static std::string const UOA_CATEGORY_NOTES3;
 		static std::string const UOA_CATEGORY_FLAGS;
 
+		typedef std::pair<WidgetInstanceIdentifier, int> DMU_Plus_Count;
+		typedef std::vector<DMU_Plus_Count> DMU_Counts;
+
 		enum COLUMN_INDEX
 		{
 			  INDEX__UOA_CATEGORY_UUID = 0
@@ -36,6 +39,14 @@ class Table_UOA_Identifier : public Table<TABLE__UOA_IDENTIFIER, TABLE_INSTANCE_
 		}
 
 		void Load(sqlite3 * db, InputModel * input_model_);
+
+		// For a given UOA, retrieve its DMU categories
+		WidgetInstanceIdentifiers RetrieveDMUCategories(sqlite3 * db, InputModel * input_model_, UUID const & uuid);
+
+		// For a given UOA, retrieve its DMU categories bucketed by DMU category
+		// (i.e., if DMU's are Country-Country-MID, return result as
+		// Country=2, MID=1
+		DMU_Counts RetrieveDMUCounts(sqlite3 * db, InputModel * input_model_, UUID const & uuid);
 
 };
 

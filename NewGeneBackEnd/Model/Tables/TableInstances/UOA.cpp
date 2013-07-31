@@ -77,6 +77,83 @@ void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
 		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ dmu_uuid /* && strlen(dmu_uuid) == UUID_LENGTH */ )
 		{
 			identifiers_map[uuid].push_back(WidgetInstanceIdentifier(uuid, input_model_->t_dmu_category.getIdentifier(dmu_uuid), "", "", sequence_number));
+
+			// Todo: Add sort by sequence number
 		}
 	}
+}
+
+WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 * db, InputModel * input_model_, UUID const & uuid)
+{
+
+	if (!db)
+	{
+		return WidgetInstanceIdentifiers();
+	}
+
+	if (!input_model_)
+	{
+		return WidgetInstanceIdentifiers();
+	}
+
+	// Debugging
+	WidgetInstanceIdentifier uoa = getIdentifier(uuid);
+	if (uoa.IsEmpty())
+	{
+		return WidgetInstanceIdentifiers();
+	}
+
+	WidgetInstanceIdentifiers dmu_categories = input_model_->t_uoa_setmemberlookup.getIdentifiers(uuid);
+
+	return dmu_categories;
+
+}
+
+Table_UOA_Identifier::DMU_Counts Table_UOA_Identifier::RetrieveDMUCounts(sqlite3 * db, InputModel * input_model_, UUID const & uuid)
+{
+
+	if (!db)
+	{
+		return DMU_Counts();
+	}
+
+	if (!input_model_)
+	{
+		return DMU_Counts();
+	}
+
+	// Debugging
+	WidgetInstanceIdentifier uoa = getIdentifier(uuid);
+	if (uoa.IsEmpty())
+	{
+		return DMU_Counts();
+	}
+
+	WidgetInstanceIdentifiers dmu_categories = input_model_->t_uoa_setmemberlookup.getIdentifiers(uuid);
+
+	DMU_Counts dmu_counts;
+	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&dmu_counts](WidgetInstanceIdentifier const & dmu_category)
+	{
+		bool found = false;
+		std::for_each(dmu_counts.begin(), dmu_counts.end(), [&dmu_category, &found](DMU_Plus_Count & dmu_plus_count)
+		{
+			if (found)
+			{
+				return; // from lambda
+			}
+			if (dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, dmu_category))
+			{
+				found = true;
+				++dmu_plus_count.second;
+				return; // from lambda
+			}
+		});
+		if (!found)
+		{
+			dmu_counts.push_back(std::make_pair(dmu_category, 1));
+		}
+	});
+
+	return dmu_counts;
+
 }
