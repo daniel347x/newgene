@@ -51,6 +51,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 	InputModel & input_model = getInputModel();
 
+	// Map: UOA identifier => [ map: VG identifier => list of variables ]
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map = t_variables_selected_identifiers.GetSelectedVariablesByUOA(getDb(), this, &input_model);
 
 	// Check for overlap in UOA's
@@ -58,7 +59,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	// Place UOA's and their associated DMU categories into a vector for convenience
 	std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> UOAs;
 	bool failed = false;
-	std::for_each(the_map.cbegin(), the_map.cend(), [this, &input_model, &UOAs, &failed](std::pair<WidgetInstanceIdentifier, Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map> const & uoa__to__variable_groups__pair)
+	std::for_each(the_map.cbegin(), the_map.cend(), [this, &input_model, &UOAs, &failed](std::pair<WidgetInstanceIdentifier /* UOA identifier */,
+																								   Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map> /* map: VG identifier => List of variables */
+																																									  const & uoa__to__variable_groups__pair)
 	{
 		if (failed)
 		{
@@ -196,5 +199,136 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	
 	// To start off, only 1 generation cycle will be allowed
 	// (i.e. only one multiple may be greater than 0).
+
+	// For now: Make sure that at most 1 DMU has a multiplicity greater than 1
+	if (!biggest_counts.first.uuid)
+	{
+		// Todo: Error message
+		return;
+	}
+	failed = false;
+	std::vector<int> multiplicities;
+	int highest_multiplicity = 0;
+	std::for_each(biggest_counts.second.cbegin(), biggest_counts.second.cend(), [this, &multiplicities, &highest_multiplicity, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+	{
+		if (failed)
+		{
+			return; // from lamda
+		}
+		WidgetInstanceIdentifier const & the_dmu_category = dmu_category.first;
+		if (!the_dmu_category.uuid)
+		{
+			failed = true;
+			return; // from lambda
+		}
+		WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->t_kad_count.getIdentifier(*the_dmu_category.uuid);
+		int uoa_count_current_dmu_category = dmu_category.second;
+		int kad_count_current_dmu_category = kad_count_pair.second;
+		int multiplicity = 0;
+		if (kad_count_current_dmu_category >= uoa_count_current_dmu_category)
+		{
+			multiplicity = 1;
+		}
+		if (multiplicity == 0)
+		{
+			failed = true;
+			return; // from lambda
+		}
+		int test_kad_count = uoa_count_current_dmu_category;
+		while (test_kad_count <= kad_count_current_dmu_category)
+		{
+			test_kad_count += uoa_count_current_dmu_category;
+			if (test_kad_count <= kad_count_current_dmu_category)
+			{
+				++multiplicity;
+			}
+		}
+		multiplicities.push_back(multiplicity);
+		if (multiplicity > highest_multiplicity)
+		{
+			highest_multiplicity = multiplicity;
+		}
+	});
+
+	if (failed)
+	{
+		// Todo: Error message
+		return;
+	}
+
+	// check that only 1 has multiplicity > 1 (for now)
+	bool anything_has_multiplicity_greater_than_1 = false;
+	int which_index_has_multiplicity_greater_than_1 = -1;
+	int current_index = 0;
+	std::for_each(multiplicities.cbegin(), multiplicities.cend(), [&anything_has_multiplicity_greater_than_1, &which_index_has_multiplicity_greater_than_1, &current_index, &failed](int const & test_multiplicity)
+	{
+		if (failed)
+		{
+			return; // from lambda
+		}
+		if (test_multiplicity > 1)
+		{
+			if (anything_has_multiplicity_greater_than_1)
+			{
+				// **************************************************************************************************** //
+				// A second multiplicity is greater than 1 - for now, not allowed.  This can be implemented in the future.
+				// **************************************************************************************************** //
+				failed = true;
+				return; // from lambda
+			}
+			anything_has_multiplicity_greater_than_1 = true;
+			which_index_has_multiplicity_greater_than_1 = current_index;
+		}
+		++current_index;
+	});
+
+	// Construct initial SQL
+	std::string sql_generate_output;
+
+
+	// The vector of variable groups corresponding to this UOA (independent of time granularity; i.e., all time granularities appear here)
+	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map & variable_groups_map = the_map[*biggest_counts.first.uuid];
+
+	// TODO: If more than one variable group corresponds to this UOA,
+	// test for time range of each, and deal with that.
+	// If the same time range, perform multiple SELECT's, one per VG,
+	// and take the union.
+
+	// For now, just use the first VG.
+	bool first_vg = true;
+	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> the_variable_group;
+	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [&first_vg, &the_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & one_variable_group)
+	{
+		if (!first_vg)
+		{
+			return; // from lambda - for now
+		}
+		first_vg = false;
+		the_variable_group = one_variable_group;
+	});
+
+	if (!the_variable_group.first.code)
+	{
+		// Todo: error message
+		return;
+	}
+
+	std::string vg_code = *the_variable_group.first.code;
+	std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
+
+	sql_generate_output += "SELECT * FROM ";
+	sql_generate_output += vg_data_table_name;
+	sql_generate_output += " t1 ";
+	char nBuffer[1024];
+	for (int m=1; m<highest_multiplicity; ++m)
+	{
+		memset(nBuffer, '\0', 1024);
+		sql_generate_output += "JOIN ";
+		sql_generate_output += vg_data_table_name;
+		sql_generate_output += " t";
+		sql_generate_output += itoa(m+1, nBuffer, 10);
+		sql_generate_output += " ON ";
+
+	}
 
 }
