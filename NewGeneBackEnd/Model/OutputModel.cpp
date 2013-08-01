@@ -366,7 +366,49 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	sql_generate_output += "SELECT ";
 	bool first_select = true;
 
-	// First: Always display primary keys
+	// First: Display the primary keys with multiplicity 1
+	int multiplicity_one = 1;
+	std::string current_table_token = CurrentTableTokenName(multiplicity_one);
+	char ns__[64];
+	std::string ms__ = itoa(multiplicity_one, ns__, 10);
+	std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &multiplicity_one, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+	{
+
+		if (failed)
+		{
+			return; // from lambda
+		}
+
+		if (!primary_key_in_this_variable_group.code || !primary_key_in_this_variable_group.longhand) // The column name has been packed into "longhand" field
+		{
+			failed = true;
+			return; // from lambda
+		}
+
+		if (*primary_key_in_this_variable_group.code != highest_multiplicity_dmu_string_code)
+		{
+			// This DMU's has multiplicity 1
+			if (!first_select)
+			{
+				sql_generate_output += ", ";
+			}
+			first_select = false;
+			sql_generate_output += current_table_token;
+			sql_generate_output += ".";
+			sql_generate_output += *primary_key_in_this_variable_group.longhand;
+			sql_generate_output += " AS ";
+			sql_generate_output += *primary_key_in_this_variable_group.longhand;
+		}
+
+	});
+
+	if (failed)
+	{
+		// Todo: Error message
+		return;
+	}
+
+	// First: Display primary keys with multiplicity greater than 1
 	for (int m=1; m<=highest_multiplicity; ++m)
 	{
 
@@ -374,19 +416,27 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		char ns__[64];
 		std::string ms__ = itoa(m, ns__, 10);
 
-		// First: Always display primary keys
-		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &ms__, &first_select, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+		// First: Display the primary keys with multiplicity 1
+		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &m, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
 		{
+
 			if (failed)
 			{
-				// Todo: Error message
 				return; // from lambda
 			}
-			if (!primary_key_in_this_variable_group.longhand)
+
+			if (!primary_key_in_this_variable_group.code || !primary_key_in_this_variable_group.longhand) // The column name has been packed into "longhand" field
 			{
 				failed = true;
 				return; // from lambda
 			}
+
+			if (*primary_key_in_this_variable_group.code != highest_multiplicity_dmu_string_code)
+			{
+				// This is not one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
+				return; // from lambda
+			}
+
 			if (!first_select)
 			{
 				sql_generate_output += ", ";
@@ -401,6 +451,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_generate_output += ms__;
 		});
 
+	}
+
+	if (failed)
+	{
+		// Todo: error message
+		return;
 	}
 
 	for (int m=1; m<=highest_multiplicity; ++m)
