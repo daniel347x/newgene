@@ -109,10 +109,10 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 		if (first)
 		{
+			first = false;
 			biggest_counts = uoa__to__dmu_counts__pair;
 			return; // from lambda
 		}
-		first = false;
 		
 		// Check if the current DMU_Counts overlaps (which is currently an error)
 		// or is bigger
@@ -362,14 +362,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				return; // from lambda
 			}
 
-			sql_generate_output += " JOIN ";
-			sql_generate_output += vg_data_table_name;
-			sql_generate_output += " ";
-			sql_generate_output += current_table_token;
-			sql_generate_output += " ON ";
-
-			std::string vg_data_column_name = *dmu_identifier.longhand;
-
 			if (*dmu_identifier.code == highest_multiplicity_dmu_string_code)
 			{
 				// This is one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
@@ -377,6 +369,15 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			}
 			
 			// good to go
+
+			std::string vg_data_column_name = *dmu_identifier.longhand;
+
+			sql_generate_output += " JOIN ";
+			sql_generate_output += vg_data_table_name;
+			sql_generate_output += " ";
+			sql_generate_output += current_table_token;
+			sql_generate_output += " ON ";
+
 			sql_generate_output += current_table_token;
 			sql_generate_output += ".";
 			sql_generate_output += vg_data_column_name;

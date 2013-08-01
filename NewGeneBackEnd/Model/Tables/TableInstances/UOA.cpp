@@ -61,7 +61,7 @@ void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
 	identifiers_map.clear();
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT * FROM VG_SET_MEMBER");
+	std::string sql("SELECT * FROM UOA_CATEGORY_LOOKUP");
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
@@ -76,7 +76,9 @@ void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
 		char const * dmu_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_LOOKUP_FK_DMU_CATEGORY_UUID));
 		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ dmu_uuid /* && strlen(dmu_uuid) == UUID_LENGTH */ )
 		{
-			identifiers_map[uuid].push_back(WidgetInstanceIdentifier(uuid, input_model_->t_dmu_category.getIdentifier(dmu_uuid), "", "", sequence_number));
+			WidgetInstanceIdentifier the_dmu_identifier = input_model_->t_dmu_category.getIdentifier(dmu_uuid);
+			the_dmu_identifier.sequence_number_or_count = sequence_number;
+			identifiers_map[uuid].push_back(the_dmu_identifier);
 
 			// Todo: Add sort by sequence number
 		}
