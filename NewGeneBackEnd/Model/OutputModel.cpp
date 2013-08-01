@@ -49,13 +49,22 @@ bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import
 void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 {
 
+
 	InputModel & input_model = getInputModel();
 
+
+	// ***************************************************************** //
+	// the_map is:
 	// Map: UOA identifier => [ map: VG identifier => list of variables ]
+	// ***************************************************************** //
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map = t_variables_selected_identifiers.GetSelectedVariablesByUOA(getDb(), this, &input_model);
 
 	// Check for overlap in UOA's
 
+	// ************************************************************************** //
+	// UOAs is:
+	// Vector of: UOA identifier and its associated list of [DMU Category / Count]
+	// ************************************************************************** //
 	// Place UOA's and their associated DMU categories into a vector for convenience
 	std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> UOAs;
 	bool failed = false;
@@ -83,6 +92,11 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		return;
 	}
 
+	// ************************************************************************************ //
+	// biggest_counts is:
+	// Pair consisting of: UOA identifier and its associated list of [DMU Category / Count]
+	// ... for the UOA that has been determined to be the primary UOA
+	// ************************************************************************************ //
 	std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> biggest_counts;
 	bool first = true;
 	std::for_each(UOAs.cbegin(), UOAs.cend(), [&first, &biggest_counts, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
@@ -209,14 +223,15 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	failed = false;
 	std::vector<int> multiplicities;
 	int highest_multiplicity = 0;
-	std::for_each(biggest_counts.second.cbegin(), biggest_counts.second.cend(), [this, &multiplicities, &highest_multiplicity, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+	std::string highest_multiplicity_dmu_string_code;
+	std::for_each(biggest_counts.second.cbegin(), biggest_counts.second.cend(), [this, &multiplicities, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
 	{
 		if (failed)
 		{
 			return; // from lamda
 		}
 		WidgetInstanceIdentifier const & the_dmu_category = dmu_category.first;
-		if (!the_dmu_category.uuid)
+		if (!the_dmu_category.uuid || !the_dmu_category.code)
 		{
 			failed = true;
 			return; // from lambda
@@ -247,6 +262,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (multiplicity > highest_multiplicity)
 		{
 			highest_multiplicity = multiplicity;
+			highest_multiplicity_dmu_string_code = *the_dmu_category.code;
 		}
 	});
 
@@ -316,19 +332,79 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	std::string vg_code = *the_variable_group.first.code;
 	std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
 
+	WidgetInstanceIdentifiers const & dmu_primary_key_codes = input_model.t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
+
+	if (dmu_primary_key_codes.size() == 0)
+	{
+		// Todo: error message
+		return;
+	}
+
 	sql_generate_output += "SELECT * FROM ";
 	sql_generate_output += vg_data_table_name;
-	sql_generate_output += " t1 ";
+	sql_generate_output += " t1";
 	char nBuffer[1024];
 	for (int m=1; m<highest_multiplicity; ++m)
 	{
 		memset(nBuffer, '\0', 1024);
-		sql_generate_output += "JOIN ";
-		sql_generate_output += vg_data_table_name;
-		sql_generate_output += " t";
-		sql_generate_output += itoa(m+1, nBuffer, 10);
-		sql_generate_output += " ON ";
+		std::string current_table_token = "t";
+		current_table_token += itoa(m+1, nBuffer, 10);
 
+		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &highest_multiplicity_dmu_string_code, &vg_data_table_name, &current_table_token, &failed](WidgetInstanceIdentifier const & dmu_identifier)
+		{
+			if (failed)
+			{
+				return; // from lambda
+			}
+			if (!dmu_identifier.code || !dmu_identifier.longhand) // The column name has been packed into "longhand" field
+			{
+				failed = true;
+				return; // from lambda
+			}
+
+			sql_generate_output += " JOIN ";
+			sql_generate_output += vg_data_table_name;
+			sql_generate_output += " ";
+			sql_generate_output += current_table_token;
+			sql_generate_output += " ON ";
+
+			std::string vg_data_column_name = *dmu_identifier.longhand;
+
+			if (*dmu_identifier.code == highest_multiplicity_dmu_string_code)
+			{
+				// This is one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
+				return; // from lambda
+			}
+			
+			// good to go
+			sql_generate_output += current_table_token;
+			sql_generate_output += ".";
+			sql_generate_output += vg_data_column_name;
+			sql_generate_output += " = ";
+			sql_generate_output += "t1.";
+			sql_generate_output += vg_data_column_name;
+		});
+
+	}
+
+	if (failed)
+	{
+		// Todo: Error message
+		return;
+	}
+
+	sqlite3_stmt * stmt = NULL;
+	sqlite3_prepare_v2(db, sql_generate_output.c_str(), sql_generate_output.size() + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		// Todo: Error message
+		return;
+	}
+
+	int step_result = 0;
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		//sqlite3
 	}
 
 }

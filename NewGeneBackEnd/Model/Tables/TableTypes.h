@@ -21,6 +21,7 @@ enum TABLE_TYPES
 
 	// Raw input data tables
 	, TABLE__VG_INPUT_DATA // special case
+	, TABLE__VG_INPUT_DATA_METADATA
 
 	// Output model tables
 	, TABLE__VG_SET_MEMBER_SELECTED

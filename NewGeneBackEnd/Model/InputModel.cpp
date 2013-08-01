@@ -57,6 +57,8 @@ void InputModel::LoadTables()
 				t_vgp_data_vector.push_back(std::move(vg_instance_data));
 			}
 		});
+
+		t_vgp_data_metadata.Load(db, this);
 	}
 
 }

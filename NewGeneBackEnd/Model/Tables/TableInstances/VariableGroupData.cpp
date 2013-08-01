@@ -5,6 +5,11 @@
 #	include <boost/lexical_cast.hpp>
 #endif
 
+std::string const Table_VariableGroupMetadata::VG_DATA_TABLE_NAME = "VG_DATA_TABLE_NAME";
+std::string const Table_VariableGroupMetadata::VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME = "VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME";
+std::string const Table_VariableGroupMetadata::VG_DATA_TABLE_FK_DMU_CATEGORY_CODE = "VG_DATA_TABLE_FK_DMU_CATEGORY_CODE";
+std::string const Table_VariableGroupMetadata::VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER = "VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER";
+
 void Table_VariableGroupData::Load(sqlite3 * db, InputModel * input_model_)
 {
 }
@@ -308,4 +313,36 @@ std::string Table_VariableGroupData::TableNameFromVGCode(std::string variable_gr
 	std::string variable_group_data_table_name("VG_INSTANCE_DATA_");
 	variable_group_data_table_name += variable_group_code;
 	return variable_group_data_table_name;
+}
+
+void Table_VariableGroupMetadata::Load(sqlite3 * db, InputModel * input_model_)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	identifiers_map.clear();
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT * FROM VG_DATA_METADATA");
+	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		return;
+	}
+	int step_result = 0;
+
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		char const * vg_data_table_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_NAME));
+		char const * vg_data_primary_key_column_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME));
+		char const * vg_data_dmu_category_code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_FK_DMU_CATEGORY_CODE));
+		int vg_data_primary_key_sequence_number = sqlite3_column_int(stmt, INDEX__VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER);
+		if (vg_data_dmu_category_code && strlen(vg_data_dmu_category_code))
+		{
+			// maps:
+			// vg_data_table_name =>
+			// a vector of primary keys (each a DMU category identifier)
+			identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_dmu_category_code), vg_data_primary_key_column_name, vg_data_primary_key_sequence_number));
+		}
+	}
 }

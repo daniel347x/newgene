@@ -70,6 +70,11 @@ void UIActionManager::DoKAdCountChange(Messager & messager, WidgetActionItemRequ
 				// ***************************************** //
 				output_model.t_kad_count.Update(output_model.getDb(), output_model, input_model, change_response);
 
+				if (actionItemSpinbox.getValue() == 4)
+				{
+					output_model.GenerateOutput(change_response);
+				}
+
 			});
 
 			messager.EmitChangeMessage(change_response);

@@ -1,6 +1,7 @@
 #ifndef VARIABLEGROUPDATA_H
 #define VARIABLEGROUPDATA_H
 
+#include "../../../globals.h"
 #include "../Table.h"
 
 class Table_VariableGroupData : public Table<TABLE__VG_INPUT_DATA, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__NONE>
@@ -25,6 +26,36 @@ public:
 
 	std::string vg_category_string_code;
 	std::string table_name;
+
+};
+
+class Table_VariableGroupMetadata : public Table<TABLE__VG_INPUT_DATA_METADATA, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>
+{
+
+public:
+
+	static std::string const VG_DATA_TABLE_NAME;
+	static std::string const VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME;
+	static std::string const VG_DATA_TABLE_FK_DMU_CATEGORY_CODE;
+	static std::string const VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER;
+
+	enum COLUMN_INDEX
+	{
+		  INDEX__VG_DATA_TABLE_NAME = 0
+		, INDEX__VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME
+		, INDEX__VG_DATA_TABLE_FK_DMU_CATEGORY_CODE
+		, INDEX__VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER
+	};
+
+public:
+
+	Table_VariableGroupMetadata()
+		: Table<TABLE__VG_INPUT_DATA_METADATA, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>(Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
+	{
+
+	}
+
+	void Load(sqlite3 * db, InputModel * input_model_);
 
 };
 
