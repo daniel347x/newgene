@@ -287,7 +287,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 
 	// The vector of variable groups corresponding to this UOA (independent of time granularity; i.e., all time granularities appear here)
-	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map & variable_groups_map = the_map[*biggest_counts.first.uuid];
+	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map & variable_groups_map = the_map[biggest_counts.first];
 
 	// TODO: If more than one variable group corresponds to this UOA,
 	// test for time range of each, and deal with that.

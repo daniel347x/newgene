@@ -38,10 +38,10 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	SchemaVector input_schema_vector;
 	SchemaVector output_schema_vector;
 
-	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "DISNO"));
-	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STATEA"));
+	input_schema_vector.push_back(SchemaEntry("MID", FIELD_TYPE_STRING_FIXED, "DISNO"));
+	input_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "STATEA"));
 	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "NAMEA"));
-	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STATEB"));
+	input_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "STATEB"));
 	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "NAMEB"));
 	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTDAY"));
 	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTMNTH"));
@@ -92,10 +92,10 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "Durindx"));
 	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "Duration"));
 
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "DISNO", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STATEA", true));
+	output_schema_vector.push_back(SchemaEntry("MID", FIELD_TYPE_STRING_FIXED, "DISNO", true));
+	output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "STATEA", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "NAMEA", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STATEB", true));
+	output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "STATEB", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "NAMEB", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "YEAR"));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "YEAR_ROW_START", true));
@@ -164,10 +164,10 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	mappings.push_back(time_range_mapping);
 
 	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32)));
-	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "DISNO"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "DISNO"), FIELD_TYPE_INT32)));
-	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "STATEA"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "STATEA"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "DISNO"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "DISNO"), FIELD_TYPE_STRING_FIXED)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "STATEA"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "STATEA"), FIELD_TYPE_STRING_FIXED)));
 	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "NAMEA"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "NAMEA"), FIELD_TYPE_STRING_FIXED)));
-	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "STATEB"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "STATEB"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "STATEB"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "STATEB"), FIELD_TYPE_STRING_FIXED)));
 	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "NAMEB"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "NAMEB"), FIELD_TYPE_STRING_FIXED)));
 	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTDAY"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTDAY"), FIELD_TYPE_INT32)));
 	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTMNTH"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTMNTH"), FIELD_TYPE_INT32)));

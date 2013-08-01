@@ -4,6 +4,7 @@
 #include <utility>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "FieldTypes.h"
 
@@ -23,15 +24,25 @@ class SchemaEntry
 		{
 		}
 
+		SchemaEntry(std::string const & dmu_category_string_code_, FIELD_TYPE const field_type_, std::string const & field_name_ = std::string(), bool const required_ = false)
+			: field_type(field_type_)
+			, field_name(field_name_)
+			, required(required_)
+			, dmu_category_string_code(std::make_shared<std::string>(dmu_category_string_code_))
+		{
+		}
+
 		SchemaEntry(SchemaEntry const & rhs)
 			: field_type(rhs.field_type)
 			, field_name(rhs.field_name)
 			, required(rhs.required)
+			, dmu_category_string_code(rhs.dmu_category_string_code)
 		{
 		}
 
 	FIELD_TYPE field_type;
 	std::string field_name;
+	std::shared_ptr<std::string> dmu_category_string_code; // primary key field
 	bool required;
 
 };
