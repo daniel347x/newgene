@@ -509,6 +509,27 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 		std::string current_table_token = CurrentTableTokenName(m+1);
 
+		sql_generate_output += " JOIN ";
+		sql_generate_output += vg_data_table_name;
+		sql_generate_output += " ";
+		sql_generate_output += current_table_token;
+		sql_generate_output += " ON ";
+
+		// Always match on time range fields
+		sql_generate_output += current_table_token;
+		sql_generate_output += ".";
+		sql_generate_output += "DATETIME_ROW_START";
+		sql_generate_output += " = ";
+		sql_generate_output += "t1.";
+		sql_generate_output += "DATETIME_ROW_START";
+		sql_generate_output += " AND ";
+		sql_generate_output += current_table_token;
+		sql_generate_output += ".";
+		sql_generate_output += "DATETIME_ROW_END";
+		sql_generate_output += " = ";
+		sql_generate_output += "t1.";
+		sql_generate_output += "DATETIME_ROW_END";
+
 		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &highest_multiplicity_dmu_string_code, &vg_data_table_name, &current_table_token, &failed](WidgetInstanceIdentifier const & dmu_identifier)
 		{
 			if (failed)
@@ -531,12 +552,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 			std::string vg_data_column_name = *dmu_identifier.longhand;
 
-			sql_generate_output += " JOIN ";
-			sql_generate_output += vg_data_table_name;
-			sql_generate_output += " ";
-			sql_generate_output += current_table_token;
-			sql_generate_output += " ON ";
-
+			sql_generate_output += " AND ";
 			sql_generate_output += current_table_token;
 			sql_generate_output += ".";
 			sql_generate_output += vg_data_column_name;

@@ -98,8 +98,8 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "STATEB", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "NAMEB", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "YEAR"));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "YEAR_ROW_START", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "YEAR_ROW_END", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_START", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_END", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTDAY", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTMNTH", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTYR", true));
@@ -155,8 +155,8 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	FieldTypeEntries output_table_fields;
 	FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32);
 	input_file_fields.push_back(input_time_field__Year);
-	FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR_ROW_START"), FIELD_TYPE_INT64);
-	FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR_ROW_END"), FIELD_TYPE_INT64);
+	FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
+	FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
 	output_table_fields.push_back(output_time_field__YearStart);
 	output_table_fields.push_back(output_time_field__YearEnd);
 	time_range_mapping->input_file_fields = input_file_fields;
