@@ -346,6 +346,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	std::string vg_code = *the_variable_group.first.code;
 	std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
 
+	// dmu_primary_key_codes:
+	// The primary key metadata for the_variable_group
 	WidgetInstanceIdentifiers const & dmu_primary_key_codes = input_model.t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
 
 	if (dmu_primary_key_codes.size() == 0)
@@ -363,12 +365,53 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	// and doing the same SELECT from each of them into a temporary table, then performing a UNION.
 	sql_generate_output += "SELECT ";
 	bool first_select = true;
+
+	// First: Always display primary keys
 	for (int m=1; m<=highest_multiplicity; ++m)
 	{
+
 		std::string current_table_token = CurrentTableTokenName(m);
 		char ns__[64];
 		std::string ms__ = itoa(m, ns__, 10);
-		std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &first_select, &sql_generate_output, &current_table_token,&ms__, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
+
+		// First: Always display primary keys
+		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &ms__, &first_select, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+		{
+			if (failed)
+			{
+				// Todo: Error message
+				return; // from lambda
+			}
+			if (!primary_key_in_this_variable_group.longhand)
+			{
+				failed = true;
+				return; // from lambda
+			}
+			if (!first_select)
+			{
+				sql_generate_output += ", ";
+			}
+			first_select = false;
+			sql_generate_output += current_table_token;
+			sql_generate_output += ".";
+			sql_generate_output += *primary_key_in_this_variable_group.longhand;
+			sql_generate_output += " AS ";
+			sql_generate_output += *primary_key_in_this_variable_group.longhand;
+			sql_generate_output += "_";
+			sql_generate_output += ms__;
+		});
+
+	}
+
+	for (int m=1; m<=highest_multiplicity; ++m)
+	{
+
+		std::string current_table_token = CurrentTableTokenName(m);
+		char ns__[64];
+		std::string ms__ = itoa(m, ns__, 10);
+
+		// Second: Display all variables selected by user
+		std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &first_select, &sql_generate_output, &current_table_token, &ms__, &dmu_primary_key_codes, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
 		{
 			if (failed)
 			{
@@ -393,7 +436,15 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_generate_output += "_";
 			sql_generate_output += ms__;
 		});
+
 	}
+
+	if (failed)
+	{
+		// Todo: Error message
+		return;
+	}
+
 	sql_generate_output += " FROM ";
 	sql_generate_output += vg_data_table_name;
 	sql_generate_output += " t1";

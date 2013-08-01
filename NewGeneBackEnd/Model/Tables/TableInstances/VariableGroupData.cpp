@@ -342,7 +342,10 @@ void Table_VariableGroupMetadata::Load(sqlite3 * db, InputModel * input_model_)
 			// maps:
 			// vg_data_table_name =>
 			// a vector of primary keys (each a DMU category identifier)
+			// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
+			// and the LONGHAND is set to the column name corresponding to this DMU in the variable group data table.
 			identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_dmu_category_code), vg_data_primary_key_column_name, vg_data_primary_key_sequence_number));
 		}
 	}
+
 }
