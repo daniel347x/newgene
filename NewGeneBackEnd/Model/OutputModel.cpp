@@ -46,6 +46,15 @@ bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import
 	return true;
 }
 
+std::string OutputModel::CurrentTableTokenName(int const multiplicity)
+{
+	char nBuffer[1024];
+	memset(nBuffer, '\0', 1024);
+	std::string current_table_token = "t";
+	current_table_token += itoa(multiplicity, nBuffer, 10);
+	return current_table_token;
+}
+
 void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 {
 
@@ -302,7 +311,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	std::string sql_generate_output;
 
 
+	// variable_groups_map:
 	// The vector of variable groups corresponding to this UOA (independent of time granularity; i.e., all time granularities appear here)
+	// ... and the selected variables in that group
 	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map & variable_groups_map = the_map[biggest_counts.first];
 
 	// TODO: If more than one variable group corresponds to this UOA,
@@ -311,8 +322,11 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	// and take the union.
 
 	// For now, just use the first VG.
-	bool first_vg = true;
+	// the_variable_group:
+	// A pair: VG identifier -> Variables in this group selected by the user.
+	// This VG is the first of those that correspond to the primary UOA.
 	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> the_variable_group;
+	bool first_vg = true;
 	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [&first_vg, &the_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & one_variable_group)
 	{
 		if (!first_vg)
@@ -340,15 +354,53 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		return;
 	}
 
-	sql_generate_output += "SELECT * FROM ";
+	// variables_selected_in_this_group:
+	// A vector of variables selected by the user in the first variable group
+	// corresponding to the primary UOA.
+	WidgetInstanceIdentifiers & variables_selected_in_this_group = the_variable_group.second;
+
+	// Todo: Enhance this SELECT by looping through all variable groups that correspond to the primary UOA
+	// and doing the same SELECT from each of them into a temporary table, then performing a UNION.
+	sql_generate_output += "SELECT ";
+	bool first_select = true;
+	for (int m=1; m<=highest_multiplicity; ++m)
+	{
+		std::string current_table_token = CurrentTableTokenName(m);
+		char ns__[64];
+		std::string ms__ = itoa(m, ns__, 10);
+		std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &first_select, &sql_generate_output, &current_table_token,&ms__, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
+		{
+			if (failed)
+			{
+				// Todo: Error message
+				return; // from lambda
+			}
+			if (!variable_selected_in_this_group.code)
+			{
+				failed = true;
+				return; // from lambda
+			}
+			if (!first_select)
+			{
+				sql_generate_output += ", ";
+			}
+			first_select = false;
+			sql_generate_output += current_table_token;
+			sql_generate_output += ".";
+			sql_generate_output += *variable_selected_in_this_group.code;
+			sql_generate_output += " AS ";
+			sql_generate_output += *variable_selected_in_this_group.code;
+			sql_generate_output += "_";
+			sql_generate_output += ms__;
+		});
+	}
+	sql_generate_output += " FROM ";
 	sql_generate_output += vg_data_table_name;
 	sql_generate_output += " t1";
-	char nBuffer[1024];
 	for (int m=1; m<highest_multiplicity; ++m)
 	{
-		memset(nBuffer, '\0', 1024);
-		std::string current_table_token = "t";
-		current_table_token += itoa(m+1, nBuffer, 10);
+
+		std::string current_table_token = CurrentTableTokenName(m+1);
 
 		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &highest_multiplicity_dmu_string_code, &vg_data_table_name, &current_table_token, &failed](WidgetInstanceIdentifier const & dmu_identifier)
 		{

@@ -38,10 +38,15 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 		Table_VARIABLES_SELECTED t_variables_selected_identifiers;
 		Table_KAD_COUNT t_kad_count;
 
-protected:
+	protected:
 
 		std::shared_ptr<InputModelSettings> input_model_settings;
 		std::shared_ptr<InputModel> input_model;
+
+	private:
+
+		// helpers used in GenerateOutput()
+		std::string CurrentTableTokenName(int const multiplicity);
 
 };
 
