@@ -315,6 +315,22 @@ std::string Table_VariableGroupData::TableNameFromVGCode(std::string variable_gr
 	return variable_group_data_table_name;
 }
 
+std::string Table_VariableGroupData::ViewNameFromCount(int const view_number)
+{
+	char vns[1024];
+	std::string view_name("v");
+	view_name += itoa(view_number, vns, 10);
+	return view_name;
+}
+
+std::string Table_VariableGroupData::JoinViewNameFromCount(int const join_number)
+{
+	char vns[1024];
+	std::string join_view_name("j");
+	join_view_name += itoa(join_number, vns, 10);
+	return join_view_name;
+}
+
 void Table_VariableGroupMetadata::Load(sqlite3 * db, InputModel * input_model_)
 {
 

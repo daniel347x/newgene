@@ -307,117 +307,70 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		++current_index;
 	});
 
-	// Construct initial SQL
-	std::string sql_generate_output;
-
 
 	// variable_groups_map:
-	// The vector of variable groups corresponding to this UOA (independent of time granularity; i.e., all time granularities appear here)
-	// ... and the selected variables in that group
+	// The vector of variable groups corresponding to this UOA (independent of time granularity; different time granularities can appear here)
+	// ... and the selected variables in that group.
+	// I.e., possibly multiple PRIMARY variable groups, all corresponding to the same primary UOA (regardless of time granularity)
 	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map & variable_groups_map = the_map[biggest_counts.first];
 
-	// TODO: If more than one variable group corresponds to this UOA,
-	// test for time range of each, and deal with that.
-	// If the same time range, perform multiple SELECT's, one per VG,
-	// and take the union.
-
-	// For now, just use the first VG.
-	// the_variable_group:
-	// A pair: VG identifier -> Variables in this group selected by the user.
-	// This VG is the first of those that correspond to the primary UOA.
-	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> the_variable_group;
-	bool first_vg = true;
-	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [&first_vg, &the_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & one_variable_group)
+	int view_count = 0;
+	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &view_count, &input_model, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 	{
-		if (!first_vg)
-		{
-			return; // from lambda - for now
-		}
-		first_vg = false;
-		the_variable_group = one_variable_group;
-	});
-
-	if (!the_variable_group.first.code)
-	{
-		// Todo: error message
-		return;
-	}
-
-	std::string vg_code = *the_variable_group.first.code;
-	std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
-
-	// dmu_primary_key_codes:
-	// The primary key metadata for the_variable_group
-	WidgetInstanceIdentifiers const & dmu_primary_key_codes = input_model.t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
-
-	if (dmu_primary_key_codes.size() == 0)
-	{
-		// Todo: error message
-		return;
-	}
-
-	// variables_selected_in_this_group:
-	// A vector of variables selected by the user in the first variable group
-	// corresponding to the primary UOA.
-	WidgetInstanceIdentifiers & variables_selected_in_this_group = the_variable_group.second;
-
-	// Todo: Enhance this SELECT by looping through all variable groups that correspond to the primary UOA
-	// and doing the same SELECT from each of them into a temporary table, then performing a UNION.
-	sql_generate_output += "SELECT ";
-	bool first_select = true;
-
-	// First: Display the primary keys with multiplicity 1
-	int multiplicity_one = 1;
-	std::string current_table_token = CurrentTableTokenName(multiplicity_one);
-	char ns__[64];
-	std::string ms__ = itoa(multiplicity_one, ns__, 10);
-	std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &multiplicity_one, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
-	{
+		// the_variable_group:
+		// A pair: VG identifier -> Variables in this group selected by the user.
+		// This VG is one of those that correspond to the primary UOA.
 
 		if (failed)
 		{
 			return; // from lambda
 		}
 
-		if (!primary_key_in_this_variable_group.code || !primary_key_in_this_variable_group.longhand) // The column name has been packed into "longhand" field
+		if (!the_variable_group.first.code)
 		{
+			// Todo: error message
 			failed = true;
-			return; // from lambda
+			return;
 		}
 
-		if (*primary_key_in_this_variable_group.code != highest_multiplicity_dmu_string_code)
+		std::string vg_code = *the_variable_group.first.code;
+		std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
+
+		// dmu_primary_key_codes:
+		// The primary key metadata for the_variable_group.
+		// This include *all* DMU categories that form the primary key,
+		// each of which might appear multiple times.
+		WidgetInstanceIdentifiers const & dmu_primary_key_codes = input_model.t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
+
+		if (dmu_primary_key_codes.size() == 0)
 		{
-			// This DMU's has multiplicity 1
-			if (!first_select)
-			{
-				sql_generate_output += ", ";
-			}
-			first_select = false;
-			sql_generate_output += current_table_token;
-			sql_generate_output += ".";
-			sql_generate_output += *primary_key_in_this_variable_group.longhand;
-			sql_generate_output += " AS ";
-			sql_generate_output += *primary_key_in_this_variable_group.longhand;
+			// Todo: error message
+			failed = true;
+			return;
 		}
 
-	});
+		// variables_selected_in_this_group:
+		// A vector of variables selected by the user in the first variable group
+		// corresponding to the primary UOA.
+		WidgetInstanceIdentifiers const & variables_selected_in_this_group = the_variable_group.second;
 
-	if (failed)
-	{
-		// Todo: Error message
-		return;
-	}
+		// Construct initial SQL
+		std::string sql_generate_output;
 
-	// First: Display primary keys with multiplicity greater than 1
-	for (int m=1; m<=highest_multiplicity; ++m)
-	{
+		// Todo: Enhance this SELECT by looping through all variable groups that correspond to the primary UOA
+		// and doing the same SELECT from each of them into a temporary table, then performing a UNION.
+		sql_generate_output += "CREATE TEMPORARY VIEW temp.";
+		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(view_count);
+		sql_generate_output += " AS SELECT ";
 
-		std::string current_table_token = CurrentTableTokenName(m);
-		char ns__[64];
-		std::string ms__ = itoa(m, ns__, 10);
+		bool first_select = true;
 
 		// First: Display the primary keys with multiplicity 1
-		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &m, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+		int multiplicity_one = 1;
+		std::string current_table_token = CurrentTableTokenName(multiplicity_one);
+		char ns__[64];
+		std::string ms__ = itoa(multiplicity_one, ns__, 10);
+		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &multiplicity_one, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
 		{
 
 			if (failed)
@@ -433,141 +386,318 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 			if (*primary_key_in_this_variable_group.code != highest_multiplicity_dmu_string_code)
 			{
-				// This is not one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
-				return; // from lambda
+				// This DMU's has multiplicity 1
+				if (!first_select)
+				{
+					sql_generate_output += ", ";
+				}
+				first_select = false;
+				sql_generate_output += current_table_token;
+				sql_generate_output += ".";
+				sql_generate_output += *primary_key_in_this_variable_group.longhand;
+				sql_generate_output += " AS ";
+				sql_generate_output += *primary_key_in_this_variable_group.longhand;
 			}
 
-			if (!first_select)
-			{
-				sql_generate_output += ", ";
-			}
-			first_select = false;
-			sql_generate_output += current_table_token;
-			sql_generate_output += ".";
-			sql_generate_output += *primary_key_in_this_variable_group.longhand;
-			sql_generate_output += " AS ";
-			sql_generate_output += *primary_key_in_this_variable_group.longhand;
-			sql_generate_output += "_";
-			sql_generate_output += ms__;
 		});
 
-	}
-
-	if (failed)
-	{
-		// Todo: error message
-		return;
-	}
-
-	for (int m=1; m<=highest_multiplicity; ++m)
-	{
-
-		std::string current_table_token = CurrentTableTokenName(m);
-		char ns__[64];
-		std::string ms__ = itoa(m, ns__, 10);
-
-		// Second: Display all variables selected by user
-		std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &first_select, &sql_generate_output, &current_table_token, &ms__, &dmu_primary_key_codes, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
+		if (failed)
 		{
-			if (failed)
+			// Todo: Error message
+			return;
+		}
+
+		// Next: Display primary keys with multiplicity greater than 1
+		for (int m=1; m<=highest_multiplicity; ++m)
+		{
+
+			std::string current_table_token = CurrentTableTokenName(m);
+			char ns__[64];
+			std::string ms__ = itoa(m, ns__, 10);
+
+			// First: Display the primary keys with multiplicity 1
+			std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &m, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
 			{
-				// Todo: Error message
-				return; // from lambda
-			}
-			if (!variable_selected_in_this_group.code)
+
+				if (failed)
+				{
+					return; // from lambda
+				}
+
+				if (!primary_key_in_this_variable_group.code || !primary_key_in_this_variable_group.longhand) // The column name has been packed into "longhand" field
+				{
+					failed = true;
+					return; // from lambda
+				}
+
+				if (*primary_key_in_this_variable_group.code != highest_multiplicity_dmu_string_code)
+				{
+					// This is not one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
+					return; // from lambda
+				}
+
+				if (!first_select)
+				{
+					sql_generate_output += ", ";
+				}
+				first_select = false;
+				sql_generate_output += current_table_token;
+				sql_generate_output += ".";
+				sql_generate_output += *primary_key_in_this_variable_group.longhand;
+				sql_generate_output += " AS ";
+				sql_generate_output += *primary_key_in_this_variable_group.longhand;
+				sql_generate_output += "_";
+				sql_generate_output += ms__;
+			});
+
+		}
+
+		if (failed)
+		{
+			// Todo: error message
+			return;
+		}
+
+		for (int m=1; m<=highest_multiplicity; ++m)
+		{
+
+			std::string current_table_token = CurrentTableTokenName(m);
+			char ns__[64];
+			std::string ms__ = itoa(m, ns__, 10);
+
+			// Second: Display all variables selected by user
+			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &first_select, &sql_generate_output, &current_table_token, &ms__, &dmu_primary_key_codes, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
 			{
-				failed = true;
-				return; // from lambda
-			}
-			if (!first_select)
-			{
-				sql_generate_output += ", ";
-			}
-			first_select = false;
-			sql_generate_output += current_table_token;
-			sql_generate_output += ".";
-			sql_generate_output += *variable_selected_in_this_group.code;
-			sql_generate_output += " AS ";
-			sql_generate_output += *variable_selected_in_this_group.code;
-			sql_generate_output += "_";
-			sql_generate_output += ms__;
-		});
+				if (failed)
+				{
+					// Todo: Error message
+					return; // from lambda
+				}
+				if (!variable_selected_in_this_group.code)
+				{
+					failed = true;
+					return; // from lambda
+				}
+				if (!first_select)
+				{
+					sql_generate_output += ", ";
+				}
+				first_select = false;
+				sql_generate_output += current_table_token;
+				sql_generate_output += ".";
+				sql_generate_output += *variable_selected_in_this_group.code;
+				sql_generate_output += " AS ";
+				sql_generate_output += *variable_selected_in_this_group.code;
+				sql_generate_output += "_";
+				sql_generate_output += ms__;
+			});
 
-	}
+		}
 
-	if (failed)
-	{
-		// Todo: Error message
-		return;
-	}
+		if (failed)
+		{
+			// Todo: Error message
+			return;
+		}
 
-	sql_generate_output += " FROM ";
-	sql_generate_output += vg_data_table_name;
-	sql_generate_output += " t1";
-	for (int m=1; m<highest_multiplicity; ++m)
-	{
-
-		std::string current_table_token = CurrentTableTokenName(m+1);
-
-		sql_generate_output += " JOIN ";
+		sql_generate_output += " FROM ";
 		sql_generate_output += vg_data_table_name;
-		sql_generate_output += " ";
-		sql_generate_output += current_table_token;
-		sql_generate_output += " ON ";
-
-		// Always match on time range fields
-		sql_generate_output += current_table_token;
-		sql_generate_output += ".";
-		sql_generate_output += "DATETIME_ROW_START";
-		sql_generate_output += " = ";
-		sql_generate_output += "t1.";
-		sql_generate_output += "DATETIME_ROW_START";
-		sql_generate_output += " AND ";
-		sql_generate_output += current_table_token;
-		sql_generate_output += ".";
-		sql_generate_output += "DATETIME_ROW_END";
-		sql_generate_output += " = ";
-		sql_generate_output += "t1.";
-		sql_generate_output += "DATETIME_ROW_END";
-
-		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &highest_multiplicity_dmu_string_code, &vg_data_table_name, &current_table_token, &failed](WidgetInstanceIdentifier const & dmu_identifier)
+		sql_generate_output += " t1";
+		for (int m=1; m<highest_multiplicity; ++m)
 		{
-			if (failed)
-			{
-				return; // from lambda
-			}
-			if (!dmu_identifier.code || !dmu_identifier.longhand) // The column name has been packed into "longhand" field
-			{
-				failed = true;
-				return; // from lambda
-			}
 
-			if (*dmu_identifier.code == highest_multiplicity_dmu_string_code)
-			{
-				// This is one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
-				return; // from lambda
-			}
-			
-			// good to go
+			std::string current_table_token = CurrentTableTokenName(m+1);
 
-			std::string vg_data_column_name = *dmu_identifier.longhand;
+			sql_generate_output += " JOIN ";
+			sql_generate_output += vg_data_table_name;
+			sql_generate_output += " ";
+			sql_generate_output += current_table_token;
+			sql_generate_output += " ON ";
 
+			// Always match on time range fields
+			sql_generate_output += current_table_token;
+			sql_generate_output += ".";
+			sql_generate_output += "DATETIME_ROW_START";
+			sql_generate_output += " = ";
+			sql_generate_output += "t1.";
+			sql_generate_output += "DATETIME_ROW_START";
 			sql_generate_output += " AND ";
 			sql_generate_output += current_table_token;
 			sql_generate_output += ".";
-			sql_generate_output += vg_data_column_name;
+			sql_generate_output += "DATETIME_ROW_END";
 			sql_generate_output += " = ";
 			sql_generate_output += "t1.";
-			sql_generate_output += vg_data_column_name;
-		});
+			sql_generate_output += "DATETIME_ROW_END";
 
-	}
+			std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &highest_multiplicity_dmu_string_code, &vg_data_table_name, &current_table_token, &failed](WidgetInstanceIdentifier const & dmu_identifier)
+			{
+				if (failed)
+				{
+					return; // from lambda
+				}
+				if (!dmu_identifier.code || !dmu_identifier.longhand) // The column name has been packed into "longhand" field
+				{
+					failed = true;
+					return; // from lambda
+				}
+
+				if (*dmu_identifier.code == highest_multiplicity_dmu_string_code)
+				{
+					// This is one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
+					return; // from lambda
+				}
+
+				// good to go
+
+				std::string vg_data_column_name = *dmu_identifier.longhand;
+
+				sql_generate_output += " AND ";
+				sql_generate_output += current_table_token;
+				sql_generate_output += ".";
+				sql_generate_output += vg_data_column_name;
+				sql_generate_output += " = ";
+				sql_generate_output += "t1.";
+				sql_generate_output += vg_data_column_name;
+			});
+
+		}
+
+		sqlite3_stmt * stmt = NULL;
+		sqlite3_prepare_v2(db, sql_generate_output.c_str(), sql_generate_output.size() + 1, &stmt, NULL);
+		if (stmt == NULL)
+		{
+			// Todo: Error message
+			return;
+		}
+
+		int step_result = 0;
+		if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+		{
+			// Todo: Error message
+			failed = true;
+			return; // from lambda
+		}
+
+	});
+
+	int join_count = 0;
+	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &join_count, &input_model, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	{
+		if (failed)
+		{
+			return; // from lambda
+		}
+		++join_count;
+
+		std::string vg_code = *the_variable_group.first.code;
+		std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
+
+		// dmu_primary_key_codes:
+		// The primary key metadata for the_variable_group.
+		// This include *all* DMU categories that form the primary key,
+		// each of which might appear multiple times.
+		WidgetInstanceIdentifiers const & dmu_primary_key_codes = input_model.t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
+
+		if (dmu_primary_key_codes.size() == 0)
+		{
+			// Todo: error message
+			failed = true;
+			return;
+		}
+
+		std::string sql_generate_output;
+		sql_generate_output += "CREATE TEMPORARY VIEW temp.";
+		sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+		sql_generate_output += " AS SELECT temp.";
+		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
+		sql_generate_output += ".*";
+		if (join_count > 1)
+		{
+			// join with the previous join
+			sql_generate_output += ", temp.";
+			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += ".*";
+
+		}
+		sql_generate_output += " FROM temp.";
+		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
+		if (join_count > 1)
+		{
+		
+			// join with the previous join
+			sql_generate_output += " INNER JOIN temp.";
+			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += " ON ";
+
+			bool first_select = true;
+
+			// Iterate through all primary key fields
+			std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &join_count, &first_select, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+			{
+
+				if (failed)
+				{
+					return; // from lambda
+				}
+
+				if (!primary_key_in_this_variable_group.code || !primary_key_in_this_variable_group.longhand) // The column name has been packed into "longhand" field
+				{
+					failed = true;
+					return; // from lambda
+				}
+
+				if (!first_select)
+				{
+					sql_generate_output += " AND ";
+				}
+				first_select = false;
+				sql_generate_output += " temp.";
+				sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
+				sql_generate_output += ".";
+				sql_generate_output += *primary_key_in_this_variable_group.longhand;
+				sql_generate_output += " = temp.";
+				sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+				sql_generate_output += ".";
+				sql_generate_output += *primary_key_in_this_variable_group.longhand;
+
+			});
+
+			if (failed)
+			{
+				// Todo: Error message
+				return;
+			}
+
+		}
+	
+		sqlite3_stmt * stmt = NULL;
+		sqlite3_prepare_v2(db, sql_generate_output.c_str(), sql_generate_output.size() + 1, &stmt, NULL);
+		if (stmt == NULL)
+		{
+			// Todo: Error message
+			return;
+		}
+
+		int step_result = 0;
+		if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+		{
+			// Todo: Error message
+			failed = true;
+			return; // from lambda
+		}
+	});
 
 	if (failed)
 	{
 		// Todo: Error message
 		return;
 	}
+
+	std::string sql_generate_output;
+	sql_generate_output += "SELECT temp.";
+	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_map.size());
+	sql_generate_output += ".* FROM temp.";
+	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_map.size());
 
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sql_generate_output.c_str(), sql_generate_output.size() + 1, &stmt, NULL);
@@ -581,6 +711,40 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		//sqlite3
+	}
+
+	view_count = 0;
+	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &view_count, &input_model, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	{
+		if (failed)
+		{
+			return; // from lambda
+		}
+		++view_count;
+		std::string sql_generate_output;
+		sql_generate_output += "DROP VIEW temp.";
+		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(view_count);
+		sqlite3_stmt * stmt = NULL;
+		sqlite3_prepare_v2(db, sql_generate_output.c_str(), sql_generate_output.size() + 1, &stmt, NULL);
+		if (stmt == NULL)
+		{
+			// Todo: Error message
+			return;
+		}
+
+		int step_result = 0;
+		if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+		{
+			// Todo: Error message
+			failed = true;
+			return; // from lambda
+		}
+	});
+
+	if (failed)
+	{
+		// Todo: Error message
+		return;
 	}
 
 }

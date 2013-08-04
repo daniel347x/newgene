@@ -23,6 +23,8 @@ public:
 	bool ImportEnd(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_);
 
 	static std::string TableNameFromVGCode(std::string variable_group_code);
+	static std::string ViewNameFromCount(int const view_number);
+	static std::string JoinViewNameFromCount(int const join_number);
 
 	std::string vg_category_string_code;
 	std::string table_name;
