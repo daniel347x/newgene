@@ -462,19 +462,19 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				}
 				first_select = false;
 
-				std::string this_variable_group__this_secondary_key__unique_name;
-				this_variable_group__this_secondary_key__unique_name += *primary_key_in_this_variable_group.longhand;
-				this_variable_group__this_secondary_key__unique_name += "_";
-				this_variable_group__this_secondary_key__unique_name += ms__;
-				this_variable_group__this_secondary_key__unique_name += "_";
-				this_variable_group__this_secondary_key__unique_name += newUUID(true);
-				this_variable_group__primary_key_names.push_back(this_variable_group__this_secondary_key__unique_name);
+				std::string this_variable_group__this_primary_key__unique_name;
+				this_variable_group__this_primary_key__unique_name += *primary_key_in_this_variable_group.longhand;
+				this_variable_group__this_primary_key__unique_name += "_";
+				this_variable_group__this_primary_key__unique_name += ms__;
+				this_variable_group__this_primary_key__unique_name += "_";
+				this_variable_group__this_primary_key__unique_name += newUUID(true);
+				this_variable_group__primary_key_names.push_back(this_variable_group__this_primary_key__unique_name);
 
 				sql_generate_output += current_table_token;
 				sql_generate_output += ".";
 				sql_generate_output += *primary_key_in_this_variable_group.longhand;
 				sql_generate_output += " AS ";
-				sql_generate_output += this_variable_group__this_secondary_key__unique_name;
+				sql_generate_output += this_variable_group__this_primary_key__unique_name;
 			});
 
 		}
@@ -655,8 +655,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			// join with the previous join
 
 			PrimaryKey_SecondaryKey_Names & this_variable_group__key_names__previous = variable_group__key_names__vectors[join_count - 2];
-			std::vector<std::string> & this_variable_group__primary_key_names__previous = this_variable_group__key_names.first;
-			std::vector<std::string> & this_variable_group__secondary_key_names__previous = this_variable_group__key_names.second;
+			std::vector<std::string> & this_variable_group__primary_key_names__previous = this_variable_group__key_names__previous.first;
+			std::vector<std::string> & this_variable_group__secondary_key_names__previous = this_variable_group__key_names__previous.second;
 
 			sql_generate_output += " INNER JOIN temp.";
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
