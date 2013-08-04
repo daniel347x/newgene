@@ -333,6 +333,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			return;
 		}
 
+		++view_count;
+
 		std::string vg_code = *the_variable_group.first.code;
 		std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
 
