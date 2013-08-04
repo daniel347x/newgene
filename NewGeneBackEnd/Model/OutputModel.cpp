@@ -658,7 +658,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			std::vector<std::string> & this_variable_group__primary_key_names__previous = this_variable_group__key_names__previous.first;
 			std::vector<std::string> & this_variable_group__secondary_key_names__previous = this_variable_group__key_names__previous.second;
 
-			sql_generate_output += " INNER JOIN temp.";
+			sql_generate_output += " LEFT OUTER JOIN temp.";
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 			sql_generate_output += " ";
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
@@ -690,6 +690,87 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 				sql_generate_output += ".";
 				sql_generate_output += primary_key_in_this_variable_group__previous;
+
+				++dmu_index;
+
+			});
+
+			if (failed)
+			{
+				// Todo: Error message
+				return;
+			}
+
+			sql_generate_output += " UNION ALL SELECT ";
+			sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
+			sql_generate_output += ".*";
+			sql_generate_output += ", ";
+			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += ".*";
+			sql_generate_output += " FROM temp.";
+			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += " ";
+			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += " LEFT OUTER JOIN temp.";
+			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+			sql_generate_output += " ";
+			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+
+			sql_generate_output += " ON ";
+
+			first_select = true;
+
+			// Iterate through all primary key fields
+			dmu_index = 0;
+			std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [&sql_generate_output, &join_count, &first_select, &dmu_index, &this_variable_group__primary_key_names__previous, &failed](std::string const & primary_key_in_this_variable_group)
+			{
+
+				if (failed)
+				{
+					return; // from lambda
+				}
+
+				std::string const & primary_key_in_this_variable_group__previous = this_variable_group__primary_key_names__previous[dmu_index];
+
+				if (!first_select)
+				{
+					sql_generate_output += " AND ";
+				}
+				first_select = false;
+				sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
+				sql_generate_output += ".";
+				sql_generate_output += primary_key_in_this_variable_group;
+				sql_generate_output += " = ";
+				sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+				sql_generate_output += ".";
+				sql_generate_output += primary_key_in_this_variable_group__previous;
+
+				++dmu_index;
+
+			});
+
+			sql_generate_output += " WHERE ";
+
+			dmu_index = 0;
+			std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [&sql_generate_output, &join_count, &first_select, &dmu_index, &this_variable_group__primary_key_names__previous, &failed](std::string const & primary_key_in_this_variable_group)
+			{
+
+				if (failed)
+				{
+					return; // from lambda
+				}
+
+				std::string const & primary_key_in_this_variable_group__previous = this_variable_group__primary_key_names__previous[dmu_index];
+
+				if (!first_select)
+				{
+					sql_generate_output += " OR ";
+				}
+				first_select = false;
+				sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
+				sql_generate_output += ".";
+				sql_generate_output += primary_key_in_this_variable_group;
+				sql_generate_output += " IS NULL";
 
 				++dmu_index;
 
