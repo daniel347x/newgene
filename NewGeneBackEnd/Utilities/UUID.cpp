@@ -21,10 +21,14 @@
 #	include <boost/lexical_cast.hpp>
 #endif
 
-const std::string newUUID()
+const std::string newUUID(bool noDashes)
 {
 	boost::uuids::uuid u = boost::uuids::random_generator()();
-	const std::string su = boost::uuids::to_string(u);
+	std::string su = boost::uuids::to_string(u);
+	if (noDashes)
+	{
+		std::replace(su.begin(), su.end(), '-', '_'); // replace all '-' to underscore
+	}
 	return su;
 }
 

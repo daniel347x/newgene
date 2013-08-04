@@ -409,7 +409,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				std::string this_variable_group__this_primary_key__unique_name;
 				this_variable_group__this_primary_key__unique_name += *primary_key_in_this_variable_group.longhand;
 				this_variable_group__this_primary_key__unique_name += "_";
-				this_variable_group__this_primary_key__unique_name += newUUID();
+				this_variable_group__this_primary_key__unique_name += newUUID(true);
 				this_variable_group__primary_key_names.push_back(this_variable_group__this_primary_key__unique_name);
 
 				sql_generate_output += current_table_token;
@@ -467,7 +467,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				this_variable_group__this_secondary_key__unique_name += "_";
 				this_variable_group__this_secondary_key__unique_name += ms__;
 				this_variable_group__this_secondary_key__unique_name += "_";
-				this_variable_group__this_secondary_key__unique_name += newUUID();
+				this_variable_group__this_secondary_key__unique_name += newUUID(true);
 				this_variable_group__secondary_key_names.push_back(this_variable_group__this_secondary_key__unique_name);
 
 				sql_generate_output += current_table_token;
