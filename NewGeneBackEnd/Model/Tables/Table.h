@@ -157,6 +157,12 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR> : public Tabl
 			return the_identifier;
 		}
 
+		void Sort()
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			std::sort(identifiers.begin(), identifiers.end());
+		}
+
 	protected:
 
 		WidgetInstanceIdentifiers identifiers;
@@ -242,6 +248,16 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 			return the_identifier;
 		}
 
+		void Sort()
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			std::for_each(identifiers_map.begin(), identifiers_map.end(), [](std::pair<UUID const, WidgetInstanceIdentifiers> & map_entry)
+			{
+				WidgetInstanceIdentifiers & the_identifiers = map_entry.second;
+				std::sort(the_identifiers.begin(), the_identifiers.end());
+			});
+		}
+
 	protected:
 
 		std::map<UUID, WidgetInstanceIdentifiers> identifiers_map;
@@ -323,6 +339,15 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT> : pu
 				}
 			});
 			return the_identifier;
+		}
+
+		void Sort()
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			std::sort(identifiers.begin(), identifiers.end(), [](WidgetInstanceIdentifier_Int_Pair const & lhs, WidgetInstanceIdentifier_Int_Pair const & rhs)
+			{
+				return lhs.first > rhs.first;
+			});
 		}
 
 	protected:

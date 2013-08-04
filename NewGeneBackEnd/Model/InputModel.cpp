@@ -10,11 +10,22 @@ void InputModel::LoadTables()
 	if (db != nullptr)
 	{
 		t_dmu_category.Load(db, this);
+		t_dmu_category.Sort();
+
 		t_dmu_setmembers.Load(db, this);
+		t_dmu_setmembers.Sort();
+
 		t_uoa_category.Load(db, this);
+		t_uoa_category.Sort();
+
 		t_uoa_setmemberlookup.Load(db, this);
+		t_uoa_setmemberlookup.Sort();
+
 		t_vgp_identifiers.Load(db, this);
+		t_vgp_identifiers.Sort();
+
 		t_vgp_setmembers.Load(db, this);
+		t_vgp_setmembers.Sort();
 
 		WidgetInstanceIdentifiers variable_group_identifiers = t_vgp_identifiers.getIdentifiers();
 		std::for_each(variable_group_identifiers.cbegin(), variable_group_identifiers.cend(), [this](WidgetInstanceIdentifier const & variable_group_identifier)
@@ -59,6 +70,7 @@ void InputModel::LoadTables()
 		});
 
 		t_vgp_data_metadata.Load(db, this);
+		t_vgp_data_metadata.Sort();
 	}
 
 }

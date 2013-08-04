@@ -150,6 +150,15 @@ public:
 		return *this;
 	}
 
+	bool operator>(WidgetInstanceIdentifier const & rhs) const
+	{
+		if (*this < rhs)
+		{
+			return false;
+		}
+		return true;
+	}
+
 	bool operator<(WidgetInstanceIdentifier const & rhs) const
 	{
 

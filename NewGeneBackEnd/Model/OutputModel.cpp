@@ -1,4 +1,5 @@
 #include "OutputModel.h"
+#include "..\Utilities\UUID.h"
 
 void OutputModel::LoadTables()
 {
@@ -8,7 +9,10 @@ void OutputModel::LoadTables()
 	if (db != nullptr)
 	{
 		t_variables_selected_identifiers.Load(db, this, input_model.get());
+		t_variables_selected_identifiers.Sort();
+
 		t_kad_count.Load(db, this, input_model.get());
+		t_kad_count.Sort();
 	}
 
 }
@@ -308,6 +312,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	});
 
 
+	VariableGroup__PrimaryKey_SecondaryKey_Names__Vector variable_group__key_names__vectors;
+
 	// variable_groups_map:
 	// The vector of variable groups corresponding to this UOA (independent of time granularity; different time granularities can appear here)
 	// ... and the selected variables in that group.
@@ -315,7 +321,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map & variable_groups_map = the_map[biggest_counts.first];
 
 	int view_count = 0;
-	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &view_count, &input_model, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &view_count, &input_model, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 	{
 		// the_variable_group:
 		// A pair: VG identifier -> Variables in this group selected by the user.
@@ -334,6 +340,11 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		}
 
 		++view_count;
+
+		variable_group__key_names__vectors.push_back(std::make_pair(std::vector<std::string>(), std::vector<std::string>()));
+		PrimaryKey_SecondaryKey_Names & this_variable_group__key_names = variable_group__key_names__vectors.back();
+		std::vector<std::string> & this_variable_group__primary_key_names = this_variable_group__key_names.first;
+		std::vector<std::string> & this_variable_group__secondary_key_names = this_variable_group__key_names.second;
 
 		std::string vg_code = *the_variable_group.first.code;
 		std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
@@ -372,7 +383,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		std::string current_table_token = CurrentTableTokenName(multiplicity_one);
 		char ns__[64];
 		std::string ms__ = itoa(multiplicity_one, ns__, 10);
-		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &multiplicity_one, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+		std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &multiplicity_one, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &this_variable_group__primary_key_names, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
 		{
 
 			if (failed)
@@ -394,11 +405,18 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					sql_generate_output += ", ";
 				}
 				first_select = false;
+
+				std::string this_variable_group__this_primary_key__unique_name;
+				this_variable_group__this_primary_key__unique_name += *primary_key_in_this_variable_group.longhand;
+				this_variable_group__this_primary_key__unique_name += "_";
+				this_variable_group__this_primary_key__unique_name += newUUID();
+				this_variable_group__primary_key_names.push_back(this_variable_group__this_primary_key__unique_name);
+
 				sql_generate_output += current_table_token;
 				sql_generate_output += ".";
 				sql_generate_output += *primary_key_in_this_variable_group.longhand;
 				sql_generate_output += " AS ";
-				sql_generate_output += *primary_key_in_this_variable_group.longhand;
+				sql_generate_output += this_variable_group__this_primary_key__unique_name;
 			}
 
 		});
@@ -418,7 +436,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			std::string ms__ = itoa(m, ns__, 10);
 
 			// First: Display the primary keys with multiplicity 1
-			std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &m, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+			std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &m, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &this_variable_group__secondary_key_names, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
 			{
 
 				if (failed)
@@ -443,13 +461,20 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					sql_generate_output += ", ";
 				}
 				first_select = false;
+
+				std::string this_variable_group__this_secondary_key__unique_name;
+				this_variable_group__this_secondary_key__unique_name += *primary_key_in_this_variable_group.longhand;
+				this_variable_group__this_secondary_key__unique_name += "_";
+				this_variable_group__this_secondary_key__unique_name += ms__;
+				this_variable_group__this_secondary_key__unique_name += "_";
+				this_variable_group__this_secondary_key__unique_name += newUUID();
+				this_variable_group__secondary_key_names.push_back(this_variable_group__this_secondary_key__unique_name);
+
 				sql_generate_output += current_table_token;
 				sql_generate_output += ".";
 				sql_generate_output += *primary_key_in_this_variable_group.longhand;
 				sql_generate_output += " AS ";
-				sql_generate_output += *primary_key_in_this_variable_group.longhand;
-				sql_generate_output += "_";
-				sql_generate_output += ms__;
+				sql_generate_output += this_variable_group__this_secondary_key__unique_name;
 			});
 
 		}
@@ -467,7 +492,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			char ns__[64];
 			std::string ms__ = itoa(m, ns__, 10);
 
-			// Second: Display all variables selected by user
+			// Display all variables selected by user
 			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &first_select, &sql_generate_output, &current_table_token, &ms__, &dmu_primary_key_codes, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
 			{
 				if (failed)
@@ -583,7 +608,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	});
 
 	int join_count = 0;
-	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &join_count, &input_model, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	std::string vg_code__previous;
+	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &join_count, &input_model, &vg_code__previous, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 	{
 		if (failed)
 		{
@@ -591,21 +617,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		}
 		++join_count;
 
+		PrimaryKey_SecondaryKey_Names & this_variable_group__key_names = variable_group__key_names__vectors[join_count - 1];
+		std::vector<std::string> & this_variable_group__primary_key_names = this_variable_group__key_names.first;
+		std::vector<std::string> & this_variable_group__secondary_key_names = this_variable_group__key_names.second;
+
 		std::string vg_code = *the_variable_group.first.code;
 		std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
-
-		// dmu_primary_key_codes:
-		// The primary key metadata for the_variable_group.
-		// This include *all* DMU categories that form the primary key,
-		// each of which might appear multiple times.
-		WidgetInstanceIdentifiers const & dmu_primary_key_codes = input_model.t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
-
-		if (dmu_primary_key_codes.size() == 0)
-		{
-			// Todo: error message
-			failed = true;
-			return;
-		}
 
 		std::string sql_generate_output;
 		sql_generate_output += "CREATE TEMPORARY VIEW temp.";
@@ -629,6 +646,11 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		{
 		
 			// join with the previous join
+
+			PrimaryKey_SecondaryKey_Names & this_variable_group__key_names__previous = variable_group__key_names__vectors[join_count - 2];
+			std::vector<std::string> & this_variable_group__primary_key_names__previous = this_variable_group__key_names.first;
+			std::vector<std::string> & this_variable_group__secondary_key_names__previous = this_variable_group__key_names.second;
+
 			sql_generate_output += " INNER JOIN temp.";
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 			sql_generate_output += " ";
@@ -638,7 +660,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			bool first_select = true;
 
 			// Iterate through all primary key fields
-			std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &join_count, &first_select, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+			int dmu_index = 0;
+			std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [&sql_generate_output, &join_count, &first_select, &dmu_index, &this_variable_group__primary_key_names__previous, &failed](std::string const & primary_key_in_this_variable_group)
 			{
 
 				if (failed)
@@ -646,11 +669,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					return; // from lambda
 				}
 
-				if (!primary_key_in_this_variable_group.code || !primary_key_in_this_variable_group.longhand) // The column name has been packed into "longhand" field
-				{
-					failed = true;
-					return; // from lambda
-				}
+				std::string const & primary_key_in_this_variable_group__previous = this_variable_group__primary_key_names__previous[dmu_index];
 
 				if (!first_select)
 				{
@@ -659,11 +678,13 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				first_select = false;
 				sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 				sql_generate_output += ".";
-				sql_generate_output += *primary_key_in_this_variable_group.longhand;
+				sql_generate_output += primary_key_in_this_variable_group;
 				sql_generate_output += " = ";
 				sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 				sql_generate_output += ".";
-				sql_generate_output += *primary_key_in_this_variable_group.longhand;
+				sql_generate_output += primary_key_in_this_variable_group__previous;
+
+				++dmu_index;
 
 			});
 
@@ -672,6 +693,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				// Todo: Error message
 				return;
 			}
+
+			vg_code__previous = vg_code;
 
 		}
 	
