@@ -436,7 +436,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			std::string ms__ = itoa(m, ns__, 10);
 
 			// First: Display the primary keys with multiplicity 1
-			std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &m, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &this_variable_group__secondary_key_names, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+			std::for_each(dmu_primary_key_codes.cbegin(), dmu_primary_key_codes.cend(), [&sql_generate_output, &current_table_token, &m, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &this_variable_group__primary_key_names, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
 			{
 
 				if (failed)
@@ -468,7 +468,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				this_variable_group__this_secondary_key__unique_name += ms__;
 				this_variable_group__this_secondary_key__unique_name += "_";
 				this_variable_group__this_secondary_key__unique_name += newUUID(true);
-				this_variable_group__secondary_key_names.push_back(this_variable_group__this_secondary_key__unique_name);
+				this_variable_group__primary_key_names.push_back(this_variable_group__this_secondary_key__unique_name);
 
 				sql_generate_output += current_table_token;
 				sql_generate_output += ".";
@@ -493,7 +493,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			std::string ms__ = itoa(m, ns__, 10);
 
 			// Display all variables selected by user
-			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &first_select, &sql_generate_output, &current_table_token, &ms__, &dmu_primary_key_codes, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
+			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &first_select, &sql_generate_output, &current_table_token, &ms__, &this_variable_group__secondary_key_names, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
 			{
 				if (failed)
 				{
@@ -510,13 +510,20 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					sql_generate_output += ", ";
 				}
 				first_select = false;
+
+				std::string this_variable_group_secondary_key_name;
+				this_variable_group_secondary_key_name += *variable_selected_in_this_group.code;
+				this_variable_group_secondary_key_name += "_";
+				this_variable_group_secondary_key_name += ms__;
+				this_variable_group_secondary_key_name += "_";
+				this_variable_group_secondary_key_name += newUUID(true);
+				this_variable_group__secondary_key_names.push_back(this_variable_group_secondary_key_name);
+
 				sql_generate_output += current_table_token;
 				sql_generate_output += ".";
 				sql_generate_output += *variable_selected_in_this_group.code;
 				sql_generate_output += " AS ";
-				sql_generate_output += *variable_selected_in_this_group.code;
-				sql_generate_output += "_";
-				sql_generate_output += ms__;
+				sql_generate_output += this_variable_group_secondary_key_name;
 			});
 
 		}
