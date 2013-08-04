@@ -199,7 +199,19 @@ public:
 			}
 			else
 			{
-				return *identifier_parent < *rhs.identifier_parent;
+				if (*identifier_parent < *rhs.identifier_parent)
+				{
+					return true;
+				}
+				else if (*rhs.identifier_parent < *identifier_parent)
+				{
+					return false;
+				}
+				else
+				{
+					// Parents are identical; revert to self test
+					test_sequence_number = false;
+				}
 			}
 		}
 
