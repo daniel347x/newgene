@@ -180,13 +180,21 @@ public:
 
 			if (test_sequence_number)
 			{
-				if (sequence_number_or_count < rhs.sequence_number_or_count)
+				if (sequence_number_or_count != rhs.sequence_number_or_count)
 				{
-					return true;
+					if (sequence_number_or_count < rhs.sequence_number_or_count)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
 				}
 				else
 				{
-					return false;
+					// Parents are identical; revert to self test
+					test_sequence_number = false;
 				}
 			}
 			else
