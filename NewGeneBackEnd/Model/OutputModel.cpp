@@ -64,6 +64,10 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 
 	InputModel & input_model = getInputModel();
+	sqlite3 * db = input_model.getDb();
+
+	//std::string temp_dot("temp.");
+	std::string temp_dot("");
 
 
 	// ***************************************************************** //
@@ -321,7 +325,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map & variable_groups_map = the_map[biggest_counts.first];
 
 	int view_count = 0;
-	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &view_count, &input_model, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &db, &temp_dot, &view_count, &input_model, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 	{
 		// the_variable_group:
 		// A pair: VG identifier -> Variables in this group selected by the user.
@@ -372,7 +376,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 		// Todo: Enhance this SELECT by looping through all variable groups that correspond to the primary UOA
 		// and doing the same SELECT from each of them into a temporary table, then performing a UNION.
-		sql_generate_output += "CREATE TEMPORARY VIEW temp.";
+		sql_generate_output += "CREATE VIEW ";
+		sql_generate_output += temp_dot;
 		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(view_count);
 		sql_generate_output += " AS SELECT ";
 
@@ -616,7 +621,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 	int join_count = 0;
 	std::string vg_code__previous;
-	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &join_count, &input_model, &vg_code__previous, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &temp_dot, &db, &join_count, &input_model, &vg_code__previous, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 	{
 		if (failed)
 		{
@@ -632,7 +637,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
 
 		std::string sql_generate_output;
-		sql_generate_output += "CREATE TEMPORARY VIEW temp.";
+		sql_generate_output += "CREATE VIEW ";
+		sql_generate_output += temp_dot;
 		sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
 		sql_generate_output += " AS SELECT ";
 		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
@@ -645,7 +651,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_generate_output += ".*";
 
 		}
-		sql_generate_output += " FROM temp.";
+		sql_generate_output += " FROM ";
+		sql_generate_output += temp_dot;
 		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 		sql_generate_output += " ";
 		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
@@ -658,7 +665,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			std::vector<std::string> & this_variable_group__primary_key_names__previous = this_variable_group__key_names__previous.first;
 			std::vector<std::string> & this_variable_group__secondary_key_names__previous = this_variable_group__key_names__previous.second;
 
-			sql_generate_output += " LEFT OUTER JOIN temp.";
+			sql_generate_output += " LEFT OUTER JOIN ";
+			sql_generate_output += temp_dot;
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 			sql_generate_output += " ";
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
@@ -707,11 +715,13 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_generate_output += ", ";
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 			sql_generate_output += ".*";
-			sql_generate_output += " FROM temp.";
+			sql_generate_output += " FROM ";
+			sql_generate_output += temp_dot;
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 			sql_generate_output += " ";
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
-			sql_generate_output += " LEFT OUTER JOIN temp.";
+			sql_generate_output += " LEFT OUTER JOIN ";
+			sql_generate_output += temp_dot;
 			sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 			sql_generate_output += " ";
 			sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
@@ -813,7 +823,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	std::string sql_generate_output;
 	sql_generate_output += "SELECT ";
 	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_map.size());
-	sql_generate_output += ".* FROM temp.";
+	sql_generate_output += ".* FROM ";
+	sql_generate_output += temp_dot;
 	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_map.size());
 	sql_generate_output += " ";
 	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_map.size());
@@ -832,22 +843,25 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		//sqlite3
 	}
 
-	view_count = 0;
-	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &view_count, &input_model, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	join_count = variable_groups_map.size();
+	std::for_each(variable_groups_map.crbegin(), variable_groups_map.crend(), [this, &db, &temp_dot, &join_count, &input_model, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 	{
 		if (failed)
 		{
 			return; // from lambda
 		}
-		++view_count;
+
 		std::string sql_generate_output;
-		sql_generate_output += "DROP VIEW temp.";
-		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(view_count);
+		sql_generate_output += "DROP VIEW ";
+		sql_generate_output += temp_dot;
+		sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+
 		sqlite3_stmt * stmt = NULL;
 		sqlite3_prepare_v2(db, sql_generate_output.c_str(), sql_generate_output.size() + 1, &stmt, NULL);
 		if (stmt == NULL)
 		{
 			// Todo: Error message
+			failed = true;
 			return;
 		}
 
@@ -858,6 +872,47 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			failed = true;
 			return; // from lambda
 		}
+
+		--join_count;
+	});
+
+	if (failed)
+	{
+		// Todo: Error message
+		return;
+	}
+
+	view_count = variable_groups_map.size();
+	std::for_each(variable_groups_map.crbegin(), variable_groups_map.crend(), [this, &db, &temp_dot, &view_count, &input_model, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	{
+		if (failed)
+		{
+			return; // from lambda
+		}
+
+		std::string sql_generate_output;
+		sql_generate_output += "DROP VIEW ";
+		sql_generate_output += temp_dot;
+		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(view_count);
+
+		sqlite3_stmt * stmt = NULL;
+		sqlite3_prepare_v2(db, sql_generate_output.c_str(), sql_generate_output.size() + 1, &stmt, NULL);
+		if (stmt == NULL)
+		{
+			// Todo: Error message
+			failed = true;
+			return;
+		}
+
+		int step_result = 0;
+		if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+		{
+			// Todo: Error message
+			failed = true;
+			return; // from lambda
+		}
+
+		--view_count;
 	});
 
 	if (failed)
