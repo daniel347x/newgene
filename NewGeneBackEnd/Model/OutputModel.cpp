@@ -610,24 +610,28 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		std::string sql_generate_output;
 		sql_generate_output += "CREATE TEMPORARY VIEW temp.";
 		sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
-		sql_generate_output += " AS SELECT temp.";
+		sql_generate_output += " AS SELECT ";
 		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 		sql_generate_output += ".*";
 		if (join_count > 1)
 		{
 			// join with the previous join
-			sql_generate_output += ", temp.";
+			sql_generate_output += ", ";
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 			sql_generate_output += ".*";
 
 		}
 		sql_generate_output += " FROM temp.";
 		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
+		sql_generate_output += " ";
+		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 		if (join_count > 1)
 		{
 		
 			// join with the previous join
 			sql_generate_output += " INNER JOIN temp.";
+			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += " ";
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 			sql_generate_output += " ON ";
 
@@ -653,11 +657,10 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					sql_generate_output += " AND ";
 				}
 				first_select = false;
-				sql_generate_output += " temp.";
 				sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 				sql_generate_output += ".";
 				sql_generate_output += *primary_key_in_this_variable_group.longhand;
-				sql_generate_output += " = temp.";
+				sql_generate_output += " = ";
 				sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 				sql_generate_output += ".";
 				sql_generate_output += *primary_key_in_this_variable_group.longhand;
@@ -696,9 +699,11 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	}
 
 	std::string sql_generate_output;
-	sql_generate_output += "SELECT temp.";
+	sql_generate_output += "SELECT ";
 	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_map.size());
 	sql_generate_output += ".* FROM temp.";
+	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_map.size());
+	sql_generate_output += " ";
 	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_map.size());
 
 	sqlite3_stmt * stmt = NULL;
