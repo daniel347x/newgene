@@ -712,9 +712,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_generate_output += " ";
 			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 			sql_generate_output += " LEFT OUTER JOIN temp.";
-			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+			sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 			sql_generate_output += " ";
-			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+			sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 
 			sql_generate_output += " ON ";
 
@@ -752,6 +752,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_generate_output += " WHERE ";
 
 			dmu_index = 0;
+			first_select = true;
 			std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [&sql_generate_output, &join_count, &first_select, &dmu_index, &this_variable_group__primary_key_names__previous, &failed](std::string const & primary_key_in_this_variable_group)
 			{
 
