@@ -111,10 +111,11 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 	// ************************************************************************************ //
 	// biggest_counts is:
+	// Vector of: (one for each identical UOA, except possibly for time granularity)
 	// Pair consisting of: UOA identifier and its associated list of [DMU Category / Count]
 	// ... for the UOA that has been determined to be the primary UOA
 	// ************************************************************************************ //
-	std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> biggest_counts;
+	std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> biggest_counts;
 	bool first = true;
 	std::for_each(UOAs.cbegin(), UOAs.cend(), [&first, &biggest_counts, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
 	{
@@ -127,7 +128,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (first)
 		{
 			first = false;
-			biggest_counts = uoa__to__dmu_counts__pair;
+			biggest_counts.push_back(uoa__to__dmu_counts__pair);
 			return; // from lambda
 		}
 		
@@ -141,7 +142,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [&biggest_counts, &current_is_bigger, &current_is_smaller, &current_is_same](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
 		{
 			bool matched_current_dmu = false;
-			std::for_each(biggest_counts.second.cbegin(), biggest_counts.second.cend(), [&matched_current_dmu, &current_dmu_plus_count, &current_is_bigger, &current_is_smaller, &current_is_same](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
+			// Looking at the first entry in biggest_counts is the same as looking at any other entry
+			// in terms of the DMU counts
+			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&matched_current_dmu, &current_dmu_plus_count, &current_is_bigger, &current_is_smaller, &current_is_same](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
 			{
 				if (current_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, biggest_dmu_plus_count.first))
 				{
@@ -166,7 +169,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			}
 		});
 
-		std::for_each(biggest_counts.second.cbegin(), biggest_counts.second.cend(), [&current_dmu_counts, &current_is_bigger, &current_is_smaller, &current_is_same](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
+		// Looking at the first entry in biggest_counts is the same as looking at any other entry
+		// in terms of the DMU counts
+		std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&current_dmu_counts, &current_is_bigger, &current_is_smaller, &current_is_same](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
 		{
 			bool matched_biggest_dmu = false;
 			std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [&matched_biggest_dmu, &biggest_dmu_plus_count, &current_is_bigger, &current_is_smaller, &current_is_same](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
@@ -195,18 +200,35 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			else
 			{
 				// ambiguity: two UOA's are the same
-				// Todo: Implement this
-				failed = true;
-				return; // from lambda
+				// This is just fine
+				biggest_counts.push_back(uoa__to__dmu_counts__pair);
 			}
 		}
-
-		if (current_is_bigger)
+		else if (current_is_bigger && current_is_smaller)
 		{
-			biggest_counts = uoa__to__dmu_counts__pair;
+			// overlapping UOA's: not yet implemented
+			// Todo: Error message
+			failed = true;
+			return; // from labmda
+		}
+		else if (current_is_bigger)
+		{
+			// Wipe the current UOA's and start fresh with this new, bigger one
+			biggest_counts.swap(std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>>());
+			biggest_counts.push_back(uoa__to__dmu_counts__pair);
+		}
+		else if (current_is_smaller)
+		{
+			// Add to child UOA's here
 		}
 
 	});
+
+	if (failed)
+	{
+		// Todo: Error
+		return;
+	}
 
 	// Proceed to generate output based on "biggest_counts" UOA
 
@@ -232,16 +254,13 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	// (i.e. only one multiple may be greater than 0).
 
 	// For now: Make sure that at most 1 DMU has a multiplicity greater than 1
-	if (!biggest_counts.first.uuid)
-	{
-		// Todo: Error message
-		return;
-	}
-	failed = false;
 	std::vector<int> multiplicities;
 	int highest_multiplicity = 0;
 	std::string highest_multiplicity_dmu_string_code;
-	std::for_each(biggest_counts.second.cbegin(), biggest_counts.second.cend(), [this, &multiplicities, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+
+	// Looking at the first entry in biggest_counts is the same as looking at any other entry
+	// in terms of the DMU counts
+	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &multiplicities, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
 	{
 		if (failed)
 		{
@@ -315,14 +334,36 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		++current_index;
 	});
 
+	if (failed)
+	{
+		// Todo: Error message
+		return;
+	}
 
+
+	// variable_group__key_names__vectors:
+	// A vector of: pair<vector<string>, vector<string>> - each such pair represents
+	// one variable group (with at least one variable selected by the user for output)
+	// ... and lists the internal *column names* used by this SQL query,
+	// one vector for the primary keys, and one for the non-primary (i.e., secondary) keys.
+	// Note that a UUID is appended to every variable name to avoid duplicates among variable groups.
+	// Also note that the order is preserved (stored) here, in case the user names
+	// columns in a different order with the same name in different variable groups.
 	VariableGroup__PrimaryKey_SecondaryKey_Names__Vector variable_group__key_names__vectors;
 
 	// variable_groups_map:
-	// The vector of variable groups corresponding to this UOA (independent of time granularity; different time granularities can appear here)
-	// ... and the selected variables in that group.
-	// I.e., possibly multiple PRIMARY variable groups, all corresponding to the same primary UOA (regardless of time granularity)
-	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map & variable_groups_map = the_map[biggest_counts.first];
+	// For all variable groups corresponding to this UOA:
+	// Variable group identifier =>
+	// The selected variables in that group.
+	// (independent of time granularity; different time granularities can appear here)
+	// (Also, multiple, identical UOA's are acceptable, possibly differing in time granularity)
+	// I.e., possibly multiple PRIMARY variable groups, all corresponding to the same primary UOA (regardless of time granularity and/or UOA multiplicity)
+	Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map variable_groups_map;
+	std::for_each(biggest_counts.cbegin(), biggest_counts.cend(), [&variable_groups_map, &the_map](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
+	{
+		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = the_map[uoa__to__dmu_category_counts.first];
+		variable_groups_map.insert(variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
+	});
 
 	int view_count = 0;
 	std::for_each(variable_groups_map.cbegin(), variable_groups_map.cend(), [this, &db, &temp_dot, &view_count, &input_model, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
