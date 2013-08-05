@@ -110,14 +110,21 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	}
 
 	// ************************************************************************************ //
-	// biggest_counts is:
-	// Vector of: (one for each identical UOA, except possibly for time granularity)
+	// biggest_counts and child_counts are:
+	// Vector of: (one for each identical UOA, so that multiple, identical 
+	// UOA's may appear as multiple vector elements,
+	// except possibly for time granularity)
 	// Pair consisting of: UOA identifier and its associated list of [DMU Category / Count]
-	// ... for the UOA that has been determined to be the primary UOA
+	// ... for the UOA that has been determined to be the primary UOA.
+	// Ditto child_counts, but for child UOA's, with the limitation that all DMU categories
+	// but one must have 0 or the max number of DMU elements in the category.  For the one,
+	// it can have one but no other term.
 	// ************************************************************************************ //
 	std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> biggest_counts;
+	std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> child_counts;
+
 	bool first = true;
-	std::for_each(UOAs.cbegin(), UOAs.cend(), [&first, &biggest_counts, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
+	std::for_each(UOAs.cbegin(), UOAs.cend(), [&first, &biggest_counts, &child_counts, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
 	{
 
 		if (failed)
@@ -139,12 +146,13 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		bool current_is_smaller = false;
 		bool current_is_same = true;
 
-		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [&biggest_counts, &current_is_bigger, &current_is_smaller, &current_is_same](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
+		int current = 0;
+		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [&biggest_counts, &current_is_bigger, &current_is_smaller, &current_is_same, &current](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
 		{
 			bool matched_current_dmu = false;
 			// Looking at the first entry in biggest_counts is the same as looking at any other entry
 			// in terms of the DMU counts
-			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&matched_current_dmu, &current_dmu_plus_count, &current_is_bigger, &current_is_smaller, &current_is_same](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
+			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&matched_current_dmu, &current_dmu_plus_count, &current_is_bigger, &current_is_smaller, &current_is_same, &current](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
 			{
 				if (current_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, biggest_dmu_plus_count.first))
 				{
@@ -167,6 +175,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				current_is_same = false;
 				current_is_bigger = true;
 			}
+			++current;
 		});
 
 		// Looking at the first entry in biggest_counts is the same as looking at any other entry
@@ -214,12 +223,21 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		else if (current_is_bigger)
 		{
 			// Wipe the current UOA's and start fresh with this new, bigger one
-			biggest_counts.swap(std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>>());
+			std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> new_child_uoas;
+			biggest_counts.swap(new_child_uoas);
+			child_counts.insert(child_counts.end(), new_child_uoas.cbegin(), new_child_uoas.cend());
 			biggest_counts.push_back(uoa__to__dmu_counts__pair);
 		}
 		else if (current_is_smaller)
 		{
 			// Add to child UOA's here
+			child_counts.push_back(uoa__to__dmu_counts__pair);
+		}
+		else
+		{
+			// error in algorithm logic
+			failed = true;
+			return; // from lambda
 		}
 
 	});
@@ -230,30 +248,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		return;
 	}
 
-	// Proceed to generate output based on "biggest_counts" UOA
 
-	// We have the primary UOA
-	// Now get the K-ad counts chosen by the user,
-	// and compare the K-ad count for each DMU category
-	// against the UOA's k-count for the same DMU category.
-	// For each matching DMU category, determine the largest
-	// whole multiple of the UOA's k-count that is equal to or
-	// smaller than the user's k-selection, and store this
-	// largest whole multiple in a vector.
-
-	// Each multiple greater than 1 corresponds to running
-	// a generation cycle, in which all other DMU columns
-	// are fixed at a SINGLE choice of their possible column variants,
-	// and the current DMU columns are a simple JOIN matching on the
-	// other columns, one join per increment of the multiple
-	// above 1.
-
-	// The final result is the union of all such generation cycles.
-	
-	// To start off, only 1 generation cycle will be allowed
-	// (i.e. only one multiple may be greater than 0).
-
-	// For now: Make sure that at most 1 DMU has a multiplicity greater than 1
+	// For primary UOA:
+	// Make sure that at most 1 DMU has a multiplicity greater than 1.
 	std::vector<int> multiplicities;
 	int highest_multiplicity = 0;
 	std::string highest_multiplicity_dmu_string_code;
@@ -337,6 +334,80 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	if (failed)
 	{
 		// Todo: Error message
+		return;
+	}
+
+
+	// Validate child UOA's
+	// For child UOA's:
+	// Make sure that, for each child UOA, the actual k-value for all DMU categories
+	// is either 0, 1, or the corresponding k-value of the primary UOA
+	// and that where not 0, it is less than the corresponding k-value of the primary UOA
+	// (i.e., has a value of 1)
+	// for only 1 DMU category
+	std::for_each(child_counts.cbegin(), child_counts.cend(), [&biggest_counts, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
+	{
+		if (failed)
+		{
+			return; // from lambda
+		}
+		int primary_dmu_categories_for_which_child_has_less = 0;
+		Table_UOA_Identifier::DMU_Counts const & current_dmu_counts = uoa__to__dmu_counts__pair.second;
+		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [&biggest_counts, &primary_dmu_categories_for_which_child_has_less, &failed](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
+		{
+			if (failed)
+			{
+				return; // from lambda
+			}
+			if (current_dmu_plus_count.second == 0)
+			{
+				// just fine
+				return; // from lambda
+			}
+			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&current_dmu_plus_count, &primary_dmu_categories_for_which_child_has_less, &failed](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
+			{
+				if (failed)
+				{
+					return; // from lambda
+				}
+				if (current_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, biggest_dmu_plus_count.first))
+				{
+					if (current_dmu_plus_count.second == biggest_dmu_plus_count.second)
+					{
+						// just fine
+						return; // from lambda
+					}
+					if (current_dmu_plus_count.second > 1)
+					{
+						// Todo: error message
+						// Invalid child UOA for this output
+						failed = true;
+						return; // from lambda
+					}
+					// Redundant 0-check for future code foolproofing
+					if (current_dmu_plus_count.second == 0)
+					{
+						// just fine
+						return; // from lambda
+					}
+					++primary_dmu_categories_for_which_child_has_less;
+				}
+			});
+		});
+
+		if (primary_dmu_categories_for_which_child_has_less > 1)
+		{
+			// Todo: error message
+			// Invalid child UOA for this output
+			failed = true;
+			return; // from lambda
+		}
+
+	});
+
+	if (failed)
+	{
+		// todo: error message
 		return;
 	}
 
