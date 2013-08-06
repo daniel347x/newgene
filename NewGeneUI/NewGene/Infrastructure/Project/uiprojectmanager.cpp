@@ -32,6 +32,30 @@ UIProjectManager::UIProjectManager( QObject * parent )
 UIProjectManager::~UIProjectManager()
 {
 
+	for_each(input_tabs.begin(), input_tabs.end(), [this](std::pair<NewGeneMainWindow * const, InputProjectTabs> & windows)
+	{
+
+		InputProjectTabs & tabs = windows.second;
+		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
+		{
+			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
+			project_ptr->deleteLater();
+		});
+
+	});
+
+	for_each(output_tabs.begin(), output_tabs.end(), [this](std::pair<NewGeneMainWindow * const, OutputProjectTabs> & windows)
+	{
+
+		OutputProjectTabs & tabs = windows.second;
+		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
+		{
+			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
+			project_ptr->deleteLater();
+		});
+
+	});
+
 }
 
 void UIProjectManager::EndAllLoops()
@@ -50,7 +74,6 @@ void UIProjectManager::EndAllLoops()
 			project_ptr->modelSettings().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->projectSettings().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->EndLoopAndBackgroundPool(); // blocks
-			project_ptr->deleteLater();
 		});
 
 	});
@@ -68,7 +91,6 @@ void UIProjectManager::EndAllLoops()
 			project_ptr->modelSettings().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->projectSettings().EndLoopAndBackgroundPool(); // blocks
 			project_ptr->EndLoopAndBackgroundPool(); // blocks
-			project_ptr->deleteLater();
 		});
 
 	});

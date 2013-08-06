@@ -17,6 +17,11 @@ public:
 	{
 
 	}
+
+	~InputProject()
+	{
+
+	}
 };
 
 #endif

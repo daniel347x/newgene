@@ -40,7 +40,6 @@ NewGeneVariableSummaryGroup::NewGeneVariableSummaryGroup( QWidget * parent, Widg
 
 NewGeneVariableSummaryGroup::~NewGeneVariableSummaryGroup()
 {
-	outp->UnregisterInterestInChanges(this);
 	delete ui;
 }
 
@@ -61,7 +60,13 @@ void NewGeneVariableSummaryGroup::changeEvent( QEvent * e )
 
 void NewGeneVariableSummaryGroup::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
+	if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		outp->UnregisterInterestInChanges(this);
+	}
+
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
+
  	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)));

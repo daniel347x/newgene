@@ -17,6 +17,11 @@ public:
 	{
 
 	}
+
+	~OutputProject()
+	{
+
+	}
 };
 
 #endif
