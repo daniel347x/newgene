@@ -581,6 +581,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 		if (view_count > number_primary_variable_groups)
 		{
+
 			if (child_uoas__which_multiplicity_is_greater_than_1.find(current_uoa_identifier) == child_uoas__which_multiplicity_is_greater_than_1.end())
 			{
 				// No UOA associated with this variable group!
@@ -596,6 +597,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				failed = true;
 				return;
 			}
+
 		}
 
 		++view_count;
@@ -769,6 +771,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				sql_generate_output += *primary_key_in_this_variable_group.longhand;
 				sql_generate_output += " AS ";
 				sql_generate_output += this_variable_group__this_primary_key__unique_name;
+
 			});
 
 		}
@@ -842,22 +845,27 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_generate_output += current_table_token;
 			sql_generate_output += " ON ";
 
-			// Always match on time range fields
-			sql_generate_output += current_table_token;
-			sql_generate_output += ".";
-			sql_generate_output += "DATETIME_ROW_START";
-			sql_generate_output += " = ";
-			sql_generate_output += "t1.";
-			sql_generate_output += "DATETIME_ROW_START";
-			sql_generate_output += " AND ";
-			sql_generate_output += current_table_token;
-			sql_generate_output += ".";
-			sql_generate_output += "DATETIME_ROW_END";
-			sql_generate_output += " = ";
-			sql_generate_output += "t1.";
-			sql_generate_output += "DATETIME_ROW_END";
+			bool and_required = false;
+			if (current_uoa_identifier.time_granularity != TIME_GRANULARITY__NONE)
+			{
+				// Always match on time range fields
+				sql_generate_output += current_table_token;
+				sql_generate_output += ".";
+				sql_generate_output += "DATETIME_ROW_START";
+				sql_generate_output += " = ";
+				sql_generate_output += "t1.";
+				sql_generate_output += "DATETIME_ROW_START";
+				sql_generate_output += " AND ";
+				sql_generate_output += current_table_token;
+				sql_generate_output += ".";
+				sql_generate_output += "DATETIME_ROW_END";
+				sql_generate_output += " = ";
+				sql_generate_output += "t1.";
+				sql_generate_output += "DATETIME_ROW_END";
+				and_required = true;
+			}
 
-			std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &highest_multiplicity_dmu_string_code, &vg_data_table_name, &current_table_token, &failed](WidgetInstanceIdentifier const & dmu_identifier)
+			std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &highest_multiplicity_dmu_string_code, &vg_data_table_name, &current_table_token, &and_required, &failed](WidgetInstanceIdentifier const & dmu_identifier)
 			{
 				if (failed)
 				{
@@ -881,7 +889,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 				std::string vg_data_column_name = *dmu_identifier.longhand;
 
-				sql_generate_output += " AND ";
+				if (and_required)
+				{
+					sql_generate_output += " AND ";
+				}
+				and_required = true;
+
 				sql_generate_output += current_table_token;
 				sql_generate_output += ".";
 				sql_generate_output += vg_data_column_name;
