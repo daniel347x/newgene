@@ -1315,17 +1315,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 					{
 
 						TimeRangeFieldMapping & the_mapping = dynamic_cast<TimeRangeFieldMapping &>(*field_mapping);
-
-						// perform the mapping here
-						switch (the_mapping.time_range_type)
-						{
-						case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR:
-							{
-								the_mapping.PerformMapping(input_data_fields, output_data_fields);
-							}
-							break;
-						}
-
+						the_mapping.PerformMapping(input_data_fields, output_data_fields);
 
 					}
 					catch (std::bad_cast &)

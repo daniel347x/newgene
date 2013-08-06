@@ -252,7 +252,7 @@ ImportDefinition Development__CreateImportDefinition_Cty()
 	import_definition__cty.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	import_definition__cty.input_file = "L:\\daniel347x\\__DanExtras\\EuGene\\InputDat\\states2008.1.csv";
 	import_definition__cty.first_row_is_header_row = true;
-	import_definition__cty.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
+	import_definition__cty.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED | ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED;
 
 	Schema schema_input;
 	Schema schema_output;
