@@ -50,6 +50,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 		// helpers used in GenerateOutput()
 		std::string CurrentTableTokenName(int const multiplicity);
+		std::string StripUUIDFromVariableName(std::string const & variable_name);
 
 };
 

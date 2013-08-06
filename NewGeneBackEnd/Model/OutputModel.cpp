@@ -59,6 +59,20 @@ std::string OutputModel::CurrentTableTokenName(int const multiplicity)
 	return current_table_token;
 }
 
+std::string OutputModel::StripUUIDFromVariableName(std::string const & variable_name)
+{
+	std::string test_uuid = newUUID();
+	size_t length_uuid = test_uuid.size();
+	length_uuid += 1; // preceding underscore
+	size_t length_variable_name = variable_name.size();
+	int left_chars = (int)length_variable_name - (int)length_uuid;
+	if (left_chars < 0)
+	{
+		return variable_name;
+	}
+	std::string stripped_variable_name = variable_name.substr(0, left_chars);
+}
+
 void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 {
 
@@ -622,6 +636,16 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		PrimaryKey_SecondaryKey_Names & this_variable_group__key_names = variable_group__key_names__vectors.back();
 		std::vector<std::string> & this_variable_group__primary_key_names = this_variable_group__key_names.first;
 		std::vector<std::string> & this_variable_group__secondary_key_names = this_variable_group__key_names.second;
+		std::vector<std::string> this_variable_group__primary_key_names__uuid_stripped;
+		std::vector<std::string> this_variable_group__secondary_key_names__uuid_stripped;
+		std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [this, &this_variable_group__primary_key_names__uuid_stripped](std::string const & this_variable_group__primary_key_name)
+		{
+			this_variable_group__primary_key_names__uuid_stripped.push_back(this->StripUUIDFromVariableName(this_variable_group__primary_key_name));
+		});
+		std::for_each(this_variable_group__secondary_key_names.cbegin(), this_variable_group__secondary_key_names.cend(), [this, &this_variable_group__secondary_key_names__uuid_stripped](std::string const & this_variable_group__secondary_key_name)
+		{
+			this_variable_group__secondary_key_names__uuid_stripped.push_back(this->StripUUIDFromVariableName(this_variable_group__secondary_key_name));
+		});
 
 		std::string vg_code = *the_variable_group.first.code;
 		std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
@@ -806,7 +830,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			std::string ms__ = itoa(m, ns__, 10);
 
 			// Display all variables selected by user
-			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &first_select, &sql_generate_output, &current_table_token, &ms__, &this_variable_group__secondary_key_names, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
+			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &first_select, &sql_generate_output, &current_table_token, &ms__, &this_variable_group__primary_key_names__uuid_stripped, &this_variable_group__secondary_key_names, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
 			{
 				if (failed)
 				{
@@ -818,19 +842,29 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					failed = true;
 					return; // from lambda
 				}
+				std::string this_variable_group_secondary_key_name;
+				this_variable_group_secondary_key_name += *variable_selected_in_this_group.code;
+				this_variable_group_secondary_key_name += "_";
+				this_variable_group_secondary_key_name += ms__;
+
+				if (std::find(this_variable_group__primary_key_names__uuid_stripped.begin(), this_variable_group__primary_key_names__uuid_stripped.end(), this_variable_group_secondary_key_name) == this_variable_group__primary_key_names__uuid_stripped.end())
+				{
+					// This is a primary key that has been selected by the user for output.
+					// Since primary keys are automatically output, regardless of whether the user selectes them,
+					// do not include it as a secondary (i.e., additional) output column
+					return; // from lambda
+				}
+
+				this_variable_group_secondary_key_name += "_";
+				this_variable_group_secondary_key_name += newUUID(true);
+
+				this_variable_group__secondary_key_names.push_back(this_variable_group_secondary_key_name);
+
 				if (!first_select)
 				{
 					sql_generate_output += ", ";
 				}
 				first_select = false;
-
-				std::string this_variable_group_secondary_key_name;
-				this_variable_group_secondary_key_name += *variable_selected_in_this_group.code;
-				this_variable_group_secondary_key_name += "_";
-				this_variable_group_secondary_key_name += ms__;
-				this_variable_group_secondary_key_name += "_";
-				this_variable_group_secondary_key_name += newUUID(true);
-				this_variable_group__secondary_key_names.push_back(this_variable_group_secondary_key_name);
 
 				sql_generate_output += current_table_token;
 				sql_generate_output += ".";
@@ -916,7 +950,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				sql_generate_output += vg_data_column_name;
 				sql_generate_output += " = ";
 				sql_generate_output += "t1.";
-				sql_generate_output += vg_data_column_name;
+				sql_generate_output += vg_data_column_name; // Creating VIEW views, not JOIN views, so it's a self-join; column names are the same
 			});
 
 			if (failed)
