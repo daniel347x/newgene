@@ -39,7 +39,7 @@ void Table_UOA_Identifier::Load(sqlite3 * db, InputModel * input_model_)
 		char const * uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_UUID));
 		char const * code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_STRING_CODE));
 		char const * longhand = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_STRING_LONGHAND));
-		TIME_GRANULARITY time_granularity = static_cast<TIME_GRANULARITY>(reinterpret_cast<int>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_TIME_GRANULARITY)));
+		TIME_GRANULARITY time_granularity = static_cast<TIME_GRANULARITY>(static_cast<int>(sqlite3_column_int(stmt, INDEX__UOA_CATEGORY_TIME_GRANULARITY)));
 		char const * notes1 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_NOTES1));
 		char const * notes2 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_NOTES2));
 		char const * notes3 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_NOTES3));
