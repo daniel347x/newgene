@@ -12,6 +12,9 @@ public:
 	static std::string const VG_SET_MEMBER_STRING_CODE;
 	static std::string const VG_CATEGORY_STRING_CODE;
 
+	// Vector of: pair<Variable Group identifier, Selected Variables in the group>
+	typedef std::vector<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>> VariableGroup_To_VariableSelections_Vector;
+
 	// Variable Group identifier => Selected Variables in the group
 	typedef std::map<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> VariableGroup_To_VariableSelections_Map;
 
