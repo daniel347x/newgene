@@ -190,6 +190,8 @@ class UIProjectManager : public QObject,
 		void DoRefreshAllInputModelWidgets();
 		void DoRefreshAllOutputModelWidgets();
 
+		void EndAllLoops();
+
 	signals:
 
 		void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);

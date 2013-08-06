@@ -32,6 +32,11 @@ UIProjectManager::UIProjectManager( QObject * parent )
 UIProjectManager::~UIProjectManager()
 {
 
+}
+
+void UIProjectManager::EndAllLoops()
+{
+
 	for_each(input_tabs.begin(), input_tabs.end(), [this](std::pair<NewGeneMainWindow * const, InputProjectTabs> & windows)
 	{
 
@@ -70,7 +75,7 @@ UIProjectManager::~UIProjectManager()
 
 	EndLoopAndBackgroundPool();
 
-}
+};
 
 void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 {

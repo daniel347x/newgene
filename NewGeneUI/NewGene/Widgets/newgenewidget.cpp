@@ -72,7 +72,6 @@ void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_
 			inp->RemoveWidgetFromUUIDMap(uuid);
 			if (data_instance.uuid)
 			{
-				//inp->RemoveWidgetDataItemFromUUIDMap(uuid, *data_instance.uuid);
 				inp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
 			}
 		}
@@ -131,8 +130,7 @@ void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS
 			outp->RemoveWidgetFromUUIDMap(uuid);
 			if (data_instance.uuid)
 			{
-				//inp->RemoveWidgetDataItemFromUUIDMap(uuid, *data_instance.uuid);
-				inp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
+				outp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
 			}
 		}
 		outp = nullptr;

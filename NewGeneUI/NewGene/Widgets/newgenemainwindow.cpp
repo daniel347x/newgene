@@ -91,11 +91,14 @@ NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 NewGeneMainWindow::~NewGeneMainWindow()
 {
 
+	projectManagerUI().EndAllLoops();
+
 	// Manage global settings in main thread
 	settingsManagerUI().globalSettings().EndLoopAndBackgroundPool();
 
 	NewGeneWidget::theMainWindow = nullptr;
 	delete ui;
+
 }
 
 void NewGeneMainWindow::changeEvent( QEvent * e )
