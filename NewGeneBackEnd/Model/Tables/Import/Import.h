@@ -58,9 +58,11 @@ class FieldMapping
 			, FIELD_MAPPING_TYPE__ROW
 			, FIELD_MAPPING_TYPE__ONE_TO_ONE
 			, FIELD_MAPPING_TYPE__TIME_RANGE
+			, FIELD_MAPPING_TYPE__HARD_CODED
 		};
 
 		FieldMapping()
+			: field_mapping_type(FIELD_MAPPING_TYPE__UNKNOWN)
 		{
 
 		}
@@ -76,6 +78,32 @@ class FieldMapping
 		{
 			input_file_fields.push_back(input_field_entry);
 			output_table_fields.push_back(output_table_entry);
+		}
+
+		FieldMapping(FieldTypeEntry const & field_entry, bool field_is_input)
+			: field_mapping_type(FIELD_MAPPING_TYPE__UNKNOWN)
+		{
+			if (field_is_input)
+			{
+				input_file_fields.push_back(field_entry);
+			}
+			else
+			{
+				output_table_fields.push_back(field_entry);
+			}
+		}
+
+		FieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_, FieldTypeEntry const & field_entry, bool field_is_input)
+			: field_mapping_type(field_mapping_type_)
+		{
+			if (field_is_input)
+			{
+				input_file_fields.push_back(field_entry);
+			}
+			else
+			{
+				output_table_fields.push_back(field_entry);
+			}
 		}
 
 		FieldMapping(FieldTypeEntry const & input_field_entry, FieldTypeEntry const & output_table_entry)
@@ -128,6 +156,11 @@ class RowFieldMapping : public FieldMapping
 		{
 		}
 
+		RowFieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_, FieldTypeEntry const & field_entry, bool field_is_input)
+			: FieldMapping(field_mapping_type_, field_entry, field_is_input)
+		{
+		}
+
 		RowFieldMapping(RowFieldMapping const & rhs)
 			: FieldMapping(rhs)
 		{
@@ -176,6 +209,49 @@ class OneToOneFieldMapping : public RowFieldMapping
 
 };
 
+class HardCodedFieldMapping : public RowFieldMapping
+{
+
+public:
+
+	HardCodedFieldMapping()
+		: RowFieldMapping(FIELD_MAPPING_TYPE__HARD_CODED)
+	{
+	}
+
+	HardCodedFieldMapping(std::shared_ptr<BaseField> data_)
+		: RowFieldMapping(FIELD_MAPPING_TYPE__HARD_CODED)
+		, data(data_)
+	{
+	}
+
+	HardCodedFieldMapping(FIELD_MAPPING_TYPE const field_mapping_type_, std::shared_ptr<BaseField> data_)
+		: RowFieldMapping(field_mapping_type_)
+		, data(data_)
+	{
+	}
+
+	HardCodedFieldMapping(std::shared_ptr<BaseField> input_data_, FieldTypeEntry const & output_table_entry)
+		: RowFieldMapping(FIELD_MAPPING_TYPE__HARD_CODED, output_table_entry, false)
+		, data(input_data_)
+	{
+	}
+
+	HardCodedFieldMapping(HardCodedFieldMapping const & rhs)
+		: RowFieldMapping(rhs)
+		, data(rhs.data)
+	{
+	}
+
+	bool Validate()
+	{
+		return true;
+	}
+
+	std::shared_ptr<BaseField> data;
+
+};
+
 class TimeRangeFieldMapping : public RowFieldMapping
 {
 	
@@ -183,7 +259,9 @@ class TimeRangeFieldMapping : public RowFieldMapping
 
 		enum TIME_RANGE_FIELD_MAPPING_TYPE
 		{
-			TIME_RANGE_FIELD_MAPPING_TYPE__YEAR
+			  TIME_RANGE_FIELD_MAPPING_TYPE__YEAR
+			, TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__YR_MNTH_DAY
+			, TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY
 		};
 
 		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_, FIELD_MAPPING_TYPE const field_mapping_type_)

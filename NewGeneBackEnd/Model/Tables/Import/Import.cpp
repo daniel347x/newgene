@@ -40,6 +40,76 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 		}
 		break;
+
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__YR_MNTH_DAY:
+			{
+				std::shared_ptr<BaseField> const the_input_field_day = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+
+				if (!the_input_field_day || !the_input_field_month || !the_input_field_year || !the_output_field_day_start)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				Field<FIELD_TYPE_INT32> const & the_input_field_day_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_day);
+				Field<FIELD_TYPE_INT32> const & the_input_field_month_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_month);
+				Field<FIELD_TYPE_INT32> const & the_input_field_year_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_year);
+				Field<FIELD_TYPE_INT64> & the_output_field_day_start_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_day_start);
+
+				// convert year to ms since jan 1, 1970 00:00:00.000
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+				boost::gregorian::date row_start_date(the_input_field_year_int32.GetValueReference(), the_input_field_month_int32.GetValueReference(), the_input_field_day_int32.GetValueReference());
+				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
+
+				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+
+				the_output_field_day_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
+			}
+			break;
+
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY:
+			{
+				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_day_end = RetrieveDataField(input_file_fields[3], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month_end = RetrieveDataField(input_file_fields[4], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_end = RetrieveDataField(input_file_fields[5], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start || !the_input_field_day_end || !the_input_field_month_end || !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				Field<FIELD_TYPE_INT32> const & the_input_field_day_start_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_day_start);
+				Field<FIELD_TYPE_INT32> const & the_input_field_month_start_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_month_start);
+				Field<FIELD_TYPE_INT32> const & the_input_field_year_start_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_year_start);
+				Field<FIELD_TYPE_INT32> const & the_input_field_day_end_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_day_end);
+				Field<FIELD_TYPE_INT32> const & the_input_field_month_end_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_month_end);
+				Field<FIELD_TYPE_INT32> const & the_input_field_year_end_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_year_end);
+				Field<FIELD_TYPE_INT64> & the_output_field_day_start_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_day_start);
+				Field<FIELD_TYPE_INT64> & the_output_field_day_end_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_day_end);
+
+				// convert year to ms since jan 1, 1970 00:00:00.000
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+				boost::gregorian::date row_start_date(the_input_field_year_start_int32.GetValueReference(), the_input_field_month_start_int32.GetValueReference(), the_input_field_day_start_int32.GetValueReference());
+				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
+				boost::gregorian::date row_end_date(the_input_field_year_end_int32.GetValueReference(), the_input_field_month_end_int32.GetValueReference(), the_input_field_day_end_int32.GetValueReference());
+				boost::posix_time::ptime time_t_epoch__rowdateend(row_end_date);
+
+				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+
+				the_output_field_day_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
+				the_output_field_day_end_int64.SetValue(diff_end_from_1970.total_milliseconds());
+			}
+			break;
 	}
 }
 
@@ -364,6 +434,53 @@ bool Importer::ValidateMapping()
 				try
 				{
 					OneToOneFieldMapping const & the_mapping = dynamic_cast<OneToOneFieldMapping const &>(*field_mapping);
+					FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
+
+					// search the output schema to see what numeric index this corresponds to, and set it in indices_required_are_matched
+					int current_index = 0;
+					std::for_each(import_definition.output_schema.schema.cbegin(), import_definition.output_schema.schema.cend(), [this, &output_entry, &indices_required_are_matched, &current_index](SchemaEntry const & output_schema_entry)
+					{
+						bool match = false;
+						if (output_entry.first.name_or_index == NameOrIndex::NAME)
+						{
+							if (boost::iequals(output_entry.first.name, output_schema_entry.field_name))
+							{
+								match = true;
+							}
+						}
+						else
+						{
+							if (output_entry.first.index == current_index)
+							{
+								match = true;
+							}
+						}
+						if (match)
+						{
+							std::for_each(indices_required_are_matched.begin(), indices_required_are_matched.end(), [&current_index](std::pair<int, bool> & the_pair)
+							{
+								if (the_pair.first == current_index)
+								{
+									the_pair.second = true;
+								}
+							});
+						}
+						++current_index;
+					});
+				}
+				catch (std::bad_cast &)
+				{
+					// TODO: Import problem warning
+					return; // from lambda
+				}
+			}
+			break;
+
+		case FieldMapping::FIELD_MAPPING_TYPE__HARD_CODED:
+			{
+				try
+				{
+					HardCodedFieldMapping const & the_mapping = dynamic_cast<HardCodedFieldMapping const &>(*field_mapping);
 					FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
 
 					// search the output schema to see what numeric index this corresponds to, and set it in indices_required_are_matched
@@ -909,6 +1026,159 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 						if (the_input_field && the_output_field)
 						{
+							// map them
+							try
+							{
+								switch (the_input_field->GetType())
+								{
+								case FIELD_TYPE_INT32:
+									{
+										Field<FIELD_TYPE_INT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_input_field);
+										Field<FIELD_TYPE_INT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_INT64:
+									{
+										Field<FIELD_TYPE_INT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_input_field);
+										Field<FIELD_TYPE_INT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_UINT32:
+									{
+										Field<FIELD_TYPE_UINT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_input_field);
+										Field<FIELD_TYPE_UINT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_UINT64:
+									{
+										Field<FIELD_TYPE_UINT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_input_field);
+										Field<FIELD_TYPE_UINT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_STRING_FIXED:
+									{
+										Field<FIELD_TYPE_STRING_FIXED> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_input_field);
+										Field<FIELD_TYPE_STRING_FIXED> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_STRING_VAR:
+									{
+										Field<FIELD_TYPE_STRING_VAR> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_input_field);
+										Field<FIELD_TYPE_STRING_VAR> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_TIMESTAMP:
+									{
+										Field<FIELD_TYPE_TIMESTAMP> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_input_field);
+										Field<FIELD_TYPE_TIMESTAMP> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_UUID:
+									{
+										Field<FIELD_TYPE_UUID> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_input_field);
+										Field<FIELD_TYPE_UUID> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_UUID_FOREIGN:
+									{
+										Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_input_field);
+										Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_STRING_CODE:
+									{
+										Field<FIELD_TYPE_STRING_CODE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_input_field);
+										Field<FIELD_TYPE_STRING_CODE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_STRING_LONGHAND:
+									{
+										Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_input_field);
+										Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_TIME_RANGE:
+									{
+										Field<FIELD_TYPE_TIME_RANGE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_input_field);
+										Field<FIELD_TYPE_TIME_RANGE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_NOTES_1:
+									{
+										Field<FIELD_TYPE_NOTES_1> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_input_field);
+										Field<FIELD_TYPE_NOTES_1> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_NOTES_2:
+									{
+										Field<FIELD_TYPE_NOTES_2> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_input_field);
+										Field<FIELD_TYPE_NOTES_2> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_NOTES_3:
+									{
+										Field<FIELD_TYPE_NOTES_3> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_input_field);
+										Field<FIELD_TYPE_NOTES_3> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								}
+							}
+							catch (std::bad_cast &)
+							{
+								// Todo: log warning
+								stop = true;
+								return; // from lambda
+							}
+						}
+
+					}
+					catch (std::bad_cast &)
+					{
+						// TODO: Import problem warning
+						stop = true;
+						return; // from lambda
+					}
+				}
+				break;
+
+			case FieldMapping::FIELD_MAPPING_TYPE__HARD_CODED:
+				{
+					try
+					{
+
+						HardCodedFieldMapping const & the_mapping = dynamic_cast<HardCodedFieldMapping const &>(*field_mapping);
+						FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
+
+						// perform the mapping here
+
+						std::shared_ptr<BaseField> the_input_field = the_mapping.data;
+						std::shared_ptr<BaseField> the_output_field = RetrieveDataField(output_entry, output_data_fields);
+
+						if (the_input_field && the_output_field)
+						{
+
+							if (the_input_field->GetType() != the_output_field->GetType())
+							{
+								// Todo: log warning
+								stop = true;
+								return; // from lambda
+							}
+
 							// map them
 							try
 							{
