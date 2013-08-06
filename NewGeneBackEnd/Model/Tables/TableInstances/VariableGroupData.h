@@ -26,6 +26,8 @@ public:
 	static std::string ViewNameFromCount(int const view_number);
 	static std::string JoinViewNameFromCount(int const join_number);
 
+	static std::string EscapeTicks(std::string const & s);
+
 	std::string vg_category_string_code;
 	std::string table_name;
 

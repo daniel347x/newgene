@@ -252,7 +252,7 @@ ImportDefinition Development__CreateImportDefinition_Cty()
 	import_definition__cty.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	import_definition__cty.input_file = "L:\\daniel347x\\__DanExtras\\EuGene\\InputDat\\states2008.1.csv";
 	import_definition__cty.first_row_is_header_row = true;
-	import_definition__cty.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED | ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED;
+	import_definition__cty.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
 
 	Schema schema_input;
 	Schema schema_output;
@@ -465,7 +465,7 @@ ImportDefinition Development__CreateImportDefinition_MidNames()
 	ImportDefinition::ImportMappings mappings;
 
 	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "ID Number"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "MIDNameMID"), FIELD_TYPE_STRING_FIXED)));
-	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "MIDNameName"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "MIDNameName"), FIELD_TYPE_STRING_FIXED)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "Name"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "MIDNameName"), FIELD_TYPE_STRING_FIXED)));
 
 	schema_input.schema = input_schema_vector;
 	schema_output.schema = output_schema_vector;

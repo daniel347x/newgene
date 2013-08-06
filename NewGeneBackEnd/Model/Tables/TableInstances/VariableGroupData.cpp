@@ -14,6 +14,22 @@ void Table_VariableGroupData::Load(sqlite3 * db, InputModel * input_model_)
 {
 }
 
+std::string Table_VariableGroupData::EscapeTicks(std::string const & s)
+{
+	std::string out;
+	char const * cs = s.c_str();
+	while (*cs != '\0')
+	{
+		if (*cs == '\'')
+		{
+			out += '\'';
+		}
+		out += *cs;
+		++cs;
+	}
+	return out;
+}
+
 bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string code, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_)
 {
 	
@@ -185,7 +201,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 				{
 					Field<FIELD_TYPE_STRING_FIXED> const & field = static_cast<Field<FIELD_TYPE_STRING_FIXED> const & >(*field_data);
 					sql_insert += '\'';
-					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 					sql_insert += '\'';
 				}
 				break;
@@ -193,7 +209,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 				{
 					Field<FIELD_TYPE_STRING_VAR> const & field = static_cast<Field<FIELD_TYPE_STRING_VAR> const & >(*field_data);
 					sql_insert += '\'';
-					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 					sql_insert += '\'';
 				}
 				break;
@@ -207,7 +223,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 				{
 					Field<FIELD_TYPE_UUID> const & field = static_cast<Field<FIELD_TYPE_UUID> const & >(*field_data);
 					sql_insert += '\'';
-					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 					sql_insert += '\'';
 				}
 				break;
@@ -215,7 +231,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 				{
 					Field<FIELD_TYPE_UUID_FOREIGN> const & field = static_cast<Field<FIELD_TYPE_UUID_FOREIGN> const & >(*field_data);
 					sql_insert += '\'';
-					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 					sql_insert += '\'';
 				}
 				break;
@@ -223,7 +239,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 				{
 					Field<FIELD_TYPE_STRING_CODE> const & field = static_cast<Field<FIELD_TYPE_STRING_CODE> const & >(*field_data);
 					sql_insert += '\'';
-					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 					sql_insert += '\'';
 				}
 				break;
@@ -231,7 +247,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 				{
 					Field<FIELD_TYPE_STRING_LONGHAND> const & field = static_cast<Field<FIELD_TYPE_STRING_LONGHAND> const & >(*field_data);
 					sql_insert += '\'';
-					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 					sql_insert += '\'';
 				}
 				break;
@@ -245,7 +261,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 				{
 					Field<FIELD_TYPE_NOTES_1> const & field = static_cast<Field<FIELD_TYPE_NOTES_1> const & >(*field_data);
 					sql_insert += '\'';
-					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 					sql_insert += '\'';
 				}
 				break;
@@ -253,7 +269,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 				{
 					Field<FIELD_TYPE_NOTES_2> const & field = static_cast<Field<FIELD_TYPE_NOTES_2> const & >(*field_data);
 					sql_insert += '\'';
-					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 					sql_insert += '\'';
 				}
 				break;
@@ -261,7 +277,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 				{
 					Field<FIELD_TYPE_NOTES_3> const & field = static_cast<Field<FIELD_TYPE_NOTES_3> const & >(*field_data);
 					sql_insert += '\'';
-					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+					sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 					sql_insert += '\'';
 				}
 				break;

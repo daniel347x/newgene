@@ -61,7 +61,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
-				boost::gregorian::date row_start_date(the_input_field_year_int32.GetValueReference(), the_input_field_month_int32.GetValueReference(), the_input_field_day_int32.GetValueReference());
+				boost::gregorian::date row_start_date(the_input_field_year_int32.GetValueReference(), the_input_field_month_int32.GetValueReference() > 0 ? the_input_field_month_int32.GetValueReference() : 1, the_input_field_day_int32.GetValueReference() > 0 ? the_input_field_day_int32.GetValueReference() : 1);
 				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
@@ -98,9 +98,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
-				boost::gregorian::date row_start_date(the_input_field_year_start_int32.GetValueReference(), the_input_field_month_start_int32.GetValueReference(), the_input_field_day_start_int32.GetValueReference());
+				boost::gregorian::date row_start_date(the_input_field_year_start_int32.GetValueReference(), the_input_field_month_start_int32.GetValueReference() > 0 ? the_input_field_month_start_int32.GetValueReference() : 1, the_input_field_day_start_int32.GetValueReference() > 0 ? the_input_field_day_start_int32.GetValueReference() : 1);
 				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
-				boost::gregorian::date row_end_date(the_input_field_year_end_int32.GetValueReference(), the_input_field_month_end_int32.GetValueReference(), the_input_field_day_end_int32.GetValueReference());
+				boost::gregorian::date row_end_date(the_input_field_year_end_int32.GetValueReference(), the_input_field_month_end_int32.GetValueReference() > 0 ? the_input_field_month_end_int32.GetValueReference() : 1, the_input_field_day_end_int32.GetValueReference() > 0 ? the_input_field_day_end_int32.GetValueReference() : 1);
 				boost::posix_time::ptime time_t_epoch__rowdateend(row_end_date);
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
@@ -123,7 +123,7 @@ ImportDefinition::ImportDefinition(ImportDefinition const & rhs)
 	, first_row_is_header_row(rhs.first_row_is_header_row)
 	, input_schema(rhs.input_schema)
 	, output_schema(rhs.output_schema)
-	, format_qualifiers(FORMAT_QUALIFIERS__COMMA_DELIMITED | FORMAT_QUALIFIERS__BACKSLASH_ESCAPE_CHAR)
+	, format_qualifiers(rhs.format_qualifiers)
 	, import_type(rhs.import_type)
 {
 }
@@ -562,26 +562,31 @@ bool Importer::ValidateMapping()
 
 void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop)
 {
+	bool is_quoted_field = false;
 	char * starting_parsed_pointer = parsed_line_ptr;
 	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED)
 	{
+		is_quoted_field = true;
 		if (*current_line_ptr != '\'')
 		{
-			// Todo: warning
-			stop = true;
-			return;
+			is_quoted_field = false;
 		}
-		++current_line_ptr;
+		else
+		{
+			++current_line_ptr;
+		}
 	}
 	else if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED)
 	{
+		is_quoted_field = true;
 		if (*current_line_ptr != '"')
 		{
-			// Todo: warning
-			stop = true;
-			return; // from lambda
+			is_quoted_field = false;
 		}
-		++current_line_ptr;
+		else
+		{
+			++current_line_ptr;
+		}
 	}
 	if (*current_line_ptr == '\0')
 	{
@@ -649,14 +654,14 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 					continue;
 				}
 			}
-			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED)
+			if (is_quoted_field && import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED)
 			{
 				if (*current_line_ptr == '\'')
 				{
 					done = true;
 				}
 			}
-			else if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED)
+			else if (is_quoted_field && import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED)
 			{
 				if (*current_line_ptr == '"')
 				{
