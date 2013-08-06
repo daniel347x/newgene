@@ -454,11 +454,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	// For child UOA's:
 	// Save the name/index of the DMU category multiplicity greater than one.
 	// Currently, this can be only one of the DMU categories.
-	//
+
 	// child_uoas__which_multiplicity_is_greater_than_1:
 	// Map of:
-	// UOA identifier => DMU category identifier of the effective DMU category that, in relation to the child, has multiplicity greater than 
-	std::map<WidgetInstanceIdentifier, WidgetInstanceIdentifier> child_uoas__which_multiplicity_is_greater_than_1;
+	// UOA identifier => pair<DMU category identifier of the effective DMU category that, in relation to the child, has multiplicity greater than 1, ... and the given multiplicity>
+	std::map<WidgetInstanceIdentifier, std::pair<WidgetInstanceIdentifier, int>> child_uoas__which_multiplicity_is_greater_than_1;
+
 	std::for_each(child_counts.cbegin(), child_counts.cend(), [this, &child_uoas__which_multiplicity_is_greater_than_1, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & child_uoa__dmu_counts__pair)
 	{
 
@@ -470,21 +471,25 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		WidgetInstanceIdentifier uoa_identifier = child_uoa__dmu_counts__pair.first;
 		std::for_each(child_uoa__dmu_counts__pair.second.cbegin(), child_uoa__dmu_counts__pair.second.cend(), [this, &uoa_identifier, &child_uoas__which_multiplicity_is_greater_than_1, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
 		{
+
 			if (failed)
 			{
 				return; // from lamda
 			}
+
 			WidgetInstanceIdentifier const & the_dmu_category_identifier = dmu_category.first;
 			if (!the_dmu_category_identifier.uuid || !the_dmu_category_identifier.code)
 			{
 				failed = true;
 				return; // from lambda
 			}
+
 			WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->t_kad_count.getIdentifier(*the_dmu_category_identifier.uuid);
-			int uoa_count_current_dmu_category = dmu_category.second;
-			int kad_count_current_dmu_category = kad_count_pair.second;
+			int uoa_k_count__current_dmu_category = dmu_category.second;
+			int k_spin_control_count__current_dmu_category = kad_count_pair.second;
 			int multiplicity = 0;
-			if (kad_count_current_dmu_category >= uoa_count_current_dmu_category)
+
+			if (k_spin_control_count__current_dmu_category >= uoa_k_count__current_dmu_category)
 			{
 				multiplicity = 1;
 			}
@@ -495,17 +500,20 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				failed = true;
 				return; // from lambda
 			}
-			int test_kad_count = uoa_count_current_dmu_category;
-			while (test_kad_count <= kad_count_current_dmu_category)
+
+			int test_kad_count = uoa_k_count__current_dmu_category;
+			while (test_kad_count <= k_spin_control_count__current_dmu_category)
 			{
-				test_kad_count += uoa_count_current_dmu_category;
-				if (test_kad_count <= kad_count_current_dmu_category)
+				test_kad_count += uoa_k_count__current_dmu_category;
+				if (test_kad_count <= k_spin_control_count__current_dmu_category)
 				{
 					++multiplicity;
 				}
 			}
-			child_uoas__which_multiplicity_is_greater_than_1[uoa_identifier] = the_dmu_category_identifier;
+
 			// Note: Code above has already validated that there is only 1 DMU category for which the multiplicity is greater than 1.
+			child_uoas__which_multiplicity_is_greater_than_1[uoa_identifier] = std::make_pair(the_dmu_category_identifier, multiplicity);
+
 		});
 
 	});
@@ -577,6 +585,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			return;
 		}
 
+		++view_count;
+
 		WidgetInstanceIdentifier current_uoa_identifier = *the_variable_group.first.identifier_parent;
 
 		if (view_count > number_primary_variable_groups)
@@ -590,7 +600,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				return;
 			}
 
-			if (!child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].code)
+			if (!child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].first.code)
 			{
 				// No UOA code associated with this variable group!
 				// Todo: error message
@@ -600,7 +610,13 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 		}
 
-		++view_count;
+		int highest_multiplicity_to_use = highest_multiplicity;
+		std::string highest_multiplicity_dmu_string_code_to_use = highest_multiplicity_dmu_string_code;
+		if (view_count > number_primary_variable_groups)
+		{
+			highest_multiplicity_to_use = child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].second;
+			highest_multiplicity_dmu_string_code_to_use = *child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].first.code;
+		}
 
 		variable_group__key_names__vectors.push_back(std::make_pair(std::vector<std::string>(), std::vector<std::string>()));
 		PrimaryKey_SecondaryKey_Names & this_variable_group__key_names = variable_group__key_names__vectors.back();
@@ -652,7 +668,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		std::string current_table_token = CurrentTableTokenName(multiplicity_one);
 		char ns__[64];
 		std::string ms__ = itoa(multiplicity_one, ns__, 10);
-		std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &current_uoa_identifier, &current_table_token, &multiplicity_one, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &this_variable_group__primary_key_names, &number_primary_variable_groups, &view_count, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+		std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &current_uoa_identifier, &current_table_token, &multiplicity_one, &ms__, &first_select, &highest_multiplicity_dmu_string_code_to_use, &this_variable_group__primary_key_names, &number_primary_variable_groups, &view_count, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
 		{
 
 			if (failed)
@@ -669,7 +685,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			if (view_count <= (int)number_primary_variable_groups)
 			{
 				// A variable group corresponding to a primary UOA
-				if (*primary_key_in_this_variable_group.code == highest_multiplicity_dmu_string_code)
+				if (*primary_key_in_this_variable_group.code == highest_multiplicity_dmu_string_code_to_use)
 				{
 					// This DMU category has multiplicity greater than 1
 					return; // from lambda
@@ -678,7 +694,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			else
 			{
 				// A variable group corresponding to a child UOA
-				if (*primary_key_in_this_variable_group.code == *child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].code)
+				if (*primary_key_in_this_variable_group.code == *child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].first.code)
 				{
 					// This DMU category has multiplicity greater than 1
 					return; // from lambda
@@ -712,14 +728,14 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		}
 
 		// Next: Display primary keys with multiplicity greater than 1
-		for (int m=1; m<=highest_multiplicity; ++m)
+		for (int m=1; m<=highest_multiplicity_to_use; ++m)
 		{
 
 			std::string current_table_token = CurrentTableTokenName(m);
 			char ns__[64];
 			std::string ms__ = itoa(m, ns__, 10);
 
-			std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &current_uoa_identifier, &current_table_token, &m, &ms__, &first_select, &highest_multiplicity_dmu_string_code, &this_variable_group__primary_key_names, &number_primary_variable_groups, &view_count, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+			std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &current_uoa_identifier, &current_table_token, &m, &ms__, &first_select, &highest_multiplicity_dmu_string_code_to_use, &this_variable_group__primary_key_names, &number_primary_variable_groups, &view_count, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
 			{
 
 				if (failed)
@@ -736,7 +752,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				if (view_count <= (int)number_primary_variable_groups)
 				{
 					// A variable group corresponding to a primary UOA
-					if (*primary_key_in_this_variable_group.code != highest_multiplicity_dmu_string_code)
+					if (*primary_key_in_this_variable_group.code != highest_multiplicity_dmu_string_code_to_use)
 					{
 						// This is not one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
 						return; // from lambda
@@ -745,7 +761,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				else
 				{
 					// A variable group corresponding to a child UOA
-					if (*primary_key_in_this_variable_group.code != *child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].code)
+					if (*primary_key_in_this_variable_group.code != *child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].first.code)
 					{
 						// This is not one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
 						return; // from lambda
@@ -782,7 +798,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			return;
 		}
 
-		for (int m=1; m<=highest_multiplicity; ++m)
+		for (int m=1; m<=highest_multiplicity_to_use; ++m)
 		{
 
 			std::string current_table_token = CurrentTableTokenName(m);
@@ -834,7 +850,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		sql_generate_output += " FROM ";
 		sql_generate_output += vg_data_table_name;
 		sql_generate_output += " t1";
-		for (int m=1; m<highest_multiplicity; ++m)
+		for (int m=1; m<highest_multiplicity_to_use; ++m)
 		{
 
 			std::string current_table_token = CurrentTableTokenName(m+1);
@@ -865,7 +881,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				and_required = true;
 			}
 
-			std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &highest_multiplicity_dmu_string_code, &vg_data_table_name, &current_table_token, &and_required, &failed](WidgetInstanceIdentifier const & dmu_identifier)
+			std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &highest_multiplicity_dmu_string_code_to_use, &vg_data_table_name, &current_table_token, &and_required, &failed](WidgetInstanceIdentifier const & dmu_identifier)
 			{
 				if (failed)
 				{
@@ -878,7 +894,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				}
 
 				// Note: Nothing needs to change here for child UOA's
-				if (*dmu_identifier.code == highest_multiplicity_dmu_string_code)
+				if (*dmu_identifier.code == highest_multiplicity_dmu_string_code_to_use)
 				{
 					// This is one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore.
 					// (Note: We wouldn't *be* here if there were no primary UOA DMU's with multiplicity greater than 1)
