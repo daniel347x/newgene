@@ -1167,6 +1167,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		//sqlite3
+		break;
 	}
 
 	join_count = variable_groups_vector.size();
