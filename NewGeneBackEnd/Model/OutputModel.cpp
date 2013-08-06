@@ -578,20 +578,24 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		}
 
 		WidgetInstanceIdentifier current_uoa_identifier = *the_variable_group.first.identifier_parent;
-		if (child_uoas__which_multiplicity_is_greater_than_1.find(current_uoa_identifier) == child_uoas__which_multiplicity_is_greater_than_1.end())
-		{
-			// No UOA associated with this variable group!
-			// Todo: error message
-			failed = true;
-			return;
-		}
 
-		if (!child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].code)
+		if (view_count > number_primary_variable_groups)
 		{
-			// No UOA code associated with this variable group!
-			// Todo: error message
-			failed = true;
-			return;
+			if (child_uoas__which_multiplicity_is_greater_than_1.find(current_uoa_identifier) == child_uoas__which_multiplicity_is_greater_than_1.end())
+			{
+				// No UOA associated with this variable group!
+				// Todo: error message
+				failed = true;
+				return;
+			}
+
+			if (!child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].code)
+			{
+				// No UOA code associated with this variable group!
+				// Todo: error message
+				failed = true;
+				return;
+			}
 		}
 
 		++view_count;
