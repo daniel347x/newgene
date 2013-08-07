@@ -1456,7 +1456,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				}
 				ColumnsInViews::ColumnsInView & columns_in_view = columnsInViews.columns_in_views[j];
 				std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view_vector = columns_in_view.columns_in_view;
-				std::for_each(columns_in_view_vector.cbegin(), columns_in_view_vector.cend(), [&sql_columns, &sql_values, &overall_column_number, &stmt, &failed](ColumnsInViews::ColumnsInView::ColumnInView const & column_in_view)
+				std::for_each(columns_in_view_vector.cbegin(), columns_in_view_vector.cend(), [&sql_columns, &sql_values, &overall_column_number, &stmt_select_output, &failed](ColumnsInViews::ColumnsInView::ColumnInView const & column_in_view)
 				{
 					if (failed)
 					{
@@ -1471,25 +1471,25 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 					sql_columns += column_in_view.column_name;
 
-					int column_data_type = sqlite3_column_type(stmt, overall_column_number);
+					int column_data_type = sqlite3_column_type(stmt_select_output, overall_column_number);
 					bool data_is_null = false;
 					switch (column_data_type)
 					{
 					case SQLITE_INTEGER:
 						{
-							std::int64_t data = sqlite3_column_int64(stmt, overall_column_number);
+							std::int64_t data = sqlite3_column_int64(stmt_select_output, overall_column_number);
 							sql_values += boost::lexical_cast<std::string>(data);
 						}
 						break;
 					case SQLITE_FLOAT:
 						{
-							long double data = sqlite3_column_double(stmt, overall_column_number);
+							long double data = sqlite3_column_double(stmt_select_output, overall_column_number);
 							sql_values += boost::lexical_cast<std::string>(data);
 						}
 						break;
 					case SQLITE_TEXT:
 						{
-							char const * data = reinterpret_cast<char const *>(sqlite3_column_text(stmt, overall_column_number));
+							char const * data = reinterpret_cast<char const *>(sqlite3_column_text(stmt_select_output, overall_column_number));
 							sql_values += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(data));
 						}
 						break;
