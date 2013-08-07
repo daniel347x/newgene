@@ -8,6 +8,7 @@
 #include "..\Settings\Setting.h"
 #include "Tables/TableManager.h"
 #include <memory>
+#include <tuple>
 
 class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS>
 {
@@ -55,5 +56,35 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 };
 
 bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
+
+class PrimaryKeySequence
+{
+
+	public:
+	
+		class VariableGroup_PrimaryKey_Info
+		{
+			public:
+				WidgetInstanceIdentifier vg_identifier;
+				std::string column_name;
+				std::string column_name_no_uuid;
+				bool is_primary_column_selected;
+		};
+
+		class PrimaryKeySequenceEntry
+		{
+			public:
+				WidgetInstanceIdentifier dmu_category;
+				int sequence_number_within_dmu_category_spin_control;
+				int sequence_number_within_dmu_category_primary_uoa;
+				std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys; // one per variable group 
+		};
+
+		//std::map<WidgetInstanceIdentifier, std::tuple<int, int, int>> dmu_count_map; // DMU category => <Total K-spin-count for this DMU, Starting index of this DMU, K-count of this DMU for the primary UOA>
+		//std::map<WidgetInstanceIdentifier, std::vector<int>> dmu_variablegroup_count_map; // DMU category => vector of [K-count of this DMU for the given variable group]
+
+		std::vector<PrimaryKeySequenceEntry> primary_key_sequence_info; // one per primary key, in sequence
+
+};
 
 #endif

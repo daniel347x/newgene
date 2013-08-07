@@ -1,5 +1,6 @@
 #include "VariableGroupData.h"
 #include "..\TableManager.h"
+#include "../../InputModel.h"
 
 #ifndef Q_MOC_RUN
 #	include <boost/lexical_cast.hpp>
@@ -375,8 +376,10 @@ void Table_VariableGroupMetadata::Load(sqlite3 * db, InputModel * input_model_)
 			// vg_data_table_name =>
 			// a vector of primary keys (each a DMU category identifier)
 			// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
-			// and the LONGHAND is set to the column name corresponding to this DMU in the variable group data table.
+			// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
+			// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
 			identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_dmu_category_code), vg_data_primary_key_column_name, vg_data_primary_key_sequence_number));
+			//identifiers_map[vg_data_table_name].back().identifier_parent = input_model_->t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(vg_data_primary_key_column_name, input_model_->t);
 		}
 	}
 
