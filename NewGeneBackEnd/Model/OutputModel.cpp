@@ -1447,7 +1447,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			// and including the current
 			// Work from the outside in, since that's how the tables were joined
 			int overall_column_number = 0;
-			for (int j=join_count - 1; j>=0; ++j)
+			for (int j=join_count - 1; j>=0; --j)
 			{
 				if (failed)
 				{
