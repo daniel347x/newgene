@@ -1425,7 +1425,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			return; // from lambda
 		}
 
-		long number_rows = 0;
+		long number_input_rows = 0;
 		int step_result_select_output = 0;
 		while ((step_result_select_output = sqlite3_step(stmt_select_output)) == SQLITE_ROW)
 		{
@@ -1435,11 +1435,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				// attempt more rows; do not exit
 			}
 
-			std::string sql_insert_time_range_row;
-			sql_insert_time_range_row += "INSERT INTO ";
-			sql_insert_time_range_row += join_table_with_time_ranges_name;
-			sql_insert_time_range_row += " (";
-
 			std::string sql_columns;
 			std::string sql_values;
 
@@ -1448,6 +1443,10 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			// and including the current
 			// Work from the outside in, since that's how the tables were joined
 			int overall_column_number = 0;
+			std::int64_t datetime_start_previous = 0;
+			std::int64_t datetime_end_previous = 0;
+			std::int64_t datetime_start_current = 0;
+			std::int64_t datetime_end_current = 0;
 			for (int j=join_count - 1; j>=0; --j)
 			{
 				if (failed)
@@ -1457,11 +1456,24 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				}
 				ColumnsInViews::ColumnsInView & columns_in_view = columnsInViews.columns_in_views[j];
 				std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view_vector = columns_in_view.columns_in_view;
-				std::for_each(columns_in_view_vector.cbegin(), columns_in_view_vector.cend(), [&sql_columns, &sql_values, &overall_column_number, &stmt_select_output, &failed](ColumnsInViews::ColumnsInView::ColumnInView const & column_in_view)
+				std::for_each(columns_in_view_vector.cbegin(), columns_in_view_vector.cend(), [&sql_columns, &sql_values, &overall_column_number, &j, &join_count, &datetime_start_previous, &datetime_end_previous, &datetime_start_current, &datetime_end_current, &stmt_select_output, &failed](ColumnsInViews::ColumnsInView::ColumnInView const & column_in_view)
 				{
 					if (failed)
 					{
 						return; // from lambda
+					}
+
+					if (j == join_count - 1)
+					{
+						// This is the new view being joined in to the previous ones
+						if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART)
+						{
+							datetime_start_current = sqlite3_column_int64(stmt_select_output, overall_column_number);
+						}
+						if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND)
+						{
+							datetime_end_current = sqlite3_column_int64(stmt_select_output, overall_column_number);
+						}
 					}
 
 					if (overall_column_number > 0)
@@ -1518,8 +1530,114 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					}
 					++overall_column_number;
 				});
+
+				if (j != join_count - 1)
+				{
+					// This is a previous join table.  Read in the two "internal time range" columns.
+					std::int64_t datetime_start_internal = sqlite3_column_int64(stmt_select_output, overall_column_number);
+					++overall_column_number;
+					std::int64_t datetime_end_internal = sqlite3_column_int64(stmt_select_output, overall_column_number);
+					++overall_column_number;
+					if (j == join_count - 2)
+					{
+						// This is the immediately preceeding join table.  Save internal datetime values.
+						datetime_start_previous = datetime_start_internal;
+						datetime_end_previous = datetime_end_internal;
+					}
+				}
 			}
 
+			// Now we need to decompose the current input row
+			// into possibly multiple output rows in order to
+			// have discrete time ranges
+
+			while (datetime_start_current < datetime_end_current)
+			{
+				std::int64_t datetime_start_new = datetime_start_current;
+				std::int64_t datetime_end_new = datetime_end_current;
+				if (datetime_start_current < datetime_start_previous)
+				{
+					datetime_end_new = datetime_start_previous;
+					if (datetime_end_new > datetime_end_current)
+					{
+						datetime_end_new = datetime_end_current;
+					}
+
+					// add row here
+
+					datetime_start_current = datetime_end_new;
+				}
+				else if (datetime_start_current == datetime_start_previous)
+				{
+					if (datetime_end_current < datetime_end_previous)
+					{
+						datetime_end_new = datetime_end_current;
+
+						// add row here
+
+						datetime_start_current = datetime_end_new;
+					}
+					else if (datetime_end_current >= datetime_end_previous)
+					{
+						datetime_end_new = datetime_end_previous;
+
+						// add row here
+
+						datetime_start_current = datetime_end_new;
+					}
+				}
+				else if (datetime_start_current > datetime_start_previous)
+				{
+					if (datetime_start_current < datetime_end_previous)
+					{
+						datetime_end_new = datetime_end_previous;
+
+						// add row here
+
+						datetime_start_current = datetime_end_new;
+					}
+					else if (datetime_start_current == datetime_end_previous)
+					{
+						datetime_end_new = datetime_end_current;
+
+						// add row here
+
+						datetime_start_current = datetime_end_new;
+					}
+					else if (datetime_start_current > datetime_end_previous)
+					{
+						// add two rows
+
+						datetime_start_new = datetime_end_previous;
+						datetime_end_new = datetime_start_current;
+
+						// add row here
+
+						datetime_start_new = datetime_start_current;
+						datetime_end_new = datetime_end_current;
+
+						// add row here
+
+						datetime_start_current = datetime_end_new;
+					}
+				}
+			}
+
+			if (datetime_end_current < datetime_end_previous)
+			{
+				// add row
+				std::int64_t datetime_start_new = datetime_end_current;
+				std::int64_t datetime_end_new = datetime_end_previous;
+			}
+
+			// Add two more "internal datetime" columns here,
+			// that contain the actual time range for this row
+			// (a merge of all views so far).
+
+			std::string sql_insert_time_range_row;
+			sql_insert_time_range_row += "INSERT INTO ";
+			sql_insert_time_range_row += join_table_with_time_ranges_name;
+			sql_insert_time_range_row += " (";
 			sql_insert_time_range_row += sql_columns;
 			sql_insert_time_range_row += ") VALUES (";
 			sql_insert_time_range_row += sql_values;
@@ -1542,9 +1660,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				break;
 			}
 
-			++number_rows;
+			++number_input_rows;
 
-			if (number_rows >= 1000)
+			if (number_input_rows >= 1000)
 			{
 				// For development - limit to 1000 rows
 				break;
