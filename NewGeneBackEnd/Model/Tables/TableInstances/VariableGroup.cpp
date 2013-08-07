@@ -92,4 +92,5 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 			identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, vg_category_identifier, code, longhand, seqnumber, flags, vg_category_identifier.time_granularity, MakeNotes(notes1, notes2, notes3)));
 		}
 	}
+
 }

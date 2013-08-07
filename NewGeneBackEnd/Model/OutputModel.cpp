@@ -1,6 +1,12 @@
 #include "OutputModel.h"
 #include "..\Utilities\UUID.h"
 
+#include <cstdint>
+
+#ifndef Q_MOC_RUN
+#	include <boost/lexical_cast.hpp>
+#endif
+
 void OutputModel::LoadTables()
 {
 
@@ -607,6 +613,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			current_primary_key_sequence.dmu_category = the_dmu_category;
 			current_primary_key_sequence.sequence_number_within_dmu_category_spin_control = current_dmu_sequence_number;
 			current_primary_key_sequence.sequence_number_within_dmu_category_primary_uoa = kad_count_current_dmu_category_sequence;
+			current_primary_key_sequence.sequence_number_in_all_primary_keys = overall_primary_key_sequence_number;
 
 			int view_count = 0;
 			std::for_each(variable_groups_vector.cbegin(), variable_groups_vector.cend(), [this, &input_model, &the_dmu_category, &sequence, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
@@ -712,6 +719,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 								current_variable_group_current_primary_key_info.view_table_name += itoa(m+1, ns__, 10);
 								current_variable_group_current_primary_key_info.join_table_name = "j";
 								current_variable_group_current_primary_key_info.join_table_name += itoa(m+1, ns__, 10);
+								current_variable_group_current_primary_key_info.join_table_name_withtime = "jt";
+								current_variable_group_current_primary_key_info.join_table_name_withtime += itoa(m+1, ns__, 10);
 
 								if (current_variable_group_current_primary_key_info.associated_uoa_identifier.time_granularity != 0)
 								{
@@ -799,8 +808,10 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		return;
 	}
 
+	ColumnsInViews columnsInViews;
+
 	int view_count = 0;
-	std::for_each(variable_groups_vector.cbegin(), variable_groups_vector.cend(), [this, &db, &sequence, &temp_dot, &view_count, &input_model, &number_primary_variable_groups, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &variable_group__key_names__vectors, &child_uoas__which_multiplicity_is_greater_than_1, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	std::for_each(variable_groups_vector.cbegin(), variable_groups_vector.cend(), [this, &db, &sequence, &columnsInViews, &temp_dot, &view_count, &input_model, &number_primary_variable_groups, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &variable_group__key_names__vectors, &child_uoas__which_multiplicity_is_greater_than_1, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 	{
 		// the_variable_group:
 		// A pair: VG identifier -> Variables in this group selected by the user.
@@ -826,6 +837,10 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		}
 
 		++view_count;
+
+		columnsInViews.columns_in_views.push_back(ColumnsInViews::ColumnsInView());
+		ColumnsInViews::ColumnsInView & columnsInView = columnsInViews.columns_in_views.back();
+		columnsInView.view_number = view_count;
 
 		WidgetInstanceIdentifier current_uoa_identifier = *the_variable_group.first.identifier_parent;
 
@@ -910,8 +925,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			// has a time range granularity associated with it
 
 			// At least one of the primary keys has this variable group active, so use that to get the date-time column names
-			// ... just break out of loop once we hav it
-			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
+			// ... just break out of loop once we have it
+			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 			{
 				if (first_select == false)
 				{
@@ -919,7 +934,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					return; // from lambda
 				}
 				std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
-				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &first_select, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
+				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 				{
 					if (first_select == false)
 					{
@@ -942,16 +957,36 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							sql_generate_output += variable_group_primary_key_info.datetime_row_end_table_column_name;
 							sql_generate_output += " AS ";
 							sql_generate_output += variable_group_primary_key_info.datetime_row_end_column_name;
+
+							std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
+
+							columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+							ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_datetime_start = columns_in_view.back();
+							column_in_view_datetime_start.column_name = variable_group_primary_key_info.datetime_row_start_column_name;
+							column_in_view_datetime_start.column_name_no_uuid = variable_group_primary_key_info.datetime_row_start_column_name_no_uuid;
+							column_in_view_datetime_start.table_column_name = variable_group_primary_key_info.datetime_row_start_table_column_name;
+							column_in_view_datetime_start.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
+							column_in_view_datetime_start.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
+							column_in_view_datetime_start.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART;
+
+							columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+							ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_datetime_end = columns_in_view.back();
+							column_in_view_datetime_end.column_name = variable_group_primary_key_info.datetime_row_end_column_name;
+							column_in_view_datetime_end.column_name_no_uuid = variable_group_primary_key_info.datetime_row_end_column_name_no_uuid;
+							column_in_view_datetime_end.table_column_name = variable_group_primary_key_info.datetime_row_end_table_column_name;
+							column_in_view_datetime_end.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
+							column_in_view_datetime_end.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
+							column_in_view_datetime_end.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND;
 						}
 					}
 				});
 			});
 		}
 
-		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
+		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 		{
 			std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
-			std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &first_select, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
+			std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &columnsInView, &first_select, &the_variable_group, &total_primary_key_sequence_entry, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 			{
 				if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
 				{
@@ -967,6 +1002,22 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						sql_generate_output += variable_group_primary_key_info.table_column_name;
 						sql_generate_output += " AS ";
 						sql_generate_output += variable_group_primary_key_info.column_name;
+
+						std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
+
+						columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+						ColumnsInViews::ColumnsInView::ColumnInView & column_in_view = columns_in_view.back();
+						column_in_view.column_name = variable_group_primary_key_info.column_name;
+						column_in_view.column_name_no_uuid = variable_group_primary_key_info.column_name_no_uuid;
+						column_in_view.table_column_name = variable_group_primary_key_info.table_column_name;
+						column_in_view.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
+						column_in_view.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
+						column_in_view.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__PRIMARY;
+						column_in_view.primary_key_dmu_category_identifier = total_primary_key_sequence_entry.dmu_category;
+						column_in_view.primary_key_index_within_total_kad_for_dmu_category = total_primary_key_sequence_entry.sequence_number_within_dmu_category_spin_control;
+						column_in_view.primary_key_index_within_total_kad_for_all_dmu_categories = total_primary_key_sequence_entry.sequence_number_in_all_primary_keys;
+						column_in_view.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = variable_group_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa;
+						column_in_view.primary_key_index_within_primary_uoa_for_dmu_category = total_primary_key_sequence_entry.sequence_number_within_dmu_category_primary_uoa;
 					}
 				}
 			});
@@ -978,11 +1029,16 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			return;
 		}
 
+
 		//std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [this, &this_variable_group__primary_key_names__uuid_stripped](std::string const & this_variable_group__primary_key_name)
 		//{
 		//	this_variable_group__primary_key_names__uuid_stripped.push_back(this->StripUUIDFromVariableName(this_variable_group__primary_key_name));
 		//});
 
+
+		// ************************************************* //
+		// Display all variables selected by user
+		// ************************************************* //
 		for (int m=1; m<=highest_multiplicity_to_use; ++m)
 		{
 
@@ -990,8 +1046,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			char ns__[64];
 			std::string ms__ = itoa(m, ns__, 10);
 
-			// Display all variables selected by user
-			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &highest_multiplicity_to_use, &current_uoa_identifier, &first_select, &sql_generate_output, &current_table_token, &ms__, &this_variable_group__primary_key_names__uuid_stripped, &this_variable_group__secondary_key_names, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
+			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &columnsInView, &the_variable_group, &highest_multiplicity_to_use, &current_uoa_identifier, &first_select, &sql_generate_output, &current_table_token, &ms__, &this_variable_group__primary_key_names__uuid_stripped, &this_variable_group__secondary_key_names, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
 			{
 				if (failed)
 				{
@@ -1013,6 +1068,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					this_variable_group_secondary_key_name += ms__;
 				}
 
+				std::string saved_secondary_key_name_no_uuid = this_variable_group_secondary_key_name;
+
 				this_variable_group_secondary_key_name += "_";
 				this_variable_group_secondary_key_name += newUUID(true);
 
@@ -1029,6 +1086,17 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				sql_generate_output += *variable_selected_in_this_group.code;
 				sql_generate_output += " AS ";
 				sql_generate_output += this_variable_group_secondary_key_name;
+
+				std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
+
+				columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+				ColumnsInViews::ColumnsInView::ColumnInView & column_in_view = columns_in_view.back();
+				column_in_view.column_name = this_variable_group_secondary_key_name;
+				column_in_view.column_name_no_uuid = saved_secondary_key_name_no_uuid;
+				column_in_view.table_column_name = *variable_selected_in_this_group.code;
+				column_in_view.variable_group_identifier = the_variable_group.first;
+				column_in_view.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
+				column_in_view.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__SECONDARY;
 			});
 
 		}
@@ -1116,6 +1184,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (stmt == NULL)
 		{
 			// Todo: Error message
+			failed = true;
 			return;
 		}
 
@@ -1130,7 +1199,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	});
 
 	int join_count = 0;
-	std::for_each(variable_groups_vector.cbegin(), variable_groups_vector.cend(), [this, &sequence, &temp_dot, &db, &join_count, &input_model, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	std::for_each(variable_groups_vector.cbegin(), variable_groups_vector.cend(), [this, &sequence, &columnsInViews, &temp_dot, &db, &join_count, &input_model, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 	{
 		if (failed)
 		{
@@ -1156,7 +1225,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		{
 			// join with the previous join
 			sql_generate_output += ", ";
-			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(join_count - 1);
 			sql_generate_output += ".*";
 
 		}
@@ -1176,9 +1245,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 			sql_generate_output += " LEFT OUTER JOIN ";
 			sql_generate_output += temp_dot;
-			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(join_count - 1);
 			sql_generate_output += " ";
-			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(join_count - 1);
 			sql_generate_output += " ON ";
 
 			bool first_select = true;
@@ -1272,7 +1341,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							}
 							else
 							{
-								sql_generate_output += "(";
+								//sql_generate_output += "(";
 							}
 							first_select = false;
 							sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
@@ -1285,22 +1354,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			});
 			if (!first_select)
 			{
-				sql_generate_output += ")";
-			}
-
-			if (!the_variable_group.first.identifier_parent)
-			{
-				// Todo: Error message
-				failed = true;
-				return;
-			}
-
-			WidgetInstanceIdentifier associated_uoa_identifier_to_variable_group = *the_variable_group.first.identifier_parent;
-
-			if (associated_uoa_identifier_to_variable_group.time_granularity != 0)
-			{
-				// The current variable group being joined into the full set of data
-				// has a time range granularity associated with it
+				//sql_generate_output += ")";
 			}
 
 		}
@@ -1310,6 +1364,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (stmt == NULL)
 		{
 			// Todo: Error message
+			failed = true;
 			return;
 		}
 
@@ -1319,6 +1374,169 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			// Todo: Error message
 			failed = true;
 			return; // from lambda
+		}
+
+		// Now, merge time ranges and place into a new view
+		std::string sql_generate_output;
+		sql_generate_output += "SELECT ";
+		sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+		sql_generate_output += ".* FROM ";
+		sql_generate_output += temp_dot;
+		sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+		sql_generate_output += " ";
+		sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+
+		sqlite3_stmt * stmt = NULL;
+		sqlite3_prepare_v2(db, sql_generate_output.c_str(), sql_generate_output.size() + 1, &stmt, NULL);
+		if (stmt == NULL)
+		{
+			// Todo: Error message
+			failed = true;
+			return; // from lambda
+		}
+
+		std::string join_table_with_time_ranges_name = Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(join_count);
+
+		// Create the table to store the same data, but with merged time ranges
+		std::string sql_create_timerange_table;
+		sql_create_timerange_table += "CREATE TABLE ";
+		sql_create_timerange_table += join_table_with_time_ranges_name;
+		sql_create_timerange_table += " AS SELECT ";
+		sql_create_timerange_table += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+		sql_create_timerange_table += ".* FROM ";
+		sql_create_timerange_table += temp_dot;
+		sql_create_timerange_table += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+		sql_create_timerange_table += " ";
+		sql_create_timerange_table += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+		sql_create_timerange_table += " WHERE 0"; // just create an empty table whose column types match, by default
+		sqlite3_stmt * stmt_create_timerange_table = NULL;
+		sqlite3_prepare_v2(db, sql_create_timerange_table.c_str(), sql_create_timerange_table.size() + 1, &stmt_create_timerange_table, NULL);
+		if (stmt_create_timerange_table == NULL)
+		{
+			// Todo: Error message
+			failed = true;
+			return; // from lambda
+		}
+		int step_result_create_table = 0;
+		if ((step_result_create_table = sqlite3_step(stmt_create_timerange_table)) != SQLITE_DONE)
+		{
+			// Todo: Error message
+			failed = true;
+			return; // from lambda
+		}
+
+		int step_result = 0;
+		while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+		{
+
+			if (failed)
+			{
+				// attempt more rows; do not exit
+			}
+
+			std::string sql_insert_time_range_row;
+			sql_insert_time_range_row += "INSERT INTO ";
+			sql_insert_time_range_row += join_table_with_time_ranges_name;
+			sql_insert_time_range_row += " (";
+
+			std::string sql_columns;
+			std::string sql_values;
+
+			// The rows that are returned from this query
+			// are the union of all rows from all views up to
+			// and including the current
+			// Work from the outside in, since that's how the tables were joined
+			int overall_column_number = 0;
+			for (int j=join_count - 1; j>=0; ++j)
+			{
+				if (failed)
+				{
+					// move on to the next row
+					break;
+				}
+				ColumnsInViews::ColumnsInView & columns_in_view = columnsInViews.columns_in_views[j];
+				std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view_vector = columns_in_view.columns_in_view;
+				std::for_each(columns_in_view_vector.cbegin(), columns_in_view_vector.cend(), [&sql_columns, &sql_values, &overall_column_number, &stmt, &failed](ColumnsInViews::ColumnsInView::ColumnInView const & column_in_view)
+				{
+					if (failed)
+					{
+						return; // from lambda
+					}
+
+					if (overall_column_number > 0)
+					{
+						sql_columns += ", ";
+						sql_values += ", ";
+					}
+
+					sql_columns += column_in_view.column_name;
+
+					int column_data_type = sqlite3_column_type(stmt, overall_column_number);
+					bool data_is_null = false;
+					switch (column_data_type)
+					{
+					case SQLITE_INTEGER:
+						{
+							std::int64_t data = sqlite3_column_int64(stmt, overall_column_number);
+							sql_values += boost::lexical_cast<std::string>(data);
+						}
+						break;
+					case SQLITE_FLOAT:
+						{
+							long double data = sqlite3_column_double(stmt, overall_column_number);
+							sql_values += boost::lexical_cast<std::string>(data);
+						}
+						break;
+					case SQLITE_TEXT:
+						{
+							char const * data = reinterpret_cast<char const *>(sqlite3_column_text(stmt, overall_column_number));
+							sql_values += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(data));
+						}
+						break;
+					case SQLITE_BLOB:
+						{
+							// Todo: Error message
+							failed = true;
+							return; // from lambda
+						}
+						break;
+					case SQLITE_NULL:
+						{
+							data_is_null = true;
+						}
+						break;
+					default:
+						{
+							// Todo: Error message
+							failed = true;
+							return; // from lambda
+						}
+					}
+					++overall_column_number;
+				});
+			}
+
+			sql_insert_time_range_row += sql_columns;
+			sql_insert_time_range_row += ") VALUES (";
+			sql_insert_time_range_row += sql_values;
+			sql_insert_time_range_row += ")";
+
+			sqlite3_stmt * stmt_insert_new_row = NULL;
+			sqlite3_prepare_v2(db, sql_insert_time_range_row.c_str(), sql_insert_time_range_row.size() + 1, &stmt_insert_new_row, NULL);
+			if (stmt_insert_new_row == NULL)
+			{
+				// Move on to the next row
+				failed = true;
+				return;
+			}
+
+			int step_result_insert_new_row = 0;
+			if ((step_result_insert_new_row = sqlite3_step(stmt_insert_new_row)) != SQLITE_DONE)
+			{
+				// Move on to the next row
+				failed = true;
+				break;
+			}
 		}
 
 	});
@@ -1331,12 +1549,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 	std::string sql_generate_output;
 	sql_generate_output += "SELECT ";
-	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_vector.size());
+	sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(variable_groups_vector.size());
 	sql_generate_output += ".* FROM ";
 	sql_generate_output += temp_dot;
-	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_vector.size());
+	sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(variable_groups_vector.size());
 	sql_generate_output += " ";
-	sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(variable_groups_vector.size());
+	sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(variable_groups_vector.size());
 
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sql_generate_output.c_str(), sql_generate_output.size() + 1, &stmt, NULL);

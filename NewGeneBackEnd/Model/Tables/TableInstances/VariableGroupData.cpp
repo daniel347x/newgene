@@ -128,7 +128,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 	{
 		if (!first)
 		{
-			sql_insert += ",";
+			sql_insert += ", ";
 		}
 		first = false;
 
@@ -344,6 +344,14 @@ std::string Table_VariableGroupData::JoinViewNameFromCount(int const join_number
 {
 	char vns[1024];
 	std::string join_view_name("j");
+	join_view_name += itoa(join_number, vns, 10);
+	return join_view_name;
+}
+
+std::string Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(int const join_number)
+{
+	char vns[1024];
+	std::string join_view_name("jt");
 	join_view_name += itoa(join_number, vns, 10);
 	return join_view_name;
 }

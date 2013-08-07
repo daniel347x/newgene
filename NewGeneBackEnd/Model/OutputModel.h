@@ -75,6 +75,7 @@ class PrimaryKeySequence
 				int total_multiplicity;
 				std::string view_table_name;
 				std::string join_table_name;
+				std::string join_table_name_withtime;
 				bool is_primary_column_selected;
 				std::string datetime_row_start_column_name;
 				std::string datetime_row_end_column_name;
@@ -90,13 +91,74 @@ class PrimaryKeySequence
 				WidgetInstanceIdentifier dmu_category;
 				int sequence_number_within_dmu_category_spin_control;
 				int sequence_number_within_dmu_category_primary_uoa;
+				int sequence_number_in_all_primary_keys;
 				std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys; // one per variable group 
 		};
 
-		//std::map<WidgetInstanceIdentifier, std::tuple<int, int, int>> dmu_count_map; // DMU category => <Total K-spin-count for this DMU, Starting index of this DMU, K-count of this DMU for the primary UOA>
-		//std::map<WidgetInstanceIdentifier, std::vector<int>> dmu_variablegroup_count_map; // DMU category => vector of [K-count of this DMU for the given variable group]
-
 		std::vector<PrimaryKeySequenceEntry> primary_key_sequence_info; // one per primary key, in sequence
+
+};
+
+class ColumnsInViews
+{
+
+	public:
+
+		class ColumnsInView
+		{
+
+			public:
+
+				class ColumnInView
+				{
+
+					public:
+
+						enum COLUMN_TYPE
+						{
+							  COLUMN_TYPE__UNKNOWN = 0
+							, COLUMN_TYPE__PRIMARY
+							, COLUMN_TYPE__SECONDARY
+							, COLUMN_TYPE__DATETIMESTART
+							, COLUMN_TYPE__DATETIMEEND
+						};
+
+						ColumnInView()
+							: column_type(COLUMN_TYPE__UNKNOWN)
+							, primary_key_index_within_total_kad_for_dmu_category(-1)
+							, primary_key_index_within_total_kad_for_all_dmu_categories(-1)
+							, primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category(-1)
+							, primary_key_index_within_primary_uoa_for_dmu_category(-1)
+						{
+
+						}
+
+						std::string column_name;
+						std::string column_name_no_uuid;
+						std::string table_column_name;
+						WidgetInstanceIdentifier variable_group_identifier;
+						WidgetInstanceIdentifier uoa_associated_with_variable_group_identifier;
+						COLUMN_TYPE column_type;
+						WidgetInstanceIdentifier primary_key_dmu_category_identifier;
+						int primary_key_index_within_total_kad_for_dmu_category;
+						int primary_key_index_within_total_kad_for_all_dmu_categories;
+						int primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category;
+						int primary_key_index_within_primary_uoa_for_dmu_category;
+
+				};
+
+				ColumnInView()
+					: view_number(-1)
+				{
+
+				}
+
+				std::vector<ColumnInView> columns_in_view;
+				int view_number;
+
+		};
+
+		std::vector<ColumnsInView> columns_in_views;
 
 };
 

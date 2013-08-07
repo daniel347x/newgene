@@ -25,6 +25,7 @@ public:
 	static std::string TableNameFromVGCode(std::string variable_group_code);
 	static std::string ViewNameFromCount(int const view_number);
 	static std::string JoinViewNameFromCount(int const join_number);
+	static std::string JoinViewNameWithTimeRangesFromCount(int const join_number);
 
 	static std::string EscapeTicks(std::string const & s);
 
