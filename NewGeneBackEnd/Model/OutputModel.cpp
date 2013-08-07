@@ -1207,6 +1207,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		}
 		++join_count;
 
+		char join_count_as_text_[1024];
+		std::string join_count_as_text = itoa(join_count, join_count_as_text_, 10);
+
 		PrimaryKey_SecondaryKey_Names & this_variable_group__key_names = variable_group__key_names__vectors[join_count - 1];
 		std::vector<std::string> & this_variable_group__primary_key_names = this_variable_group__key_names.first;
 		std::vector<std::string> & this_variable_group__secondary_key_names = this_variable_group__key_names.second;
@@ -1403,11 +1406,24 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		sql_create_timerange_table += join_table_with_time_ranges_name;
 		sql_create_timerange_table += " AS SELECT ";
 		sql_create_timerange_table += Table_VariableGroupData::JoinViewNameFromCount(join_count);
-		sql_create_timerange_table += ".* FROM ";
+		sql_create_timerange_table += ".*, ";
+		sql_create_timerange_table += "DATETIME_START_NEWGENE_INTERNAL_";
+		sql_create_timerange_table += join_count_as_text;
+		sql_create_timerange_table += ", ";
+		sql_create_timerange_table += "DATETIME_END_NEWGENE_INTERNAL_";
+		sql_create_timerange_table += join_count_as_text;
+		sql_create_timerange_table += " ";
+		sql_create_timerange_table += " FROM ";
 		sql_create_timerange_table += temp_dot;
 		sql_create_timerange_table += Table_VariableGroupData::JoinViewNameFromCount(join_count);
 		sql_create_timerange_table += " ";
 		sql_create_timerange_table += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+		sql_create_timerange_table += ", 1 AS ";
+		sql_create_timerange_table += "DATETIME_START_NEWGENE_INTERNAL_";
+		sql_create_timerange_table += join_count_as_text;
+		sql_create_timerange_table += ", 1 AS ";
+		sql_create_timerange_table += "DATETIME_END_NEWGENE_INTERNAL_";
+		sql_create_timerange_table += join_count_as_text;
 		sql_create_timerange_table += " WHERE 0"; // just create an empty table whose column types match, by default
 		sqlite3_stmt * stmt_create_timerange_table = NULL;
 		sqlite3_prepare_v2(db, sql_create_timerange_table.c_str(), sql_create_timerange_table.size() + 1, &stmt_create_timerange_table, NULL);
@@ -1553,6 +1569,10 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 			while (datetime_start_current < datetime_end_current)
 			{
+				if (failed)
+				{
+					break;
+				}
 				std::int64_t datetime_start_new = datetime_start_current;
 				std::int64_t datetime_end_new = datetime_end_current;
 				if (datetime_start_current < datetime_start_previous)
@@ -1563,27 +1583,37 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_end_current;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_new = datetime_end_new;
 						datetime_end_new = datetime_start_previous;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_new = datetime_start_previous;
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
 					}
 					else if (datetime_end_current == datetime_start_previous)
 					{
 						// add row here as-is
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_new = datetime_start_previous;
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
 					}
@@ -1593,16 +1623,22 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_start_previous;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_new = datetime_start_previous;
 						datetime_end_new = datetime_end_current;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_new = datetime_end_current;
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
 					}
@@ -1612,11 +1648,15 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_start_previous;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_new = datetime_start_previous;
 						datetime_end_new = datetime_end_current;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
 					}
@@ -1626,16 +1666,22 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_start_previous;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_new = datetime_start_previous;
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_new = datetime_end_previous;
 						datetime_end_new = datetime_end_current;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
 					}
@@ -1647,6 +1693,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_end_current;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
 					}
@@ -1655,6 +1703,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
 					}
@@ -1666,6 +1716,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
 					}
@@ -1674,6 +1726,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_end_current;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
 					}
@@ -1685,11 +1739,15 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_start_current;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_new = datetime_start_current;
 						datetime_end_new = datetime_end_current;
 
 						// add row here
+						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
 					}
@@ -1701,36 +1759,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				// add row
 				std::int64_t datetime_start_new = datetime_end_current;
 				std::int64_t datetime_end_new = datetime_end_previous;
-			}
-
-			// Add two more "internal datetime" columns here,
-			// that contain the actual time range for this row
-			// (a merge of all views so far).
-
-			std::string sql_insert_time_range_row;
-			sql_insert_time_range_row += "INSERT INTO ";
-			sql_insert_time_range_row += join_table_with_time_ranges_name;
-			sql_insert_time_range_row += " (";
-			sql_insert_time_range_row += sql_columns;
-			sql_insert_time_range_row += ") VALUES (";
-			sql_insert_time_range_row += sql_values;
-			sql_insert_time_range_row += ")";
-
-			sqlite3_stmt * stmt_insert_new_row = NULL;
-			sqlite3_prepare_v2(db, sql_insert_time_range_row.c_str(), sql_insert_time_range_row.size() + 1, &stmt_insert_new_row, NULL);
-			if (stmt_insert_new_row == NULL)
-			{
-				// Move on to the next row
-				failed = true;
-				return;
-			}
-
-			int step_result_insert_new_row = 0;
-			if ((step_result_insert_new_row = sqlite3_step(stmt_insert_new_row)) != SQLITE_DONE)
-			{
-				// Move on to the next row
-				failed = true;
-				break;
+				failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+				if (failed) continue;
 			}
 
 			++number_input_rows;
@@ -1852,4 +1882,47 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		return;
 	}
 
+}
+
+bool OutputModel::AddTimeRangeMergedRow(std::int64_t const datetime_start_new, std::int64_t const datetime_end_new, int & overall_column_number, std::string & sql_columns, std::string & sql_values, std::string & join_count_as_text, std::string const & join_table_with_time_ranges_name)
+{
+	// Add two more "internal datetime" columns here,
+	// that contain the actual time range for this row
+	// (a merge of all views so far).
+	if (overall_column_number > 0)
+	{
+		sql_columns += ", ";
+		sql_values += ", ";
+	}
+	sql_columns += "DATETIME_START_NEWGENE_INTERNAL_";
+	sql_columns += join_count_as_text;
+	sql_values += boost::lexical_cast<std::string>(datetime_start_new);
+	++overall_column_number;
+	sql_columns += ", ";
+	sql_values += ", ";
+	sql_columns += "DATETIME_END_NEWGENE_INTERNAL_";
+	sql_columns += join_count_as_text;
+	sql_values += boost::lexical_cast<std::string>(datetime_end_new);
+	++overall_column_number;
+	std::string sql_insert_time_range_row;
+	sql_insert_time_range_row += "INSERT INTO ";
+	sql_insert_time_range_row += join_table_with_time_ranges_name;
+	sql_insert_time_range_row += " (";
+	sql_insert_time_range_row += sql_columns;
+	sql_insert_time_range_row += ") VALUES (";
+	sql_insert_time_range_row += sql_values;
+	sql_insert_time_range_row += ")";
+	sqlite3_stmt * stmt_insert_new_row = NULL;
+	sqlite3_prepare_v2(db, sql_insert_time_range_row.c_str(), sql_insert_time_range_row.size() + 1, &stmt_insert_new_row, NULL);
+	if (stmt_insert_new_row == NULL)
+	{
+		return false;
+	}
+	int step_result_insert_new_row = 0;
+	if ((step_result_insert_new_row = sqlite3_step(stmt_insert_new_row)) != SQLITE_DONE)
+	{
+		// Move on to the next row
+		return false;
+	}
+	return true;
 }
