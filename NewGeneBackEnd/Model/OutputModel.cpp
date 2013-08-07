@@ -1377,18 +1377,18 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		}
 
 		// Now, merge time ranges and place into a new view
-		std::string sql_generate_output;
-		sql_generate_output += "SELECT ";
-		sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
-		sql_generate_output += ".* FROM ";
-		sql_generate_output += temp_dot;
-		sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
-		sql_generate_output += " ";
-		sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+		std::string sql_select_output;
+		sql_select_output += "SELECT ";
+		sql_select_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+		sql_select_output += ".* FROM ";
+		sql_select_output += temp_dot;
+		sql_select_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
+		sql_select_output += " ";
+		sql_select_output += Table_VariableGroupData::JoinViewNameFromCount(join_count);
 
-		sqlite3_stmt * stmt = NULL;
-		sqlite3_prepare_v2(db, sql_generate_output.c_str(), sql_generate_output.size() + 1, &stmt, NULL);
-		if (stmt == NULL)
+		sqlite3_stmt * stmt_select_output = NULL;
+		sqlite3_prepare_v2(db, sql_select_output.c_str(), sql_select_output.size() + 1, &stmt_select_output, NULL);
+		if (stmt_select_output == NULL)
 		{
 			// Todo: Error message
 			failed = true;
@@ -1425,8 +1425,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			return; // from lambda
 		}
 
-		int step_result = 0;
-		while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+		int step_result_select_output = 0;
+		while ((step_result_select_output = sqlite3_step(stmt_select_output)) == SQLITE_ROW)
 		{
 
 			if (failed)

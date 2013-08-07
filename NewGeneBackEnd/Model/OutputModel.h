@@ -147,7 +147,7 @@ class ColumnsInViews
 
 				};
 
-				ColumnInView()
+				ColumnsInView()
 					: view_number(-1)
 				{
 
