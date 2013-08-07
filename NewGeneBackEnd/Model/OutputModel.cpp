@@ -1561,11 +1561,84 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					if (datetime_end_new > datetime_end_current)
 					{
 						datetime_end_new = datetime_end_current;
+
+						// add row here
+
+						datetime_start_new = datetime_end_new;
+						datetime_end_new = datetime_start_previous;
+
+						// add row here
+
+						datetime_start_new = datetime_start_previous;
+						datetime_end_new = datetime_end_previous;
+
+						// add row here
+
+						datetime_start_current = datetime_end_new;
 					}
+					else if (datetime_end_current == datetime_start_previous)
+					{
+						// add row here as-is
 
-					// add row here
+						datetime_start_new = datetime_start_previous;
+						datetime_end_new = datetime_end_previous;
 
-					datetime_start_current = datetime_end_new;
+						// add row here
+
+						datetime_start_current = datetime_end_new;
+					}
+					else if (datetime_end_current < datetime_end_previous)
+					{
+						datetime_start_new = datetime_start_current;
+						datetime_end_new = datetime_start_previous;
+
+						// add row here
+
+						datetime_start_new = datetime_start_previous;
+						datetime_end_new = datetime_end_current;
+
+						// add row here
+
+						datetime_start_new = datetime_end_current;
+						datetime_end_new = datetime_end_previous;
+
+						// add row here
+
+						datetime_start_current = datetime_end_new;
+					}
+					else if (datetime_end_current == datetime_end_previous)
+					{
+						datetime_start_new = datetime_start_current;
+						datetime_end_new = datetime_start_previous;
+
+						// add row here
+
+						datetime_start_new = datetime_start_previous;
+						datetime_end_new = datetime_end_current;
+
+						// add row here
+
+						datetime_start_current = datetime_end_new;
+					}
+					else if (datetime_end_current > datetime_end_previous)
+					{
+						datetime_start_new = datetime_start_current;
+						datetime_end_new = datetime_start_previous;
+
+						// add row here
+
+						datetime_start_new = datetime_start_previous;
+						datetime_end_new = datetime_end_previous;
+
+						// add row here
+
+						datetime_start_new = datetime_end_previous;
+						datetime_end_new = datetime_end_current;
+
+						// add row here
+
+						datetime_start_current = datetime_end_new;
+					}
 				}
 				else if (datetime_start_current == datetime_start_previous)
 				{
