@@ -1911,13 +1911,13 @@ bool OutputModel::AddTimeRangeMergedRow(sqlite3 * db, std::int64_t const datetim
 	if (stmt_insert_new_row == NULL)
 	{
 		std::string error_msg = sqlite3_errmsg(db);
-		return false;
+		return true;
 	}
 	int step_result_insert_new_row = 0;
 	if ((step_result_insert_new_row = sqlite3_step(stmt_insert_new_row)) != SQLITE_DONE)
 	{
 		// Move on to the next row
-		return false;
+		return true;
 	}
-	return true;
+	return false;
 }
