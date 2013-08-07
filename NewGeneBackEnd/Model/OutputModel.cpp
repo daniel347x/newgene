@@ -1269,7 +1269,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							sql_generate_output += ".";
 							sql_generate_output += variable_group_primary_key_info.column_name;
 							sql_generate_output += " = ";
-							sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+							sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(join_count - 1);
 							sql_generate_output += ".";
 							sql_generate_output += variable_group_info_for_primary_keys[0].column_name;
 						}
