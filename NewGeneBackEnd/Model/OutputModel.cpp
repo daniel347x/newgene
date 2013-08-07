@@ -1490,7 +1490,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					case SQLITE_TEXT:
 						{
 							char const * data = reinterpret_cast<char const *>(sqlite3_column_text(stmt_select_output, overall_column_number));
+							sql_values += '\'';
 							sql_values += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(data));
+							sql_values += '\'';
 						}
 						break;
 					case SQLITE_BLOB:
