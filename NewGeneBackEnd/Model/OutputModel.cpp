@@ -1425,6 +1425,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			return; // from lambda
 		}
 
+		long number_rows = 0;
 		int step_result_select_output = 0;
 		while ((step_result_select_output = sqlite3_step(stmt_select_output)) == SQLITE_ROW)
 		{
@@ -1538,6 +1539,14 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			{
 				// Move on to the next row
 				failed = true;
+				break;
+			}
+
+			++number_rows;
+
+			if (number_rows >= 1000)
+			{
+				// For development - limit to 1000 rows
 				break;
 			}
 		}
