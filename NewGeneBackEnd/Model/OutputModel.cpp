@@ -1503,6 +1503,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					case SQLITE_NULL:
 						{
 							data_is_null = true;
+							sql_values += "NULL";
 						}
 						break;
 					default:
