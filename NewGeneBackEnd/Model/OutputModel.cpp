@@ -1281,13 +1281,13 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 			sql_generate_output += ".*";
 			sql_generate_output += ", ";
-			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(join_count - 1);
 			sql_generate_output += ".*";
 			sql_generate_output += " FROM ";
 			sql_generate_output += temp_dot;
-			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(join_count - 1);
 			sql_generate_output += " ";
-			sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+			sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(join_count - 1);
 			sql_generate_output += " LEFT OUTER JOIN ";
 			sql_generate_output += temp_dot;
 			sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
@@ -1315,7 +1315,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							sql_generate_output += ".";
 							sql_generate_output += variable_group_primary_key_info.column_name;
 							sql_generate_output += " = ";
-							sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+							sql_generate_output += Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(join_count - 1);
 							sql_generate_output += ".";
 							sql_generate_output += variable_group_info_for_primary_keys[0].column_name;
 						}
