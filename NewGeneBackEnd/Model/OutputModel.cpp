@@ -713,6 +713,11 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 								std::string this_variable_group__this_primary_key__unique_name;
 								this_variable_group__this_primary_key__unique_name += *current_variable_group_current_dmu_primary_key.longhand;
 								current_variable_group_current_primary_key_info.column_name_no_uuid = this_variable_group__this_primary_key__unique_name;
+								if (multiplicity > 1)
+								{
+									this_variable_group__this_primary_key__unique_name += "_";
+									this_variable_group__this_primary_key__unique_name += itoa(m+1, ns__, 10);
+								}
 								this_variable_group__this_primary_key__unique_name += "_";
 								this_variable_group__this_primary_key__unique_name += newUUID(true);
 								current_variable_group_current_primary_key_info.column_name = this_variable_group__this_primary_key__unique_name;
@@ -1019,20 +1024,23 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					{
 						if (!variable_group_primary_key_info.column_name.empty())
 						{
-							std::string vg_data_column_name = variable_group_primary_key_info.table_column_name;
-
-							if (and_required)
+							if (variable_group_primary_key_info.total_multiplicity == 1)
 							{
-								sql_generate_output += " AND ";
-							}
-							and_required = true;
+								std::string vg_data_column_name = variable_group_primary_key_info.table_column_name;
 
-							sql_generate_output += current_table_token;
-							sql_generate_output += ".";
-							sql_generate_output += vg_data_column_name;
-							sql_generate_output += " = ";
-							sql_generate_output += "t1.";
-							sql_generate_output += vg_data_column_name; // Creating VIEW views, not JOIN views, so it's a self-join; column names are the same
+								if (and_required)
+								{
+									sql_generate_output += " AND ";
+								}
+								and_required = true;
+
+								sql_generate_output += current_table_token;
+								sql_generate_output += ".";
+								sql_generate_output += vg_data_column_name;
+								sql_generate_output += " = ";
+								sql_generate_output += "t1.";
+								sql_generate_output += vg_data_column_name; // Creating VIEW views, not JOIN views, so it's a self-join; column names are the same
+							}
 						}
 					}
 				});
