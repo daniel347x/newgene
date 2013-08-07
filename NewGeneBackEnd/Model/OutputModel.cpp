@@ -1407,10 +1407,10 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		sql_create_timerange_table += " AS SELECT ";
 		sql_create_timerange_table += Table_VariableGroupData::JoinViewNameFromCount(join_count);
 		sql_create_timerange_table += ".*, ";
-		sql_create_timerange_table += "DATETIME_START_NEWGENE_INTERNAL_";
+		sql_create_timerange_table += "1 AS DATETIME_START_NEWGENE_INTERNAL_";
 		sql_create_timerange_table += join_count_as_text;
 		sql_create_timerange_table += ", ";
-		sql_create_timerange_table += "DATETIME_END_NEWGENE_INTERNAL_";
+		sql_create_timerange_table += "1 AS DATETIME_END_NEWGENE_INTERNAL_";
 		sql_create_timerange_table += join_count_as_text;
 		sql_create_timerange_table += " ";
 		sql_create_timerange_table += " FROM ";
@@ -1418,12 +1418,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		sql_create_timerange_table += Table_VariableGroupData::JoinViewNameFromCount(join_count);
 		sql_create_timerange_table += " ";
 		sql_create_timerange_table += Table_VariableGroupData::JoinViewNameFromCount(join_count);
-		sql_create_timerange_table += ", 1 AS ";
-		sql_create_timerange_table += "DATETIME_START_NEWGENE_INTERNAL_";
-		sql_create_timerange_table += join_count_as_text;
-		sql_create_timerange_table += ", 1 AS ";
-		sql_create_timerange_table += "DATETIME_END_NEWGENE_INTERNAL_";
-		sql_create_timerange_table += join_count_as_text;
 		sql_create_timerange_table += " WHERE 0"; // just create an empty table whose column types match, by default
 		sqlite3_stmt * stmt_create_timerange_table = NULL;
 		sqlite3_prepare_v2(db, sql_create_timerange_table.c_str(), sql_create_timerange_table.size() + 1, &stmt_create_timerange_table, NULL);
