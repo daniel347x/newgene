@@ -1577,21 +1577,21 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_end_current;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_new = datetime_end_new;
 						datetime_end_new = datetime_start_previous;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_new = datetime_start_previous;
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
@@ -1599,14 +1599,14 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					else if (datetime_end_current == datetime_start_previous)
 					{
 						// add row here as-is
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_new = datetime_start_previous;
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
@@ -1617,21 +1617,21 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_start_previous;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_new = datetime_start_previous;
 						datetime_end_new = datetime_end_current;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_new = datetime_end_current;
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
@@ -1642,14 +1642,14 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_start_previous;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_new = datetime_start_previous;
 						datetime_end_new = datetime_end_current;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
@@ -1660,21 +1660,21 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_start_previous;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_new = datetime_start_previous;
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_new = datetime_end_previous;
 						datetime_end_new = datetime_end_current;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
@@ -1687,7 +1687,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_end_current;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
@@ -1697,7 +1697,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
@@ -1710,7 +1710,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_end_previous;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
@@ -1720,7 +1720,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_end_current;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
@@ -1733,14 +1733,14 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						datetime_end_new = datetime_start_current;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_new = datetime_start_current;
 						datetime_end_new = datetime_end_current;
 
 						// add row here
-						failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 						if (failed) continue;
 
 						datetime_start_current = datetime_end_new;
@@ -1753,7 +1753,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				// add row
 				std::int64_t datetime_start_new = datetime_end_current;
 				std::int64_t datetime_end_new = datetime_end_previous;
-				failed = AddTimeRangeMergedRow(datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+				failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 				if (failed) continue;
 			}
 
@@ -1878,7 +1878,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 }
 
-bool OutputModel::AddTimeRangeMergedRow(std::int64_t const datetime_start_new, std::int64_t const datetime_end_new, int & overall_column_number, std::string & sql_columns, std::string & sql_values, std::string & join_count_as_text, std::string const & join_table_with_time_ranges_name)
+bool OutputModel::AddTimeRangeMergedRow(sqlite3 * db, std::int64_t const datetime_start_new, std::int64_t const datetime_end_new, int & overall_column_number, std::string & sql_columns, std::string & sql_values, std::string & join_count_as_text, std::string const & join_table_with_time_ranges_name)
 {
 	// Add two more "internal datetime" columns here,
 	// that contain the actual time range for this row
@@ -1910,6 +1910,7 @@ bool OutputModel::AddTimeRangeMergedRow(std::int64_t const datetime_start_new, s
 	sqlite3_prepare_v2(db, sql_insert_time_range_row.c_str(), sql_insert_time_range_row.size() + 1, &stmt_insert_new_row, NULL);
 	if (stmt_insert_new_row == NULL)
 	{
+		std::string error_msg = sqlite3_errmsg(db);
 		return false;
 	}
 	int step_result_insert_new_row = 0;

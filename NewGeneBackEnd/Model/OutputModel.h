@@ -52,7 +52,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 		// helpers used in GenerateOutput()
 		std::string CurrentTableTokenName(int const multiplicity);
 		std::string StripUUIDFromVariableName(std::string const & variable_name);
-		bool AddTimeRangeMergedRow(std::int64_t const datetime_start_new, std::int64_t const datetime_end_new, int & overall_column_number, std::string & sql_columns, std::string & sql_values, std::string & join_count_as_text, std::string const & join_table_with_time_ranges_name);
+		bool AddTimeRangeMergedRow(sqlite3 * db, std::int64_t const datetime_start_new, std::int64_t const datetime_end_new, int & overall_column_number, std::string & sql_columns, std::string & sql_values, std::string & join_count_as_text, std::string const & join_table_with_time_ranges_name);
 
 };
 
