@@ -66,6 +66,7 @@ class PrimaryKeySequence
 		{
 			public:
 				WidgetInstanceIdentifier vg_identifier;
+				WidgetInstanceIdentifier associated_uoa_identifier;
 				std::string column_name;
 				std::string column_name_no_uuid;
 				std::string table_column_name;
@@ -75,6 +76,12 @@ class PrimaryKeySequence
 				std::string view_table_name;
 				std::string join_table_name;
 				bool is_primary_column_selected;
+				std::string datetime_row_start_column_name;
+				std::string datetime_row_end_column_name;
+				std::string datetime_row_start_column_name_no_uuid;
+				std::string datetime_row_end_column_name_no_uuid;
+				std::string datetime_row_start_table_column_name;
+				std::string datetime_row_end_table_column_name;
 		};
 
 		class PrimaryKeySequenceEntry

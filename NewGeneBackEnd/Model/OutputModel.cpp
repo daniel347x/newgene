@@ -630,6 +630,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					return;
 				}
 
+				WidgetInstanceIdentifier current_uoa_identifier = *the_variable_group.first.identifier_parent;
+
 				std::string vg_code = *the_variable_group.first.code;
 				std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
 
@@ -682,6 +684,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				PrimaryKeySequence::VariableGroup_PrimaryKey_Info & current_variable_group_current_primary_key_info = variable_group_info_for_primary_keys.back();
 				current_variable_group_current_primary_key_info.vg_identifier = the_variable_group.first;
 				current_variable_group_current_primary_key_info.is_primary_column_selected = false;
+				current_variable_group_current_primary_key_info.associated_uoa_identifier = current_uoa_identifier;
 
 				int current_variable_group_current_primary_key_dmu_category_total_sequence_number = 0;
 				for (int m=0; m<multiplicity; ++m)
@@ -709,6 +712,22 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 								current_variable_group_current_primary_key_info.view_table_name += itoa(m+1, ns__, 10);
 								current_variable_group_current_primary_key_info.join_table_name = "j";
 								current_variable_group_current_primary_key_info.join_table_name += itoa(m+1, ns__, 10);
+
+								if (current_variable_group_current_primary_key_info.associated_uoa_identifier.time_granularity != 0)
+								{
+									current_variable_group_current_primary_key_info.datetime_row_start_table_column_name = "DATETIME_ROW_START";
+									current_variable_group_current_primary_key_info.datetime_row_end_table_column_name = "DATETIME_ROW_END";
+
+									std::string datetime_start_row_name = "DATETIME_ROW_START_";
+									datetime_start_row_name += *current_variable_group_current_primary_key_info.vg_identifier.code;
+									current_variable_group_current_primary_key_info.datetime_row_start_column_name = datetime_start_row_name;
+									current_variable_group_current_primary_key_info.datetime_row_start_column_name_no_uuid = datetime_start_row_name;
+
+									std::string datetime_end_row_name = "DATETIME_ROW_END_";
+									datetime_end_row_name += *current_variable_group_current_primary_key_info.vg_identifier.code;
+									current_variable_group_current_primary_key_info.datetime_row_end_column_name = datetime_end_row_name;
+									current_variable_group_current_primary_key_info.datetime_row_end_column_name_no_uuid = datetime_end_row_name;
+								}
 
 								std::string this_variable_group__this_primary_key__unique_name;
 								this_variable_group__this_primary_key__unique_name += *current_variable_group_current_dmu_primary_key.longhand;
@@ -885,6 +904,50 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		sql_generate_output += " AS SELECT ";
 
 		bool first_select = true;
+		if (current_uoa_identifier.time_granularity != 0)
+		{
+			// The current variable group being joined into the full set of data
+			// has a time range granularity associated with it
+
+			// At least one of the primary keys has this variable group active, so use that to get the date-time column names
+			// ... just break out of loop once we hav it
+			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
+			{
+				if (first_select == false)
+				{
+					// We already have the information we need
+					return; // from lambda
+				}
+				std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
+				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &first_select, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
+				{
+					if (first_select == false)
+					{
+						// We already have the information we need
+						return; // from lambda
+					}
+					if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
+					{
+						if (!variable_group_primary_key_info.column_name.empty())
+						{
+							first_select = false;
+							sql_generate_output += variable_group_primary_key_info.view_table_name;
+							sql_generate_output += ".";
+							sql_generate_output += variable_group_primary_key_info.datetime_row_start_table_column_name;
+							sql_generate_output += " AS ";
+							sql_generate_output += variable_group_primary_key_info.datetime_row_start_column_name;
+							sql_generate_output += ", ";
+							sql_generate_output += variable_group_primary_key_info.view_table_name;
+							sql_generate_output += ".";
+							sql_generate_output += variable_group_primary_key_info.datetime_row_end_table_column_name;
+							sql_generate_output += " AS ";
+							sql_generate_output += variable_group_primary_key_info.datetime_row_end_column_name;
+						}
+					}
+				});
+			});
+		}
+
 		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 		{
 			std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
@@ -1207,6 +1270,10 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							{
 								sql_generate_output += " OR ";
 							}
+							else
+							{
+								sql_generate_output += "(";
+							}
 							first_select = false;
 							sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 							sql_generate_output += ".";
@@ -1216,6 +1283,25 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					}
 				});
 			});
+			if (!first_select)
+			{
+				sql_generate_output += ")";
+			}
+
+			if (!the_variable_group.first.identifier_parent)
+			{
+				// Todo: Error message
+				failed = true;
+				return;
+			}
+
+			WidgetInstanceIdentifier associated_uoa_identifier_to_variable_group = *the_variable_group.first.identifier_parent;
+
+			if (associated_uoa_identifier_to_variable_group.time_granularity != 0)
+			{
+				// The current variable group being joined into the full set of data
+				// has a time range granularity associated with it
+			}
 
 		}
 	
