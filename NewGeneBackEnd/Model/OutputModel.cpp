@@ -663,14 +663,18 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					}
 				});
 
-				int multiplicity = 1;
-				int test_kad_count = current_variable_group_current_primary_key_dmu_category_total_number;
-				while (test_kad_count <= kad_count_current_dmu_category)
+				int multiplicity = 0;
+				if (current_variable_group_current_primary_key_dmu_category_total_number > 0)
 				{
-					test_kad_count += current_variable_group_current_primary_key_dmu_category_total_number;
-					if (test_kad_count <= kad_count_current_dmu_category)
+					multiplicity = 1;
+					int test_kad_count = current_variable_group_current_primary_key_dmu_category_total_number;
+					while (test_kad_count <= kad_count_current_dmu_category)
 					{
-						++multiplicity;
+						test_kad_count += current_variable_group_current_primary_key_dmu_category_total_number;
+						if (test_kad_count <= kad_count_current_dmu_category)
+						{
+							++multiplicity;
+						}
 					}
 				}
 
