@@ -677,12 +677,13 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				variable_group_info_for_primary_keys.push_back(PrimaryKeySequence::VariableGroup_PrimaryKey_Info());
 				PrimaryKeySequence::VariableGroup_PrimaryKey_Info & current_variable_group_current_primary_key_info = variable_group_info_for_primary_keys.back();
 				current_variable_group_current_primary_key_info.vg_identifier = the_variable_group.first;
+				current_variable_group_current_primary_key_info.is_primary_column_selected = false;
 
 				int current_variable_group_current_primary_key_dmu_category_total_sequence_number = 0;
 				for (int m=0; m<multiplicity; ++m)
 				{
 					int current_variable_group_current_primary_key_dmu_category_sequence_number = 0;
-					std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, &m, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category_total_sequence_number, &input_model, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category_sequence_number, &sequence, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &failed](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
+					std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, &m, &multiplicity, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category_total_sequence_number, &input_model, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category_sequence_number, &sequence, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &failed](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
 					{
 						if (failed)
 						{
@@ -692,13 +693,25 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						{
 							if (current_dmu_sequence_number == current_variable_group_current_primary_key_dmu_category_total_sequence_number)
 							{
+								// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
+								// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
+								// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
+								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group_current_dmu_primary_key.longhand;
+								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa = current_variable_group_current_primary_key_dmu_category_sequence_number;
+								current_variable_group_current_primary_key_info.current_multiplicity = m+1;
+								current_variable_group_current_primary_key_info.total_multiplicity = multiplicity;
+								char ns__[64];
+								current_variable_group_current_primary_key_info.view_table_name = "t";
+								current_variable_group_current_primary_key_info.view_table_name += itoa(m+1, ns__, 10);
+								current_variable_group_current_primary_key_info.join_table_name = "j";
+								current_variable_group_current_primary_key_info.join_table_name += itoa(m+1, ns__, 10);
+
 								std::string this_variable_group__this_primary_key__unique_name;
 								this_variable_group__this_primary_key__unique_name += *current_variable_group_current_dmu_primary_key.longhand;
 								current_variable_group_current_primary_key_info.column_name_no_uuid = this_variable_group__this_primary_key__unique_name;
 								this_variable_group__this_primary_key__unique_name += "_";
 								this_variable_group__this_primary_key__unique_name += newUUID(true);
 								current_variable_group_current_primary_key_info.column_name = this_variable_group__this_primary_key__unique_name;
-								//this_variable_group__primary_key_names.push_back(this_variable_group__this_primary_key__unique_name);
 								WidgetInstanceIdentifier vg_setmember_identifier;
 								bool found_variable_group_set_member_identifier = input_model.t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(*current_variable_group_current_dmu_primary_key.longhand, *the_variable_group.first.uuid, vg_setmember_identifier);
 								if (!found_variable_group_set_member_identifier)
@@ -706,6 +719,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 									failed = true;
 									return; // from lambda
 								}
+
+								// Is this primary key selected by the user for output?
 								bool found = false;
 								std::for_each(the_variable_group.second.cbegin(), the_variable_group.second.cend(), [&found, &vg_setmember_identifier](WidgetInstanceIdentifier const & selected_variable_identifier)
 								{
@@ -861,63 +876,28 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		sql_generate_output += " AS SELECT ";
 
 		bool first_select = true;
-
-		// First: Display the primary keys with multiplicity 1
-		int multiplicity_one = 1;
-		std::string current_table_token = CurrentTableTokenName(multiplicity_one);
-		char ns__[64];
-		std::string ms__ = itoa(multiplicity_one, ns__, 10);
-		std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &current_uoa_identifier, &current_table_token, &multiplicity_one, &ms__, &first_select, &highest_multiplicity_dmu_string_code_to_use, &this_variable_group__primary_key_names, &number_primary_variable_groups, &view_count, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
+		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 		{
-
-			if (failed)
+			std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
+			std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &first_select, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 			{
-				return; // from lambda
-			}
-
-			if (!primary_key_in_this_variable_group.code || !primary_key_in_this_variable_group.longhand) // The column name has been packed into "longhand" field
-			{
-				failed = true;
-				return; // from lambda
-			}
-
-			if (view_count <= (int)number_primary_variable_groups)
-			{
-				// A variable group corresponding to a primary UOA
-				if (*primary_key_in_this_variable_group.code == highest_multiplicity_dmu_string_code_to_use)
+				if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
 				{
-					// This DMU category has multiplicity greater than 1
-					return; // from lambda
+					if (!variable_group_primary_key_info.column_name.empty())
+					{
+						if (!first_select)
+						{
+							sql_generate_output += ", ";
+						}
+						first_select = false;
+						sql_generate_output += variable_group_primary_key_info.view_table_name;
+						sql_generate_output += ".";
+						sql_generate_output += variable_group_primary_key_info.table_column_name;
+						sql_generate_output += " AS ";
+						sql_generate_output += variable_group_primary_key_info.column_name;
+					}
 				}
-			}
-			else
-			{
-				// A variable group corresponding to a child UOA
-				if (*primary_key_in_this_variable_group.code == *child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].first.code)
-				{
-					// This DMU category has multiplicity greater than 1
-					return; // from lambda
-				}
-			}
-			// This DMU category has multiplicity 1
-			if (!first_select)
-			{
-				sql_generate_output += ", ";
-			}
-			first_select = false;
-
-			std::string this_variable_group__this_primary_key__unique_name;
-			this_variable_group__this_primary_key__unique_name += *primary_key_in_this_variable_group.longhand;
-			this_variable_group__this_primary_key__unique_name += "_";
-			this_variable_group__this_primary_key__unique_name += newUUID(true);
-			this_variable_group__primary_key_names.push_back(this_variable_group__this_primary_key__unique_name);
-
-			sql_generate_output += current_table_token;
-			sql_generate_output += ".";
-			sql_generate_output += *primary_key_in_this_variable_group.longhand;
-			sql_generate_output += " AS ";
-			sql_generate_output += this_variable_group__this_primary_key__unique_name;
-
+			});
 		});
 
 		if (failed)
@@ -926,81 +906,10 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			return;
 		}
 
-		// Next: Display primary keys with multiplicity greater than 1
-		for (int m=1; m<=highest_multiplicity_to_use; ++m)
-		{
-
-			std::string current_table_token = CurrentTableTokenName(m);
-			char ns__[64];
-			std::string ms__ = itoa(m, ns__, 10);
-
-			std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &current_uoa_identifier, &current_table_token, &m, &ms__, &first_select, &highest_multiplicity_dmu_string_code_to_use, &this_variable_group__primary_key_names, &number_primary_variable_groups, &view_count, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & primary_key_in_this_variable_group)
-			{
-
-				if (failed)
-				{
-					return; // from lambda
-				}
-
-				if (!primary_key_in_this_variable_group.code || !primary_key_in_this_variable_group.longhand) // The column name has been packed into "longhand" field
-				{
-					failed = true;
-					return; // from lambda
-				}
-
-				if (view_count <= (int)number_primary_variable_groups)
-				{
-					// A variable group corresponding to a primary UOA
-					if (*primary_key_in_this_variable_group.code != highest_multiplicity_dmu_string_code_to_use)
-					{
-						// This is not one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
-						return; // from lambda
-					}
-				}
-				else
-				{
-					// A variable group corresponding to a child UOA
-					if (*primary_key_in_this_variable_group.code != *child_uoas__which_multiplicity_is_greater_than_1[current_uoa_identifier].first.code)
-					{
-						// This is not one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore
-						return; // from lambda
-					}
-				}
-
-				if (!first_select)
-				{
-					sql_generate_output += ", ";
-				}
-				first_select = false;
-
-				std::string this_variable_group__this_primary_key__unique_name;
-				this_variable_group__this_primary_key__unique_name += *primary_key_in_this_variable_group.longhand;
-				this_variable_group__this_primary_key__unique_name += "_";
-				this_variable_group__this_primary_key__unique_name += ms__;
-				this_variable_group__this_primary_key__unique_name += "_";
-				this_variable_group__this_primary_key__unique_name += newUUID(true);
-				this_variable_group__primary_key_names.push_back(this_variable_group__this_primary_key__unique_name);
-
-				sql_generate_output += current_table_token;
-				sql_generate_output += ".";
-				sql_generate_output += *primary_key_in_this_variable_group.longhand;
-				sql_generate_output += " AS ";
-				sql_generate_output += this_variable_group__this_primary_key__unique_name;
-
-			});
-
-		}
-
-		if (failed)
-		{
-			// Todo: error message
-			return;
-		}
-
-		std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [this, &this_variable_group__primary_key_names__uuid_stripped](std::string const & this_variable_group__primary_key_name)
-		{
-			this_variable_group__primary_key_names__uuid_stripped.push_back(this->StripUUIDFromVariableName(this_variable_group__primary_key_name));
-		});
+		//std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [this, &this_variable_group__primary_key_names__uuid_stripped](std::string const & this_variable_group__primary_key_name)
+		//{
+		//	this_variable_group__primary_key_names__uuid_stripped.push_back(this->StripUUIDFromVariableName(this_variable_group__primary_key_name));
+		//});
 
 		for (int m=1; m<=highest_multiplicity_to_use; ++m)
 		{
@@ -1010,7 +919,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			std::string ms__ = itoa(m, ns__, 10);
 
 			// Display all variables selected by user
-			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &current_uoa_identifier, &first_select, &sql_generate_output, &current_table_token, &ms__, &this_variable_group__primary_key_names__uuid_stripped, &this_variable_group__secondary_key_names, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
+			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &highest_multiplicity_to_use, &current_uoa_identifier, &first_select, &sql_generate_output, &current_table_token, &ms__, &this_variable_group__primary_key_names__uuid_stripped, &this_variable_group__secondary_key_names, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
 			{
 				if (failed)
 				{
@@ -1025,19 +934,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 				std::string this_variable_group_secondary_key_name;
 				this_variable_group_secondary_key_name += *variable_selected_in_this_group.code;
-				this_variable_group_secondary_key_name += "_";
-				this_variable_group_secondary_key_name += ms__;
 
-				// No.  The columns in variable groups that correspond to primary key columns can have user-defined names; the user may wish for these columns to appear in the output
-#				if 0
-				if (std::find(this_variable_group__primary_key_names__uuid_stripped.begin(), this_variable_group__primary_key_names__uuid_stripped.end(), this_variable_group_secondary_key_name) != this_variable_group__primary_key_names__uuid_stripped.end())
+				if (highest_multiplicity_to_use > 1)
 				{
-					// This is a primary key that has been selected by the user for output.
-					// Since primary keys are automatically output, regardless of whether the user selectes them,
-					// do not include it as a secondary (i.e., additional) output column
-					return; // from lambda
+					this_variable_group_secondary_key_name += "_";
+					this_variable_group_secondary_key_name += ms__;
 				}
-#				endif
 
 				this_variable_group_secondary_key_name += "_";
 				this_variable_group_secondary_key_name += newUUID(true);
@@ -1104,48 +1006,33 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				and_required = true;
 			}
 
-			std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [&sql_generate_output, &highest_multiplicity_dmu_string_code_to_use, &vg_data_table_name, &current_table_token, &and_required, &failed](WidgetInstanceIdentifier const & dmu_identifier)
+			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &and_required, &current_table_token, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 			{
-				if (failed)
+				std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
+				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &and_required, &current_table_token, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 				{
-					return; // from lambda
-				}
-				if (!dmu_identifier.code || !dmu_identifier.longhand) // The column name has been packed into "longhand" field
-				{
-					failed = true;
-					return; // from lambda
-				}
+					if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
+					{
+						if (!variable_group_primary_key_info.column_name.empty())
+						{
+							std::string vg_data_column_name = variable_group_primary_key_info.table_column_name;
 
-				// Note: Nothing needs to change here for child UOA's
-				if (*dmu_identifier.code == highest_multiplicity_dmu_string_code_to_use)
-				{
-					// This is one of the DMU's in the set of (identical code) DMU's with multiplicity greater than 1; ignore.
-					// (Note: We wouldn't *be* here if there were no primary UOA DMU's with multiplicity greater than 1)
-					return; // from lambda
-				}
+							if (and_required)
+							{
+								sql_generate_output += " AND ";
+							}
+							and_required = true;
 
-				// good to go
-
-				std::string vg_data_column_name = *dmu_identifier.longhand;
-
-				if (and_required)
-				{
-					sql_generate_output += " AND ";
-				}
-				and_required = true;
-
-				sql_generate_output += current_table_token;
-				sql_generate_output += ".";
-				sql_generate_output += vg_data_column_name;
-				sql_generate_output += " = ";
-				sql_generate_output += "t1.";
-				sql_generate_output += vg_data_column_name; // Creating VIEW views, not JOIN views, so it's a self-join; column names are the same
+							sql_generate_output += current_table_token;
+							sql_generate_output += ".";
+							sql_generate_output += vg_data_column_name;
+							sql_generate_output += " = ";
+							sql_generate_output += "t1.";
+							sql_generate_output += vg_data_column_name; // Creating VIEW views, not JOIN views, so it's a self-join; column names are the same
+						}
+					}
+				});
 			});
-
-			if (failed)
-			{
-				return;
-			}
 
 		}
 
@@ -1168,8 +1055,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	});
 
 	int join_count = 0;
-	std::string vg_code__previous;
-	std::for_each(variable_groups_vector.cbegin(), variable_groups_vector.cend(), [this, &temp_dot, &db, &join_count, &input_model, &vg_code__previous, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+	std::for_each(variable_groups_vector.cbegin(), variable_groups_vector.cend(), [this, &sequence, &temp_dot, &db, &join_count, &input_model, &variable_group__key_names__vectors, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 	{
 		if (failed)
 		{
@@ -1221,41 +1107,31 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_generate_output += " ON ";
 
 			bool first_select = true;
-
-			// Iterate through all primary key fields
-			int dmu_index = 0;
-			std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [&sql_generate_output, &join_count, &first_select, &dmu_index, &this_variable_group__primary_key_names__previous, &failed](std::string const & primary_key_in_this_variable_group)
+			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &first_select, &join_count, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 			{
-
-				if (failed)
+				std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
+				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &variable_group_info_for_primary_keys, &first_select, &join_count, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 				{
-					return; // from lambda
-				}
-
-				std::string const & primary_key_in_this_variable_group__previous = this_variable_group__primary_key_names__previous[dmu_index];
-
-				if (!first_select)
-				{
-					sql_generate_output += " AND ";
-				}
-				first_select = false;
-				sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
-				sql_generate_output += ".";
-				sql_generate_output += primary_key_in_this_variable_group;
-				sql_generate_output += " = ";
-				sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
-				sql_generate_output += ".";
-				sql_generate_output += primary_key_in_this_variable_group__previous;
-
-				++dmu_index;
-
+					if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
+					{
+						if (!variable_group_primary_key_info.column_name.empty())
+						{
+							if (!first_select)
+							{
+								sql_generate_output += " AND ";
+							}
+							first_select = false;
+							sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
+							sql_generate_output += ".";
+							sql_generate_output += variable_group_primary_key_info.table_column_name;
+							sql_generate_output += " = ";
+							sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+							sql_generate_output += ".";
+							sql_generate_output += variable_group_info_for_primary_keys[0].table_column_name;
+						}
+					}
+				});
 			});
-
-			if (failed)
-			{
-				// Todo: Error message
-				return;
-			}
 
 			sql_generate_output += " UNION ALL SELECT ";
 			sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
@@ -1277,71 +1153,57 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_generate_output += " ON ";
 
 			first_select = true;
-
-			// Iterate through all primary key fields
-			dmu_index = 0;
-			std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [&sql_generate_output, &join_count, &first_select, &dmu_index, &this_variable_group__primary_key_names__previous, &failed](std::string const & primary_key_in_this_variable_group)
+			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &first_select, &join_count, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 			{
-
-				if (failed)
+				std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
+				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &variable_group_info_for_primary_keys, &first_select, &join_count, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 				{
-					return; // from lambda
-				}
-
-				std::string const & primary_key_in_this_variable_group__previous = this_variable_group__primary_key_names__previous[dmu_index];
-
-				if (!first_select)
-				{
-					sql_generate_output += " AND ";
-				}
-				first_select = false;
-				sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
-				sql_generate_output += ".";
-				sql_generate_output += primary_key_in_this_variable_group;
-				sql_generate_output += " = ";
-				sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
-				sql_generate_output += ".";
-				sql_generate_output += primary_key_in_this_variable_group__previous;
-
-				++dmu_index;
-
+					if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
+					{
+						if (!variable_group_primary_key_info.column_name.empty())
+						{
+							if (!first_select)
+							{
+								sql_generate_output += " AND ";
+							}
+							first_select = false;
+							sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
+							sql_generate_output += ".";
+							sql_generate_output += variable_group_primary_key_info.table_column_name;
+							sql_generate_output += " = ";
+							sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
+							sql_generate_output += ".";
+							sql_generate_output += variable_group_info_for_primary_keys[0].table_column_name;
+						}
+					}
+				});
 			});
 
 			sql_generate_output += " WHERE ";
 
-			dmu_index = 0;
 			first_select = true;
-			std::for_each(this_variable_group__primary_key_names.cbegin(), this_variable_group__primary_key_names.cend(), [&sql_generate_output, &join_count, &first_select, &dmu_index, &this_variable_group__primary_key_names__previous, &failed](std::string const & primary_key_in_this_variable_group)
+			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &first_select, &join_count, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 			{
-
-				if (failed)
+				std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
+				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &variable_group_info_for_primary_keys, &first_select, &join_count, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 				{
-					return; // from lambda
-				}
-
-				std::string const & primary_key_in_this_variable_group__previous = this_variable_group__primary_key_names__previous[dmu_index];
-
-				if (!first_select)
-				{
-					sql_generate_output += " OR ";
-				}
-				first_select = false;
-				sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
-				sql_generate_output += ".";
-				sql_generate_output += primary_key_in_this_variable_group;
-				sql_generate_output += " IS NULL";
-
-				++dmu_index;
-
+					if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
+					{
+						if (!variable_group_primary_key_info.column_name.empty())
+						{
+							if (!first_select)
+							{
+								sql_generate_output += " OR ";
+							}
+							first_select = false;
+							sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
+							sql_generate_output += ".";
+							sql_generate_output += variable_group_primary_key_info.table_column_name;
+							sql_generate_output += " IS NULL";
+						}
+					}
+				});
 			});
-
-			if (failed)
-			{
-				// Todo: Error message
-				return;
-			}
-
-			vg_code__previous = vg_code;
 
 		}
 	

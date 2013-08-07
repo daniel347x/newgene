@@ -68,6 +68,12 @@ class PrimaryKeySequence
 				WidgetInstanceIdentifier vg_identifier;
 				std::string column_name;
 				std::string column_name_no_uuid;
+				std::string table_column_name;
+				int sequence_number_within_dmu_category_variable_group_uoa;
+				int current_multiplicity;
+				int total_multiplicity;
+				std::string view_table_name;
+				std::string join_table_name;
 				bool is_primary_column_selected;
 		};
 
