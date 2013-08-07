@@ -1135,11 +1135,11 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							first_select = false;
 							sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 							sql_generate_output += ".";
-							sql_generate_output += variable_group_primary_key_info.table_column_name;
+							sql_generate_output += variable_group_primary_key_info.column_name;
 							sql_generate_output += " = ";
 							sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 							sql_generate_output += ".";
-							sql_generate_output += variable_group_info_for_primary_keys[0].table_column_name;
+							sql_generate_output += variable_group_info_for_primary_keys[0].column_name;
 						}
 					}
 				});
@@ -1181,11 +1181,11 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							first_select = false;
 							sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 							sql_generate_output += ".";
-							sql_generate_output += variable_group_primary_key_info.table_column_name;
+							sql_generate_output += variable_group_primary_key_info.column_name;
 							sql_generate_output += " = ";
 							sql_generate_output += Table_VariableGroupData::JoinViewNameFromCount(join_count - 1);
 							sql_generate_output += ".";
-							sql_generate_output += variable_group_info_for_primary_keys[0].table_column_name;
+							sql_generate_output += variable_group_info_for_primary_keys[0].column_name;
 						}
 					}
 				});
@@ -1210,7 +1210,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							first_select = false;
 							sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
 							sql_generate_output += ".";
-							sql_generate_output += variable_group_primary_key_info.table_column_name;
+							sql_generate_output += variable_group_primary_key_info.column_name;
 							sql_generate_output += " IS NULL";
 						}
 					}
