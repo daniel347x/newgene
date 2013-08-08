@@ -1523,13 +1523,11 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					{
 						if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART)
 						{
-							is_current_datetime_internal_column_being_read = true;
 							datetime_start_current = sqlite3_column_int64(stmt_select_output, overall_column_number_input);
 							new_current_datetime_string = boost::lexical_cast<std::string>(datetime_start_current);
 						}
 						if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND)
 						{
-							is_current_datetime_internal_column_being_read = true;
 							datetime_end_current = sqlite3_column_int64(stmt_select_output, overall_column_number_input);
 							new_current_datetime_string = boost::lexical_cast<std::string>(datetime_end_current);
 						}
@@ -1538,10 +1536,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					{
 						if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
 						{
+							is_current_datetime_internal_column_being_read = true;
 							datetime_start_previous = sqlite3_column_int64(stmt_select_output, overall_column_number_input);
 						}
 						if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 						{
+							is_current_datetime_internal_column_being_read = true;
 							datetime_end_previous = sqlite3_column_int64(stmt_select_output, overall_column_number_input);
 						}
 					}
@@ -2133,6 +2133,11 @@ bool OutputModel::AddTimeRangeMergedRow(bool previous_is_null, bool current_is_n
 	else
 	{
 		sql_insert_time_range_row += sql_values_current_filled;
+	}
+
+	if (overall_column_number_current_regular > 0)
+	{
+		sql_insert_time_range_row += ", ";
 	}
 
 	sql_insert_time_range_row += sql_values_current_datetime_internal;
