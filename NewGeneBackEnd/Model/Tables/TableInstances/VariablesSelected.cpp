@@ -242,6 +242,13 @@ Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSele
 		{
 			return; // from lambda
 		}
+
+		if (variable_group__variables__pair.second.size() == 0)
+		{
+			// no variables selected
+			return; // from lambda
+		}
+
 		// Get the UOA corresponding to the variable group.
 		// This is the *parent* WidgetInstanceIdentifier of the variable group's WidgetInstanceIdentifier
 		WidgetInstanceIdentifier variable_group = input_model_->t_vgp_identifiers.getIdentifier(variable_group__variables__pair.first);
