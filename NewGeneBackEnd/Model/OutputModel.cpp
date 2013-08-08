@@ -1577,208 +1577,259 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				}
 				else if (datetime_start_previous == 0 && datetime_end_previous == 0)
 				{
-					// Previous time range did not exist, but new does.
-					// There can be only one previous row per new row.
+					// Previous time range did not exist (or there is no previous table),
+					// but new time range does exist.
+					// There can be only one previous row per new row (if there are previous rows).
 					// Add current row as-is, using the current time range.
 					failed = AddTimeRangeMergedRow(db, datetime_start_current, datetime_end_current, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
 				}
 				else
 				{
 					// normal merge - both previous and current time ranges exist
-					while (datetime_start_current < datetime_end_current)
+
+					// If we're here, a child is being merged in.
+
+					// Method two: Assume that only 1 primary variable group is being included,
+					// and any following variable groups are children.
+					// The children will not provide independent row, but only rows
+					// that overlap the time range of the primary.
+					bool method_two = true;
+
+					if (method_two)
 					{
-						if (failed)
-						{
-							break;
-						}
-						std::int64_t datetime_start_new = datetime_start_current;
-						std::int64_t datetime_end_new = datetime_end_current;
 						if (datetime_start_current < datetime_start_previous)
 						{
-							datetime_end_new = datetime_start_previous;
-							if (datetime_end_new > datetime_end_current)
-							{
-								datetime_end_new = datetime_end_current;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_new = datetime_end_new;
-								datetime_end_new = datetime_start_previous;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_new = datetime_start_previous;
-								datetime_end_new = datetime_end_previous;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_current = datetime_end_new;
-							}
-							else if (datetime_end_current == datetime_start_previous)
-							{
-								// add row here as-is
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_new = datetime_start_previous;
-								datetime_end_new = datetime_end_previous;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_current = datetime_end_new;
-							}
-							else if (datetime_end_current < datetime_end_previous)
-							{
-								datetime_start_new = datetime_start_current;
-								datetime_end_new = datetime_start_previous;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_new = datetime_start_previous;
-								datetime_end_new = datetime_end_current;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_new = datetime_end_current;
-								datetime_end_new = datetime_end_previous;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_current = datetime_end_new;
-							}
-							else if (datetime_end_current == datetime_end_previous)
-							{
-								datetime_start_new = datetime_start_current;
-								datetime_end_new = datetime_start_previous;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_new = datetime_start_previous;
-								datetime_end_new = datetime_end_current;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_current = datetime_end_new;
-							}
-							else if (datetime_end_current > datetime_end_previous)
-							{
-								datetime_start_new = datetime_start_current;
-								datetime_end_new = datetime_start_previous;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_new = datetime_start_previous;
-								datetime_end_new = datetime_end_previous;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_new = datetime_end_previous;
-								datetime_end_new = datetime_end_current;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_current = datetime_end_new;
-							}
+							datetime_start_current = datetime_start_previous;
 						}
-						else if (datetime_start_current == datetime_start_previous)
-						{
-							if (datetime_end_current < datetime_end_previous)
-							{
-								datetime_end_new = datetime_end_current;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_current = datetime_end_new;
-							}
-							else if (datetime_end_current >= datetime_end_previous)
-							{
-								datetime_end_new = datetime_end_previous;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_current = datetime_end_new;
-							}
-						}
-						else if (datetime_start_current > datetime_start_previous)
+						if (datetime_end_current > datetime_start_current)
 						{
 							if (datetime_start_current < datetime_end_previous)
 							{
-								datetime_end_new = datetime_end_previous;
+								// We have something to do
+								if (datetime_start_current > datetime_start_previous)
+								{
+									// Add a row from the start of the previous, to the start of the current
+									failed = AddTimeRangeMergedRow(db, datetime_start_previous, datetime_start_current, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									//if (failed) continue;
 
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
+									if (datetime_end_current >= datetime_end_previous)
+									{
+										// Add a row from the start of the current, to the end of the previous, and we're done
+										failed = AddTimeRangeMergedRow(db, datetime_start_current, datetime_end_previous, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+										//if (failed) continue;
+									}
+									else
+									{
+										// Add a row from the start of the current, to the end of the current
+										failed = AddTimeRangeMergedRow(db, datetime_start_current, datetime_end_current, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+										//if (failed) continue;
 
-								datetime_start_current = datetime_end_new;
-							}
-							else if (datetime_start_current == datetime_end_previous)
-							{
-								datetime_end_new = datetime_end_current;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_current = datetime_end_new;
-							}
-							else if (datetime_start_current > datetime_end_previous)
-							{
-								// add two rows
-
-								datetime_start_new = datetime_end_previous;
-								datetime_end_new = datetime_start_current;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_new = datetime_start_current;
-								datetime_end_new = datetime_end_current;
-
-								// add row here
-								failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-								if (failed) continue;
-
-								datetime_start_current = datetime_end_new;
+										// ... then from the end of the current, to the end of the previous, and we're done
+										failed = AddTimeRangeMergedRow(db, datetime_end_current, datetime_end_previous, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+										//if (failed) continue;
+									}
+								}
 							}
 						}
 					}
-
-					if (datetime_end_current < datetime_end_previous)
+					else
 					{
-						// add row
-						std::int64_t datetime_start_new = datetime_end_current;
-						std::int64_t datetime_end_new = datetime_end_previous;
-						failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
-						if (failed) continue;
+						// This older method stinks
+						while (datetime_start_current < datetime_end_current)
+						{
+							if (failed)
+							{
+								break;
+							}
+							std::int64_t datetime_start_new = datetime_start_current;
+							std::int64_t datetime_end_new = datetime_end_current;
+							if (datetime_start_current < datetime_start_previous)
+							{
+								datetime_end_new = datetime_start_previous;
+								if (datetime_end_new > datetime_end_current)
+								{
+									datetime_end_new = datetime_end_current;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_new = datetime_end_new;
+									datetime_end_new = datetime_start_previous;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_new = datetime_start_previous;
+									datetime_end_new = datetime_end_previous;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_current = datetime_end_new;
+								}
+								else if (datetime_end_current == datetime_start_previous)
+								{
+									// add row here as-is
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_new = datetime_start_previous;
+									datetime_end_new = datetime_end_previous;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_current = datetime_end_new;
+								}
+								else if (datetime_end_current < datetime_end_previous)
+								{
+									datetime_start_new = datetime_start_current;
+									datetime_end_new = datetime_start_previous;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_new = datetime_start_previous;
+									datetime_end_new = datetime_end_current;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_new = datetime_end_current;
+									datetime_end_new = datetime_end_previous;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_current = datetime_end_new;
+								}
+								else if (datetime_end_current == datetime_end_previous)
+								{
+									datetime_start_new = datetime_start_current;
+									datetime_end_new = datetime_start_previous;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_new = datetime_start_previous;
+									datetime_end_new = datetime_end_current;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_current = datetime_end_new;
+								}
+								else if (datetime_end_current > datetime_end_previous)
+								{
+									datetime_start_new = datetime_start_current;
+									datetime_end_new = datetime_start_previous;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_new = datetime_start_previous;
+									datetime_end_new = datetime_end_previous;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_new = datetime_end_previous;
+									datetime_end_new = datetime_end_current;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_current = datetime_end_new;
+								}
+							}
+							else if (datetime_start_current == datetime_start_previous)
+							{
+								if (datetime_end_current < datetime_end_previous)
+								{
+									datetime_end_new = datetime_end_current;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_current = datetime_end_new;
+								}
+								else if (datetime_end_current >= datetime_end_previous)
+								{
+									datetime_end_new = datetime_end_previous;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_current = datetime_end_new;
+								}
+							}
+							else if (datetime_start_current > datetime_start_previous)
+							{
+								if (datetime_start_current < datetime_end_previous)
+								{
+									datetime_end_new = datetime_end_previous;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_current = datetime_end_new;
+								}
+								else if (datetime_start_current == datetime_end_previous)
+								{
+									datetime_end_new = datetime_end_current;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_current = datetime_end_new;
+								}
+								else if (datetime_start_current > datetime_end_previous)
+								{
+									// add two rows
+
+									datetime_start_new = datetime_end_previous;
+									datetime_end_new = datetime_start_current;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_new = datetime_start_current;
+									datetime_end_new = datetime_end_current;
+
+									// add row here
+									failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+									if (failed) continue;
+
+									datetime_start_current = datetime_end_new;
+								}
+							}
+						}
+
+						if (datetime_end_current < datetime_end_previous)
+						{
+							// add row
+							std::int64_t datetime_start_new = datetime_end_current;
+							std::int64_t datetime_end_new = datetime_end_previous;
+							failed = AddTimeRangeMergedRow(db, datetime_start_new, datetime_end_new, overall_column_number, sql_columns, sql_values, join_count_as_text, join_table_with_time_ranges_name);
+							if (failed) continue;
+						}
 					}
 				}
 			}
