@@ -1526,22 +1526,28 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							datetime_start_current = sqlite3_column_int64(stmt_select_output, overall_column_number_input);
 							new_current_datetime_string = boost::lexical_cast<std::string>(datetime_start_current);
 						}
-						if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND)
+						else if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND)
 						{
 							datetime_end_current = sqlite3_column_int64(stmt_select_output, overall_column_number_input);
 							new_current_datetime_string = boost::lexical_cast<std::string>(datetime_end_current);
+						}
+						else if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+						{
+							is_current_datetime_internal_column_being_read = true;
+						}
+						else if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+						{
+							is_current_datetime_internal_column_being_read = true;
 						}
 					}
 					else
 					{
 						if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
 						{
-							is_current_datetime_internal_column_being_read = true;
 							datetime_start_previous = sqlite3_column_int64(stmt_select_output, overall_column_number_input);
 						}
-						if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+						else if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 						{
-							is_current_datetime_internal_column_being_read = true;
 							datetime_end_previous = sqlite3_column_int64(stmt_select_output, overall_column_number_input);
 						}
 					}
