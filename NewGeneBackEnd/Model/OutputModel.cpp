@@ -911,7 +911,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 		std::string sql_generate_output;
 
-		sql_generate_output += "CREATE VIEW ";
+		sql_generate_output += "CREATE TABLE ";
 		sql_generate_output += temp_dot;
 		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(view_count);
 		sql_generate_output += " AS SELECT ";
@@ -1110,40 +1110,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			this_variable_group__secondary_key_names__uuid_stripped.push_back(this->StripUUIDFromVariableName(this_variable_group__secondary_key_name));
 		});
 
-		char join_count_as_text_[1024];
-		std::string join_count_as_text = itoa(view_count, join_count_as_text_, 10);
-
-		if (!first_select)
-		{
-			sql_generate_output += ", ";
-		}
-		first_select = false;
-		sql_generate_output += "0 AS DATETIME_START_NEWGENE_INTERNAL_";
-		sql_generate_output += join_count_as_text;
-		sql_generate_output += ", ";
-		sql_generate_output += "0 AS DATETIME_END_NEWGENE_INTERNAL_";
-		sql_generate_output += join_count_as_text;
-
-		std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
-
-		columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
-		ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_start = columns_in_view.back();
-		column_in_view_start.column_name = "DATETIME_START_NEWGENE_INTERNAL_";
-		column_in_view_start.column_name += join_count_as_text;
-		column_in_view_start.column_name_no_uuid = column_in_view_start.column_name;
-		column_in_view_start.variable_group_identifier = the_variable_group.first;
-		column_in_view_start.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
-		column_in_view_start.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
-
-		columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
-		ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_end = columns_in_view.back();
-		column_in_view_end.column_name = "DATETIME_END_NEWGENE_INTERNAL_";
-		column_in_view_end.column_name += join_count_as_text;
-		column_in_view_end.column_name_no_uuid = column_in_view_end.column_name;
-		column_in_view_end.variable_group_identifier = the_variable_group.first;
-		column_in_view_end.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
-		column_in_view_end.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
-
 		sql_generate_output += " FROM ";
 		sql_generate_output += vg_data_table_name;
 		sql_generate_output += " t1";
@@ -1228,6 +1194,47 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			return; // from lambda
 		}
 
+		char join_count_as_text_[1024];
+		std::string join_count_as_text = itoa(view_count, join_count_as_text_, 10);
+
+		std::string sql_update;
+		sql_update += "ALTER TABLE ";
+		sql_update += temp_dot;
+		sql_update += Table_VariableGroupData::ViewNameFromCount(view_count);
+		sql_update += " ADD COLUMN ";
+		sql_generate_output += "RANDOM() AS DATETIME_START_NEWGENE_INTERNAL_";
+		sql_generate_output += join_count_as_text;
+
+		if (!first_select)
+		{
+			sql_generate_output += ", ";
+		}
+		first_select = false;
+		sql_generate_output += "RANDOM() AS DATETIME_START_NEWGENE_INTERNAL_";
+		sql_generate_output += join_count_as_text;
+		sql_generate_output += ", ";
+		sql_generate_output += "RANDOM() AS DATETIME_END_NEWGENE_INTERNAL_";
+		sql_generate_output += join_count_as_text;
+
+		std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
+
+		columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+		ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_start = columns_in_view.back();
+		column_in_view_start.column_name = "DATETIME_START_NEWGENE_INTERNAL_";
+		column_in_view_start.column_name += join_count_as_text;
+		column_in_view_start.column_name_no_uuid = column_in_view_start.column_name;
+		column_in_view_start.variable_group_identifier = the_variable_group.first;
+		column_in_view_start.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
+		column_in_view_start.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
+
+		columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+		ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_end = columns_in_view.back();
+		column_in_view_end.column_name = "DATETIME_END_NEWGENE_INTERNAL_";
+		column_in_view_end.column_name += join_count_as_text;
+		column_in_view_end.column_name_no_uuid = column_in_view_end.column_name;
+		column_in_view_end.variable_group_identifier = the_variable_group.first;
+		column_in_view_end.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
+		column_in_view_end.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
 	});
 
 	int join_count = 0;
