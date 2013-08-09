@@ -1365,6 +1365,9 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				});
 			});
 
+			// Uncomment to full outer join child variable groups to parent variable groups
+			// ... this will include child rows even where there is no parent data
+			// (some modifications to the code may be necessary ... check through if this code is needed)
 #			if 0
 			sql_generate_output += " UNION ALL SELECT ";
 			sql_generate_output += Table_VariableGroupData::ViewNameFromCount(join_count);
