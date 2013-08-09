@@ -1146,16 +1146,16 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				sql_tmp_view += " ";
 				sql_tmp_view += Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m - 1);
 
-				sql_tmp_view += " ON ";
+				bool on_has_been_written = false;
 
 				ColumnsInViews::ColumnsInView & columns_in_temp_view_ = columnsInView.columns_in_temp_views.columns_in_temp_views_vector[m-2];
 				
 				bool and_required = false;
 				int the_primary_key_sequence_number = 0;
-				std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_tmp_view, &m, &the_primary_key_sequence_number, &and_required, &columns_in_temp_view_, &vg_data_table_name, &view_count, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
+				std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_tmp_view, &on_has_been_written, &m, &the_primary_key_sequence_number, &and_required, &columns_in_temp_view_, &vg_data_table_name, &view_count, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 				{
 					std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
-					std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_tmp_view, &m, &the_primary_key_sequence_number, &and_required, &columns_in_temp_view_, &vg_data_table_name, &view_count, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
+					std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_tmp_view, &on_has_been_written, &m, &the_primary_key_sequence_number, &and_required, &columns_in_temp_view_, &vg_data_table_name, &view_count, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 					{
 						if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
 						{
@@ -1164,6 +1164,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 								if (variable_group_primary_key_info.total_multiplicity == 1)
 								{
 									std::string vg_data_column_name = variable_group_primary_key_info.table_column_name;
+
+									if (!on_has_been_written)
+									{
+										sql_tmp_view += " ON ";
+									}
+									on_has_been_written = true;
 
 									if (and_required)
 									{
