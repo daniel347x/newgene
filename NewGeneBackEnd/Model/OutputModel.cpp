@@ -1953,7 +1953,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&a_single_subview, &the_primary_key_index, &view_count, &highest_multiplicity_to_use, &sql_generate_output, &the_most_recent_view, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 			{
 				std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
-				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&a_single_subview, &the_primary_key_index, &view_count, &highest_multiplicity_to_use, &sql_generate_output, &the_most_recent_view, &columnsInView, &first_select, &the_variable_group, &total_primary_key_sequence_entry, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
+				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&m, &a_single_subview, &the_primary_key_index, &view_count, &highest_multiplicity_to_use, &sql_generate_output, &the_most_recent_view, &columnsInView, &first_select, &the_variable_group, &total_primary_key_sequence_entry, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 				{
 					if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
 					{
