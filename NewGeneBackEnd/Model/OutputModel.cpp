@@ -1209,6 +1209,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			if (stmt_tmp == NULL)
 			{
 				// Todo: Error message
+				std::string error_msg = sqlite3_errmsg(db);
 				failed = true;
 				return;
 			}
@@ -1217,6 +1218,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			if ((step_result_tmp = sqlite3_step(stmt_tmp)) != SQLITE_DONE)
 			{
 				// Todo: Error message
+				std::string error_msg = sqlite3_errmsg(db);
 				failed = true;
 				return; // from lambda
 			}
@@ -1247,6 +1249,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				if (stmt_add_datetime_start == NULL)
 				{
 					// Todo: Error message
+					std::string error_msg = sqlite3_errmsg(db);
 					failed = true;
 					return;
 				}
@@ -1255,6 +1258,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				if ((step_result_add_datetime_start = sqlite3_step(stmt_add_datetime_start)) != SQLITE_DONE)
 				{
 					// Todo: Error message
+					std::string error_msg = sqlite3_errmsg(db);
 					failed = true;
 					return; // from lambda
 				}
@@ -1272,6 +1276,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				if (stmt_add_datetime_end == NULL)
 				{
 					// Todo: Error message
+					std::string error_msg = sqlite3_errmsg(db);
 					failed = true;
 					return;
 				}
@@ -1280,6 +1285,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				if ((step_result_add_datetime_end = sqlite3_step(stmt_add_datetime_end)) != SQLITE_DONE)
 				{
 					// Todo: Error message
+					std::string error_msg = sqlite3_errmsg(db);
 					failed = true;
 					return; // from lambda
 				}
@@ -1321,6 +1327,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			if (stmt_real_view == NULL)
 			{
 				// Todo: Error message
+				std::string error_msg = sqlite3_errmsg(db);
 				failed = true;
 				return;
 			}
@@ -1329,6 +1336,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			if ((step_result_real_view = sqlite3_step(stmt_real_view)) != SQLITE_DONE)
 			{
 				// Todo: Error message
+				std::string error_msg = sqlite3_errmsg(db);
 				failed = true;
 				return; // from lambda
 			}
@@ -1353,6 +1361,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				if (stmt_loop == NULL)
 				{
 					// Todo: Error message
+					std::string error_msg = sqlite3_errmsg(db);
 					failed = true;
 					return;
 				}
@@ -1422,6 +1431,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 									// currently, start and end columns must be contiguous
 									if (datetime_active || after_datetime)
 									{
+										std::string error_msg = sqlite3_errmsg(db);
 										failed = true;
 										return; // from lambda
 									}
@@ -1434,6 +1444,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 									// currently, start and end columns must be contiguous
 									if (!datetime_active || after_datetime)
 									{
+										std::string error_msg = sqlite3_errmsg(db);
 										failed = true;
 										return; // from lambda
 									}
@@ -1577,6 +1588,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							case SQLITE_BLOB:
 								{
 									// Todo: Error message
+									std::string error_msg = sqlite3_errmsg(db);
 									failed = true;
 									return; // from lambda
 								}
@@ -1608,6 +1620,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							default:
 								{
 									// Todo: Error message
+									std::string error_msg = sqlite3_errmsg(db);
 									failed = true;
 									return; // from lambda
 								}
@@ -2011,6 +2024,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				}
 				if (!variable_selected_in_this_group.code)
 				{
+					std::string error_msg = sqlite3_errmsg(db);
 					failed = true;
 					return; // from lambda
 				}
@@ -2073,6 +2087,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (stmt == NULL)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return;
 		}
@@ -2081,6 +2096,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return; // from lambda
 		}
@@ -2102,6 +2118,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (stmt_add_datetime_start_internal_column == NULL)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return;
 		}
@@ -2110,6 +2127,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if ((step_result_add_datetime_start_internal_column = sqlite3_step(stmt_add_datetime_start_internal_column)) != SQLITE_DONE)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return; // from lambda
 		}
@@ -2137,6 +2155,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (stmt_add_datetime_end_internal_column == NULL)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return;
 		}
@@ -2145,6 +2164,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if ((step_result_add_datetime_end_internal_column = sqlite3_step(stmt_add_datetime_end_internal_column)) != SQLITE_DONE)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return; // from lambda
 		}
@@ -2346,6 +2366,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (stmt == NULL)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return;
 		}
@@ -2354,6 +2375,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return; // from lambda
 		}
@@ -2373,6 +2395,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (stmt_select_output == NULL)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return; // from lambda
 		}
@@ -2398,6 +2421,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (stmt_create_timerange_table == NULL)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return; // from lambda
 		}
@@ -2405,6 +2429,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if ((step_result_create_table = sqlite3_step(stmt_create_timerange_table)) != SQLITE_DONE)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return; // from lambda
 		}
@@ -2602,6 +2627,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					case SQLITE_BLOB:
 						{
 							// Todo: Error message
+							std::string error_msg = sqlite3_errmsg(db);
 							failed = true;
 							return; // from lambda
 						}
@@ -2625,6 +2651,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					default:
 						{
 							// Todo: Error message
+							std::string error_msg = sqlite3_errmsg(db);
 							failed = true;
 							return; // from lambda
 						}
@@ -2767,6 +2794,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	if (stmt == NULL)
 	{
 		// Todo: Error message
+		std::string error_msg = sqlite3_errmsg(db);
 		failed = true;
 		return;
 	}
@@ -2796,6 +2824,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (stmt == NULL)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return;
 		}
@@ -2804,6 +2833,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return; // from lambda
 		}
@@ -2835,6 +2865,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if (stmt == NULL)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return;
 		}
@@ -2843,6 +2874,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
 		{
 			// Todo: Error message
+			std::string error_msg = sqlite3_errmsg(db);
 			failed = true;
 			return; // from lambda
 		}
