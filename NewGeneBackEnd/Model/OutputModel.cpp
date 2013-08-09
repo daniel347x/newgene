@@ -1901,7 +1901,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				{
 					if (!variable_group_primary_key_info.column_name.empty())
 					{
-						if (variable_group_primary_key_info.current_multiplicity == 1)
+						if (variable_group_primary_key_info.total_multiplicity == 1)
 						{
 							if (!first_select)
 							{
@@ -1959,7 +1959,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					{
 						if (!variable_group_primary_key_info.column_name.empty())
 						{
-							if (variable_group_primary_key_info.current_multiplicity > 1)
+							if (variable_group_primary_key_info.total_multiplicity > 1)
 							{
 								if (!first_select)
 								{
