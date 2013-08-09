@@ -932,6 +932,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 
 
+			// Date-time columns
 
 			bool first_select = true;
 			if (current_uoa_identifier.time_granularity != 0)
@@ -1018,6 +1019,15 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					{
 						if (!variable_group_primary_key_info.column_name.empty())
 						{
+
+							if (variable_group_primary_key_info.total_multiplicity > 1)
+							{
+								if (variable_group_primary_key_info.current_multiplicity != m)
+								{
+									// Only one primary key field per DMU in the UOA here
+									return; // from lambda
+								}
+							}
 
 							std::string name_column_temp_view;
 							name_column_temp_view += variable_group_primary_key_info.column_name;
