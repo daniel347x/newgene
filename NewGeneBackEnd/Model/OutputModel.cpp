@@ -1961,32 +1961,35 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						{
 							if (variable_group_primary_key_info.total_multiplicity > 1)
 							{
-								if (!first_select)
+								if (variable_group_primary_key_info.current_multiplicity == m)
 								{
-									sql_generate_output += ", ";
+									if (!first_select)
+									{
+										sql_generate_output += ", ";
+									}
+									first_select = false;
+									sql_generate_output += Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, highest_multiplicity_to_use);
+									sql_generate_output += ".";
+									sql_generate_output += a_single_subview.primary_key_names_in_sub_view[the_primary_key_index];
+									sql_generate_output += " AS ";
+									sql_generate_output += variable_group_primary_key_info.column_name;
+
+									std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
+
+									columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+									ColumnsInViews::ColumnsInView::ColumnInView & column_in_view = columns_in_view.back();
+									column_in_view.column_name = variable_group_primary_key_info.column_name;
+									column_in_view.column_name_no_uuid = variable_group_primary_key_info.column_name_no_uuid;
+									column_in_view.table_column_name = variable_group_primary_key_info.table_column_name;
+									column_in_view.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
+									column_in_view.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
+									column_in_view.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__PRIMARY;
+									column_in_view.primary_key_dmu_category_identifier = total_primary_key_sequence_entry.dmu_category;
+									column_in_view.primary_key_index_within_total_kad_for_dmu_category = total_primary_key_sequence_entry.sequence_number_within_dmu_category_spin_control;
+									column_in_view.primary_key_index_within_total_kad_for_all_dmu_categories = total_primary_key_sequence_entry.sequence_number_in_all_primary_keys;
+									column_in_view.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = variable_group_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa;
+									column_in_view.primary_key_index_within_primary_uoa_for_dmu_category = total_primary_key_sequence_entry.sequence_number_within_dmu_category_primary_uoa;
 								}
-								first_select = false;
-								sql_generate_output += Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, highest_multiplicity_to_use);
-								sql_generate_output += ".";
-								sql_generate_output += a_single_subview.primary_key_names_in_sub_view[the_primary_key_index];
-								sql_generate_output += " AS ";
-								sql_generate_output += variable_group_primary_key_info.column_name;
-
-								std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
-
-								columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
-								ColumnsInViews::ColumnsInView::ColumnInView & column_in_view = columns_in_view.back();
-								column_in_view.column_name = variable_group_primary_key_info.column_name;
-								column_in_view.column_name_no_uuid = variable_group_primary_key_info.column_name_no_uuid;
-								column_in_view.table_column_name = variable_group_primary_key_info.table_column_name;
-								column_in_view.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
-								column_in_view.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
-								column_in_view.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__PRIMARY;
-								column_in_view.primary_key_dmu_category_identifier = total_primary_key_sequence_entry.dmu_category;
-								column_in_view.primary_key_index_within_total_kad_for_dmu_category = total_primary_key_sequence_entry.sequence_number_within_dmu_category_spin_control;
-								column_in_view.primary_key_index_within_total_kad_for_all_dmu_categories = total_primary_key_sequence_entry.sequence_number_in_all_primary_keys;
-								column_in_view.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = variable_group_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa;
-								column_in_view.primary_key_index_within_primary_uoa_for_dmu_category = total_primary_key_sequence_entry.sequence_number_within_dmu_category_primary_uoa;
 							}
 
 							++the_primary_key_index;
