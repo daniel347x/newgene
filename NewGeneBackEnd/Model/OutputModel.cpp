@@ -1957,7 +1957,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		for (int m=1; m<=highest_multiplicity_to_use; ++m)
 		{
 
-			std::string current_table_token = CurrentTableTokenName(m);
+			std::string current_table_token = Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, highest_multiplicity_to_use);
 			char ns__[64];
 			std::string ms__ = itoa(m, ns__, 10);
 
