@@ -1329,6 +1329,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				if (stmt_loop == NULL)
 				{
 					// Todo: Error message
+					failed = true;
 					return;
 				}
 
@@ -2723,6 +2724,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 	if (stmt == NULL)
 	{
 		// Todo: Error message
+		failed = true;
 		return;
 	}
 
