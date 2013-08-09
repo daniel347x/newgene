@@ -112,7 +112,12 @@ class ColumnsInViews
 			public:
 
 				// Only used by sub-views
-				std::vector<std::string> primary_key_of_multiplicity_one_in_sub_view_names;
+				std::vector<std::string> primary_key_names_in_sub_view;
+				std::vector<std::string> secondary_key_names_in_sub_view;
+				std::vector<std::string> primary_key_names_in_sub_view_no_uuid;
+				std::vector<std::string> secondary_key_names_in_sub_view_no_uuid;
+				std::string datetime_start_column_name;
+				std::string datetime_end_column_name;
 
 				class ColumnInView
 				{
