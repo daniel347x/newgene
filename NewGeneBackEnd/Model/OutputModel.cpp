@@ -1775,70 +1775,50 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		sql_generate_output += Table_VariableGroupData::ViewNameFromCount(view_count);
 		sql_generate_output += " AS SELECT ";
 
-		bool first_select = true;
-		if (current_uoa_identifier.time_granularity != 0)
-		{
-			// The current variable group being joined into the full set of data
-			// has a time range granularity associated with it
+		ColumnsInViews::ColumnsInView & the_most_recent_view = columns_in_temp_views[highest_multiplicity_to_use];
 
-			// At least one of the primary keys has this variable group active, so use that to get the date-time column names
-			// ... just break out of loop once we have it
-			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &columns_in_temp_views, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
-			{
-				if (first_select == false)
-				{
-					// We already have the information we need
-					return; // from lambda
-				}
-				std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
-				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &columns_in_temp_views, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
-				{
-					if (first_select == false)
-					{
-						// We already have the information we need
-						return; // from lambda
-					}
-					if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
-					{
-						if (!variable_group_primary_key_info.column_name.empty())
-						{
-							first_select = false;
-							sql_generate_output += variable_group_primary_key_info.view_table_name; // "t1, "t2", etc.
-							sql_generate_output += ".";
-							sql_generate_output += variable_group_primary_key_info.datetime_row_start_table_column_name;
-							sql_generate_output += " AS ";
-							sql_generate_output += variable_group_primary_key_info.datetime_row_start_column_name;
-							sql_generate_output += ", ";
-							sql_generate_output += variable_group_primary_key_info.view_table_name;
-							sql_generate_output += ".";
-							sql_generate_output += variable_group_primary_key_info.datetime_row_end_table_column_name;
-							sql_generate_output += " AS ";
-							sql_generate_output += variable_group_primary_key_info.datetime_row_end_column_name;
 
-							std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
+		// The first two columns in the main View tables are the time range columns.
+		// These correspond to the time range columns added by the LAST variable group that was added to a subview,
+		// which is the LAST subview that was created (this subview also contains ALL columns
+		// appended to all previous subviews).
+		//
+		// Note that the ColumnsInView objects only contain the columns APPENDED by the variable group
+		// that triggered the creation of the subview, even though the subview contains all previously appended
+		// columns as well.
 
-							columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
-							ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_datetime_start = columns_in_view.back();
-							column_in_view_datetime_start.column_name = variable_group_primary_key_info.datetime_row_start_column_name;
-							column_in_view_datetime_start.column_name_no_uuid = variable_group_primary_key_info.datetime_row_start_column_name_no_uuid;
-							column_in_view_datetime_start.table_column_name = variable_group_primary_key_info.datetime_row_start_table_column_name;
-							column_in_view_datetime_start.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
-							column_in_view_datetime_start.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
-							column_in_view_datetime_start.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART;
+		bool first_select = false;
+		sql_generate_output += variable_group_primary_key_info.view_table_name; // "t1, "t2", etc.
+		sql_generate_output += ".";
+		sql_generate_output += variable_group_primary_key_info.datetime_row_start_table_column_name;
+		sql_generate_output += " AS ";
+		sql_generate_output += variable_group_primary_key_info.datetime_row_start_column_name;
+		sql_generate_output += ", ";
+		sql_generate_output += variable_group_primary_key_info.view_table_name;
+		sql_generate_output += ".";
+		sql_generate_output += variable_group_primary_key_info.datetime_row_end_table_column_name;
+		sql_generate_output += " AS ";
+		sql_generate_output += variable_group_primary_key_info.datetime_row_end_column_name;
 
-							columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
-							ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_datetime_end = columns_in_view.back();
-							column_in_view_datetime_end.column_name = variable_group_primary_key_info.datetime_row_end_column_name;
-							column_in_view_datetime_end.column_name_no_uuid = variable_group_primary_key_info.datetime_row_end_column_name_no_uuid;
-							column_in_view_datetime_end.table_column_name = variable_group_primary_key_info.datetime_row_end_table_column_name;
-							column_in_view_datetime_end.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
-							column_in_view_datetime_end.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
-							column_in_view_datetime_end.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND;
-						}
-					}
-				});
-			});
-		}
+		std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
+
+		columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+		ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_datetime_start = columns_in_view.back();
+		column_in_view_datetime_start.column_name = variable_group_primary_key_info.datetime_row_start_column_name;
+		column_in_view_datetime_start.column_name_no_uuid = variable_group_primary_key_info.datetime_row_start_column_name_no_uuid;
+		column_in_view_datetime_start.table_column_name = variable_group_primary_key_info.datetime_row_start_table_column_name;
+		column_in_view_datetime_start.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
+		column_in_view_datetime_start.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
+		column_in_view_datetime_start.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART;
+
+		columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+		ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_datetime_end = columns_in_view.back();
+		column_in_view_datetime_end.column_name = variable_group_primary_key_info.datetime_row_end_column_name;
+		column_in_view_datetime_end.column_name_no_uuid = variable_group_primary_key_info.datetime_row_end_column_name_no_uuid;
+		column_in_view_datetime_end.table_column_name = variable_group_primary_key_info.datetime_row_end_table_column_name;
+		column_in_view_datetime_end.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
+		column_in_view_datetime_end.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
+		column_in_view_datetime_end.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND;
 
 		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 		{
