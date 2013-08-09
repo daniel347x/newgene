@@ -1067,7 +1067,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			// Display all variables selected by user
 			// ************************************************* //
 			int secondary_key_index = 0;
-			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &columns_in_temp_view, &secondary_key_index, &columns_in_temp_view_vector, &vg_data_table_name, &ns, &m, &sql_tmp_view, &the_variable_group, &highest_multiplicity_to_use, &current_uoa_identifier, &first_select, &ms__, &this_variable_group__primary_key_names__uuid_stripped, &this_variable_group__secondary_key_names, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
+			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &columns_in_temp_view, &secondary_key_index, &columns_in_temp_view_vector, &vg_data_table_name, &ns, &m, &sql_tmp_view, &the_variable_group, &highest_multiplicity_to_use, &current_uoa_identifier, &first_select, &this_variable_group__primary_key_names__uuid_stripped, &this_variable_group__secondary_key_names, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
 			{
 			
 				if (failed)
@@ -1605,7 +1605,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						});
 					}
 
-					std::string join_table_with_time_ranges_name = Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m);;
+					std::string temp_view_table_with_time_ranges_name = Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m);;
 					
 					bool continue_ = true;
 
@@ -1617,12 +1617,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							if (datetime_start_previous == 0 && datetime_end_previous == 0)
 							{
 								// No time ranges yet.  Just add the current input row, as-is, with 0 and 0 as indicators of this
-								failed = AddTimeRangeMergedRowTemp(false, false, db, 0, 0, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_count_as_text, join_table_with_time_ranges_name);
+								failed = AddTimeRangeMergedRowTemp(false, false, db, 0, 0, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 								continue_ = false;
 							}
 							else if (datetime_end_previous > datetime_start_previous)
 							{
-								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_count_as_text, join_table_with_time_ranges_name);
+								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 								continue_ = false;
 							}
 							continue_ = false;
@@ -1632,7 +1632,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							// The equality case is handled above
 							if (datetime_end_current > datetime_start_current)
 							{
-								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_count_as_text, join_table_with_time_ranges_name);
+								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 								continue_ = false;
 							}
 							continue_ = false;
@@ -1648,7 +1648,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						else
 						{
 							// Add a row from the start of the previous, to the end of the previous
-							failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+							failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 							//if (failed) continue;
 
 							continue_ = false;
@@ -1658,7 +1658,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					if (continue_ && datetime_end_previous <= datetime_start_previous)
 					{
 						// Add a row from the start of the current, to the end of the current
-						failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 						//if (failed) continue;
 
 						continue_ = false;
@@ -1667,7 +1667,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					if (continue_ && datetime_start_current == 0 && datetime_end_current == 0 && datetime_start_previous == 0 && datetime_end_previous == 0)
 					{
 						// No time ranges yet.  Just add the current input row, as-is, with 0 and 0 as indicators of this
-						failed = AddTimeRangeMergedRowTemp(false, false, db, 0, 0, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_count_as_text, join_table_with_time_ranges_name);
+						failed = AddTimeRangeMergedRowTemp(false, false, db, 0, 0, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 						continue_ = false;
 					}
 					else
@@ -1677,7 +1677,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							// Previous time range exists, but new does not.
 							// There can be only one new row per previous row.
 							// Add current row as-is, bringing the previous time range over to the new.
-							failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+							failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 							continue_ = false;
 						}
 						else if (continue_ && datetime_start_previous == 0 && datetime_end_previous == 0)
@@ -1686,7 +1686,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							// but new time range does exist.
 							// There can be only one previous row per new row (if there are previous rows).
 							// Add current row as-is, using the current time range.
-							failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+							failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 							continue_ = false;
 						}
 						else
@@ -1700,17 +1700,17 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 								if (datetime_end_current >= datetime_start_previous)
 								{
 									// Add a row from the start of the current, to the start of the previous
-									failed = AddTimeRangeMergedRowTemp(true, false, db, datetime_start_current, datetime_start_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+									failed = AddTimeRangeMergedRowTemp(true, false, db, datetime_start_current, datetime_start_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 									//if (failed) continue;
 								}
 								else
 								{
 									// Add a row from the start of the previous, to the end of the previous
-									failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+									failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 									//if (failed) continue;
 
 									// Add a row from the start of the current, to the end of the current
-									failed = AddTimeRangeMergedRowTemp(true, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+									failed = AddTimeRangeMergedRowTemp(true, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 									//if (failed) continue;
 
 									continue_ = false;
@@ -1727,21 +1727,21 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							if (continue_ && datetime_end_current >= datetime_end_previous)
 							{
 								// Add a row from the start of the current, to the end of the previous
-								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 								//if (failed) continue;
 
 								// Add a row from the end of the previous, to the end of the current
-								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_end_previous, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_end_previous, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 								//if (failed) continue;
 							}
 							else if (continue_)
 							{
 								// Add a row from the start of the current, to the end of the current
-								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 								//if (failed) continue;
 
 								// ... then from the end of the current, to the end of the previous, and we're done
-								failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_end_current, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+								failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_end_current, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, temp_view_table_with_time_ranges_name);
 								//if (failed) continue;
 							}
 						
@@ -2008,7 +2008,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				column_in_view.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
 				column_in_view.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__SECONDARY;
 
-				++the_secondary_key_index
+				++the_secondary_key_index;
 
 			});
 
@@ -2043,8 +2043,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 		char join_count_as_text_[1024];
 		std::string join_count_as_text = itoa(view_count, join_count_as_text_, 10);
-
-		std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
 
 		std::string sql_update_add_datetime_start_internal_column;
 		sql_update_add_datetime_start_internal_column += "ALTER TABLE ";
