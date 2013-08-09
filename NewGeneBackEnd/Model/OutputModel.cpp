@@ -914,6 +914,14 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		for (int m=1; m<=highest_multiplicity_to_use; ++m)
 		{
 
+			std::string sql_tmp_view;
+			sql_tmp_view += "CREATE TABLE ";
+			sql_tmp_view += temp_dot;
+			sql_tmp_view += Table_VariableGroupData::ViewNameFromCountTemp(view_count, m);
+			sql_tmp_view += " AS SELECT ";
+
+
+
 			std::string ns = itoa(m, ns_, 10);
 
 			columns_in_temp_views.push_back(ColumnsInViews::ColumnsInView());
@@ -921,13 +929,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			columns_in_temp_view.view_number = m;
 			columns_in_temp_view.view_name = Table_VariableGroupData::ViewNameFromCountTemp(view_count, m);
 			std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_temp_view_vector = columns_in_temp_view.columns_in_view;
-
-			std::string sql_tmp_view;
-			sql_tmp_view += "CREATE TABLE ";
-			sql_tmp_view += temp_dot;
-			sql_tmp_view += Table_VariableGroupData::ViewNameFromCountTemp(view_count, m);
-			sql_tmp_view += " AS SELECT ";
-
 
 
 
@@ -1005,41 +1006,55 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				});
 			}
 
-			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
+			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_tmp_view, &ns, &m, &columns_in_temp_view_vector, &columns_in_temp_view, &vg_data_table_name, &view_count, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 			{
 				std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
-				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &columnsInView, &first_select, &the_variable_group, &total_primary_key_sequence_entry, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
+				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_tmp_view, &ns, &m, &columns_in_temp_view_vector, &columns_in_temp_view, &vg_data_table_name, &view_count, &first_select, &the_variable_group, &total_primary_key_sequence_entry, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 				{
 					if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
 					{
 						if (!variable_group_primary_key_info.column_name.empty())
 						{
-							if (!first_select)
+
+							if (variable_group_primary_key_info.current_multiplicity == 1)
 							{
-								sql_generate_output += ", ";
+								std::string name_column_temp_view;
+								name_column_temp_view += variable_group_primary_key_info.column_name;
+								name_column_temp_view += "_";
+								name_column_temp_view += ns;
+
+								if (!first_select)
+								{
+									sql_tmp_view += ", ";
+								}
+								first_select = false;
+								sql_tmp_view += vg_data_table_name;
+								sql_tmp_view += ".";
+								sql_tmp_view += variable_group_primary_key_info.table_column_name;
+								sql_tmp_view += " AS ";
+								sql_tmp_view += name_column_temp_view;
+
+								columns_in_temp_view_vector.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+								ColumnsInViews::ColumnsInView::ColumnInView & column_in_view = columns_in_temp_view_vector.back();
+								column_in_view.column_name = name_column_temp_view;
+								column_in_view.column_name_no_uuid = variable_group_primary_key_info.column_name_no_uuid;
+								column_in_view.table_column_name = variable_group_primary_key_info.table_column_name;
+								column_in_view.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
+								column_in_view.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
+								column_in_view.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__PRIMARY;
+								column_in_view.primary_key_dmu_category_identifier = total_primary_key_sequence_entry.dmu_category;
+								column_in_view.primary_key_index_within_total_kad_for_dmu_category = total_primary_key_sequence_entry.sequence_number_within_dmu_category_spin_control;
+								column_in_view.primary_key_index_within_total_kad_for_all_dmu_categories = total_primary_key_sequence_entry.sequence_number_in_all_primary_keys;
+								column_in_view.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = variable_group_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa;
+								column_in_view.primary_key_index_within_primary_uoa_for_dmu_category = total_primary_key_sequence_entry.sequence_number_within_dmu_category_primary_uoa;
+
+								columns_in_temp_view.primary_key_of_multiplicity_one_in_sub_view_names.push_back(name_column_temp_view);
 							}
-							first_select = false;
-							sql_generate_output += variable_group_primary_key_info.view_table_name;
-							sql_generate_output += ".";
-							sql_generate_output += variable_group_primary_key_info.table_column_name;
-							sql_generate_output += " AS ";
-							sql_generate_output += variable_group_primary_key_info.column_name;
+							else
+							{
+								columns_in_temp_view.primary_key_of_multiplicity_one_in_sub_view_names.push_back("");
+							}
 
-							std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
-
-							columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
-							ColumnsInViews::ColumnsInView::ColumnInView & column_in_view = columns_in_view.back();
-							column_in_view.column_name = variable_group_primary_key_info.column_name;
-							column_in_view.column_name_no_uuid = variable_group_primary_key_info.column_name_no_uuid;
-							column_in_view.table_column_name = variable_group_primary_key_info.table_column_name;
-							column_in_view.variable_group_identifier = variable_group_primary_key_info.vg_identifier;
-							column_in_view.uoa_associated_with_variable_group_identifier = *variable_group_primary_key_info.vg_identifier.identifier_parent;
-							column_in_view.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__PRIMARY;
-							column_in_view.primary_key_dmu_category_identifier = total_primary_key_sequence_entry.dmu_category;
-							column_in_view.primary_key_index_within_total_kad_for_dmu_category = total_primary_key_sequence_entry.sequence_number_within_dmu_category_spin_control;
-							column_in_view.primary_key_index_within_total_kad_for_all_dmu_categories = total_primary_key_sequence_entry.sequence_number_in_all_primary_keys;
-							column_in_view.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = variable_group_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa;
-							column_in_view.primary_key_index_within_primary_uoa_for_dmu_category = total_primary_key_sequence_entry.sequence_number_within_dmu_category_primary_uoa;
 						}
 					}
 				});
@@ -1054,67 +1069,52 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			// ************************************************* //
 			// Display all variables selected by user
 			// ************************************************* //
-			for (int m=1; m<=highest_multiplicity_to_use; ++m)
+			std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &columns_in_temp_view_vector, &vg_data_table_name, &ns, &m, &sql_tmp_view, &the_variable_group, &highest_multiplicity_to_use, &current_uoa_identifier, &first_select, &ms__, &this_variable_group__primary_key_names__uuid_stripped, &this_variable_group__secondary_key_names, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
 			{
-
-				std::string current_table_token = CurrentTableTokenName(m);
-				char ns__[64];
-				std::string ms__ = itoa(m, ns__, 10);
-
-				std::for_each(variables_selected_in_this_group.cbegin(), variables_selected_in_this_group.cend(), [this, &columnsInView, &the_variable_group, &highest_multiplicity_to_use, &current_uoa_identifier, &first_select, &sql_generate_output, &current_table_token, &ms__, &this_variable_group__primary_key_names__uuid_stripped, &this_variable_group__secondary_key_names, &child_uoas__which_multiplicity_is_greater_than_1, &failed](WidgetInstanceIdentifier const & variable_selected_in_this_group)
+				if (failed)
 				{
-					if (failed)
-					{
-						// Todo: Error message
-						return; // from lambda
-					}
-					if (!variable_selected_in_this_group.code)
-					{
-						failed = true;
-						return; // from lambda
-					}
+					// Todo: Error message
+					return; // from lambda
+				}
 
-					std::string this_variable_group_secondary_key_name;
-					this_variable_group_secondary_key_name += *variable_selected_in_this_group.code;
+				if (!variable_selected_in_this_group.code)
+				{
+					failed = true;
+					return; // from lambda
+				}
 
-					if (highest_multiplicity_to_use > 1)
-					{
-						this_variable_group_secondary_key_name += "_";
-						this_variable_group_secondary_key_name += ms__;
-					}
+				std::string this_variable_group_secondary_key_name;
+				this_variable_group_secondary_key_name += *variable_selected_in_this_group.code;
 
-					std::string saved_secondary_key_name_no_uuid = this_variable_group_secondary_key_name;
+				this_variable_group_secondary_key_name += "_tmp";
+				this_variable_group_secondary_key_name += ns;
 
-					this_variable_group_secondary_key_name += "_";
-					this_variable_group_secondary_key_name += newUUID(true);
+				std::string saved_secondary_key_name_no_uuid = this_variable_group_secondary_key_name;
 
-					this_variable_group__secondary_key_names.push_back(this_variable_group_secondary_key_name);
+				this_variable_group_secondary_key_name += "_";
+				this_variable_group_secondary_key_name += newUUID(true);
 
-					if (!first_select)
-					{
-						sql_generate_output += ", ";
-					}
-					first_select = false;
+				if (!first_select)
+				{
+					sql_tmp_view += ", ";
+				}
+				first_select = false;
 
-					sql_generate_output += current_table_token;
-					sql_generate_output += ".";
-					sql_generate_output += *variable_selected_in_this_group.code;
-					sql_generate_output += " AS ";
-					sql_generate_output += this_variable_group_secondary_key_name;
+				sql_tmp_view += vg_data_table_name;
+				sql_tmp_view += ".";
+				sql_tmp_view += *variable_selected_in_this_group.code;
+				sql_tmp_view += " AS ";
+				sql_tmp_view += this_variable_group_secondary_key_name;
 
-					std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_view = columnsInView.columns_in_view;
-
-					columns_in_view.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
-					ColumnsInViews::ColumnsInView::ColumnInView & column_in_view = columns_in_view.back();
-					column_in_view.column_name = this_variable_group_secondary_key_name;
-					column_in_view.column_name_no_uuid = saved_secondary_key_name_no_uuid;
-					column_in_view.table_column_name = *variable_selected_in_this_group.code;
-					column_in_view.variable_group_identifier = the_variable_group.first;
-					column_in_view.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
-					column_in_view.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__SECONDARY;
-				});
-
-			}
+				columns_in_temp_view_vector.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+				ColumnsInViews::ColumnsInView::ColumnInView & column_in_view = columns_in_temp_view_vector.back();
+				column_in_view.column_name = this_variable_group_secondary_key_name;
+				column_in_view.column_name_no_uuid = saved_secondary_key_name_no_uuid;
+				column_in_view.table_column_name = *variable_selected_in_this_group.code;
+				column_in_view.variable_group_identifier = the_variable_group.first;
+				column_in_view.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
+				column_in_view.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__SECONDARY;
+			});
 
 			if (failed)
 			{
@@ -1122,18 +1122,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				return;
 			}
 
-
-			sql_tmp_view += vg_data_table_name;
-			sql_tmp_view += ".*";
-
-
 			if (m > 1)
 			{
 				sql_tmp_view += ", ";
-				sql_tmp_view += Table_VariableGroupData::ViewNameFromCount(view_count);
+				sql_tmp_view += Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m - 1);
 				sql_tmp_view += ".*";
 			}
-
 
 			sql_tmp_view += " FROM ";
 			sql_tmp_view += vg_data_table_name;
@@ -1141,19 +1135,22 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			sql_tmp_view += vg_data_table_name;
 			if (m > 1)
 			{
-				sql_tmp_view += ", ";
+				sql_tmp_view += " INNER JOIN ";
 				sql_tmp_view += temp_dot;
-				sql_tmp_view += Table_VariableGroupData::ViewNameFromCount(view_count);
+				sql_tmp_view += Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m - 1);
 				sql_tmp_view += " ";
-				sql_tmp_view += Table_VariableGroupData::ViewNameFromCount(view_count);
+				sql_tmp_view += Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m - 1);
 
-				sql_tmp_view += " WHERE ";
+				sql_tmp_view += " ON ";
 
+				ColumnsInViews::ColumnsInView & columns_in_temp_view_ = columnsInView.columns_in_temp_views.columns_in_temp_views_vector[m-2];
+				
 				bool and_required = false;
-				std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_tmp_view, &and_required, &vg_data_table_name, &view_count, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
+				int the_primary_key_sequence_number = 0;
+				std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_tmp_view, &m, &the_primary_key_sequence_number, &and_required, &columns_in_temp_view_, &vg_data_table_name, &view_count, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 				{
 					std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
-					std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_tmp_view, &and_required, &vg_data_table_name, &view_count, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
+					std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_tmp_view, &m, &the_primary_key_sequence_number, &and_required, &columns_in_temp_view_, &vg_data_table_name, &view_count, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 					{
 						if (variable_group_primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))		
 						{
@@ -1173,13 +1170,14 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 									sql_tmp_view += ".";
 									sql_tmp_view += vg_data_column_name;
 									sql_tmp_view += " = ";
-									sql_tmp_view += Table_VariableGroupData::ViewNameFromCount(view_count);
+									sql_tmp_view += Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m - 1);
 									sql_tmp_view += ".";
-									sql_tmp_view += vg_data_column_name; // Creating VIEW views, not JOIN views, so it's a self-join; column names are the same
+									sql_tmp_view += columns_in_temp_view_.primary_key_of_multiplicity_one_in_sub_view_names[the_primary_key_sequence_number];
 								}
 							}
 						}
 					});
+					++the_primary_key_sequence_number;
 				});
 			}
 
@@ -1198,6 +1196,37 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				// Todo: Error message
 				failed = true;
 				return; // from lambda
+			}
+
+			if (m == 1)
+			{
+				std::string sql_create_real_view;
+				sql_create_real_view += "CREATE TABLE ";
+				sql_create_real_view += temp_dot;
+				sql_create_real_view += Table_VariableGroupData::ViewNameFromCount(view_count);
+				sql_create_real_view += " AS SELECT * FROM ";
+				sql_create_real_view += Table_VariableGroupData::ViewNameFromCountTemp(view_count, m);
+
+				sqlite3_stmt * stmt_real_view = NULL;
+				sqlite3_prepare_v2(db, sql_create_real_view.c_str(), sql_create_real_view.size() + 1, &stmt_real_view, NULL);
+				if (stmt_real_view == NULL)
+				{
+					// Todo: Error message
+					failed = true;
+					return;
+				}
+
+				int step_result_real_view = 0;
+				if ((step_result_real_view = sqlite3_step(stmt_real_view)) != SQLITE_DONE)
+				{
+					// Todo: Error message
+					failed = true;
+					return; // from lambda
+				}
+			}
+			else
+			{
+
 			}
 		}
 

@@ -110,6 +110,9 @@ class ColumnsInViews
 
 			public:
 
+				// Only used by sub-views
+				std::vector<std::string> primary_key_of_multiplicity_one_in_sub_view_names;
+
 				class ColumnInView
 				{
 
