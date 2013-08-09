@@ -1025,6 +1025,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 								if (variable_group_primary_key_info.current_multiplicity != m)
 								{
 									// Only one primary key field per DMU in the UOA here
+									columns_in_temp_view.primary_key_names_in_sub_view.push_back("");
+									columns_in_temp_view.primary_key_names_in_sub_view_no_uuid.push_back("");
 									return; // from lambda
 								}
 							}
