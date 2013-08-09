@@ -158,6 +158,18 @@ class ColumnsInViews
 
 				std::vector<ColumnInView> columns_in_view;
 				int view_number;
+				std::string view_name;
+
+				class ColumnsInTempViews
+				{
+
+					public:
+
+						std::vector<ColumnsInView> columns_in_temp_views_vector;
+
+				};
+
+				ColumnsInTempViews columns_in_temp_views;
 
 		};
 
