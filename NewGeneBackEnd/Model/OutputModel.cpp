@@ -1456,8 +1456,8 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 									{
 										if (overall_column_number_input_previous > 0)
 										{
-											sql_values_before_datetime += ", ";
-											sql_values_before_datetime_null += ", ";
+											sql_values_previous += ", ";
+											sql_values_previous_null += ", ";
 										}
 									}
 								}
