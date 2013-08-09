@@ -1431,7 +1431,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 									// currently, start and end columns must be contiguous
 									if (datetime_active || after_datetime)
 									{
-										std::string error_msg = sqlite3_errmsg(db);
 										failed = true;
 										return; // from lambda
 									}
@@ -1444,7 +1443,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 									// currently, start and end columns must be contiguous
 									if (!datetime_active || after_datetime)
 									{
-										std::string error_msg = sqlite3_errmsg(db);
 										failed = true;
 										return; // from lambda
 									}
@@ -1588,7 +1586,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							case SQLITE_BLOB:
 								{
 									// Todo: Error message
-									std::string error_msg = sqlite3_errmsg(db);
 									failed = true;
 									return; // from lambda
 								}
@@ -1620,7 +1617,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							default:
 								{
 									// Todo: Error message
-									std::string error_msg = sqlite3_errmsg(db);
 									failed = true;
 									return; // from lambda
 								}
@@ -2024,7 +2020,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				}
 				if (!variable_selected_in_this_group.code)
 				{
-					std::string error_msg = sqlite3_errmsg(db);
 					failed = true;
 					return; // from lambda
 				}
@@ -2627,7 +2622,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					case SQLITE_BLOB:
 						{
 							// Todo: Error message
-							std::string error_msg = sqlite3_errmsg(db);
 							failed = true;
 							return; // from lambda
 						}
@@ -2651,7 +2645,6 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					default:
 						{
 							// Todo: Error message
-							std::string error_msg = sqlite3_errmsg(db);
 							failed = true;
 							return; // from lambda
 						}
