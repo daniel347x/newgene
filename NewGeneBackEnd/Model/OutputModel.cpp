@@ -962,12 +962,12 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 							{
 								std::string datetime_start_col_name;
 								datetime_start_col_name += variable_group_primary_key_info.datetime_row_start_column_name;
-								datetime_start_col_name += "_";
+								datetime_start_col_name += "__";
 								datetime_start_col_name += ns;
 
 								std::string datetime_end_col_name;
 								datetime_end_col_name += variable_group_primary_key_info.datetime_row_end_column_name;
-								datetime_end_col_name += "_";
+								datetime_end_col_name += "__";
 								datetime_end_col_name += ns;
 
 								first_select = false;
@@ -1198,6 +1198,87 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				return; // from lambda
 			}
 
+
+			if (current_uoa_identifier.time_granularity == 0)
+			{
+				// Time granularity is 0.  Special case: set time range columns to 0, 0
+				std::string datetime_start_col_name;
+				datetime_start_col_name += "DATETIME_ROW_START";
+				datetime_start_col_name += "__";
+				datetime_start_col_name += ns;
+
+				std::string datetime_end_col_name;
+				datetime_end_col_name += "DATETIME_ROW_START";
+				datetime_end_col_name += "__";
+				datetime_end_col_name += ns;
+
+				std::string sql_add_datetime_start;
+				sql_add_datetime_start += "ALTER TABLE ";
+				sql_add_datetime_start += Table_VariableGroupData::ViewNameFromCountTemp(view_count, m);
+				sql_add_datetime_start += " ADD COLUMN ";
+				sql_add_datetime_start += datetime_start_col_name;
+				sql_add_datetime_start += " INTEGER DEFAULT 0";
+
+				sqlite3_stmt * stmt_add_datetime_start = NULL;
+				sqlite3_prepare_v2(db, sql_add_datetime_start.c_str(), sql_add_datetime_start.size() + 1, &stmt_add_datetime_start, NULL);
+				if (stmt_add_datetime_start == NULL)
+				{
+					// Todo: Error message
+					failed = true;
+					return;
+				}
+
+				int step_result_add_datetime_start = 0;
+				if ((step_result_add_datetime_start = sqlite3_step(stmt_add_datetime_start)) != SQLITE_DONE)
+				{
+					// Todo: Error message
+					failed = true;
+					return; // from lambda
+				}
+
+
+				std::string sql_add_datetime_end;
+				sql_add_datetime_end += "ALTER TABLE ";
+				sql_add_datetime_end += Table_VariableGroupData::ViewNameFromCountTemp(view_count, m);
+				sql_add_datetime_end += " ADD COLUMN ";
+				sql_add_datetime_end += datetime_end_col_name;
+				sql_add_datetime_end += " INTEGER DEFAULT 0";
+
+				sqlite3_stmt * stmt_add_datetime_end = NULL;
+				sqlite3_prepare_v2(db, sql_add_datetime_end.c_str(), sql_add_datetime_end.size() + 1, &stmt_add_datetime_end, NULL);
+				if (stmt_add_datetime_end == NULL)
+				{
+					// Todo: Error message
+					failed = true;
+					return;
+				}
+
+				int step_result_add_datetime_end = 0;
+				if ((step_result_add_datetime_end = sqlite3_step(stmt_add_datetime_end)) != SQLITE_DONE)
+				{
+					// Todo: Error message
+					failed = true;
+					return; // from lambda
+				}
+
+				columns_in_temp_view_vector.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+				ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_datetime_start = columns_in_temp_view_vector.back();
+				column_in_view_datetime_start.column_name = datetime_start_col_name;
+				column_in_view_datetime_start.column_name_no_uuid = datetime_start_col_name;
+				column_in_view_datetime_start.variable_group_identifier = the_variable_group.first;
+				column_in_view_datetime_start.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
+				column_in_view_datetime_start.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART;
+
+				columns_in_temp_view_vector.push_back(ColumnsInViews::ColumnsInView::ColumnInView());
+				ColumnsInViews::ColumnsInView::ColumnInView & column_in_view_datetime_end = columns_in_temp_view_vector.back();
+				column_in_view_datetime_end.column_name = datetime_end_col_name;
+				column_in_view_datetime_end.column_name_no_uuid = datetime_end_col_name;
+				column_in_view_datetime_end.variable_group_identifier = the_variable_group.first;
+				column_in_view_datetime_end.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
+				column_in_view_datetime_end.column_type = ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND;
+			}
+
+
 			if (m == 1)
 			{
 				std::string sql_create_real_view;
@@ -1249,8 +1330,432 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				int step_result_loop = 0;
 				while ((step_result_loop = sqlite3_step(stmt_loop)) == SQLITE_ROW)
 				{
-					//sqlite3
-					break;
+
+					if (failed)
+					{
+						// attempt more rows; do not exit
+					}
+
+					std::string new_data_string;
+
+					std::string sql_columns;
+					std::string sql_values_previous;
+					std::string sql_values_previous_null;
+					std::string sql_values_before_datetime;
+					std::string sql_values_after_datetime;
+					std::string sql_values_before_datetime_null;
+					std::string sql_values_after_datetime_null;
+					bool datetime_active = false;
+					bool after_datetime = false;
+
+					int overall_column_number_input_previous = 0;
+					int overall_column_number_input_before_datetime = 0;
+					int overall_column_number_input_after_datetime = 0;
+					int overall_column_number_input = 0;
+					std::int64_t datetime_start_previous = 0;
+					std::int64_t datetime_end_previous = 0;
+					std::int64_t datetime_start_current = 0;
+					std::int64_t datetime_end_current = 0;
+					for (int j = m - 1; j >= 0; --j)
+					{
+						if (failed)
+						{
+							// move on to the next row
+							break;
+						}
+						ColumnsInViews::ColumnsInView & columns_in_temp_view = columnsInView.columns_in_temp_views.columns_in_temp_views_vector[j];
+						std::vector<ColumnsInViews::ColumnsInView::ColumnInView> & columns_in_temp_view_vector = columns_in_temp_view.columns_in_view;
+						std::for_each(columns_in_temp_view_vector.cbegin(), columns_in_temp_view_vector.cend(), [&sql_columns, &overall_column_number_input_previous, &sql_values_previous, &sql_values_previous_null, &sql_values_before_datetime_null, &sql_values_after_datetime_null, &new_data_string, &after_datetime, &datetime_active, &sql_values_before_datetime, &sql_values_after_datetime, &overall_column_number_input_before_datetime, &overall_column_number_input, &overall_column_number_input_after_datetime, &j, &view_count, &datetime_start_previous, &datetime_end_previous, &datetime_start_current, &datetime_end_current, &stmt_loop, &failed](ColumnsInViews::ColumnsInView::ColumnInView const & column_in_view)
+						{
+							if (failed)
+							{
+								return; // from lambda
+							}
+
+							bool current_view = false;
+
+							if (j == view_count - 1)
+							{
+								// This is the new view being joined in to the previous ones
+								current_view = true;
+							}
+
+							bool doing_datetime = false;
+							if (current_view)
+							{
+								if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART)
+								{
+									// currently, start and end columns must be contiguous
+									if (datetime_active || after_datetime)
+									{
+										failed = true;
+										return; // from lambda
+									}
+									datetime_active = true;
+									datetime_start_current = sqlite3_column_int64(stmt_loop, overall_column_number_input);
+									doing_datetime = true;
+								}
+								else if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND)
+								{
+									// currently, start and end columns must be contiguous
+									if (!datetime_active || after_datetime)
+									{
+										failed = true;
+										return; // from lambda
+									}
+									datetime_active = false;
+									after_datetime = true;
+									datetime_end_current = sqlite3_column_int64(stmt_loop, overall_column_number_input);
+									doing_datetime = true;
+								}
+							}
+							else
+							{
+								if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMESTART)
+								{
+									datetime_start_previous = sqlite3_column_int64(stmt_loop, overall_column_number_input);
+								}
+								else if (column_in_view.column_type == ColumnsInViews::ColumnsInView::ColumnInView::COLUMN_TYPE__DATETIMEEND)
+								{
+									datetime_end_previous = sqlite3_column_int64(stmt_loop, overall_column_number_input);
+								}
+							}
+
+							if (overall_column_number_input > 0)
+							{
+								sql_columns += ", ";
+							}
+
+							if (!doing_datetime)
+							{
+								if (after_datetime)
+								{
+									if (overall_column_number_input_after_datetime > 0)
+									{
+										sql_values_after_datetime += ", ";
+										sql_values_after_datetime_null += ", ";
+									}
+								}
+								else
+								{
+									if (current_view)
+									{
+										if (overall_column_number_input_before_datetime > 0)
+										{
+											sql_values_before_datetime += ", ";
+											sql_values_before_datetime_null += ", ";
+										}
+									}
+									else
+									{
+										if (overall_column_number_input_previous > 0)
+										{
+											sql_values_before_datetime += ", ";
+											sql_values_before_datetime_null += ", ";
+										}
+									}
+								}
+							}
+
+							sql_columns += column_in_view.column_name;
+
+							int column_data_type = sqlite3_column_type(stmt_loop, overall_column_number_input);
+							bool data_is_null = false;
+							switch (column_data_type)
+							{
+							case SQLITE_INTEGER:
+								{
+									std::int64_t data = sqlite3_column_int64(stmt_loop, overall_column_number_input);
+									new_data_string = boost::lexical_cast<std::string>(data);
+									if (!doing_datetime)
+									{
+										if (after_datetime)
+										{
+											sql_values_after_datetime += new_data_string;
+											sql_values_after_datetime_null += "NULL";
+										}
+										else
+										{
+											if (current_view)
+											{
+												sql_values_before_datetime += new_data_string;
+												sql_values_before_datetime_null += "NULL";
+											}
+											else
+											{
+												sql_values_previous += new_data_string;
+												sql_values_previous_null += "NULL";
+											}
+										}
+									}
+								}
+								break;
+							case SQLITE_FLOAT:
+								{
+									long double data = sqlite3_column_double(stmt_loop, overall_column_number_input);
+									new_data_string = boost::lexical_cast<std::string>(data);
+									if (after_datetime)
+									{
+										sql_values_after_datetime += new_data_string;
+										sql_values_after_datetime_null += "NULL";
+									}
+									else
+									{
+										if (current_view)
+										{
+											sql_values_before_datetime += new_data_string;
+											sql_values_before_datetime_null += "NULL";
+										}
+										else
+										{
+											sql_values_previous += new_data_string;
+											sql_values_previous_null += "NULL";
+										}
+									}
+								}
+								break;
+							case SQLITE_TEXT:
+								{
+									char const * data = reinterpret_cast<char const *>(sqlite3_column_text(stmt_loop, overall_column_number_input));
+									new_data_string = '\'';
+									new_data_string += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(data));
+									new_data_string += '\'';
+									if (after_datetime)
+									{
+										sql_values_after_datetime += new_data_string;
+										sql_values_after_datetime_null += "NULL";
+									}
+									else
+									{
+										if (current_view)
+										{
+											sql_values_before_datetime += new_data_string;
+											sql_values_before_datetime_null += "NULL";
+										}
+										else
+										{
+											sql_values_previous += new_data_string;
+											sql_values_previous_null += "NULL";
+										}
+									}
+								}
+								break;
+							case SQLITE_BLOB:
+								{
+									// Todo: Error message
+									failed = true;
+									return; // from lambda
+								}
+								break;
+							case SQLITE_NULL:
+								{
+									data_is_null = true;
+									new_data_string = "NULL";
+									if (after_datetime)
+									{
+										sql_values_after_datetime += new_data_string;
+										sql_values_after_datetime_null += "NULL";
+									}
+									else
+									{
+										if (current_view)
+										{
+											sql_values_before_datetime += new_data_string;
+											sql_values_before_datetime_null += "NULL";
+										}
+										else
+										{
+											sql_values_previous += new_data_string;
+											sql_values_previous_null += "NULL";
+										}
+									}
+								}
+								break;
+							default:
+								{
+									// Todo: Error message
+									failed = true;
+									return; // from lambda
+								}
+							}
+							++overall_column_number_input;
+							if (!doing_datetime)
+							{
+								if (after_datetime)
+								{
+									++overall_column_number_input_after_datetime;
+								}
+								else
+								{
+									if (current_view)
+									{
+										++overall_column_number_input_before_datetime;
+									}
+									else
+									{
+										++overall_column_number_input_previous;
+									}
+								}
+							}
+						});
+					}
+
+					std::string join_table_with_time_ranges_name = Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m);;
+					
+					bool continue_ = true;
+
+					// handle 0, 0 special cases
+					if (continue_)
+					{
+						if (datetime_start_current == 0 && datetime_end_current == 0)
+						{
+							if (datetime_start_previous == 0 && datetime_end_previous == 0)
+							{
+								// No time ranges yet.  Just add the current input row, as-is, with 0 and 0 as indicators of this
+								failed = AddTimeRangeMergedRowTemp(false, false, db, 0, 0, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_count_as_text, join_table_with_time_ranges_name);
+								continue_ = false;
+							}
+							else if (datetime_end_previous > datetime_start_previous)
+							{
+								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_count_as_text, join_table_with_time_ranges_name);
+								continue_ = false;
+							}
+							continue_ = false;
+						}
+						else if (datetime_start_previous == 0 && datetime_end_previous == 0)
+						{
+							// The equality case is handled above
+							if (datetime_end_current > datetime_start_current)
+							{
+								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_count_as_text, join_table_with_time_ranges_name);
+								continue_ = false;
+							}
+							continue_ = false;
+						}
+					}
+
+					if (continue_ && datetime_end_current <= datetime_start_current)
+					{
+						if (continue_ && datetime_end_previous <= datetime_start_previous)
+						{
+							continue_ = false;
+						}
+						else
+						{
+							// Add a row from the start of the previous, to the end of the previous
+							failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+							//if (failed) continue;
+
+							continue_ = false;
+						}
+					}
+
+					if (continue_ && datetime_end_previous <= datetime_start_previous)
+					{
+						// Add a row from the start of the current, to the end of the current
+						failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+						//if (failed) continue;
+
+						continue_ = false;
+					}
+
+					if (continue_ && datetime_start_current == 0 && datetime_end_current == 0 && datetime_start_previous == 0 && datetime_end_previous == 0)
+					{
+						// No time ranges yet.  Just add the current input row, as-is, with 0 and 0 as indicators of this
+						failed = AddTimeRangeMergedRowTemp(false, false, db, 0, 0, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous_null, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_count_as_text, join_table_with_time_ranges_name);
+						continue_ = false;
+					}
+					else
+					{
+						if (continue_&& datetime_start_current == 0 && datetime_end_current == 0)
+						{
+							// Previous time range exists, but new does not.
+							// There can be only one new row per previous row.
+							// Add current row as-is, bringing the previous time range over to the new.
+							failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+							continue_ = false;
+						}
+						else if (continue_ && datetime_start_previous == 0 && datetime_end_previous == 0)
+						{
+							// Previous time range did not exist (or there is no previous table),
+							// but new time range does exist.
+							// There can be only one previous row per new row (if there are previous rows).
+							// Add current row as-is, using the current time range.
+							failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+							continue_ = false;
+						}
+						else
+						{
+
+							// normal merge - both previous and current time ranges exist
+							
+							if (datetime_start_current < datetime_start_previous)
+							{
+								
+								if (datetime_end_current >= datetime_start_previous)
+								{
+									// Add a row from the start of the current, to the start of the previous
+									failed = AddTimeRangeMergedRowTemp(true, false, db, datetime_start_current, datetime_start_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+									//if (failed) continue;
+								}
+								else
+								{
+									// Add a row from the start of the previous, to the end of the previous
+									failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_start_previous, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+									//if (failed) continue;
+
+									// Add a row from the start of the current, to the end of the current
+									failed = AddTimeRangeMergedRowTemp(true, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+									//if (failed) continue;
+
+									continue_ = false;
+								}
+
+								datetime_start_current = datetime_start_previous;
+							
+							}
+
+
+							// datetime_start_current is guaranteed to be equal to datetime_start_previous,
+							// and both previous and current are guaranteed to be valid, and of non-zero width
+
+							if (continue_ && datetime_end_current >= datetime_end_previous)
+							{
+								// Add a row from the start of the current, to the end of the previous
+								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+								//if (failed) continue;
+
+								// Add a row from the end of the previous, to the end of the current
+								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_end_previous, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+								//if (failed) continue;
+							}
+							else if (continue_)
+							{
+								// Add a row from the start of the current, to the end of the current
+								failed = AddTimeRangeMergedRowTemp(false, false, db, datetime_start_current, datetime_end_current, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+								//if (failed) continue;
+
+								// ... then from the end of the current, to the end of the previous, and we're done
+								failed = AddTimeRangeMergedRowTemp(false, true, db, datetime_end_current, datetime_end_previous, overall_column_number_input_previous, overall_column_number_input_before_datetime, overall_column_number_input_after_datetime, sql_columns, sql_values_previous, sql_values_previous_null, sql_values_before_datetime, sql_values_before_datetime_null, sql_values_after_datetime, sql_values_after_datetime_null, join_table_with_time_ranges_name);
+								//if (failed) continue;
+							}
+						
+						}
+					}
+
+					if (failed)
+					{
+						// Do nothing.  Just continue with next row, if possible
+					}
+
+					//++number_input_rows;
+
+					//if (number_input_rows >= 1000)
+					//{
+					//	// For development - limit to 1000 rows
+					//	break;
+					//}
+
 				}
 			}
 		}
@@ -1278,7 +1783,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 
 			// At least one of the primary keys has this variable group active, so use that to get the date-time column names
 			// ... just break out of loop once we have it
-			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
+			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_generate_output, &columns_in_temp_views, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::PrimaryKeySequenceEntry const & total_primary_key_sequence_entry)
 			{
 				if (first_select == false)
 				{
@@ -1286,7 +1791,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 					return; // from lambda
 				}
 				std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> const & variable_group_info_for_primary_keys = total_primary_key_sequence_entry.variable_group_info_for_primary_keys;
-				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
+				std::for_each(variable_group_info_for_primary_keys.cbegin(), variable_group_info_for_primary_keys.cend(), [&sql_generate_output, &columns_in_temp_views, &columnsInView, &first_select, &the_variable_group, &failed](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & variable_group_primary_key_info)
 				{
 					if (first_select == false)
 					{
@@ -1298,7 +1803,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						if (!variable_group_primary_key_info.column_name.empty())
 						{
 							first_select = false;
-							sql_generate_output += variable_group_primary_key_info.view_table_name;
+							sql_generate_output += variable_group_primary_key_info.view_table_name; // "t1, "t2", etc.
 							sql_generate_output += ".";
 							sql_generate_output += variable_group_primary_key_info.datetime_row_start_table_column_name;
 							sql_generate_output += " AS ";
@@ -2353,6 +2858,81 @@ bool OutputModel::AddTimeRangeMergedRow(bool previous_is_null, bool current_is_n
 	}
 
 	sql_insert_time_range_row += sql_values_current_datetime_internal;
+
+	sql_insert_time_range_row += ")";
+	sqlite3_stmt * stmt_insert_new_row = NULL;
+	sqlite3_prepare_v2(db, sql_insert_time_range_row.c_str(), sql_insert_time_range_row.size() + 1, &stmt_insert_new_row, NULL);
+	if (stmt_insert_new_row == NULL)
+	{
+		std::string error_msg = sqlite3_errmsg(db);
+		return true;
+	}
+	int step_result_insert_new_row = 0;
+	if ((step_result_insert_new_row = sqlite3_step(stmt_insert_new_row)) != SQLITE_DONE)
+	{
+		// Move on to the next row
+		return true;
+	}
+	return false;
+}
+
+bool OutputModel::AddTimeRangeMergedRowTemp(bool previous_is_null, bool current_is_null, sqlite3 * db, std::int64_t const datetime_start_new, std::int64_t const datetime_end_new, int const overall_column_number_input_previous, int const overall_column_number_input_before_datetime, int const overall_column_number_input_after_datetime, std::string const & sql_columns, std::string const & sql_values_previous, std::string const & sql_values_previous_null, std::string const & sql_values_before_datetime, std::string const & sql_values_before_datetime_null, std::string const & sql_values_after_datetime, std::string const & sql_values_after_datetime_null, std::string const & join_table_with_time_ranges_name)
+{
+	std::string sql_insert_time_range_row;
+	sql_insert_time_range_row += "INSERT INTO ";
+	sql_insert_time_range_row += join_table_with_time_ranges_name;
+	sql_insert_time_range_row += " (";
+	sql_insert_time_range_row += sql_columns;
+	sql_insert_time_range_row += ") VALUES (";
+
+	if (previous_is_null)
+	{
+		sql_insert_time_range_row += sql_values_previous_null;
+	}
+	else
+	{
+		sql_insert_time_range_row += sql_values_previous;
+	}
+
+	if (overall_column_number_input_previous > 0)
+	{
+		sql_insert_time_range_row += ", ";
+	}
+
+	if (current_is_null)
+	{
+		sql_insert_time_range_row += sql_values_before_datetime_null;
+	}
+	else
+	{
+		sql_insert_time_range_row += sql_values_before_datetime;
+	}
+
+	if (overall_column_number_input_before_datetime > 0)
+	{
+		sql_insert_time_range_row += ", ";
+	}
+
+	std::string sql_values_current_datetime;
+	sql_values_current_datetime += boost::lexical_cast<std::string>(datetime_start_new);
+	sql_values_current_datetime += ", ";
+	sql_values_current_datetime += boost::lexical_cast<std::string>(datetime_end_new);
+
+	sql_insert_time_range_row += sql_values_current_datetime;
+
+	if (overall_column_number_input_after_datetime > 0)
+	{
+		sql_insert_time_range_row += ", ";
+	}
+
+	if (current_is_null)
+	{
+		sql_insert_time_range_row += sql_values_after_datetime_null;
+	}
+	else
+	{
+		sql_insert_time_range_row += sql_values_after_datetime;
+	}
 
 	sql_insert_time_range_row += ")";
 	sqlite3_stmt * stmt_insert_new_row = NULL;
