@@ -1781,7 +1781,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		sql_generate_output += " AS SELECT ";
 
 
-		ColumnsInViews::ColumnsInView & the_most_recent_view = columns_in_temp_views[highest_multiplicity_to_use];
+		ColumnsInViews::ColumnsInView & the_most_recent_view = columns_in_temp_views[highest_multiplicity_to_use - 1];
 
 
 		// The first two columns in the main View tables are the time range columns.
