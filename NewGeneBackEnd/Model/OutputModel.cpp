@@ -1284,34 +1284,40 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 			}
 
 
-			if (m == 1)
+			std::string sql_create_real_view;
+			sql_create_real_view += "CREATE TABLE ";
+			sql_create_real_view += temp_dot;
+			sql_create_real_view += Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m);
+			sql_create_real_view += " AS SELECT * FROM ";
+			sql_create_real_view += Table_VariableGroupData::ViewNameFromCountTemp(view_count, m);
+			if (m > 1)
 			{
-				std::string sql_create_real_view;
-				sql_create_real_view += "CREATE TABLE ";
-				sql_create_real_view += temp_dot;
-				sql_create_real_view += Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m);
-				sql_create_real_view += " AS SELECT * FROM ";
-				sql_create_real_view += Table_VariableGroupData::ViewNameFromCountTemp(view_count, m);
-
-				sqlite3_stmt * stmt_real_view = NULL;
-				sqlite3_prepare_v2(db, sql_create_real_view.c_str(), sql_create_real_view.size() + 1, &stmt_real_view, NULL);
-				if (stmt_real_view == NULL)
-				{
-					// Todo: Error message
-					failed = true;
-					return;
-				}
-
-				int step_result_real_view = 0;
-				if ((step_result_real_view = sqlite3_step(stmt_real_view)) != SQLITE_DONE)
-				{
-					// Todo: Error message
-					failed = true;
-					return; // from lambda
-				}
+				// First table is just a copy of the source table, so do not perform the time range processing.
+				// But all others must merge into the previous table, so just create them as empty tables,
+				// and do proceed with the time range processing.
+				sql_create_real_view += " WHERE 0";
 			}
-			else
+
+			sqlite3_stmt * stmt_real_view = NULL;
+			sqlite3_prepare_v2(db, sql_create_real_view.c_str(), sql_create_real_view.size() + 1, &stmt_real_view, NULL);
+			if (stmt_real_view == NULL)
 			{
+				// Todo: Error message
+				failed = true;
+				return;
+			}
+
+			int step_result_real_view = 0;
+			if ((step_result_real_view = sqlite3_step(stmt_real_view)) != SQLITE_DONE)
+			{
+				// Todo: Error message
+				failed = true;
+				return; // from lambda
+			}
+
+			if (m > 1)
+			{
+
 				// Loop through vtmp_m table to create vtmp_TR_m table.
 				// The vtmp_m table contains m sets of all variables
 				// from the current variable group, from identical columns (all from the same data table),
@@ -1606,7 +1612,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 						});
 					}
 
-					std::string temp_view_table_with_time_ranges_name = Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m);;
+					std::string temp_view_table_with_time_ranges_name = Table_VariableGroupData::ViewNameFromCountTempTimeRanged(view_count, m);
 					
 					bool continue_ = true;
 
