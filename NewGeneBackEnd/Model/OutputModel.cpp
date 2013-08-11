@@ -87,7 +87,7 @@ void OutputModel::OutputGenerator::GenerateOutput()
 	bool failed = false;
 	//std::string temp_dot("temp.");
 	std::string temp_dot("");
-	PrepareData();
+	Prepare();
 
 }
 
@@ -736,9 +736,10 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 	});
 }
 
-void OutputModel::OutputGenerator::PrepareData()
+void OutputModel::OutputGenerator::Prepare()
 {
 
+	input_model = getInputModel();
 	db = input_model.getDb();
 
 	the_map = model.t_variables_selected_identifiers.GetSelectedVariablesByUOA(model.getDb(), &model, &input_model);

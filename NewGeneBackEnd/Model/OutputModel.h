@@ -164,7 +164,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 			
 			private:
 
-				void PrepareData();
+				void Prepare();
 				void PopulateDMUCounts();
 				void PopulateUOAs();
 				void ValidateUOAs();
@@ -228,6 +228,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				size_t number_primary_variable_groups;
 
 				OutputModel & model;
+				InputModel & input_model;
 				sqlite3 * db;
 
 				bool failed;
