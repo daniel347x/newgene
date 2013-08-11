@@ -80,9 +80,685 @@ std::string OutputModel::StripUUIDFromVariableName(std::string const & variable_
 	return stripped_variable_name;
 }
 
-void OutputModel::GenerateOutput(DataChangeMessage & change_response)
+void OutputModel::OutputGenerator::GenerateOutput()
 {
 
+	InputModel & input_model = model.getInputModel();
+	bool failed = false;
+	//std::string temp_dot("temp.");
+	std::string temp_dot("");
+	PrepareData();
+
+}
+
+void OutputModel::OutputGenerator::PopulateDMUCounts()
+{
+
+	bool first = true;
+	std::for_each(UOAs.cbegin(), UOAs.cend(), [&first, &biggest_counts, &child_counts, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
+	{
+
+		if (failed)
+		{
+			return; // from lambda
+		}
+
+		if (first)
+		{
+			first = false;
+			biggest_counts.push_back(uoa__to__dmu_counts__pair);
+			return; // from lambda
+		}
+
+		// Check if the current DMU_Counts overlaps (which is currently an error)
+		// or is bigger
+		Table_UOA_Identifier::DMU_Counts current_dmu_counts = uoa__to__dmu_counts__pair.second;
+		bool current_is_bigger = false;
+		bool current_is_smaller = false;
+		bool current_is_same = true;
+
+		int current = 0;
+		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [&biggest_counts, &current_is_bigger, &current_is_smaller, &current_is_same, &current](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
+		{
+			bool matched_current_dmu = false;
+			// Looking at the first entry in biggest_counts is the same as looking at any other entry
+			// in terms of the DMU counts
+			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&matched_current_dmu, &current_dmu_plus_count, &current_is_bigger, &current_is_smaller, &current_is_same, &current](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
+			{
+				if (current_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, biggest_dmu_plus_count.first))
+				{
+					matched_current_dmu = true;
+					if (current_dmu_plus_count.second > biggest_dmu_plus_count.second)
+					{
+						current_is_same = false;
+						current_is_bigger = true;
+					}
+					else if (current_dmu_plus_count.second < biggest_dmu_plus_count.second)
+					{
+						current_is_same = false;
+						current_is_smaller = true;
+					}
+				}
+			});
+			if (!matched_current_dmu)
+			{
+				// The DMU in the current UOA being tested does not exist in the "biggest" UOA previous to this
+				current_is_same = false;
+				current_is_bigger = true;
+			}
+			++current;
+		});
+
+		// Looking at the first entry in biggest_counts is the same as looking at any other entry
+		// in terms of the DMU counts
+		std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&current_dmu_counts, &current_is_bigger, &current_is_smaller, &current_is_same](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
+		{
+			bool matched_biggest_dmu = false;
+			std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [&matched_biggest_dmu, &biggest_dmu_plus_count, &current_is_bigger, &current_is_smaller, &current_is_same](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
+			{
+				if (current_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, biggest_dmu_plus_count.first))
+				{
+					matched_biggest_dmu = true;
+				}
+			});
+			if (!matched_biggest_dmu)
+			{
+				// The DMU in the "biggest" UOA does not exist in the current UOA being tested
+				current_is_same = false;
+				current_is_smaller = true;
+			}
+		});
+
+		if (current_is_same)
+		{
+			if (current_is_smaller || current_is_bigger)
+			{
+				// error in algorithm logic
+				failed = true;
+				return; // from lambda
+			}
+			else
+			{
+				// ambiguity: two UOA's are the same
+				// This is just fine
+				biggest_counts.push_back(uoa__to__dmu_counts__pair);
+			}
+		}
+		else if (current_is_bigger && current_is_smaller)
+		{
+			// overlapping UOA's: not yet implemented
+			// Todo: Error message
+			failed = true;
+			return; // from labmda
+		}
+		else if (current_is_bigger)
+		{
+			// Wipe the current UOA's and start fresh with this new, bigger one
+			std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> new_child_uoas;
+			biggest_counts.swap(new_child_uoas);
+			child_counts.insert(child_counts.end(), new_child_uoas.cbegin(), new_child_uoas.cend());
+			biggest_counts.push_back(uoa__to__dmu_counts__pair);
+		}
+		else if (current_is_smaller)
+		{
+			// Add to child UOA's here
+			child_counts.push_back(uoa__to__dmu_counts__pair);
+		}
+		else
+		{
+			// error in algorithm logic
+			failed = true;
+			return; // from lambda
+		}
+
+	});
+
+}
+
+void OutputModel::OutputGenerator::ValidateUOAs()
+{
+	// Check for overlap in UOA's
+
+	// For primary UOA:
+	// Make sure that at most 1 DMU has a multiplicity greater than 1,
+	// and save the name/index of the DMU category with the highest multiplicity.
+	std::vector<int> multiplicities;
+	int highest_multiplicity = 0;
+	std::string highest_multiplicity_dmu_string_code;
+
+	// Looking at the first entry in biggest_counts is the same as looking at any other entry
+	// in terms of the DMU counts
+	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &multiplicities, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+	{
+		if (failed)
+		{
+			return; // from lamda
+		}
+		WidgetInstanceIdentifier const & the_dmu_category = dmu_category.first;
+		if (!the_dmu_category.uuid || !the_dmu_category.code)
+		{
+			failed = true;
+			return; // from lambda
+		}
+		WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->t_kad_count.getIdentifier(*the_dmu_category.uuid);
+		int uoa_count_current_dmu_category = dmu_category.second;
+		int kad_count_current_dmu_category = kad_count_pair.second;
+		int multiplicity = 0;
+		if (kad_count_current_dmu_category >= uoa_count_current_dmu_category)
+		{
+			multiplicity = 1;
+		}
+		if (multiplicity == 0)
+		{
+			// User's K-ad selection is too small in this DMU category to support the variables they have selected
+			// Todo: Error message
+			failed = true;
+			return; // from lambda
+		}
+		int test_kad_count = uoa_count_current_dmu_category;
+		while (test_kad_count <= kad_count_current_dmu_category)
+		{
+			test_kad_count += uoa_count_current_dmu_category;
+			if (test_kad_count <= kad_count_current_dmu_category)
+			{
+				++multiplicity;
+			}
+		}
+		multiplicities.push_back(multiplicity);
+		if (multiplicity > highest_multiplicity)
+		{
+			highest_multiplicity = multiplicity;
+			highest_multiplicity_dmu_string_code = *the_dmu_category.code;
+		}
+	});
+
+	if (failed)
+	{
+		// Todo: Error message
+		return;
+	}
+
+	// check that only 1 primary UOA's DMU category has multiplicity > 1 (for now)
+	bool anything_has_multiplicity_greater_than_1 = false;
+	int which_index_has_multiplicity_greater_than_1 = -1;
+	int current_index = 0;
+	std::for_each(multiplicities.cbegin(), multiplicities.cend(), [&anything_has_multiplicity_greater_than_1, &which_index_has_multiplicity_greater_than_1, &current_index, &failed](int const & test_multiplicity)
+	{
+		if (failed)
+		{
+			return; // from lambda
+		}
+		if (test_multiplicity > 1)
+		{
+			if (anything_has_multiplicity_greater_than_1)
+			{
+				// ********************************************************************************************************************** //
+				// A second DMU category's multiplicity is greater than 1 - for now, not allowed.  This can be implemented in the future.
+				// ********************************************************************************************************************** //
+				failed = true;
+				return; // from lambda
+			}
+			anything_has_multiplicity_greater_than_1 = true;
+			which_index_has_multiplicity_greater_than_1 = current_index;
+		}
+		++current_index;
+	});
+
+	if (failed)
+	{
+		// Todo: Error message
+		return;
+	}
+
+	// Validate child UOA's
+	// For child UOA's:
+	// Make sure that, for each child UOA, the actual k-value for all DMU categories
+	// is either 0, 1, or the corresponding k-value of the primary UOA
+	// and that where not 0, it is less than the corresponding k-value of the primary UOA
+	// (i.e., has a value of 1)
+	// for only 1 DMU category,
+	// and this DMU category must match the DMU category with multiplicity greater than 1 (if any)
+	// for the primary UOAs
+	std::for_each(child_counts.cbegin(), child_counts.cend(), [&biggest_counts, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
+	{
+		if (failed)
+		{
+			return; // from lambda
+		}
+		int primary_dmu_categories_for_which_child_has_less = 0;
+		Table_UOA_Identifier::DMU_Counts const & current_dmu_counts = uoa__to__dmu_counts__pair.second;
+		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [&biggest_counts, &primary_dmu_categories_for_which_child_has_less, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
+		{
+			if (failed)
+			{
+				return; // from lambda
+			}
+			if (current_dmu_plus_count.second == 0)
+			{
+				// just fine
+				return; // from lambda
+			}
+			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&current_dmu_plus_count, &primary_dmu_categories_for_which_child_has_less, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
+			{
+				if (failed)
+				{
+					return; // from lambda
+				}
+				if (current_dmu_plus_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, biggest_dmu_plus_count.first))
+				{
+					if (current_dmu_plus_count.second == biggest_dmu_plus_count.second) // biggest_dmu_plus_count.second is the K-value of the unit of analysis, not the K-value chosen by the user in the spin control
+					{
+						if (highest_multiplicity > 1)
+						{
+							// Special case:
+							// The child UOA has the same K-value in this DMU category
+							// as the K-value of the primary UOA,
+							// but the K-value chosen by the user in the spin control for this DMU category
+							// has incremented the multiplicity of the primary UOA for this DMU category greater than 1.
+							++primary_dmu_categories_for_which_child_has_less;
+						}
+						return; // from lambda
+					}
+					if (current_dmu_plus_count.second > 1)
+					{
+						// Todo: error message
+						// Invalid child UOA for this output
+						failed = true;
+						return; // from lambda
+					}
+					// Redundant 0-check for future code foolproofing
+					else if (current_dmu_plus_count.second == 0)
+					{
+						// just fine
+						return; // from lambda
+					}
+					// Current UOA's current DMU category's K-value is 1
+					else if (!boost::iequals(*current_dmu_plus_count.first.code, highest_multiplicity_dmu_string_code))
+					{
+						if (highest_multiplicity > 1)
+						{
+							// Todo: error message
+
+							// *************************************************************************************** //
+							// Subtle edge case failure:
+							//
+							// Is this edge case common enough that it should be implemented for version 1 of NewGene?
+							//
+							// The current child DMU category has K-value less than the K-value
+							// of the primary UOA's corresponding DMU category,
+							// AND this is not the DMU category for which the primary UOA has
+							// multiplicity greater than 1
+							// *************************************************************************************** //
+
+							// Invalid child UOA for this output
+							failed = true;
+							return; // from lambda
+						}
+					}
+					++primary_dmu_categories_for_which_child_has_less;
+				}
+			});
+		});
+
+		if (primary_dmu_categories_for_which_child_has_less > 1)
+		{
+			// Todo: error message
+			// Invalid child UOA for this output
+			failed = true;
+			return; // from lambda
+		}
+
+	});
+}
+
+void OutputModel::OutputGenerator::PopulateUOAs()
+{
+	std::for_each(the_map.cbegin(), the_map.cend(), [this, &input_model, &UOAs, &failed](std::pair<WidgetInstanceIdentifier /* UOA identifier */,
+		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map> /* map: VG identifier => List of variables */
+		const & uoa__to__variable_groups__pair)
+	{
+		if (failed)
+		{
+			return; // from lambda
+		}
+		WidgetInstanceIdentifier const & uoa = uoa__to__variable_groups__pair.first;
+		if (!uoa.uuid)
+		{
+			failed = true;
+			return; // from lambda
+		}
+		Table_UOA_Identifier::DMU_Counts dmu_counts = input_model.t_uoa_category.RetrieveDMUCounts(getDb(), &input_model, *uoa.uuid);
+		UOAs.push_back(std::make_pair(uoa, dmu_counts));
+	});
+}
+
+void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
+{
+	// For child UOA's:
+	// Save the name/index of the DMU category multiplicity greater than one.
+	// Currently, this can be only one of the DMU categories.
+	std::for_each(child_counts.cbegin(), child_counts.cend(), [this, &child_uoas__which_multiplicity_is_greater_than_1, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & child_uoa__dmu_counts__pair)
+	{
+
+		if (failed)
+		{
+			return; // from lambda
+		}
+
+		WidgetInstanceIdentifier uoa_identifier = child_uoa__dmu_counts__pair.first;
+		std::for_each(child_uoa__dmu_counts__pair.second.cbegin(), child_uoa__dmu_counts__pair.second.cend(), [this, &uoa_identifier, &child_uoas__which_multiplicity_is_greater_than_1, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+		{
+
+			if (failed)
+			{
+				return; // from lamda
+			}
+
+			WidgetInstanceIdentifier const & the_dmu_category_identifier = dmu_category.first;
+			if (!the_dmu_category_identifier.uuid || !the_dmu_category_identifier.code)
+			{
+				failed = true;
+				return; // from lambda
+			}
+
+			WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->t_kad_count.getIdentifier(*the_dmu_category_identifier.uuid);
+			int uoa_k_count__current_dmu_category = dmu_category.second;
+			int k_spin_control_count__current_dmu_category = kad_count_pair.second;
+			int multiplicity = 0;
+
+			if (k_spin_control_count__current_dmu_category >= uoa_k_count__current_dmu_category)
+			{
+				multiplicity = 1;
+			}
+			if (multiplicity == 0)
+			{
+				// User's K-ad selection is too small in this DMU category to support the variables they have selected
+				// Todo: Error message
+				failed = true;
+				return; // from lambda
+			}
+
+			int test_kad_count = uoa_k_count__current_dmu_category;
+			while (test_kad_count <= k_spin_control_count__current_dmu_category)
+			{
+				test_kad_count += uoa_k_count__current_dmu_category;
+				if (test_kad_count <= k_spin_control_count__current_dmu_category)
+				{
+					++multiplicity;
+				}
+			}
+
+			// Note: Code above has already validated that there is only 1 DMU category for which the multiplicity is greater than 1.
+			child_uoas__which_multiplicity_is_greater_than_1[uoa_identifier] = std::make_pair(the_dmu_category_identifier, multiplicity);
+
+		});
+
+	});
+}
+
+void OutputModel::OutputGenerator::PopulateVariableGroups()
+{
+	std::for_each(biggest_counts.cbegin(), biggest_counts.cend(), [&variable_groups_vector, &number_primary_variable_groups, &the_map](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
+	{
+		// Get all the variable groups corresponding to the primary UOA (identical except possibly for time granularity)
+		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = the_map[uoa__to__dmu_category_counts.first];
+		number_primary_variable_groups += variable_groups_map_current.size();
+		variable_groups_vector.insert(variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
+	});
+	std::for_each(child_counts.cbegin(), child_counts.cend(), [&variable_groups_vector, &the_map](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
+	{
+		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = the_map[uoa__to__dmu_category_counts.first];
+		variable_groups_vector.insert(variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
+	});
+}
+
+void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
+{
+	int overall_primary_key_sequence_number = 0;
+	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &input_model, &sequence, &overall_primary_key_sequence_number, &variable_groups_vector, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+	{
+		if (failed)
+		{
+			return; // from lamda
+		}
+		WidgetInstanceIdentifier const & the_dmu_category = dmu_category.first;
+		if (!the_dmu_category.uuid || !the_dmu_category.code)
+		{
+			failed = true;
+			return; // from lambda
+		}
+		WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->t_kad_count.getIdentifier(*the_dmu_category.uuid);
+		int uoa_count_current_dmu_category = dmu_category.second;
+		int kad_count_current_dmu_category = kad_count_pair.second;
+
+		int kad_count_current_dmu_category_sequence = 0;
+		for (int current_dmu_sequence_number = 0; current_dmu_sequence_number < kad_count_current_dmu_category; ++current_dmu_sequence_number)
+		{
+			if (kad_count_current_dmu_category_sequence == uoa_count_current_dmu_category)
+			{
+				kad_count_current_dmu_category_sequence = 0;
+			}
+
+			sequence.primary_key_sequence_info.push_back(PrimaryKeySequence::PrimaryKeySequenceEntry());
+			PrimaryKeySequence::PrimaryKeySequenceEntry & current_primary_key_sequence = sequence.primary_key_sequence_info.back();
+			std::vector<PrimaryKeySequence::VariableGroup_PrimaryKey_Info> & variable_group_info_for_primary_keys = current_primary_key_sequence.variable_group_info_for_primary_keys;
+
+			current_primary_key_sequence.dmu_category = the_dmu_category;
+			current_primary_key_sequence.sequence_number_within_dmu_category_spin_control = current_dmu_sequence_number;
+			current_primary_key_sequence.sequence_number_within_dmu_category_primary_uoa = kad_count_current_dmu_category_sequence;
+			current_primary_key_sequence.sequence_number_in_all_primary_keys = overall_primary_key_sequence_number;
+
+			int view_count = 0;
+			std::for_each(variable_groups_vector.cbegin(), variable_groups_vector.cend(), [this, &input_model, &the_dmu_category, &sequence, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+			{
+				if (failed)
+				{
+					return; // from lambda
+				}
+
+				if (!the_variable_group.first.code)
+				{
+					// Todo: error message
+					failed = true;
+					return;
+				}
+
+				if (!the_variable_group.first.identifier_parent)
+				{
+					// Todo: error message
+					failed = true;
+					return;
+				}
+
+				WidgetInstanceIdentifier current_uoa_identifier = *the_variable_group.first.identifier_parent;
+
+				std::string vg_code = *the_variable_group.first.code;
+				std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
+
+				// dmu_primary_key_codes_metadata:
+				// The primary key metadata for the_variable_group - a possible SUBSET of all primary keys from the primary UOA.
+				// This include *all* DMU categories that form the primary keys for this variable group,
+				// each of which might appear multiple times as a separate entry here.
+				// This metadata just states which DMU category the key refers to,
+				// what the total (overall) sequence number is of the primary key in the variable group table,
+				// and the column name in the variable group table for this column.
+				// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
+				// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
+				// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
+				WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model.t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
+
+				// Todo: To implement global variables (i.e., variables with no primary key),
+				// make the necessary changes and then remove the following requirement
+				if (dmu_primary_key_codes_metadata.size() == 0)
+				{
+					// Todo: error message
+					failed = true;
+					return;
+				}
+
+				int current_variable_group_current_primary_key_dmu_category_total_number = 0;
+				std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, &input_model, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category_total_number, &sequence, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &failed](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
+				{
+					if (current_variable_group_current_dmu_primary_key.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
+					{
+						++current_variable_group_current_primary_key_dmu_category_total_number;
+					}
+				});
+
+				int multiplicity = 0;
+				if (current_variable_group_current_primary_key_dmu_category_total_number > 0)
+				{
+					multiplicity = 1;
+					int test_kad_count = current_variable_group_current_primary_key_dmu_category_total_number;
+					while (test_kad_count <= kad_count_current_dmu_category)
+					{
+						test_kad_count += current_variable_group_current_primary_key_dmu_category_total_number;
+						if (test_kad_count <= kad_count_current_dmu_category)
+						{
+							++multiplicity;
+						}
+					}
+				}
+
+				variable_group_info_for_primary_keys.push_back(PrimaryKeySequence::VariableGroup_PrimaryKey_Info());
+				PrimaryKeySequence::VariableGroup_PrimaryKey_Info & current_variable_group_current_primary_key_info = variable_group_info_for_primary_keys.back();
+				current_variable_group_current_primary_key_info.vg_identifier = the_variable_group.first;
+				current_variable_group_current_primary_key_info.is_primary_column_selected = false;
+				current_variable_group_current_primary_key_info.associated_uoa_identifier = current_uoa_identifier;
+
+				int current_variable_group_current_primary_key_dmu_category_total_sequence_number = 0;
+				for (int m=0; m<multiplicity; ++m)
+				{
+					int current_variable_group_current_primary_key_dmu_category_sequence_number = 0;
+					std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, &m, &multiplicity, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category_total_sequence_number, &input_model, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category_sequence_number, &sequence, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &failed](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
+					{
+						if (failed)
+						{
+							return; // from lambda
+						}
+						if (current_variable_group_current_dmu_primary_key.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
+						{
+							if (current_dmu_sequence_number == current_variable_group_current_primary_key_dmu_category_total_sequence_number)
+							{
+								// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
+								// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
+								// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
+								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group_current_dmu_primary_key.longhand;
+								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa = current_variable_group_current_primary_key_dmu_category_sequence_number;
+								current_variable_group_current_primary_key_info.current_multiplicity = m+1;
+								current_variable_group_current_primary_key_info.total_multiplicity = multiplicity;
+								char ns__[64];
+								current_variable_group_current_primary_key_info.view_table_name = "t";
+								current_variable_group_current_primary_key_info.view_table_name += itoa(m+1, ns__, 10);
+								current_variable_group_current_primary_key_info.join_table_name = "j";
+								current_variable_group_current_primary_key_info.join_table_name += itoa(m+1, ns__, 10);
+								current_variable_group_current_primary_key_info.join_table_name_withtime = "jt";
+								current_variable_group_current_primary_key_info.join_table_name_withtime += itoa(m+1, ns__, 10);
+
+								if (current_variable_group_current_primary_key_info.associated_uoa_identifier.time_granularity != 0)
+								{
+									current_variable_group_current_primary_key_info.datetime_row_start_table_column_name = "DATETIME_ROW_START";
+									current_variable_group_current_primary_key_info.datetime_row_end_table_column_name = "DATETIME_ROW_END";
+
+									std::string datetime_start_row_name = "DATETIME_ROW_START_";
+									datetime_start_row_name += *current_variable_group_current_primary_key_info.vg_identifier.code;
+									current_variable_group_current_primary_key_info.datetime_row_start_column_name = datetime_start_row_name;
+									current_variable_group_current_primary_key_info.datetime_row_start_column_name_no_uuid = datetime_start_row_name;
+
+									std::string datetime_end_row_name = "DATETIME_ROW_END_";
+									datetime_end_row_name += *current_variable_group_current_primary_key_info.vg_identifier.code;
+									current_variable_group_current_primary_key_info.datetime_row_end_column_name = datetime_end_row_name;
+									current_variable_group_current_primary_key_info.datetime_row_end_column_name_no_uuid = datetime_end_row_name;
+								}
+
+								std::string this_variable_group__this_primary_key__unique_name;
+								this_variable_group__this_primary_key__unique_name += *current_variable_group_current_dmu_primary_key.longhand;
+								current_variable_group_current_primary_key_info.column_name_no_uuid = this_variable_group__this_primary_key__unique_name;
+								if (multiplicity > 1)
+								{
+									this_variable_group__this_primary_key__unique_name += "_";
+									this_variable_group__this_primary_key__unique_name += itoa(m+1, ns__, 10);
+								}
+								this_variable_group__this_primary_key__unique_name += "_";
+								this_variable_group__this_primary_key__unique_name += newUUID(true);
+								current_variable_group_current_primary_key_info.column_name = this_variable_group__this_primary_key__unique_name;
+								WidgetInstanceIdentifier vg_setmember_identifier;
+								bool found_variable_group_set_member_identifier = input_model.t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(*current_variable_group_current_dmu_primary_key.longhand, *the_variable_group.first.uuid, vg_setmember_identifier);
+								if (!found_variable_group_set_member_identifier)
+								{
+									failed = true;
+									return; // from lambda
+								}
+
+								// Is this primary key selected by the user for output?
+								bool found = false;
+								std::for_each(the_variable_group.second.cbegin(), the_variable_group.second.cend(), [&found, &vg_setmember_identifier](WidgetInstanceIdentifier const & selected_variable_identifier)
+								{
+									if (found)
+									{
+										return; // from lambda
+									}
+									if (selected_variable_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg_setmember_identifier))
+									{
+										found = true;
+									}
+								});
+								if (found)
+								{
+									current_variable_group_current_primary_key_info.is_primary_column_selected = true;
+								}
+								else
+								{
+									current_variable_group_current_primary_key_info.is_primary_column_selected = false;
+								}
+							}
+							++current_variable_group_current_primary_key_dmu_category_sequence_number;
+							++current_variable_group_current_primary_key_dmu_category_total_sequence_number;
+						}
+					});
+				}
+
+				if (failed)
+				{
+					return; // from lambda
+				}
+			});
+
+			if (failed)
+			{
+				return; // from lambda
+			}
+
+			++overall_primary_key_sequence_number;
+			++kad_count_current_dmu_category_sequence;
+		}
+
+	});
+}
+
+void OutputModel::OutputGenerator::PrepareData()
+{
+
+	db = input_model.getDb();
+
+	the_map = model.t_variables_selected_identifiers.GetSelectedVariablesByUOA(model.getDb(), &model, &input_model);
+
+	PopulateUOAs();
+
+	PopulateDMUCounts();
+
+	ValidateUOAs();
+
+	DetermineChildMultiplicitiesGreaterThanOne();
+
+	PopulateVariableGroups();
+
+	PopulatePrimaryKeySequenceInfo();
+
+}
+
+void OutputModel::GenerateOutput(DataChangeMessage & change_response)
+{
 
 	InputModel & input_model = getInputModel();
 	sqlite3 * db = input_model.getDb();

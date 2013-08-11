@@ -10,6 +10,105 @@
 #include <memory>
 #include <tuple>
 
+class PrimaryKeySequence
+{
+
+public:
+
+	class VariableGroup_PrimaryKey_Info
+	{
+	public:
+		WidgetInstanceIdentifier vg_identifier;
+		WidgetInstanceIdentifier associated_uoa_identifier;
+		std::string column_name;
+		std::string column_name_no_uuid;
+		std::string table_column_name;
+		int sequence_number_within_dmu_category_variable_group_uoa;
+		int current_multiplicity;
+		int total_multiplicity;
+		std::string view_table_name;
+		std::string join_table_name;
+		std::string join_table_name_withtime;
+		bool is_primary_column_selected;
+		std::string datetime_row_start_column_name;
+		std::string datetime_row_end_column_name;
+		std::string datetime_row_start_column_name_no_uuid;
+		std::string datetime_row_end_column_name_no_uuid;
+		std::string datetime_row_start_table_column_name;
+		std::string datetime_row_end_table_column_name;
+	};
+
+	class PrimaryKeySequenceEntry
+	{
+	public:
+		WidgetInstanceIdentifier dmu_category;
+		int sequence_number_within_dmu_category_spin_control;
+		int sequence_number_within_dmu_category_primary_uoa;
+		int sequence_number_in_all_primary_keys;
+		std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys; // one per variable group 
+	};
+
+	std::vector<PrimaryKeySequenceEntry> primary_key_sequence_info; // one per primary key, in sequence
+
+};
+
+class ColumnsInTempView
+{
+
+public:
+
+	class ColumnInTempView
+	{
+
+	public:
+
+		enum COLUMN_TYPE
+		{
+			  COLUMN_TYPE__UNKNOWN = 0
+			, COLUMN_TYPE__PRIMARY
+			, COLUMN_TYPE__SECONDARY
+			, COLUMN_TYPE__DATETIMESTART
+			, COLUMN_TYPE__DATETIMEEND
+			, COLUMN_TYPE__DATETIMESTART_INTERNAL
+			, COLUMN_TYPE__DATETIMEEND_INTERNAL
+		};
+
+		ColumnInTempView()
+			: column_type(COLUMN_TYPE__UNKNOWN)
+			, primary_key_index_within_total_kad_for_dmu_category(-1)
+			, primary_key_index_within_total_kad_for_all_dmu_categories(-1)
+			, primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category(-1)
+			, primary_key_index_within_primary_uoa_for_dmu_category(-1)
+		{
+
+		}
+
+		std::string column_name;
+		std::string column_name_no_uuid;
+		std::string table_column_name;
+		WidgetInstanceIdentifier variable_group_identifier;
+		WidgetInstanceIdentifier uoa_associated_with_variable_group_identifier;
+		COLUMN_TYPE column_type;
+		WidgetInstanceIdentifier primary_key_dmu_category_identifier;
+		int primary_key_index_within_total_kad_for_dmu_category;
+		int primary_key_index_within_total_kad_for_all_dmu_categories;
+		int primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category;
+		int primary_key_index_within_primary_uoa_for_dmu_category;
+
+	};
+
+	ColumnsInTempView()
+		: view_number(-1)
+	{
+
+	}
+
+	std::vector<ColumnInTempView> columns_in_view;
+	int view_number;
+	std::string view_name;
+
+};
+
 class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS>
 {
 
@@ -38,6 +137,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 		void LoadTables();
 		void GenerateOutput(DataChangeMessage & change_response);
+		void GenerateOutput2(DataChangeMessage & change_response);
 
 		Table_VARIABLES_SELECTED t_variables_selected_identifiers;
 		Table_KAD_COUNT t_kad_count;
@@ -55,51 +155,88 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 		bool AddTimeRangeMergedRow(bool previous_is_null, bool current_is_null, sqlite3 * db, std::int64_t const datetime_start_new, std::int64_t const datetime_end_new, int & overall_column_number_previous, int & overall_column_number_current_regular, std::string & sql_columns, std::string & sql_values_previous_null, std::string & sql_values_previous_filled, std::string & sql_values_current_null, std::string & sql_values_current_filled, std::string & join_count_as_text, std::string const & join_table_with_time_ranges_name);
 		bool AddTimeRangeMergedRowTemp(bool previous_is_null, bool current_is_null, sqlite3 * db, std::int64_t const datetime_start_new, std::int64_t const datetime_end_new, int const overall_column_number_input_previous, int const overall_column_number_input_before_datetime, int const overall_column_number_input_after_datetime, std::string const & sql_columns, std::string const & sql_values_previous, std::string const & sql_values_previous_null, std::string const & sql_values_before_datetime, std::string const & sql_values_before_datetime_null, std::string const & sql_values_after_datetime, std::string const & sql_values_after_datetime_null, std::string const & join_table_with_time_ranges_name);
 
+		class OutputGenerator
+		{
+
+			public:
+
+				void GenerateOutput();
+			
+			private:
+
+				void PrepareData();
+				void PopulateDMUCounts();
+				void PopulateUOAs();
+				void ValidateUOAs();
+				void DetermineChildMultiplicitiesGreaterThanOne();
+				void PopulateVariableGroups();
+				void PopulatePrimaryKeySequenceInfo();
+
+				// ***************************************************************** //
+				// the_map is:
+				// Map: UOA identifier => [ map: VG identifier => list of variables ]
+				// ***************************************************************** //
+				Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map;
+
+				// ************************************************************************** //
+				// UOAs is:
+				// Vector of: UOA identifier and its associated list of [DMU Category / Count]
+				// ************************************************************************** //
+				// Place UOA's and their associated DMU categories into a vector for convenience
+				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> UOAs;
+				
+				// ************************************************************************************ //
+				// biggest_counts and child_counts are:
+				// Vector of: (one for each identical UOA, so that multiple, identical 
+				// UOA's may appear as multiple vector elements,
+				// except possibly for time granularity)
+				// Pair consisting of: UOA identifier and its associated list of [DMU Category / Count]
+				// ... for the UOA that has been determined to be the primary UOA.
+				// Ditto child_counts, but for child UOA's, with the limitation that all DMU categories
+				// but one must have 0 or the max number of DMU elements in the category.  For the one,
+				// it can have one but no other term.
+				// ************************************************************************************ //
+				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> biggest_counts;
+				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> child_counts;
+
+				// child_uoas__which_multiplicity_is_greater_than_1:
+				// Map of:
+				// UOA identifier => pair<DMU category identifier of the effective DMU category that, in relation to the child, has multiplicity greater than 1, ... and the given multiplicity>
+				std::map<WidgetInstanceIdentifier, std::pair<WidgetInstanceIdentifier, int>> child_uoas__which_multiplicity_is_greater_than_1;
+
+				// variable_group__key_names__vectors:
+				// A vector of: pair<vector<string>, vector<string>> - each such pair represents
+				// one variable group (with at least one variable selected by the user for output)
+				// ... and lists the internal *column names* used by this SQL query,
+				// one vector for the primary keys, and one for the non-primary (i.e., secondary) keys.
+				// Note that a UUID is appended to every variable name to avoid duplicates among variable groups.
+				// Also note that the order is preserved (stored) here, in case the user names
+				// columns in a different order with the same name in different variable groups.
+				VariableGroup__PrimaryKey_SecondaryKey_Names__Vector variable_group__key_names__vectors;
+
+				// variable_groups_vector:
+				// Vector:
+				// Variable group identifier,
+				// The selected variables in that group.
+				// (independent of time granularity; different time granularities can appear here)
+				// (Also, multiple, identical UOA's are acceptable, possibly differing in time granularity)
+				// I.e., possibly multiple PRIMARY variable groups, all corresponding to the same primary UOA (regardless of time granularity and/or UOA multiplicity)
+				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector variable_groups_vector;
+
+				PrimaryKeySequence sequence;
+
+				size_t number_primary_variable_groups;
+
+				OutputModel & model;
+				sqlite3 * db;
+
+				bool failed;
+
+		};
+
 };
 
 bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
-
-class PrimaryKeySequence
-{
-
-	public:
-	
-		class VariableGroup_PrimaryKey_Info
-		{
-			public:
-				WidgetInstanceIdentifier vg_identifier;
-				WidgetInstanceIdentifier associated_uoa_identifier;
-				std::string column_name;
-				std::string column_name_no_uuid;
-				std::string table_column_name;
-				int sequence_number_within_dmu_category_variable_group_uoa;
-				int current_multiplicity;
-				int total_multiplicity;
-				std::string view_table_name;
-				std::string join_table_name;
-				std::string join_table_name_withtime;
-				bool is_primary_column_selected;
-				std::string datetime_row_start_column_name;
-				std::string datetime_row_end_column_name;
-				std::string datetime_row_start_column_name_no_uuid;
-				std::string datetime_row_end_column_name_no_uuid;
-				std::string datetime_row_start_table_column_name;
-				std::string datetime_row_end_table_column_name;
-		};
-
-		class PrimaryKeySequenceEntry
-		{
-			public:
-				WidgetInstanceIdentifier dmu_category;
-				int sequence_number_within_dmu_category_spin_control;
-				int sequence_number_within_dmu_category_primary_uoa;
-				int sequence_number_in_all_primary_keys;
-				std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys; // one per variable group 
-		};
-
-		std::vector<PrimaryKeySequenceEntry> primary_key_sequence_info; // one per primary key, in sequence
-
-};
 
 class ColumnsInViews
 {
