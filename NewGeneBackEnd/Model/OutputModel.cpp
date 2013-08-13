@@ -91,11 +91,60 @@ void OutputModel::OutputGenerator::GenerateOutput()
 
 }
 
+void OutputModel::OutputGenerator::Prepare()
+{
+
+	input_model = model.getInputModel();
+
+	db = input_model.getDb();
+
+	the_map = model.t_variables_selected_identifiers.GetSelectedVariablesByUOA(model.getDb(), &model, &input_model);
+
+	PopulateUOAs();
+
+	PopulateDMUCounts();
+
+	ValidateUOAs();
+
+	DetermineChildMultiplicitiesGreaterThanOne();
+
+	PopulateVariableGroups();
+
+	PopulatePrimaryKeySequenceInfo();
+
+	ObtainColumnInfoForVariableGroups();
+
+}
+
+void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups()
+{
+
+	int view_count = 0;
+	std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &view_count](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
+	{
+
+		// ************************************************************************************************ //
+		// the_primary_variable_group:
+		// A pair: VG identifier -> Variables in this group selected by the user.
+		// ************************************************************************************************ //
+
+		// Convert data into a far more useful form for construction of K-adic output
+
+		primary_variable_groups_column_info.push_back(ColumnsInTempView());
+		ColumnsInTempView & columns_in_primary_variable_group_view = primary_variable_groups_column_info.back();
+
+		columns_in_primary_variable_group_view.view_number = view_count;
+		columns_in_primary_variable_group_view.view_name = *the_primary_variable_group.first.code;
+
+	});
+
+}
+
 void OutputModel::OutputGenerator::PopulateDMUCounts()
 {
 
 	bool first = true;
-	std::for_each(UOAs.cbegin(), UOAs.cend(), [&first, &biggest_counts, &child_counts, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
+	std::for_each(UOAs.cbegin(), UOAs.cend(), [this, &first](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
 	{
 
 		if (failed)
@@ -118,7 +167,7 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 		bool current_is_same = true;
 
 		int current = 0;
-		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [&biggest_counts, &current_is_bigger, &current_is_smaller, &current_is_same, &current](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
+		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [this, &current_is_bigger, &current_is_smaller, &current_is_same, &current](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
 		{
 			bool matched_current_dmu = false;
 			// Looking at the first entry in biggest_counts is the same as looking at any other entry
@@ -228,7 +277,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 	// Looking at the first entry in biggest_counts is the same as looking at any other entry
 	// in terms of the DMU counts
-	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &multiplicities, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &multiplicities, &highest_multiplicity, &highest_multiplicity_dmu_string_code](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
 	{
 		if (failed)
 		{
@@ -240,7 +289,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			failed = true;
 			return; // from lambda
 		}
-		WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->t_kad_count.getIdentifier(*the_dmu_category.uuid);
+		WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->model.t_kad_count.getIdentifier(*the_dmu_category.uuid);
 		int uoa_count_current_dmu_category = dmu_category.second;
 		int kad_count_current_dmu_category = kad_count_pair.second;
 		int multiplicity = 0;
@@ -282,7 +331,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	bool anything_has_multiplicity_greater_than_1 = false;
 	int which_index_has_multiplicity_greater_than_1 = -1;
 	int current_index = 0;
-	std::for_each(multiplicities.cbegin(), multiplicities.cend(), [&anything_has_multiplicity_greater_than_1, &which_index_has_multiplicity_greater_than_1, &current_index, &failed](int const & test_multiplicity)
+	std::for_each(multiplicities.cbegin(), multiplicities.cend(), [this, &anything_has_multiplicity_greater_than_1, &which_index_has_multiplicity_greater_than_1, &current_index](int const & test_multiplicity)
 	{
 		if (failed)
 		{
@@ -319,7 +368,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	// for only 1 DMU category,
 	// and this DMU category must match the DMU category with multiplicity greater than 1 (if any)
 	// for the primary UOAs
-	std::for_each(child_counts.cbegin(), child_counts.cend(), [&biggest_counts, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
+	std::for_each(child_counts.cbegin(), child_counts.cend(), [this, &highest_multiplicity, &highest_multiplicity_dmu_string_code](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
 	{
 		if (failed)
 		{
@@ -327,7 +376,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		}
 		int primary_dmu_categories_for_which_child_has_less = 0;
 		Table_UOA_Identifier::DMU_Counts const & current_dmu_counts = uoa__to__dmu_counts__pair.second;
-		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [&biggest_counts, &primary_dmu_categories_for_which_child_has_less, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
+		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [this, &primary_dmu_categories_for_which_child_has_less, &highest_multiplicity, &highest_multiplicity_dmu_string_code](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
 		{
 			if (failed)
 			{
@@ -338,7 +387,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				// just fine
 				return; // from lambda
 			}
-			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [&current_dmu_plus_count, &primary_dmu_categories_for_which_child_has_less, &highest_multiplicity, &highest_multiplicity_dmu_string_code, &failed](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
+			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &current_dmu_plus_count, &primary_dmu_categories_for_which_child_has_less, &highest_multiplicity, &highest_multiplicity_dmu_string_code](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
 			{
 				if (failed)
 				{
@@ -413,7 +462,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 void OutputModel::OutputGenerator::PopulateUOAs()
 {
-	std::for_each(the_map.cbegin(), the_map.cend(), [this, &input_model, &UOAs, &failed](std::pair<WidgetInstanceIdentifier /* UOA identifier */,
+	std::for_each(the_map.cbegin(), the_map.cend(), [this](std::pair<WidgetInstanceIdentifier /* UOA identifier */,
 		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map> /* map: VG identifier => List of variables */
 		const & uoa__to__variable_groups__pair)
 	{
@@ -498,17 +547,17 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 
 void OutputModel::OutputGenerator::PopulateVariableGroups()
 {
-	std::for_each(biggest_counts.cbegin(), biggest_counts.cend(), [&variable_groups_vector, &number_primary_variable_groups, &the_map](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
+	std::for_each(biggest_counts.cbegin(), biggest_counts.cend(), [&primary_variable_groups_vector, &number_primary_variable_groups, &the_map](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
 	{
 		// Get all the variable groups corresponding to the primary UOA (identical except possibly for time granularity)
 		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = the_map[uoa__to__dmu_category_counts.first];
 		number_primary_variable_groups += variable_groups_map_current.size();
-		variable_groups_vector.insert(variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
+		primary_variable_groups_vector.insert(primary_variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
 	});
-	std::for_each(child_counts.cbegin(), child_counts.cend(), [&variable_groups_vector, &the_map](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
+	std::for_each(child_counts.cbegin(), child_counts.cend(), [&secondary_variable_groups_vector, &number_secondary_variable_groups, &the_map](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
 	{
 		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = the_map[uoa__to__dmu_category_counts.first];
-		variable_groups_vector.insert(variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
+		secondary_variable_groups_vector.insert(secondary_variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
 	});
 }
 
@@ -734,28 +783,6 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 		}
 
 	});
-}
-
-void OutputModel::OutputGenerator::Prepare()
-{
-
-	input_model = getInputModel();
-	db = input_model.getDb();
-
-	the_map = model.t_variables_selected_identifiers.GetSelectedVariablesByUOA(model.getDb(), &model, &input_model);
-
-	PopulateUOAs();
-
-	PopulateDMUCounts();
-
-	ValidateUOAs();
-
-	DetermineChildMultiplicitiesGreaterThanOne();
-
-	PopulateVariableGroups();
-
-	PopulatePrimaryKeySequenceInfo();
-
 }
 
 void OutputModel::GenerateOutput(DataChangeMessage & change_response)

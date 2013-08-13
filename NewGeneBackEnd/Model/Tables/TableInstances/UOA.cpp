@@ -85,7 +85,7 @@ void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
 	}
 }
 
-WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 * db, InputModel * input_model_, UUID const & uuid)
+WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 const * db, InputModel * input_model_, UUID const & uuid)
 {
 
 	if (!db)
@@ -111,7 +111,7 @@ WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 * 
 
 }
 
-Table_UOA_Identifier::DMU_Counts Table_UOA_Identifier::RetrieveDMUCounts(sqlite3 * db, InputModel * input_model_, UUID const & uuid)
+Table_UOA_Identifier::DMU_Counts Table_UOA_Identifier::RetrieveDMUCounts(sqlite3 const * db, InputModel * input_model_, UUID const & uuid)
 {
 
 	if (!db)

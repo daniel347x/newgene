@@ -171,6 +171,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void DetermineChildMultiplicitiesGreaterThanOne();
 				void PopulateVariableGroups();
 				void PopulatePrimaryKeySequenceInfo();
+				void ObtainColumnInfoForVariableGroups();
 
 				// ***************************************************************** //
 				// the_map is:
@@ -221,11 +222,16 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// (independent of time granularity; different time granularities can appear here)
 				// (Also, multiple, identical UOA's are acceptable, possibly differing in time granularity)
 				// I.e., possibly multiple PRIMARY variable groups, all corresponding to the same primary UOA (regardless of time granularity and/or UOA multiplicity)
-				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector variable_groups_vector;
+				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector primary_variable_groups_vector;
+				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector secondary_variable_groups_vector;
 
 				PrimaryKeySequence sequence;
 
 				size_t number_primary_variable_groups;
+				size_t number_secondary_variable_groups;
+
+				std::vector<ColumnsInTempView> primary_variable_groups_column_info;
+				std::vector<ColumnsInTempView> secondary_variable_groups_column_info;
 
 				OutputModel & model;
 				InputModel & input_model;
