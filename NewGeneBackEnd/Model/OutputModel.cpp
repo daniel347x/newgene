@@ -80,25 +80,25 @@ std::string OutputModel::StripUUIDFromVariableName(std::string const & variable_
 	return stripped_variable_name;
 }
 
-void OutputModel::OutputGenerator::GenerateOutput()
-{
-
-	InputModel & input_model = model.getInputModel();
-	bool failed = false;
-	//std::string temp_dot("temp.");
-	std::string temp_dot("");
-	Prepare();
-
-}
+//void OutputModel::OutputGenerator::GenerateOutput()
+//{
+//
+//	InputModel & input_model = model.getInputModel();
+//	bool failed = false;
+//	//std::string temp_dot("temp.");
+//	std::string temp_dot("");
+//	Prepare();
+//
+//}
 
 void OutputModel::OutputGenerator::Prepare()
 {
 
-	input_model = model.getInputModel();
+	input_model = &model->getInputModel();
 
-	db = input_model.getDb();
+	db = input_model->getDb();
 
-	the_map = model.t_variables_selected_identifiers.GetSelectedVariablesByUOA(model.getDb(), &model, &input_model);
+	the_map = &model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, input_model);
 
 	PopulateUOAs();
 
@@ -289,7 +289,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			failed = true;
 			return; // from lambda
 		}
-		WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->model.t_kad_count.getIdentifier(*the_dmu_category.uuid);
+		WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->model->t_kad_count.getIdentifier(*the_dmu_category.uuid);
 		int uoa_count_current_dmu_category = dmu_category.second;
 		int kad_count_current_dmu_category = kad_count_pair.second;
 		int multiplicity = 0;
@@ -462,7 +462,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 void OutputModel::OutputGenerator::PopulateUOAs()
 {
-	std::for_each(the_map.cbegin(), the_map.cend(), [this](std::pair<WidgetInstanceIdentifier /* UOA identifier */,
+	std::for_each(the_map->cbegin(), the_map->cend(), [this](std::pair<WidgetInstanceIdentifier /* UOA identifier */,
 		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map> /* map: VG identifier => List of variables */
 		const & uoa__to__variable_groups__pair)
 	{
@@ -476,7 +476,7 @@ void OutputModel::OutputGenerator::PopulateUOAs()
 			failed = true;
 			return; // from lambda
 		}
-		Table_UOA_Identifier::DMU_Counts dmu_counts = input_model.t_uoa_category.RetrieveDMUCounts(getDb(), &input_model, *uoa.uuid);
+		Table_UOA_Identifier::DMU_Counts dmu_counts = input_model->t_uoa_category.RetrieveDMUCounts(input_model->getDb(), input_model, *uoa.uuid);
 		UOAs.push_back(std::make_pair(uoa, dmu_counts));
 	});
 }
@@ -486,7 +486,7 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 	// For child UOA's:
 	// Save the name/index of the DMU category multiplicity greater than one.
 	// Currently, this can be only one of the DMU categories.
-	std::for_each(child_counts.cbegin(), child_counts.cend(), [this, &child_uoas__which_multiplicity_is_greater_than_1, &failed](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & child_uoa__dmu_counts__pair)
+	std::for_each(child_counts.cbegin(), child_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & child_uoa__dmu_counts__pair)
 	{
 
 		if (failed)
@@ -495,7 +495,7 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 		}
 
 		WidgetInstanceIdentifier uoa_identifier = child_uoa__dmu_counts__pair.first;
-		std::for_each(child_uoa__dmu_counts__pair.second.cbegin(), child_uoa__dmu_counts__pair.second.cend(), [this, &uoa_identifier, &child_uoas__which_multiplicity_is_greater_than_1, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+		std::for_each(child_uoa__dmu_counts__pair.second.cbegin(), child_uoa__dmu_counts__pair.second.cend(), [this, &uoa_identifier](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
 		{
 
 			if (failed)
@@ -510,7 +510,7 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 				return; // from lambda
 			}
 
-			WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->t_kad_count.getIdentifier(*the_dmu_category_identifier.uuid);
+			WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->model->t_kad_count.getIdentifier(*the_dmu_category_identifier.uuid);
 			int uoa_k_count__current_dmu_category = dmu_category.second;
 			int k_spin_control_count__current_dmu_category = kad_count_pair.second;
 			int multiplicity = 0;
@@ -547,16 +547,16 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 
 void OutputModel::OutputGenerator::PopulateVariableGroups()
 {
-	std::for_each(biggest_counts.cbegin(), biggest_counts.cend(), [&primary_variable_groups_vector, &number_primary_variable_groups, &the_map](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
+	std::for_each(biggest_counts.cbegin(), biggest_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
 	{
 		// Get all the variable groups corresponding to the primary UOA (identical except possibly for time granularity)
-		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = the_map[uoa__to__dmu_category_counts.first];
+		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = (*the_map)[uoa__to__dmu_category_counts.first];
 		number_primary_variable_groups += variable_groups_map_current.size();
 		primary_variable_groups_vector.insert(primary_variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
 	});
-	std::for_each(child_counts.cbegin(), child_counts.cend(), [&secondary_variable_groups_vector, &number_secondary_variable_groups, &the_map](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
+	std::for_each(child_counts.cbegin(), child_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
 	{
-		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = the_map[uoa__to__dmu_category_counts.first];
+		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = (*the_map)[uoa__to__dmu_category_counts.first];
 		secondary_variable_groups_vector.insert(secondary_variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
 	});
 }
@@ -564,7 +564,7 @@ void OutputModel::OutputGenerator::PopulateVariableGroups()
 void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 {
 	int overall_primary_key_sequence_number = 0;
-	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &input_model, &sequence, &overall_primary_key_sequence_number, &variable_groups_vector, &failed](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &overall_primary_key_sequence_number](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
 	{
 		if (failed)
 		{
@@ -576,7 +576,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 			failed = true;
 			return; // from lambda
 		}
-		WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->t_kad_count.getIdentifier(*the_dmu_category.uuid);
+		WidgetInstanceIdentifier_Int_Pair kad_count_pair = this->model->t_kad_count.getIdentifier(*the_dmu_category.uuid);
 		int uoa_count_current_dmu_category = dmu_category.second;
 		int kad_count_current_dmu_category = kad_count_pair.second;
 
@@ -598,7 +598,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 			current_primary_key_sequence.sequence_number_in_all_primary_keys = overall_primary_key_sequence_number;
 
 			int view_count = 0;
-			std::for_each(variable_groups_vector.cbegin(), variable_groups_vector.cend(), [this, &input_model, &the_dmu_category, &sequence, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+			std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &the_dmu_category, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 			{
 				if (failed)
 				{
@@ -634,7 +634,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
 				// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
 				// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
-				WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model.t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
+				WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model->t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
 
 				// Todo: To implement global variables (i.e., variables with no primary key),
 				// make the necessary changes and then remove the following requirement
@@ -646,7 +646,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				}
 
 				int current_variable_group_current_primary_key_dmu_category_total_number = 0;
-				std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, &input_model, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category_total_number, &sequence, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &failed](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
+				std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, the_dmu_category, &current_variable_group_current_primary_key_dmu_category_total_number, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
 				{
 					if (current_variable_group_current_dmu_primary_key.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
 					{
@@ -679,7 +679,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				for (int m=0; m<multiplicity; ++m)
 				{
 					int current_variable_group_current_primary_key_dmu_category_sequence_number = 0;
-					std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, &m, &multiplicity, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category_total_sequence_number, &input_model, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category_sequence_number, &sequence, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &failed](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
+					std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, &m, &multiplicity, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category_total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category_sequence_number, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
 					{
 						if (failed)
 						{
@@ -732,7 +732,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								this_variable_group__this_primary_key__unique_name += newUUID(true);
 								current_variable_group_current_primary_key_info.column_name = this_variable_group__this_primary_key__unique_name;
 								WidgetInstanceIdentifier vg_setmember_identifier;
-								bool found_variable_group_set_member_identifier = input_model.t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(*current_variable_group_current_dmu_primary_key.longhand, *the_variable_group.first.uuid, vg_setmember_identifier);
+								bool found_variable_group_set_member_identifier = input_model->t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(*current_variable_group_current_dmu_primary_key.longhand, *the_variable_group.first.uuid, vg_setmember_identifier);
 								if (!found_variable_group_set_member_identifier)
 								{
 									failed = true;

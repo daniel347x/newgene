@@ -177,7 +177,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// the_map is:
 				// Map: UOA identifier => [ map: VG identifier => list of variables ]
 				// ***************************************************************** //
-				Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map;
+				Table_VARIABLES_SELECTED::UOA_To_Variables_Map * the_map;
 
 				// ************************************************************************** //
 				// UOAs is:
@@ -233,8 +233,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::vector<ColumnsInTempView> primary_variable_groups_column_info;
 				std::vector<ColumnsInTempView> secondary_variable_groups_column_info;
 
-				OutputModel & model;
-				InputModel & input_model;
+				OutputModel * model;
+				InputModel * input_model;
 				sqlite3 * db;
 
 				bool failed;

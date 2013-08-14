@@ -68,10 +68,6 @@ class Table_basemost
 		std::recursive_mutex data_mutex;
 		TABLE_MODEL_TYPE table_model_type;
 
-	private:
-
-		//Table_basemost & operator=(Table_basemost const & rhs) {}
-
 };
 
 template<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE CONTAINER_TYPE>
