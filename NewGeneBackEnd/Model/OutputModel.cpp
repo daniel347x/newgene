@@ -80,16 +80,16 @@ std::string OutputModel::StripUUIDFromVariableName(std::string const & variable_
 	return stripped_variable_name;
 }
 
-//void OutputModel::OutputGenerator::GenerateOutput()
-//{
-//
-//	InputModel & input_model = model.getInputModel();
-//	bool failed = false;
-//	//std::string temp_dot("temp.");
-//	std::string temp_dot("");
-//	Prepare();
-//
-//}
+void OutputModel::OutputGenerator::GenerateOutput()
+{
+
+	InputModel & input_model = model->getInputModel();
+	bool failed = false;
+	//std::string temp_dot("temp.");
+	std::string temp_dot("");
+	Prepare();
+
+}
 
 void OutputModel::OutputGenerator::Prepare()
 {
