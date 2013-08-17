@@ -439,7 +439,7 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 		char const * vg_data_datetime_end_column_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_DATETIME_END_COLUMN_NAME));
 		// maps:
 		// vg_data_table_name =>
-		// a pair of datetime keys
+		// a pair of datetime keys stuck into a vector (the first for the start datetime; the second for the end datetime)
 		// In the WidgetInstanceIdentifier, the CODE is set to the column name
 		identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_datetime_start_column_name)));
 		identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_datetime_end_column_name)));

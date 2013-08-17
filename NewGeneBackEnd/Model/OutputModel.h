@@ -83,12 +83,12 @@ public:
 
 		}
 
-		std::string column_name;
-		std::string column_name_no_uuid;
-		std::string table_column_name;
-		WidgetInstanceIdentifier variable_group_identifier;
-		WidgetInstanceIdentifier uoa_associated_with_variable_group_identifier;
-		COLUMN_TYPE column_type;
+		std::string column_name; // The name of the column in the temporary view (includes UUID)
+		std::string column_name_no_uuid; // The name of the column in the temporary view (without UUID)
+		std::string table_column_name; // The name of the column in the original raw data table corresponding to this column (if any)
+		WidgetInstanceIdentifier variable_group_identifier; // The variable group associated with this column
+		WidgetInstanceIdentifier uoa_associated_with_variable_group_identifier; // The unit of analysis associated with the variable group associated with this column
+		COLUMN_TYPE column_type; // Primary key?  Secondary column (i.e., data, not a primary key)?  One of the two special DateTime columns?
 		WidgetInstanceIdentifier primary_key_dmu_category_identifier;
 		int primary_key_index_within_total_kad_for_dmu_category;
 		int primary_key_index_within_total_kad_for_all_dmu_categories;
@@ -105,7 +105,9 @@ public:
 
 	std::vector<ColumnInTempView> columns_in_view;
 	int view_number;
+	bool has_no_datetime_columns;
 	std::string view_name;
+	std::string view_name_no_uuid;
 
 };
 
@@ -171,7 +173,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void DetermineChildMultiplicitiesGreaterThanOne();
 				void PopulateVariableGroups();
 				void PopulatePrimaryKeySequenceInfo();
-				void ObtainColumnInfoForVariableGroups();
+				void ObtainColumnInfoForVariableGroups(bool & failed);
 
 				// ***************************************************************** //
 				// the_map is:

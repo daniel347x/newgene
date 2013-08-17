@@ -116,11 +116,11 @@ void OutputModel::OutputGenerator::Prepare()
 
 }
 
-void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups()
+void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups(bool & failed)
 {
 
 	int view_count = 0;
-	std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &view_count](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
+	std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &view_count, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
 	{
 
 		// ************************************************************************************************ //
@@ -130,11 +130,24 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups()
 
 		// Convert data into a far more useful form for construction of K-adic output
 
+		if (failed)
+		{
+			return;
+		}
+
+		std::string vg_code = *the_primary_variable_group.first.code;
+		std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
+
 		primary_variable_groups_column_info.push_back(ColumnsInTempView());
 		ColumnsInTempView & columns_in_primary_variable_group_view = primary_variable_groups_column_info.back();
 
 		columns_in_primary_variable_group_view.view_number = view_count;
-		columns_in_primary_variable_group_view.view_name = *the_primary_variable_group.first.code;
+		std::string view_name;
+		view_name = *the_primary_variable_group.first.code;
+		columns_in_primary_variable_group_view.view_name_no_uuid = view_name;
+		view_name += "_";
+		view_name += newUUID(true);
+		columns_in_primary_variable_group_view.view_name = view_name;
 
 		WidgetInstanceIdentifiers & variables_in_primary_group = input_model->t_vgp_setmembers.getIdentifiers(*the_primary_variable_group.first.uuid);
 
@@ -144,7 +157,20 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups()
 			variables_in_primary_group_sorted.insert(variable_group_set_member);
 		});
 
-		std::for_each(variables_in_primary_group_sorted.cbegin(), variables_in_primary_group_sorted.cend(), [&columns_in_primary_variable_group_view](WidgetInstanceIdentifier const & variable_group_set_member)
+		WidgetInstanceIdentifiers & datetime_columns = input_model->t_vgp_data_metadata__datetime_columns.getIdentifiers(vg_data_table_name);
+		if (datetime_columns.size() > 0 && datetime_columns.size() != 2)
+		{
+			failed = true;
+			return;
+		}
+
+		columns_in_primary_variable_group_view.has_no_datetime_columns = false;
+		if (datetime_columns.size() == 0)
+		{
+			columns_in_primary_variable_group_view.has_no_datetime_columns = true;
+		}
+
+		std::for_each(variables_in_primary_group_sorted.cbegin(), variables_in_primary_group_sorted.cend(), [&columns_in_primary_variable_group_view, &datetime_columns, &the_primary_variable_group, &failed](WidgetInstanceIdentifier const & variable_group_set_member)
 		{
 			columns_in_primary_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 			ColumnsInTempView::ColumnInTempView & column_in_variable_group_data_table = columns_in_primary_variable_group_view.columns_in_view.back();
@@ -158,7 +184,36 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups()
 
 			column_in_variable_group_data_table.column_name = column_name;
 
-			//column_in_variable_group_data_table.column_type = 
+			column_in_variable_group_data_table.table_column_name = column_name_no_uuid;
+
+			column_in_variable_group_data_table.variable_group_identifier = the_primary_variable_group.first;
+
+			if (!the_primary_variable_group.first.identifier_parent)
+			{
+				failed = true;
+				return;
+			}
+
+			column_in_variable_group_data_table.uoa_associated_with_variable_group_identifier = *the_primary_variable_group.first.identifier_parent;
+
+			column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY;
+
+			if (datetime_columns.size())
+			{
+				if (datetime_columns[0].code && variable_group_set_member.code && *datetime_columns[0].code == *variable_group_set_member.code)
+				{
+					// The current column is the datetime_start column
+					column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART;
+				}
+				else if (datetime_columns[1].code && variable_group_set_member.code && *datetime_columns[1].code == *variable_group_set_member.code)
+				{
+					// The current column is the datetime_end column
+					column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND;
+				}
+			}
+
+			column_in_variable_group_data_table.primary_key_dmu_category_identifier = 
+
 		});
 
 	});

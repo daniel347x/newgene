@@ -31,6 +31,7 @@ class InputModel : public Model<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETT
 
 		VariableGroup_DataTables t_vgp_data_vector;
 		Table_VariableGroupMetadata_PrimaryKeys t_vgp_data_metadata__primary_keys;
+		Table_VariableGroupMetadata_DateTimeColumns t_vgp_data_metadata__datetime_columns;
 
 };
 

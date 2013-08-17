@@ -184,6 +184,10 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 		WidgetInstanceIdentifiers getIdentifiers(UUID const & uuid)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			if (identifiers_map.find(uuid) == identifiers_map.end())
+			{
+				return WidgetInstanceIdentifiers();
+			}
 			return identifiers_map[uuid];
 		}
 

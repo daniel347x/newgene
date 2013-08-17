@@ -71,6 +71,9 @@ void InputModel::LoadTables()
 
 		t_vgp_data_metadata__primary_keys.Load(db, this);
 		t_vgp_data_metadata__primary_keys.Sort();
+
+		t_vgp_data_metadata__datetime_columns.Load(db, this);
+		// Do not sort!!!
 	}
 
 }
