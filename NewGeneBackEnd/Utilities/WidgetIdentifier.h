@@ -107,7 +107,7 @@ public:
 
 	}
 
-	WidgetInstanceIdentifier(std::string code_, std::string description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY const time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
+	WidgetInstanceIdentifier(std::string code_, std::string description_ = "", int const sequence_number_or_count_ = -1, char const * const flags_ = "", TIME_GRANULARITY const time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
 		: code(std::make_shared<std::string>(code_))
 		, sequence_number_or_count(sequence_number_or_count_)
 		, longhand(std::make_shared<std::string>(description_))

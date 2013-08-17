@@ -36,7 +36,7 @@ public:
 
 };
 
-class Table_VariableGroupMetadata_PrimaryKeys : public Table<TABLE__VG_INPUT_DATA_METADATA, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>
+class Table_VariableGroupMetadata_PrimaryKeys : public Table<TABLE__VG_INPUT_DATA_METADATA_PRIMARY_KEYS, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>
 {
 
 public:
@@ -57,7 +57,36 @@ public:
 public:
 
 	Table_VariableGroupMetadata_PrimaryKeys()
-		: Table<TABLE__VG_INPUT_DATA_METADATA, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>(Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
+		: Table<TABLE__VG_INPUT_DATA_METADATA_PRIMARY_KEYS, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>(Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
+	{
+
+	}
+
+	void Load(sqlite3 * db, InputModel * input_model_);
+
+};
+
+
+class Table_VariableGroupMetadata_DateTimeColumns : public Table<TABLE__VG_INPUT_DATA_METADATA_DATETIME_COLUMNS, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>
+{
+
+public:
+
+	static std::string const VG_DATA_TABLE_NAME;
+	static std::string const VG_DATA_TABLE_DATETIME_START_COLUMN_NAME;
+	static std::string const VG_DATA_TABLE_DATETIME_END_COLUMN_NAME;
+
+	enum DATETIME_INDEX
+	{
+		  INDEX__VG_DATA_TABLE_NAME = 0
+		, INDEX__VG_DATA_TABLE_DATETIME_START_COLUMN_NAME
+		, INDEX__VG_DATA_TABLE_DATETIME_END_COLUMN_NAME
+	};
+
+public:
+
+	Table_VariableGroupMetadata_DateTimeColumns()
+		: Table<TABLE__VG_INPUT_DATA_METADATA_DATETIME_COLUMNS, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>(Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
 	{
 
 	}

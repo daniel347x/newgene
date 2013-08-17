@@ -11,6 +11,10 @@ std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_PRIMARY
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_FK_DMU_CATEGORY_CODE = "VG_DATA_TABLE_FK_DMU_CATEGORY_CODE";
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER = "VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER";
 
+std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_TABLE_NAME = "VG_DATA_TABLE_NAME";
+std::string const Table_VariableGroupMetadata_DateTimeColumns::INDEX__VG_DATA_TABLE_DATETIME_START_COLUMN_NAME = "VG_DATETIME_START_COLUMN_NAME";
+std::string const Table_VariableGroupMetadata_DateTimeColumns::INDEX__VG_DATA_TABLE_DATETIME_END_COLUMN_NAME = "VG_DATETIME_END_COLUMN_NAME";
+
 void Table_VariableGroupData::Load(sqlite3 * db, InputModel * input_model_)
 {
 }
@@ -407,8 +411,38 @@ void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * in
 			// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
 			// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
 			identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_dmu_category_code), vg_data_primary_key_column_name, vg_data_primary_key_sequence_number));
-			//identifiers_map[vg_data_table_name].back().identifier_parent = input_model_->t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(vg_data_primary_key_column_name, input_model_->t);
 		}
+	}
+
+}
+
+void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel * input_model_)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	identifiers_map.clear();
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT * FROM VG_DATA_METADATA__PRIMARY_KEYS");
+	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		return;
+	}
+	int step_result = 0;
+
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		char const * vg_data_table_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_NAME));
+		char const * vg_data_datetime_start_column_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_DATETIME_START_COLUMN_NAME));
+		char const * vg_data_datetime_end_column_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_DATETIME_END_COLUMN_NAME));
+		// maps:
+		// vg_data_table_name =>
+		// a pair of datetime keys
+		// In the WidgetInstanceIdentifier, the CODE is set to the column name
+		identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_datetime_start_column_name)));
+		identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_datetime_end_column_name)));
 	}
 
 }
