@@ -136,6 +136,31 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups()
 		columns_in_primary_variable_group_view.view_number = view_count;
 		columns_in_primary_variable_group_view.view_name = *the_primary_variable_group.first.code;
 
+		WidgetInstanceIdentifiers & variables_in_primary_group = input_model->t_vgp_setmembers.getIdentifiers(*the_primary_variable_group.first.uuid);
+
+		std::set<WidgetInstanceIdentifier> variables_in_primary_group_sorted;
+		std::for_each(variables_in_primary_group.cbegin(), variables_in_primary_group.cend(), [&variables_in_primary_group_sorted](WidgetInstanceIdentifier const & variable_group_set_member)
+		{
+			variables_in_primary_group_sorted.insert(variable_group_set_member);
+		});
+
+		std::for_each(variables_in_primary_group_sorted.cbegin(), variables_in_primary_group_sorted.cend(), [&columns_in_primary_variable_group_view](WidgetInstanceIdentifier const & variable_group_set_member)
+		{
+			columns_in_primary_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+			ColumnsInTempView::ColumnInTempView & column_in_variable_group_data_table = columns_in_primary_variable_group_view.columns_in_view.back();
+
+			std::string column_name_no_uuid = *variable_group_set_member.code;
+			column_in_variable_group_data_table.column_name_no_uuid = column_name_no_uuid;
+
+			std::string column_name = column_name_no_uuid;
+			column_name += "_";
+			column_name += newUUID(true);
+
+			column_in_variable_group_data_table.column_name = column_name;
+
+			//column_in_variable_group_data_table.column_type = 
+		});
+
 	});
 
 }
@@ -634,7 +659,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
 				// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
 				// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
-				WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model->t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
+				WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model->t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
 
 				// Todo: To implement global variables (i.e., variables with no primary key),
 				// make the necessary changes and then remove the following requirement
@@ -1354,7 +1379,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 				// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
 				// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
 				// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
-				WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model.t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
+				WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model.t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
 
 				// Todo: To implement global variables (i.e., variables with no primary key),
 				// make the necessary changes and then remove the following requirement
@@ -1593,7 +1618,7 @@ void OutputModel::GenerateOutput(DataChangeMessage & change_response)
 		// This metadata just states which DMU category the key refers to,
 		// what the total (overall) sequence number is of the primary key in the variable group table,
 		// and the column name in the variable group table for this column.
-		WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model.t_vgp_data_metadata.getIdentifiers(vg_data_table_name);
+		WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model.t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
 
 		// Todo: To implement global variables (i.e., variables with no primary key),
 		// make the necessary changes and then remove the following requirement

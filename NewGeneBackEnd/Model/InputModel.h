@@ -30,7 +30,7 @@ class InputModel : public Model<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETT
 		Table_VG_SET_MEMBER t_vgp_setmembers;
 
 		VariableGroup_DataTables t_vgp_data_vector;
-		Table_VariableGroupMetadata t_vgp_data_metadata;
+		Table_VariableGroupMetadata_PrimaryKeys t_vgp_data_metadata__primary_keys;
 
 };
 

@@ -36,7 +36,7 @@ public:
 
 };
 
-class Table_VariableGroupMetadata : public Table<TABLE__VG_INPUT_DATA_METADATA, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>
+class Table_VariableGroupMetadata_PrimaryKeys : public Table<TABLE__VG_INPUT_DATA_METADATA, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>
 {
 
 public:
@@ -56,7 +56,7 @@ public:
 
 public:
 
-	Table_VariableGroupMetadata()
+	Table_VariableGroupMetadata_PrimaryKeys()
 		: Table<TABLE__VG_INPUT_DATA_METADATA, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>(Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
 	{
 

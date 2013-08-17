@@ -69,8 +69,8 @@ void InputModel::LoadTables()
 			}
 		});
 
-		t_vgp_data_metadata.Load(db, this);
-		t_vgp_data_metadata.Sort();
+		t_vgp_data_metadata__primary_keys.Load(db, this);
+		t_vgp_data_metadata__primary_keys.Sort();
 	}
 
 }

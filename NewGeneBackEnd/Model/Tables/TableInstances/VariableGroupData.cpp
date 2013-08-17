@@ -6,10 +6,10 @@
 #	include <boost/lexical_cast.hpp>
 #endif
 
-std::string const Table_VariableGroupMetadata::VG_DATA_TABLE_NAME = "VG_DATA_TABLE_NAME";
-std::string const Table_VariableGroupMetadata::VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME = "VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME";
-std::string const Table_VariableGroupMetadata::VG_DATA_TABLE_FK_DMU_CATEGORY_CODE = "VG_DATA_TABLE_FK_DMU_CATEGORY_CODE";
-std::string const Table_VariableGroupMetadata::VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER = "VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER";
+std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_NAME = "VG_DATA_TABLE_NAME";
+std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME = "VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME";
+std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_FK_DMU_CATEGORY_CODE = "VG_DATA_TABLE_FK_DMU_CATEGORY_CODE";
+std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER = "VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER";
 
 void Table_VariableGroupData::Load(sqlite3 * db, InputModel * input_model_)
 {
@@ -376,7 +376,7 @@ std::string Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(int con
 	return join_view_name;
 }
 
-void Table_VariableGroupMetadata::Load(sqlite3 * db, InputModel * input_model_)
+void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * input_model_)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -384,7 +384,7 @@ void Table_VariableGroupMetadata::Load(sqlite3 * db, InputModel * input_model_)
 	identifiers_map.clear();
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT * FROM VG_DATA_METADATA");
+	std::string sql("SELECT * FROM VG_DATA_METADATA__PRIMARY_KEYS");
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
