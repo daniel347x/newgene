@@ -133,10 +133,19 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 {
 
-	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
-	
+		if (failed)
+		{
+			return;
+		}
+		ConstructFullOutputForSinglePrimaryGroup(primary_variable_group_raw_data_columns);
 	});
+
+}
+
+void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns)
+{
 
 }
 
