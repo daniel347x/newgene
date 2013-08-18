@@ -23,13 +23,30 @@ public:
 		std::string column_name;
 		std::string column_name_no_uuid;
 		std::string table_column_name;
+
+		// For example:
+		// Primary UOA:
+		// A B B B B C C
+		// Selected K-ad:
+		// A B B B B B B B B C C
+		// Variable group's UOA (were this allowed, as it could be in the future):
+		// A B B
+		// ... then, the primary key sequence will include eight entries for "B"
+		// And for the given variable group, we have,
+		// for the following three integers for each of the eight "B"'s:
+		// B    B    B    B    B    B    B    B
+		// ^114 ^214 ^124 ^224 ^134 ^234 ^144 ^244
 		int sequence_number_within_dmu_category_variable_group_uoa;
 		int current_multiplicity;
 		int total_multiplicity;
+
+
 		std::string view_table_name;
 		std::string join_table_name;
 		std::string join_table_name_withtime;
 		bool is_primary_column_selected;
+
+		// Unused in new algorithm
 		std::string datetime_row_start_column_name;
 		std::string datetime_row_end_column_name;
 		std::string datetime_row_start_column_name_no_uuid;
@@ -106,6 +123,7 @@ public:
 	std::vector<ColumnInTempView> columns_in_view;
 	int view_number;
 	bool has_no_datetime_columns;
+	std::string original_table_name;
 	std::string view_name;
 	std::string view_name_no_uuid;
 

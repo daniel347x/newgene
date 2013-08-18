@@ -94,6 +94,8 @@ void OutputModel::OutputGenerator::GenerateOutput()
 void OutputModel::OutputGenerator::Prepare()
 {
 
+	bool failed = false;
+
 	input_model = &model->getInputModel();
 
 	db = input_model->getDb();
@@ -112,7 +114,7 @@ void OutputModel::OutputGenerator::Prepare()
 
 	PopulatePrimaryKeySequenceInfo();
 
-	ObtainColumnInfoForVariableGroups();
+	ObtainColumnInfoForVariableGroups(failed);
 
 }
 
@@ -149,6 +151,8 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups(bool & fail
 		view_name += newUUID(true);
 		columns_in_primary_variable_group_view.view_name = view_name;
 
+		columns_in_primary_variable_group_view.original_table_name = vg_data_table_name;
+
 		WidgetInstanceIdentifiers & variables_in_primary_group = input_model->t_vgp_setmembers.getIdentifiers(*the_primary_variable_group.first.uuid);
 
 		std::set<WidgetInstanceIdentifier> variables_in_primary_group_sorted;
@@ -170,7 +174,7 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups(bool & fail
 			columns_in_primary_variable_group_view.has_no_datetime_columns = true;
 		}
 
-		std::for_each(variables_in_primary_group_sorted.cbegin(), variables_in_primary_group_sorted.cend(), [&columns_in_primary_variable_group_view, &datetime_columns, &the_primary_variable_group, &failed](WidgetInstanceIdentifier const & variable_group_set_member)
+		std::for_each(variables_in_primary_group_sorted.cbegin(), variables_in_primary_group_sorted.cend(), [this, &columns_in_primary_variable_group_view, &datetime_columns, &the_primary_variable_group, &failed](WidgetInstanceIdentifier const & variable_group_set_member)
 		{
 			columns_in_primary_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 			ColumnsInTempView::ColumnInTempView & column_in_variable_group_data_table = columns_in_primary_variable_group_view.columns_in_view.back();
@@ -212,7 +216,26 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups(bool & fail
 				}
 			}
 
-			column_in_variable_group_data_table.primary_key_dmu_category_identifier = 
+			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&the_primary_variable_group, &column_in_variable_group_data_table](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key_entry)
+			{
+				std::for_each(primary_key_entry.variable_group_info_for_primary_keys.cbegin(), primary_key_entry.variable_group_info_for_primary_keys.cend(), [&the_primary_variable_group, &column_in_variable_group_data_table, &primary_key_entry](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
+				{
+					if (current_variable_group_primary_key_entry.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_primary_variable_group.first))
+					{
+						if (!current_variable_group_primary_key_entry.column_name.empty())
+						{
+							if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, column_in_variable_group_data_table.table_column_name))
+							{
+								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry.dmu_category;
+								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_spin_control;
+								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_all_dmu_categories = primary_key_entry.sequence_number_in_all_primary_keys;
+								column_in_variable_group_data_table.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_variable_group_uoa;
+								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_primary_uoa;
+							}
+						}
+					}
+				});
+			});
 
 		});
 
