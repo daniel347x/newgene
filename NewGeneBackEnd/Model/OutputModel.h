@@ -195,6 +195,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 			
 			private:
 
+				typedef std::pair<std::vector<std::string>, ColumnsInTempView> SqlAndColumnSet;
+				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;
+
+				// Initialize generator
 				void Prepare();
 				void PopulateDMUCounts();
 				void PopulateUOAs();
@@ -202,13 +206,18 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void DetermineChildMultiplicitiesGreaterThanOne();
 				void PopulateVariableGroups();
 				void PopulatePrimaryKeySequenceInfo();
+
+				// Functions involved in different phases of generation
 				void ObtainColumnInfoForRawDataTables();
 				void PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count, std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary);
 				void LoopThroughPrimaryVariableGroups();
 				void MergeHighLevelGroupResults();
-				void ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns);
-				void CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns);
-				void CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns);
+				void ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets);
+				SqlAndColumnSet CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns);
+				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns);
+
+				// Save the SQL and column sets corresponding to each primary variable group in a global data structure
+				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
 
 				// ***************************************************************** //
 				// the_map is:

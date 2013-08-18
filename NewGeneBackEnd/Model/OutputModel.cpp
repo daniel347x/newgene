@@ -139,21 +139,26 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 		{
 			return;
 		}
-		ConstructFullOutputForSinglePrimaryGroup(primary_variable_group_raw_data_columns);
+		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
+		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
+		ConstructFullOutputForSinglePrimaryGroup(primary_variable_group_raw_data_columns, primary_group_column_sets);
 	});
 
 }
 
-void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns)
+void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets)
 {
-	CreateInitialPrimaryXTable(primary_variable_group_raw_data_columns);
+
+	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable(primary_variable_group_raw_data_columns);
+	sql_and_column_sets.push_back(x_table_result);
 
 	if (failed)
 	{
 		return;
 	}
 
-	CreateInitialPrimaryXRTable(primary_variable_group_raw_data_columns);
+	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(primary_variable_group_raw_data_columns);
+	sql_and_column_sets.push_back(x_table_result);
 
 	if (failed)
 	{
@@ -162,12 +167,12 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 }
 
-void OutputModel::OutputGenerator::CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns)
 {
 
 }
 
-void OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns)
 {
 
 }
