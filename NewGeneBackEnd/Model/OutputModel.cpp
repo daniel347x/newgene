@@ -115,6 +115,29 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	MergeHighLevelGroupResults();
+
+	if (failed)
+	{
+		// failed
+		return;
+	}
+
+}
+
+void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
+{
+
+}
+
+void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
+{
+
+	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	{
+	
+	});
+
 }
 
 void OutputModel::OutputGenerator::Prepare()
