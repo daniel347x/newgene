@@ -89,13 +89,25 @@ OutputModel::OutputGenerator::OutputGenerator(OutputModel & model_)
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
 {
 
-	bool failed = false;
+	bool failed_or_succeeded = false;
 
 	InputModel & input_model = model->getInputModel();
 
-	Prepare(failed);
+	Prepare(failed_or_succeeded);
+	if (failed_or_succeeded)
+	{
+		// failed
+		return;
+	}
 
-	ObtainColumnInfoForVariableGroups(failed);
+	ObtainColumnInfoForVariableGroups(failed_or_succeeded);
+	if (failed_or_succeeded)
+	{
+		// failed
+		return;
+	}
+
+
 
 }
 
