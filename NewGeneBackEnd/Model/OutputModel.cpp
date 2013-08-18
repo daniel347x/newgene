@@ -99,7 +99,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	ObtainColumnInfoForVariableGroups();
+	ObtainColumnInfoForRawDataTables();
 
 	if (failed)
 	{
@@ -107,7 +107,13 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	LoopThroughPrimaryVariableGroups();
 
+	if (failed)
+	{
+		// failed
+		return;
+	}
 
 }
 
@@ -140,7 +146,7 @@ void OutputModel::OutputGenerator::Prepare()
 
 }
 
-void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups()
+void OutputModel::OutputGenerator::ObtainColumnInfoForRawDataTables()
 {
 
 	int primary_view_count = 0;
