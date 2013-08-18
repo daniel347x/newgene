@@ -100,7 +100,8 @@ void OutputModel::OutputGenerator::Prepare()
 
 	db = input_model->getDb();
 
-	the_map = &model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, input_model);
+	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, input_model);
+	the_map = &the_map_;
 
 	PopulateUOAs();
 
