@@ -207,6 +207,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void LoopThroughPrimaryVariableGroups();
 				void MergeHighLevelGroupResults();
 				void ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns);
+				void CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns);
+				void CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns);
 
 				// ***************************************************************** //
 				// the_map is:

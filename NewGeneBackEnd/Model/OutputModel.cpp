@@ -146,6 +146,29 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 
 void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns)
 {
+	CreateInitialPrimaryXTable(primary_variable_group_raw_data_columns);
+
+	if (failed)
+	{
+		return;
+	}
+
+	CreateInitialPrimaryXRTable(primary_variable_group_raw_data_columns);
+
+	if (failed)
+	{
+		return;
+	}
+
+}
+
+void OutputModel::OutputGenerator::CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns)
+{
+
+}
+
+void OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns)
+{
 
 }
 
