@@ -121,122 +121,140 @@ void OutputModel::OutputGenerator::Prepare()
 void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups(bool & failed)
 {
 
-	int view_count = 0;
-	std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &view_count, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
+	int primary_view_count = 0;
+	std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &primary_view_count, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
 	{
+		PopulateColumnsFromRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true, failed);
+	});
 
-		// ************************************************************************************************ //
-		// the_primary_variable_group:
-		// A pair: VG identifier -> Variables in this group selected by the user.
-		// ************************************************************************************************ //
+	int secondary_view_count = 0;
+	std::for_each(secondary_variable_groups_vector.cbegin(), secondary_variable_groups_vector.cend(), [this, &secondary_view_count, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_secondary_variable_group)
+	{
+		PopulateColumnsFromRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_column_info, false, failed);
+	});
 
-		// Convert data into a far more useful form for construction of K-adic output
+}
 
-		if (failed)
-		{
-			return;
-		}
+void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group, int view_count, std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, bool & failed)
+{
 
-		std::string vg_code = *the_primary_variable_group.first.code;
-		std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
+	// ************************************************************************************************ //
+	// the_variable_group:
+	// A pair: VG identifier -> Variables in this group selected by the user.
+	// ************************************************************************************************ //
 
-		primary_variable_groups_column_info.push_back(ColumnsInTempView());
-		ColumnsInTempView & columns_in_primary_variable_group_view = primary_variable_groups_column_info.back();
+	// Convert data into a far more useful form for construction of K-adic output
 
-		columns_in_primary_variable_group_view.view_number = view_count;
-		std::string view_name;
-		view_name = *the_primary_variable_group.first.code;
-		columns_in_primary_variable_group_view.view_name_no_uuid = view_name;
-		view_name += "_";
-		view_name += newUUID(true);
-		columns_in_primary_variable_group_view.view_name = view_name;
+	if (failed)
+	{
+		return;
+	}
 
-		columns_in_primary_variable_group_view.original_table_name = vg_data_table_name;
+	std::string vg_code = *the_variable_group.first.code;
+	std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
 
-		WidgetInstanceIdentifiers & variables_in_primary_group = input_model->t_vgp_setmembers.getIdentifiers(*the_primary_variable_group.first.uuid);
+	variable_groups_column_info.push_back(ColumnsInTempView());
+	ColumnsInTempView & columns_in_variable_group_view = variable_groups_column_info.back();
 
-		std::set<WidgetInstanceIdentifier> variables_in_primary_group_sorted;
-		std::for_each(variables_in_primary_group.cbegin(), variables_in_primary_group.cend(), [&variables_in_primary_group_sorted](WidgetInstanceIdentifier const & variable_group_set_member)
-		{
-			variables_in_primary_group_sorted.insert(variable_group_set_member);
-		});
+	columns_in_variable_group_view.view_number = view_count;
+	std::string view_name;
+	view_name = *the_variable_group.first.code;
+	columns_in_variable_group_view.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	columns_in_variable_group_view.view_name = view_name;
 
-		WidgetInstanceIdentifiers & datetime_columns = input_model->t_vgp_data_metadata__datetime_columns.getIdentifiers(vg_data_table_name);
-		if (datetime_columns.size() > 0 && datetime_columns.size() != 2)
+	columns_in_variable_group_view.original_table_name = vg_data_table_name;
+
+	WidgetInstanceIdentifiers & variables_in_group = input_model->t_vgp_setmembers.getIdentifiers(*the_variable_group.first.uuid);
+
+	std::set<WidgetInstanceIdentifier> variables_in_group_sorted;
+	std::for_each(variables_in_group.cbegin(), variables_in_group.cend(), [&variables_in_group_sorted](WidgetInstanceIdentifier const & variable_group_set_member)
+	{
+		variables_in_group_sorted.insert(variable_group_set_member);
+	});
+
+	WidgetInstanceIdentifiers & datetime_columns = input_model->t_vgp_data_metadata__datetime_columns.getIdentifiers(vg_data_table_name);
+	if (datetime_columns.size() > 0 && datetime_columns.size() != 2)
+	{
+		failed = true;
+		return;
+	}
+
+	columns_in_variable_group_view.has_no_datetime_columns = false;
+	if (datetime_columns.size() == 0)
+	{
+		columns_in_variable_group_view.has_no_datetime_columns = true;
+	}
+
+	std::for_each(variables_in_group_sorted.cbegin(), variables_in_group_sorted.cend(), [this, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group, &failed](WidgetInstanceIdentifier const & variable_group_set_member)
+	{
+		columns_in_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & column_in_variable_group_data_table = columns_in_variable_group_view.columns_in_view.back();
+
+		std::string column_name_no_uuid = *variable_group_set_member.code;
+		column_in_variable_group_data_table.column_name_no_uuid = column_name_no_uuid;
+
+		std::string column_name = column_name_no_uuid;
+		column_name += "_";
+		column_name += newUUID(true);
+
+		column_in_variable_group_data_table.column_name = column_name;
+
+		column_in_variable_group_data_table.table_column_name = column_name_no_uuid;
+
+		column_in_variable_group_data_table.variable_group_identifier = the_variable_group.first;
+
+		if (!the_variable_group.first.identifier_parent)
 		{
 			failed = true;
 			return;
 		}
 
-		columns_in_primary_variable_group_view.has_no_datetime_columns = false;
-		if (datetime_columns.size() == 0)
+		column_in_variable_group_data_table.uoa_associated_with_variable_group_identifier = *the_variable_group.first.identifier_parent;
+
+		if (is_primary)
 		{
-			columns_in_primary_variable_group_view.has_no_datetime_columns = true;
+			column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY;
+		}
+		else
+		{
+			column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
 		}
 
-		std::for_each(variables_in_primary_group_sorted.cbegin(), variables_in_primary_group_sorted.cend(), [this, &columns_in_primary_variable_group_view, &datetime_columns, &the_primary_variable_group, &failed](WidgetInstanceIdentifier const & variable_group_set_member)
+		if (datetime_columns.size())
 		{
-			columns_in_primary_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-			ColumnsInTempView::ColumnInTempView & column_in_variable_group_data_table = columns_in_primary_variable_group_view.columns_in_view.back();
-
-			std::string column_name_no_uuid = *variable_group_set_member.code;
-			column_in_variable_group_data_table.column_name_no_uuid = column_name_no_uuid;
-
-			std::string column_name = column_name_no_uuid;
-			column_name += "_";
-			column_name += newUUID(true);
-
-			column_in_variable_group_data_table.column_name = column_name;
-
-			column_in_variable_group_data_table.table_column_name = column_name_no_uuid;
-
-			column_in_variable_group_data_table.variable_group_identifier = the_primary_variable_group.first;
-
-			if (!the_primary_variable_group.first.identifier_parent)
+			if (datetime_columns[0].code && variable_group_set_member.code && *datetime_columns[0].code == *variable_group_set_member.code)
 			{
-				failed = true;
-				return;
+				// The current column is the datetime_start column
+				column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART;
 			}
-
-			column_in_variable_group_data_table.uoa_associated_with_variable_group_identifier = *the_primary_variable_group.first.identifier_parent;
-
-			column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY;
-
-			if (datetime_columns.size())
+			else if (datetime_columns[1].code && variable_group_set_member.code && *datetime_columns[1].code == *variable_group_set_member.code)
 			{
-				if (datetime_columns[0].code && variable_group_set_member.code && *datetime_columns[0].code == *variable_group_set_member.code)
-				{
-					// The current column is the datetime_start column
-					column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART;
-				}
-				else if (datetime_columns[1].code && variable_group_set_member.code && *datetime_columns[1].code == *variable_group_set_member.code)
-				{
-					// The current column is the datetime_end column
-					column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND;
-				}
+				// The current column is the datetime_end column
+				column_in_variable_group_data_table.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND;
 			}
+		}
 
-			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&the_primary_variable_group, &column_in_variable_group_data_table](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key_entry)
+		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&the_variable_group, &column_in_variable_group_data_table](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key_entry)
+		{
+			std::for_each(primary_key_entry.variable_group_info_for_primary_keys.cbegin(), primary_key_entry.variable_group_info_for_primary_keys.cend(), [&the_variable_group, &column_in_variable_group_data_table, &primary_key_entry](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
 			{
-				std::for_each(primary_key_entry.variable_group_info_for_primary_keys.cbegin(), primary_key_entry.variable_group_info_for_primary_keys.cend(), [&the_primary_variable_group, &column_in_variable_group_data_table, &primary_key_entry](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
+				if (current_variable_group_primary_key_entry.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))
 				{
-					if (current_variable_group_primary_key_entry.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_primary_variable_group.first))
+					if (!current_variable_group_primary_key_entry.column_name.empty())
 					{
-						if (!current_variable_group_primary_key_entry.column_name.empty())
+						if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, column_in_variable_group_data_table.table_column_name))
 						{
-							if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, column_in_variable_group_data_table.table_column_name))
-							{
-								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry.dmu_category;
-								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_spin_control;
-								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_all_dmu_categories = primary_key_entry.sequence_number_in_all_primary_keys;
-								column_in_variable_group_data_table.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_variable_group_uoa;
-								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_primary_uoa;
-							}
+							column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry.dmu_category;
+							column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_spin_control;
+							column_in_variable_group_data_table.primary_key_index_within_total_kad_for_all_dmu_categories = primary_key_entry.sequence_number_in_all_primary_keys;
+							column_in_variable_group_data_table.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_variable_group_uoa;
+							column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_primary_uoa;
 						}
 					}
-				});
+				}
 			});
-
 		});
 
 	});
