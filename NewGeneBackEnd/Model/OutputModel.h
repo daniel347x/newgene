@@ -232,23 +232,35 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// Place UOA's and their associated DMU categories into a vector for convenience
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> UOAs;
 				
-				// ************************************************************************************ //
+				// ****************************************************************************************** //
 				// biggest_counts and child_counts are:
-				// Vector of: (one for each identical UOA, so that multiple, identical 
+				// Vector of: (one for each (possibly identical) UOA, so that multiple, identical 
 				// UOA's may appear as multiple vector elements,
 				// except possibly for time granularity)
 				// Pair consisting of: UOA identifier and its associated list of [DMU Category / Count]
 				// ... for the UOA that has been determined to be the primary UOA.
-				// Ditto child_counts, but for child UOA's, with the limitation that all DMU categories
-				// but one must have 0 or the max number of DMU elements in the category.  For the one,
-				// it can have one but no other term.
-				// ************************************************************************************ //
+				// Ditto child_counts, but for child UOA's:
+				// The UOA k-value for all DMU categories
+				// is either 0, 1, or the corresponding UOA k-value of the primary UOA
+				// and that where not 0, it is less than the corresponding UOA k-value of the primary UOA
+				// (i.e., has a value of 1)
+				// for only 1 DMU category,
+				// and this DMU category must match the DMU category with multiplicity greater than 1 (if any)
+				// for the primary UOAs
+				// ****************************************************************************************** //
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> biggest_counts;
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> child_counts;
 
+				std::vector<int> multiplicities_primary_uoa;
+				int highest_multiplicity_primary_uoa;
+				std::string highest_multiplicity_primary_uoa_dmu_string_code;
+				bool any_primary_dmu_has_multiplicity_greater_than_1;
+				int which_primary_index_has_multiplicity_greater_than_1;
+
 				// child_uoas__which_multiplicity_is_greater_than_1:
 				// Map of:
-				// UOA identifier => pair<DMU category identifier of the effective DMU category that, in relation to the child, has multiplicity greater than 1, ... and the given multiplicity>
+				// UOA identifier => pair<DMU category identifier of the effective DMU category that, in relation to the child,
+				// has multiplicity greater than 1, ... and the given multiplicity, with respect to the total spin control count>
 				std::map<WidgetInstanceIdentifier, std::pair<WidgetInstanceIdentifier, int>> child_uoas__which_multiplicity_is_greater_than_1;
 
 				// variable_group__key_names__vectors:
@@ -272,9 +284,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector secondary_variable_groups_vector;
 
 				PrimaryKeySequence sequence;
-
-				size_t number_primary_variable_groups;
-				size_t number_secondary_variable_groups;
 
 				std::vector<ColumnsInTempView> primary_variable_groups_column_info;
 				std::vector<ColumnsInTempView> secondary_variable_groups_column_info;

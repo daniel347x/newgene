@@ -158,7 +158,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	}
 
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(primary_variable_group_raw_data_columns);
-	sql_and_column_sets.push_back(x_table_result);
+	sql_and_column_sets.push_back(xr_table_result);
 
 	if (failed)
 	{
@@ -480,13 +480,14 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	// For primary UOA:
 	// Make sure that at most 1 DMU has a multiplicity greater than 1,
 	// and save the name/index of the DMU category with the highest multiplicity.
-	std::vector<int> multiplicities;
-	int highest_multiplicity = 0;
-	std::string highest_multiplicity_dmu_string_code;
+
+	multiplicities_primary_uoa.clear();
+	highest_multiplicity_primary_uoa = 0;
+	highest_multiplicity_primary_uoa_dmu_string_code.clear();
 
 	// Looking at the first entry in biggest_counts is the same as looking at any other entry
 	// in terms of the DMU counts
-	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &multiplicities, &highest_multiplicity, &highest_multiplicity_dmu_string_code](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
 	{
 		if (failed)
 		{
@@ -522,11 +523,11 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				++multiplicity;
 			}
 		}
-		multiplicities.push_back(multiplicity);
-		if (multiplicity > highest_multiplicity)
+		multiplicities_primary_uoa.push_back(multiplicity);
+		if (multiplicity > highest_multiplicity_primary_uoa)
 		{
-			highest_multiplicity = multiplicity;
-			highest_multiplicity_dmu_string_code = *the_dmu_category.code;
+			highest_multiplicity_primary_uoa = multiplicity;
+			highest_multiplicity_primary_uoa_dmu_string_code = *the_dmu_category.code;
 		}
 	});
 
@@ -537,10 +538,11 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	}
 
 	// check that only 1 primary UOA's DMU category has multiplicity > 1 (for now)
-	bool anything_has_multiplicity_greater_than_1 = false;
-	int which_index_has_multiplicity_greater_than_1 = -1;
+	any_primary_dmu_has_multiplicity_greater_than_1 = false;
+	which_primary_index_has_multiplicity_greater_than_1 = -1;
+
 	int current_index = 0;
-	std::for_each(multiplicities.cbegin(), multiplicities.cend(), [this, &anything_has_multiplicity_greater_than_1, &which_index_has_multiplicity_greater_than_1, &current_index](int const & test_multiplicity)
+	std::for_each(multiplicities_primary_uoa.cbegin(), multiplicities_primary_uoa.cend(), [this, &current_index](int const & test_multiplicity)
 	{
 		if (failed)
 		{
@@ -548,7 +550,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		}
 		if (test_multiplicity > 1)
 		{
-			if (anything_has_multiplicity_greater_than_1)
+			if (any_primary_dmu_has_multiplicity_greater_than_1)
 			{
 				// ********************************************************************************************************************** //
 				// A second DMU category's multiplicity is greater than 1 - for now, not allowed.  This can be implemented in the future.
@@ -556,8 +558,8 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				failed = true;
 				return; // from lambda
 			}
-			anything_has_multiplicity_greater_than_1 = true;
-			which_index_has_multiplicity_greater_than_1 = current_index;
+			any_primary_dmu_has_multiplicity_greater_than_1 = true;
+			which_primary_index_has_multiplicity_greater_than_1 = current_index;
 		}
 		++current_index;
 	});
@@ -570,14 +572,14 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 	// Validate child UOA's
 	// For child UOA's:
-	// Make sure that, for each child UOA, the actual k-value for all DMU categories
-	// is either 0, 1, or the corresponding k-value of the primary UOA
-	// and that where not 0, it is less than the corresponding k-value of the primary UOA
+	// Make sure that, for each child UOA, the UOA k-value for all DMU categories
+	// is either 0, 1, or the corresponding UOA k-value of the primary UOA
+	// and that where not 0, it is less than the corresponding UOA k-value of the primary UOA
 	// (i.e., has a value of 1)
 	// for only 1 DMU category,
 	// and this DMU category must match the DMU category with multiplicity greater than 1 (if any)
 	// for the primary UOAs
-	std::for_each(child_counts.cbegin(), child_counts.cend(), [this, &highest_multiplicity, &highest_multiplicity_dmu_string_code](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
+	std::for_each(child_counts.cbegin(), child_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
 	{
 		if (failed)
 		{
@@ -585,7 +587,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		}
 		int primary_dmu_categories_for_which_child_has_less = 0;
 		Table_UOA_Identifier::DMU_Counts const & current_dmu_counts = uoa__to__dmu_counts__pair.second;
-		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [this, &primary_dmu_categories_for_which_child_has_less, &highest_multiplicity, &highest_multiplicity_dmu_string_code](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
+		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [this, &primary_dmu_categories_for_which_child_has_less](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
 		{
 			if (failed)
 			{
@@ -596,7 +598,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				// just fine
 				return; // from lambda
 			}
-			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &current_dmu_plus_count, &primary_dmu_categories_for_which_child_has_less, &highest_multiplicity, &highest_multiplicity_dmu_string_code](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
+			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &current_dmu_plus_count, &primary_dmu_categories_for_which_child_has_less](Table_UOA_Identifier::DMU_Plus_Count const & biggest_dmu_plus_count)
 			{
 				if (failed)
 				{
@@ -606,7 +608,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				{
 					if (current_dmu_plus_count.second == biggest_dmu_plus_count.second) // biggest_dmu_plus_count.second is the K-value of the unit of analysis, not the K-value chosen by the user in the spin control
 					{
-						if (highest_multiplicity > 1)
+						if (highest_multiplicity_primary_uoa > 1)
 						{
 							// Special case:
 							// The child UOA has the same K-value in this DMU category
@@ -631,9 +633,9 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 						return; // from lambda
 					}
 					// Current UOA's current DMU category's K-value is 1
-					else if (!boost::iequals(*current_dmu_plus_count.first.code, highest_multiplicity_dmu_string_code))
+					else if (!boost::iequals(*current_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code))
 					{
-						if (highest_multiplicity > 1)
+						if (highest_multiplicity_primary_uoa > 1)
 						{
 							// Todo: error message
 
@@ -728,6 +730,7 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 			{
 				multiplicity = 1;
 			}
+
 			if (multiplicity == 0)
 			{
 				// User's K-ad selection is too small in this DMU category to support the variables they have selected
@@ -760,7 +763,6 @@ void OutputModel::OutputGenerator::PopulateVariableGroups()
 	{
 		// Get all the variable groups corresponding to the primary UOA (identical except possibly for time granularity)
 		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map const & variable_groups_map_current = (*the_map)[uoa__to__dmu_category_counts.first];
-		number_primary_variable_groups += variable_groups_map_current.size();
 		primary_variable_groups_vector.insert(primary_variable_groups_vector.end(), variable_groups_map_current.cbegin(), variable_groups_map_current.cend());
 	});
 	std::for_each(child_counts.cbegin(), child_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_category_counts)
