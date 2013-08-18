@@ -24,18 +24,25 @@ public:
 		std::string column_name_no_uuid;
 		std::string table_column_name;
 
+		// Regarding the three integer variables below,
+		// their purpose is best explained by providing an example.
 		// For example:
-		// Primary UOA:
+		//
+		// Primary UOA (i.e., the "largest" unit of analysis corresponding to the variable groups with variables selected by the user):
 		// A B B B B C C
-		// Selected K-ad:
+		//
+		// Selected K-ad (i.e., the spin control values chosen by the user):
 		// A B B B B B B B B C C
-		// Variable group's UOA (were this allowed, as it could be in the future):
+		//
+		// Variable group's UOA (were the particular choice given in this example allowed, as it could be in the future) (i.e., a given variable group, which might not be the "largest"):
 		// A B B
+		//
 		// ... then, the primary key sequence will include eight entries for "B"
 		// And for the given variable group, we have,
 		// for the following three integers for each of the eight "B"'s:
 		// B    B    B    B    B    B    B    B
 		// ^114 ^214 ^124 ^224 ^134 ^234 ^144 ^244
+		//
 		int sequence_number_within_dmu_category_variable_group_uoa;
 		int current_multiplicity;
 		int total_multiplicity;
