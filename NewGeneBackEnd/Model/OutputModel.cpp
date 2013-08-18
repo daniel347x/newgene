@@ -80,21 +80,30 @@ std::string OutputModel::StripUUIDFromVariableName(std::string const & variable_
 	return stripped_variable_name;
 }
 
-void OutputModel::OutputGenerator::GenerateOutput()
+OutputModel::OutputGenerator::OutputGenerator(OutputModel & model_)
+{
+	model = &model_;
+}
+
+
+void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
 {
 
-	InputModel & input_model = model->getInputModel();
 	bool failed = false;
-	//std::string temp_dot("temp.");
-	std::string temp_dot("");
-	Prepare();
+
+	InputModel & input_model = model->getInputModel();
+
+	Prepare(failed);
+
+	ObtainColumnInfoForVariableGroups(failed);
 
 }
 
-void OutputModel::OutputGenerator::Prepare()
+void OutputModel::OutputGenerator::Prepare(bool & failed)
 {
 
-	bool failed = false;
+	//temp_dot = "temp.";
+	temp_dot = "";
 
 	input_model = &model->getInputModel();
 
@@ -114,8 +123,6 @@ void OutputModel::OutputGenerator::Prepare()
 	PopulateVariableGroups();
 
 	PopulatePrimaryKeySequenceInfo();
-
-	ObtainColumnInfoForVariableGroups(failed);
 
 }
 

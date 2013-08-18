@@ -51,7 +51,9 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				// ***************************************** //
 				// Generate output
 				// ***************************************** //
-				output_model.GenerateOutput(change_response);
+				OutputModel::OutputGenerator output_generator(output_model);
+				//output_model.GenerateOutput(change_response);
+				output_generator.GenerateOutput(change_response);
 
 			});
 
