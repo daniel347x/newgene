@@ -89,19 +89,19 @@ OutputModel::OutputGenerator::OutputGenerator(OutputModel & model_)
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
 {
 
-	bool failed_or_succeeded = false;
-
 	InputModel & input_model = model->getInputModel();
 
-	Prepare(failed_or_succeeded);
-	if (failed_or_succeeded)
+	Prepare();
+
+	if (failed)
 	{
 		// failed
 		return;
 	}
 
-	ObtainColumnInfoForVariableGroups(failed_or_succeeded);
-	if (failed_or_succeeded)
+	ObtainColumnInfoForVariableGroups();
+
+	if (failed)
 	{
 		// failed
 		return;
@@ -111,8 +111,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 }
 
-void OutputModel::OutputGenerator::Prepare(bool & failed)
+void OutputModel::OutputGenerator::Prepare()
 {
+
+	failed = false;
 
 	//temp_dot = "temp.";
 	temp_dot = "";
@@ -138,24 +140,24 @@ void OutputModel::OutputGenerator::Prepare(bool & failed)
 
 }
 
-void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups(bool & failed)
+void OutputModel::OutputGenerator::ObtainColumnInfoForVariableGroups()
 {
 
 	int primary_view_count = 0;
-	std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &primary_view_count, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
+	std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &primary_view_count](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
 	{
-		PopulateColumnsFromRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true, failed);
+		PopulateColumnsFromRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true);
 	});
 
 	int secondary_view_count = 0;
-	std::for_each(secondary_variable_groups_vector.cbegin(), secondary_variable_groups_vector.cend(), [this, &secondary_view_count, &failed](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_secondary_variable_group)
+	std::for_each(secondary_variable_groups_vector.cbegin(), secondary_variable_groups_vector.cend(), [this, &secondary_view_count](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_secondary_variable_group)
 	{
-		PopulateColumnsFromRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_column_info, false, failed);
+		PopulateColumnsFromRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_column_info, false);
 	});
 
 }
 
-void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group, int view_count, std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, bool & failed)
+void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group, int view_count, std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary)
 {
 
 	// ************************************************************************************************ //
@@ -207,7 +209,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 		columns_in_variable_group_view.has_no_datetime_columns = true;
 	}
 
-	std::for_each(variables_in_group_sorted.cbegin(), variables_in_group_sorted.cend(), [this, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group, &failed](WidgetInstanceIdentifier const & variable_group_set_member)
+	std::for_each(variables_in_group_sorted.cbegin(), variables_in_group_sorted.cend(), [this, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group](WidgetInstanceIdentifier const & variable_group_set_member)
 	{
 		columns_in_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & column_in_variable_group_data_table = columns_in_variable_group_view.columns_in_view.back();

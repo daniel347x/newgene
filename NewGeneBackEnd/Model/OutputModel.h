@@ -195,15 +195,16 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 			
 			private:
 
-				void Prepare(bool & failed);
+				void Prepare();
 				void PopulateDMUCounts();
 				void PopulateUOAs();
 				void ValidateUOAs();
 				void DetermineChildMultiplicitiesGreaterThanOne();
 				void PopulateVariableGroups();
 				void PopulatePrimaryKeySequenceInfo();
-				void ObtainColumnInfoForVariableGroups(bool & failed);
-				void PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count, std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, bool & failed);
+				void ObtainColumnInfoForVariableGroups();
+				void PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count, std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary);
+				void LoopThroughPrimaryVariableGroups();
 
 				// ***************************************************************** //
 				// the_map is:
