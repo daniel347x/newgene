@@ -133,7 +133,8 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 {
 
-	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	int primary_group_number = 1;
+	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
 		if (failed)
 		{
@@ -141,15 +142,16 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 		}
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
-		ConstructFullOutputForSinglePrimaryGroup(primary_variable_group_raw_data_columns, primary_group_column_sets);
+		ConstructFullOutputForSinglePrimaryGroup(primary_variable_group_raw_data_columns, primary_group_column_sets, primary_group_number);
+		++primary_group_number;
 	});
 
 }
 
-void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets)
+void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number)
 {
 
-	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable(primary_variable_group_raw_data_columns);
+	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable(primary_variable_group_raw_data_columns, primary_group_number);
 	sql_and_column_sets.push_back(x_table_result);
 
 	if (failed)
@@ -157,7 +159,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 		return;
 	}
 
-	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(primary_variable_group_raw_data_columns);
+	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(primary_variable_group_raw_data_columns, primary_group_number);
 	sql_and_column_sets.push_back(xr_table_result);
 
 	if (failed)
@@ -168,7 +170,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
 
-		SqlAndColumnSet x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, current_multiplicity);
+		SqlAndColumnSet x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, current_multiplicity, primary_group_number);
 		sql_and_column_sets.push_back(x_table_result);
 
 		if (failed)
@@ -176,7 +178,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 			return;
 		}
 
-		SqlAndColumnSet xr_table_result = CreatePrimaryXRTable(primary_variable_group_raw_data_columns, current_multiplicity);
+		SqlAndColumnSet xr_table_result = CreatePrimaryXRTable(primary_variable_group_raw_data_columns, current_multiplicity, primary_group_number);
 		sql_and_column_sets.push_back(xr_table_result);
 
 		if (failed)
@@ -195,12 +197,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
 	std::vector<std::string> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
-	sql_strings.push_back(std::string());
-	std::string & sql_string = sql_strings.back();
 
-	result_columns.has_no_datetime_columns = false;
-	result_columns.original_table_name = primary_variable_group_raw_data_columns.original_table_name;
+	result_columns = primary_variable_group_raw_data_columns;
+
 	result_columns.view_number = 1;
+	result_columns.has_no_datetime_columns = false;
 	std::string view_name = "V";
 	view_name += itoa(primary_group_number, c, 10);
 	view_name += "_x";
@@ -210,10 +211,77 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	view_name += newUUID(true);
 	result_columns.view_name = view_name;
 
-	sql_string = "SELECT * FROM ";
-	sql_string += result_columns.original_table_name;
+	WidgetInstanceIdentifier variable_group_saved;
+	WidgetInstanceIdentifier uoa_saved;
 
-	if (primary_variable_group_raw_data_columns.has_no_datetime_columns)
+	bool first = true;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first, &variable_group_saved, &uoa_saved](ColumnsInTempView::ColumnInTempView & new_column)
+	{
+		new_column.column_name = new_column.column_name_no_uuid;
+		new_column.column_name += "_";
+		new_column.column_name += newUUID(true);
+		if (first)
+		{
+			first = false;
+			variable_group_saved = new_column.variable_group_identifier;
+			uoa_saved = new_column.uoa_associated_with_variable_group_identifier;
+		}
+	});
+
+	sql_strings.push_back(std::string());
+	std::string & sql_string = sql_strings.back();
+
+	sql_string = "SELECT ";
+	first = true;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	{
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+		{
+			return; // Enforce that datetime columns appear last.
+		}
+		if (!first)
+		{
+			sql_string += ", ";
+		}
+		first = false;
+		sql_string += new_column.column_name_no_uuid; // This is the original column name
+		sql_string += " AS ";
+		sql_string += new_column.column_name;
+	});
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	{
+		// Now do the datetime_start column
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART)
+		{
+			if (!first)
+			{
+				sql_string += ", ";
+			}
+			first = false;
+			sql_string += new_column.column_name_no_uuid; // This is the original column name
+			sql_string += " AS ";
+			sql_string += new_column.column_name;
+		}
+	});
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	{
+		// Now do the datetime_start column
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+		{
+			if (!first)
+			{
+				sql_string += ", ";
+			}
+			first = false;
+			sql_string += new_column.column_name_no_uuid; // This is the original column name
+			sql_string += " AS ";
+			sql_string += new_column.column_name;
+		}
+	});
+	sql_string += " FROM ";
+	sql_string += result_columns.original_table_names[0];
+
+	if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
 		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
@@ -226,7 +294,49 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		alter_string += " ADD COLUMN ";
 		alter_string += datetime_start_col_name;
 		alter_string += " INTEGER DEFAULT 0";
+		sql_strings.push_back(alter_string);
+
+		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+		datetime_start_column.column_name = datetime_start_col_name;
+		datetime_start_column.column_name_no_uuid = datetime_start_col_name_no_uuid;
+		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
+		datetime_start_column.variable_group_identifier = variable_group_saved;
+		datetime_start_column.uoa_associated_with_variable_group_identifier = uoa_saved;
+		datetime_start_column.table_column_name = "";
+		datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
+		datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
+		datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
+		datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
+
+		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
+		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
+		datetime_end_col_name += "_";
+		datetime_end_col_name += newUUID(true);
+
+		alter_string.clear();
+		alter_string += "ALTER TABLE ";
+		alter_string += result_columns.view_name;
+		alter_string += " ADD COLUMN ";
+		alter_string += datetime_end_col_name;
+		alter_string += " INTEGER DEFAULT 0";
+		sql_strings.push_back(alter_string);
+
+		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+		datetime_end_column.column_name = datetime_end_col_name;
+		datetime_end_column.column_name_no_uuid = datetime_end_col_name_no_uuid;
+		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
+		datetime_end_column.variable_group_identifier = variable_group_saved;
+		datetime_end_column.uoa_associated_with_variable_group_identifier = uoa_saved;
+		datetime_end_column.table_column_name = "";
+		datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
+		datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
+		datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
+		datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 	}
+
+	return result;
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number)
@@ -313,13 +423,13 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 
 	columns_in_variable_group_view.view_number = view_count;
 	std::string view_name;
-	view_name = *the_variable_group.first.code;
+	view_name = vg_data_table_name;
 	columns_in_variable_group_view.view_name_no_uuid = view_name;
-	view_name += "_";
-	view_name += newUUID(true);
 	columns_in_variable_group_view.view_name = view_name;
 
-	columns_in_variable_group_view.original_table_name = vg_data_table_name;
+	columns_in_variable_group_view.original_table_names.push_back(vg_data_table_name);
+	columns_in_variable_group_view.variable_group_codes.push_back(*the_variable_group.first.code);
+	columns_in_variable_group_view.variable_group_longhand_names.push_back(*the_variable_group.first.longhand);
 
 	WidgetInstanceIdentifiers & variables_in_group = input_model->t_vgp_setmembers.getIdentifiers(*the_variable_group.first.uuid);
 
@@ -337,9 +447,11 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 	}
 
 	columns_in_variable_group_view.has_no_datetime_columns = false;
+	columns_in_variable_group_view.has_no_datetime_columns_originally = false;
 	if (datetime_columns.size() == 0)
 	{
 		columns_in_variable_group_view.has_no_datetime_columns = true;
+		columns_in_variable_group_view.has_no_datetime_columns_originally = true;
 	}
 
 	std::for_each(variables_in_group_sorted.cbegin(), variables_in_group_sorted.cend(), [this, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group](WidgetInstanceIdentifier const & variable_group_set_member)
@@ -351,8 +463,6 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 		column_in_variable_group_data_table.column_name_no_uuid = column_name_no_uuid;
 
 		std::string column_name = column_name_no_uuid;
-		column_name += "_";
-		column_name += newUUID(true);
 
 		column_in_variable_group_data_table.column_name = column_name;
 

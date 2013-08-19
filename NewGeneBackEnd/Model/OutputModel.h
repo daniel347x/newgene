@@ -130,7 +130,10 @@ public:
 	std::vector<ColumnInTempView> columns_in_view;
 	int view_number;
 	bool has_no_datetime_columns;
-	std::string original_table_name;
+	bool has_no_datetime_columns_originally;
+	std::vector<std::string> original_table_names;
+	std::vector<std::string> variable_group_codes;
+	std::vector<std::string> variable_group_longhand_names;
 	std::string view_name;
 	std::string view_name_no_uuid;
 
@@ -212,7 +215,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count, std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary);
 				void LoopThroughPrimaryVariableGroups();
 				void MergeHighLevelGroupResults();
-				void ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets);
+				void ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity, int const primary_group_number);
