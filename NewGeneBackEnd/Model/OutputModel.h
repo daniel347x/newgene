@@ -26,7 +26,6 @@ public:
 
 		// Regarding the three integer variables below,
 		// their purpose is best explained by providing an example.
-		// For example:
 		//
 		// Primary UOA (i.e., the "largest" unit of analysis corresponding to the variable groups with variables selected by the user):
 		// A B B B B C C
@@ -288,6 +287,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector primary_variable_groups_vector;
 				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector secondary_variable_groups_vector;
 
+				// Information about *all* primary keys, in the sequence they appear in the output
+				// ... including "duplicate" primary keys resulting from multiplicity greater than 1
 				PrimaryKeySequence sequence;
 
 				std::vector<ColumnsInTempView> primary_variable_groups_column_info;

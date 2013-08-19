@@ -392,7 +392,160 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number)
 {
 
+	char c[256];
+
 	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
+	std::vector<std::string> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+
+	result_columns = previous_xr_columns;
+
+	std::string view_name = "V";
+	view_name += itoa(primary_group_number, c, 10);
+	view_name += "_x";
+	view_name += itoa(current_multiplicity, c, 10);
+	result_columns.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	result_columns.view_name = view_name;
+	result_columns.view_number = current_multiplicity;
+	result_columns.has_no_datetime_columns = false;
+
+	int first_table_column_count = 0;
+	int second_table_column_count = 0;
+
+	std::vector<std::string> previous_column_names_first_table;
+
+	WidgetInstanceIdentifier variable_group;
+	WidgetInstanceIdentifier uoa;
+
+	// These columns are from the previous XR temporary table, which is guaranteed to have all columns in place, including datetime columns
+	bool first = true;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_table_column_count, &previous_column_names_first_table, &variable_group, &uoa, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	{
+		previous_column_names_first_table.push_back(new_column.column_name);
+		new_column.column_name = new_column.column_name_no_uuid;
+		new_column.column_name += "_";
+		new_column.column_name += newUUID(true);
+		++first_table_column_count;
+		if (first)
+		{
+			first = false;
+			variable_group = new_column.variable_group_identifier;
+			uoa = new_column.uoa_associated_with_variable_group_identifier;
+		}
+	});
+
+	// These columns are from the original raw data table, which may or may not have datetime columns
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	{
+		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		{
+			return; // Add these columns last
+		}
+		result_columns.columns_in_view.push_back(new_column_);
+		ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+		new_column.column_name = new_column.column_name_no_uuid;
+		new_column.column_name += "_";
+		new_column.column_name += newUUID(true);
+		++second_table_column_count;
+	});
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	{
+		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+		{
+			result_columns.columns_in_view.push_back(new_column_);
+			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+			new_column.column_name = new_column.column_name_no_uuid;
+			new_column.column_name += "_";
+			new_column.column_name += newUUID(true);
+			++second_table_column_count;
+		}
+	});
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	{
+		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		{
+			result_columns.columns_in_view.push_back(new_column_);
+			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+			new_column.column_name = new_column.column_name_no_uuid;
+			new_column.column_name += "_";
+			new_column.column_name += newUUID(true);
+			++second_table_column_count;
+		}
+	});
+
+	sql_strings.push_back(std::string());
+	std::string & sql_string = sql_strings.back();
+
+	sql_string = "SELECT ";
+	first = true;
+	int column_count = 0;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first, &column_count, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table](ColumnsInTempView::ColumnInTempView & new_column)
+	{
+		if (!first)
+		{
+			sql_string += ", ";
+		}
+		first = false;
+		if (column_count < first_table_column_count)
+		{
+			sql_string += "t1.";
+			sql_string += previous_column_names_first_table[column_count];
+		}
+		else
+		{
+			sql_string += "t2.";
+			sql_string += new_column.column_name_no_uuid; // This is the original column name
+		}
+		sql_string += " AS ";
+		sql_string += new_column.column_name;
+		++column_count;
+	});
+	sql_string += " FROM ";
+	sql_string += previous_xr_columns.view_name;
+	sql_string += " t1 JOIN ";
+	sql_string += primary_variable_group_raw_data_columns.original_table_names[0];
+	sql_string += " t2 ON ";
+	bool and_ = false;
+	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_string, &variable_group, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+	{
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [&sql_string, &variable_group, &primary_key, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
+		{
+			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
+			{
+				if (primary_key_info.total_multiplicity == 1)
+				{
+					// Only join on primary keys whose total multiplicity is 1
+					int column_count = 0;
+					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [&sql_string, &first_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
+					{
+						if (column_count < first_table_column_count)
+						{
+							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
+							{
+								// there is only one set of primary keys for this DMU category,
+								// so the following "if" statement only matches once
+								if (new_column.primary_key_index_within_primary_uoa_for_dmu_category == primary_key.sequence_number_within_dmu_category_primary_uoa)
+								{
+									if (and_)
+									{
+										sql_string += " AND ";
+									}
+									and_ = true;
+									sql_string += "t1.";
+									sql_string += previous_column_names_first_table[column_count];
+									sql_string += " = t2.";
+									sql_string += new_column.table_column_name;
+								}
+							}
+						}
+						++column_count;
+					});
+				}
+			}
+		});
+	});
 
 	return result;
 
