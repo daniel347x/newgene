@@ -547,6 +547,61 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		});
 	});
 
+	if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+	{
+		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
+		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
+		datetime_start_col_name += "_";
+		datetime_start_col_name += newUUID(true);
+
+		std::string alter_string;
+		alter_string += "ALTER TABLE ";
+		alter_string += result_columns.view_name;
+		alter_string += " ADD COLUMN ";
+		alter_string += datetime_start_col_name;
+		alter_string += " INTEGER DEFAULT 0";
+		sql_strings.push_back(alter_string);
+
+		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+		datetime_start_column.column_name = datetime_start_col_name;
+		datetime_start_column.column_name_no_uuid = datetime_start_col_name_no_uuid;
+		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
+		datetime_start_column.variable_group_identifier = variable_group;
+		datetime_start_column.uoa_associated_with_variable_group_identifier = uoa;
+		datetime_start_column.table_column_name = "";
+		datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
+		datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
+		datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
+		datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
+
+		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
+		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
+		datetime_end_col_name += "_";
+		datetime_end_col_name += newUUID(true);
+
+		alter_string.clear();
+		alter_string += "ALTER TABLE ";
+		alter_string += result_columns.view_name;
+		alter_string += " ADD COLUMN ";
+		alter_string += datetime_end_col_name;
+		alter_string += " INTEGER DEFAULT 0";
+		sql_strings.push_back(alter_string);
+
+		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+		datetime_end_column.column_name = datetime_end_col_name;
+		datetime_end_column.column_name_no_uuid = datetime_end_col_name_no_uuid;
+		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
+		datetime_end_column.variable_group_identifier = variable_group;
+		datetime_end_column.uoa_associated_with_variable_group_identifier = uoa;
+		datetime_end_column.table_column_name = "";
+		datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
+		datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
+		datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
+		datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
+	}
+
 	return result;
 
 }
