@@ -159,7 +159,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 		return;
 	}
 
-	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(primary_variable_group_raw_data_columns, primary_group_number);
+	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(x_table_result.second, primary_group_number);
 	sql_and_column_sets.push_back(xr_table_result);
 
 	if (failed)
@@ -339,10 +339,51 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	return result;
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number)
 {
 
+	char c[256];
+
 	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
+	std::vector<std::string> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+
+	result_columns = primary_variable_group_x1_columns;
+
+	std::string view_name = "V";
+	view_name += itoa(primary_group_number, c, 10);
+	view_name += "_xr";
+	view_name += "1";
+	result_columns.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	result_columns.view_name = view_name;
+
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [](ColumnsInTempView::ColumnInTempView & new_column)
+	{
+		new_column.column_name = new_column.column_name_no_uuid;
+		new_column.column_name += "_";
+		new_column.column_name += newUUID(true);
+	});
+
+	sql_strings.push_back(std::string());
+	std::string & sql_string = sql_strings.back();
+
+	sql_string = "SELECT ";
+	bool first = true;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	{
+		if (!first)
+		{
+			sql_string += ", ";
+		}
+		first = false;
+		sql_string += new_column.column_name_no_uuid; // This is the original column name
+		sql_string += " AS ";
+		sql_string += new_column.column_name;
+	});
+	sql_string += " FROM ";
+	sql_string += primary_variable_group_x1_columns.view_name;
 
 	return result;
 

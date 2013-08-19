@@ -217,7 +217,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void MergeHighLevelGroupResults();
 				void ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
-				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
+				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity, int const primary_group_number);
 				SqlAndColumnSet CreatePrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity, int const primary_group_number);
 
