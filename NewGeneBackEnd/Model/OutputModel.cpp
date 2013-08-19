@@ -188,22 +188,42 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number)
+{
+	char c[256];
+
+	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
+	std::vector<std::string> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+	sql_strings.push_back(std::string());
+	std::string & sql_string = sql_strings.back();
+
+	result_columns.has_no_datetime_columns = false;
+	result_columns.original_table_name = primary_variable_group_raw_data_columns.original_table_name;
+	result_columns.view_number = 1;
+	std::string view_name = "V";
+	view_name += itoa(primary_group_number, c, 10);
+	view_name += "_x";
+	view_name += "1";
+	result_columns.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	result_columns.view_name = view_name;
+
+
+}
+
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number)
 {
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity, int const primary_group_number)
 {
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity)
-{
-
-}
-
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity, int const primary_group_number)
 {
 
 }

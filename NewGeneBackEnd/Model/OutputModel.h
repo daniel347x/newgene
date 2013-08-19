@@ -213,10 +213,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void LoopThroughPrimaryVariableGroups();
 				void MergeHighLevelGroupResults();
 				void ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets);
-				SqlAndColumnSet CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns);
-				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns);
-				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity);
-				SqlAndColumnSet CreatePrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity);
+				SqlAndColumnSet CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
+				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
+				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity, int const primary_group_number);
+				SqlAndColumnSet CreatePrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity, int const primary_group_number);
 
 				// Save the SQL and column sets corresponding to each primary variable group in a global data structure
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
