@@ -165,6 +165,27 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 		return;
 	}
 
+	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
+	{
+
+		SqlAndColumnSet x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, current_multiplicity);
+		sql_and_column_sets.push_back(x_table_result);
+
+		if (failed)
+		{
+			return;
+		}
+
+		SqlAndColumnSet xr_table_result = CreatePrimaryXRTable(primary_variable_group_raw_data_columns, current_multiplicity);
+		sql_and_column_sets.push_back(xr_table_result);
+
+		if (failed)
+		{
+			return;
+		}
+
+	}
+
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns)
@@ -173,6 +194,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns)
+{
+
+}
+
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity)
+{
+
+}
+
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity)
 {
 
 }
