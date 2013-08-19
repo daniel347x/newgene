@@ -342,15 +342,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number)
 {
 
+	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
+
+	return result;
+
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity, int const primary_group_number)
 {
 
+	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
+
+	return result;
+
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity, int const primary_group_number)
 {
+
+	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
+
+	return result;
 
 }
 
