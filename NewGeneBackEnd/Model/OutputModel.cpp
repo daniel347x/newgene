@@ -170,7 +170,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
 
-		SqlAndColumnSet x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, current_multiplicity, primary_group_number);
+		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number);
 		sql_and_column_sets.push_back(x_table_result);
 
 		if (failed)
@@ -178,7 +178,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 			return;
 		}
 
-		SqlAndColumnSet xr_table_result = CreatePrimaryXRTable(primary_variable_group_raw_data_columns, current_multiplicity, primary_group_number);
+		xr_table_result = CreatePrimaryXRTable(primary_variable_group_raw_data_columns, current_multiplicity, primary_group_number);
 		sql_and_column_sets.push_back(xr_table_result);
 
 		if (failed)
@@ -389,7 +389,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const current_multiplicity, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number)
 {
 
 	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
