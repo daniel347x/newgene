@@ -210,7 +210,23 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	view_name += newUUID(true);
 	result_columns.view_name = view_name;
 
+	sql_string = "SELECT * FROM ";
+	sql_string += result_columns.original_table_name;
 
+	if (primary_variable_group_raw_data_columns.has_no_datetime_columns)
+	{
+		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
+		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
+		datetime_start_col_name += "_";
+		datetime_start_col_name += newUUID(true);
+
+		std::string alter_string;
+		alter_string += "ALTER TABLE ";
+		alter_string += result_columns.view_name;
+		alter_string += " ADD COLUMN ";
+		alter_string += datetime_start_col_name;
+		alter_string += " INTEGER DEFAULT 0";
+	}
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number)
