@@ -313,6 +313,8 @@ void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 		statement_is_prepared = false;
 	}
 
+	failed = false;
+
 }
 
 void OutputModel::OutputGenerator::SQLExecutor::Execute()
