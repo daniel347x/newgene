@@ -191,7 +191,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 }
 
-bool OutputModel::OutputGenerator::StepData(SqlAndColumnSet & sql_and_column_set)
+bool OutputModel::OutputGenerator::StepData()
 {
 
 	if (stmt_result == nullptr)
@@ -221,7 +221,7 @@ bool OutputModel::OutputGenerator::StepData(SqlAndColumnSet & sql_and_column_set
 	return true;
 }
 
-void OutputModel::OutputGenerator::ObtainData(SqlAndColumnSet & sql_and_column_set)
+void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView & column_set)
 {
 
 	if (stmt_result)
@@ -236,7 +236,7 @@ void OutputModel::OutputGenerator::ObtainData(SqlAndColumnSet & sql_and_column_s
 
 	std::string sql;
 	sql += "SELECT * FROM ";
-	sql += sql_and_column_set.second.view_name;
+	sql += column_set.view_name;
 
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt_result, NULL);
 	if (stmt_result == NULL)
@@ -783,12 +783,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXRTable(ColumnsInTempView const & previous_x_columns, int const current_multiplicity, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number)
 {
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 
-	//previous_x_columns
+	ObtainData(previous_x_columns);
+
+	if (failed)
+	{
+		return result;
+	}
+
+	while (StepData())
+	{
+
+	}
+
+	if (failed)
+	{
+		return result;
+	}
 
 	return result;
 
