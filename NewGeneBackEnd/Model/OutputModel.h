@@ -202,19 +202,38 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 					public:
 
-						SQLExecutor()
+						enum STATEMENT_TYPE
+						{
+							  UNKNOWN
+							, RETURNS_ROWS
+							, DOES_NOT_RETURN_ROWS
+						};
+
+						SQLExecutor(sqlite3 * db_)
+							: executed(false)
+							, statement_type(UNKNOWN)
+							, db(db_)
 						{
 
 						}
 
-						SQLExecutor(std::string const & sql_)
+						SQLExecutor(sqlite3 * db_, std::string const & sql_)
 							: sql(sql_)
+							, executed(false)
+							, statement_type(UNKNOWN)
+							, db(db_)
 						{
 
 						}
+
+						void Execute();
 					
 						std::string sql;
 						std::string sql_error;
+
+						sqlite3 * db;
+						STATEMENT_TYPE statement_type;
+						bool executed;
 
 				};
 

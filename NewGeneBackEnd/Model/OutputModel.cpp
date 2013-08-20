@@ -195,6 +195,42 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 
 	std::vector<SQLExecutor> & sql_commands = sql_and_column_set.first;
 
+	std::for_each(sql_commands.begin(), sql_commands.end(), [](SQLExecutor & sql_executor)
+	{
+		
+		sql_executor.Execute();
+
+	});
+
+}
+
+void OutputModel::OutputGenerator::SQLExecutor::Execute()
+{
+
+	if (executed)
+	{
+		return;
+	}
+
+	switch(statement_type)
+	{
+
+		case DOES_NOT_RETURN_ROWS:
+			{
+
+			}
+			break;
+
+		case RETURNS_ROWS:
+			{
+
+			}
+			break;
+
+	}
+
+	executed = true;
+
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number)
@@ -235,7 +271,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 
-	sql_strings.push_back(SQLExecutor());
+	sql_strings.push_back(SQLExecutor(db));
 	std::string & sql_string = sql_strings.back().sql;
 
 	sql_string = "SELECT ";
@@ -301,7 +337,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		alter_string += " ADD COLUMN ";
 		alter_string += datetime_start_col_name;
 		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(SQLExecutor(alter_string));
+		sql_strings.push_back(SQLExecutor(db, alter_string));
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
@@ -327,7 +363,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		alter_string += " ADD COLUMN ";
 		alter_string += datetime_end_col_name;
 		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(SQLExecutor(alter_string));
+		sql_strings.push_back(SQLExecutor(db, alter_string));
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
@@ -373,7 +409,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		new_column.column_name += newUUID(true);
 	});
 
-	sql_strings.push_back(SQLExecutor());
+	sql_strings.push_back(SQLExecutor(db));
 	std::string & sql_string = sql_strings.back().sql;
 
 	sql_string = "SELECT ";
@@ -482,7 +518,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 
-	sql_strings.push_back(SQLExecutor());
+	sql_strings.push_back(SQLExecutor(db));
 	std::string & sql_string = sql_strings.back().sql;
 
 	sql_string = "SELECT ";
@@ -567,7 +603,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		alter_string += " ADD COLUMN ";
 		alter_string += datetime_start_col_name;
 		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(SQLExecutor(alter_string));
+		sql_strings.push_back(SQLExecutor(db, alter_string));
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
@@ -593,7 +629,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		alter_string += " ADD COLUMN ";
 		alter_string += datetime_end_col_name;
 		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(SQLExecutor(alter_string));
+		sql_strings.push_back(SQLExecutor(db, alter_string));
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
