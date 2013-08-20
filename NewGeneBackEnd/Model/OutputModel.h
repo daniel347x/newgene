@@ -220,7 +220,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							, db(db_)
 							, stmt(nullptr)
 							, failed(false)
-							, executor(db_, false)
 						{
 
 						}
@@ -232,7 +231,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							, db(db_)
 							, stmt(nullptr)
 							, failed(false)
-							, executor(db_, false)
 						{
 
 						}
@@ -249,8 +247,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						STATEMENT_TYPE statement_type;
 						bool executed;
 						bool failed;
-
-						Executor executor;
 
 				};
 
@@ -277,6 +273,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number);
 				SqlAndColumnSet CreatePrimaryXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number);
 
+				void BeginNewTransaction();
+				void EndTransaction();
 				void ExecuteSQL(SqlAndColumnSet & sql_and_column_set);
 				void ObtainData(ColumnsInTempView & column_set);
 				bool StepData();
@@ -360,6 +358,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				sqlite3 * db;
 				sqlite3_stmt * stmt_result;
 				std::string sql_error;
+				Executor executor;
 
 				bool failed;
 

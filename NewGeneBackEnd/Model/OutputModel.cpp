@@ -83,6 +83,7 @@ std::string OutputModel::StripUUIDFromVariableName(std::string const & variable_
 OutputModel::OutputGenerator::OutputGenerator(OutputModel & model_)
 	: model(&model_)
 	, stmt_result(nullptr)
+	, executor(nullptr, false)
 {
 }
 
@@ -244,6 +245,16 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView & column_set)
 
 }
 
+void OutputModel::OutputGenerator::BeginNewTransaction()
+{
+	executor.BeginTransaction();
+}
+
+void OutputModel::OutputGenerator::EndTransaction()
+{
+	executor.EndTransaction();
+}
+
 void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_set)
 {
 
@@ -347,8 +358,6 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 	}
 
 	executed = true;
-
-	executor.success();
 
 }
 
@@ -1026,6 +1035,8 @@ void OutputModel::OutputGenerator::Prepare()
 	input_model = &model->getInputModel();
 
 	db = input_model->getDb();
+
+	executor.db = db;
 
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, input_model);
 	the_map = &the_map_;
