@@ -1096,15 +1096,24 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (previous_is_0 && current_is_0)
 		{
+			
 			// Add row as-is, setting new time range columns to 0
+			CreateNewXRRow(0, 0, previous_x_columns, true, true);
+
 		}
 		else if (previous_is_0 && !current_is_0)
 		{
+
 			// Add row as-is, setting new time range columns to current time range values
+			CreateNewXRRow(current_datetime_start, current_datetime_end, previous_x_columns, true, true);
+
 		}
 		else if (!previous_is_0 && current_is_0)
 		{
+
 			// Add row as-is, setting new time range columns to previous time range values
+			CreateNewXRRow(previous_datetime_start, previous_datetime_end, previous_x_columns, true, true);
+
 		}
 		else
 		{
@@ -1143,6 +1152,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				previous_is_lower = true;
 			}
 
+			bool previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
+			bool previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = true;
+			bool previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
+			bool previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+			bool current__DO_include_lower_range_data__DO_include_upper_range_data = true;
+			bool current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+			bool current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = true;
+			bool current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+			if (!previous_is_lower)
+			{
+				previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
+				previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+				previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = true;
+				previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+				current__DO_include_lower_range_data__DO_include_upper_range_data = true;
+				current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = true;
+				current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
+				current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+			}
+
 			if (lower_range_start == upper_range_start)
 			{
 
@@ -1162,6 +1191,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// Add row as-is, setting new time range columns
 					// to either the previous or the current time range columns,
 					// because they are the same
+					CreateNewXRRow(current_datetime_start, current_datetime_end, previous_x_columns, true, true);
 
 				}
 				else if (lower_range_end < upper_range_end)
@@ -1172,10 +1202,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// First, add a row that includes all data,
 					// setting new time range columns to:
 					// lower_range_start - lower_range_end
+					CreateNewXRRow(lower_range_start, lower_range_end, previous_x_columns, true, true);
 
 					// Second, add a row that includes only the upper range's data,
 					// setting new time range columns to:
 					// lower_range_end - upper_range_end
+					CreateNewXRRow(lower_range_end, upper_range_end, previous_x_columns, previous_is_lower ? false : true, true);
 
 				}
 				else
@@ -1282,6 +1314,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 
 	return result;
+
+}
+
+void OutputModel::OutputGenerator::CreateNewXRRow(int const datetime_start, int const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data)
+{
 
 }
 
