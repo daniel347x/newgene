@@ -197,6 +197,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 			public:
 
 				OutputGenerator(OutputModel & model_);
+				~OutputGenerator();
 
 				void GenerateOutput(DataChangeMessage & change_response);
 			

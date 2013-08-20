@@ -87,6 +87,13 @@ OutputModel::OutputGenerator::OutputGenerator(OutputModel & model_)
 {
 }
 
+OutputModel::OutputGenerator::~OutputGenerator()
+{
+	if (executor.transaction_begun)
+	{
+		EndTransaction();
+	}
+}
 
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
 {
@@ -996,12 +1003,63 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
 	datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 
-	ExecuteSQL(result);
+
+	int previous_datetime_start_column_index = -1;
+	int previous_datetime_end_column_index = -1;
+	int current_datetime_start_column_index = -1;
+	int current_datetime_end_column_index = -1;
+	int column_index = (int)previous_x_columns.columns_in_view.size() - 1;
+	std::for_each(previous_x_columns.columns_in_view.crbegin(), previous_x_columns.columns_in_view.crend(), [&previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index](ColumnsInTempView::ColumnInTempView const & schema_column)
+	{
+		// COLUMN_TYPE__DATETIMESTART_MERGED can only be for the previous data
+		if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED)
+		{
+			if (previous_datetime_start_column_index == -1)
+			{
+				previous_datetime_start_column_index = column_index;
+			}
+		}
+		// COLUMN_TYPE__DATETIMEEND_MERGED can only be for the previous data
+		else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+		{
+			if (previous_datetime_end_column_index == -1)
+			{
+				previous_datetime_end_column_index = column_index;
+			}
+		}
+		// COLUMN_TYPE__DATETIMESTART and COLUMN_TYPE__DATETIMESTART_INTERNAL, when first seen, can only be for the current data
+		else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+		{
+			if (current_datetime_start_column_index == -1)
+			{
+				current_datetime_start_column_index = column_index;
+			}
+		}
+		// COLUMN_TYPE__DATETIMEEND and COLUMN_TYPE__DATETIMEEND_INTERNAL, when first seen, can only be for the current data
+		else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		{
+			if (current_datetime_end_column_index == -1)
+			{
+				current_datetime_end_column_index = column_index;
+			}
+		}
+
+		// The previous values are always located after the current values, but in arbitrary order,
+		// so this check suffices to be certain that all 4 values have been obtained
+		if (previous_datetime_start_column_index != -1 && previous_datetime_end_column_index != -1)
+		{
+			return;
+		}
+		--column_index;
+	});
+
+	ExecuteSQL(result); // Executes all SQL queries up to the current one
 
 	if (failed)
 	{
 		return result;
 	}
+
 
 	ObtainData(previous_x_columns);
 
@@ -1010,9 +1068,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		return result;
 	}
 
+
+	int const minimum_desired_rows_per_transaction = 1024;
+
+	BeginNewTransaction();
+
+	int current_rows_added = 0;
+
 	while (StepData())
 	{
-
+		std::int64_t previous_datetime_start = sqlite3_column_int64(stmt_result, previous_datetime_start_column_index);
+		std::int64_t previous_datetime_end = sqlite3_column_int64(stmt_result, previous_datetime_end_column_index);
+		std::int64_t current_datetime_start = sqlite3_column_int64(stmt_result, current_datetime_start_column_index);
+		std::int64_t current_datetime_end = sqlite3_column_int64(stmt_result, current_datetime_end_column_index);
 	}
 
 	if (failed)
