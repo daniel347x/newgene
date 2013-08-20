@@ -1155,6 +1155,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 				if (lower_range_end == upper_range_end)
 				{
+
 					// special case: The lower range and the upper range
 					// end at the same time value
 
@@ -1165,14 +1166,31 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				else if (lower_range_end < upper_range_end)
 				{
+
 					// The upper range ends higher than the lower range
 
-					// First, add a row that includes both sets of data,
-					// setting 
+					// First, add a row that includes all data,
+					// setting new time range columns to:
+					// lower_range_start - lower_range_end
+
+					// Second, add a row that includes only the upper range's data,
+					// setting new time range columns to:
+					// lower_range_end - upper_range_end
+
 				}
 				else
 				{
+
 					// The lower range ends higher than the upper range
+
+					// First, add a row that includes all data,
+					// setting new time range columns to:
+					// upper_range_start - upper_range_end
+
+					// Second, add a row that includes only the lower range's data,
+					// setting new time range columns to:
+					// upper_range_end - lower_range_end
+
 				}
 
 			}
@@ -1184,7 +1202,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 				if (lower_range_end <= upper_range_start)
 				{
+
 					// No overlap between the lower range and the upper range
+
+					// First, add a row corresponding to the lower range,
+					// setting new time range columns to:
+					// lower_range_start - lower_range_end
+
+					// Second, add a row corresponding to the upper range,
+					// setting new time range columns to:
+					// upper_range_start - upper_range_end
+
 				}
 				else
 				{
@@ -1192,20 +1220,52 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// There is guaranteed to be overlap between the lower range
 					// and the upper range
 
+					// First, add a row to cover the region of the lower range
+					// that is before the upper range begins,
+					// i.e., including only the lower range's data,
+					// setting new time range columns to:
+					// lower_range_start - upper_range_start
+
 					if (lower_range_end == upper_range_end)
 					{
+
 						// special case: The lower range and the upper range
 						// end at the same time value
 
-						// 
+						// So second, add a row that covers the entire upper range
+						// that includes all data,
+						// therefore setting new time range columns to:
+						// upper_range_start - upper_range_end
+
 					}
 					else if (lower_range_end < upper_range_end)
 					{
+
 						// The upper range ends higher than the lower range
+
+						// So second, add a row that includes all data,
+						// setting new time range columns to:
+						// upper_range_start - lower_range_end
+
+						// And third, add a row that includes only the upper range's data,
+						// setting new time range columns to:
+						// lower_range_end - upper_range_end
+
 					}
 					else
 					{
+
 						// The lower range ends higher than the upper range
+
+						// So second, add a row that covers the entire upper range
+						// that includes all data,
+						// therefore setting new time range columns to:
+						// upper_range_start - upper_range_end
+
+						// And third, add a row that includes only the lower range's data,
+						// setting new time range columns to:
+						// upper_range_end - lower_range_end
+
 					}
 
 				}
