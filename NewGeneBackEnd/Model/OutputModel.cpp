@@ -532,11 +532,35 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	view_name += newUUID(true);
 	result_columns.view_name = view_name;
 
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [](ColumnsInTempView::ColumnInTempView & new_column)
+	WidgetInstanceIdentifier variable_group;
+	WidgetInstanceIdentifier uoa;
+
+	// x1 table is guaranteed to have datetime columns
+	int x1_datetime_start_column_index = -1;
+	int x1_datetime_end_column_index = -1;
+
+	bool first = true;
+	int column_index = 0;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&variable_group, &uoa, &x1_datetime_start_column_index, &x1_datetime_end_column_index, &column_index, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		new_column.column_name = new_column.column_name_no_uuid;
 		new_column.column_name += "_";
 		new_column.column_name += newUUID(true);
+		if (first)
+		{
+			first = false;
+			variable_group = new_column.variable_group_identifier;
+			uoa = new_column.uoa_associated_with_variable_group_identifier;
+		}
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+		{
+			x1_datetime_start_column_index = column_index;
+		}
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		{
+			x1_datetime_end_column_index = column_index;
+		}
+		++column_index;
 	});
 
 	sql_strings.push_back(SQLExecutor(db));
@@ -545,7 +569,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string = "CREATE TABLE ";
 	sql_string += result_columns.view_name;
 	sql_string += " AS SELECT ";
-	bool first = true;
+	first = true;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		if (!first)
@@ -559,6 +583,76 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	});
 	sql_string += " FROM ";
 	sql_string += primary_variable_group_x1_columns.view_name;
+
+
+	// Add the "merged" time range columns
+
+	std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START_MERGED";
+	std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
+	datetime_start_col_name += "_";
+	datetime_start_col_name += newUUID(true);
+
+	std::string alter_string;
+	alter_string += "ALTER TABLE ";
+	alter_string += result_columns.view_name;
+	alter_string += " ADD COLUMN ";
+	alter_string += datetime_start_col_name;
+	alter_string += " INTEGER DEFAULT 0";
+	sql_strings.push_back(SQLExecutor(db, alter_string));
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+	datetime_start_column.column_name = datetime_start_col_name;
+	datetime_start_column.column_name_no_uuid = datetime_start_col_name_no_uuid;
+	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED;
+	datetime_start_column.variable_group_identifier = variable_group;
+	datetime_start_column.uoa_associated_with_variable_group_identifier = uoa;
+	datetime_start_column.table_column_name = "";
+	datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
+	datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
+	datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
+	datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
+
+	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED";
+	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
+	datetime_end_col_name += "_";
+	datetime_end_col_name += newUUID(true);
+
+	alter_string.clear();
+	alter_string += "ALTER TABLE ";
+	alter_string += result_columns.view_name;
+	alter_string += " ADD COLUMN ";
+	alter_string += datetime_end_col_name;
+	alter_string += " INTEGER DEFAULT 0";
+	sql_strings.push_back(SQLExecutor(db, alter_string));
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+	datetime_end_column.column_name = datetime_end_col_name;
+	datetime_end_column.column_name_no_uuid = datetime_end_col_name_no_uuid;
+	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED;
+	datetime_end_column.variable_group_identifier = variable_group;
+	datetime_end_column.uoa_associated_with_variable_group_identifier = uoa;
+	datetime_end_column.table_column_name = "";
+	datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
+	datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
+	datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
+	datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
+
+
+	// Set the "merged" time range columns to be equal to the original time range columns
+	std::string sql_time_range;
+	sql_time_range += "UPDATE OR FAIL ";
+	sql_time_range += result_columns.view_name;
+	sql_time_range += " SET ";
+	sql_time_range += datetime_start_col_name;
+	sql_time_range += " = ";
+	sql_time_range += result_columns.columns_in_view[x1_datetime_start_column_index].column_name;
+	sql_time_range += ", ";
+	sql_time_range += datetime_end_col_name;
+	sql_time_range += " = ";
+	sql_time_range += result_columns.columns_in_view[x1_datetime_end_column_index].column_name;
+	sql_strings.push_back(SQLExecutor(db, alter_string));
 
 	return result;
 
