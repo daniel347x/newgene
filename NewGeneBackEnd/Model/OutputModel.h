@@ -211,7 +211,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						SQLExecutor(sqlite3 * db_)
 							: executed(false)
-							, statement_type(UNKNOWN)
+							, statement_type(DOES_NOT_RETURN_ROWS)
 							, db(db_)
 							, stmt(nullptr)
 							, failed(false)
@@ -222,7 +222,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						SQLExecutor(sqlite3 * db_, std::string const & sql_)
 							: sql(sql_)
 							, executed(false)
-							, statement_type(UNKNOWN)
+							, statement_type(DOES_NOT_RETURN_ROWS)
 							, db(db_)
 							, stmt(nullptr)
 							, failed(false)
