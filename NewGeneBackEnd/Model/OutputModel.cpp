@@ -313,7 +313,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_strings.push_back(SQLExecutor(db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	sql_string = "SELECT ";
+	sql_string = "CREATE TABLE ";
+	sql_string += result_columns.view_name;
+	sql_string += " AS SELECT ";
 	first = true;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
@@ -451,7 +453,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_strings.push_back(SQLExecutor(db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	sql_string = "SELECT ";
+	sql_string = "CREATE TABLE ";
+	sql_string += result_columns.view_name;
+	sql_string += " AS SELECT ";
 	bool first = true;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
@@ -560,7 +564,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_strings.push_back(SQLExecutor(db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	sql_string = "SELECT ";
+	sql_string = "CREATE TABLE ";
+	sql_string += result_columns.view_name;
+	sql_string += " AS SELECT ";
 	first = true;
 	int column_count = 0;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first, &column_count, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table](ColumnsInTempView::ColumnInTempView & new_column)
