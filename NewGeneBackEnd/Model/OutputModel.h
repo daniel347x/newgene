@@ -197,7 +197,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 			
 			private:
 
-				typedef std::pair<std::vector<std::string>, ColumnsInTempView> SqlAndColumnSet;
+				typedef std::pair<std::vector<std::pair<std::string, std::string>>, ColumnsInTempView> SqlAndColumnSet;
 				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;
 
 				// Initialize generator

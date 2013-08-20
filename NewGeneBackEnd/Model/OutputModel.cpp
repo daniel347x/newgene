@@ -194,8 +194,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 {
 	char c[256];
 
-	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
-	std::vector<std::string> & sql_strings = result.first;
+	SqlAndColumnSet result = std::make_pair(std::vector<std::pair<std::string, std::string>>(), ColumnsInTempView());
+	std::vector<std::pair<std::string, std::string>> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
 
 	result_columns = primary_variable_group_raw_data_columns;
@@ -228,8 +228,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 
-	sql_strings.push_back(std::string());
-	std::string & sql_string = sql_strings.back();
+	sql_strings.push_back(std::make_pair(std::string(), std::string()));
+	std::string & sql_string = sql_strings.back().first;
 
 	sql_string = "SELECT ";
 	first = true;
@@ -294,7 +294,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		alter_string += " ADD COLUMN ";
 		alter_string += datetime_start_col_name;
 		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(alter_string);
+		sql_strings.push_back(std::make_pair(alter_string, std::string()));
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
@@ -320,7 +320,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		alter_string += " ADD COLUMN ";
 		alter_string += datetime_end_col_name;
 		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(alter_string);
+		sql_strings.push_back(std::make_pair(alter_string, std::string()));
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
@@ -344,8 +344,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	char c[256];
 
-	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
-	std::vector<std::string> & sql_strings = result.first;
+	SqlAndColumnSet result = std::make_pair(std::vector<std::pair<std::string, std::string>>(), ColumnsInTempView());
+	std::vector<std::pair<std::string, std::string>> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
 
 	result_columns = primary_variable_group_x1_columns;
@@ -366,8 +366,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		new_column.column_name += newUUID(true);
 	});
 
-	sql_strings.push_back(std::string());
-	std::string & sql_string = sql_strings.back();
+	sql_strings.push_back(std::make_pair(std::string(), std::string()));
+	std::string & sql_string = sql_strings.back().first;
 
 	sql_string = "SELECT ";
 	bool first = true;
@@ -394,8 +394,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	char c[256];
 
-	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
-	std::vector<std::string> & sql_strings = result.first;
+	SqlAndColumnSet result = std::make_pair(std::vector<std::pair<std::string, std::string>>(), ColumnsInTempView());
+	std::vector<std::pair<std::string, std::string>> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
 
 	result_columns = previous_xr_columns;
@@ -475,8 +475,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 
-	sql_strings.push_back(std::string());
-	std::string & sql_string = sql_strings.back();
+	sql_strings.push_back(std::make_pair(std::string(), std::string()));
+	std::string & sql_string = sql_strings.back().first;
 
 	sql_string = "SELECT ";
 	first = true;
@@ -560,7 +560,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		alter_string += " ADD COLUMN ";
 		alter_string += datetime_start_col_name;
 		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(alter_string);
+		sql_strings.push_back(std::make_pair(alter_string, std::string()));
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
@@ -586,7 +586,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		alter_string += " ADD COLUMN ";
 		alter_string += datetime_end_col_name;
 		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(alter_string);
+		sql_strings.push_back(std::make_pair(alter_string, std::string()));
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
@@ -609,7 +609,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXRTable(ColumnsInTempView const & previous_x_columns, int const current_multiplicity, int const primary_group_number)
 {
 
-	SqlAndColumnSet result = std::make_pair(std::vector<std::string>(), ColumnsInTempView());
+	SqlAndColumnSet result = std::make_pair(std::vector<std::pair<std::string, std::string>>(), ColumnsInTempView());
 
 	return result;
 
