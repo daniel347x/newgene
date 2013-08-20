@@ -220,6 +220,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							, db(db_)
 							, stmt(nullptr)
 							, failed(false)
+							, executor(db_, false)
 						{
 
 						}
@@ -231,12 +232,14 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							, db(db_)
 							, stmt(nullptr)
 							, failed(false)
+							, executor(db_, false)
 						{
 
 						}
 
 						void Execute();
 						bool Step();
+						void Empty(bool const empty_sql); // closes prepared statement and optionally clears stored SQL
 					
 						std::string sql;
 						std::string sql_error;
@@ -246,6 +249,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						STATEMENT_TYPE statement_type;
 						bool executed;
 						bool failed;
+
+						Executor executor;
 
 				};
 

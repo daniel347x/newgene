@@ -249,7 +249,7 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 
 	std::vector<SQLExecutor> & sql_commands = sql_and_column_set.first;
 
-	if (sql_and_column_set.second.most_recent_sql_statement_executed__index >= sql_commands.size() - 1)
+	if (sql_and_column_set.second.most_recent_sql_statement_executed__index >= (long)sql_commands.size() - 1)
 	{
 		// All SQL commands have been executed successfully
 		return;
@@ -276,6 +276,22 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 
 }
 
+void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
+{
+
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	if (empty_sql)
+	{
+		sql.clear();
+	}
+
+}
+
 void OutputModel::OutputGenerator::SQLExecutor::Execute()
 {
 
@@ -288,8 +304,6 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 	{
 		return;
 	}
-
-	Executor executor(db);
 
 	switch(statement_type)
 	{
