@@ -1071,9 +1071,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	int const minimum_desired_rows_per_transaction = 1024;
 
-	BeginNewTransaction();
-
 	int current_rows_added = 0;
+	int current_rows_added_since_execution = 0;
+	std::string sql_add_xr_row;
+
+	BeginNewTransaction();
 
 	while (StepData())
 	{
@@ -1098,21 +1100,30 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 			
 			// Add row as-is, setting new time range columns to 0
-			CreateNewXRRow(0, 0, previous_x_columns, true, true);
+			CreateNewXRRow(sql_add_xr_row, 0, 0, previous_x_columns, true, true);
+			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+			++current_rows_added;
+			++current_rows_added_since_execution;
 
 		}
 		else if (previous_is_0 && !current_is_0)
 		{
 
 			// Add row as-is, setting new time range columns to current time range values
-			CreateNewXRRow(current_datetime_start, current_datetime_end, previous_x_columns, true, true);
+			CreateNewXRRow(sql_add_xr_row, current_datetime_start, current_datetime_end, previous_x_columns, true, true);
+			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+			++current_rows_added;
+			++current_rows_added_since_execution;
 
 		}
 		else if (!previous_is_0 && current_is_0)
 		{
 
 			// Add row as-is, setting new time range columns to previous time range values
-			CreateNewXRRow(previous_datetime_start, previous_datetime_end, previous_x_columns, true, true);
+			CreateNewXRRow(sql_add_xr_row, previous_datetime_start, previous_datetime_end, previous_x_columns, true, true);
+			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+			++current_rows_added;
+			++current_rows_added_since_execution;
 
 		}
 		else
@@ -1191,7 +1202,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// Add row as-is, setting new time range columns
 					// to either the previous or the current time range columns,
 					// because they are the same
-					CreateNewXRRow(current_datetime_start, current_datetime_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					CreateNewXRRow(sql_add_xr_row, current_datetime_start, current_datetime_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+					++current_rows_added;
+					++current_rows_added_since_execution;
 
 				}
 				else if (lower_range_end < upper_range_end)
@@ -1202,12 +1216,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// First, add a row that includes all data,
 					// setting new time range columns to:
 					// lower_range_start - lower_range_end
-					CreateNewXRRow(lower_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					CreateNewXRRow(sql_add_xr_row, lower_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+					++current_rows_added;
+					++current_rows_added_since_execution;
 
 					// Second, add a row that includes only the upper range's data,
 					// setting new time range columns to:
 					// lower_range_end - upper_range_end
-					CreateNewXRRow(lower_range_end, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+					CreateNewXRRow(sql_add_xr_row, lower_range_end, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+					++current_rows_added;
+					++current_rows_added_since_execution;
 
 				}
 				else
@@ -1218,12 +1238,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// First, add a row that includes all data,
 					// setting new time range columns to:
 					// upper_range_start - upper_range_end
-					CreateNewXRRow(upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					CreateNewXRRow(sql_add_xr_row, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+					++current_rows_added;
+					++current_rows_added_since_execution;
+
 
 					// Second, add a row that includes only the lower range's data,
 					// setting new time range columns to:
 					// upper_range_end - lower_range_end
-					CreateNewXRRow(upper_range_end, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					CreateNewXRRow(sql_add_xr_row, upper_range_end, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+					++current_rows_added;
+					++current_rows_added_since_execution;
+
 
 				}
 
@@ -1242,12 +1270,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// First, add a row corresponding to the lower range,
 					// setting new time range columns to:
 					// lower_range_start - lower_range_end
-					CreateNewXRRow(lower_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					CreateNewXRRow(sql_add_xr_row, lower_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+					++current_rows_added;
+					++current_rows_added_since_execution;
 
 					// Second, add a row corresponding to the upper range,
 					// setting new time range columns to:
 					// upper_range_start - upper_range_end
-					CreateNewXRRow(upper_range_start, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+					CreateNewXRRow(sql_add_xr_row, upper_range_start, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+					++current_rows_added;
+					++current_rows_added_since_execution;
 
 				}
 				else
@@ -1261,7 +1295,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// i.e., including only the lower range's data,
 					// setting new time range columns to:
 					// lower_range_start - upper_range_start
-					CreateNewXRRow(lower_range_start, upper_range_start, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					CreateNewXRRow(sql_add_xr_row, lower_range_start, upper_range_start, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+					++current_rows_added;
+					++current_rows_added_since_execution;
 
 					if (lower_range_end == upper_range_end)
 					{
@@ -1273,7 +1310,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// that includes all data,
 						// therefore setting new time range columns to:
 						// upper_range_start - upper_range_end
-						CreateNewXRRow(upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						CreateNewXRRow(sql_add_xr_row, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+						++current_rows_added;
+						++current_rows_added_since_execution;
 
 					}
 					else if (lower_range_end < upper_range_end)
@@ -1284,12 +1324,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// So second, add a row that includes all data,
 						// setting new time range columns to:
 						// upper_range_start - lower_range_end
-						CreateNewXRRow(upper_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						CreateNewXRRow(sql_add_xr_row, upper_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+						++current_rows_added;
+						++current_rows_added_since_execution;
+
 
 						// And third, add a row that includes only the upper range's data,
 						// setting new time range columns to:
 						// lower_range_end - upper_range_end
-						CreateNewXRRow(lower_range_end, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+						CreateNewXRRow(sql_add_xr_row, lower_range_end, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+						++current_rows_added;
+						++current_rows_added_since_execution;
+
 
 					}
 					else
@@ -1301,12 +1349,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// that includes all data,
 						// therefore setting new time range columns to:
 						// upper_range_start - upper_range_end
-						CreateNewXRRow(upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						CreateNewXRRow(sql_add_xr_row, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+						++current_rows_added;
+						++current_rows_added_since_execution;
+
 
 						// And third, add a row that includes only the lower range's data,
 						// setting new time range columns to:
 						// upper_range_end - lower_range_end
-						CreateNewXRRow(upper_range_end, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+						CreateNewXRRow(sql_add_xr_row, upper_range_end, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
+						++current_rows_added;
+						++current_rows_added_since_execution;
+
 
 					}
 
@@ -1316,6 +1372,24 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		}
 
+		if ( current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
+		{
+			ExecuteSQL(result);
+			EndTransaction();
+			BeginNewTransaction();
+			current_rows_added_since_execution = 0;
+		}
+
+	}
+
+	if (current_rows_added_since_execution > 0)
+	{
+		ExecuteSQL(result);
+		EndTransaction();
+	}
+	else
+	{
+		EndTransaction();
 	}
 
 	if (failed)
@@ -1327,7 +1401,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-void OutputModel::OutputGenerator::CreateNewXRRow(std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data)
+void OutputModel::OutputGenerator::CreateNewXRRow(std::string & sql_add_xr_row, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data)
 {
 
 }

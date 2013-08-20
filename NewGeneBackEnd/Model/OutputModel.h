@@ -279,7 +279,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void ExecuteSQL(SqlAndColumnSet & sql_and_column_set);
 				void ObtainData(ColumnsInTempView & column_set);
 				bool StepData();
-				void CreateNewXRRow(std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data);
+				void CreateNewXRRow(std::string & sql_add_xr_row, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data);
 
 				// Save the SQL and column sets corresponding to each primary variable group in a global data structure
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
