@@ -213,6 +213,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							: executed(false)
 							, statement_type(UNKNOWN)
 							, db(db_)
+							, stmt(nullptr)
+							, failed(false)
 						{
 
 						}
@@ -222,6 +224,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							, executed(false)
 							, statement_type(UNKNOWN)
 							, db(db_)
+							, stmt(nullptr)
+							, failed(false)
 						{
 
 						}
@@ -232,8 +236,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::string sql_error;
 
 						sqlite3 * db;
+						sqlite3_stmt * stmt;
 						STATEMENT_TYPE statement_type;
 						bool executed;
+						bool failed;
 
 				};
 

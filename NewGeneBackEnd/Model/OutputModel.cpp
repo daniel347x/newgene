@@ -152,16 +152,16 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 {
 
 	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable(primary_variable_group_raw_data_columns, primary_group_number);
+	ExecuteSQL(x_table_result);
 	sql_and_column_sets.push_back(x_table_result);
-
 	if (failed)
 	{
 		return;
 	}
 
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(x_table_result.second, primary_group_number);
+	ExecuteSQL(xr_table_result);
 	sql_and_column_sets.push_back(xr_table_result);
-
 	if (failed)
 	{
 		return;
@@ -171,16 +171,16 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	{
 
 		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number);
+		ExecuteSQL(x_table_result);
 		sql_and_column_sets.push_back(x_table_result);
-
 		if (failed)
 		{
 			return;
 		}
 
 		xr_table_result = CreatePrimaryXRTable(x_table_result.second, current_multiplicity, primary_group_number);
+		ExecuteSQL(xr_table_result);
 		sql_and_column_sets.push_back(xr_table_result);
-
 		if (failed)
 		{
 			return;
@@ -195,10 +195,20 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 
 	std::vector<SQLExecutor> & sql_commands = sql_and_column_set.first;
 
-	std::for_each(sql_commands.begin(), sql_commands.end(), [](SQLExecutor & sql_executor)
+	std::for_each(sql_commands.begin(), sql_commands.end(), [this](SQLExecutor & sql_executor)
 	{
 		
+		if (failed)
+		{
+			return;
+		}
+
 		sql_executor.Execute();
+		if (sql_executor.failed)
+		{
+			failed = true;
+			return;
+		}
 
 	});
 
@@ -212,17 +222,46 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		return;
 	}
 
+	if (failed)
+	{
+		return;
+	}
+
 	switch(statement_type)
 	{
 
 		case DOES_NOT_RETURN_ROWS:
 			{
 
+				sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+				if (stmt == NULL)
+				{
+					sql_error = sqlite3_errmsg(db);
+					failed = true;
+					return;
+				}
+
+				int step_result = 0;
+				if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+				{
+					sql_error = sqlite3_errmsg(db);
+					failed = true;
+					return;
+				}
+
 			}
 			break;
 
 		case RETURNS_ROWS:
 			{
+
+				sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+				if (stmt == NULL)
+				{
+					sql_error = sqlite3_errmsg(db);
+					failed = true;
+					return;
+				}
 
 			}
 			break;
