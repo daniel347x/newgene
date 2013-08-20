@@ -380,6 +380,8 @@ void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 	if (empty_sql)
 	{
 		sql.clear();
+		bound_parameter_strings.clear();
+		bound_parameter_ints.clear();
 	}
 
 	if (statement_is_owned)
