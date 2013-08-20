@@ -1081,6 +1081,139 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		std::int64_t previous_datetime_end = sqlite3_column_int64(stmt_result, previous_datetime_end_column_index);
 		std::int64_t current_datetime_start = sqlite3_column_int64(stmt_result, current_datetime_start_column_index);
 		std::int64_t current_datetime_end = sqlite3_column_int64(stmt_result, current_datetime_end_column_index);
+
+		bool previous_is_0 = false;
+		if (previous_datetime_start == 0 && previous_datetime_end == 0)
+		{
+			previous_is_0 = true;
+		}
+
+		bool current_is_0 = false;
+		if (current_datetime_start == 0 && current_datetime_end == 0)
+		{
+			current_is_0 = true;
+		}
+
+		if (previous_is_0 && current_is_0)
+		{
+			// Add row as-is, setting new time range columns to 0
+		}
+		else if (previous_is_0 && !current_is_0)
+		{
+			// Add row as-is, setting new time range columns to current time range values
+		}
+		else if (!previous_is_0 && current_is_0)
+		{
+			// Add row as-is, setting new time range columns to previous time range values
+		}
+		else
+		{
+
+			// Both current and previous rows have non-zero time range columns.
+			// Perform the algorithm that possibly splits the row into multiple rows,
+			// one for each time range sub-region in the overlap of the time ranges between current and previous.
+
+			// Rule out garbage
+			if (previous_datetime_start >= previous_datetime_end)
+			{
+				// invalid previous time range values
+				continue;
+			}
+			else if (current_datetime_start >= current_datetime_end)
+			{
+				// invalid current time range values
+				continue;
+			}
+
+			// Both current and previous time range windows
+			// are now guaranteed to have a non-zero, and positive, width
+
+			std::int64_t lower_range_start = 0;
+			std::int64_t lower_range_end = 0;
+			std::int64_t upper_range_start = 0;
+			std::int64_t upper_range_end = 0;
+
+			bool previous_is_lower = false;
+			if (previous_datetime_start <= current_datetime_start)
+			{
+				lower_range_start = previous_datetime_start;
+				lower_range_end = previous_datetime_end;
+				upper_range_start = current_datetime_start;
+				upper_range_end = current_datetime_end;
+				previous_is_lower = true;
+			}
+
+			if (lower_range_start == upper_range_start)
+			{
+
+				// special case: The lower range and the upper range
+				// begin at the same time value
+
+
+				// There is guaranteed to be overlap between the lower range
+				// and the upper range
+
+				if (lower_range_end == upper_range_end)
+				{
+					// special case: The lower range and the upper range
+					// end at the same time value
+
+					// Add row as-is, setting new time range columns
+					// to either the previous or the current time range columns,
+					// because they are the same
+
+				}
+				else if (lower_range_end < upper_range_end)
+				{
+					// The upper range ends higher than the lower range
+
+					// First, add a row that includes both sets of data,
+					// setting 
+				}
+				else
+				{
+					// The lower range ends higher than the upper range
+				}
+
+			}
+			else
+			{
+
+				// The lower range is guaranteed to start
+				// before the upper range starts
+
+				if (lower_range_end <= upper_range_start)
+				{
+					// No overlap between the lower range and the upper range
+				}
+				else
+				{
+
+					// There is guaranteed to be overlap between the lower range
+					// and the upper range
+
+					if (lower_range_end == upper_range_end)
+					{
+						// special case: The lower range and the upper range
+						// end at the same time value
+
+						// 
+					}
+					else if (lower_range_end < upper_range_end)
+					{
+						// The upper range ends higher than the lower range
+					}
+					else
+					{
+						// The lower range ends higher than the upper range
+					}
+
+				}
+
+			}
+
+		}
+
 	}
 
 	if (failed)
