@@ -124,6 +124,7 @@ public:
 
 	ColumnsInTempView()
 		: view_number(-1)
+		, most_recent_sql_statement_executed__index(-1)
 	{
 
 	}
@@ -137,6 +138,8 @@ public:
 	std::vector<std::string> variable_group_longhand_names;
 	std::string view_name;
 	std::string view_name_no_uuid;
+
+	int most_recent_sql_statement_executed__index;
 
 };
 

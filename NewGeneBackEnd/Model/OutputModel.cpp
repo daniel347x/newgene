@@ -249,7 +249,13 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 
 	std::vector<SQLExecutor> & sql_commands = sql_and_column_set.first;
 
-	std::for_each(sql_commands.begin(), sql_commands.end(), [this](SQLExecutor & sql_executor)
+	if (sql_and_column_set.second.most_recent_sql_statement_executed__index >= sql_commands.size() - 1)
+	{
+		// All SQL commands have been executed successfully
+		return;
+	}
+
+	std::for_each(sql_commands.begin() + sql_and_column_set.second.most_recent_sql_statement_executed__index + 1, sql_commands.end(), [this, &sql_and_column_set](SQLExecutor & sql_executor)
 	{
 		
 		if (failed)
@@ -263,6 +269,8 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 			failed = true;
 			return;
 		}
+
+		++sql_and_column_set.second.most_recent_sql_statement_executed__index;
 
 	});
 
@@ -965,6 +973,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
 	datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 
+	ExecuteSQL(result);
+
+	if (failed)
+	{
+		return result;
+	}
 
 	ObtainData(previous_x_columns);
 
@@ -972,7 +986,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 		return result;
 	}
-
 
 	while (StepData())
 	{
