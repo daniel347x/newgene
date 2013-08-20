@@ -231,6 +231,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						}
 
 						void Execute();
+						bool Step();
 					
 						std::string sql;
 						std::string sql_error;
@@ -267,6 +268,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreatePrimaryXRTable(ColumnsInTempView const & previous_x_columns, int const current_multiplicity, int const primary_group_number);
 
 				void ExecuteSQL(SqlAndColumnSet & sql_and_column_set);
+				void ObtainData(SqlAndColumnSet & sql_and_column_set);
+				bool StepData(SqlAndColumnSet & sql_and_column_set);
 
 				// Save the SQL and column sets corresponding to each primary variable group in a global data structure
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
@@ -345,6 +348,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				OutputModel * model;
 				InputModel * input_model;
 				sqlite3 * db;
+				sqlite3_stmt * stmt_result;
+				std::string sql_error;
 
 				bool failed;
 

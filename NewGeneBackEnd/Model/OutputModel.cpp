@@ -81,8 +81,9 @@ std::string OutputModel::StripUUIDFromVariableName(std::string const & variable_
 }
 
 OutputModel::OutputGenerator::OutputGenerator(OutputModel & model_)
+	: model(&model_)
+	, stmt_result(nullptr)
 {
-	model = &model_;
 }
 
 
@@ -190,6 +191,63 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 }
 
+bool OutputModel::OutputGenerator::StepData(SqlAndColumnSet & sql_and_column_set)
+{
+
+	if (stmt_result == nullptr)
+	{
+		return false;
+	}
+
+	if (failed)
+	{
+		return false;
+	}
+
+	int step_result = 0;
+	if ((step_result = sqlite3_step(stmt_result)) != SQLITE_ROW)
+	{
+
+		if (step_result == SQLITE_DONE)
+		{
+			return false;
+		}
+
+		sql_error = sqlite3_errmsg(db);
+		failed = true;
+		return false;
+	}
+
+	return true;
+}
+
+void OutputModel::OutputGenerator::ObtainData(SqlAndColumnSet & sql_and_column_set)
+{
+
+	if (stmt_result)
+	{
+		return;
+	}
+
+	if (failed)
+	{
+		return;
+	}
+
+	std::string sql;
+	sql += "SELECT * FROM ";
+	sql += sql_and_column_set.second.view_name;
+
+	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt_result, NULL);
+	if (stmt_result == NULL)
+	{
+		sql_error = sqlite3_errmsg(db);
+		failed = true;
+		return;
+	}
+
+}
+
 void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_set)
 {
 
@@ -269,6 +327,37 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 	}
 
 	executed = true;
+
+}
+
+bool OutputModel::OutputGenerator::SQLExecutor::Step()
+{
+
+	if (stmt == nullptr)
+	{
+		return false;
+	}
+
+	if (failed)
+	{
+		return false;
+	}
+
+	int step_result = 0;
+	if ((step_result = sqlite3_step(stmt)) != SQLITE_ROW)
+	{
+
+		if (step_result == SQLITE_DONE)
+		{
+			return false;
+		}
+
+		sql_error = sqlite3_errmsg(db);
+		failed = true;
+		return false;
+	}
+
+	return true;
 
 }
 
@@ -698,6 +787,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 {
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+
+	//previous_x_columns
 
 	return result;
 
