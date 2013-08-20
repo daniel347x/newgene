@@ -281,6 +281,8 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		return;
 	}
 
+	Executor executor(db);
+
 	switch(statement_type)
 	{
 
@@ -323,6 +325,8 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 	}
 
 	executed = true;
+
+	executor.success();
 
 }
 
