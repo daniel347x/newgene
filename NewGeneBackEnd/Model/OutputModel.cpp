@@ -294,6 +294,80 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 
 }
 
+OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_)
+	: statement_type(DOES_NOT_RETURN_ROWS)
+	, db(db_)
+	, stmt(nullptr)
+	, failed(false)
+	, statement_is_owned(true)
+	, statement_is_prepared(false)
+{
+
+}
+
+OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::string const & sql_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
+	: sql(sql_)
+	, statement_type(DOES_NOT_RETURN_ROWS)
+	, db(db_)
+	, stmt(stmt_to_use)
+	, failed(false)
+	, statement_is_owned(stmt_to_use == nullptr)
+	, statement_is_prepared(stmt_to_use != nullptr)
+{
+	if (!failed && statement_is_owned && prepare_statement_if_null && stmt == nullptr)
+	{
+		if (!statement_is_prepared)
+		{
+			sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+			if (stmt == NULL)
+			{
+				sql_error = sqlite3_errmsg(db);
+				failed = true;
+				return;
+			}
+			statement_is_prepared = true;
+		}
+	}
+}
+
+OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
+	: sql(sql_)
+	, statement_type(DOES_NOT_RETURN_ROWS)
+	, db(db_)
+	, stmt(stmt_to_use)
+	, failed(false)
+	, statement_is_owned(stmt_to_use == nullptr)
+	, statement_is_prepared(stmt_to_use != nullptr)
+	, bound_parameter_strings(bound_parameter_strings_)
+	, bound_parameter_ints(bound_parameter_ints_)
+{
+	if (!failed && statement_is_owned && prepare_statement_if_null && stmt == nullptr)
+	{
+		if (!statement_is_prepared)
+		{
+			sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+			if (stmt == NULL)
+			{
+				sql_error = sqlite3_errmsg(db);
+				failed = true;
+				return;
+			}
+			statement_is_prepared = true;
+		}
+	}
+}
+
+OutputModel::OutputGenerator::SQLExecutor::~SQLExecutor()
+{
+	if (statement_is_owned && stmt)
+	{
+		sqlite3_finalize(stmt);
+	}
+	stmt = nullptr;
+	statement_is_owned = true;
+	statement_is_prepared = false;
+}
+
 void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 {
 
@@ -1088,6 +1162,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	int current_rows_added_since_execution = 0;
 	std::string sql_add_xr_row;
 	bool first_row_added = true;
+	std::vector<std::string> bound_parameter_strings;
+	std::vector<std::int64_t> bound_parameter_ints;
 	sqlite3_stmt * the_prepared_stmt = nullptr;
 
 	BeginNewTransaction();
@@ -1115,8 +1191,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 			
 			// Add row as-is, setting new time range columns to 0
-			CreateNewXRRow(first_row_added, sql_add_xr_row, 0, 0, previous_x_columns, true, true);
-			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+			CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, 0, 0, previous_x_columns, true, true);
+			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 			the_prepared_stmt = sql_strings.back().stmt;
 			++current_rows_added;
 			++current_rows_added_since_execution;
@@ -1126,8 +1202,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 
 			// Add row as-is, setting new time range columns to current time range values
-			CreateNewXRRow(first_row_added, sql_add_xr_row, current_datetime_start, current_datetime_end, previous_x_columns, true, true);
-			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+			CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, current_datetime_start, current_datetime_end, previous_x_columns, true, true);
+			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 			the_prepared_stmt = sql_strings.back().stmt;
 			++current_rows_added;
 			++current_rows_added_since_execution;
@@ -1137,8 +1213,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 
 			// Add row as-is, setting new time range columns to previous time range values
-			CreateNewXRRow(first_row_added, sql_add_xr_row, previous_datetime_start, previous_datetime_end, previous_x_columns, true, true);
-			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+			CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, previous_datetime_start, previous_datetime_end, previous_x_columns, true, true);
+			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 			the_prepared_stmt = sql_strings.back().stmt;
 			++current_rows_added;
 			++current_rows_added_since_execution;
@@ -1220,8 +1296,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// Add row as-is, setting new time range columns
 					// to either the previous or the current time range columns,
 					// because they are the same
-					CreateNewXRRow(first_row_added, sql_add_xr_row, current_datetime_start, current_datetime_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+					CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, current_datetime_start, current_datetime_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -1235,8 +1311,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// First, add a row that includes all data,
 					// setting new time range columns to:
 					// lower_range_start - lower_range_end
-					CreateNewXRRow(first_row_added, sql_add_xr_row, lower_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+					CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, lower_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row,bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -1244,8 +1320,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// Second, add a row that includes only the upper range's data,
 					// setting new time range columns to:
 					// lower_range_end - upper_range_end
-					CreateNewXRRow(first_row_added, sql_add_xr_row, lower_range_end, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+					CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, lower_range_end, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -1259,8 +1335,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// First, add a row that includes all data,
 					// setting new time range columns to:
 					// upper_range_start - upper_range_end
-					CreateNewXRRow(first_row_added, sql_add_xr_row, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+					CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -1269,8 +1345,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// Second, add a row that includes only the lower range's data,
 					// setting new time range columns to:
 					// upper_range_end - lower_range_end
-					CreateNewXRRow(first_row_added, sql_add_xr_row, upper_range_end, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+					CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, upper_range_end, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -1293,8 +1369,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// First, add a row corresponding to the lower range,
 					// setting new time range columns to:
 					// lower_range_start - lower_range_end
-					CreateNewXRRow(first_row_added, sql_add_xr_row, lower_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+					CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, lower_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -1302,8 +1378,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// Second, add a row corresponding to the upper range,
 					// setting new time range columns to:
 					// upper_range_start - upper_range_end
-					CreateNewXRRow(first_row_added, sql_add_xr_row, upper_range_start, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+					CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, upper_range_start, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -1320,8 +1396,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// i.e., including only the lower range's data,
 					// setting new time range columns to:
 					// lower_range_start - upper_range_start
-					CreateNewXRRow(first_row_added, sql_add_xr_row, lower_range_start, upper_range_start, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+					CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, lower_range_start, upper_range_start, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -1336,8 +1412,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// that includes all data,
 						// therefore setting new time range columns to:
 						// upper_range_start - upper_range_end
-						CreateNewXRRow(first_row_added, sql_add_xr_row, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
-						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+						CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 						the_prepared_stmt = sql_strings.back().stmt;
 						++current_rows_added;
 						++current_rows_added_since_execution;
@@ -1351,8 +1427,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// So second, add a row that includes all data,
 						// setting new time range columns to:
 						// upper_range_start - lower_range_end
-						CreateNewXRRow(first_row_added, sql_add_xr_row, upper_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
-						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+						CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, upper_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 						the_prepared_stmt = sql_strings.back().stmt;
 						++current_rows_added;
 						++current_rows_added_since_execution;
@@ -1361,8 +1437,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// And third, add a row that includes only the upper range's data,
 						// setting new time range columns to:
 						// lower_range_end - upper_range_end
-						CreateNewXRRow(first_row_added, sql_add_xr_row, lower_range_end, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
-						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+						CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, lower_range_end, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 						the_prepared_stmt = sql_strings.back().stmt;
 						++current_rows_added;
 						++current_rows_added_since_execution;
@@ -1378,8 +1454,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// that includes all data,
 						// therefore setting new time range columns to:
 						// upper_range_start - upper_range_end
-						CreateNewXRRow(first_row_added, sql_add_xr_row, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
-						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+						CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 						the_prepared_stmt = sql_strings.back().stmt;
 						++current_rows_added;
 						++current_rows_added_since_execution;
@@ -1388,8 +1464,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// And third, add a row that includes only the lower range's data,
 						// setting new time range columns to:
 						// upper_range_end - lower_range_end
-						CreateNewXRRow(first_row_added, sql_add_xr_row, upper_range_end, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
-						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, the_prepared_stmt, true));
+						CreateNewXRRow(first_row_added, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, upper_range_end, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, the_prepared_stmt, true));
 						the_prepared_stmt = sql_strings.back().stmt;
 						++current_rows_added;
 						++current_rows_added_since_execution;
@@ -1431,7 +1507,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-void OutputModel::OutputGenerator::CreateNewXRRow(bool const first_row_added, std::string & sql_add_xr_row, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data)
+void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data)
 {
 
 }
