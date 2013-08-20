@@ -297,7 +297,7 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 {
 
-	if (stmt)
+	if (statement_is_owned && stmt)
 	{
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
@@ -308,15 +308,15 @@ void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 		sql.clear();
 	}
 
+	if (statement_is_owned)
+	{
+		statement_is_prepared = false;
+	}
+
 }
 
 void OutputModel::OutputGenerator::SQLExecutor::Execute()
 {
-
-	if (executed)
-	{
-		return;
-	}
 
 	if (failed)
 	{
@@ -329,12 +329,16 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		case DOES_NOT_RETURN_ROWS:
 			{
 
-				sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
-				if (stmt == NULL)
+				if (!statement_is_prepared)
 				{
-					sql_error = sqlite3_errmsg(db);
-					failed = true;
-					return;
+					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+					if (stmt == NULL)
+					{
+						sql_error = sqlite3_errmsg(db);
+						failed = true;
+						return;
+					}
+					statement_is_prepared = true;
 				}
 
 				int step_result = 0;
@@ -351,12 +355,16 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		case RETURNS_ROWS:
 			{
 
-				sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
-				if (stmt == NULL)
+				if (!statement_is_prepared)
 				{
-					sql_error = sqlite3_errmsg(db);
-					failed = true;
-					return;
+					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+					if (stmt == NULL)
+					{
+						sql_error = sqlite3_errmsg(db);
+						failed = true;
+						return;
+					}
+					statement_is_prepared = true;
 				}
 
 			}
@@ -364,14 +372,17 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 
 	}
 
-	executed = true;
-
 }
 
 bool OutputModel::OutputGenerator::SQLExecutor::Step()
 {
 
 	if (stmt == nullptr)
+	{
+		return false;
+	}
+
+	if (!statement_is_prepared)
 	{
 		return false;
 	}
@@ -1362,7 +1373,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row));
 						++current_rows_added;
 						++current_rows_added_since_execution;
-
 
 					}
 

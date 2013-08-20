@@ -216,24 +216,37 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						};
 
 						SQLExecutor(sqlite3 * db_)
-							: executed(false)
-							, statement_type(DOES_NOT_RETURN_ROWS)
+							: statement_type(DOES_NOT_RETURN_ROWS)
 							, db(db_)
 							, stmt(nullptr)
 							, failed(false)
+							, statement_is_owned(true)
+							, statement_is_prepared(false)
 						{
 
 						}
 
-						SQLExecutor(sqlite3 * db_, std::string const & sql_)
+						SQLExecutor(sqlite3 * db_, std::string const & sql_, sqlite3_stmt * stmt_to_use = nullptr)
 							: sql(sql_)
-							, executed(false)
 							, statement_type(DOES_NOT_RETURN_ROWS)
 							, db(db_)
-							, stmt(nullptr)
+							, stmt(stmt_to_use)
 							, failed(false)
+							, statement_is_owned(stmt_to_use == nullptr)
+							, statement_is_prepared(stmt_to_use != nullptr)
 						{
 
+						}
+
+						~SQLExecutor()
+						{
+							if (statement_is_owned && stmt)
+							{
+								sqlite3_finalize(stmt);
+							}
+							stmt = nullptr;
+							statement_is_owned = true;
+							statement_is_prepared = false;
 						}
 
 						void Execute();
@@ -246,7 +259,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						sqlite3 * db;
 						sqlite3_stmt * stmt;
 						STATEMENT_TYPE statement_type;
-						bool executed;
+						bool statement_is_owned;
+						bool statement_is_prepared;
 						bool failed;
 
 				};
