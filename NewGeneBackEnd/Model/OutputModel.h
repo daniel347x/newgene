@@ -215,14 +215,22 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							, DOES_NOT_RETURN_ROWS
 						};
 
+						enum WHICH_BINDING
+						{
+							UNKNOWN_BINDING
+							, NULL_BINDING
+							, STRING
+							, INT64
+						};
+
 						SQLExecutor(sqlite3 * db_);
 						SQLExecutor(sqlite3 * db_, std::string const & sql_, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
-						SQLExecutor(sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
+						SQLExecutor(sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
 						~SQLExecutor();
 
 						void Execute();
 						bool Step();
-						void Empty(bool const empty_sql); // closes prepared statement and optionally clears stored SQL
+						void Empty(bool const empty_sql = true); // closes prepared statement and optionally clears stored SQL
 					
 						std::string sql;
 						std::string sql_error;
@@ -234,12 +242,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						bool statement_is_prepared;
 						bool failed;
 
-						enum WHICH_BINDING
-						{
-							  UNKNOWN_BINDING
-							, STRING
-							, INT64
-						};
 						std::vector<std::string> bound_parameter_strings;
 						std::vector<std::int64_t> bound_parameter_ints;
 						std::vector<WHICH_BINDING> bound_parameter_which_binding_to_use;
@@ -274,7 +276,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void ExecuteSQL(SqlAndColumnSet & sql_and_column_set);
 				void ObtainData(ColumnsInTempView & column_set);
 				bool StepData();
-				void CreateNewXRRow(bool & first_row_added, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data);
+				void CreateNewXRRow(bool & first_row_added, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data);
 
 				// Save the SQL and column sets corresponding to each primary variable group in a global data structure
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
