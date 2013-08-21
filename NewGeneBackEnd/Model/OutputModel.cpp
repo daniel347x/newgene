@@ -331,36 +331,22 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_)
 	, db(db_)
 	, stmt(nullptr)
 	, failed(false)
-	, statement_is_owned(false)
+	, statement_is_owned(true)
 	, statement_is_prepared(false)
 {
 
 }
 
-OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::string const & sql_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
+OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::string const & sql_)
 	: sql(sql_)
 	, statement_type(DOES_NOT_RETURN_ROWS)
 	, db(db_)
-	, stmt(stmt_to_use)
+	, stmt(nullptr)
 	, failed(false)
-	, statement_is_owned(false)
-	, statement_is_prepared(stmt_to_use != nullptr)
+	, statement_is_owned(true)
+	, statement_is_prepared(false)
 {
-	if (!failed && prepare_statement_if_null && stmt == nullptr)
-	{
-		if (!statement_is_prepared)
-		{
-			sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
-			if (stmt == NULL)
-			{
-				sql_error = sqlite3_errmsg(db);
-				failed = true;
-				return;
-			}
-			statement_is_owned = true;
-			statement_is_prepared = true;
-		}
-	}
+
 }
 
 OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
