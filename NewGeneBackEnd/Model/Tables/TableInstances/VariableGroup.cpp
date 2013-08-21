@@ -80,7 +80,7 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 		char const * uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_UUID));
 		char const * code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_STRING_CODE));
 		char const * longhand = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_STRING_LONGHAND));
-		int const seqnumber = reinterpret_cast<int const>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_SEQUENCE_NUMBER));
+		int const seqnumber = sqlite3_column_int(stmt, INDEX__VG_SET_MEMBER_SEQUENCE_NUMBER);
 		char const * notes1 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_NOTES1));
 		char const * notes2 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_NOTES2));
 		char const * notes3 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_NOTES3));
