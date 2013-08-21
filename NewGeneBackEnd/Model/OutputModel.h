@@ -276,7 +276,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void ExecuteSQL(SqlAndColumnSet & sql_and_column_set);
 				void ObtainData(ColumnsInTempView & column_set);
 				bool StepData();
-				void CreateNewXRRow(bool & first_row_added, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data);
+				void CreateNewXRRow(bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data);
 
 				// Save the SQL and column sets corresponding to each primary variable group in a global data structure
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
