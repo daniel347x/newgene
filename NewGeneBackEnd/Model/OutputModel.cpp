@@ -273,7 +273,8 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 		return;
 	}
 
-	std::for_each(sql_commands.begin() + sql_and_column_set.second.most_recent_sql_statement_executed__index + 1, sql_commands.end(), [this, &sql_and_column_set](SQLExecutor & sql_executor)
+	int number_executed = 0;
+	std::for_each(sql_commands.begin() + sql_and_column_set.second.most_recent_sql_statement_executed__index + 1, sql_commands.end(), [this, &number_executed, &sql_and_column_set](SQLExecutor & sql_executor)
 	{
 		
 		if (failed)
@@ -289,8 +290,20 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 		}
 
 		++sql_and_column_set.second.most_recent_sql_statement_executed__index;
+		++number_executed;
 
 	});
+
+	// Clean preceding SQL
+	while (number_executed > 0)
+	{
+		if (!sql_commands.back().statement_is_owned)
+		{
+			sql_commands.pop_back();
+		}
+		--number_executed;
+		--sql_and_column_set.second.most_recent_sql_statement_executed__index;
+	}
 
 }
 
@@ -1544,7 +1557,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		}
 
-		if ( current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
+		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 		{
 			ExecuteSQL(result);
 			EndTransaction();
