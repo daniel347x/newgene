@@ -460,22 +460,22 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		{
 			switch (which_binding)
 			{
-			case STRING:
-				{
-					std::string & the_string = this->bound_parameter_strings[current_string_index];
-					sqlite3_bind_text(this->stmt, current_index, the_string.c_str(), the_string.size(), SQLITE_STATIC);
-					++current_string_index;
-					++current_index;
-				}
-				break;
-			case INT64:
-				{
-					std::int64_t the_int64 = this->bound_parameter_ints[current_int64_index];
-					sqlite3_bind_int64(this->stmt, current_index, the_int64);
-					++current_int64_index;
-					++current_index;
-				}
-				break;
+				case STRING:
+					{
+						std::string & the_string = this->bound_parameter_strings[current_string_index];
+						sqlite3_bind_text(this->stmt, current_index, the_string.c_str(), the_string.size(), SQLITE_STATIC);
+						++current_string_index;
+						++current_index;
+					}
+					break;
+				case INT64:
+					{
+						std::int64_t the_int64 = this->bound_parameter_ints[current_int64_index];
+						sqlite3_bind_int64(this->stmt, current_index, the_int64);
+						++current_int64_index;
+						++current_index;
+					}
+					break;
 			}
 		});
 
