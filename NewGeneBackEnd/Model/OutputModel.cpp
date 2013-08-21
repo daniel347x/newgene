@@ -180,6 +180,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 {
 
 	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable(primary_variable_group_raw_data_columns, primary_group_number);
+	x_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(x_table_result);
 	sql_and_column_sets.push_back(x_table_result);
 	if (failed)
@@ -188,6 +189,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	}
 
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(x_table_result.second, primary_group_number);
+	xr_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(xr_table_result);
 	sql_and_column_sets.push_back(xr_table_result);
 	if (failed)
@@ -199,6 +201,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	{
 
 		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number);
+		x_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(x_table_result);
 		sql_and_column_sets.push_back(x_table_result);
 		if (failed)
@@ -207,6 +210,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 		}
 
 		xr_table_result = CreatePrimaryXRTable(x_table_result.second, current_multiplicity, primary_group_number);
+		xr_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(xr_table_result);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed)
