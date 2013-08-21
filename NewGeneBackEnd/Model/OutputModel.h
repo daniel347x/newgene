@@ -226,6 +226,12 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						SQLExecutor(sqlite3 * db_);
 						SQLExecutor(sqlite3 * db_, std::string const & sql_, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
 						SQLExecutor(sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
+						SQLExecutor(SQLExecutor const & rhs);
+						SQLExecutor(SQLExecutor && rhs);
+						SQLExecutor & operator=(SQLExecutor const & rhs);
+						SQLExecutor & operator=(SQLExecutor && rhs);
+						void Copy(SQLExecutor const & rhs);
+						void CopyOwned(SQLExecutor const & rhs);
 						~SQLExecutor();
 
 						void Execute();

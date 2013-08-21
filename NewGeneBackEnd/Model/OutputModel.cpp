@@ -89,10 +89,29 @@ OutputModel::OutputGenerator::OutputGenerator(OutputModel & model_)
 
 OutputModel::OutputGenerator::~OutputGenerator()
 {
+
 	if (executor.transaction_begun)
 	{
 		EndTransaction();
 	}
+
+	std::for_each(primary_variable_group_column_sets.begin(), primary_variable_group_column_sets.end(), [](SqlAndColumnSets & sql_and_column_sets)
+	{
+		
+		std::for_each(sql_and_column_sets.begin(), sql_and_column_sets.end(), [](SqlAndColumnSet & sql_and_column_set)
+		{
+
+			std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [](SQLExecutor & sql_executor)
+			{
+				
+				sql_executor.Empty();
+
+			});
+
+		});
+
+	});
+
 }
 
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
@@ -312,7 +331,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_)
 	, db(db_)
 	, stmt(nullptr)
 	, failed(false)
-	, statement_is_owned(true)
+	, statement_is_owned(false)
 	, statement_is_prepared(false)
 {
 
@@ -324,10 +343,10 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 	, db(db_)
 	, stmt(stmt_to_use)
 	, failed(false)
-	, statement_is_owned(stmt_to_use == nullptr)
+	, statement_is_owned(false)
 	, statement_is_prepared(stmt_to_use != nullptr)
 {
-	if (!failed && statement_is_owned && prepare_statement_if_null && stmt == nullptr)
+	if (!failed && prepare_statement_if_null && stmt == nullptr)
 	{
 		if (!statement_is_prepared)
 		{
@@ -338,6 +357,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 				failed = true;
 				return;
 			}
+			statement_is_owned = true;
 			statement_is_prepared = true;
 		}
 	}
@@ -349,13 +369,13 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 	, db(db_)
 	, stmt(stmt_to_use)
 	, failed(false)
-	, statement_is_owned(stmt_to_use == nullptr)
+	, statement_is_owned(false)
 	, statement_is_prepared(stmt_to_use != nullptr)
 	, bound_parameter_strings(bound_parameter_strings_)
 	, bound_parameter_ints(bound_parameter_ints_)
 	, bound_parameter_which_binding_to_use(bound_parameter_which_binding_to_use_)
 {
-	if (!failed && statement_is_owned && prepare_statement_if_null && stmt == nullptr)
+	if (!failed && prepare_statement_if_null && stmt == nullptr)
 	{
 		if (!statement_is_prepared)
 		{
@@ -366,6 +386,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 				failed = true;
 				return;
 			}
+			statement_is_owned = true;
 			statement_is_prepared = true;
 		}
 	}
@@ -374,6 +395,65 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 OutputModel::OutputGenerator::SQLExecutor::~SQLExecutor()
 {
 	Empty();
+}
+
+OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(SQLExecutor const & rhs)
+{
+	Copy(rhs);
+}
+
+OutputModel::OutputGenerator::SQLExecutor & OutputModel::OutputGenerator::SQLExecutor::operator=(SQLExecutor const & rhs)
+{
+	if (&rhs != this)
+	{
+		Copy(rhs);
+	}
+	return *this;
+}
+
+OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(SQLExecutor && rhs)
+{
+	CopyOwned(rhs);
+}
+
+OutputModel::OutputGenerator::SQLExecutor & OutputModel::OutputGenerator::SQLExecutor::operator=(SQLExecutor && rhs)
+{
+	CopyOwned(rhs);
+	return *this;
+}
+
+void OutputModel::OutputGenerator::SQLExecutor::Copy(SQLExecutor const & rhs)
+{
+	// The following line, not the default, is why we explicitly define a copy constructor and assignment operator
+	this->statement_is_owned = false;
+
+	this->bound_parameter_ints = rhs.bound_parameter_ints;
+	this->bound_parameter_strings = rhs.bound_parameter_strings;
+	this->bound_parameter_which_binding_to_use = rhs.bound_parameter_which_binding_to_use;
+	this->db = rhs.db;
+	this->failed = rhs.failed;
+	this->sql = rhs.sql;
+	this->sql_error = sql_error;
+	this->statement_is_prepared = rhs.statement_is_prepared;
+	this->statement_type = rhs.statement_type;
+	this->stmt = rhs.stmt;
+}
+
+void OutputModel::OutputGenerator::SQLExecutor::CopyOwned(SQLExecutor const & rhs)
+{
+	// The following line DOES use the default here
+	this->statement_is_owned = rhs.statement_is_owned;
+
+	this->bound_parameter_ints = rhs.bound_parameter_ints;
+	this->bound_parameter_strings = rhs.bound_parameter_strings;
+	this->bound_parameter_which_binding_to_use = rhs.bound_parameter_which_binding_to_use;
+	this->db = rhs.db;
+	this->failed = rhs.failed;
+	this->sql = rhs.sql;
+	this->sql_error = sql_error;
+	this->statement_is_prepared = rhs.statement_is_prepared;
+	this->statement_type = rhs.statement_type;
+	this->stmt = rhs.stmt;
 }
 
 void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
@@ -416,7 +496,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		case DOES_NOT_RETURN_ROWS:
 			{
 
-				if (!statement_is_prepared)
+				if (statement_is_owned && !statement_is_prepared)
 				{
 					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 					if (stmt == NULL)
@@ -434,7 +514,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		case RETURNS_ROWS:
 			{
 
-				if (!statement_is_prepared)
+				if (statement_is_owned && !statement_is_prepared)
 				{
 					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 					if (stmt == NULL)
