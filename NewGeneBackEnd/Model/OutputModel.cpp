@@ -319,9 +319,13 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 		if (!sql_commands.back().statement_is_owned)
 		{
 			sql_commands.pop_back();
+			--number_executed;
+			--sql_and_column_set.second.most_recent_sql_statement_executed__index;
 		}
-		--number_executed;
-		--sql_and_column_set.second.most_recent_sql_statement_executed__index;
+		else
+		{
+			break;
+		}
 	}
 
 }
