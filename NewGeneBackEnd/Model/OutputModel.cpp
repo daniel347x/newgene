@@ -773,16 +773,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += result_columns.view_name;
 	sql_string += " AS SELECT ";
 	first = true;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	int the_index = 0;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &the_index, &primary_variable_group_x1_columns, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		if (!first)
 		{
 			sql_string += ", ";
 		}
 		first = false;
-		sql_string += new_column.column_name_no_uuid; // This is the original column name
+		sql_string += primary_variable_group_x1_columns.columns_in_view[the_index].column_name; // This is the original column name
 		sql_string += " AS ";
 		sql_string += new_column.column_name;
+		++the_index;
 	});
 	sql_string += " FROM ";
 	sql_string += primary_variable_group_x1_columns.view_name;
