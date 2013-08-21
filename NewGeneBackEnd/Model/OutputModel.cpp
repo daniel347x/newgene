@@ -857,7 +857,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_time_range += datetime_end_col_name;
 	sql_time_range += " = ";
 	sql_time_range += result_columns.columns_in_view[x1_datetime_end_column_index].column_name;
-	sql_strings.push_back(SQLExecutor(db, alter_string));
+	sql_strings.push_back(SQLExecutor(db, sql_time_range));
 
 	return result;
 
