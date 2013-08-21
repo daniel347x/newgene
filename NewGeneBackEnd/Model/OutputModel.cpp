@@ -274,7 +274,7 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 	}
 
 	int number_executed = 0;
-	std::for_each(sql_commands.begin() + sql_and_column_set.second.most_recent_sql_statement_executed__index + 1, sql_commands.end(), [this, &number_executed, &sql_and_column_set](SQLExecutor & sql_executor)
+	std::for_each(sql_commands.begin() + (sql_and_column_set.second.most_recent_sql_statement_executed__index + 1), sql_commands.end(), [this, &number_executed, &sql_and_column_set](SQLExecutor & sql_executor)
 	{
 		
 		if (failed)
