@@ -231,7 +231,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						SQLExecutor & operator=(SQLExecutor const & rhs);
 						SQLExecutor & operator=(SQLExecutor && rhs);
 						void Copy(SQLExecutor const & rhs);
-						void CopyOwned(SQLExecutor const & rhs);
+						void CopyOwned(SQLExecutor & rhs);
 						~SQLExecutor();
 
 						void Execute();

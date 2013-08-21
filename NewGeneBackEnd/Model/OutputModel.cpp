@@ -425,10 +425,11 @@ void OutputModel::OutputGenerator::SQLExecutor::Copy(SQLExecutor const & rhs)
 	this->stmt = rhs.stmt;
 }
 
-void OutputModel::OutputGenerator::SQLExecutor::CopyOwned(SQLExecutor const & rhs)
+void OutputModel::OutputGenerator::SQLExecutor::CopyOwned(SQLExecutor & rhs)
 {
 	// The following line DOES use the default here
 	this->statement_is_owned = rhs.statement_is_owned;
+	rhs.statement_is_owned = false;
 
 	this->bound_parameter_ints = rhs.bound_parameter_ints;
 	this->bound_parameter_strings = rhs.bound_parameter_strings;
