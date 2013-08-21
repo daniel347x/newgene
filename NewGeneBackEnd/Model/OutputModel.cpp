@@ -1661,6 +1661,8 @@ void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		sql_add_xr_row += itoa(index, cindex, 10);
 		++index;
 
+		sql_add_xr_row += ")";
+
 		first_row_added = false;
 
 	}
