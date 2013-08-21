@@ -234,8 +234,15 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						bool statement_is_prepared;
 						bool failed;
 
+						enum WHICH_BINDING
+						{
+							  UNKNOWN_BINDING
+							, STRING
+							, INT64
+						};
 						std::vector<std::string> bound_parameter_strings;
 						std::vector<std::int64_t> bound_parameter_ints;
+						std::vector<WHICH_BINDING> bound_parameter_which_binding_to_use;
 
 				};
 

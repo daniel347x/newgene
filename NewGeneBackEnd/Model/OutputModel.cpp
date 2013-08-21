@@ -382,6 +382,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 		sql.clear();
 		bound_parameter_strings.clear();
 		bound_parameter_ints.clear();
+		bound_parameter_which_binding_to_use.clear();
 	}
 
 	if (statement_is_owned)
@@ -419,14 +420,6 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 					statement_is_prepared = true;
 				}
 
-				int step_result = 0;
-				if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
-				{
-					sql_error = sqlite3_errmsg(db);
-					failed = true;
-					return;
-				}
-
 			}
 			break;
 
@@ -444,6 +437,69 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 					}
 					statement_is_prepared = true;
 				}
+
+			}
+			break;
+
+	}
+
+	if (stmt == nullptr)
+	{
+		return;
+	}
+
+	if (bound_parameter_which_binding_to_use.size() > 0)
+	{
+
+		int current_string_index = 0;
+		int current_int64_index = 0;
+		int current_index = 0;
+		std::for_each(bound_parameter_which_binding_to_use.cbegin(), bound_parameter_which_binding_to_use.cend(), [this, &current_string_index, &current_int64_index, &current_index](WHICH_BINDING const & which_binding)
+		{
+			switch (which_binding)
+			{
+			case STRING:
+				{
+					std::string & the_string = this->bound_parameter_strings[current_string_index];
+					sqlite3_bind_text(this->stmt, current_index, the_string.c_str(), the_string.size(), SQLITE_STATIC);
+					++current_string_index;
+					++current_index;
+				}
+				break;
+			case INT64:
+				{
+					std::int64_t the_int64 = this->bound_parameter_ints[current_int64_index];
+					sqlite3_bind_int64(this->stmt, current_index, the_int64);
+					++current_int64_index;
+					++current_index;
+				}
+				break;
+			}
+		});
+
+	}
+
+	switch(statement_type)
+	{
+
+		case DOES_NOT_RETURN_ROWS:
+			{
+
+				int step_result = 0;
+				if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+				{
+					sql_error = sqlite3_errmsg(db);
+					failed = true;
+					return;
+				}
+
+			}
+			break;
+
+		case RETURNS_ROWS:
+			{
+
+				// no-op
 
 			}
 			break;
