@@ -659,6 +659,32 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	view_name += newUUID(true);
 	result_columns.view_name = view_name;
 
+	result_columns.columns_in_view.clear();
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	{
+		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+		{
+			return; // Enforce that datetime columns appear last.
+		}
+		result_columns.columns_in_view.push_back(column_in_view);
+	});
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	{
+		// Now do the datetime_start column
+		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART)
+		{
+			result_columns.columns_in_view.push_back(column_in_view);
+		}
+	});
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	{
+		// Now do the datetime_end column
+		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART)
+		{
+			result_columns.columns_in_view.push_back(column_in_view);
+		}
+	});
+
 	WidgetInstanceIdentifier variable_group_saved;
 	WidgetInstanceIdentifier uoa_saved;
 
