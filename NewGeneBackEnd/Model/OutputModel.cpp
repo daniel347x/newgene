@@ -1763,7 +1763,7 @@ void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	});
 
 	// Set the list of bound parameters, regardless of whether or not the SQL string was created
-	int index = 1;
+	int index = 0;
 	char cindex[256];
 	bool first_column_value = true;
 	std::int64_t data_int64 = 0;
@@ -1781,7 +1781,7 @@ void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 		data_is_null = false;
 
-		if (index-1 <= highest_index_previous_table)
+		if (index <= highest_index_previous_table)
 		{
 			if (!include_previous_data)
 			{
