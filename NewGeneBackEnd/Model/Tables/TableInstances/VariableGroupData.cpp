@@ -424,7 +424,7 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 	identifiers_map.clear();
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT * FROM VG_DATA_METADATA__PRIMARY_KEYS");
+	std::string sql("SELECT * FROM VG_DATA_METADATA__DATETIME_COLUMNS");
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
