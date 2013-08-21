@@ -210,8 +210,6 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 		}
 
 		xr_table_result = CreatePrimaryXRTable(x_table_result.second, current_multiplicity, primary_group_number);
-		xr_table_result.second.most_recent_sql_statement_executed__index = -1;
-		ExecuteSQL(xr_table_result);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed)
 		{
@@ -1167,6 +1165,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	ColumnsInTempView & result_columns = result.second;
 
 	result_columns = previous_x_columns;
+	result_columns.most_recent_sql_statement_executed__index = -1;
 
 	std::string view_name = "V";
 	view_name += itoa(primary_group_number, c, 10);
