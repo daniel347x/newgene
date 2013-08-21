@@ -1772,6 +1772,9 @@ void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	long double data_long = 0.0;
 	bool data_is_null = false;
 	int column_data_type = 0;
+	bound_parameter_strings.clear();
+	bound_parameter_ints.clear();
+	bound_parameter_which_binding_to_use.clear();
 	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [this, &highest_index_previous_table, &data_int64, &data_string, &data_long, &data_is_null, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
