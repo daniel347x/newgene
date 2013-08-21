@@ -537,7 +537,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 
 		int current_string_index = 0;
 		int current_int64_index = 0;
-		int current_index = 0;
+		int current_index = 1;
 		std::for_each(bound_parameter_which_binding_to_use.cbegin(), bound_parameter_which_binding_to_use.cend(), [this, &current_string_index, &current_int64_index, &current_index](WHICH_BINDING const & which_binding)
 		{
 			switch (which_binding)
