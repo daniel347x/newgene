@@ -280,6 +280,7 @@ void OutputModel::OutputGenerator::BeginNewTransaction()
 
 void OutputModel::OutputGenerator::EndTransaction()
 {
+	executor.success();
 	executor.EndTransaction();
 }
 
