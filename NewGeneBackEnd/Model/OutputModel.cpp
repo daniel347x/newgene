@@ -1655,6 +1655,22 @@ void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		return;
 	}
 
+	int highest_index_previous_table = (int)previous_x_columns.columns_in_view.size() - 1;
+	bool found_highest_index = false;
+	std::for_each(previous_x_columns.columns_in_view.crbegin(), previous_x_columns.columns_in_view.crend(), [&highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	{
+		if (found_highest_index)
+		{
+			return;
+		}
+		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+		{
+			found_highest_index = true;
+			return;
+		}
+		--highest_index_previous_table;
+	});
+
 	// Set the list of bound parameters, regardless of whether or not the SQL string was created
 	int index = 1;
 	char cindex[256];
@@ -1664,7 +1680,7 @@ void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	long double data_long = 0.0;
 	bool data_is_null = false;
 	int column_data_type = 0;
-	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [this, &data_int64, &data_string, &data_long, &data_is_null, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [this, &highest_index_previous_table, &data_int64, &data_string, &data_long, &data_is_null, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
 		if (failed)
@@ -1672,58 +1688,81 @@ void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			return;
 		}
 
-		column_data_type = sqlite3_column_type(stmt_result, index);
 		data_is_null = false;
-		switch (column_data_type)
+
+		if (index-1 <= highest_index_previous_table)
+		{
+			if (!include_previous_data)
+			{
+				data_is_null = true;
+				bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+			}
+		}
+		else
+		{
+			if (!include_current_data)
+			{
+				data_is_null = true;
+				bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+			}
+		}
+
+		if (!data_is_null)
 		{
 
-			case SQLITE_INTEGER:
-				{
-					data_int64 = sqlite3_column_int64(stmt_result, index);
-					bound_parameter_ints.push_back(data_int64);
-					bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
-				}
-				break;
-			
-			case SQLITE_FLOAT:
-				{
-					// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
-					data_long = sqlite3_column_double(stmt_result, index);
-					// Todo: Error message
-					failed = true;
-					return; // from lambda
-				}
-				break;
-			
-			case SQLITE_TEXT:
-				{
-					data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, index));
-					bound_parameter_strings.push_back(data_string);
-					bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
-				}
-				break;
+			column_data_type = sqlite3_column_type(stmt_result, index);
+			switch (column_data_type)
+			{
 
-			case SQLITE_BLOB:
-				{
-					// Todo: Error message
-					failed = true;
-					return; // from lambda
-				}
-				break;
+				case SQLITE_INTEGER:
+					{
+						data_int64 = sqlite3_column_int64(stmt_result, index);
+						bound_parameter_ints.push_back(data_int64);
+						bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+					}
+					break;
 
-			case SQLITE_NULL:
-				{
-					data_is_null = true;
-					bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
-				}
-				break;
+				case SQLITE_FLOAT:
+					{
+						// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
+						data_long = sqlite3_column_double(stmt_result, index);
+						// Todo: Error message
+						failed = true;
+						return; // from lambda
+					}
+					break;
 
-			default:
-				{
-					// Todo: Error message
-					failed = true;
-					return; // from lambda
-				}
+				case SQLITE_TEXT:
+					{
+						data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, index));
+						bound_parameter_strings.push_back(data_string);
+						bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+					}
+					break;
+
+				case SQLITE_BLOB:
+					{
+						// Todo: Error message
+						failed = true;
+						return; // from lambda
+					}
+					break;
+
+				case SQLITE_NULL:
+					{
+						data_is_null = true;
+						bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+					}
+					break;
+
+				default:
+					{
+						// Todo: Error message
+						failed = true;
+						return; // from lambda
+					}
+
+			}
 
 		}
 
