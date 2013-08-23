@@ -194,6 +194,51 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 		class OutputGenerator
 		{
 
+			// **************************************************************************************************************************************** //
+			// The algorithm, in a nutshell
+			//
+			// For each high-level variable group (variable group corresponding to the "biggest" unit of analysis):
+			//
+			// (1) Create an initial so-called "X" table (labeled X1)
+			// that is an exact copy of the raw data table for this variable group,
+			// but that includes (in addition to all primary key columns)
+			// only the user's selected variables, and that adjusts the position
+			// of the time range columns (if any) to appear at the right.
+			// If there are no time range columns, they are added (at the right)
+			// and populated with 0.
+			// Also, this table only includes those rows which overlap the time range
+			// of interest selected by the user.
+			//
+			// (2) Create an initial so-called "XR" table (labeled XR1)
+			// that is an exact copy of the X1 table, but has two columns
+			// appended to the right, called "merge" columns, which are
+			// time range columns representing the time range of the given
+			// row, after merging with previous tables.  Because this is
+			// the original table, these columns are just copies of the 
+			// time range columns from the X1 table.
+			//
+			// (3) For each multiplicity greater than 1, create another "X" table
+			// (labeled by the multiplicity count) which is a join of the following two tables:
+			// (a) The previous "XR" table (i.e., it includes the most recent "merge" columns)
+			// (b) An exact copy of columns of the raw data table, created from the raw data
+			// table *exactly* as the X1 table was (i.e., adjusting/adding the time range
+			// columns at the right).
+			// This "X" table will therefore have the "merge" columns from the previous multiplicity
+			// available, and it will have the "raw data" time range columns from the current multiplicity available.
+			//
+			// (4) Proceed to create an "XR" table corresponding to the "X" table just created
+			// (do this before moving on to the next X table in the sequence).
+			// This table simply adds the "merge" columns to the "X" table.
+			// However, it does so in a special way: It performs an algorithm to make
+			// sure that the current data being merged into the previous data has
+			// any time range overlaps handled properly, creating multiple rows if necessary,
+			// which includes creating NULL values for some data on some rows to make
+			// sure that all data that is displayed on a row is valid for the sub-time-range
+			// generated for that row.
+			//
+			// (5) Move on to child variable groups.
+			// **************************************************************************************************************************************** //
+
 			public:
 
 				OutputGenerator(OutputModel & model_);
