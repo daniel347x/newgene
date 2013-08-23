@@ -320,6 +320,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> biggest_counts;
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> child_counts;
 
+				// Keep track of multiplicities involved
 				std::vector<int> multiplicities_primary_uoa;
 				int highest_multiplicity_primary_uoa;
 				std::string highest_multiplicity_primary_uoa_dmu_string_code;
