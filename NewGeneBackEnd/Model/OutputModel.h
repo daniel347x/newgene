@@ -277,6 +277,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number);
 				SqlAndColumnSet CreatePrimaryXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number);
 
+				// Helper functions used by the functions above
 				void BeginNewTransaction();
 				void EndTransaction();
 				void ExecuteSQL(SqlAndColumnSet & sql_and_column_set);
@@ -351,13 +352,25 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector primary_variable_groups_vector;
 				Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Vector secondary_variable_groups_vector;
 
-				// Information about *all* primary keys, in the sequence they appear in the output
-				// ... including "duplicate" primary keys resulting from multiplicity greater than 1
+				// Information about *all* primary key columns, in the sequence they appear in the output
+				// ... including "duplicate" primary keys resulting from multiplicity greater than 1.
+				// In other words, a class (wrapping a vector) that tracks all primary keys that
+				// will appear in the K-adic *output*, in the default order it will appear
+				// (not counting any column order modifications set by the user).
 				PrimaryKeySequence sequence;
 
+				// Column metadata for the raw *data* tables (not Generator-created temporary tables)
+				// corresponding to every variable group for which there is at least 1 variable
+				// selected for output by the user.
+				// This breaks down into top-level variable groups ("primary"), which
+				// correspond to the "biggest" unit of analysis,
+				// and "child" or "secondary" variable groups, which simply add additional
+				// columns of output variables, but do not add to the multiplicity of the
+				// DMU categories, which are obtained from the primary variable groups.
 				std::vector<ColumnsInTempView> primary_variable_groups_column_info;
 				std::vector<ColumnsInTempView> secondary_variable_groups_column_info;
 
+				// Basic variables used throughout different functions of this Generator
 				OutputModel * model;
 				InputModel * input_model;
 				sqlite3 * db;
