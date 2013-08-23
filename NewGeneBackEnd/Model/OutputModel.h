@@ -78,72 +78,72 @@ public:
 class ColumnsInTempView
 {
 
-public:
-
-	class ColumnInTempView
-	{
-
 	public:
 
-		enum COLUMN_TYPE
+		class ColumnInTempView
 		{
-			  COLUMN_TYPE__UNKNOWN = 0
-			, COLUMN_TYPE__PRIMARY
-			, COLUMN_TYPE__SECONDARY
-			, COLUMN_TYPE__DATETIMESTART
-			, COLUMN_TYPE__DATETIMEEND
-			, COLUMN_TYPE__DATETIMESTART_INTERNAL
-			, COLUMN_TYPE__DATETIMEEND_INTERNAL
-			, COLUMN_TYPE__DATETIMESTART_MERGED
-			, COLUMN_TYPE__DATETIMEEND_MERGED
+
+		public:
+
+			enum COLUMN_TYPE
+			{
+				  COLUMN_TYPE__UNKNOWN = 0
+				, COLUMN_TYPE__PRIMARY
+				, COLUMN_TYPE__SECONDARY
+				, COLUMN_TYPE__DATETIMESTART
+				, COLUMN_TYPE__DATETIMEEND
+				, COLUMN_TYPE__DATETIMESTART_INTERNAL
+				, COLUMN_TYPE__DATETIMEEND_INTERNAL
+				, COLUMN_TYPE__DATETIMESTART_MERGED
+				, COLUMN_TYPE__DATETIMEEND_MERGED
+			};
+
+			ColumnInTempView()
+				: column_type(COLUMN_TYPE__UNKNOWN)
+				, primary_key_index_within_total_kad_for_dmu_category(-1)
+				, primary_key_index_within_total_kad_for_all_dmu_categories(-1)
+				, primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category(-1)
+				, primary_key_index_within_primary_uoa_for_dmu_category(-1)
+				, current_multiplicity(-1)
+				, total_multiplicity(-1)
+			{
+
+			}
+
+			std::string column_name; // The name of the column in the temporary view (includes UUID)
+			std::string column_name_no_uuid; // The name of the column in the temporary view (without UUID)
+			std::string table_column_name; // The name of the column in the original raw data table corresponding to this column (if any)
+			WidgetInstanceIdentifier variable_group_identifier; // The variable group associated with this column
+			WidgetInstanceIdentifier uoa_associated_with_variable_group_identifier; // The unit of analysis associated with the variable group associated with this column
+			COLUMN_TYPE column_type; // Primary key?  Secondary column (i.e., data, not a primary key)?  One of the two special DateTime columns?
+			WidgetInstanceIdentifier primary_key_dmu_category_identifier;
+			int primary_key_index_within_total_kad_for_dmu_category;
+			int primary_key_index_within_total_kad_for_all_dmu_categories;
+			int primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category;
+			int primary_key_index_within_primary_uoa_for_dmu_category;
+			int current_multiplicity;
+			int total_multiplicity;
+
 		};
 
-		ColumnInTempView()
-			: column_type(COLUMN_TYPE__UNKNOWN)
-			, primary_key_index_within_total_kad_for_dmu_category(-1)
-			, primary_key_index_within_total_kad_for_all_dmu_categories(-1)
-			, primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category(-1)
-			, primary_key_index_within_primary_uoa_for_dmu_category(-1)
-			, current_multiplicity(-1)
-			, total_multiplicity(-1)
+		ColumnsInTempView()
+			: view_number(-1)
+			, most_recent_sql_statement_executed__index(-1)
 		{
 
 		}
 
-		std::string column_name; // The name of the column in the temporary view (includes UUID)
-		std::string column_name_no_uuid; // The name of the column in the temporary view (without UUID)
-		std::string table_column_name; // The name of the column in the original raw data table corresponding to this column (if any)
-		WidgetInstanceIdentifier variable_group_identifier; // The variable group associated with this column
-		WidgetInstanceIdentifier uoa_associated_with_variable_group_identifier; // The unit of analysis associated with the variable group associated with this column
-		COLUMN_TYPE column_type; // Primary key?  Secondary column (i.e., data, not a primary key)?  One of the two special DateTime columns?
-		WidgetInstanceIdentifier primary_key_dmu_category_identifier;
-		int primary_key_index_within_total_kad_for_dmu_category;
-		int primary_key_index_within_total_kad_for_all_dmu_categories;
-		int primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category;
-		int primary_key_index_within_primary_uoa_for_dmu_category;
-		int current_multiplicity;
-		int total_multiplicity;
+		std::vector<ColumnInTempView> columns_in_view;
+		int view_number;
+		bool has_no_datetime_columns;
+		bool has_no_datetime_columns_originally;
+		std::vector<std::string> original_table_names;
+		std::vector<std::string> variable_group_codes;
+		std::vector<std::string> variable_group_longhand_names;
+		std::string view_name;
+		std::string view_name_no_uuid;
 
-	};
-
-	ColumnsInTempView()
-		: view_number(-1)
-		, most_recent_sql_statement_executed__index(-1)
-	{
-
-	}
-
-	std::vector<ColumnInTempView> columns_in_view;
-	int view_number;
-	bool has_no_datetime_columns;
-	bool has_no_datetime_columns_originally;
-	std::vector<std::string> original_table_names;
-	std::vector<std::string> variable_group_codes;
-	std::vector<std::string> variable_group_longhand_names;
-	std::string view_name;
-	std::string view_name_no_uuid;
-
-	int most_recent_sql_statement_executed__index;
+		int most_recent_sql_statement_executed__index;
 
 };
 
@@ -437,6 +437,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				bool failed;
 
+				bool debug_ordering;
 				std::string temp_dot;
 
 		};
