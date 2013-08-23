@@ -208,6 +208,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 			// and populated with 0.
 			// Also, this table only includes those rows which overlap the time range
 			// of interest selected by the user.
+			// In debug mode, the results are ordered by the primary key columns (with multiplicity greater than 1).
 			//
 			// (2) Create an initial so-called "XR" table (labeled XR1)
 			// that is an exact copy of the X1 table, but has two columns
@@ -225,6 +226,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 			// columns at the right).
 			// This "X" table will therefore have the "merge" columns from the previous multiplicity
 			// available, and it will have the "raw data" time range columns from the current multiplicity available.
+			// The rows are sorted so that, for each row, all NULL columns in primary keys appear at the right,
+			// and all non-NULL primary keys are sorted from left to right across multiplicities.
+			// In debug mode, the results are ordered by the primary key columns (with multiplicity greater than 1).
 			//
 			// (4) Proceed to create an "XR" table corresponding to the "X" table just created
 			// (do this before moving on to the next X table in the sequence).
