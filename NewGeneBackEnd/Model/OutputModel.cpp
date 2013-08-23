@@ -1022,7 +1022,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	WidgetInstanceIdentifier variable_group;
 	WidgetInstanceIdentifier uoa;
 
-	// These columns are from the previous XR temporary table, which is guaranteed to have all columns in place, including datetime columns
+	// These columns are from the previous XR temporary table, which is guaranteed to have all columns in place, including datetime columns.
+	// Further, the "current_multiplicity" of these columns is guaranteed to be correct.
 	bool first = true;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_table_column_count, &previous_column_names_first_table, &variable_group, &uoa, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
@@ -1039,8 +1040,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 
-	// These columns are from the original raw data table, which may or may not have datetime columns
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	// These columns are from the original raw data table, which may or may not have datetime columns.
+	// Further, the "current_multiplicity" of these columns is 1, and must be updated.
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
 	{
 		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
@@ -1051,6 +1053,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		new_column.column_name = new_column.column_name_no_uuid;
 		new_column.column_name += "_";
 		new_column.column_name += newUUID(true);
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+		{
+			if (new_column.total_multiplicity > 1)
+			{
+				new_column.current_multiplicity = current_multiplicity - 1;
+			}
+		}
 		++second_table_column_count;
 	});
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
