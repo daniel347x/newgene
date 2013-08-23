@@ -104,6 +104,8 @@ public:
 			, primary_key_index_within_total_kad_for_all_dmu_categories(-1)
 			, primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category(-1)
 			, primary_key_index_within_primary_uoa_for_dmu_category(-1)
+			, current_multiplicity(-1)
+			, total_multiplicity(-1)
 		{
 
 		}
@@ -119,6 +121,8 @@ public:
 		int primary_key_index_within_total_kad_for_all_dmu_categories;
 		int primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category;
 		int primary_key_index_within_primary_uoa_for_dmu_category;
+		int current_multiplicity;
+		int total_multiplicity;
 
 	};
 
