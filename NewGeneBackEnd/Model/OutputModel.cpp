@@ -817,6 +817,25 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 
 	// Add the ORDER BY column/s
+	if (highest_multiplicity_primary_uoa > 1)
+	{
+		for (int current_multiplicity = 0; current_multiplicity < highest_multiplicity_primary_uoa; ++current_multiplicity)
+		{
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &current_multiplicity, &sql_string](ColumnsInTempView::ColumnInTempView & new_column)
+			{
+				if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				{
+					if (new_column.total_multiplicity == highest_multiplicity_primary_uoa)
+					{
+						if (new_column.current_multiplicity == current_multiplicity)
+						{
+
+						}
+					}
+				}
+			});
+		}
+	}
 
 	return result;
 }
@@ -2076,13 +2095,19 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 					{
 						if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, column_in_variable_group_data_table.table_column_name))
 						{
-							column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry.dmu_category;
-							column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_spin_control;
-							column_in_variable_group_data_table.primary_key_index_within_total_kad_for_all_dmu_categories = primary_key_entry.sequence_number_in_all_primary_keys;
-							column_in_variable_group_data_table.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_variable_group_uoa;
-							column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_primary_uoa;
-							column_in_variable_group_data_table.current_multiplicity = current_variable_group_primary_key_entry.current_multiplicity;
-							column_in_variable_group_data_table.total_multiplicity = current_variable_group_primary_key_entry.total_multiplicity;
+							// For the raw data table, there is only one instance of the primary keys associated with multiplicity greater than 1.
+							// But the total primary key sequence ("sequence") stores the columns of the OUTPUT, which contains all multiplicities.
+							// So use only the first occurrence of the primary keys (current_multiplicity == 1).
+							if (current_variable_group_primary_key_entry.current_multiplicity == 1)
+							{
+								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry.dmu_category;
+								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_spin_control;
+								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_all_dmu_categories = primary_key_entry.sequence_number_in_all_primary_keys;
+								column_in_variable_group_data_table.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_variable_group_uoa;
+								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_primary_uoa;
+								column_in_variable_group_data_table.current_multiplicity = current_variable_group_primary_key_entry.current_multiplicity; // should be 1
+								column_in_variable_group_data_table.total_multiplicity = current_variable_group_primary_key_entry.total_multiplicity;
+							}
 						}
 					}
 				}
