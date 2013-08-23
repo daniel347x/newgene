@@ -864,6 +864,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				});
 			}
 		}
+	
 	}
 
 	return result;
@@ -1247,6 +1248,65 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 		datetime_end_column.current_multiplicity = -1;
 		datetime_end_column.total_multiplicity = -1;
+	}
+
+	// Add the ORDER BY column/s
+	if (debug_ordering)
+	{
+
+		sql_string += " ORDER BY ";
+
+		// Regarding highest_multiplicity_primary_uoa > 1:
+		// Otherwise, we do not have any way to know which ordering the user wants in regards to the different DMU categories.
+		// At least we can assume they want the DMU category corresponding to "highest_multiplicity_primary_uoa > 1" to be ordered.
+		if (highest_multiplicity_primary_uoa > 1)
+		{
+
+			// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
+			int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1, &sql_string](ColumnsInTempView::ColumnInTempView & new_column)
+			{
+				if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				{
+					if (new_column.total_multiplicity == highest_multiplicity_primary_uoa)
+					{
+						if (new_column.current_multiplicity == 0)
+						{
+							++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+						}
+					}
+				}
+			});
+
+			// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
+			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+			{
+				for (int outer_dmu_multiplicity = 0; outer_dmu_multiplicity < highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
+				{
+					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_string](ColumnsInTempView::ColumnInTempView & new_column)
+					{
+						if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+						{
+							if (new_column.total_multiplicity == highest_multiplicity_primary_uoa)
+							{
+								if (new_column.current_multiplicity == inner_dmu_multiplicity)
+								{
+									if (new_column.current_multiplicity == outer_dmu_multiplicity)
+									{
+										if (inner_dmu_multiplicity > 0 || outer_dmu_multiplicity > 0)
+										{
+											sql_string += ", ";
+										}
+										sql_string += new_column.column_name;
+									}
+								}
+							}
+						}
+					});
+				}
+			}
+		}
+
 	}
 
 	return result;
