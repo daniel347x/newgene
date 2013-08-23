@@ -1250,6 +1250,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.total_multiplicity = -1;
 	}
 
+	// Add the WHERE clause to guarantee that NULL primary key columns are at the right on each row,
+	// and that non-NULL primary key columns are sorted from left to right on each row
+
 	// Add the ORDER BY column/s
 	if (debug_ordering)
 	{
