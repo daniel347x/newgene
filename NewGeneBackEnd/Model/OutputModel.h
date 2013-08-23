@@ -228,7 +228,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 			// available, and it will have the "raw data" time range columns from the current multiplicity available.
 			// The rows are sorted so that, for each row, all NULL columns in primary keys appear at the right,
 			// and all non-NULL primary keys are sorted from left to right across multiplicities.
+			// This sorting is necessary to avoid duplicates.
 			// In debug mode, the results are ordered by the primary key columns (with multiplicity greater than 1).
+			// (The final XR table will be ordered even in release mode, as this is part of a later step
+			// that walks through the final result removing duplicates).
 			//
 			// (4) Proceed to create an "XR" table corresponding to the "X" table just created
 			// (do this before moving on to the next X table in the sequence).
