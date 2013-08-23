@@ -375,7 +375,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				OutputModel * model;
 				InputModel * input_model;
 				sqlite3 * db;
-				sqlite3_stmt * stmt_result;
+				sqlite3_stmt * stmt_result; // An overall statement handle that is used only to iterate through the final result of various temporary tables
 				std::string sql_error;
 				Executor executor;
 
