@@ -7,7 +7,7 @@ WHERE
 each corresponding to the set of primary key fields of the unit of analysis for that DMU category with multiplicity greater than 1
 (i.e. for the DMU category which the user has cranked up beyond the minimum via the spin control in the user interface),
 but it also handles the possibility of NULL for any of these primary key fields.
-This WHERE clause has the effect of including only rows where all NULL columns in primary keys fields appear to the right,
+This WHERE clause has the effect of including only rows where all NULL columns in primary keys fields appear to the right across multiplicities,
 and where the non-NULL primary keys increase from left to right.
 When there is more than one field in the unit of analysis corresponding to the DMU category with multiplicity greater than one, 
 the "<=" comparison is expanded to be based on the first field which is not equal. */ 
