@@ -106,6 +106,7 @@ class ColumnsInTempView
 				, primary_key_index_within_primary_uoa_for_dmu_category(-1)
 				, current_multiplicity(-1)
 				, total_multiplicity(-1)
+				, primary_key_should_be_treated_as_numeric(false)
 			{
 
 			}
@@ -123,6 +124,7 @@ class ColumnsInTempView
 			int primary_key_index_within_primary_uoa_for_dmu_category;
 			int current_multiplicity;
 			int total_multiplicity;
+			bool primary_key_should_be_treated_as_numeric;
 
 		};
 

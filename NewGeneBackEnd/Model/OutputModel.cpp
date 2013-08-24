@@ -859,7 +859,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 									sql_string += ", ";
 								}
 								first = false;
+								if (view_column.primary_key_should_be_treated_as_numeric)
+								{
+									sql_string += "CAST (";
+								}
 								sql_string += view_column.column_name;
+								if (view_column.primary_key_should_be_treated_as_numeric)
+								{
+									sql_string += " AS INTEGER)";
+								}
 							}
 						}
 					}
@@ -1353,9 +1361,25 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 				if (number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 == 1)
 				{
+					if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
+					{
+						sql_string += "CAST (";
+					}
 					sql_string += columns_for_active_dmu_category_lhs[0].column_name;
+					if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
+					{
+						sql_string += " AS INTEGER)";
+					}
 					sql_string += " <= ";
+					if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
+					{
+						sql_string += "CAST (";
+					}
 					sql_string += columns_for_active_dmu_category_rhs[0].column_name;
+					if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
+					{
+						sql_string += " AS INTEGER)";
+					}
 				}
 				else
 				{
@@ -1368,9 +1392,25 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						sql_string += " != ";
 						sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity].column_name;
 						sql_string += " THEN ";
+						if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
+						{
+							sql_string += "CAST (";
+						}
 						sql_string += columns_for_active_dmu_category_lhs[inner_dmu_multiplicity].column_name;
+						if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
+						{
+							sql_string += " AS INTEGER)";
+						}
 						sql_string += " <= ";
+						if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
+						{
+							sql_string += "CAST (";
+						}
 						sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity].column_name;
+						if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
+						{
+							sql_string += " AS INTEGER)";
+						}
 					}
 
 					sql_string += " ELSE 1 "; // Equal primary key column sets
@@ -1419,7 +1459,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 											sql_string += ", ";
 										}
 										first = false;
+										if (view_column.primary_key_should_be_treated_as_numeric)
+										{
+											sql_string += "CAST (";
+										}
 										sql_string += view_column.column_name;
+										if (view_column.primary_key_should_be_treated_as_numeric)
+										{
+											sql_string += " AS INTEGER)";
+										}
 									}
 								}
 							}
@@ -2211,6 +2259,10 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 	// ************************************************************************************************ //
 	// the_variable_group:
 	// A pair: VG identifier -> Variables in this group selected by the user.
+	// Note that even though only the variables selected by the user appear as the second member
+	// of the pair, that nonetheless in this function we bypass this data structure
+	// and retrieve the *full* set of columns from the vg_set_member table
+	// via the VG identifier.
 	// ************************************************************************************************ //
 
 	// Convert data into a far more useful form for construction of K-adic output
@@ -2237,6 +2289,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 	columns_in_variable_group_view.variable_group_longhand_names.push_back(*the_variable_group.first.longhand);
 
 	WidgetInstanceIdentifiers & variables_in_group = input_model->t_vgp_setmembers.getIdentifiers(*the_variable_group.first.uuid);
+	WidgetInstanceIdentifiers & variables_in_group_primary_keys_metadata = input_model->t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
 
 	std::set<WidgetInstanceIdentifier> variables_in_group_sorted;
 	std::for_each(variables_in_group.cbegin(), variables_in_group.cend(), [&variables_in_group_sorted](WidgetInstanceIdentifier const & variable_group_set_member)
@@ -2259,7 +2312,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 		columns_in_variable_group_view.has_no_datetime_columns_originally = true;
 	}
 
-	std::for_each(variables_in_group_sorted.cbegin(), variables_in_group_sorted.cend(), [this, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group](WidgetInstanceIdentifier const & variable_group_set_member)
+	std::for_each(variables_in_group_sorted.cbegin(), variables_in_group_sorted.cend(), [this, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group, &variables_in_group_primary_keys_metadata](WidgetInstanceIdentifier const & variable_group_set_member)
 	{
 		columns_in_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & column_in_variable_group_data_table = columns_in_variable_group_view.columns_in_view.back();
@@ -2306,9 +2359,9 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 			}
 		}
 
-		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&the_variable_group, &column_in_variable_group_data_table](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key_entry)
+		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&the_variable_group, &column_in_variable_group_data_table, &variables_in_group_primary_keys_metadata](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key_entry)
 		{
-			std::for_each(primary_key_entry.variable_group_info_for_primary_keys.cbegin(), primary_key_entry.variable_group_info_for_primary_keys.cend(), [&the_variable_group, &column_in_variable_group_data_table, &primary_key_entry](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
+			std::for_each(primary_key_entry.variable_group_info_for_primary_keys.cbegin(), primary_key_entry.variable_group_info_for_primary_keys.cend(), [&the_variable_group, &column_in_variable_group_data_table, &primary_key_entry, &variables_in_group_primary_keys_metadata](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
 			{
 				if (current_variable_group_primary_key_entry.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))
 				{
@@ -2328,6 +2381,18 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_primary_uoa;
 								column_in_variable_group_data_table.current_multiplicity = current_variable_group_primary_key_entry.current_multiplicity; // should be set to 1
 								column_in_variable_group_data_table.total_multiplicity = current_variable_group_primary_key_entry.total_multiplicity;
+
+								// Now determine if this primary key field should be treated as numeric for sorting and ordering
+								std::for_each(variables_in_group_primary_keys_metadata.cbegin(), variables_in_group_primary_keys_metadata.cend(), [&column_in_variable_group_data_table, &primary_key_entry, &current_variable_group_primary_key_entry](WidgetInstanceIdentifier const & primary_key_in_variable_group_metadata)
+								{
+									if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, *primary_key_in_variable_group_metadata.longhand))
+									{
+										if (primary_key_in_variable_group_metadata.flags == "n")
+										{
+											column_in_variable_group_data_table.primary_key_should_be_treated_as_numeric = true;
+										}
+									}
+								});
 							}
 						}
 					}

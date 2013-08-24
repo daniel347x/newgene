@@ -402,6 +402,7 @@ void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * in
 		char const * vg_data_primary_key_column_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME));
 		char const * vg_data_dmu_category_code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_FK_DMU_CATEGORY_CODE));
 		int vg_data_primary_key_sequence_number = sqlite3_column_int(stmt, INDEX__VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER);
+		int vg_data_primary_key_is_numeric = sqlite3_column_int(stmt, INDEX__VG_DATA_TABLE_PRIMARY_KEY_IS_NUMERIC);
 		if (vg_data_dmu_category_code && strlen(vg_data_dmu_category_code))
 		{
 			// maps:
@@ -410,7 +411,12 @@ void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * in
 			// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
 			// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
 			// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
-			identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_dmu_category_code), vg_data_primary_key_column_name, vg_data_primary_key_sequence_number));
+			std::string flags;
+			if (vg_data_primary_key_is_numeric)
+			{
+				flags = "n";
+			}
+			identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_dmu_category_code), vg_data_primary_key_column_name, vg_data_primary_key_sequence_number, flags.c_str()));
 		}
 	}
 
