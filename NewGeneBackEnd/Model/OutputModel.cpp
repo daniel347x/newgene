@@ -1089,11 +1089,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 			if (new_column.total_multiplicity > 1)
 			{
-				new_column.current_multiplicity = current_multiplicity;
+				new_column.current_multiplicity = current_multiplicity; // update current multiplicity
 			}
 		}
 		++second_table_column_count;
 	});
+	// Datetime columns, if present
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
 	{
 		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
@@ -1193,6 +1194,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		});
 	});
 
+	// Datetime columns, if not present
 	if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
