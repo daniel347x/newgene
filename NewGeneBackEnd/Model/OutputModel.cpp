@@ -1357,23 +1357,23 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				else
 				{
-					sql_string += "( CASE ";
+					sql_string += "( CASE";
 
-					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 - 1; ++inner_dmu_multiplicity)
+					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
 					{
-						sql_string += "WHEN ";
+						sql_string += " WHEN ";
 						sql_string += columns_for_active_dmu_category_lhs[inner_dmu_multiplicity].column_name;
 						sql_string += " != ";
 						sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity].column_name;
 						sql_string += " THEN ";
-						sql_string += columns_for_active_dmu_category_lhs[inner_dmu_multiplicity + 1].column_name;
+						sql_string += columns_for_active_dmu_category_lhs[inner_dmu_multiplicity].column_name;
 						sql_string += " <= ";
-						sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity + 1].column_name;
+						sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity].column_name;
 					}
 
 					sql_string += " ELSE 1 "; // Equal primary key column sets
 
-					sql_string += " END )";
+					sql_string += "END )";
 				}
 
 				sql_string += " END )";
