@@ -219,6 +219,33 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 	}
 
+	// Child tables
+	for (int current_multiplicity = 1; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
+	{
+
+		std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &x_table_result, &xr_table_result, &current_multiplicity, &primary_group_number, &sql_and_column_sets](ColumnsInTempView const & child_variable_group_raw_data_columns)
+		{
+		
+			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number);
+			x_table_result.second.most_recent_sql_statement_executed__index = -1;
+			ExecuteSQL(x_table_result);
+			sql_and_column_sets.push_back(x_table_result);
+			if (failed)
+			{
+				return;
+			}
+
+			xr_table_result = CreateChildXRTable(x_table_result.second, current_multiplicity, primary_group_number);
+			sql_and_column_sets.push_back(xr_table_result);
+			if (failed)
+			{
+				return;
+			}
+
+		});
+
+	}
+
 }
 
 bool OutputModel::OutputGenerator::StepData()
@@ -2202,6 +2229,969 @@ void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 	bound_parameter_ints.push_back(datetime_end);
 	bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+
+}
+
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number)
+{
+
+	char c[256];
+
+	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	std::vector<SQLExecutor> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+
+	result_columns = previous_xr_columns;
+
+	std::string view_name = "V";
+	view_name += itoa(primary_group_number, c, 10);
+	view_name += "_x";
+	view_name += itoa(current_multiplicity, c, 10);
+	result_columns.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	result_columns.view_name = view_name;
+	result_columns.view_number = current_multiplicity;
+	result_columns.has_no_datetime_columns = false;
+
+	int first_table_column_count = 0;
+	int second_table_column_count = 0;
+
+	std::vector<std::string> previous_column_names_first_table;
+
+	WidgetInstanceIdentifier variable_group;
+	WidgetInstanceIdentifier uoa;
+
+	// These columns are from the previous XR temporary table, which is guaranteed to have all columns in place, including datetime columns.
+	// Further, the "current_multiplicity" of these columns is guaranteed to be correct.
+	bool first = true;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_table_column_count, &previous_column_names_first_table, &variable_group, &uoa, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	{
+		previous_column_names_first_table.push_back(new_column.column_name);
+		new_column.column_name = new_column.column_name_no_uuid;
+		new_column.column_name += "_";
+		new_column.column_name += newUUID(true);
+		++first_table_column_count;
+		if (first)
+		{
+			first = false;
+			variable_group = new_column.variable_group_identifier;
+			uoa = new_column.uoa_associated_with_variable_group_identifier;
+		}
+	});
+
+	// These columns are from the original raw data table, which may or may not have datetime columns.
+	// Further, the "current_multiplicity" of these columns is 1, and must be updated.
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
+	{
+		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		{
+			return; // Add these columns last
+		}
+		result_columns.columns_in_view.push_back(new_column_);
+		ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+		new_column.column_name = new_column.column_name_no_uuid;
+		new_column.column_name += "_";
+		new_column.column_name += newUUID(true);
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+		{
+			if (new_column.total_multiplicity > 1)
+			{
+				new_column.current_multiplicity = current_multiplicity; // update current multiplicity
+			}
+		}
+		++second_table_column_count;
+	});
+	// Datetime columns, if present
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	{
+		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+		{
+			result_columns.columns_in_view.push_back(new_column_);
+			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+			new_column.column_name = new_column.column_name_no_uuid;
+			new_column.column_name += "_";
+			new_column.column_name += newUUID(true);
+			++second_table_column_count;
+		}
+	});
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	{
+		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		{
+			result_columns.columns_in_view.push_back(new_column_);
+			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+			new_column.column_name = new_column.column_name_no_uuid;
+			new_column.column_name += "_";
+			new_column.column_name += newUUID(true);
+			++second_table_column_count;
+		}
+	});
+
+	sql_strings.push_back(SQLExecutor(db));
+	std::string & sql_string = sql_strings.back().sql;
+
+	sql_string = "CREATE TABLE ";
+	sql_string += result_columns.view_name;
+	sql_string += " AS SELECT ";
+	first = true;
+	int column_count = 0;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first, &column_count, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table](ColumnsInTempView::ColumnInTempView & new_column)
+	{
+		if (!first)
+		{
+			sql_string += ", ";
+		}
+		first = false;
+		if (column_count < first_table_column_count)
+		{
+			sql_string += "t1.";
+			sql_string += previous_column_names_first_table[column_count];
+		}
+		else
+		{
+			sql_string += "t2.";
+			sql_string += new_column.column_name_no_uuid; // This is the original column name
+		}
+		sql_string += " AS ";
+		sql_string += new_column.column_name;
+		++column_count;
+	});
+	sql_string += " FROM ";
+	sql_string += previous_xr_columns.view_name;
+	sql_string += " t1 JOIN ";
+	sql_string += primary_variable_group_raw_data_columns.original_table_names[0];
+	sql_string += " t2 ON ";
+	bool and_ = false;
+	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_string, &variable_group, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+	{
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [&sql_string, &variable_group, &primary_key, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
+		{
+			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
+			{
+				if (primary_key_info.total_multiplicity == 1)
+				{
+					// Only join on primary keys whose total multiplicity is 1
+					int column_count = 0;
+					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [&sql_string, &first_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
+					{
+						if (column_count < first_table_column_count)
+						{
+							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
+							{
+								// there is only one set of primary keys for this DMU category,
+								// so the following "if" statement only matches once
+								if (new_column.primary_key_index_within_primary_uoa_for_dmu_category == primary_key.sequence_number_within_dmu_category_primary_uoa)
+								{
+									if (and_)
+									{
+										sql_string += " AND ";
+									}
+									and_ = true;
+									sql_string += "t1.";
+									sql_string += previous_column_names_first_table[column_count];
+									sql_string += " = t2.";
+									sql_string += new_column.table_column_name;
+								}
+							}
+						}
+						++column_count;
+					});
+				}
+			}
+		});
+	});
+
+	// Datetime columns, if not present
+	if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+	{
+		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
+		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
+		datetime_start_col_name += "_";
+		datetime_start_col_name += newUUID(true);
+
+		std::string alter_string;
+		alter_string += "ALTER TABLE ";
+		alter_string += result_columns.view_name;
+		alter_string += " ADD COLUMN ";
+		alter_string += datetime_start_col_name;
+		alter_string += " INTEGER DEFAULT 0";
+		sql_strings.push_back(SQLExecutor(db, alter_string));
+
+		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+		datetime_start_column.column_name = datetime_start_col_name;
+		datetime_start_column.column_name_no_uuid = datetime_start_col_name_no_uuid;
+		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
+		datetime_start_column.variable_group_identifier = variable_group;
+		datetime_start_column.uoa_associated_with_variable_group_identifier = uoa;
+		datetime_start_column.table_column_name = "";
+		datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
+		datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
+		datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
+		datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
+		datetime_start_column.current_multiplicity = -1;
+		datetime_start_column.total_multiplicity = -1;
+
+		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
+		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
+		datetime_end_col_name += "_";
+		datetime_end_col_name += newUUID(true);
+
+		alter_string.clear();
+		alter_string += "ALTER TABLE ";
+		alter_string += result_columns.view_name;
+		alter_string += " ADD COLUMN ";
+		alter_string += datetime_end_col_name;
+		alter_string += " INTEGER DEFAULT 0";
+		sql_strings.push_back(SQLExecutor(db, alter_string));
+
+		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+		datetime_end_column.column_name = datetime_end_col_name;
+		datetime_end_column.column_name_no_uuid = datetime_end_col_name_no_uuid;
+		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
+		datetime_end_column.variable_group_identifier = variable_group;
+		datetime_end_column.uoa_associated_with_variable_group_identifier = uoa;
+		datetime_end_column.table_column_name = "";
+		datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
+		datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
+		datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
+		datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
+		datetime_end_column.current_multiplicity = -1;
+		datetime_end_column.total_multiplicity = -1;
+	}
+
+	// For use in both the WHERE and ORDER BY clauses
+	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
+	int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
+	if (debug_ordering)
+	{
+		if (highest_multiplicity_primary_uoa > 1)
+		{
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column)
+			{
+				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				{
+					if (view_column.total_multiplicity == highest_multiplicity_primary_uoa)
+					{
+						if (view_column.current_multiplicity == 1)
+						{
+							++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+						}
+					}
+				}
+			});
+		}
+	}
+
+	// Add the WHERE clause to guarantee that NULL primary key columns are at the right on each row,
+	// and that non-NULL primary key columns are sorted from left to right on each row
+	if (debug_ordering)
+	{
+
+		if (highest_multiplicity_primary_uoa > 1)
+		{
+
+			sql_string += " WHERE ";
+
+			// Obtain the columns for the two primary keys being compared in a convenient vector.
+			// The number of columns within a single primary key corresponding to the DMU category with multiplicity greater than 1 can be more than 1.
+			for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity < highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
+			{
+
+				if (outer_dmu_multiplicity > 1)
+				{
+					sql_string += " AND ";
+				}
+
+				sql_string += "( CASE ";
+
+				std::vector<ColumnsInTempView::ColumnInTempView> columns_for_active_dmu_category_lhs;
+				std::vector<ColumnsInTempView::ColumnInTempView> columns_for_active_dmu_category_rhs;
+
+				for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+				{
+
+					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_string, &columns_for_active_dmu_category_lhs, &columns_for_active_dmu_category_rhs](ColumnsInTempView::ColumnInTempView & view_column)
+					{
+						if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+						{
+							if (view_column.total_multiplicity == highest_multiplicity_primary_uoa)
+							{
+								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category == inner_dmu_multiplicity)
+								{
+									if (view_column.current_multiplicity == outer_dmu_multiplicity)
+									{
+										columns_for_active_dmu_category_lhs.push_back(view_column);
+									}
+									else if (view_column.current_multiplicity == outer_dmu_multiplicity + 1)
+									{
+										columns_for_active_dmu_category_rhs.push_back(view_column);
+									}
+								}
+							}
+						}
+					});
+
+				}
+
+				sql_string += "WHEN ";
+				sql_string += columns_for_active_dmu_category_lhs[0].column_name; // The first column in any primary key group suffices for the NULL check
+				sql_string += " IS NULL AND ";
+				sql_string += columns_for_active_dmu_category_rhs[0].column_name;
+				sql_string += " IS NULL ";
+				sql_string += "THEN 1 ";
+
+				sql_string += "WHEN ";
+				sql_string += columns_for_active_dmu_category_lhs[0].column_name; // The first column in any primary key group suffices for the NULL check
+				sql_string += " IS NULL AND ";
+				sql_string += columns_for_active_dmu_category_rhs[0].column_name;
+				sql_string += " IS NOT NULL ";
+				sql_string += "THEN 0 ";
+
+				sql_string += "WHEN ";
+				sql_string += columns_for_active_dmu_category_lhs[0].column_name; // The first column in any primary key group suffices for the NULL check
+				sql_string += " IS NOT NULL AND ";
+				sql_string += columns_for_active_dmu_category_rhs[0].column_name;
+				sql_string += " IS NULL ";
+				sql_string += "THEN 1 ";
+
+				sql_string += "ELSE ";
+
+				if (number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 == 1)
+				{
+					if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
+					{
+						sql_string += "CAST (";
+					}
+					sql_string += columns_for_active_dmu_category_lhs[0].column_name;
+					if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
+					{
+						sql_string += " AS INTEGER)";
+					}
+					sql_string += " <= ";
+					if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
+					{
+						sql_string += "CAST (";
+					}
+					sql_string += columns_for_active_dmu_category_rhs[0].column_name;
+					if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
+					{
+						sql_string += " AS INTEGER)";
+					}
+				}
+				else
+				{
+					sql_string += "( CASE";
+
+					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+					{
+						sql_string += " WHEN ";
+						sql_string += columns_for_active_dmu_category_lhs[inner_dmu_multiplicity].column_name;
+						sql_string += " != ";
+						sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity].column_name;
+						sql_string += " THEN ";
+						if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
+						{
+							sql_string += "CAST (";
+						}
+						sql_string += columns_for_active_dmu_category_lhs[inner_dmu_multiplicity].column_name;
+						if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
+						{
+							sql_string += " AS INTEGER)";
+						}
+						sql_string += " <= ";
+						if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
+						{
+							sql_string += "CAST (";
+						}
+						sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity].column_name;
+						if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
+						{
+							sql_string += " AS INTEGER)";
+						}
+					}
+
+					sql_string += " ELSE 1 "; // Equal primary key column sets
+
+					sql_string += "END )";
+				}
+
+				sql_string += " END )";
+
+			}
+
+		}
+	}
+
+	// Add the ORDER BY column/s
+	if (debug_ordering)
+	{
+
+		if (highest_multiplicity_primary_uoa > 1)
+		{
+
+			sql_string += " ORDER BY ";
+
+			// Regarding highest_multiplicity_primary_uoa > 1:
+			// Otherwise, we do not have any way to know which ordering the user wants in regards to the different DMU categories.
+			// At least we can assume they want the DMU category corresponding to "highest_multiplicity_primary_uoa > 1" to be ordered.
+
+			// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
+			bool first = true;
+			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+			{
+				for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
+				{
+					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_string, &first](ColumnsInTempView::ColumnInTempView & view_column)
+					{
+						if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+						{
+							if (view_column.total_multiplicity == highest_multiplicity_primary_uoa)
+							{
+								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category == inner_dmu_multiplicity)
+								{
+									if (view_column.current_multiplicity == outer_dmu_multiplicity)
+									{
+										if (!first)
+										{
+											sql_string += ", ";
+										}
+										first = false;
+										if (view_column.primary_key_should_be_treated_as_numeric)
+										{
+											sql_string += "CAST (";
+										}
+										sql_string += view_column.column_name;
+										if (view_column.primary_key_should_be_treated_as_numeric)
+										{
+											sql_string += " AS INTEGER)";
+										}
+									}
+								}
+							}
+						}
+					});
+				}
+			}
+
+		}
+
+	}
+
+	return result;
+
+}
+
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateChildXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number)
+{
+
+	char c[256];
+
+	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	std::vector<SQLExecutor> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+
+	result_columns = previous_x_columns;
+	result_columns.most_recent_sql_statement_executed__index = -1;
+
+	std::string view_name = "V";
+	view_name += itoa(primary_group_number, c, 10);
+	view_name += "_xr";
+	view_name += itoa(current_multiplicity, c, 10);
+	result_columns.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	result_columns.view_name = view_name;
+	result_columns.view_number = current_multiplicity;
+	result_columns.has_no_datetime_columns = false;
+
+	std::string sql_create_empty_table;
+	sql_create_empty_table += "CREATE TABLE ";
+	sql_create_empty_table += result_columns.view_name;
+	sql_create_empty_table += " AS SELECT * FROM ";
+	sql_create_empty_table += previous_x_columns.view_name;
+	sql_create_empty_table += " WHERE 0";
+	sql_strings.push_back(SQLExecutor(db, sql_create_empty_table));
+
+
+	// Add the "merged" time range columns
+
+	WidgetInstanceIdentifier variable_group = previous_x_columns.columns_in_view[0].variable_group_identifier;
+	WidgetInstanceIdentifier uoa = previous_x_columns.columns_in_view[0].uoa_associated_with_variable_group_identifier;
+
+	std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START_MERGED";
+	std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
+	datetime_start_col_name += "_";
+	datetime_start_col_name += newUUID(true);
+
+	std::string alter_string;
+	alter_string += "ALTER TABLE ";
+	alter_string += result_columns.view_name;
+	alter_string += " ADD COLUMN ";
+	alter_string += datetime_start_col_name;
+	alter_string += " INTEGER DEFAULT 0";
+	sql_strings.push_back(SQLExecutor(db, alter_string));
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+	datetime_start_column.column_name = datetime_start_col_name;
+	datetime_start_column.column_name_no_uuid = datetime_start_col_name_no_uuid;
+	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED;
+	datetime_start_column.variable_group_identifier = variable_group;
+	datetime_start_column.uoa_associated_with_variable_group_identifier = uoa;
+	datetime_start_column.table_column_name = "";
+	datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
+	datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
+	datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
+	datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
+	datetime_start_column.current_multiplicity = -1;
+	datetime_start_column.total_multiplicity = -1;
+
+	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED";
+	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
+	datetime_end_col_name += "_";
+	datetime_end_col_name += newUUID(true);
+
+	alter_string.clear();
+	alter_string += "ALTER TABLE ";
+	alter_string += result_columns.view_name;
+	alter_string += " ADD COLUMN ";
+	alter_string += datetime_end_col_name;
+	alter_string += " INTEGER DEFAULT 0";
+	sql_strings.push_back(SQLExecutor(db, alter_string));
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+	datetime_end_column.column_name = datetime_end_col_name;
+	datetime_end_column.column_name_no_uuid = datetime_end_col_name_no_uuid;
+	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED;
+	datetime_end_column.variable_group_identifier = variable_group;
+	datetime_end_column.uoa_associated_with_variable_group_identifier = uoa;
+	datetime_end_column.table_column_name = "";
+	datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
+	datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
+	datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
+	datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
+	datetime_end_column.current_multiplicity = -1;
+	datetime_end_column.total_multiplicity = -1;
+
+
+	int previous_datetime_start_column_index = -1;
+	int previous_datetime_end_column_index = -1;
+	int current_datetime_start_column_index = -1;
+	int current_datetime_end_column_index = -1;
+	int column_index = (int)previous_x_columns.columns_in_view.size() - 1;
+	std::for_each(previous_x_columns.columns_in_view.crbegin(), previous_x_columns.columns_in_view.crend(), [&previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index](ColumnsInTempView::ColumnInTempView const & schema_column)
+	{
+		// COLUMN_TYPE__DATETIMESTART_MERGED can only be for the previous data
+		if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED)
+		{
+			if (previous_datetime_start_column_index == -1)
+			{
+				previous_datetime_start_column_index = column_index;
+			}
+		}
+		// COLUMN_TYPE__DATETIMEEND_MERGED can only be for the previous data
+		else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+		{
+			if (previous_datetime_end_column_index == -1)
+			{
+				previous_datetime_end_column_index = column_index;
+			}
+		}
+		// COLUMN_TYPE__DATETIMESTART and COLUMN_TYPE__DATETIMESTART_INTERNAL, when first seen, can only be for the current data
+		else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+		{
+			if (current_datetime_start_column_index == -1)
+			{
+				current_datetime_start_column_index = column_index;
+			}
+		}
+		// COLUMN_TYPE__DATETIMEEND and COLUMN_TYPE__DATETIMEEND_INTERNAL, when first seen, can only be for the current data
+		else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		{
+			if (current_datetime_end_column_index == -1)
+			{
+				current_datetime_end_column_index = column_index;
+			}
+		}
+
+		// The previous values are always located after the current values, but in arbitrary order,
+		// so this check suffices to be certain that all 4 values have been obtained
+		if (previous_datetime_start_column_index != -1 && previous_datetime_end_column_index != -1)
+		{
+			return;
+		}
+		--column_index;
+	});
+
+	ExecuteSQL(result); // Executes all SQL queries up to the current one
+
+	if (failed)
+	{
+		return result;
+	}
+
+
+	ObtainData(previous_x_columns);
+
+	if (failed)
+	{
+		return result;
+	}
+
+
+	int const minimum_desired_rows_per_transaction = 1024;
+
+	int current_rows_added = 0;
+	int current_rows_added_since_execution = 0;
+	std::string sql_add_xr_row;
+	bool first_row_added = true;
+	std::vector<std::string> bound_parameter_strings;
+	std::vector<std::int64_t> bound_parameter_ints;
+	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
+	sqlite3_stmt * the_prepared_stmt = nullptr;
+
+	BeginNewTransaction();
+
+	while (StepData())
+	{
+		std::int64_t previous_datetime_start = sqlite3_column_int64(stmt_result, previous_datetime_start_column_index);
+		std::int64_t previous_datetime_end = sqlite3_column_int64(stmt_result, previous_datetime_end_column_index);
+		std::int64_t current_datetime_start = sqlite3_column_int64(stmt_result, current_datetime_start_column_index);
+		std::int64_t current_datetime_end = sqlite3_column_int64(stmt_result, current_datetime_end_column_index);
+
+		bool previous_is_0 = false;
+		if (previous_datetime_start == 0 && previous_datetime_end == 0)
+		{
+			previous_is_0 = true;
+		}
+
+		bool current_is_0 = false;
+		if (current_datetime_start == 0 && current_datetime_end == 0)
+		{
+			current_is_0 = true;
+		}
+
+		if (previous_is_0 && current_is_0)
+		{
+
+			// Add row as-is, setting new time range columns to 0
+			CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, 0, 0, previous_x_columns, true, true);
+			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+			the_prepared_stmt = sql_strings.back().stmt;
+			++current_rows_added;
+			++current_rows_added_since_execution;
+
+		}
+		else if (previous_is_0 && !current_is_0)
+		{
+
+			// Add row as-is, setting new time range columns to current time range values
+			CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_columns, true, true);
+			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+			the_prepared_stmt = sql_strings.back().stmt;
+			++current_rows_added;
+			++current_rows_added_since_execution;
+
+		}
+		else if (!previous_is_0 && current_is_0)
+		{
+
+			// Add row as-is, setting new time range columns to previous time range values
+			CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_x_columns, true, true);
+			sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+			the_prepared_stmt = sql_strings.back().stmt;
+			++current_rows_added;
+			++current_rows_added_since_execution;
+
+		}
+		else
+		{
+
+			// Both current and previous rows have non-zero time range columns.
+			// Perform the algorithm that possibly splits the row into multiple rows,
+			// one for each time range sub-region in the overlap of the time ranges between current and previous.
+
+			// Rule out garbage
+			if (previous_datetime_start >= previous_datetime_end)
+			{
+				// invalid previous time range values
+				continue;
+			}
+			else if (current_datetime_start >= current_datetime_end)
+			{
+				// invalid current time range values
+				continue;
+			}
+
+			// Both current and previous time range windows
+			// are now guaranteed to have a non-zero, and positive, width
+
+			std::int64_t lower_range_start = 0;
+			std::int64_t lower_range_end = 0;
+			std::int64_t upper_range_start = 0;
+			std::int64_t upper_range_end = 0;
+
+			bool previous_is_lower = false;
+			if (previous_datetime_start <= current_datetime_start)
+			{
+				lower_range_start = previous_datetime_start;
+				lower_range_end = previous_datetime_end;
+				upper_range_start = current_datetime_start;
+				upper_range_end = current_datetime_end;
+				previous_is_lower = true;
+			}
+
+			bool previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
+			bool previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = true;
+			bool previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
+			bool previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+			bool current__DO_include_lower_range_data__DO_include_upper_range_data = true;
+			bool current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+			bool current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = true;
+			bool current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+			if (!previous_is_lower)
+			{
+				previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
+				previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+				previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = true;
+				previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+				current__DO_include_lower_range_data__DO_include_upper_range_data = true;
+				current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = true;
+				current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
+				current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+			}
+
+			if (lower_range_start == upper_range_start)
+			{
+
+				// special case: The lower range and the upper range
+				// begin at the same time value
+
+
+				// There is guaranteed to be overlap between the lower range
+				// and the upper range
+
+				if (lower_range_end == upper_range_end)
+				{
+
+					// special case: The lower range and the upper range
+					// end at the same time value
+
+					// Add row as-is, setting new time range columns
+					// to either the previous or the current time range columns,
+					// because they are the same
+					CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+
+				}
+				else if (lower_range_end < upper_range_end)
+				{
+
+					// The upper range ends higher than the lower range
+
+					// First, add a row that includes all data,
+					// setting new time range columns to:
+					// lower_range_start - lower_range_end
+					CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row,bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+
+					// Second, add a row that includes only the upper range's data,
+					// setting new time range columns to:
+					// lower_range_end - upper_range_end
+					CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_end, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+
+				}
+				else
+				{
+
+					// The lower range ends higher than the upper range
+
+					// First, add a row that includes all data,
+					// setting new time range columns to:
+					// upper_range_start - upper_range_end
+					CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+
+
+					// Second, add a row that includes only the lower range's data,
+					// setting new time range columns to:
+					// upper_range_end - lower_range_end
+					CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+
+
+				}
+
+			}
+			else
+			{
+
+				// The lower range is guaranteed to start
+				// before the upper range starts
+
+				if (lower_range_end <= upper_range_start)
+				{
+
+					// No overlap between the lower range and the upper range
+
+					// First, add a row corresponding to the lower range,
+					// setting new time range columns to:
+					// lower_range_start - lower_range_end
+					CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+
+					// Second, add a row corresponding to the upper range,
+					// setting new time range columns to:
+					// upper_range_start - upper_range_end
+					CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+
+				}
+				else
+				{
+
+					// There is guaranteed to be overlap between the lower range
+					// and the upper range
+
+					// First, add a row to cover the region of the lower range
+					// that is before the upper range begins,
+					// i.e., including only the lower range's data,
+					// setting new time range columns to:
+					// lower_range_start - upper_range_start
+					CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, upper_range_start, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+
+					if (lower_range_end == upper_range_end)
+					{
+
+						// special case: The lower range and the upper range
+						// end at the same time value
+
+						// So second, add a row that covers the entire upper range
+						// that includes all data,
+						// therefore setting new time range columns to:
+						// upper_range_start - upper_range_end
+						CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+						the_prepared_stmt = sql_strings.back().stmt;
+						++current_rows_added;
+						++current_rows_added_since_execution;
+
+					}
+					else if (lower_range_end < upper_range_end)
+					{
+
+						// The upper range ends higher than the lower range
+
+						// So second, add a row that includes all data,
+						// setting new time range columns to:
+						// upper_range_start - lower_range_end
+						CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+						the_prepared_stmt = sql_strings.back().stmt;
+						++current_rows_added;
+						++current_rows_added_since_execution;
+
+
+						// And third, add a row that includes only the upper range's data,
+						// setting new time range columns to:
+						// lower_range_end - upper_range_end
+						CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_end, upper_range_end, previous_x_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+						the_prepared_stmt = sql_strings.back().stmt;
+						++current_rows_added;
+						++current_rows_added_since_execution;
+
+
+					}
+					else
+					{
+
+						// The lower range ends higher than the upper range
+
+						// So second, add a row that covers the entire upper range
+						// that includes all data,
+						// therefore setting new time range columns to:
+						// upper_range_start - upper_range_end
+						CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+						the_prepared_stmt = sql_strings.back().stmt;
+						++current_rows_added;
+						++current_rows_added_since_execution;
+
+
+						// And third, add a row that includes only the lower range's data,
+						// setting new time range columns to:
+						// upper_range_end - lower_range_end
+						CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_x_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data);
+						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+						the_prepared_stmt = sql_strings.back().stmt;
+						++current_rows_added;
+						++current_rows_added_since_execution;
+
+					}
+
+				}
+
+			}
+
+		}
+
+		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
+		{
+			ExecuteSQL(result);
+			EndTransaction();
+			BeginNewTransaction();
+			current_rows_added_since_execution = 0;
+		}
+
+	}
+
+	if (current_rows_added_since_execution > 0)
+	{
+		ExecuteSQL(result);
+		EndTransaction();
+	}
+	else
+	{
+		EndTransaction();
+	}
+
+	if (failed)
+	{
+		return result;
+	}
+
+	return result;
 
 }
 
