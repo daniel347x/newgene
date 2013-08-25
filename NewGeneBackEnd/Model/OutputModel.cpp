@@ -1081,7 +1081,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns.view_number = current_multiplicity;
 	result_columns.has_no_datetime_columns = false;
 
-	int first_table_column_count = 0;
+	int first_full_table_column_count = 0;
+	int first_inner_table_column_count = 0;
 	int second_table_column_count = 0;
 
 	std::vector<std::string> previous_column_names_first_table;
@@ -1092,13 +1093,32 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// These columns are from the previous XR temporary table, which is guaranteed to have all columns in place, including datetime columns.
 	// Further, the "current_multiplicity" of these columns is guaranteed to be correct.
 	bool first = true;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_table_column_count, &previous_column_names_first_table, &variable_group, &uoa, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	bool in_first_inner_table = true;
+	bool reached_first_datetime_start_merged_column = false;
+	bool reached_first_datetime_end_merged_column = false;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_full_table_column_count, &first_inner_table_column_count, &reached_first_datetime_start_merged_column, &reached_first_datetime_end_merged_column, &previous_column_names_first_table, &variable_group, &uoa, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		previous_column_names_first_table.push_back(new_column.column_name);
 		new_column.column_name = new_column.column_name_no_uuid;
 		new_column.column_name += "_";
 		new_column.column_name += newUUID(true);
-		++first_table_column_count;
+		++first_full_table_column_count;
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED)
+		{
+			reached_first_datetime_start_merged_column = true;
+		}
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+		{
+			reached_first_datetime_end_merged_column = true;
+		}
+		if (in_first_inner_table)
+		{
+			++first_inner_table_column_count;
+		}
+		if (reached_first_datetime_start_merged_column && reached_first_datetime_end_merged_column)
+		{
+			in_first_inner_table = false;
+		}
 		if (first)
 		{
 			first = false;
@@ -1163,14 +1183,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += " AS SELECT ";
 	first = true;
 	int column_count = 0;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first, &column_count, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table](ColumnsInTempView::ColumnInTempView & new_column)
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first, &column_count, &first_full_table_column_count, &second_table_column_count, &previous_column_names_first_table](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		if (!first)
 		{
 			sql_string += ", ";
 		}
 		first = false;
-		if (column_count < first_table_column_count)
+		if (column_count < first_full_table_column_count)
 		{
 			sql_string += "t1.";
 			sql_string += previous_column_names_first_table[column_count];
@@ -1190,9 +1210,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += primary_variable_group_raw_data_columns.original_table_names[0];
 	sql_string += " t2 ON ";
 	bool and_ = false;
-	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_string, &variable_group, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_string, &variable_group, &result_columns, &first_full_table_column_count, &first_inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 	{
-		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [&sql_string, &variable_group, &primary_key, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [&sql_string, &variable_group, &primary_key, &result_columns, &first_full_table_column_count, &first_inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
 		{
 			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
 			{
@@ -1200,9 +1220,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					// Only join on primary keys whose total multiplicity is 1
 					int column_count = 0;
-					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [&sql_string, &first_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
+					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [&sql_string, &first_full_table_column_count, &first_inner_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 					{
-						if (column_count < first_table_column_count)
+						if (column_count < first_inner_table_column_count)
 						{
 							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
 							{
@@ -2254,7 +2274,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns.view_number = current_multiplicity;
 	result_columns.has_no_datetime_columns = false;
 
-	int first_table_column_count = 0;
+	int first_full_table_column_count = 0;
+	int first_inner_table_column_count = 0;
 	int second_table_column_count = 0;
 
 	std::vector<std::string> previous_column_names_first_table;
@@ -2269,13 +2290,32 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Further, the "current_multiplicity" of these columns is guaranteed to be correct.
 	// Also, the first columns always correspond to the primary variable group.
 	bool first = true;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_table_column_count, &previous_column_names_first_table, &variable_group_primary, &uoa_primary, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	bool in_first_inner_table = true;
+	bool reached_first_datetime_start_merged_column = false;
+	bool reached_first_datetime_end_merged_column = false;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_full_table_column_count, &first_inner_table_column_count, &in_first_inner_table, &reached_first_datetime_start_merged_column, &reached_first_datetime_end_merged_column, &previous_column_names_first_table, &variable_group_primary, &uoa_primary, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		previous_column_names_first_table.push_back(new_column.column_name);
 		new_column.column_name = new_column.column_name_no_uuid;
 		new_column.column_name += "_";
 		new_column.column_name += newUUID(true);
-		++first_table_column_count;
+		++first_full_table_column_count;
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED)
+		{
+			reached_first_datetime_start_merged_column = true;
+		}
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+		{
+			reached_first_datetime_end_merged_column = true;
+		}
+		if (in_first_inner_table)
+		{
+			++first_inner_table_column_count;
+		}
+		if (reached_first_datetime_start_merged_column && reached_first_datetime_end_merged_column)
+		{
+			in_first_inner_table = false;
+		}
 		if (first)
 		{
 			first = false;
@@ -2348,14 +2388,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += " AS SELECT ";
 	first = true;
 	int column_count = 0;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first, &column_count, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table](ColumnsInTempView::ColumnInTempView & new_column)
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first, &column_count, &first_full_table_column_count, &second_table_column_count, &previous_column_names_first_table](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		if (!first)
 		{
 			sql_string += ", ";
 		}
 		first = false;
-		if (column_count < first_table_column_count)
+		if (column_count < first_full_table_column_count)
 		{
 			sql_string += "t1.";
 			sql_string += previous_column_names_first_table[column_count];
@@ -2375,19 +2415,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += child_variable_group_raw_data_columns.original_table_names[0];
 	sql_string += " t2 ON ";
 	bool and_ = false;
-	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_string, &variable_group_primary, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_string, &variable_group_primary, &variable_group_child, &result_columns, &first_full_table_column_count, &first_inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 	{
-		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [&sql_string, &variable_group_primary, &primary_key, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [&sql_string, &variable_group_primary, &variable_group_child, &primary_key, &result_columns, &first_full_table_column_count, &first_inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
 		{
-			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group_primary))
+			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group_child))
 			{
 				if (primary_key_info.total_multiplicity == 1)
 				{
 					// Only join on primary keys whose total multiplicity is 1
 					int column_count = 0;
-					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [&sql_string, &first_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
+					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [&sql_string, &first_full_table_column_count, &first_inner_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 					{
-						if (column_count < first_table_column_count)
+						if (column_count < first_inner_table_column_count)
 						{
 							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
 							{
