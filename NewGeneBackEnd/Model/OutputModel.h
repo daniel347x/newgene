@@ -106,8 +106,8 @@ class ColumnsInTempView
 				, primary_key_index_within_total_kad_for_all_dmu_categories(-1)
 				, primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category(-1)
 				, primary_key_index_within_primary_uoa_for_dmu_category(-1)
-				, current_multiplicity(-1)
-				, total_multiplicity(-1)
+				, current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group(-1)
+				, total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group(-1)
 				, primary_key_should_be_treated_as_numeric(false)
 				, total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category(-1)
 				, total_k_spin_count_across_multiplicities_for_dmu_category(-1)
@@ -115,19 +115,25 @@ class ColumnsInTempView
 
 			}
 
-			std::string column_name; // The name of the column in the temporary view (includes UUID)
-			std::string column_name_no_uuid; // The name of the column in the temporary view (without UUID)
-			std::string table_column_name; // The name of the column in the original raw data table corresponding to this column (if any)
-			WidgetInstanceIdentifier variable_group_identifier; // The variable group associated with this column
-			WidgetInstanceIdentifier uoa_associated_with_variable_group_identifier; // The unit of analysis associated with the variable group associated with this column
+			std::string column_name_in_temporary_table; // The name of the column in the temporary view (includes UUID)
+			std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without UUID)
+			std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)
+			WidgetInstanceIdentifier variable_group_associated_with_current_inner_table; // The variable group associated with this column
+			WidgetInstanceIdentifier uoa_associated_with_variable_group_associated_with_current_inner_table; // The unit of analysis associated with the variable group associated with this column
 			COLUMN_TYPE column_type; // Primary key?  Secondary column (i.e., data, not a primary key)?  One of the two special DateTime columns?
-			WidgetInstanceIdentifier primary_key_dmu_category_identifier;
+			WidgetInstanceIdentifier primary_key_dmu_category_identifier; // Empty if this column is not a primary key column
+
+			// For both primary and child inner tables,
+			// spans multiple inner tables; i.e., the first inner table starts at 0, the next inner table starts higher than 0, etc.,
+			// but only for those dmu categories with multiplicity greater than 1; other dmu categories reset to 0 for each inner table.
+			// Resets to 0 for each group of inner tables corresponding to a new child variable group.
 			int primary_key_index_within_total_kad_for_dmu_category;
+
 			int primary_key_index_within_total_kad_for_all_dmu_categories;
 			int primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category;
 			int primary_key_index_within_primary_uoa_for_dmu_category;
-			int current_multiplicity;
-			int total_multiplicity;
+			int current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group;
+			int total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group;
 			int total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category;
 			int total_k_spin_count_across_multiplicities_for_dmu_category;
 			bool primary_key_should_be_treated_as_numeric;
