@@ -2425,12 +2425,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	bool and_ = false;
 	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_string, &variable_group_primary, &variable_group_child, &result_columns, &first_full_table_column_count, &first_inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 	{
-		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [&sql_string, &variable_group_primary, &variable_group_child, &primary_key, &result_columns, &first_full_table_column_count, &first_inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [&sql_string, &variable_group_primary, &variable_group_child, &primary_key, &result_columns, &first_full_table_column_count, &first_inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info_this_variable_group)
 		{
-			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group_child))
+			if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group_child))
 			{
 				// First, join on primary keys whose total multiplicity is 1
-				if (primary_key_info.total_multiplicity == 1)
+				if (primary_key_info_this_variable_group.total_multiplicity == 1)
 				{
 					int column_count = 0;
 					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [&sql_string, &first_full_table_column_count, &first_inner_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
@@ -2457,6 +2457,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					});
 				}
 				// Also join on the current multiplicity
+				else
+				{
+
+				}
 			}
 		});
 	});
