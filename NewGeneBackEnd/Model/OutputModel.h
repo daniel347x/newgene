@@ -68,6 +68,8 @@ public:
 		int sequence_number_within_dmu_category_spin_control;
 		int sequence_number_within_dmu_category_primary_uoa;
 		int sequence_number_in_all_primary_keys;
+		int total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
+		int total_kad_spin_count_for_this_dmu_category;
 		std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys; // one per variable group 
 	};
 
@@ -107,6 +109,8 @@ class ColumnsInTempView
 				, current_multiplicity(-1)
 				, total_multiplicity(-1)
 				, primary_key_should_be_treated_as_numeric(false)
+				, total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category(-1)
+				, total_k_spin_count_across_multiplicities_for_dmu_category(-1)
 			{
 
 			}
@@ -124,6 +128,8 @@ class ColumnsInTempView
 			int primary_key_index_within_primary_uoa_for_dmu_category;
 			int current_multiplicity;
 			int total_multiplicity;
+			int total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category;
+			int total_k_spin_count_across_multiplicities_for_dmu_category;
 			bool primary_key_should_be_treated_as_numeric;
 
 		};
@@ -346,7 +352,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool StepData();
 				void CreateNewXRRow(bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, bool const include_previous_data, bool const include_current_data);
 
-				// Save the SQL and column sets corresponding to each primary variable group in a global data structure
+				// Save the SQL and column sets corresponding to each primary and child variable group in a global data structure
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
 
 				// ********************************************************************* //
@@ -427,7 +433,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// child_uoas__which_multiplicity_is_greater_than_1:
 				// Map of:
 				// UOA identifier => pair<DMU category identifier of the effective DMU category that, in relation to the child,
-				// has multiplicity greater than 1, ... and the given multiplicity, with respect to the total spin control count>
+				// has multiplicity greater than 1, ... and the given multiplicity, with respect to the total spin control count>.
+				// There could be multiple UOA's with identical primary keys, but they will correspond to different UOA's
+				// defined / imported by the user.
 				std::map<WidgetInstanceIdentifier, std::pair<WidgetInstanceIdentifier, int>> child_uoas__which_multiplicity_is_greater_than_1;
 
 				// variable_group__key_names__vectors:
