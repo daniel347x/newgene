@@ -349,35 +349,60 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// Save the SQL and column sets corresponding to each primary variable group in a global data structure
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
 
-				// ***************************************************************** //
+				// ********************************************************************* //
 				// the_map is:
-				// Map: UOA identifier => [ map: VG identifier => list of variables ]
-				// ***************************************************************** //
+				// Map: UOA identifier => [ map: VG identifier => list of variables ].
+				// Each UOA appears at most only once (some appear none, if no variables 
+				// are selected for any variable group associated with the UOA).
+				// 
+				// But, these UOA's are those defined / imported by the USER,
+				// so if the USER chooses to have two UOA's that are identical,
+				// they will appear separately.
+				// In particular, UOA's with different TIME GRANULARITY *must* be
+				// different, even with exactly the same primary keys, so it isn't
+				// uncommon to see this (the time granularity is not reflected in 
+				// the primary keys).
+				// ********************************************************************* //
 				Table_VARIABLES_SELECTED::UOA_To_Variables_Map * the_map;
 
-				// ************************************************************************** //
+				// *************************************************************************** //
 				// UOAs is:
-				// Vector of: UOA identifier and its associated list of [DMU Category / Count]
-				// ************************************************************************** //
+				// Vector of: UOA identifier and its associated list of [DMU Category / Count].
+				// Note that each UOA appears exactly once (regardless of whether variables
+				// are selected by the user for any variable groups associated with this UOA).
+				// 
+				// But, these UOA's are those defined / imported by the USER,
+				// so if the USER chooses to have two UOA's that are identical,
+				// they will appear separately.
+				// In particular, UOA's with different TIME GRANULARITY *must* be
+				// different, even with exactly the same primary keys, so it isn't
+				// uncommon to see this (the time granularity is not reflected in 
+				// the primary keys).
+				// **************************************************************************** //
 				// Place UOA's and their associated DMU categories into a vector for convenience
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> UOAs;
 				
-				// ****************************************************************************************** //
-				// biggest_counts and child_counts are:
-				// Vector of: (one for each (possibly identical) UOA, so that multiple, identical 
-				// UOA's may appear as multiple vector elements,
-				// except possibly for time granularity)
-				// Pair consisting of: UOA identifier and its associated list of [DMU Category / Count]
-				// ... for the UOA that has been determined to be the primary UOA.
-				// Ditto child_counts, but for child UOA's:
-				// The UOA k-value for all DMU categories
-				// is either 0, 1, or the corresponding UOA k-value of the primary UOA
-				// and that where not 0, it is less than the corresponding UOA k-value of the primary UOA
-				// (i.e., has a value of 1)
-				// for only 1 DMU category,
+				// ******************************************************************************************* //
+				// biggest_counts and child_counts are each a Vector of:
+				// Pair consisting of: UOA identifier and its associated list of [DMU Category / Count].
+				//
+				// For biggest_counts, each UOA is the one that has has been determined to be the primary UOA.
+				// There could be multiple UOA's in biggest_counts, each different but with exactly the
+				// same primary keys, because the USER can choose to import / define multiple, identical
+				// UOA's; also, multiple UOA's can (and must, if the primary keys are the same)
+				// be defined that have different TIME GRANULARITY, even if the primary keys
+				// are exactly the same.
+				//
+				// For child_counts, each UOA is enforced to be a smaller subset of the primary keys
+				// in the primary UOA's in biggest_counts.
+				// Further, the UOA k-value for all DMU categories
+				// is either 0, 1, or the corresponding UOA k-value of the primary UOA's,
+				// and that where not 0, it is less than the corresponding UOA k-value of the primary UOA's
+				// (i.e., has a value of 1) for only 1 DMU category,
 				// and this DMU category must match the DMU category with multiplicity greater than 1 (if any)
-				// for the primary UOAs
-				// ****************************************************************************************** //
+				// for the primary UOA's.
+				// As for biggest_counts, each UOA is different, but might have the same primary keys.
+				// ******************************************************************************************* //
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> biggest_counts;
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> child_counts;
 
