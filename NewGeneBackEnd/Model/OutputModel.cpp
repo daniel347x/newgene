@@ -814,6 +814,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 		datetime_start_column.current_multiplicity = -1;
 		datetime_start_column.total_multiplicity = -1;
+		datetime_start_column.primary_key_should_be_treated_as_numeric = false;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -842,6 +843,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 		datetime_end_column.current_multiplicity = -1;
 		datetime_end_column.total_multiplicity = -1;
+		datetime_end_column.primary_key_should_be_treated_as_numeric = false;
 	}
 
 	// Add the ORDER BY column/s
@@ -1011,6 +1013,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 	datetime_start_column.current_multiplicity = -1;
 	datetime_start_column.total_multiplicity = -1;
+	datetime_start_column.primary_key_should_be_treated_as_numeric = false;
 
 	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED";
 	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -1039,6 +1042,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 	datetime_end_column.current_multiplicity = -1;
 	datetime_end_column.total_multiplicity = -1;
+	datetime_end_column.primary_key_should_be_treated_as_numeric = false;
 
 
 	// Set the "merged" time range columns to be equal to the original time range columns
@@ -1279,6 +1283,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 		datetime_start_column.current_multiplicity = -1;
 		datetime_start_column.total_multiplicity = -1;
+		datetime_start_column.primary_key_should_be_treated_as_numeric = false;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -1307,6 +1312,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 		datetime_end_column.current_multiplicity = -1;
 		datetime_end_column.total_multiplicity = -1;
+		datetime_end_column.primary_key_should_be_treated_as_numeric = false;
 	}
 
 	// For use in both the WHERE and ORDER BY clauses
@@ -1595,6 +1601,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 	datetime_start_column.current_multiplicity = -1;
 	datetime_start_column.total_multiplicity = -1;
+	datetime_start_column.primary_key_should_be_treated_as_numeric = false;
 
 	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED";
 	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -1623,6 +1630,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 	datetime_end_column.current_multiplicity = -1;
 	datetime_end_column.total_multiplicity = -1;
+	datetime_end_column.primary_key_should_be_treated_as_numeric = false;
 
 
 	int previous_datetime_start_column_index = -1;
@@ -2453,7 +2461,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	});
 
 	// Datetime columns, if not present
-	if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+	if (child_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
 		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
@@ -2473,8 +2481,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.column_name = datetime_start_col_name;
 		datetime_start_column.column_name_no_uuid = datetime_start_col_name_no_uuid;
 		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
-		datetime_start_column.variable_group_identifier = variable_group_primary;
-		datetime_start_column.uoa_associated_with_variable_group_identifier = uoa_primary;
+		datetime_start_column.variable_group_identifier = variable_group_child;
+		datetime_start_column.uoa_associated_with_variable_group_identifier = uoa_child;
 		datetime_start_column.table_column_name = "";
 		datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
 		datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
@@ -2482,6 +2490,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 		datetime_start_column.current_multiplicity = -1;
 		datetime_start_column.total_multiplicity = -1;
+		datetime_start_column.primary_key_should_be_treated_as_numeric = false;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -2510,6 +2519,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 		datetime_end_column.current_multiplicity = -1;
 		datetime_end_column.total_multiplicity = -1;
+		datetime_end_column.primary_key_should_be_treated_as_numeric = false;
 	}
 
 	// For use in both the WHERE and ORDER BY clauses
@@ -2798,6 +2808,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 	datetime_start_column.current_multiplicity = -1;
 	datetime_start_column.total_multiplicity = -1;
+	datetime_start_column.primary_key_should_be_treated_as_numeric = false;
 
 	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED";
 	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -2826,6 +2837,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
 	datetime_end_column.current_multiplicity = -1;
 	datetime_end_column.total_multiplicity = -1;
+	datetime_end_column.primary_key_should_be_treated_as_numeric = false;
 
 
 	int previous_datetime_start_column_index = -1;
