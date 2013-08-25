@@ -2457,9 +2457,36 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					});
 				}
 				// Also join on the current multiplicity
+				// Note: As currently enforced, child UOA's can have only one
+				// DMU with multiplicity greater than 1.
 				else
 				{
+					// Break this into different cases.
 
+					// Case 1: The highest multiplicity of the PRIMARY uoa's is 1.
+					// All columns exist in the first inner table.
+
+					// Case 2: The highest multiplicity of the primary UOA's is greater than 1,
+					// but the DMU category of this child group does not match the one
+					// corresponding to that multiplicity.
+					// All columns therefore exist in the first inner table.
+
+					// Case 3: The highest multiplicity of the primary UOA's is greater than 1,
+					// and the DMU category of this child group matches the one corresponding
+					// to that multiplicity.
+					// This breaks into two sub cases.
+
+					// ... Sub case 3a: The K-value for the *UOA* of the child group for this DMU category
+					// ... is less than the K-value for the *UOA* of the primary groups for this DMU category
+					// ... (due to current constraints enforced on the user's settings,
+					// ... the child group's K-value must be equal to 1).
+					// ... We must therefore iterate through every column INSIDE each inner table,
+					// ... every inner table, along with iterating through every inner table.
+
+					// ... Sub case 3b: The K-value for the *UOA* of the child group for this DMU category
+					// ... matches the K-value for the *UOA* of the primary groups for this DMU category.
+					// ... Therefore, we need to iterate through every inner table,
+					// ... but inside each inner table, there is only one match for the child.
 				}
 			}
 		});
