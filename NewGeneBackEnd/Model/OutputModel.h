@@ -42,10 +42,12 @@ public:
 		// B    B    B    B    B    B    B    B
 		// ^114 ^214 ^124 ^224 ^134 ^234 ^144 ^244
 		//
-		int sequence_number_within_dmu_category_variable_group_uoa;
+		int sequence_number_within_dmu_category_for_this_variable_groups_uoa;
 		int current_multiplicity;
 		int total_multiplicity;
-		int total_multiplicity_of_primary_uoa_for_the_same_dmu_category;
+		int total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group;
+		int total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group;
+		int total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category;
 
 
 		std::string view_table_name;
@@ -71,6 +73,7 @@ public:
 		int sequence_number_in_all_primary_keys;
 		int total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
 		int total_kad_spin_count_for_this_dmu_category;
+		int total_multiplicity_of_uoa_corresponding_to_top_level_variable_group_for_the_current_dmu_category;
 		std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys; // one per variable group 
 	};
 
