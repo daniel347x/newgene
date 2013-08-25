@@ -2450,13 +2450,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
 					{
-						int desired_inner_table_number = 0;
+						int desired_inner_table_index = 0;
 						bool match_condition = false;
 
 						// First, join on primary keys whose total multiplicity is 1
 						if (primary_key_info_this_variable_group.total_multiplicity == 1)
 						{
-							match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
+							if (current_multiplicity == 1)
+							{
+								match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
+							}
 						}
 						// Also join on the current multiplicity
 						// Note: As currently enforced, child UOA's can have only one
@@ -2469,7 +2472,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							// All columns exist in the first inner table.
 							if (highest_multiplicity_primary_uoa == 1)
 							{
-								match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
+								if (current_multiplicity == 1)
+								{
+									match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
+								}
 							}
 
 							// Cases 2-4 correspond to the highest multiplicity of the primary UOA's
@@ -2500,20 +2506,23 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 									// ... is less than the K-value for the *UOA* of the primary groups for this DMU category
 									// ... (due to current constraints enforced on the user's settings,
 									// ... the child group's K-value must in this scenario be equal to 1).
-									// ... We must therefore iterate through every column INSIDE each inner table,
-									// ... every inner table, along with iterating through every inner table.
+									// ... We must therefore iterate through every column of this DMU category INSIDE each inner table,
+									// ... along with iterating through every inner table.
 									if (new_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category < primary_key.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
 									{
-
+										desired_inner_table_index = (current_multiplicity - 1) / primary_key.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
+										match_condition = (current_multiplicity - 1 == new_column.primary_key_index_within_total_kad_for_dmu_category);
 									}
 
 									// ... Case 4: The K-value for the *UOA* of the child group for this DMU category
 									// ... matches the K-value for the *UOA* of the primary groups for this DMU category.
 									// ... Therefore, we need to iterate through every inner table,
-									// ... but inside each inner table, there is only one match for the child.
+									// ... but inside each inner table, there is only one match for the child
+									// ... that includes all columns in that table for this DMU category.
 									else
 									{
-
+										desired_inner_table_index = current_multiplicity - 1;
+										match_condition = true;
 									}
 
 								}
@@ -2522,7 +2531,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 						}
 
-						if (column_count >= desired_inner_table_number * inner_table_column_count && column_count < column_count * (desired_inner_table_number + 1) * inner_table_column_count)
+						if (column_count >= desired_inner_table_index * inner_table_column_count && column_count < column_count * (desired_inner_table_index + 1) * inner_table_column_count)
 						{
 							if (match_condition)
 							{
