@@ -386,22 +386,28 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// biggest_counts and child_counts are each a Vector of:
 				// Pair consisting of: UOA identifier and its associated list of [DMU Category / Count].
 				//
-				// For biggest_counts, each UOA is the one that has has been determined to be the primary UOA.
-				// There could be multiple UOA's in biggest_counts, each different but with exactly the
-				// same primary keys, because the USER can choose to import / define multiple, identical
-				// UOA's; also, multiple UOA's can (and must, if the primary keys are the same)
+				// For biggest_counts, each UOA is one that has has been determined to
+				// correspond to the "primary UOA", which is defined only in terms of the primary
+				// keys (not the time granularity, and not reflecting the possibility that the user
+				// can define multiple, identical UOA's in terms of primary keys
+				// and even time granularity).
+				// Therefore, there could be multiple UOA's in biggest_counts,
+				// each different but with exactly the same primary keys.
+				// Also, specifically reiterating the time granularity issue, multiple UOA's can
+				// (and must, if the primary keys are the same)
 				// be defined that have different TIME GRANULARITY, even if the primary keys
 				// are exactly the same.
 				//
 				// For child_counts, each UOA is enforced to be a smaller subset of the primary keys
-				// in the primary UOA's in biggest_counts.
+				// in the primary UOA's that appear in biggest_counts.
 				// Further, the UOA k-value for all DMU categories
 				// is either 0, 1, or the corresponding UOA k-value of the primary UOA's,
 				// and that where not 0, it is less than the corresponding UOA k-value of the primary UOA's
 				// (i.e., has a value of 1) for only 1 DMU category,
 				// and this DMU category must match the DMU category with multiplicity greater than 1 (if any)
 				// for the primary UOA's.
-				// As for biggest_counts, each UOA is different, but might have the same primary keys.
+				// As is the case with biggest_counts,
+				// each UOA is different, but might have the same primary keys.
 				// ******************************************************************************************* //
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> biggest_counts;
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> child_counts;
