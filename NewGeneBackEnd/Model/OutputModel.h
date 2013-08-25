@@ -45,6 +45,7 @@ public:
 		int sequence_number_within_dmu_category_variable_group_uoa;
 		int current_multiplicity;
 		int total_multiplicity;
+		int total_multiplicity_of_primary_uoa_for_the_same_dmu_category;
 
 
 		std::string view_table_name;
@@ -152,7 +153,7 @@ class ColumnsInTempView
 			int primary_key_index_within_total_kad_for_all_dmu_categories;
 
 			int primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category;
-			int primary_key_index_within_primary_uoa_for_dmu_category;
+			int primary_key_index_within_primary_uoa_for_dmu_category; // done
 			int current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group;
 			int total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group;
 			int total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category;
