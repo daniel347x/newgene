@@ -3310,9 +3310,9 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 			}
 		}
 
-		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &dmu_counts, &the_variable_group, &column_in_variable_group_data_table, &variables_in_group_primary_keys_metadata](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key_entry)
+		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &dmu_counts, &the_variable_group, &column_in_variable_group_data_table, &variables_in_group_primary_keys_metadata](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key_entry__output__including_multiplicities)
 		{
-			std::for_each(primary_key_entry.variable_group_info_for_primary_keys.cbegin(), primary_key_entry.variable_group_info_for_primary_keys.cend(), [this, &dmu_counts, &the_variable_group, &column_in_variable_group_data_table, &primary_key_entry, &variables_in_group_primary_keys_metadata](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
+			std::for_each(primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys.cbegin(), primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys.cend(), [this, &dmu_counts, &the_variable_group, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities, &variables_in_group_primary_keys_metadata](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
 			{
 				if (current_variable_group_primary_key_entry.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))
 				{
@@ -3325,26 +3325,26 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 							// So use the first occurrence of the primary keys (current_multiplicity == 1) to obtain the information.
 							if (current_variable_group_primary_key_entry.current_multiplicity == 1)
 							{
-								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry.dmu_category;
-								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_spin_control;
-								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_all_dmu_categories = primary_key_entry.sequence_number_in_all_primary_keys;
+								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry__output__including_multiplicities.dmu_category;
+								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category = primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_spin_control;
+								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_all_dmu_categories = primary_key_entry__output__including_multiplicities.sequence_number_in_all_primary_keys;
 								column_in_variable_group_data_table.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_variable_group_uoa;
-								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_primary_uoa;
+								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_primary_uoa;
 								column_in_variable_group_data_table.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = current_variable_group_primary_key_entry.current_multiplicity; // should be set to 1
 								column_in_variable_group_data_table.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = current_variable_group_primary_key_entry.total_multiplicity;
 
-								std::for_each(dmu_counts.cbegin(), dmu_counts.cend(), [this, &column_in_variable_group_data_table, &primary_key_entry](Table_UOA_Identifier::DMU_Plus_Count const & dmu_count)
+								std::for_each(dmu_counts.cbegin(), dmu_counts.cend(), [this, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities](Table_UOA_Identifier::DMU_Plus_Count const & dmu_count)
 								{
-									if (dmu_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key_entry.dmu_category))
+									if (dmu_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key_entry__output__including_multiplicities.dmu_category))
 									{
 										column_in_variable_group_data_table.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = dmu_count.second;
-										WidgetInstanceIdentifier_Int_Pair Kad_Data = model->t_kad_count.getIdentifier(*primary_key_entry.dmu_category.uuid);
+										WidgetInstanceIdentifier_Int_Pair Kad_Data = model->t_kad_count.getIdentifier(*primary_key_entry__output__including_multiplicities.dmu_category.uuid);
 										column_in_variable_group_data_table.total_k_spin_count_across_multiplicities_for_dmu_category = Kad_Data.second;
 									}
 								});
 
 								// Now determine if this primary key field should be treated as numeric for sorting and ordering
-								std::for_each(variables_in_group_primary_keys_metadata.cbegin(), variables_in_group_primary_keys_metadata.cend(), [&column_in_variable_group_data_table, &primary_key_entry, &current_variable_group_primary_key_entry](WidgetInstanceIdentifier const & primary_key_in_variable_group_metadata)
+								std::for_each(variables_in_group_primary_keys_metadata.cbegin(), variables_in_group_primary_keys_metadata.cend(), [&column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities, &current_variable_group_primary_key_entry](WidgetInstanceIdentifier const & primary_key_in_variable_group_metadata)
 								{
 									if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, *primary_key_in_variable_group_metadata.longhand))
 									{
@@ -3876,11 +3876,11 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
 				// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
 				// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
-				WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model->t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
+				WidgetInstanceIdentifiers const & dmu_category_metadata__for_current_primary_or_child_uoa = input_model->t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
 
 				// Todo: To implement global variables (i.e., variables with no primary key),
 				// make the necessary changes and then remove the following requirement
-				if (dmu_primary_key_codes_metadata.size() == 0)
+				if (dmu_category_metadata__for_current_primary_or_child_uoa.size() == 0)
 				{
 					// Todo: error message
 					failed = true;
@@ -3888,7 +3888,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				}
 
 				int primary_uoa_primary_key_info__for_current_primary_or_child_variable_group_and_for_current_primary_key_in_primary_uoa__total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group = 0;
-				std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, the_dmu_category, &primary_uoa_primary_key_info__for_current_primary_or_child_variable_group_and_for_current_primary_key_in_primary_uoa__total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_primary_or_child_variable_group__current_dmu_category__primary_key_instance)
+				std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, the_dmu_category, &primary_uoa_primary_key_info__for_current_primary_or_child_variable_group_and_for_current_primary_key_in_primary_uoa__total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_primary_or_child_variable_group__current_dmu_category__primary_key_instance)
 				{
 					if (current_primary_or_child_variable_group__current_dmu_category__primary_key_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
 					{
@@ -3917,11 +3917,11 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				current_variable_group_current_primary_key_info.is_primary_column_selected = false;
 				current_variable_group_current_primary_key_info.associated_uoa_identifier = current_uoa_identifier;
 
-				int current_variable_group_current_primary_key_dmu_category_total_sequence_number = 0;
+				int current_variable_group_current_primary_key_dmu_category__total_sequence_number = 0;
 				for (int m=0; m<multiplicity_current_primary_or_child_uoa; ++m)
 				{
-					int current_variable_group_current_primary_key_dmu_category_sequence_number = 0;
-					std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, &m, &multiplicity_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category_total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category_sequence_number, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group__current_dmu_primary_key_instance)
+					int current_variable_group_current_primary_key_dmu_category__internal_sequence_number = 0;
+					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &multiplicity_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category__total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category__internal_sequence_number, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group__current_dmu_primary_key_instance)
 					{
 						if (failed)
 						{
@@ -3929,13 +3929,13 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 						}
 						if (current_variable_group__current_dmu_primary_key_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
 						{
-							if (k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category == current_variable_group_current_primary_key_dmu_category_total_sequence_number)
+							if (k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category == current_variable_group_current_primary_key_dmu_category__total_sequence_number)
 							{
 								// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
 								// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
 								// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
 								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group__current_dmu_primary_key_instance.longhand;
-								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa = current_variable_group_current_primary_key_dmu_category_sequence_number;
+								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa = current_variable_group_current_primary_key_dmu_category__internal_sequence_number;
 								current_variable_group_current_primary_key_info.current_multiplicity = m+1;
 								current_variable_group_current_primary_key_info.total_multiplicity = multiplicity_current_primary_or_child_uoa;
 
@@ -4006,8 +4006,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 									current_variable_group_current_primary_key_info.is_primary_column_selected = false;
 								}
 							}
-							++current_variable_group_current_primary_key_dmu_category_sequence_number;
-							++current_variable_group_current_primary_key_dmu_category_total_sequence_number;
+							++current_variable_group_current_primary_key_dmu_category__internal_sequence_number;
+							++current_variable_group_current_primary_key_dmu_category__total_sequence_number;
 						}
 					});
 				}
@@ -4060,11 +4060,11 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
 				// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
 				// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
-				WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model->t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
+				WidgetInstanceIdentifiers const & dmu_category_metadata__for_current_primary_or_child_uoa = input_model->t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
 
 				// Todo: To implement global variables (i.e., variables with no primary key),
 				// make the necessary changes and then remove the following requirement
-				if (dmu_primary_key_codes_metadata.size() == 0)
+				if (dmu_category_metadata__for_current_primary_or_child_uoa.size() == 0)
 				{
 					// Todo: error message
 					failed = true;
@@ -4072,7 +4072,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				}
 
 				int primary_uoa_primary_key_info__for_current_primary_or_child_variable_group_and_for_current_primary_key_in_primary_uoa__total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group = 0;
-				std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, the_dmu_category, &primary_uoa_primary_key_info__for_current_primary_or_child_variable_group_and_for_current_primary_key_in_primary_uoa__total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_primary_or_child_variable_group__current_dmu_category__primary_key_instance)
+				std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, the_dmu_category, &primary_uoa_primary_key_info__for_current_primary_or_child_variable_group_and_for_current_primary_key_in_primary_uoa__total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_primary_or_child_variable_group__current_dmu_category__primary_key_instance)
 				{
 					if (current_primary_or_child_variable_group__current_dmu_category__primary_key_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
 					{
@@ -4101,11 +4101,11 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				current_variable_group_current_primary_key_info.is_primary_column_selected = false;
 				current_variable_group_current_primary_key_info.associated_uoa_identifier = current_uoa_identifier;
 
-				int current_variable_group_current_primary_key_dmu_category_total_sequence_number = 0;
+				int current_variable_group_current_primary_key_dmu_category__total_sequence_number = 0;
 				for (int m=0; m<multiplicity_current_primary_or_child_uoa; ++m)
 				{
-					int current_variable_group_current_primary_key_dmu_category_sequence_number = 0;
-					std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, &m, &multiplicity_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category_total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category_sequence_number, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
+					int current_variable_group_current_primary_key_dmu_category__internal_sequence_number = 0;
+					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &multiplicity_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category__total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category__internal_sequence_number, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
 					{
 						if (failed)
 						{
@@ -4113,13 +4113,13 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 						}
 						if (current_variable_group_current_dmu_primary_key.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
 						{
-							if (k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category == current_variable_group_current_primary_key_dmu_category_total_sequence_number)
+							if (k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category == current_variable_group_current_primary_key_dmu_category__total_sequence_number)
 							{
 								// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
 								// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
 								// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
 								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group_current_dmu_primary_key.longhand;
-								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa = current_variable_group_current_primary_key_dmu_category_sequence_number;
+								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa = current_variable_group_current_primary_key_dmu_category__internal_sequence_number;
 								current_variable_group_current_primary_key_info.current_multiplicity = m+1;
 								current_variable_group_current_primary_key_info.total_multiplicity = multiplicity_current_primary_or_child_uoa;
 								char ns__[64];
@@ -4187,8 +4187,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 									current_variable_group_current_primary_key_info.is_primary_column_selected = false;
 								}
 							}
-							++current_variable_group_current_primary_key_dmu_category_sequence_number;
-							++current_variable_group_current_primary_key_dmu_category_total_sequence_number;
+							++current_variable_group_current_primary_key_dmu_category__internal_sequence_number;
+							++current_variable_group_current_primary_key_dmu_category__total_sequence_number;
 						}
 					});
 				}
