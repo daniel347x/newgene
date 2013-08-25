@@ -3680,7 +3680,8 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 		}
 
 		WidgetInstanceIdentifier uoa_identifier = child_uoa__dmu_counts__pair.first;
-		std::for_each(child_uoa__dmu_counts__pair.second.cbegin(), child_uoa__dmu_counts__pair.second.cend(), [this, &uoa_identifier](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
+		bool first = true;
+		std::for_each(child_uoa__dmu_counts__pair.second.cbegin(), child_uoa__dmu_counts__pair.second.cend(), [this, &uoa_identifier, &first](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
 		{
 
 			if (failed)
@@ -3723,8 +3724,15 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 				}
 			}
 
-			// Note: Code above has already validated that there is only 1 DMU category for which the multiplicity is greater than 1.
-			child_uoas__which_multiplicity_is_greater_than_1[uoa_identifier] = std::make_pair(the_dmu_category_identifier, multiplicity);
+			// Note: Validation code has already validated that there is only 1 DMU category for which the multiplicity is greater than 1.
+			// Always add at least one entry, even if multiplicity is 1.
+			// This is to support the way things are currently designed, which requires
+			// that there be an entry here in the special case that all multiplicities are 1.
+			if (first || multiplicity > 1)
+			{
+				child_uoas__which_multiplicity_is_greater_than_1[uoa_identifier] = std::make_pair(the_dmu_category_identifier, multiplicity);
+				first = false;
+			}
 
 		});
 

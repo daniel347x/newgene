@@ -397,6 +397,12 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// (and must, if the primary keys are the same)
 				// be defined that have different TIME GRANULARITY, even if the primary keys
 				// are exactly the same.
+				// ******************************************************************************************* //
+				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> biggest_counts;
+
+				// ******************************************************************************************* //
+				// biggest_counts and child_counts are each a Vector of:
+				// Pair consisting of: UOA identifier and its associated list of [DMU Category / Count].
 				//
 				// For child_counts, each UOA is enforced to be a smaller subset of the primary keys
 				// in the primary UOA's that appear in biggest_counts.
@@ -409,7 +415,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// As is the case with biggest_counts,
 				// each UOA is different, but might have the same primary keys.
 				// ******************************************************************************************* //
-				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> biggest_counts;
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> child_counts;
 
 				// Keep track of multiplicities involved
