@@ -2243,7 +2243,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	result_columns = previous_xr_columns;
 
-	std::string view_name = "V";
+	std::string view_name = "CV";
 	view_name += itoa(primary_group_number, c, 10);
 	view_name += "_x";
 	view_name += itoa(current_multiplicity, c, 10);
@@ -2259,13 +2259,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	std::vector<std::string> previous_column_names_first_table;
 
-	WidgetInstanceIdentifier variable_group;
-	WidgetInstanceIdentifier uoa;
+	WidgetInstanceIdentifier variable_group_primary;
+	WidgetInstanceIdentifier uoa_primary;
+
+	WidgetInstanceIdentifier variable_group_child;
+	WidgetInstanceIdentifier uoa_child;
 
 	// These columns are from the previous XR temporary table, which is guaranteed to have all columns in place, including datetime columns.
 	// Further, the "current_multiplicity" of these columns is guaranteed to be correct.
+	// Also, the first columns always correspond to the primary variable group.
 	bool first = true;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_table_column_count, &previous_column_names_first_table, &variable_group, &uoa, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_table_column_count, &previous_column_names_first_table, &variable_group_primary, &uoa_primary, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		previous_column_names_first_table.push_back(new_column.column_name);
 		new_column.column_name = new_column.column_name_no_uuid;
@@ -2275,14 +2279,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (first)
 		{
 			first = false;
-			variable_group = new_column.variable_group_identifier;
-			uoa = new_column.uoa_associated_with_variable_group_identifier;
+			variable_group_primary = new_column.variable_group_identifier;
+			uoa_primary = new_column.uoa_associated_with_variable_group_identifier;
 		}
 	});
 
-	// These columns are from the original raw data table, which may or may not have datetime columns.
+	// These columns are from the original raw data table for the child variable group,
+	// which may or may not have datetime columns.
 	// Further, the "current_multiplicity" of these columns is 1, and must be updated.
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
+	first = true;
+	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&first, &variable_group_child, &uoa_child, &result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
 	{
 		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
@@ -2301,9 +2307,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 		}
 		++second_table_column_count;
+		if (first)
+		{
+			first = false;
+			variable_group_child = new_column.variable_group_identifier;
+			uoa_child = new_column.uoa_associated_with_variable_group_identifier;
+		}
 	});
 	// Datetime columns, if present
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
 	{
 		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
 		{
@@ -2315,7 +2327,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			++second_table_column_count;
 		}
 	});
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
 	{
 		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
@@ -2360,14 +2372,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += " FROM ";
 	sql_string += previous_xr_columns.view_name;
 	sql_string += " t1 JOIN ";
-	sql_string += primary_variable_group_raw_data_columns.original_table_names[0];
+	sql_string += child_variable_group_raw_data_columns.original_table_names[0];
 	sql_string += " t2 ON ";
 	bool and_ = false;
-	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_string, &variable_group, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&sql_string, &variable_group_primary, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 	{
-		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [&sql_string, &variable_group, &primary_key, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [&sql_string, &variable_group_primary, &primary_key, &result_columns, &first_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
 		{
-			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
+			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group_primary))
 			{
 				if (primary_key_info.total_multiplicity == 1)
 				{
@@ -2423,8 +2435,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.column_name = datetime_start_col_name;
 		datetime_start_column.column_name_no_uuid = datetime_start_col_name_no_uuid;
 		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
-		datetime_start_column.variable_group_identifier = variable_group;
-		datetime_start_column.uoa_associated_with_variable_group_identifier = uoa;
+		datetime_start_column.variable_group_identifier = variable_group_primary;
+		datetime_start_column.uoa_associated_with_variable_group_identifier = uoa_primary;
 		datetime_start_column.table_column_name = "";
 		datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
 		datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
@@ -2451,8 +2463,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.column_name = datetime_end_col_name;
 		datetime_end_column.column_name_no_uuid = datetime_end_col_name_no_uuid;
 		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
-		datetime_end_column.variable_group_identifier = variable_group;
-		datetime_end_column.uoa_associated_with_variable_group_identifier = uoa;
+		datetime_end_column.variable_group_identifier = variable_group_primary;
+		datetime_end_column.uoa_associated_with_variable_group_identifier = uoa_primary;
 		datetime_end_column.table_column_name = "";
 		datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
 		datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
@@ -3952,6 +3964,190 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa = current_variable_group_current_primary_key_dmu_category_sequence_number;
 								current_variable_group_current_primary_key_info.current_multiplicity = m+1;
 								current_variable_group_current_primary_key_info.total_multiplicity = multiplicity;
+
+								// unused in current algorithm (ditto below block, but not marked above so delete it at same time you delete this)
+								char ns__[64];
+								current_variable_group_current_primary_key_info.view_table_name = "t";
+								current_variable_group_current_primary_key_info.view_table_name += itoa(m+1, ns__, 10);
+								current_variable_group_current_primary_key_info.join_table_name = "j";
+								current_variable_group_current_primary_key_info.join_table_name += itoa(m+1, ns__, 10);
+								current_variable_group_current_primary_key_info.join_table_name_withtime = "jt";
+								current_variable_group_current_primary_key_info.join_table_name_withtime += itoa(m+1, ns__, 10);
+
+								// unused in current algorithm? (ditto below block, but not marked above so delete it at same time you delete this)
+								if (current_variable_group_current_primary_key_info.associated_uoa_identifier.time_granularity != 0)
+								{
+									current_variable_group_current_primary_key_info.datetime_row_start_table_column_name = "DATETIME_ROW_START";
+									current_variable_group_current_primary_key_info.datetime_row_end_table_column_name = "DATETIME_ROW_END";
+
+									std::string datetime_start_row_name = "DATETIME_ROW_START_";
+									datetime_start_row_name += *current_variable_group_current_primary_key_info.vg_identifier.code;
+									current_variable_group_current_primary_key_info.datetime_row_start_column_name = datetime_start_row_name;
+									current_variable_group_current_primary_key_info.datetime_row_start_column_name_no_uuid = datetime_start_row_name;
+
+									std::string datetime_end_row_name = "DATETIME_ROW_END_";
+									datetime_end_row_name += *current_variable_group_current_primary_key_info.vg_identifier.code;
+									current_variable_group_current_primary_key_info.datetime_row_end_column_name = datetime_end_row_name;
+									current_variable_group_current_primary_key_info.datetime_row_end_column_name_no_uuid = datetime_end_row_name;
+								}
+
+								std::string this_variable_group__this_primary_key__unique_name;
+								this_variable_group__this_primary_key__unique_name += *current_variable_group_current_dmu_primary_key.longhand;
+								current_variable_group_current_primary_key_info.column_name_no_uuid = this_variable_group__this_primary_key__unique_name;
+								if (multiplicity > 1)
+								{
+									this_variable_group__this_primary_key__unique_name += "_";
+									this_variable_group__this_primary_key__unique_name += itoa(m+1, ns__, 10);
+								}
+								this_variable_group__this_primary_key__unique_name += "_";
+								this_variable_group__this_primary_key__unique_name += newUUID(true);
+								current_variable_group_current_primary_key_info.column_name = this_variable_group__this_primary_key__unique_name;
+								WidgetInstanceIdentifier vg_setmember_identifier;
+								bool found_variable_group_set_member_identifier = input_model->t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(*current_variable_group_current_dmu_primary_key.longhand, *the_variable_group.first.uuid, vg_setmember_identifier);
+								if (!found_variable_group_set_member_identifier)
+								{
+									failed = true;
+									return; // from lambda
+								}
+
+								// Is this primary key selected by the user for output?
+								bool found = false;
+								std::for_each(the_variable_group.second.cbegin(), the_variable_group.second.cend(), [&found, &vg_setmember_identifier](WidgetInstanceIdentifier const & selected_variable_identifier)
+								{
+									if (found)
+									{
+										return; // from lambda
+									}
+									if (selected_variable_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg_setmember_identifier))
+									{
+										found = true;
+									}
+								});
+								if (found)
+								{
+									current_variable_group_current_primary_key_info.is_primary_column_selected = true;
+								}
+								else
+								{
+									current_variable_group_current_primary_key_info.is_primary_column_selected = false;
+								}
+							}
+							++current_variable_group_current_primary_key_dmu_category_sequence_number;
+							++current_variable_group_current_primary_key_dmu_category_total_sequence_number;
+						}
+					});
+				}
+
+				if (failed)
+				{
+					return; // from lambda
+				}
+			});
+
+			if (failed)
+			{
+				return; // from lambda
+			}
+
+			view_count = 0;
+			std::for_each(secondary_variable_groups_vector.cbegin(), secondary_variable_groups_vector.cend(), [this, &the_dmu_category, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+			{
+				if (failed)
+				{
+					return; // from lambda
+				}
+
+				if (!the_variable_group.first.code)
+				{
+					// Todo: error message
+					failed = true;
+					return;
+				}
+
+				if (!the_variable_group.first.identifier_parent)
+				{
+					// Todo: error message
+					failed = true;
+					return;
+				}
+
+				WidgetInstanceIdentifier current_uoa_identifier = *the_variable_group.first.identifier_parent;
+
+				std::string vg_code = *the_variable_group.first.code;
+				std::string vg_data_table_name = Table_VariableGroupData::TableNameFromVGCode(vg_code);
+
+				// dmu_primary_key_codes_metadata:
+				// The primary key metadata for the_variable_group - a possible SUBSET of all primary keys from the primary UOA.
+				// This include *all* DMU categories that form the primary keys for this variable group,
+				// each of which might appear multiple times as a separate entry here.
+				// This metadata just states which DMU category the key refers to,
+				// what the total (overall) sequence number is of the primary key in the variable group table,
+				// and the column name in the variable group table for this column.
+				// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
+				// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
+				// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
+				WidgetInstanceIdentifiers const & dmu_primary_key_codes_metadata = input_model->t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
+
+				// Todo: To implement global variables (i.e., variables with no primary key),
+				// make the necessary changes and then remove the following requirement
+				if (dmu_primary_key_codes_metadata.size() == 0)
+				{
+					// Todo: error message
+					failed = true;
+					return;
+				}
+
+				int current_variable_group_current_primary_key_dmu_category_total_number = 0;
+				std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, the_dmu_category, &current_variable_group_current_primary_key_dmu_category_total_number, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
+				{
+					if (current_variable_group_current_dmu_primary_key.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
+					{
+						++current_variable_group_current_primary_key_dmu_category_total_number;
+					}
+				});
+
+				int multiplicity = 0;
+				if (current_variable_group_current_primary_key_dmu_category_total_number > 0)
+				{
+					multiplicity = 1;
+					int test_kad_count = current_variable_group_current_primary_key_dmu_category_total_number;
+					while (test_kad_count <= kad_count_current_dmu_category)
+					{
+						test_kad_count += current_variable_group_current_primary_key_dmu_category_total_number;
+						if (test_kad_count <= kad_count_current_dmu_category)
+						{
+							++multiplicity;
+						}
+					}
+				}
+
+				variable_group_info_for_primary_keys.push_back(PrimaryKeySequence::VariableGroup_PrimaryKey_Info());
+				PrimaryKeySequence::VariableGroup_PrimaryKey_Info & current_variable_group_current_primary_key_info = variable_group_info_for_primary_keys.back();
+				current_variable_group_current_primary_key_info.vg_identifier = the_variable_group.first;
+				current_variable_group_current_primary_key_info.is_primary_column_selected = false;
+				current_variable_group_current_primary_key_info.associated_uoa_identifier = current_uoa_identifier;
+
+				int current_variable_group_current_primary_key_dmu_category_total_sequence_number = 0;
+				for (int m=0; m<multiplicity; ++m)
+				{
+					int current_variable_group_current_primary_key_dmu_category_sequence_number = 0;
+					std::for_each(dmu_primary_key_codes_metadata.cbegin(), dmu_primary_key_codes_metadata.cend(), [this, &m, &multiplicity, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category_total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category_sequence_number, &current_dmu_sequence_number, &uoa_count_current_dmu_category, &kad_count_current_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
+					{
+						if (failed)
+						{
+							return; // from lambda
+						}
+						if (current_variable_group_current_dmu_primary_key.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
+						{
+							if (current_dmu_sequence_number == current_variable_group_current_primary_key_dmu_category_total_sequence_number)
+							{
+								// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
+								// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
+								// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
+								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group_current_dmu_primary_key.longhand;
+								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_variable_group_uoa = current_variable_group_current_primary_key_dmu_category_sequence_number;
+								current_variable_group_current_primary_key_info.current_multiplicity = m+1;
+								current_variable_group_current_primary_key_info.total_multiplicity = multiplicity;
 								char ns__[64];
 								current_variable_group_current_primary_key_info.view_table_name = "t";
 								current_variable_group_current_primary_key_info.view_table_name += itoa(m+1, ns__, 10);
@@ -4028,11 +4224,6 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 					return; // from lambda
 				}
 			});
-
-			if (failed)
-			{
-				return; // from lambda
-			}
 
 			++overall_primary_key_sequence_number;
 			++kad_count_current_dmu_category_sequence;
