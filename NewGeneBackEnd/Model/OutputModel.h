@@ -142,6 +142,7 @@ class ColumnsInTempView
 		std::vector<std::string> original_table_names;
 		std::vector<std::string> variable_group_codes;
 		std::vector<std::string> variable_group_longhand_names;
+		std::vector<WidgetInstanceIdentifier> variable_groups;
 		std::string view_name;
 		std::string view_name_no_uuid;
 
