@@ -808,15 +808,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_saved;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
 		datetime_start_column.column_name_in_original_data_table = "";
-		datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-		datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-		datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-		datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_start_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_start_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_start_column.primary_key_should_be_treated_as_numeric = false;
-		datetime_start_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_start_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -839,15 +830,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_saved;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
 		datetime_end_column.column_name_in_original_data_table = "";
-		datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-		datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-		datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-		datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_end_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_end_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_end_column.primary_key_should_be_treated_as_numeric = false;
-		datetime_end_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_end_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 	}
 
 	// Add the ORDER BY column/s
@@ -885,7 +867,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						if (view_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group == highest_multiplicity_primary_uoa)
 						{
-							if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category == inner_dmu_multiplicity)
+							if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category == inner_dmu_multiplicity)
 							{
 								if (!first)
 								{
@@ -1011,15 +993,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_start_column.column_name_in_original_data_table = "";
-	datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-	datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-	datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-	datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_start_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_start_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_start_column.primary_key_should_be_treated_as_numeric = false;
-	datetime_start_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_start_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 
 	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED";
 	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -1042,15 +1015,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_end_column.column_name_in_original_data_table = "";
-	datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-	datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-	datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-	datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_end_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_end_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_end_column.primary_key_should_be_treated_as_numeric = false;
-	datetime_end_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_end_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 
 
 	// Set the "merged" time range columns to be equal to the original time range columns
@@ -1285,15 +1249,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 		datetime_start_column.column_name_in_original_data_table = "";
-		datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-		datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-		datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-		datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_start_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_start_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_start_column.primary_key_should_be_treated_as_numeric = false;
-		datetime_start_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_start_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -1316,15 +1271,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 		datetime_end_column.column_name_in_original_data_table = "";
-		datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-		datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-		datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-		datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_end_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_end_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_end_column.primary_key_should_be_treated_as_numeric = false;
-		datetime_end_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_end_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 	}
 
 	// For use in both the WHERE and ORDER BY clauses
@@ -1384,7 +1330,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						{
 							if (view_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group == highest_multiplicity_primary_uoa)
 							{
-								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category == inner_dmu_multiplicity)
+								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category == inner_dmu_multiplicity)
 								{
 									if (view_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group == outer_dmu_multiplicity)
 									{
@@ -1515,7 +1461,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						{
 							if (view_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group == highest_multiplicity_primary_uoa)
 							{
-								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category == inner_dmu_multiplicity)
+								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category == inner_dmu_multiplicity)
 								{
 									if (view_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group == outer_dmu_multiplicity)
 									{
@@ -1607,15 +1553,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_start_column.column_name_in_original_data_table = "";
-	datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-	datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-	datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-	datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_start_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_start_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_start_column.primary_key_should_be_treated_as_numeric = false;
-	datetime_start_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_start_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 
 	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED";
 	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -1638,15 +1575,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_end_column.column_name_in_original_data_table = "";
-	datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-	datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-	datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-	datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_end_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_end_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_end_column.primary_key_should_be_treated_as_numeric = false;
-	datetime_end_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_end_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 
 
 	int previous_datetime_start_column_index = -1;
@@ -2578,15 +2506,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_child;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_child;
 		datetime_start_column.column_name_in_original_data_table = "";
-		datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-		datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-		datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-		datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_start_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_start_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_start_column.primary_key_should_be_treated_as_numeric = false;
-		datetime_start_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_start_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -2609,15 +2528,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_child;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_child;
 		datetime_end_column.column_name_in_original_data_table = "";
-		datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-		datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-		datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-		datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_end_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_end_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-		datetime_end_column.primary_key_should_be_treated_as_numeric = false;
-		datetime_end_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-		datetime_end_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 	}
 
 	// For use in both the WHERE and ORDER BY clauses
@@ -2696,7 +2606,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						{
 							if (view_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group == highest_multiplicity_primary_uoa)
 							{
-								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category == inner_dmu_multiplicity)
+								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category == inner_dmu_multiplicity)
 								{
 									if (view_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group == outer_dmu_multiplicity)
 									{
@@ -2788,15 +2698,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_start_column.column_name_in_original_data_table = "";
-	datetime_start_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-	datetime_start_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-	datetime_start_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-	datetime_start_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_start_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_start_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_start_column.primary_key_should_be_treated_as_numeric = false;
-	datetime_start_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_start_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 
 	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED";
 	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -2819,15 +2720,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_end_column.column_name_in_original_data_table = "";
-	datetime_end_column.primary_key_index_within_primary_uoa_for_dmu_category = -1;
-	datetime_end_column.primary_key_index_within_total_kad_for_all_dmu_categories = -1;
-	datetime_end_column.primary_key_index_within_total_kad_for_dmu_category = -1;
-	datetime_end_column.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_end_column.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_end_column.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = -1;
-	datetime_end_column.primary_key_should_be_treated_as_numeric = false;
-	datetime_end_column.total_k_count_within_uoa_corresponding_to_variable_group_for_dmu_category = -1;
-	datetime_end_column.total_k_spin_count_across_multiplicities_for_dmu_category = -1;
 
 
 	int previous_datetime_start_column_index = -1;
@@ -3436,7 +3328,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry.dmu_category;
 								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_spin_control;
 								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_all_dmu_categories = primary_key_entry.sequence_number_in_all_primary_keys;
-								column_in_variable_group_data_table.primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_variable_group_uoa;
+								column_in_variable_group_data_table.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_variable_group_uoa;
 								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry.sequence_number_within_dmu_category_primary_uoa;
 								column_in_variable_group_data_table.current_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = current_variable_group_primary_key_entry.current_multiplicity; // should be set to 1
 								column_in_variable_group_data_table.total_multiplicity_in_uoa_corresponding_to_current_inner_table_variable_group = current_variable_group_primary_key_entry.total_multiplicity;
