@@ -132,14 +132,23 @@ class ColumnsInTempView
 			// the child can have multiplicity greater than 1 for a single such VG).
 			// Other dmu categories (those with multiplicity of 1) reset to 0 for each inner table.
 			// Resets to 0 for each group of inner tables corresponding to a new child variable group.
-			// Note that child variable groups may increment differently across inner tables.
+			// Note that child variable groups may increment differently across inner tables
+			// than primary variable groups.
 			int primary_key_index_within_total_kad_for_dmu_category;
 
-			// For both primary and child inner tables, spans multiple inner tables.
-			// The primary keys in each inner table that 
-			//; i.e., the first inner table starts at 0, the next inner table starts higher than 0, etc.,
-			// but only for those dmu categories with multiplicity greater than 1; other dmu categories reset to 0 for each inner table.
+			// For both primary and child inner tables,
+			// spans multiple inner tables; i.e., the first inner table starts at
+			// the index of this primary key column within the given UOA,
+			// the next inner table starts with a value incremented above that, etc.,
+			// but only for those dmu categories with multiplicity greater than 1
+			// (note that the SAME dmu category always has multiplicity greater than 1
+			// for both child and primary variable groups,
+			// except that if all DMU categories have multiplicity of 1 for primary VG's,
+			// the child can have multiplicity greater than 1 for a single such VG).
+			// Other dmu categories (those with multiplicity of 1) reset to 0 for each inner table.
 			// Resets to 0 for each group of inner tables corresponding to a new child variable group.
+			// Note that child variable groups may increment differently across inner tables
+			// than primary variable groups.
 			int primary_key_index_within_total_kad_for_all_dmu_categories;
 
 			int primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category;
