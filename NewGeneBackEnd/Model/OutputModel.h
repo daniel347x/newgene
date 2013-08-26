@@ -139,11 +139,11 @@ class ColumnsInTempView
 			// Resets to 0 for each group of inner tables corresponding to a new child variable group.
 			// Note that child variable groups may increment differently across inner tables
 			// than primary variable groups.
-			int primary_key_index_within_total_kad_for_dmu_category; // done
+			int primary_key_index_within_total_kad_for_dmu_category;
 
-			int primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category; // done
-			int primary_key_index_within_primary_uoa_for_dmu_category; // done
-			int current_multiplicity__corresponding_to__current_inner_table; // done
+			int primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category;
+			int primary_key_index_within_primary_uoa_for_dmu_category;
+			int current_multiplicity__corresponding_to__current_inner_table;
 			int total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category;
 			int total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 			int total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category;
