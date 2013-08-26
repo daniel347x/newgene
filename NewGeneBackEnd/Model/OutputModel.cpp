@@ -1496,8 +1496,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (highest_multiplicity_primary_uoa > 1)
 		{
 	
-			sql_string += " WHERE ";
-
 			// Obtain the columns for the two primary keys being compared in a convenient vector.
 			// The number of columns within a single primary key corresponding to the DMU category with multiplicity greater than 1 can be more than 1.
 			for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity < highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
@@ -1506,6 +1504,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				if (outer_dmu_multiplicity > 1)
 				{
 					sql_string += " AND ";
+				}
+				else
+				{
+					sql_string += " WHERE ";
 				}
 
 				sql_string += "( CASE ";
