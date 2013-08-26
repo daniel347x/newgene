@@ -49,19 +49,8 @@ public:
 		int total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group;
 		int total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category;
 
-
-		std::string view_table_name;
-		std::string join_table_name;
-		std::string join_table_name_withtime;
 		bool is_primary_column_selected;
 
-		// Unused in new algorithm
-		std::string datetime_row_start_column_name;
-		std::string datetime_row_end_column_name;
-		std::string datetime_row_start_column_name_no_uuid;
-		std::string datetime_row_end_column_name_no_uuid;
-		std::string datetime_row_start_table_column_name;
-		std::string datetime_row_end_table_column_name;
 	};
 
 	class PrimaryKeySequenceEntry
@@ -201,8 +190,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 		}
 
 		void LoadTables();
-		void GenerateOutput(DataChangeMessage & change_response);
-		void GenerateOutput2(DataChangeMessage & change_response);
 
 		Table_VARIABLES_SELECTED t_variables_selected_identifiers;
 		Table_KAD_COUNT t_kad_count;
@@ -214,11 +201,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 	private:
 
-		// helpers used in GenerateOutput()
-		std::string CurrentTableTokenName(int const multiplicity);
+		// helpers used by the output generator
 		std::string StripUUIDFromVariableName(std::string const & variable_name);
-		bool AddTimeRangeMergedRow(bool previous_is_null, bool current_is_null, sqlite3 * db, std::int64_t const datetime_start_new, std::int64_t const datetime_end_new, int & overall_column_number_previous, int & overall_column_number_current_regular, std::string & sql_columns, std::string & sql_values_previous_null, std::string & sql_values_previous_filled, std::string & sql_values_current_null, std::string & sql_values_current_filled, std::string & join_count_as_text, std::string const & join_table_with_time_ranges_name);
-		bool AddTimeRangeMergedRowTemp(bool previous_is_null, bool current_is_null, sqlite3 * db, std::int64_t const datetime_start_new, std::int64_t const datetime_end_new, int const overall_column_number_input_previous, int const overall_column_number_input_before_datetime, int const overall_column_number_input_after_datetime, std::string const & sql_columns, std::string const & sql_values_previous, std::string const & sql_values_previous_null, std::string const & sql_values_before_datetime, std::string const & sql_values_before_datetime_null, std::string const & sql_values_after_datetime, std::string const & sql_values_after_datetime_null, std::string const & join_table_with_time_ranges_name);
 
 	public:
 	
@@ -511,90 +495,5 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 };
 
 bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
-
-class ColumnsInViews
-{
-
-	public:
-
-		class ColumnsInView
-		{
-
-			public:
-
-				// Only used by sub-views
-				std::vector<std::string> primary_key_names_in_sub_view;
-				std::vector<std::string> secondary_key_names_in_sub_view;
-				std::vector<std::string> primary_key_names_in_sub_view_no_uuid;
-				std::vector<std::string> secondary_key_names_in_sub_view_no_uuid;
-				std::string datetime_start_column_name;
-				std::string datetime_end_column_name;
-
-				class ColumnInView
-				{
-
-					public:
-
-						enum COLUMN_TYPE
-						{
-							  COLUMN_TYPE__UNKNOWN = 0
-							, COLUMN_TYPE__PRIMARY
-							, COLUMN_TYPE__SECONDARY
-							, COLUMN_TYPE__DATETIMESTART
-							, COLUMN_TYPE__DATETIMEEND
-							, COLUMN_TYPE__DATETIMESTART_INTERNAL
-							, COLUMN_TYPE__DATETIMEEND_INTERNAL
-						};
-
-						ColumnInView()
-							: column_type(COLUMN_TYPE__UNKNOWN)
-							, primary_key_index_within_total_kad_for_dmu_category(-1)
-							, primary_key_index_within_total_kad_for_all_dmu_categories(-1)
-							, primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category(-1)
-							, primary_key_index_within_primary_uoa_for_dmu_category(-1)
-						{
-
-						}
-
-						std::string column_name;
-						std::string column_name_no_uuid;
-						std::string table_column_name;
-						WidgetInstanceIdentifier variable_group_identifier;
-						WidgetInstanceIdentifier uoa_associated_with_variable_group_identifier;
-						COLUMN_TYPE column_type;
-						WidgetInstanceIdentifier primary_key_dmu_category_identifier;
-						int primary_key_index_within_total_kad_for_dmu_category;
-						int primary_key_index_within_total_kad_for_all_dmu_categories;
-						int primary_key_index_within_uoa_corresponding_to_variable_group_for_dmu_category;
-						int primary_key_index_within_primary_uoa_for_dmu_category;
-
-				};
-
-				ColumnsInView()
-					: view_number(-1)
-				{
-
-				}
-
-				std::vector<ColumnInView> columns_in_view;
-				int view_number;
-				std::string view_name;
-
-				class ColumnsInTempViews
-				{
-
-					public:
-
-						std::vector<ColumnsInView> columns_in_temp_views_vector;
-
-				};
-
-				ColumnsInTempViews columns_in_temp_views;
-
-		};
-
-		std::vector<ColumnsInView> columns_in_views;
-
-};
 
 #endif
