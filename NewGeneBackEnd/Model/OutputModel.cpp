@@ -110,6 +110,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 {
 
 	InputModel & input_model = model->getInputModel();
+	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, &input_model);
+	the_map = &the_map_;
 
 	Prepare();
 
@@ -2922,9 +2924,6 @@ void OutputModel::OutputGenerator::Prepare()
 	db = input_model->getDb();
 
 	executor.db = db;
-
-	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, input_model);
-	the_map = &the_map_;
 
 	PopulateUOAs();
 
