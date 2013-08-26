@@ -242,12 +242,20 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 	});
 
-	SqlAndColumnSet final_top_level_variable_group_result = RemoveDuplicates(xr_table_result);
+	SqlAndColumnSet final_top_level_variable_group_result = RemoveDuplicates(xr_table_result.second);
 
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates(ColumnsInTempView const & final_xr_columns)
 {
+
+	char c[256];
+
+	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	std::vector<SQLExecutor> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+
+	result_columns = previous_xr_columns;
 
 }
 
