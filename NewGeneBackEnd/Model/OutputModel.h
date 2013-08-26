@@ -108,7 +108,7 @@ class ColumnsInTempView
 				: column_type(COLUMN_TYPE__UNKNOWN)
 				, primary_key_index_within_total_kad_for_dmu_category(-1)
 				, primary_key_index_within_total_kad_for_all_dmu_categories(-1)
-				, primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category(-1)
+				, primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category(-1)
 				, primary_key_index_within_primary_uoa_for_dmu_category(-1)
 				, current_multiplicity__corresponding_to__current_inner_table(-1)
 				, total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category(-1)
@@ -129,7 +129,8 @@ class ColumnsInTempView
 			WidgetInstanceIdentifier primary_key_dmu_category_identifier; // Empty if this column is not a primary key column
 
 			// For both primary and child inner tables,
-			// spans multiple inner tables; i.e., the first inner table starts at 0, the next inner table starts higher than 0, etc.,
+			// spans multiple inner tables; i.e., the first inner table starts at 0,
+			// the next inner table starts higher than 0, etc.,
 			// but only for those dmu categories with multiplicity greater than 1
 			// (note that the SAME dmu category always has multiplicity greater than 1
 			// for both child and primary variable groups,
@@ -156,7 +157,7 @@ class ColumnsInTempView
 			// than primary variable groups.
 			int primary_key_index_within_total_kad_for_all_dmu_categories;
 
-			int primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category;
+			int primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category; // done
 			int primary_key_index_within_primary_uoa_for_dmu_category; // done
 			int current_multiplicity__corresponding_to__current_inner_table; // done
 			int total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category;

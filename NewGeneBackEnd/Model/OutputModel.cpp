@@ -867,7 +867,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						if (view_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category == highest_multiplicity_primary_uoa)
 						{
-							if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category == inner_dmu_multiplicity)
+							if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 							{
 								if (!first)
 								{
@@ -1121,6 +1121,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			if (new_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category > 1)
 			{
 				new_column.current_multiplicity__corresponding_to__current_inner_table = current_multiplicity; // update current multiplicity
+				new_column.primary_key_index_within_total_kad_for_dmu_category = new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
+																				+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 			}
 		}
 		++second_table_column_count;
@@ -1330,7 +1332,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						{
 							if (view_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category == highest_multiplicity_primary_uoa)
 							{
-								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category == inner_dmu_multiplicity)
+								if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 								{
 									if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
 									{
@@ -1461,7 +1463,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						{
 							if (view_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category == highest_multiplicity_primary_uoa)
 							{
-								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category == inner_dmu_multiplicity)
+								if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 								{
 									if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
 									{
@@ -2296,7 +2298,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			if (new_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category > 1)
 			{
 				new_column.current_multiplicity__corresponding_to__current_inner_table = current_multiplicity; // update current multiplicity
-				if (new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category < new_column.tot)
+				if (new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category < new_column.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category)
+				{
+					new_column.primary_key_index_within_total_kad_for_dmu_category = current_multiplicity;
+				}
+				else
+				{
+					// must have: new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category
+					//         == new_column.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category
+					new_column.primary_key_index_within_total_kad_for_dmu_category = new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
+																					+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+				}
 			}
 		}
 		++second_table_column_count;
@@ -2607,7 +2619,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						{
 							if (view_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category == highest_multiplicity_primary_uoa)
 							{
-								if (view_column.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category == inner_dmu_multiplicity)
+								if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 								{
 									if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
 									{
@@ -3367,7 +3379,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry__output__including_multiplicities.dmu_category;
 								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category = primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_spin_control;
 								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_all_dmu_categories = primary_key_entry__output__including_multiplicities.sequence_number_in_all_primary_keys;
-								column_in_variable_group_data_table.primary_key_index_within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table_for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_for_this_variable_groups_uoa;
+								column_in_variable_group_data_table.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_for_this_variable_groups_uoa;
 								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_primary_uoa;
 								column_in_variable_group_data_table.current_multiplicity__corresponding_to__current_inner_table = current_variable_group_primary_key_entry.current_multiplicity;
 								column_in_variable_group_data_table.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category = current_variable_group_primary_key_entry.total_multiplicity;
