@@ -794,9 +794,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		sql_string += " ORDER BY ";
 
-		// Regarding highest_multiplicity_primary_uoa > 1:
-		// Otherwise, we do not have any way to know which ordering the user wants in regards to the different DMU categories.
-		// At least we can assume they want the DMU category corresponding to "highest_multiplicity_primary_uoa > 1" to be ordered.
 		if (highest_multiplicity_primary_uoa > 1)
 		{
 
@@ -844,6 +841,54 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					}
 				});
 			}
+
+			// Now order by remaining primary key columns (with multiplicity 1)
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &first](ColumnsInTempView::ColumnInTempView & view_column)
+			{
+				// Determine how many columns there are corresponding to the DMU category
+				int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
+				std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &view_column, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column_)
+				{
+					if (view_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+					{
+						if (view_column_.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
+						{
+							if (view_column_.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category == 1)
+							{
+								++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+							}
+						}
+					}
+				});
+
+				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				{
+					if (view_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category == 1)
+					{
+						for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_of_1; ++inner_dmu_multiplicity)
+						{
+							if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
+							{
+								if (!first)
+								{
+									sql_string += ", ";
+								}
+								first = false;
+								if (view_column.primary_key_should_be_treated_as_numeric)
+								{
+									sql_string += "CAST (";
+								}
+								sql_string += view_column.column_name_in_temporary_table;
+								if (view_column.primary_key_should_be_treated_as_numeric)
+								{
+									sql_string += " AS INTEGER)";
+								}
+							}
+						}
+					}
+				}
+			});
+
 		}
 	
 	}
