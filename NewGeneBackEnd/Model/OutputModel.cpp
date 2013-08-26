@@ -284,11 +284,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		{
 			if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+				if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 				{
-					if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+					if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
 					{
-						++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+						if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+						{
+							++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+						}
 					}
 				}
 			}
@@ -984,9 +987,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+					if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 					{
-						++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+						if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+						{
+							++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+						}
 					}
 				}
 			});
@@ -1503,11 +1509,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+					if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 					{
-						if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+						if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
 						{
-							++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+							if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+							{
+								++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+							}
 						}
 					}
 				}
@@ -2369,11 +2378,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+					if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 					{
-						if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+						if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
 						{
-							++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+							if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+							{
+								++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+							}
 						}
 					}
 				}
