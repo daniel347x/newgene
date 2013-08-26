@@ -312,23 +312,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 							{
 								if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
 								{
-									if (!first)
+									if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 									{
-										sql_create_final_primary_group_table += ", ";
-									}
-									else
-									{
-										sql_create_final_primary_group_table += " ORDER BY ";
-									}
-									first = false;
-									if (view_column.primary_key_should_be_treated_as_numeric)
-									{
-										sql_create_final_primary_group_table += "CAST (";
-									}
-									sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
-									if (view_column.primary_key_should_be_treated_as_numeric)
-									{
-										sql_create_final_primary_group_table += " AS INTEGER)";
+										if (!first)
+										{
+											sql_create_final_primary_group_table += ", ";
+										}
+										else
+										{
+											sql_create_final_primary_group_table += " ORDER BY ";
+										}
+										first = false;
+										if (view_column.primary_key_should_be_treated_as_numeric)
+										{
+											sql_create_final_primary_group_table += "CAST (";
+										}
+										sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
+										if (view_column.primary_key_should_be_treated_as_numeric)
+										{
+											sql_create_final_primary_group_table += " AS INTEGER)";
+										}
 									}
 								}
 							}
@@ -378,23 +381,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				{
 					if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 					{
-						if (!first)
+						if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 						{
-							sql_create_final_primary_group_table += ", ";
-						}
-						else
-						{
-							sql_create_final_primary_group_table += " ORDER BY ";
-						}
-						first = false;
-						if (view_column.primary_key_should_be_treated_as_numeric)
-						{
-							sql_create_final_primary_group_table += "CAST (";
-						}
-						sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
-						if (view_column.primary_key_should_be_treated_as_numeric)
-						{
-							sql_create_final_primary_group_table += " AS INTEGER)";
+							if (!first)
+							{
+								sql_create_final_primary_group_table += ", ";
+							}
+							else
+							{
+								sql_create_final_primary_group_table += " ORDER BY ";
+							}
+							first = false;
+							if (view_column.primary_key_should_be_treated_as_numeric)
+							{
+								sql_create_final_primary_group_table += "CAST (";
+							}
+							sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
+							if (view_column.primary_key_should_be_treated_as_numeric)
+							{
+								sql_create_final_primary_group_table += " AS INTEGER)";
+							}
 						}
 					}
 				}
@@ -1008,23 +1014,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						{
 							if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 							{
-								if (!first)
+								if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 								{
-									sql_string += ", ";
-								}
-								else
-								{
-									sql_string += " ORDER BY ";
-								}
-								first = false;
-								if (view_column.primary_key_should_be_treated_as_numeric)
-								{
-									sql_string += "CAST (";
-								}
-								sql_string += view_column.column_name_in_temporary_table;
-								if (view_column.primary_key_should_be_treated_as_numeric)
-								{
-									sql_string += " AS INTEGER)";
+									if (!first)
+									{
+										sql_string += ", ";
+									}
+									else
+									{
+										sql_string += " ORDER BY ";
+									}
+									first = false;
+									if (view_column.primary_key_should_be_treated_as_numeric)
+									{
+										sql_string += "CAST (";
+									}
+									sql_string += view_column.column_name_in_temporary_table;
+									if (view_column.primary_key_should_be_treated_as_numeric)
+									{
+										sql_string += " AS INTEGER)";
+									}
 								}
 							}
 						}
@@ -1061,23 +1070,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 						{
-							if (!first)
+							if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 							{
-								sql_string += ", ";
-							}
-							else
-							{
-								sql_string += " ORDER BY ";
-							}
-							first = false;
-							if (view_column.primary_key_should_be_treated_as_numeric)
-							{
-								sql_string += "CAST (";
-							}
-							sql_string += view_column.column_name_in_temporary_table;
-							if (view_column.primary_key_should_be_treated_as_numeric)
-							{
-								sql_string += " AS INTEGER)";
+								if (!first)
+								{
+									sql_string += ", ";
+								}
+								else
+								{
+									sql_string += " ORDER BY ";
+								}
+								first = false;
+								if (view_column.primary_key_should_be_treated_as_numeric)
+								{
+									sql_string += "CAST (";
+								}
+								sql_string += view_column.column_name_in_temporary_table;
+								if (view_column.primary_key_should_be_treated_as_numeric)
+								{
+									sql_string += " AS INTEGER)";
+								}
 							}
 						}
 					}
@@ -1562,13 +1574,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							{
 								if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 								{
-									if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
+									if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 									{
-										columns_for_active_dmu_category_lhs.push_back(view_column);
-									}
-									else if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity + 1)
-									{
-										columns_for_active_dmu_category_rhs.push_back(view_column);
+										if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
+										{
+											columns_for_active_dmu_category_lhs.push_back(view_column);
+										}
+										else if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity + 1)
+										{
+											columns_for_active_dmu_category_rhs.push_back(view_column);
+										}
 									}
 								}
 							}
@@ -1690,23 +1705,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								{
 									if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
 									{
-										if (!first)
+										if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 										{
-											sql_string += ", ";
-										}
-										else
-										{
-											sql_string += " ORDER BY ";
-										}
-										first = false;
-										if (view_column.primary_key_should_be_treated_as_numeric)
-										{
-											sql_string += "CAST (";
-										}
-										sql_string += view_column.column_name_in_temporary_table;
-										if (view_column.primary_key_should_be_treated_as_numeric)
-										{
-											sql_string += " AS INTEGER)";
+											if (!first)
+											{
+												sql_string += ", ";
+											}
+											else
+											{
+												sql_string += " ORDER BY ";
+											}
+											first = false;
+											if (view_column.primary_key_should_be_treated_as_numeric)
+											{
+												sql_string += "CAST (";
+											}
+											sql_string += view_column.column_name_in_temporary_table;
+											if (view_column.primary_key_should_be_treated_as_numeric)
+											{
+												sql_string += " AS INTEGER)";
+											}
 										}
 									}
 								}
@@ -1756,23 +1774,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 						{
-							if (!first)
+							if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 							{
-								sql_string += ", ";
-							}
-							else
-							{
-								sql_string += " ORDER BY ";
-							}
-							first = false;
-							if (view_column.primary_key_should_be_treated_as_numeric)
-							{
-								sql_string += "CAST (";
-							}
-							sql_string += view_column.column_name_in_temporary_table;
-							if (view_column.primary_key_should_be_treated_as_numeric)
-							{
-								sql_string += " AS INTEGER)";
+								if (!first)
+								{
+									sql_string += ", ";
+								}
+								else
+								{
+									sql_string += " ORDER BY ";
+								}
+								first = false;
+								if (view_column.primary_key_should_be_treated_as_numeric)
+								{
+									sql_string += "CAST (";
+								}
+								sql_string += view_column.column_name_in_temporary_table;
+								if (view_column.primary_key_should_be_treated_as_numeric)
+								{
+									sql_string += " AS INTEGER)";
+								}
 							}
 						}
 					}
@@ -2445,23 +2466,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								{
 									if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
 									{
-										if (!first)
+										if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 										{
-											sql_string += ", ";
-										}
-										else
-										{
-											sql_string += " ORDER BY ";
-										}
-										first = false;
-										if (view_column.primary_key_should_be_treated_as_numeric)
-										{
-											sql_string += "CAST (";
-										}
-										sql_string += view_column.column_name_in_temporary_table;
-										if (view_column.primary_key_should_be_treated_as_numeric)
-										{
-											sql_string += " AS INTEGER)";
+											if (!first)
+											{
+												sql_string += ", ";
+											}
+											else
+											{
+												sql_string += " ORDER BY ";
+											}
+											first = false;
+											if (view_column.primary_key_should_be_treated_as_numeric)
+											{
+												sql_string += "CAST (";
+											}
+											sql_string += view_column.column_name_in_temporary_table;
+											if (view_column.primary_key_should_be_treated_as_numeric)
+											{
+												sql_string += " AS INTEGER)";
+											}
 										}
 									}
 								}
@@ -2511,23 +2535,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 						{
-							if (!first)
+							if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 							{
-								sql_string += ", ";
-							}
-							else
-							{
-								sql_string += " ORDER BY ";
-							}
-							first = false;
-							if (view_column.primary_key_should_be_treated_as_numeric)
-							{
-								sql_string += "CAST (";
-							}
-							sql_string += view_column.column_name_in_temporary_table;
-							if (view_column.primary_key_should_be_treated_as_numeric)
-							{
-								sql_string += " AS INTEGER)";
+								if (!first)
+								{
+									sql_string += ", ";
+								}
+								else
+								{
+									sql_string += " ORDER BY ";
+								}
+								first = false;
+								if (view_column.primary_key_should_be_treated_as_numeric)
+								{
+									sql_string += "CAST (";
+								}
+								sql_string += view_column.column_name_in_temporary_table;
+								if (view_column.primary_key_should_be_treated_as_numeric)
+								{
+									sql_string += " AS INTEGER)";
+								}
 							}
 						}
 					}
