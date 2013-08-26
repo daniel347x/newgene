@@ -203,7 +203,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 			return;
 		}
 
-		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, false, current_multiplicity);
+		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, false, 0, current_multiplicity);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed)
 		{
@@ -214,14 +214,15 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 	// Child tables
 	int current_child_view_name_index = 1;
-	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &current_child_view_name_index, &x_table_result, &xr_table_result, &primary_group_number, &sql_and_column_sets](ColumnsInTempView const & child_variable_group_raw_data_columns)
+	int child_set_number = 1;
+	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &current_child_view_name_index, &child_set_number, &x_table_result, &xr_table_result, &primary_group_number, &sql_and_column_sets](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 		
 		WidgetInstanceIdentifier const & dmu_category_multiplicity_greater_than_1_for_child = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].first;
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
 		for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
 		{
-			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number, current_child_view_name_index);
+			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number, child_set_number, current_child_view_name_index);
 			x_table_result.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(x_table_result);
 			sql_and_column_sets.push_back(x_table_result);
@@ -230,7 +231,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 				return;
 			}
 
-			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, true, current_child_view_name_index);
+			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, true, child_set_number, current_child_view_name_index);
 			sql_and_column_sets.push_back(xr_table_result);
 			if (failed)
 			{
@@ -239,6 +240,8 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 			++current_child_view_name_index;
 		}
+
+		++child_set_number;
 
 	});
 
@@ -913,6 +916,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		new_column.column_name_in_temporary_table += "_";
 		new_column.column_name_in_temporary_table += newUUID(true);
 
+		new_column.inner_table_set_number = 0;
 		new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 
 		if (first)
@@ -1123,6 +1127,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_saved;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
 		datetime_start_column.column_name_in_original_data_table = "";
+		datetime_start_column.inner_table_set_number = 0;
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
@@ -1146,6 +1151,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_saved;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
 		datetime_end_column.column_name_in_original_data_table = "";
+		datetime_end_column.inner_table_set_number = 0;
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	}
 
@@ -1250,6 +1256,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_start_column.column_name_in_original_data_table = "";
+	datetime_start_column.inner_table_set_number = 0;
 	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 
 	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED";
@@ -1273,6 +1280,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_end_column.column_name_in_original_data_table = "";
+	datetime_end_column.inner_table_set_number = 0;
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 
 
@@ -1395,6 +1403,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
+			new_column.inner_table_set_number = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
@@ -1418,6 +1427,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
+			new_column.inner_table_set_number = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			++second_table_column_count;
 		}
@@ -1431,6 +1441,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
+			new_column.inner_table_set_number = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			++second_table_column_count;
 		}
@@ -1828,6 +1839,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 		datetime_start_column.column_name_in_original_data_table = "";
+		datetime_start_column.inner_table_set_number = 0;
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
@@ -1851,6 +1863,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 		datetime_end_column.column_name_in_original_data_table = "";
+		datetime_end_column.inner_table_set_number = 0;
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	}
 
@@ -2068,7 +2081,7 @@ void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const current_child_view_name_index)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const child_set_number, int const current_child_view_name_index)
 {
 
 	char c[256];
@@ -2147,7 +2160,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// which may or may not have datetime columns.
 	// Further, the "current_multiplicity" of these columns is 1, and must be updated.
 	first = true;
-	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&first, &variable_group_child, &uoa_child, &variables_selected, &result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&first, &child_set_number, &variable_group_child, &uoa_child, &variables_selected, &result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
 	{
 		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
@@ -2174,6 +2187,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
+			new_column.inner_table_set_number = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
@@ -2203,7 +2217,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 	// Datetime columns, if present
-	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &child_set_number, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
 	{
 		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
 		{
@@ -2212,11 +2226,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
+			new_column.inner_table_set_number = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			++second_table_column_count;
 		}
 	});
-	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &child_set_number, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
 	{
 		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
@@ -2225,6 +2240,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
+			new_column.inner_table_set_number = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			++second_table_column_count;
 		}
@@ -2589,6 +2605,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_child;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_child;
 		datetime_start_column.column_name_in_original_data_table = "";
+		datetime_start_column.inner_table_set_number = child_set_number;
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
@@ -2612,6 +2629,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_child;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_child;
 		datetime_end_column.column_name_in_original_data_table = "";
+		datetime_end_column.inner_table_set_number = child_set_number;
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 	}
 
@@ -2619,7 +2637,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, bool const is_child_inner_table, int const current_view_name_index)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, bool const is_child_inner_table, int const current_set_number, int const current_view_name_index)
 {
 
 	char c[256];
@@ -2685,6 +2703,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_start_column.column_name_in_original_data_table = "";
+	datetime_start_column.inner_table_set_number = current_set_number;
 	if (!is_child_inner_table)
 	{
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
@@ -2715,6 +2734,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_end_column.column_name_in_original_data_table = "";
+	datetime_end_column.inner_table_set_number = current_set_number;
 	if (!is_child_inner_table)
 	{
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;

@@ -105,11 +105,13 @@ class ColumnsInTempView
 				, total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category(-1)
 				, total_k_spin_count_across_multiplicities_for_dmu_category(-1)
 				, is_within_inner_table_corresponding_to_top_level_uoa(false)
+				, inner_table_set_number(-1)
 			{
 
 			}
 
 			bool is_within_inner_table_corresponding_to_top_level_uoa;
+			int inner_table_set_number; // 0 for primary, 1 for first child variable group, etc.  Note that each set includes potentially multiple inner tables, depending on the multiplicity of the given primary or child variable group.
 			std::string column_name_in_temporary_table; // The name of the column in the temporary view (includes UUID)
 			std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without UUID)
 			std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)
@@ -146,6 +148,8 @@ class ColumnsInTempView
 		ColumnsInTempView()
 			: view_number(-1)
 			, most_recent_sql_statement_executed__index(-1)
+			, has_no_datetime_columns(false)
+			, has_no_datetime_columns_originally(false)
 		{
 
 		}
@@ -344,8 +348,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number);
-				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const current_child_view_name_index);
-				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, bool const is_child_inner_table, int const current_view_name_index);
+				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const child_set_number, int const current_child_view_name_index);
+				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, bool const is_child_inner_table, int const current_set_number, int const current_view_name_index);
 				SqlAndColumnSet RemoveDuplicates(ColumnsInTempView const & final_xr_columns, int const primary_group_number);
 
 				// Helper functions used by the functions above
