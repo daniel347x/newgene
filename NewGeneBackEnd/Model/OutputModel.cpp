@@ -710,6 +710,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	WidgetInstanceIdentifier variable_group_saved;
 	WidgetInstanceIdentifier uoa_saved;
 
+	// Make column names for this temporary table unique (not the same as the column names from the previous table that is being copied)
 	bool first = true;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first, &variable_group_saved, &uoa_saved](ColumnsInTempView::ColumnInTempView & new_column)
 	{
@@ -884,6 +885,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	}
 
+	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
 	if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
@@ -1142,6 +1144,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 
+	// Make column names for this temporary table unique (not the same as the column names from the previous table that is being copied)
 	// These columns are from the original raw data table, which may or may not have datetime columns.
 	// Further, the "current_multiplicity" of these columns is 1, and must be updated.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
@@ -1539,7 +1542,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	}
 
-	// Datetime columns, if not present
+	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
 	if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
@@ -1835,6 +1838,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	WidgetInstanceIdentifier variable_group_child;
 	WidgetInstanceIdentifier uoa_child;
 
+	// Make column names for this temporary table unique (not the same as the column names from the previous table that is being copied)
 	// These columns are from the previous XR temporary table, which is guaranteed to have all columns in place, including datetime columns.
 	// Further, the "current_multiplicity" of these columns is guaranteed to be correct.
 	// Also, the first columns always correspond to the primary variable group.
@@ -2259,7 +2263,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	}
 
-	// Datetime columns, if not present
+	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
 	if (child_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
