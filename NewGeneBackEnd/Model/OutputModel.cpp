@@ -242,11 +242,11 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 	});
 
-	SqlAndColumnSet final_top_level_variable_group_result = RemoveDuplicates(xr_table_result.second);
+	SqlAndColumnSet final_top_level_variable_group_result = RemoveDuplicates(xr_table_result.second, primary_group_number);
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates(ColumnsInTempView const & final_xr_columns)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates(ColumnsInTempView const & final_xr_columns, int const primary_group_number)
 {
 
 	char c[256];
@@ -255,7 +255,140 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
 
-	result_columns = previous_xr_columns;
+	result_columns = final_xr_columns;
+	result_columns.most_recent_sql_statement_executed__index = -1;
+
+	std::string view_name = "F";
+	view_name += itoa(primary_group_number, c, 10);
+	result_columns.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	result_columns.view_name = view_name;
+	result_columns.view_number = 1;
+	result_columns.has_no_datetime_columns = false;
+
+	std::string sql_create_final_primary_group_table;
+	sql_create_final_primary_group_table += "CREATE TABLE ";
+	sql_create_final_primary_group_table += result_columns.view_name;
+	sql_create_final_primary_group_table += " AS SELECT * FROM ";
+	sql_create_final_primary_group_table += final_xr_columns.view_name;
+
+	bool first = true;
+
+	if (highest_multiplicity_primary_uoa > 1)
+	{
+
+		// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
+		for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+		{
+			for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
+			{
+				std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_create_final_primary_group_table, &first](ColumnsInTempView::ColumnInTempView & view_column)
+				{
+					if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+					{
+						if (view_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category == highest_multiplicity_primary_uoa)
+						{
+							if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
+							{
+								if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
+								{
+									if (!first)
+									{
+										sql_create_final_primary_group_table += ", ";
+									}
+									else
+									{
+										sql_create_final_primary_group_table += " ORDER BY ";
+									}
+									first = false;
+									if (view_column.primary_key_should_be_treated_as_numeric)
+									{
+										sql_create_final_primary_group_table += "CAST (";
+									}
+									sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
+									if (view_column.primary_key_should_be_treated_as_numeric)
+									{
+										sql_create_final_primary_group_table += " AS INTEGER)";
+									}
+								}
+							}
+						}
+					}
+				});
+			}
+		}
+
+	}
+
+	// Now order by remaining primary key columns (with multiplicity 1)
+	int current_column = 0;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_create_final_primary_group_table, &result_columns, &current_column, &inner_table_column_count, &first](ColumnsInTempView::ColumnInTempView & view_column)
+	{
+		if (current_column >= inner_table_column_count)
+		{
+			return;
+		}
+		// Determine how many columns there are corresponding to the DMU category
+		int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
+		int column_count_ = 0;
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &view_column, &column_count_, &inner_table_column_count, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView & view_column_)
+		{
+			if (column_count_ >= inner_table_column_count)
+			{
+				return;
+			}
+			if (view_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			{
+				if (view_column_.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
+				{
+					if (view_column_.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category == 1)
+					{
+						++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+					}
+				}
+			}
+			++column_count_;
+		});
+
+		if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+		{
+			if (view_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category == 1)
+			{
+				for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_of_1; ++inner_dmu_multiplicity)
+				{
+					if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
+					{
+						if (!first)
+						{
+							sql_create_final_primary_group_table += ", ";
+						}
+						else
+						{
+							sql_create_final_primary_group_table += " ORDER BY ";
+						}
+						first = false;
+						if (view_column.primary_key_should_be_treated_as_numeric)
+						{
+							sql_create_final_primary_group_table += "CAST (";
+						}
+						sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
+						if (view_column.primary_key_should_be_treated_as_numeric)
+						{
+							sql_create_final_primary_group_table += " AS INTEGER)";
+						}
+					}
+				}
+			}
+		}
+		++current_column;
+	});
+
+	// Finally, order by the time range columns
+	sql_create_final_primary_group_table += final_xr_columns.columns_in_view[final_xr_columns.columns_in_view.size()-2].column_name_in_temporary_table; // final merged datetime start column
+	sql_create_final_primary_group_table += ", ";
+	sql_create_final_primary_group_table += final_xr_columns.columns_in_view[final_xr_columns.columns_in_view.size()-1].column_name_in_temporary_table; // final merged datetime end column
+	sql_strings.push_back(SQLExecutor(db, sql_create_final_primary_group_table));
 
 }
 
@@ -820,7 +953,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	if (debug_ordering)
 	{
 
-		sql_string += " ORDER BY ";
+		bool first = true;
 
 		if (highest_multiplicity_primary_uoa > 1)
 		{
@@ -839,7 +972,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			});
 
 			// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
-			bool first = true;
 			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
 			{
 				std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &sql_string, &first](ColumnsInTempView::ColumnInTempView & view_column)
@@ -853,6 +985,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								if (!first)
 								{
 									sql_string += ", ";
+								}
+								else
+								{
+									sql_string += " ORDER BY ";
 								}
 								first = false;
 								if (view_column.primary_key_should_be_treated_as_numeric)
@@ -902,6 +1038,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							if (!first)
 							{
 								sql_string += ", ";
+							}
+							else
+							{
+								sql_string += " ORDER BY ";
 							}
 							first = false;
 							if (view_column.primary_key_should_be_treated_as_numeric)
@@ -1492,13 +1632,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	if (debug_ordering)
 	{
 
+		bool first = true;
+
 		if (highest_multiplicity_primary_uoa > 1)
 		{
 
-			sql_string += " ORDER BY ";
-
 			// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
-			bool first = true;
 			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
 			{
 				for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
@@ -1516,6 +1655,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 										if (!first)
 										{
 											sql_string += ", ";
+										}
+										else
+										{
+											sql_string += " ORDER BY ";
 										}
 										first = false;
 										if (view_column.primary_key_should_be_treated_as_numeric)
@@ -1578,6 +1721,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							if (!first)
 							{
 								sql_string += ", ";
+							}
+							else
+							{
+								sql_string += " ORDER BY ";
 							}
 							first = false;
 							if (view_column.primary_key_should_be_treated_as_numeric)
@@ -2232,13 +2379,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	if (debug_ordering)
 	{
 
+		bool first = true;
+
 		if (highest_multiplicity_primary_uoa > 1)
 		{
 
-			sql_string += " ORDER BY ";
-
 			// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
-			bool first = true;
 			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
 			{
 				for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
@@ -2256,6 +2402,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 										if (!first)
 										{
 											sql_string += ", ";
+										}
+										else
+										{
+											sql_string += " ORDER BY ";
 										}
 										first = false;
 										if (view_column.primary_key_should_be_treated_as_numeric)
@@ -2318,6 +2468,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							if (!first)
 							{
 								sql_string += ", ";
+							}
+							else
+							{
+								sql_string += " ORDER BY ";
 							}
 							first = false;
 							if (view_column.primary_key_should_be_treated_as_numeric)
