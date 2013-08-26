@@ -242,6 +242,13 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 	});
 
+	SqlAndColumnSet final_top_level_variable_group_result = RemoveDuplicates(xr_table_result);
+
+}
+
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates(ColumnsInTempView const & final_xr_columns)
+{
+
 }
 
 bool OutputModel::OutputGenerator::StepData()
