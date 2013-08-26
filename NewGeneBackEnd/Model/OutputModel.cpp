@@ -681,14 +681,33 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	view_name += newUUID(true);
 	result_columns.view_name = view_name;
 
+	WidgetInstanceIdentifiers const & variables_selected = (*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
+
 	result_columns.columns_in_view.clear();
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
+
+	// Add the columns from the raw data table into this initial temporary table.
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 		{
 			return; // Enforce that datetime columns appear last.
 		}
-		result_columns.columns_in_view.push_back(column_in_view);
+		bool match = true;
+		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			match = false;
+			std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&column_in_view, &match](WidgetInstanceIdentifier const & variable_selected)
+			{
+				if (boost::iequals(column_in_view.column_name_in_original_data_table, *variable_selected.code))
+				{
+					match = true;
+				}
+			});
+		}
+		if (match)
+		{
+			result_columns.columns_in_view.push_back(column_in_view);
+		}
 	});
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
@@ -1144,30 +1163,50 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 
+	WidgetInstanceIdentifiers const & variables_selected = (*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
+
+	// These columns are from the new table (the raw data table) being added.
 	// Make column names for this temporary table unique (not the same as the column names from the previous table that is being copied)
 	// These columns are from the original raw data table, which may or may not have datetime columns.
 	// Further, the "current_multiplicity" of these columns is 1, and must be updated.
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
 	{
 		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
 			return; // Add these columns last
 		}
-		result_columns.columns_in_view.push_back(new_column_);
-		ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
-		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
-		new_column.column_name_in_temporary_table += "_";
-		new_column.column_name_in_temporary_table += newUUID(true);
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+
+		bool match = true;
+		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
-			if (new_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category > 1)
+			match = false;
+			std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&new_column_, &match](WidgetInstanceIdentifier const & variable_selected)
 			{
-				new_column.current_multiplicity__corresponding_to__current_inner_table = current_multiplicity; // update current multiplicity
-				new_column.primary_key_index_within_total_kad_for_dmu_category = new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
-																				+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
-			}
+				if (boost::iequals(new_column_.column_name_in_original_data_table, *variable_selected.code))
+				{
+					match = true;
+				}
+			});
 		}
-		++second_table_column_count;
+
+		if (match)
+		{
+			result_columns.columns_in_view.push_back(new_column_);
+			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
+			new_column.column_name_in_temporary_table += "_";
+			new_column.column_name_in_temporary_table += newUUID(true);
+			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			{
+				if (new_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category > 1)
+				{
+					new_column.current_multiplicity__corresponding_to__current_inner_table = current_multiplicity; // update current multiplicity
+					new_column.primary_key_index_within_total_kad_for_dmu_category = new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
+						+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+				}
+			}
+			++second_table_column_count;
+		}
 	});
 	// Datetime columns, if present
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
@@ -1838,7 +1877,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	WidgetInstanceIdentifier variable_group_child;
 	WidgetInstanceIdentifier uoa_child;
 
-	// Make column names for this temporary table unique (not the same as the column names from the previous table that is being copied)
 	// These columns are from the previous XR temporary table, which is guaranteed to have all columns in place, including datetime columns.
 	// Further, the "current_multiplicity" of these columns is guaranteed to be correct.
 	// Also, the first columns always correspond to the primary variable group.
@@ -1877,45 +1915,65 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 
-	// These columns are from the original raw data table for the child variable group,
+	WidgetInstanceIdentifiers const & variables_selected = (*the_map)[*child_variable_group_raw_data_columns.variable_groups[0].identifier_parent][child_variable_group_raw_data_columns.variable_groups[0]];
+
+	// These columns are from the new table (the raw child data table) being added.
+	// Make column names for this temporary table unique (not the same as the column names from the previous table that is being copied)
 	// which may or may not have datetime columns.
 	// Further, the "current_multiplicity" of these columns is 1, and must be updated.
 	first = true;
-	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&first, &variable_group_child, &uoa_child, &result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&first, &variable_group_child, &uoa_child, &variables_selected, &result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
 	{
 		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
 			return; // Add these columns last
 		}
-		result_columns.columns_in_view.push_back(new_column_);
-		ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
-		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
-		new_column.column_name_in_temporary_table += "_";
-		new_column.column_name_in_temporary_table += newUUID(true);
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+
+		bool match = true;
+		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
-			if (new_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category > 1)
+			match = false;
+			std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&new_column_, &match](WidgetInstanceIdentifier const & variable_selected)
 			{
-				new_column.current_multiplicity__corresponding_to__current_inner_table = current_multiplicity; // update current multiplicity
-				if (new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category < new_column.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category)
+				if (boost::iequals(new_column_.column_name_in_original_data_table, *variable_selected.code))
 				{
-					new_column.primary_key_index_within_total_kad_for_dmu_category = current_multiplicity;
+					match = true;
 				}
-				else
+			});
+		}
+
+		if (match)
+		{
+			result_columns.columns_in_view.push_back(new_column_);
+			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
+			new_column.column_name_in_temporary_table += "_";
+			new_column.column_name_in_temporary_table += newUUID(true);
+			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			{
+				if (new_column.total_multiplicity__in_uoa_corresponding_to_the_current_inner_tables_variable_group__for_current_dmu_category > 1)
 				{
-					// must have: new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category
-					//         == new_column.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category
-					new_column.primary_key_index_within_total_kad_for_dmu_category = new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
-																					+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+					new_column.current_multiplicity__corresponding_to__current_inner_table = current_multiplicity; // update current multiplicity
+					if (new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category < new_column.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category)
+					{
+						new_column.primary_key_index_within_total_kad_for_dmu_category = current_multiplicity;
+					}
+					else
+					{
+						// must have: new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category
+						//         == new_column.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category
+						new_column.primary_key_index_within_total_kad_for_dmu_category = new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
+							+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+					}
 				}
 			}
-		}
-		++second_table_column_count;
-		if (first)
-		{
-			first = false;
-			variable_group_child = new_column.variable_group_associated_with_current_inner_table;
-			uoa_child = new_column.uoa_associated_with_variable_group_associated_with_current_inner_table;
+			++second_table_column_count;
+			if (first)
+			{
+				first = false;
+				variable_group_child = new_column.variable_group_associated_with_current_inner_table;
+				uoa_child = new_column.uoa_associated_with_variable_group_associated_with_current_inner_table;
+			}
 		}
 	});
 	// Datetime columns, if present
@@ -2923,6 +2981,8 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 
 	variable_groups_column_info.push_back(ColumnsInTempView());
 	ColumnsInTempView & columns_in_variable_group_view = variable_groups_column_info.back();
+
+
 
 	columns_in_variable_group_view.view_number = view_count;
 	std::string view_name;
