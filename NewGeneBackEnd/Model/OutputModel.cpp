@@ -369,7 +369,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				{
 					if (view_column_.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
 					{
-						++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+						if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+						{
+							++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+						}
 					}
 				}
 			}
@@ -1060,7 +1063,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						if (view_column_.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
 						{
-							++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+							if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+							{
+								++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+							}
 						}
 					}
 				}
@@ -1770,7 +1776,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						if (view_column_.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
 						{
-							++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+							if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+							{
+								++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+							}
 						}
 					}
 				}
@@ -2536,7 +2545,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						if (view_column_.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
 						{
-							++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+							if (view_column_.is_within_inner_table_corresponding_to_top_level_uoa)
+							{
+								++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+							}
 						}
 					}
 				}
