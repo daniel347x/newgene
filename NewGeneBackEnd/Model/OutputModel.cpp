@@ -2855,6 +2855,7 @@ void OutputModel::OutputGenerator::Prepare()
 
 	failed = false;
 
+	// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
 	//temp_dot = "temp.";
 	temp_dot = "";
 

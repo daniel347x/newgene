@@ -488,6 +488,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool failed;
 
 				bool debug_ordering;
+
+				// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
 				std::string temp_dot;
 
 		};
