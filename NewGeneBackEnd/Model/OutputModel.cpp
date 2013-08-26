@@ -210,7 +210,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 			return;
 		}
 
-		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, false);
+		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, false, current_multiplicity);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed)
 		{
@@ -220,14 +220,15 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	}
 
 	// Child tables
-	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &x_table_result, &xr_table_result, &primary_group_number, &sql_and_column_sets](ColumnsInTempView const & child_variable_group_raw_data_columns)
+	int current_child_view_name_index = 1;
+	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &current_child_view_name_index, &x_table_result, &xr_table_result, &primary_group_number, &sql_and_column_sets](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 		
 		WidgetInstanceIdentifier const & dmu_category_multiplicity_greater_than_1_for_child = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].first;
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
 		for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
 		{
-			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number);
+			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number, current_child_view_name_index);
 			x_table_result.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(x_table_result);
 			sql_and_column_sets.push_back(x_table_result);
@@ -236,12 +237,14 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 				return;
 			}
 
-			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, true);
+			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, true, current_child_view_name_index);
 			sql_and_column_sets.push_back(xr_table_result);
 			if (failed)
 			{
 				return;
 			}
+
+			++current_child_view_name_index;
 		}
 
 	});
@@ -1707,7 +1710,7 @@ void OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const current_child_view_name_index)
 {
 
 	char c[256];
@@ -1721,7 +1724,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	std::string view_name = "CV";
 	view_name += itoa(primary_group_number, c, 10);
 	view_name += "_x";
-	view_name += itoa(current_multiplicity, c, 10);
+	view_name += itoa(current_child_view_name_index, c, 10);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
@@ -1730,7 +1733,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns.has_no_datetime_columns = false;
 
 	int first_full_table_column_count = 0;
-	int inner_table_column_count = 0;
+	int top_level_inner_table_column_count = 0;
 	int second_table_column_count = 0;
 
 	std::vector<std::string> previous_column_names_first_table;
@@ -1748,7 +1751,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	bool in_first_inner_table = true;
 	bool reached_first_datetime_start_merged_column = false;
 	bool reached_first_datetime_end_merged_column = false;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_full_table_column_count, &inner_table_column_count, &in_first_inner_table, &reached_first_datetime_start_merged_column, &reached_first_datetime_end_merged_column, &previous_column_names_first_table, &variable_group_primary, &uoa_primary, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_full_table_column_count, &top_level_inner_table_column_count, &in_first_inner_table, &reached_first_datetime_start_merged_column, &reached_first_datetime_end_merged_column, &previous_column_names_first_table, &variable_group_primary, &uoa_primary, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		previous_column_names_first_table.push_back(new_column.column_name_in_temporary_table);
 		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
@@ -1765,7 +1768,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 		if (in_first_inner_table)
 		{
-			++inner_table_column_count;
+			++top_level_inner_table_column_count;
 		}
 		if (reached_first_datetime_start_merged_column && reached_first_datetime_end_merged_column)
 		{
@@ -1881,39 +1884,28 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += child_variable_group_raw_data_columns.original_table_names[0];
 	sql_string += " t2 ON ";
 	bool and_ = false;
-	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &current_multiplicity, &sql_string, &variable_group_primary, &variable_group_child, &result_columns, &first_full_table_column_count, &inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &current_multiplicity, &sql_string, &variable_group_primary, &variable_group_child, &result_columns, &first_full_table_column_count, &top_level_inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 	{
-		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &current_multiplicity, &sql_string, &variable_group_primary, &variable_group_child, &primary_key, &result_columns, &first_full_table_column_count, &inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info_this_variable_group)
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &current_multiplicity, &sql_string, &variable_group_primary, &variable_group_child, &primary_key, &result_columns, &first_full_table_column_count, &top_level_inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info_this_variable_group)
 		{
 			if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group_child))
 			{
-				int column_count = 0;
-				std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &current_multiplicity, &sql_string, &primary_key_info_this_variable_group, &first_full_table_column_count, &inner_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
+				if (primary_key_info_this_variable_group.current_multiplicity == current_multiplicity)
 				{
-					if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
+					int column_count = 0;
+					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &current_multiplicity, &sql_string, &primary_key_info_this_variable_group, &first_full_table_column_count, &top_level_inner_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 					{
-						int desired_inner_table_index = 0;
-						bool match_condition = false;
-
-						// First, join on primary keys whose total multiplicity is 1
-						if (primary_key_info_this_variable_group.total_multiplicity == 1)
+						if (column_count >= highest_multiplicity_primary_uoa * top_level_inner_table_column_count)
 						{
-							if (current_multiplicity == 1)
-							{
-								match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
-							}
+							return;
 						}
-
-						// Also join on the current multiplicity
-						// Note: As currently enforced, child UOA's can have only one
-						// DMU with multiplicity greater than 1.
-						else
+						if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
 						{
-							// Break this into different cases.
+							int desired_inner_table_index = 0;
+							bool match_condition = false;
 
-							// Case 1: The highest multiplicity of the PRIMARY uoa's is 1.
-							// All columns exist in the first inner table.
-							if (highest_multiplicity_primary_uoa == 1)
+							// First, join on primary keys whose total multiplicity is 1
+							if (primary_key_info_this_variable_group.total_multiplicity == 1)
 							{
 								if (current_multiplicity == 1)
 								{
@@ -1921,78 +1913,96 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								}
 							}
 
-							// Cases 2-4 correspond to the highest multiplicity of the primary UOA's
-							// being greater than 1.
-							if (highest_multiplicity_primary_uoa > 1)
+							// Also join on the current multiplicity
+							// Note: As currently enforced, child UOA's can have only one
+							// DMU with multiplicity greater than 1.
+							else
 							{
+								// Break this into different cases.
 
-								// Case 2: The highest multiplicity of the primary UOA's is greater than 1,
-								// but the DMU category of this child group does not match the one
-								// corresponding to that multiplicity.
-								// All columns therefore exist in the first inner table.
-								if (!boost::iequals(highest_multiplicity_primary_uoa_dmu_string_code, *primary_key.dmu_category.code))
+								// Case 1: The highest multiplicity of the PRIMARY uoa's is 1.
+								// All columns exist in the first inner table.
+								if (highest_multiplicity_primary_uoa == 1)
 								{
 									if (current_multiplicity == 1)
 									{
-										// Same match condition as above.
 										match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
 									}
 								}
 
-								// Cases 3 & 4 correspond to the highest multiplicity of the primary UOA's being greater than 1,
-								// and the DMU category of this child group matches the one corresponding
-								// to that multiplicity.
-								else
+								// Cases 2-4 correspond to the highest multiplicity of the primary UOA's
+								// being greater than 1.
+								if (highest_multiplicity_primary_uoa > 1)
 								{
 
-									// ... Case 3: The K-value for the *UOA* of the child group for this DMU category
-									// ... is less than the K-value for the *UOA* of the primary groups for this DMU category
-									// ... (due to current constraints enforced on the user's settings,
-									// ... the child group's K-value must in this scenario be equal to 1).
-									// ... We must therefore iterate through every column of this DMU category INSIDE each inner table,
-									// ... along with iterating through every inner table.
-									if (new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category < primary_key.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
+									// Case 2: The highest multiplicity of the primary UOA's is greater than 1,
+									// but the DMU category of this child group does not match the one
+									// corresponding to that multiplicity.
+									// All columns therefore exist in the first inner table.
+									if (!boost::iequals(highest_multiplicity_primary_uoa_dmu_string_code, *primary_key.dmu_category.code))
 									{
-										desired_inner_table_index = (current_multiplicity - 1) / primary_key.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
-										match_condition = (current_multiplicity - 1 == new_column.primary_key_index_within_total_kad_for_dmu_category);
+										if (current_multiplicity == 1)
+										{
+											// Same match condition as above.
+											match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
+										}
 									}
 
-									// ... Case 4: The K-value for the *UOA* of the child group for this DMU category
-									// ... matches the K-value for the *UOA* of the primary groups for this DMU category.
-									// ... Therefore, we need to iterate through every inner table,
-									// ... but inside each inner table, there is only one match for the child
-									// ... that includes all columns in that table for this DMU category.
+									// Cases 3 & 4 correspond to the highest multiplicity of the primary UOA's being greater than 1,
+									// and the DMU category of this child group matches the one corresponding
+									// to that multiplicity.
 									else
 									{
-										desired_inner_table_index = current_multiplicity - 1;
-										match_condition = true;
+
+										// ... Case 3: The K-value for the *UOA* of the child group for this DMU category
+										// ... is less than the K-value for the *UOA* of the primary groups for this DMU category
+										// ... (due to current constraints enforced on the user's settings,
+										// ... the child group's K-value must in this scenario be equal to 1).
+										// ... We must therefore iterate through every column of this DMU category INSIDE each inner table,
+										// ... along with iterating through every inner table.
+										if (primary_key_info_this_variable_group.total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group < primary_key.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
+										{
+											desired_inner_table_index = (current_multiplicity - 1) / primary_key.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
+											match_condition = (current_multiplicity - 1 == new_column.primary_key_index_within_total_kad_for_dmu_category);
+										}
+
+										// ... Case 4: The K-value for the *UOA* of the child group for this DMU category
+										// ... matches the K-value for the *UOA* of the primary groups for this DMU category.
+										// ... Therefore, we need to iterate through every inner table,
+										// ... but inside each inner table, there is only one match for the child
+										// ... that includes all columns in that table for this DMU category.
+										else
+										{
+											desired_inner_table_index = current_multiplicity - 1;
+											match_condition = true;
+										}
+
 									}
 
 								}
 
 							}
 
-						}
-
-						if (column_count >= desired_inner_table_index * inner_table_column_count && column_count < column_count * (desired_inner_table_index + 1) * inner_table_column_count)
-						{
-							if (match_condition)
+							if (column_count >= desired_inner_table_index * top_level_inner_table_column_count && column_count < column_count * (desired_inner_table_index + 1) * top_level_inner_table_column_count)
 							{
-								if (and_)
+								if (match_condition)
 								{
-									sql_string += " AND ";
+									if (and_)
+									{
+										sql_string += " AND ";
+									}
+									and_ = true;
+									sql_string += "t1.";
+									sql_string += previous_column_names_first_table[column_count];
+									sql_string += " = t2.";
+									sql_string += primary_key_info_this_variable_group.table_column_name;
 								}
-								and_ = true;
-								sql_string += "t1.";
-								sql_string += previous_column_names_first_table[column_count];
-								sql_string += " = t2.";
-								sql_string += new_column.column_name_in_original_data_table;
 							}
-						}
 
-					}
-					++column_count;
-				});
+						}
+						++column_count;
+					});
+				}
 			}
 		});
 	});
@@ -2155,7 +2165,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, bool const is_child_inner_table)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, bool const is_child_inner_table, int const current_view_name_index)
 {
 
 	char c[256];
@@ -2178,7 +2188,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 	view_name += itoa(primary_group_number, c, 10);
 	view_name += "_xr";
-	view_name += itoa(current_multiplicity, c, 10);
+	view_name += itoa(current_view_name_index, c, 10);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
