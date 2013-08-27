@@ -487,12 +487,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 		}
 
 
+		// If we're starting fresh, just add the current row of input to incoming_rows_of_data
+		// and proceed to the next row of input.
 		if (incoming_rows_of_data.empty())
 		{
 			incoming_rows_of_data.push_back(current_row_of_data);
 			continue;
 		}
 
+		// If the current row of input starts past
+		// the end of any of the saved rows, then
+		// there can be no overlap with these rows, and they are done.
+		// Move them to outgoing_rows_of_data.
 		while(!incoming_rows_of_data.empty())
 		{
 			
@@ -503,8 +509,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 				outgoing_rows_of_data.push_back(first_incoming_row);
 				incoming_rows_of_data.pop_front();
 			}
+			else
+			{
+				break;
+			}
 
 		}
+
+		// There is guaranteed to be overlap of the current row of input with the first saved row.
 
 		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 		{
