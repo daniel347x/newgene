@@ -329,6 +329,29 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				};
 
+				class SavedRowData
+				{
+
+					public:
+						
+						SavedRowData()
+							: datetime_start(0)
+							, datetime_end(0)
+						{
+
+						}
+
+						void Clear();
+						void PopulateFromCurrentRowInDatabase(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt);
+
+						std::int64_t datetime_start;
+						std::int64_t datetime_end;
+						std::vector<std::string> current_parameter_strings;
+						std::vector<std::int64_t> current_parameter_ints;
+						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
+
+				};
+
 				typedef std::pair<std::vector<SQLExecutor>, ColumnsInTempView> SqlAndColumnSet;
 				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;
 
@@ -353,7 +376,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const child_set_number, int const current_child_view_name_index);
 				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, bool const is_child_inner_table, int const current_set_number, int const current_view_name_index);
 				SqlAndColumnSet CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(ColumnsInTempView const & final_xr_columns, int const primary_group_number);
-				SqlAndColumnSet DuplicatesRemovedForTopLevelVariableGroup(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number);
+				SqlAndColumnSet DuplicatesRemovedForTopLevelVariableGroup(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number);
 
 				// Helper functions used by the functions above
 				void BeginNewTransaction();
