@@ -246,6 +246,11 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	});
 
 	SqlAndColumnSet final_top_level_variable_group_result = RemoveDuplicates(xr_table_result.second, primary_group_number);
+	sql_and_column_sets.push_back(xr_table_result);
+	if (failed)
+	{
+		return;
+	}
 
 }
 
@@ -419,7 +424,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	sql_create_final_primary_group_table += final_xr_columns.columns_in_view[final_xr_columns.columns_in_view.size()-2].column_name_in_temporary_table; // final merged datetime start column
 	sql_create_final_primary_group_table += ", ";
 	sql_create_final_primary_group_table += final_xr_columns.columns_in_view[final_xr_columns.columns_in_view.size()-1].column_name_in_temporary_table; // final merged datetime end column
+
 	sql_strings.push_back(SQLExecutor(db, sql_create_final_primary_group_table));
+
+	ExecuteSQL(result);
+
+	if (failed)
+	{
+		return result;
+	}
+
+	return result;
 
 }
 
