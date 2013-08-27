@@ -2301,10 +2301,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					int column_count = 0;
 					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &current_multiplicity, &sql_string, &primary_key_info_this_variable_group, &first_full_table_column_count, &top_level_inner_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 					{
+
+						// The following 2 "if" checks are redundant and do the same thing.
+						// They are both here in order to help understand the use of the metadata.
+						if (!new_column.is_within_inner_table_corresponding_to_top_level_uoa)
+						{
+							return;
+						}
 						if (column_count >= highest_multiplicity_primary_uoa * top_level_inner_table_column_count)
 						{
 							return;
 						}
+
 						if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
 						{
 							int desired_inner_table_index = 0;
@@ -2415,12 +2423,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	// For use in both the WHERE and ORDER BY clauses
 	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
-	int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
+	int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_for_top_level_uoa = 0;
 	if (debug_ordering)
 	{
 		if (highest_multiplicity_primary_uoa > 1)
 		{
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column)
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_for_top_level_uoa, &sql_string](ColumnsInTempView::ColumnInTempView & view_column)
 			{
 				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
@@ -2430,7 +2438,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						{
 							if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
 							{
-								++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
+								++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_for_top_level_uoa;
 							}
 						}
 					}
@@ -2440,30 +2448,31 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 
 	// For use in both the WHERE and ORDER BY clauses
-	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
+	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1 for the current child table being joined in
 	int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_child = 0;
 	std::pair<WidgetInstanceIdentifier, int> & uoa_child__which_multiplicity_is_greater_than_1 = child_uoas__which_multiplicity_is_greater_than_1[uoa_child];
 	int const highest_multiplicity_child_uoa = uoa_child__which_multiplicity_is_greater_than_1.second;
-	WidgetInstanceIdentifier const & dmu_category_multiplicity = uoa_child__which_multiplicity_is_greater_than_1.first;
+	WidgetInstanceIdentifier const & dmu_category__with_multiplicity_greater_than_1__for_current_child_uoa = uoa_child__which_multiplicity_is_greater_than_1.first;
 	if (debug_ordering)
 	{
 		if (highest_multiplicity_child_uoa > 1)
 		{
-			int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_temp = 0;
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_temp, &sql_string, &highest_multiplicity_child_uoa, &dmu_category_multiplicity](ColumnsInTempView::ColumnInTempView & view_column)
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &child_set_number, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_child, &sql_string, &highest_multiplicity_child_uoa, &dmu_category__with_multiplicity_greater_than_1__for_current_child_uoa](ColumnsInTempView::ColumnInTempView & view_column)
 			{
 				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					if (view_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, dmu_category_multiplicity))
+					if (view_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, dmu_category__with_multiplicity_greater_than_1__for_current_child_uoa))
 					{
 						if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
 						{
-							++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_temp;
+							if (view_column.inner_table_set_number == child_set_number)
+							{
+								++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_child;
+							}
 						}
 					}
 				}
 			});
-			number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_child = number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_temp / highest_multiplicity_child_uoa;
 		}
 	}
 
@@ -2477,7 +2486,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 
 			// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
-			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_for_top_level_uoa; ++inner_dmu_multiplicity)
 			{
 				for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
 				{
