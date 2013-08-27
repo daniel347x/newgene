@@ -471,6 +471,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 	BeginNewTransaction();
 
 	std::vector<SavedRowData> incoming_rows_of_data;
+	std::vector<SavedRowData> intermediate_rows_of_data;
 	std::vector<SavedRowData> outgoing_rows_of_data;
 	SavedRowData current_row_of_data;
 
