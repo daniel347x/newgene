@@ -351,6 +351,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const child_set_number, int const current_child_view_name_index);
 				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, bool const is_child_inner_table, int const current_set_number, int const current_view_name_index);
 				SqlAndColumnSet CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(ColumnsInTempView const & final_xr_columns, int const primary_group_number);
+				SqlAndColumnSet DuplicatesRemovedForTopLevelVariableGroup(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number);
 
 				// Helper functions used by the functions above
 				void BeginNewTransaction();

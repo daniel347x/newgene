@@ -254,6 +254,19 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 		return;
 	}
 
+	SqlAndColumnSet duplicates_removed_top_level_variable_group_result = DuplicatesRemovedForTopLevelVariableGroup(preliminary_sorted_top_level_variable_group_result.second, primary_group_number);
+	sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
+	if (failed)
+	{
+		return;
+	}
+
+}
+
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::DuplicatesRemovedForTopLevelVariableGroup(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number)
+{
+	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	return result;
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(ColumnsInTempView const & final_xr_columns, int const primary_group_number)
