@@ -337,18 +337,21 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						SavedRowData()
 							: datetime_start(0)
 							, datetime_end(0)
+							, failed(false)
 						{
 
 						}
 
 						void Clear();
-						void PopulateFromCurrentRowInDatabase(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt);
+						void PopulateFromCurrentRowInDatabase(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result);
 
 						std::int64_t datetime_start;
 						std::int64_t datetime_end;
 						std::vector<std::string> current_parameter_strings;
 						std::vector<std::int64_t> current_parameter_ints;
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
+
+						bool failed;
 
 				};
 

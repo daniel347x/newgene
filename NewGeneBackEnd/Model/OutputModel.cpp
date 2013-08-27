@@ -270,9 +270,10 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	current_parameter_which_binding_to_use.clear();
 	datetime_start = 0;
 	datetime_end = 0;
+	failed = false;
 }
 
-void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt)
+void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result)
 {
 
 	Clear();
@@ -285,9 +286,72 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	datetime_start = datetime_start_of_possible_duplicate;
 	datetime_end = datetime_end_of_possible_duplicate;
 
+	int column_data_type = 0;
 	int current_column = 0;
-	std::for_each(preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.begin(), preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.end(), [this, &current_column](ColumnsInTempView::ColumnInTempView & possible_duplicate_view_column)
+	std::for_each(preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.begin(), preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.end(), [this, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView & possible_duplicate_view_column)
 	{
+
+		if (failed)
+		{
+			return;
+		}
+
+		column_data_type = sqlite3_column_type(stmt_result, current_column);
+		switch (column_data_type)
+		{
+
+			case SQLITE_INTEGER:
+				{
+					data_int64 = sqlite3_column_int64(stmt_result, current_column);
+					bound_parameter_ints.push_back(data_int64);
+					bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+				}
+				break;
+
+			case SQLITE_FLOAT:
+				{
+					// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
+					data_long = sqlite3_column_double(stmt_result, current_column);
+					// Todo: Error message
+					failed = true;
+					return; // from lambda
+				}
+				break;
+
+			case SQLITE_TEXT:
+				{
+					data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, current_column));
+					bound_parameter_strings.push_back(data_string);
+					bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+				}
+				break;
+
+			case SQLITE_BLOB:
+				{
+					// Todo: Error message
+					failed = true;
+					return; // from lambda
+				}
+				break;
+
+			case SQLITE_NULL:
+				{
+					data_is_null = true;
+					bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+				}
+				break;
+
+			default:
+				{
+					// Todo: Error message
+					failed = true;
+					return; // from lambda
+				}
+
+		}
+
+		++current_column;
+
 	});
 
 }
