@@ -265,8 +265,91 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::DuplicatesRemovedForTopLevelVariableGroup(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number)
 {
+
+	char c[256];
+
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	std::vector<SQLExecutor> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+
+	result_columns = preliminary_sorted_top_level_variable_group_result_columns;
+	result_columns.most_recent_sql_statement_executed__index = -1;
+
+	std::string view_name = "Z";
+	view_name += itoa(primary_group_number, c, 10);
+	result_columns.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	result_columns.view_name = view_name;
+	result_columns.view_number = 1;
+	result_columns.has_no_datetime_columns = false;
+
+	std::string sql_create_empty_table;
+	sql_create_empty_table += "CREATE TABLE ";
+	sql_create_empty_table += result_columns.view_name;
+	sql_create_empty_table += " AS SELECT * FROM ";
+	sql_create_empty_table += preliminary_sorted_top_level_variable_group_result_columns.view_name;
+	sql_create_empty_table += " WHERE 0";
+	sql_strings.push_back(SQLExecutor(db, sql_create_empty_table));
+
+
+	// Add the "merged" time range columns
+
+	// The variable group is that of the primary variable group for this final result set,
+	// which is obtained from the first column
+	WidgetInstanceIdentifier variable_group = preliminary_sorted_top_level_variable_group_result_columns.columns_in_view[0].variable_group_associated_with_current_inner_table;
+	WidgetInstanceIdentifier uoa = preliminary_sorted_top_level_variable_group_result_columns.columns_in_view[0].uoa_associated_with_variable_group_associated_with_current_inner_table;
+
+	std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START_MERGED_FINAL";
+	std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
+	datetime_start_col_name += "_";
+	datetime_start_col_name += newUUID(true);
+
+	std::string alter_string;
+	alter_string += "ALTER TABLE ";
+	alter_string += result_columns.view_name;
+	alter_string += " ADD COLUMN ";
+	alter_string += datetime_start_col_name;
+	alter_string += " INTEGER DEFAULT 0";
+	sql_strings.push_back(SQLExecutor(db, alter_string));
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
+	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
+	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_FINAL;
+	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
+	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
+	datetime_start_column.column_name_in_original_data_table = "";
+	datetime_start_column.inner_table_set_number = -1;
+	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+
+	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED_FINAL";
+	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
+	datetime_end_col_name += "_";
+	datetime_end_col_name += newUUID(true);
+
+	alter_string.clear();
+	alter_string += "ALTER TABLE ";
+	alter_string += result_columns.view_name;
+	alter_string += " ADD COLUMN ";
+	alter_string += datetime_end_col_name;
+	alter_string += " INTEGER DEFAULT 0";
+	sql_strings.push_back(SQLExecutor(db, alter_string));
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
+	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
+	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL;
+	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
+	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
+	datetime_end_column.column_name_in_original_data_table = "";
+	datetime_end_column.inner_table_set_number = -1;
+	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+
 	return result;
+
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(ColumnsInTempView const & final_xr_columns, int const primary_group_number)
