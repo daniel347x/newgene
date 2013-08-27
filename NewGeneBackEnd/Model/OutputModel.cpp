@@ -287,8 +287,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	datetime_end = datetime_end_of_possible_duplicate;
 
 	int column_data_type = 0;
+	std::int64_t data_int64 = 0;
+	std::string data_string;
+	long double data_long = 0.0;
 	int current_column = 0;
-	std::for_each(preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.begin(), preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.end(), [this, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView & possible_duplicate_view_column)
+	std::for_each(preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.begin(), preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.end(), [this, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView & possible_duplicate_view_column)
 	{
 
 		if (failed)
@@ -303,8 +306,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			case SQLITE_INTEGER:
 				{
 					data_int64 = sqlite3_column_int64(stmt_result, current_column);
-					bound_parameter_ints.push_back(data_int64);
-					bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+					current_parameter_ints.push_back(data_int64);
+					current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 				}
 				break;
 
@@ -321,8 +324,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			case SQLITE_TEXT:
 				{
 					data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, current_column));
-					bound_parameter_strings.push_back(data_string);
-					bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+					current_parameter_strings.push_back(data_string);
+					current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
 				}
 				break;
 
@@ -336,8 +339,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 			case SQLITE_NULL:
 				{
-					data_is_null = true;
-					bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+					current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
 				}
 				break;
 
