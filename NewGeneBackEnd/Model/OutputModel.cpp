@@ -245,7 +245,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 	});
 
-	SqlAndColumnSet final_top_level_variable_group_result = RemoveDuplicates(xr_table_result.second, primary_group_number);
+	SqlAndColumnSet final_top_level_variable_group_result = CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(xr_table_result.second, primary_group_number);
 	sql_and_column_sets.push_back(xr_table_result);
 	if (failed)
 	{
@@ -254,7 +254,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates(ColumnsInTempView const & final_xr_columns, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(ColumnsInTempView const & final_xr_columns, int const primary_group_number)
 {
 
 	char c[256];
@@ -266,7 +266,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	result_columns = final_xr_columns;
 	result_columns.most_recent_sql_statement_executed__index = -1;
 
-	std::string view_name = "F";
+	std::string view_name = "Y";
 	view_name += itoa(primary_group_number, c, 10);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
