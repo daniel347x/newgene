@@ -1558,6 +1558,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	if (debug_ordering)
 	{
 
+		// The following is guaranteed to be true given that this function is being called.
+		// Nonetheless, leave it for clarity.
 		if (highest_multiplicity_primary_uoa > 1)
 		{
 	
@@ -1754,27 +1756,31 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 
 		// Now order by remaining primary key columns (with multiplicity 1)
+		// ... If there are no primary key DMU categories for this top-level UOA with multiplicity greater than 1,
+		// then this section will order by all of this top-level's UOA primary key DMU categories.
 		int current_column = 0;
 		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &current_column, &inner_table_column_count, &first](ColumnsInTempView::ColumnInTempView & view_column)
 		{
+
 			if (current_column >= inner_table_column_count)
 			{
 				return;
 			}
+
 			// Determine how many columns there are corresponding to the DMU category
 			int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
-			int column_count_ = 0;
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &view_column, &column_count_, &inner_table_column_count, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column_)
+			int column_count_nested = 0;
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &view_column, &column_count_nested, &inner_table_column_count, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column_nested)
 			{
-				if (column_count_ >= inner_table_column_count)
+				if (column_count_nested >= inner_table_column_count)
 				{
 					return;
 				}
-				if (view_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				if (view_column_nested.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					if (view_column_.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
+					if (view_column_nested.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
 					{
-						if (view_column_.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+						if (view_column_nested.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
 						{
 							if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 							{
@@ -1783,7 +1789,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						}
 					}
 				}
-				++column_count_;
+				++column_count_nested;
 			});
 
 			if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
@@ -2286,7 +2292,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	});
 	sql_string += " FROM ";
 	sql_string += previous_xr_columns.view_name;
-	sql_string += " t1 JOIN ";
+	sql_string += " t1 LEFT OUTER JOIN ";
 	sql_string += child_variable_group_raw_data_columns.original_table_names[0];
 	sql_string += " t2 ON ";
 	bool and_ = false;
@@ -2421,7 +2427,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		});
 	});
 
-	// For use in both the WHERE and ORDER BY clauses
+	// For use in ORDER BY clause
 	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
 	int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa = 0;
 	if (debug_ordering)
@@ -2447,7 +2453,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	}
 
-	// For use in both the WHERE and ORDER BY clauses
+	// For use in ORDER BY clause
 	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1 for the current child table being joined in
 	int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_child = 0;
 	std::pair<WidgetInstanceIdentifier, int> & uoa_child__which_multiplicity_is_greater_than_1 = child_uoas__which_multiplicity_is_greater_than_1[uoa_child];
@@ -2532,6 +2538,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 
 		// Now order by remaining primary key columns (with multiplicity 1 FOR THE TOP-LEVEL UOA)
+		// ... If there are no primary key DMU categories for the top-level UOA with multiplicity greater than 1,
+		// then this section will order by all of the top-level UOA's primary key DMU categories.
 		int current_column = 0;
 		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &current_column, &top_level_inner_table_column_count, &first](ColumnsInTempView::ColumnInTempView & view_column)
 		{
