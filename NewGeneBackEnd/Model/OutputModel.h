@@ -492,6 +492,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::string sql_error;
 				Executor executor;
 
+				// Helper variable saves the number of columns in the current primary variable group's inner table
+				int inner_table_column_count;
+
 				bool failed;
 
 				bool debug_ordering;
