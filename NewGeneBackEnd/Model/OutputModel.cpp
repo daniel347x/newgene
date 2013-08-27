@@ -5,6 +5,7 @@
 
 #ifndef Q_MOC_RUN
 #	include <boost/lexical_cast.hpp>
+#	include <deque>
 #endif
 
 void OutputModel::LoadTables()
@@ -470,9 +471,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 
 	BeginNewTransaction();
 
-	std::vector<SavedRowData> incoming_rows_of_data;
-	std::vector<SavedRowData> intermediate_rows_of_data;
-	std::vector<SavedRowData> outgoing_rows_of_data;
+	std::deque<SavedRowData> incoming_rows_of_data;
+	std::deque<SavedRowData> intermediate_rows_of_data;
+	std::deque<SavedRowData> outgoing_rows_of_data;
 	SavedRowData current_row_of_data;
 
 	while (StepData())
@@ -489,12 +490,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 		if (incoming_rows_of_data.empty())
 		{
 			incoming_rows_of_data.push_back(current_row_of_data);
+			continue;
 		}
-		else
+
+		while(!incoming_rows_of_data.empty())
 		{
+			
+			SavedRowData & first_incoming_row = incoming_rows_of_data.front();
+
+			if (first_incoming_row.datetime_end <= current_row_of_data.datetime_start)
+			{
+				outgoing_rows_of_data.push_back(first_incoming_row);
+				incoming_rows_of_data.pop_front();
+			}
 
 		}
-
 
 		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 		{
