@@ -624,7 +624,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 		if (!primary_keys_match)
 		{
 			outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-			WriteRowsToFinalTable(outgoing_rows_of_data, the_prepared_stmt, sql_strings, db, result_columns.view_name, preliminary_sorted_top_level_variable_group_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+			WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, preliminary_sorted_top_level_variable_group_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 			if (failed)
 			{
 				return result;
@@ -697,7 +697,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 	}
 
 	outgoing_rows_of_data.insert(outgoing_rows_of_data.cbegin(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-	WriteRowsToFinalTable(outgoing_rows_of_data, the_prepared_stmt, sql_strings, db, result_columns.view_name, preliminary_sorted_top_level_variable_group_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, preliminary_sorted_top_level_variable_group_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 	if (failed)
 	{
 		return result;
@@ -1037,8 +1037,178 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 }
 
-void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int & current_rows_added, int & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
+void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int & current_rows_added, int & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
 {
+
+	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
+	{
+	
+		if (first_row_added)
+		{
+
+			// Create SQL statement here, including placeholders for bound parameters
+
+			sql_add_xr_row.clear();
+
+			sql_add_xr_row += "INSERT OR FAIL INTO ";
+			sql_add_xr_row += result_columns_view_name;
+			sql_add_xr_row += "(";
+
+			bool first_column_name = true;
+			std::for_each(preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.cbegin(), preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.cend(), [&first_column_name, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](ColumnsInTempView::ColumnInTempView const & column_in_view)
+			{
+
+				if (!first_column_name)
+				{
+					sql_add_xr_row += ", ";
+				}
+				first_column_name = false;
+
+				sql_add_xr_row += column_in_view.column_name_in_temporary_table;
+
+			});
+
+			// The two new "merged" time range columns
+			if (!first_column_name)
+			{
+				sql_add_xr_row += ", ";
+			}
+			first_column_name = false;
+			sql_add_xr_row += datetime_start_col_name;
+			sql_add_xr_row += ", ";
+			sql_add_xr_row += datetime_end_col_name;
+
+			sql_add_xr_row += ") VALUES (";
+
+			int index = 1;
+			char cindex[256];
+
+			bool first_column_value = true;
+			std::for_each(row_of_data.current_parameter_which_binding_to_use.cbegin(), row_of_data.current_parameter_which_binding_to_use.cend(), [&first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](ColumnsInTempView::ColumnInTempView const & column_in_view)
+			{
+
+				if (!first_column_value)
+				{
+					sql_add_xr_row += ", ";
+				}
+				first_column_value = false;
+
+				sql_add_xr_row += "?";
+				sql_add_xr_row += itoa(index, cindex, 10);
+				++index;
+
+			});
+
+			// The two new "merged" time range columns
+			if (!first_column_value)
+			{
+				sql_add_xr_row += ", ";
+			}
+			first_column_value = false;
+			sql_add_xr_row += "?";
+			sql_add_xr_row += itoa(index, cindex, 10);
+			++index;
+			sql_add_xr_row += ", ";
+			sql_add_xr_row += "?";
+			sql_add_xr_row += itoa(index, cindex, 10);
+			++index;
+
+			sql_add_xr_row += ")";
+
+			first_row_added = false;
+
+		}
+
+		if (failed)
+		{
+			return;
+		}
+
+		// Set the list of bound parameters, regardless of whether or not the SQL string was created
+		int index = 0;
+		char cindex[256];
+		bool first_column_value = true;
+		std::int64_t data_int64 = 0;
+		std::string data_string;
+		long double data_long = 0.0;
+		bound_parameter_strings.clear();
+		bound_parameter_ints.clear();
+		bound_parameter_which_binding_to_use.clear();
+		std::for_each(row_of_data.current_parameter_which_binding_to_use.cbegin(), row_of_data.current_parameter_which_binding_to_use.cend(), [this, &row_of_data, &data_int64, &data_string, &data_long, &data_is_null, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](SQLExecutor::WHICH_BINDING const & the_binding)
+		{
+
+			if (failed)
+			{
+				return;
+			}
+
+			switch (the_binding)
+			{
+
+				case SQLITE_INTEGER:
+					{
+						data_int64 = row_of_data.current_parameter_ints[int_index];
+						bound_parameter_ints.push_back(data_int64);
+						bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+					}
+					break;
+
+				case SQLITE_FLOAT:
+					{
+						// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
+						// Todo: Error message
+						failed = true;
+						return; // from lambda
+					}
+					break;
+
+				case SQLITE_TEXT:
+					{
+						data_string = row_of_data.current_parameter_strings[string_index];
+						bound_parameter_strings.push_back(data_string);
+						bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+					}
+					break;
+
+				case SQLITE_BLOB:
+					{
+						// Todo: Error message
+						failed = true;
+						return; // from lambda
+					}
+					break;
+
+				case SQLITE_NULL:
+					{
+						bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+					}
+					break;
+
+				default:
+					{
+						// Todo: Error message
+						failed = true;
+						return; // from lambda
+					}
+
+			}
+
+			++index;
+
+		});
+
+		// The two new "merged" time range columns
+		bound_parameter_ints.push_back(row_of_data.datetime_start);
+		bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+		bound_parameter_ints.push_back(row_of_data.datetime_end);
+		bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+		
+		sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+		the_prepared_stmt = sql_strings.back().stmt;
+		++current_rows_added;
+		++current_rows_added_since_execution;
+
+	});
 
 }
 
@@ -1247,6 +1417,7 @@ bool OutputModel::OutputGenerator::StepData()
 	}
 
 	return true;
+
 }
 
 void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView & column_set)
