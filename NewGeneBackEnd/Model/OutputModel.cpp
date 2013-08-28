@@ -499,7 +499,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 		if (!primary_keys_match)
 		{
 			outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-			WriteRowsToFinalTable(outgoing_rows_of_data, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added);
+			WriteRowsToFinalTable(outgoing_rows_of_data, the_prepared_stmt, sql_strings, db, result_columns.view_name, preliminary_sorted_top_level_variable_group_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 			incoming_rows_of_data.clear();
 			outgoing_rows_of_data.clear();
 			incoming_rows_of_data.push_back(current_row_of_data);
@@ -564,7 +564,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 	}
 
 	outgoing_rows_of_data.insert(outgoing_rows_of_data.cbegin(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-	WriteRowsToFinalTable(outgoing_rows_of_data, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added);
+	WriteRowsToFinalTable(outgoing_rows_of_data, the_prepared_stmt, sql_strings, db, result_columns.view_name, preliminary_sorted_top_level_variable_group_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 	incoming_rows_of_data.clear();
 	outgoing_rows_of_data.clear();
 
@@ -598,7 +598,7 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 }
 
-void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, int & current_rows_added, int & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added)
+void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int & current_rows_added, int & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
 {
 
 }
