@@ -372,7 +372,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count, std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary);
 				void LoopThroughPrimaryVariableGroups();
 				void MergeHighLevelGroupResults();
-				void ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number);
+				void FormatResultsForOutput();
+				void WriteResultsToFileOrScreen();
+				SqlAndColumnSet ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number);
@@ -392,8 +394,34 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool ProcessCurrentDataRowOverlapWithFrontSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data);
 				void WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int & current_rows_added, int & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use);
 
-				// Save the SQL and column sets corresponding to each primary and child variable group in a global data structure
+				// Save the SQL and column sets corresponding to each primary and child variable group in global data structures
+				//
+				// "primary_variable_group_column_sets":
+				// Includes all intermediate tables for each of the primary variable groups
+				// (i.e., a single SqlAndColumnSets contains all of the intermediate tables,
+				// each with a single SqlAndColumnSet, for a given primary variable group).
+				//
+				// "primary_group_final_results", on the other hand, contains
+				// only 1 table per primary variable group: The final table
+				// (each one corresponding to a single SqlAndColumnSet).
+				//
+				// "intermediate_merging_of_primary_groups_column_sets":
+				// Each merging of a top-level primary variable group
+				// into the previously-merged ones requires a new temporary table.
+				// These are stored in this variable (one per SqlAndColumnSet).
+				//
+				// "all_merged_results_unformatted" contains a single table:
+				// the final results - including a merge across all top-level (primary) variable groups -
+				// but unformatted (i.e., with extra columns that have internally-generated column names).
+				//
+				// "final_result":
+				// This is the final result of the K-ad generator, in a form presentable as-is
+				// to the end user.
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
+				SqlAndColumnSets primary_group_final_results;
+				SqlAndColumnSets intermediate_merging_of_primary_groups_column_sets;
+				SqlAndColumnSet all_merged_results_unformatted;
+				SqlAndColumnSet final_result;
 
 				// ********************************************************************* //
 				// the_map is:

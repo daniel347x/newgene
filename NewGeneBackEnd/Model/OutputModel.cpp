@@ -146,10 +146,52 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	FormatResultsForOutput();
+
+	if (failed)
+	{
+		// failed
+		return;
+	}
+
+	WriteResultsToFileOrScreen();
+
+	if (failed)
+	{
+		return;
+	}
+
+}
+
+void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
+{
+
+	// The final results are stored in "final_result".
+	// Do an "ObtainData()" on this result, loop through,
+	// and write the output to a CSV file on disk.
+
+}
+
+void OutputModel::OutputGenerator::FormatResultsForOutput()
+{
+	
+	// The unformatted results are stored in "all_merged_results_unformatted"
+	// Just do a SELECT ... AS ... to pluck out the desired columns and give them the proper names.
+	// Save this in "final_result"
+
 }
 
 void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 {
+	
+	// The primary variable group data is stored in primary_group_final_results
+
+	std::for_each(primary_group_final_results.cbegin(), primary_group_final_results.cend(), [](SqlAndColumnSet const & primary_variable_group_final_result)
+	{
+		// Save merged data in "intermediate_merging_of_primary_groups_column_sets"
+	});
+
+	// Save temporary table from the final iteration of the merging of the primary groups into "all_merged_results_unformatted"
 
 }
 
@@ -165,13 +207,18 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 		}
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
-		ConstructFullOutputForSinglePrimaryGroup(primary_variable_group_raw_data_columns, primary_group_column_sets, primary_group_number);
+		SqlAndColumnSet primary_group_final_result = ConstructFullOutputForSinglePrimaryGroup(primary_variable_group_raw_data_columns, primary_group_column_sets, primary_group_number);
+		if (failed)
+		{
+			return;
+		}
+		primary_group_final_results.push_back(primary_group_final_result);
 		++primary_group_number;
 	});
 
 }
 
-void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number)
 {
 
 	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable(primary_variable_group_raw_data_columns, primary_group_number);
@@ -180,7 +227,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	sql_and_column_sets.push_back(x_table_result);
 	if (failed)
 	{
-		return;
+		return SqlAndColumnSet();
 	}
 
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(x_table_result.second, primary_group_number);
@@ -189,7 +236,7 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	sql_and_column_sets.push_back(xr_table_result);
 	if (failed)
 	{
-		return;
+		return SqlAndColumnSet();
 	}
 
 	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
@@ -201,14 +248,14 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 		sql_and_column_sets.push_back(x_table_result);
 		if (failed)
 		{
-			return;
+			return SqlAndColumnSet();
 		}
 
 		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, false, 0, current_multiplicity);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed)
 		{
-			return;
+			return SqlAndColumnSet();
 		}
 
 	}
@@ -229,14 +276,14 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 			sql_and_column_sets.push_back(x_table_result);
 			if (failed)
 			{
-				return;
+				return SqlAndColumnSet();
 			}
 
 			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, true, child_set_number, current_child_view_name_index);
 			sql_and_column_sets.push_back(xr_table_result);
 			if (failed)
 			{
-				return;
+				return SqlAndColumnSet();
 			}
 
 			++current_child_view_name_index;
@@ -252,15 +299,17 @@ void OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(Colu
 	sql_and_column_sets.push_back(preliminary_sorted_top_level_variable_group_result);
 	if (failed)
 	{
-		return;
+		return SqlAndColumnSet();
 	}
 
 	SqlAndColumnSet duplicates_removed_top_level_variable_group_result = DuplicatesRemovedForTopLevelVariableGroup(preliminary_sorted_top_level_variable_group_result.second, primary_group_number);
 	sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
 	if (failed)
 	{
-		return;
+		return SqlAndColumnSet();
 	}
+
+	return duplicates_removed_top_level_variable_group_result;
 
 }
 
