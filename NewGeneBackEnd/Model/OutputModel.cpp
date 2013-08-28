@@ -780,7 +780,10 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 	{
 		// merge from:
 		// current_row_of_data.datetime_start - current_row_of_data.datetime_end
-		// ...
+		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row);
+		merged_data_row.datetime_start = current_row_of_data.datetime_start;
+		merged_data_row.datetime_end = current_row_of_data.datetime_end;
+		intermediate_rows_of_data.push_back(merged_data_row);
 
 		// then:
 		SavedRowData new_data_row = first_incoming_row;
@@ -793,7 +796,10 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 	{
 		// merge from:
 		// current_row_of_data.datetime_start - current_row_of_data.datetime_end
-		// ...
+		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row);
+		merged_data_row.datetime_start = current_row_of_data.datetime_start;
+		merged_data_row.datetime_end = current_row_of_data.datetime_end;
+		intermediate_rows_of_data.push_back(merged_data_row);
 
 		return true; // current_row_complete
 	}
@@ -803,12 +809,105 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 
 		// merge from:
 		// first_incoming_row.datetime_start - first_incoming_row.datetime_end
-		// ...
+		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row);
+		merged_data_row.datetime_start = first_incoming_row.datetime_start;
+		merged_data_row.datetime_end = first_incoming_row.datetime_end;
+		intermediate_rows_of_data.push_back(merged_data_row);
 
 		current_row_of_data.datetime_start = first_incoming_row.datetime_end;
 
 		return false; // current_row is not complete
 	}
+}
+
+OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRows(SavedRowData const & current_row_of_data, SavedRowData const & first_incoming_row)
+{
+	int int_index_current = 0;
+	int string_index_current = 0;
+	int int_index_incoming = 0;
+	int string_index_incoming = 0;
+	int current_index = 0;
+	SavedRowData merged_data_row;
+	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&current_row_of_data, &int_index_current, &string_index_current, &int_index_incoming, &string_index_incoming, &current_index, &first_incoming_row, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	{
+		SQLExecutor::WHICH_BINDING const first_incoming_row_binding = first_incoming_row.current_parameter_which_binding_to_use[current_index];
+
+		if (current_binding == SQLExecutor::NULL_BINDING && first_incoming_row_binding == SQLExecutor::NULL_BINDING)
+		{
+			merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+		}
+		else
+		{
+			if (current_binding != SQLExecutor::NULL_BINDING)
+			{
+				switch (current_binding)
+				{
+					case SQLExecutor::INT64:
+						{
+							merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+							merged_data_row.current_parameter_ints.push_back(current_row_of_data.current_parameter_ints[int_index_current]);
+						}
+						break;
+					case SQLExecutor::STRING:
+						{
+							merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+							merged_data_row.current_parameter_ints.push_back(current_row_of_data.current_parameter_strings[string_index_current]);
+						}
+						break;
+				}
+			}
+			else
+			{
+				switch (first_incoming_row_binding)
+				{
+					case SQLExecutor::INT64:
+						{
+							merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+							merged_data_row.current_parameter_ints.push_back(first_incoming_row.current_parameter_ints[int_index_incoming]);
+						}
+						break;
+					case SQLExecutor::STRING:
+						{
+							merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+							merged_data_row.current_parameter_ints.push_back(first_incoming_row.current_parameter_strings[string_index_incoming]);
+						}
+						break;
+				}
+			}
+		}
+
+		switch (current_binding)
+		{
+			case SQLExecutor::INT64:
+				{
+					++int_index_current;
+				}
+				break;
+			case SQLExecutor::STRING:
+				{
+					++string_index_current;
+				}
+				break;
+		}
+
+		switch (first_incoming_row_binding)
+		{
+			case SQLExecutor::INT64:
+				{
+					++int_index_incoming;
+				}
+				break;
+			case SQLExecutor::STRING:
+				{
+					++string_index_incoming;
+				}
+				break;
+		}
+
+		++current_index;
+	});
+
+	return merged_data_row;
 }
 
 bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data)
