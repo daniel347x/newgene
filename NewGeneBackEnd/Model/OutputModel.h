@@ -17,53 +17,58 @@ public:
 
 	class VariableGroup_PrimaryKey_Info
 	{
-	public:
-		WidgetInstanceIdentifier vg_identifier;
-		WidgetInstanceIdentifier associated_uoa_identifier;
-		std::string column_name;
-		std::string column_name_no_uuid;
-		std::string table_column_name;
 
-		// Regarding the three integer variables below,
-		// their purpose is best explained by providing an example.
-		//
-		// Primary UOA (i.e., the "largest" unit of analysis corresponding to the variable groups with variables selected by the user):
-		// A B B B B C C
-		//
-		// Selected K-ad (i.e., the spin control values chosen by the user):
-		// A B B B B B B B B C C
-		//
-		// Variable group's UOA (were the particular choice given in this example allowed, as it could be in the future) (i.e., a given variable group, which might not be the "largest"):
-		// A B B
-		//
-		// ... then, the primary key sequence will include eight entries for "B"
-		// And for the given variable group, we have,
-		// for the following three integers for each of the eight "B"'s:
-		// B    B    B    B    B    B    B    B
-		// ^114 ^214 ^124 ^224 ^134 ^234 ^144 ^244
-		//
-		int sequence_number_within_dmu_category_for_this_variable_groups_uoa;
-		int current_multiplicity;
-		int total_multiplicity;
-		int total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group;
-		int total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group;
-		int total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category;
+		public:
 
-		bool is_primary_column_selected;
+			WidgetInstanceIdentifier vg_identifier;
+			WidgetInstanceIdentifier associated_uoa_identifier;
+			std::string column_name;
+			std::string column_name_no_uuid;
+			std::string table_column_name;
+
+			// Regarding the three integer variables below,
+			// their purpose is best explained by providing an example.
+			//
+			// Primary UOA (i.e., the "largest" unit of analysis corresponding to the variable groups with variables selected by the user):
+			// A B B B B C C
+			//
+			// Selected K-ad (i.e., the spin control values chosen by the user):
+			// A B B B B B B B B C C
+			//
+			// Variable group's UOA (were the particular choice given in this example allowed, as it could be in the future) (i.e., a given variable group, which might not be the "largest"):
+			// A B B
+			//
+			// ... then, the primary key sequence will include eight entries for "B"
+			// And for the given variable group, we have,
+			// for the following three integers for each of the eight "B"'s:
+			// B    B    B    B    B    B    B    B
+			// ^114 ^214 ^124 ^224 ^134 ^234 ^144 ^244
+			//
+			int sequence_number_within_dmu_category_for_this_variable_groups_uoa;
+			int current_multiplicity;
+			int total_multiplicity;
+			int total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group;
+			int total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group;
+			int total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category;
+
+			bool is_primary_column_selected;
 
 	};
 
 	class PrimaryKeySequenceEntry
 	{
-	public:
-		WidgetInstanceIdentifier dmu_category;
-		int sequence_number_within_dmu_category_spin_control;
-		int sequence_number_within_dmu_category_primary_uoa;
-		int sequence_number_in_all_primary_keys;
-		int total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
-		int total_kad_spin_count_for_this_dmu_category;
-		int total_multiplicity_of_uoa_corresponding_to_top_level_variable_group_for_the_current_dmu_category;
-		std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys; // one per variable group 
+
+		public:
+
+			WidgetInstanceIdentifier dmu_category;
+			int sequence_number_within_dmu_category_spin_control;
+			int sequence_number_within_dmu_category_primary_uoa;
+			int sequence_number_in_all_primary_keys;
+			int total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
+			int total_kad_spin_count_for_this_dmu_category;
+			int total_multiplicity_of_uoa_corresponding_to_top_level_variable_group_for_the_current_dmu_category;
+			std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys; // one per variable group 
+
 	};
 
 	std::vector<PrimaryKeySequenceEntry> primary_key_sequence_info; // one per primary key, in sequence
@@ -78,72 +83,72 @@ class ColumnsInTempView
 		class ColumnInTempView
 		{
 
-		public:
+			public:
 
-			enum COLUMN_TYPE
-			{
-				  COLUMN_TYPE__UNKNOWN = 0
-				, COLUMN_TYPE__PRIMARY
-				, COLUMN_TYPE__SECONDARY
-				, COLUMN_TYPE__DATETIMESTART
-				, COLUMN_TYPE__DATETIMEEND
-				, COLUMN_TYPE__DATETIMESTART_INTERNAL
-				, COLUMN_TYPE__DATETIMEEND_INTERNAL
-				, COLUMN_TYPE__DATETIMESTART_MERGED
-				, COLUMN_TYPE__DATETIMEEND_MERGED
-				, COLUMN_TYPE__DATETIMESTART_MERGED_FINAL
-				, COLUMN_TYPE__DATETIMEEND_MERGED_FINAL
-			};
+				enum COLUMN_TYPE
+				{
+					  COLUMN_TYPE__UNKNOWN = 0
+					, COLUMN_TYPE__PRIMARY
+					, COLUMN_TYPE__SECONDARY
+					, COLUMN_TYPE__DATETIMESTART
+					, COLUMN_TYPE__DATETIMEEND
+					, COLUMN_TYPE__DATETIMESTART_INTERNAL
+					, COLUMN_TYPE__DATETIMEEND_INTERNAL
+					, COLUMN_TYPE__DATETIMESTART_MERGED
+					, COLUMN_TYPE__DATETIMEEND_MERGED
+					, COLUMN_TYPE__DATETIMESTART_MERGED_FINAL
+					, COLUMN_TYPE__DATETIMEEND_MERGED_FINAL
+				};
 
-			ColumnInTempView()
-				: column_type(COLUMN_TYPE__UNKNOWN)
-				, primary_key_index_within_total_kad_for_dmu_category(-1)
-				, primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category(-1)
-				, primary_key_index_within_primary_uoa_for_dmu_category(-1)
-				, current_multiplicity__corresponding_to__current_inner_table(-1)
-				, total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group(-1)
-				, primary_key_should_be_treated_as_numeric(false)
-				, total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category(-1)
-				, total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category(-1)
-				, total_k_spin_count_across_multiplicities_for_dmu_category(-1)
-				, is_within_inner_table_corresponding_to_top_level_uoa(false)
-				, inner_table_set_number(-1)
-			{
+				ColumnInTempView()
+					: column_type(COLUMN_TYPE__UNKNOWN)
+					, primary_key_index_within_total_kad_for_dmu_category(-1)
+					, primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category(-1)
+					, primary_key_index_within_primary_uoa_for_dmu_category(-1)
+					, current_multiplicity__corresponding_to__current_inner_table(-1)
+					, total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group(-1)
+					, primary_key_should_be_treated_as_numeric(false)
+					, total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category(-1)
+					, total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category(-1)
+					, total_k_spin_count_across_multiplicities_for_dmu_category(-1)
+					, is_within_inner_table_corresponding_to_top_level_uoa(false)
+					, inner_table_set_number(-1)
+				{
 
-			}
+				}
 
-			bool is_within_inner_table_corresponding_to_top_level_uoa;
-			int inner_table_set_number; // 0 for primary, 1 for first child variable group, etc.  Note that each set includes potentially multiple inner tables, depending on the multiplicity of the given primary or child variable group.
-			std::string column_name_in_temporary_table; // The name of the column in the temporary view (includes UUID)
-			std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without UUID)
-			std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)
-			WidgetInstanceIdentifier variable_group_associated_with_current_inner_table; // The variable group associated with this column
-			WidgetInstanceIdentifier uoa_associated_with_variable_group_associated_with_current_inner_table; // The unit of analysis associated with the variable group associated with this column
-			COLUMN_TYPE column_type; // Primary key?  Secondary column (i.e., data, not a primary key)?  One of the two special DateTime columns?
-			WidgetInstanceIdentifier primary_key_dmu_category_identifier; // Empty if this column is not a primary key column
+				bool is_within_inner_table_corresponding_to_top_level_uoa;
+				int inner_table_set_number; // 0 for primary, 1 for first child variable group, etc.  Note that each set includes potentially multiple inner tables, depending on the multiplicity of the given primary or child variable group.
+				std::string column_name_in_temporary_table; // The name of the column in the temporary view (includes UUID)
+				std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without UUID)
+				std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)
+				WidgetInstanceIdentifier variable_group_associated_with_current_inner_table; // The variable group associated with this column
+				WidgetInstanceIdentifier uoa_associated_with_variable_group_associated_with_current_inner_table; // The unit of analysis associated with the variable group associated with this column
+				COLUMN_TYPE column_type; // Primary key?  Secondary column (i.e., data, not a primary key)?  One of the two special DateTime columns?
+				WidgetInstanceIdentifier primary_key_dmu_category_identifier; // Empty if this column is not a primary key column
 
-			// For both primary and child inner tables,
-			// spans multiple inner tables; i.e., the first inner table starts at 0,
-			// the next inner table starts higher than 0, etc.,
-			// but only for those dmu categories with multiplicity greater than 1
-			// (note that the SAME dmu category always has multiplicity greater than 1
-			// for both child and primary variable groups,
-			// except that if all DMU categories have multiplicity of 1 for primary VG's,
-			// the child can have multiplicity greater than 1 for a single such VG).
-			// Other dmu categories (those with multiplicity of 1) reset to 0 for each inner table.
-			// Resets to 0 for each group of inner tables corresponding to a new child variable group.
-			// Note that child variable groups may increment differently across inner tables
-			// than primary variable groups.
-			int primary_key_index_within_total_kad_for_dmu_category;
+				// For both primary and child inner tables,
+				// spans multiple inner tables; i.e., the first inner table starts at 0,
+				// the next inner table starts higher than 0, etc.,
+				// but only for those dmu categories with multiplicity greater than 1
+				// (note that the SAME dmu category always has multiplicity greater than 1
+				// for both child and primary variable groups,
+				// except that if all DMU categories have multiplicity of 1 for primary VG's,
+				// the child can have multiplicity greater than 1 for a single such VG).
+				// Other dmu categories (those with multiplicity of 1) reset to 0 for each inner table.
+				// Resets to 0 for each group of inner tables corresponding to a new child variable group.
+				// Note that child variable groups may increment differently across inner tables
+				// than primary variable groups.
+				int primary_key_index_within_total_kad_for_dmu_category;
 
-			int primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category;
-			int primary_key_index_within_primary_uoa_for_dmu_category;
-			int current_multiplicity__corresponding_to__current_inner_table;
-			int total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group;
-			int total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
-			int total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category;
-			int total_k_spin_count_across_multiplicities_for_dmu_category;
-			bool primary_key_should_be_treated_as_numeric;
+				int primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category;
+				int primary_key_index_within_primary_uoa_for_dmu_category;
+				int current_multiplicity__corresponding_to__current_inner_table;
+				int total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group;
+				int total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+				int total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category;
+				int total_k_spin_count_across_multiplicities_for_dmu_category;
+				bool primary_key_should_be_treated_as_numeric;
 
 		};
 

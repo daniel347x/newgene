@@ -697,15 +697,47 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 
 	WidgetInstanceIdentifier variable_group = first_incoming_row.primary_variable_group_associated_with_row;
 	WidgetInstanceIdentifier uoa = first_incoming_row.primary_uoa_associated_with_row;
-	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &variable_group, &uoa](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+	int number_primary_keys_selected_by_user_in_primary_variable_group = 0;
+	int number_primary_keys_in_each_inner_table_in_primary_variable_group = 0;
+	int number_variables_selected_by_user_in_primary_variable_group = 0;
+	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_primary_keys_in_each_inner_table_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &variable_group, &uoa](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 	{
-		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &primary_key, &variable_group, &uoa](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_primary_keys_in_each_inner_table_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &primary_key, &variable_group, &uoa](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
 		{
 			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
 			{
+				if (primary_key_info.current_multiplicity == 1)
+				{
+					++number_primary_keys_in_each_inner_table_in_primary_variable_group;
+				}
+				std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &variable_group, &primary_key_info](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
+				{
+					if (the_primary_variable_group.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
+					{
+						WidgetInstanceIdentifiers const & the_selected_variables = the_primary_variable_group.second;
+						number_variables_selected_by_user_in_primary_variable_group = the_selected_variables.size();
+						std::for_each(the_selected_variables.cbegin(), the_selected_variables.cend(), [this, &number_primary_keys_selected_by_user_in_primary_variable_group, &primary_key_info](WidgetInstanceIdentifier const & the_selected_variable)
+						{
+							if (boost::iequals(primary_key_info.table_column_name, *the_selected_variable.code))
+							{
+								if (!primary_key_info.table_column_name.empty())
+								{
+									if (primary_key_info.current_multiplicity == 1)
+									{
+										++number_primary_keys_selected_by_user_in_primary_variable_group;
+									}
+								}
+							}
+						});
+					}
+				});
 			}
 		});
 	});
+
+	int number_of_primary_keys_not_selected_by_user_in_primary_variable_group = number_primary_keys_in_each_inner_table_in_primary_variable_group - number_primary_keys_selected_by_user_in_primary_variable_group;
+
+	int number_of_variables_in_primary_group_inner_table = number_variables_selected_by_user_in_primary_variable_group + number_of_primary_keys_not_selected_by_user_in_primary_variable_group;
 
 }
 
