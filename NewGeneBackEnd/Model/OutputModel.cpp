@@ -728,7 +728,85 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data)
 {
 
+	if (current_row_of_data.datetime_start >= first_incoming_row.datetime_end)
+	{
+		failed = true;
+		return false;
+	}
 
+	if (current_row_of_data.datetime_start < first_incoming_row.datetime_start)
+	{
+		if (current_row_of_data.datetime_end <= first_incoming_row.datetime_start)
+		{
+			// Rows do not overlap
+			intermediate_rows_of_data.push_back(current_row_of_data);
+			intermediate_rows_of_data.push_back(first_incoming_row);
+			return true; // current_row_complete
+		}
+		else
+		{
+			// Rows overlap
+			SavedRowData new_data_row = current_row_of_data;
+			new_data_row.datetime_end = first_incoming_row.datetime_start;
+			intermediate_rows_of_data.push_back(new_data_row);
+			current_row_of_data.datetime_start = first_incoming_row.datetime_start;
+		}
+	}
+
+	if (current_row_of_data.datetime_start > first_incoming_row.datetime_start)
+	{
+		if (first_incoming_row.datetime_end <= current_row_of_data.datetime_start)
+		{
+			// Rows do not overlap
+			intermediate_rows_of_data.push_back(first_incoming_row);
+			return false; // current_row is not complete
+		}
+		else
+		{
+			// Rows overlap
+			SavedRowData new_data_row = first_incoming_row;
+			new_data_row.datetime_end = current_row_of_data.datetime_start;
+			intermediate_rows_of_data.push_back(new_data_row);
+			first_incoming_row.datetime_start = current_row_of_data.datetime_start;
+		}
+	}
+
+
+	// current_row_of_data.datetime_start == first_incoming_row.datetime_start
+
+	if (current_row_of_data.datetime_end < first_incoming_row.datetime_end)
+	{
+		// merge from:
+		// current_row_of_data.datetime_start - current_row_of_data.datetime_end
+		// ...
+
+		// then:
+		SavedRowData new_data_row = first_incoming_row;
+		new_data_row.datetime_start = current_row_of_data.datetime_end;
+		intermediate_rows_of_data.push_back(new_data_row);
+
+		return true; // current_row_complete
+	}
+	else if (current_row_of_data.datetime_end == first_incoming_row.datetime_end)
+	{
+		// merge from:
+		// current_row_of_data.datetime_start - current_row_of_data.datetime_end
+		// ...
+
+		return true; // current_row_complete
+	}
+	else
+	{
+		// current_row_of_data.datetime_end > first_incoming_row.datetime_end
+
+		// merge from:
+		// first_incoming_row.datetime_start - first_incoming_row.datetime_end
+		// ...
+
+		current_row_of_data.datetime_start = first_incoming_row.datetime_end;
+
+		return false; // current_row is not complete
+	}
 }
 
 bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data)
