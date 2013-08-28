@@ -499,7 +499,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 		if (!primary_keys_match)
 		{
 			outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-			WriteRowsToFinalTable(outgoing_rows_of_data);
+			WriteRowsToFinalTable(outgoing_rows_of_data, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added);
 			incoming_rows_of_data.clear();
 			outgoing_rows_of_data.clear();
 			incoming_rows_of_data.push_back(current_row_of_data);
@@ -527,7 +527,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 
 		}
 
-		// There is guaranteed to be overlap of the current row of input with the first saved row.
+		// There is guaranteed to either:
+		// (1) be overlap of the current row of input with the first saved row,
+		// (2) have the current row be completely beyond the end of all saved rows
+		// (or, falling into the same category,
+		// the current row's starting datetime is exactly equal to the ending datetime
+		// of the last of the saved rows)
 		bool current_row_complete = false;
 		while (!current_row_complete)
 		{
@@ -556,6 +561,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 		}
 
 	}
+
+	outgoing_rows_of_data.insert(outgoing_rows_of_data.cbegin(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
+	WriteRowsToFinalTable(outgoing_rows_of_data, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added);
+	incoming_rows_of_data.clear();
+	outgoing_rows_of_data.clear();
 
 	if (current_rows_added_since_execution > 0)
 	{
@@ -587,7 +597,7 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 }
 
-void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data)
+void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, int & current_rows_added, int & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added)
 {
 
 }
