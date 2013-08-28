@@ -734,7 +734,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			return SqlAndColumnSet();
 		}
 
-		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, false, 0, current_multiplicity);
+		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed)
 		{
@@ -762,7 +762,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 				return SqlAndColumnSet();
 			}
 
-			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, true, child_set_number, current_child_view_name_index);
+			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
 			sql_and_column_sets.push_back(xr_table_result);
 			if (failed)
 			{
@@ -4160,7 +4160,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, bool const is_child_inner_table, int const current_set_number, int const current_view_name_index)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index)
 {
 
 	char c[256];
@@ -4173,13 +4173,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns.most_recent_sql_statement_executed__index = -1;
 
 	std::string view_name;
-	if (is_child_inner_table)
+	if (xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
 	{
 		view_name += "CV";
 	}
-	else
+	else if (xr_table_category == OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP)
 	{
 		view_name += "V";
+	}
+	else if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
+	{
+		view_name += "MFR";
 	}
 	view_name += itoa(primary_group_number, c, 10);
 	view_name += "_xr";
@@ -4256,11 +4260,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_start_column.column_name_in_original_data_table = "";
 	datetime_start_column.inner_table_set_number = current_set_number;
-	if (!is_child_inner_table)
+	if (xr_table_category == OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP)
 	{
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	}
-	else
+	else if (xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
+	{
+		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+	}
+	else if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
 	{
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 	}
@@ -4287,11 +4295,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_end_column.column_name_in_original_data_table = "";
 	datetime_end_column.inner_table_set_number = current_set_number;
-	if (!is_child_inner_table)
+	if (xr_table_category == OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP)
 	{
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	}
-	else
+	else if (xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
+	{
+		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+	}
+	else if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
 	{
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 	}

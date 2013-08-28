@@ -98,6 +98,8 @@ class ColumnsInTempView
 					, COLUMN_TYPE__DATETIMEEND_MERGED
 					, COLUMN_TYPE__DATETIMESTART_MERGED_FINAL
 					, COLUMN_TYPE__DATETIMEEND_MERGED_FINAL
+					, COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS
+					, COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS
 				};
 
 				ColumnInTempView()
@@ -365,6 +367,13 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				};
 
+				enum XR_TABLE_CATEGORY
+				{
+					  PRIMARY_VARIABLE_GROUP
+					, CHILD_VARIABLE_GROUP
+					, FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP
+				};
+
 				typedef std::pair<std::vector<SQLExecutor>, ColumnsInTempView> SqlAndColumnSet;
 				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;
 
@@ -389,7 +398,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number);
 				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const child_set_number, int const current_child_view_name_index);
-				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, bool const is_child_inner_table, int const current_set_number, int const current_view_name_index);
+				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index);
 				SqlAndColumnSet CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(ColumnsInTempView const & final_xr_columns, int const primary_group_number);
 				SqlAndColumnSet DuplicatesRemovedForTopLevelVariableGroup(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number);
 
