@@ -779,7 +779,7 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 	if (current_row_of_data.datetime_end < first_incoming_row.datetime_end)
 	{
 		// merge from:
-		// current_row_of_data.datetime_start - current_row_of_data.datetime_end
+		// current_row_of_data.datetime_start to current_row_of_data.datetime_end
 		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row);
 		merged_data_row.datetime_start = current_row_of_data.datetime_start;
 		merged_data_row.datetime_end = current_row_of_data.datetime_end;
@@ -795,7 +795,7 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 	else if (current_row_of_data.datetime_end == first_incoming_row.datetime_end)
 	{
 		// merge from:
-		// current_row_of_data.datetime_start - current_row_of_data.datetime_end
+		// current_row_of_data.datetime_start to current_row_of_data.datetime_end
 		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row);
 		merged_data_row.datetime_start = current_row_of_data.datetime_start;
 		merged_data_row.datetime_end = current_row_of_data.datetime_end;
@@ -808,7 +808,7 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 		// current_row_of_data.datetime_end > first_incoming_row.datetime_end
 
 		// merge from:
-		// first_incoming_row.datetime_start - first_incoming_row.datetime_end
+		// first_incoming_row.datetime_start to first_incoming_row.datetime_end
 		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row);
 		merged_data_row.datetime_start = first_incoming_row.datetime_start;
 		merged_data_row.datetime_end = first_incoming_row.datetime_end;
