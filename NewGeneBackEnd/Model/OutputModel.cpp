@@ -274,16 +274,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	result_columns.has_no_datetime_columns = false;
 
 	int first_full_table_column_count = 0;
-	int number_columns_very_first_variable_group_including_multiplicities = 0; // corresponding to primary variable group #1
-	int top_level_inner_table_column_count = 0;
+	int number_columns_very_first_primary_variable_group_including_multiplicities = 0; // corresponding to primary variable group #1
+	int number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table = 0;
+	int number_columns_very_last_primary_variable_group_including_multiplicities = 0; // corresponding to newly-being-added primary variable group (the last one)
+	int number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table = 0;
 	int second_table_column_count = 0;
-	WidgetInstanceIdentifier very_first_variable_group;
-	WidgetInstanceIdentifier very_last_variable_group;
+	WidgetInstanceIdentifier very_first_primary_variable_group;
+	WidgetInstanceIdentifier very_last_primary_variable_group;
 
 	std::vector<std::string> previous_column_names;
 
 	// These columns are from the previous MF temporary table
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_full_table_column_count, &top_level_inner_table_column_count, &previous_column_names, &number_columns_very_first_variable_group_including_multiplicities, &very_first_variable_group](ColumnsInTempView::ColumnInTempView & previous_column)
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_full_table_column_count, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &previous_column_names, &number_columns_very_first_primary_variable_group_including_multiplicities, &very_first_primary_variable_group](ColumnsInTempView::ColumnInTempView & previous_column)
 	{
 		previous_column_names.push_back(previous_column.column_name_in_temporary_table);
 		previous_column.column_name_in_temporary_table = previous_column.column_name_in_temporary_table_no_uuid;
@@ -292,15 +294,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 		if (first_full_table_column_count == 0)
 		{
-			very_first_variable_group = previous_column.variable_group_associated_with_current_inner_table;
+			very_first_primary_variable_group = previous_column.variable_group_associated_with_current_inner_table;
 		}
 
-		if (previous_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_first_variable_group))
+		if (previous_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_first_primary_variable_group))
 		{
-			++number_columns_very_first_variable_group_including_multiplicities;
+			++number_columns_very_first_primary_variable_group_including_multiplicities;
 			if (previous_column.current_multiplicity__corresponding_to__current_inner_table == 1)
 			{
-				++top_level_inner_table_column_count;
+				++number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table;
 			}
 		}
 
@@ -308,7 +310,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	});
 
 	// These columns are from the new table (the current primary variable group final results being merged in) being added.
-	std::for_each(primary_variable_group_final_result.columns_in_view.cbegin(), primary_variable_group_final_result.columns_in_view.cend(), [&result_columns, &very_last_variable_group, &second_table_column_count, &previous_column_names, &count](ColumnsInTempView::ColumnInTempView const & new_table_column)
+	std::for_each(primary_variable_group_final_result.columns_in_view.cbegin(), primary_variable_group_final_result.columns_in_view.cend(), [&result_columns, &number_columns_very_last_primary_variable_group_including_multiplicities, &number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table, &very_last_primary_variable_group, &second_table_column_count, &previous_column_names, &count](ColumnsInTempView::ColumnInTempView const & new_table_column)
 	{
 		previous_column_names.push_back(new_table_column.column_name_in_temporary_table);
 		result_columns.columns_in_view.push_back(new_table_column);
@@ -316,10 +318,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 		new_column.column_name_in_temporary_table += "_";
 		new_column.column_name_in_temporary_table += newUUID(true);
+
 		if (second_table_column_count == 0)
 		{
-			very_last_variable_group = new_table_column.variable_group_associated_with_current_inner_table;
+			very_last_primary_variable_group = new_table_column.variable_group_associated_with_current_inner_table;
 		}
+
+		if (new_table_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_last_primary_variable_group))
+		{
+			++number_columns_very_last_primary_variable_group_including_multiplicities;
+			if (new_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+			{
+				++number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table;
+			}
+		}
+
 		++second_table_column_count;
 	});
 
@@ -361,24 +374,24 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	bool and_ = false;
 	for (int current_multiplicity = 1; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
-		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &top_level_inner_table_column_count, &join_column_names_lhs, &join_column_names_rhs, &very_first_variable_group, &very_last_variable_group, &number_columns_very_first_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &join_column_names_lhs, &join_column_names_rhs, &very_first_primary_variable_group, &very_last_primary_variable_group, &number_columns_very_first_primary_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 		{
-			std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &top_level_inner_table_column_count, &join_column_names_lhs, &join_column_names_rhs, &very_first_variable_group, &very_last_variable_group, &number_columns_very_first_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &primary_key, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info_this_variable_group)
+			std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &join_column_names_lhs, &join_column_names_rhs, &very_first_primary_variable_group, &very_last_primary_variable_group, &number_columns_very_first_primary_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &primary_key, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info_this_variable_group)
 			{
-				if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_first_variable_group)
+				if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_first_primary_variable_group)
 					||
-					primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_last_variable_group))
+					primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_last_primary_variable_group))
 				{
 					if (primary_key_info_this_variable_group.current_multiplicity == current_multiplicity)
 					{
 						int column_count = 0;
-						std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &top_level_inner_table_column_count, &current_multiplicity, &join_column_names_lhs, &join_column_names_rhs, &very_first_variable_group, &very_last_variable_group, &sql_string, &number_columns_very_first_variable_group_including_multiplicities, &primary_key_info_this_variable_group, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
+						std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &current_multiplicity, &join_column_names_lhs, &join_column_names_rhs, &very_first_primary_variable_group, &very_last_primary_variable_group, &sql_string, &number_columns_very_first_primary_variable_group_including_multiplicities, &primary_key_info_this_variable_group, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 						{
 
-							if (column_count < number_columns_very_first_variable_group_including_multiplicities)
+							if (column_count < number_columns_very_first_primary_variable_group_including_multiplicities)
 							{
 
-								if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_first_variable_group))
+								if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_first_primary_variable_group))
 								{
 
 									if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
@@ -405,7 +418,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 											match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == primary_key_info_this_variable_group.sequence_number_within_dmu_category_for_this_variable_groups_uoa));
 										}
 
-										if (column_count >= desired_inner_table_index * top_level_inner_table_column_count && column_count < (desired_inner_table_index + 1) * top_level_inner_table_column_count)
+										if (column_count >= desired_inner_table_index * number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table && column_count < (desired_inner_table_index + 1) * number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table)
 										{
 											if (match_condition)
 											{
@@ -421,7 +434,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 							else if (column_count >= first_full_table_column_count)
 							{
 
-								if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_last_variable_group))
+								if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_last_primary_variable_group))
 								{
 
 									if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
@@ -448,7 +461,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 											match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == primary_key_info_this_variable_group.sequence_number_within_dmu_category_for_this_variable_groups_uoa));
 										}
 
-										if (column_count >= desired_inner_table_index * top_level_inner_table_column_count && column_count < (desired_inner_table_index + 1) * top_level_inner_table_column_count)
+										if (column_count >= first_full_table_column_count + (desired_inner_table_index * number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table) && column_count < first_full_table_column_count + ((desired_inner_table_index + 1) * number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table))
 										{
 											if (match_condition)
 											{
@@ -601,9 +614,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		// ... If there are no primary key DMU categories for the top-level UOA with multiplicity greater than 1,
 		// then this section will order by all of the top-level UOA's primary key DMU categories.
 		int current_column = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &current_column, &top_level_inner_table_column_count, &first](ColumnsInTempView::ColumnInTempView & view_column)
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &current_column, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &first](ColumnsInTempView::ColumnInTempView & view_column)
 		{
-			if (current_column >= top_level_inner_table_column_count)
+			if (current_column >= number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table)
 			{
 				return;
 			}
@@ -611,9 +624,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			// Determine how many columns there are corresponding to this DMU category
 			int number_primary_key_columns_in_dmu_category_with_multiplicity_of_only_1__for_top_level_uoa = 0;
 			int column_count_nested = 0;
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &view_column, &column_count_nested, &top_level_inner_table_column_count, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_only_1__for_top_level_uoa, &sql_string](ColumnsInTempView::ColumnInTempView & view_column_nested)
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &view_column, &column_count_nested, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_only_1__for_top_level_uoa, &sql_string](ColumnsInTempView::ColumnInTempView & view_column_nested)
 			{
-				if (column_count_nested >= top_level_inner_table_column_count)
+				if (column_count_nested >= number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table)
 				{
 					return;
 				}
