@@ -551,6 +551,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 		}
 
 		incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), intermediate_rows_of_data.cbegin(), intermediate_rows_of_data.cend());
+		intermediate_rows_of_data.clear();
 
 		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 		{
