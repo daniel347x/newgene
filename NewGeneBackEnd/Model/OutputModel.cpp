@@ -500,6 +500,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 		{
 			outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
 			WriteRowsToFinalTable(outgoing_rows_of_data, the_prepared_stmt, sql_strings, db, result_columns.view_name, preliminary_sorted_top_level_variable_group_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+			if (failed)
+			{
+				return result;
+			}
 			incoming_rows_of_data.clear();
 			outgoing_rows_of_data.clear();
 			incoming_rows_of_data.push_back(current_row_of_data);
@@ -542,6 +546,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 			}
 			SavedRowData & first_incoming_row = incoming_rows_of_data.front();
 			current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data);
+			if (failed)
+			{
+				return result;
+			}
 			incoming_rows_of_data.pop_front();
 		}
 
@@ -565,6 +573,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 
 	outgoing_rows_of_data.insert(outgoing_rows_of_data.cbegin(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
 	WriteRowsToFinalTable(outgoing_rows_of_data, the_prepared_stmt, sql_strings, db, result_columns.view_name, preliminary_sorted_top_level_variable_group_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+	if (failed)
+	{
+		return result;
+	}
 	incoming_rows_of_data.clear();
 	outgoing_rows_of_data.clear();
 
