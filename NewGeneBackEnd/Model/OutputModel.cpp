@@ -297,6 +297,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		if (previous_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_first_variable_group))
 		{
 			++number_columns_very_first_variable_group_including_multiplicities;
+			if (previous_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+			{
+				++top_level_inner_table_column_count;
+			}
 		}
 
 		++first_full_table_column_count;
@@ -352,55 +356,52 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	bool and_ = false;
 	for (int current_multiplicity = 1; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
-		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &join_column_names_lhs, &join_column_names_rhs, &very_first_variable_group, &number_columns_very_first_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &top_level_inner_table_column_count, &join_column_names_lhs, &join_column_names_rhs, &very_first_variable_group, &number_columns_very_first_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 		{
-			std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &join_column_names_lhs, &join_column_names_rhs, &very_first_variable_group, &number_columns_very_first_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &primary_key, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info_this_variable_group)
+			std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &top_level_inner_table_column_count, &join_column_names_lhs, &join_column_names_rhs, &very_first_variable_group, &number_columns_very_first_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &primary_key, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info_this_variable_group)
 			{
 				if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_first_variable_group))
 				{
 					if (primary_key_info_this_variable_group.current_multiplicity == current_multiplicity)
 					{
 						int column_count = 0;
-						std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &current_multiplicity, &join_column_names_lhs, &join_column_names_rhs, &sql_string, &number_columns_very_first_variable_group_including_multiplicities, &primary_key_info_this_variable_group, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
+						std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &top_level_inner_table_column_count, &current_multiplicity, &join_column_names_lhs, &join_column_names_rhs, &sql_string, &number_columns_very_first_variable_group_including_multiplicities, &primary_key_info_this_variable_group, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 						{
 
-							if (column_count >= number_columns_very_first_variable_group_including_multiplicities)
+							if (column_count < number_columns_very_first_variable_group_including_multiplicities)
 							{
-								return;
-							}
-
-							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
-							{
-								int desired_inner_table_index = 0;
-								bool match_condition = false;
-
-								// First, join on primary keys whose total multiplicity is 1
-								if (primary_key_info_this_variable_group.total_multiplicity == 1)
+								if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
 								{
-									if (current_multiplicity == 1)
+									int desired_inner_table_index = 0;
+									bool match_condition = false;
+
+									// First, join on primary keys whose total multiplicity is 1
+									if (primary_key_info_this_variable_group.total_multiplicity == 1)
 									{
-										if (new_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+										if (current_multiplicity == 1)
 										{
-											match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
+											if (new_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+											{
+												match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
+											}
 										}
 									}
-								}
-
-								// Join on primary keys with multiplicity greater than 1
-								else
-								{
-									desired_inner_table_index = current_multiplicity - 1;
-									match_condition = true;
-								}
-
-								if (column_count >= desired_inner_table_index * top_level_inner_table_column_count && column_count < (desired_inner_table_index + 1) * top_level_inner_table_column_count)
-								{
-									if (match_condition)
+									// Join on primary keys with multiplicity greater than 1
+									else
 									{
-										join_column_names_lhs.push_back(previous_column_names[column_count]);
+										desired_inner_table_index = current_multiplicity - 1;
+										match_condition = true;
 									}
-								}
 
+									if (column_count >= desired_inner_table_index * top_level_inner_table_column_count && column_count < (desired_inner_table_index + 1) * top_level_inner_table_column_count)
+									{
+										if (match_condition)
+										{
+											join_column_names_lhs.push_back(previous_column_names[column_count]);
+										}
+									}
+
+								}
 							}
 
 							++column_count;
