@@ -371,7 +371,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	sql_string += " t2 ON ";
 	std::vector<std::string> join_column_names_lhs;
 	std::vector<std::string> join_column_names_rhs;
-	bool and_ = false;
 	for (int current_multiplicity = 1; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
 		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &join_column_names_lhs, &join_column_names_rhs, &very_first_primary_variable_group, &very_last_primary_variable_group, &number_columns_very_first_primary_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
@@ -484,9 +483,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		});
 	}
 
+	// sanity check
+	if (join_column_names_lhs.size() != join_column_names_rhs.size())
+	{
+		failed = true;
+		return result;
+	}
 
-
-	if (match_condition)
+	int join_index = 0;
+	bool and_ = false;
+	std::for_each(join_column_names_lhs.cbegin(), join_column_names_lhs.cend(), [&join_index, &sql_string, &and_, &join_column_names_rhs](std::string const & join_column_name_lhs)
 	{
 		if (and_)
 		{
@@ -494,10 +500,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		}
 		and_ = true;
 		sql_string += "t1.";
-		sql_string += previous_column_names_first_table[column_count];
+		sql_string += join_column_name_lhs;
 		sql_string += " = t2.";
-		sql_string += primary_key_info_this_variable_group.table_column_name;
-	}
+		sql_string += join_column_names_rhs[join_index];
+
+		++join_index;
+	});
 
 
 	// For use in ORDER BY clause
