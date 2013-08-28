@@ -1931,10 +1931,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	first = true;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
-		{
-			return; // Enforce that datetime columns appear last.
-		}
 		if (!first)
 		{
 			sql_string += ", ";
@@ -1943,36 +1939,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
 		sql_string += " AS ";
 		sql_string += new_column.column_name_in_temporary_table;
-	});
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
-	{
-		// Now do the datetime_start column
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART)
-		{
-			if (!first)
-			{
-				sql_string += ", ";
-			}
-			first = false;
-			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
-			sql_string += " AS ";
-			sql_string += new_column.column_name_in_temporary_table;
-		}
-	});
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
-	{
-		// Now do the datetime_end column
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
-		{
-			if (!first)
-			{
-				sql_string += ", ";
-			}
-			first = false;
-			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
-			sql_string += " AS ";
-			sql_string += new_column.column_name_in_temporary_table;
-		}
 	});
 	sql_string += " FROM ";
 	sql_string += result_columns.original_table_names[0];
