@@ -486,11 +486,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 			return result;
 		}
 
-
 		// If we're starting fresh, just add the current row of input to incoming_rows_of_data
 		// and proceed to the next row of input.
 		if (incoming_rows_of_data.empty())
 		{
+			incoming_rows_of_data.push_back(current_row_of_data);
+			continue;
+		}
+
+		bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(current_row_of_data, incoming_rows_of_data[0]);
+
+		if (!primary_keys_match)
+		{
+			outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
+			WriteRowsToFinalTable(outgoing_rows_of_data);
+			incoming_rows_of_data.clear();
+			outgoing_rows_of_data.clear();
 			incoming_rows_of_data.push_back(current_row_of_data);
 			continue;
 		}
@@ -517,6 +528,24 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 		}
 
 		// There is guaranteed to be overlap of the current row of input with the first saved row.
+		bool current_row_complete = false;
+		while (!current_row_complete)
+		{
+			if (incoming_rows_of_data.empty())
+			{
+				break;
+			}
+			SavedRowData & first_incoming_row = incoming_rows_of_data.front();
+			current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data);
+			incoming_rows_of_data.pop_front();
+		}
+
+		if (!current_row_complete)
+		{
+			intermediate_rows_of_data.push_back(current_row_of_data);
+		}
+
+		incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), intermediate_rows_of_data.cbegin(), intermediate_rows_of_data.cend());
 
 		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 		{
@@ -545,6 +574,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 
 
 	return result;
+
+}
+
+bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data)
+{
+
+}
+
+bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data)
+{
+
+}
+
+void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data)
+{
 
 }
 
