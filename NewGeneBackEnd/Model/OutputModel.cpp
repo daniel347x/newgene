@@ -515,21 +515,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	{
 		if (highest_multiplicity_primary_uoa > 1)
 		{
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa, &sql_string](ColumnsInTempView::ColumnInTempView & view_column)
+			int current_column_count = 0;
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &current_column_count, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa, &sql_string](ColumnsInTempView::ColumnInTempView & view_column)
 			{
-				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				if (current_column_count < number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table)
 				{
-					if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+					if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 					{
-						if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+						if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 						{
-							if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+							if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
 							{
-								++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa;
+								if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+								{
+									++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa;
+								}
 							}
 						}
 					}
 				}
+				++current_column_count;
 			});
 		}
 	}
@@ -618,7 +623,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 		}
 
-		// For use in both the WHERE and ORDER BY clauses
+		// For use in the ORDER BY clause
 		// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
 		int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
 		if (debug_ordering)
