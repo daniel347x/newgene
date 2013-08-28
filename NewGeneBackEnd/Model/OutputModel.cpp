@@ -223,13 +223,19 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 {
 	
 	// The primary variable group data is stored in primary_group_final_results
-
-	std::for_each(primary_group_final_results.cbegin(), primary_group_final_results.cend(), [](SqlAndColumnSet const & primary_variable_group_final_result)
+	int count = 0;
+	std::for_each(primary_group_final_results.cbegin(), primary_group_final_results.cend(), [this, &count](SqlAndColumnSet const & primary_variable_group_final_result)
 	{
 		// Save merged data in "intermediate_merging_of_primary_groups_column_sets"
+		SqlAndColumnSet intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, count);
 	});
 
 	// Save temporary table from the final iteration of the merging of the primary groups into "all_merged_results_unformatted"
+
+}
+
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::MergeIndividualTopLevelGroupIntoPrevious(ColumnsInTempView const & primary_variable_group_final_result, int const count)
+{
 
 }
 
