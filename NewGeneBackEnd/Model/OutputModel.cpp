@@ -539,35 +539,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		}
 	}
 
-	// For use in ORDER BY clause
-	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1 for the current child table being joined in
-	int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_child = 0;
-	std::pair<WidgetInstanceIdentifier, int> & uoa_child__which_multiplicity_is_greater_than_1 = child_uoas__which_multiplicity_is_greater_than_1[uoa_child];
-	int const highest_multiplicity_child_uoa = uoa_child__which_multiplicity_is_greater_than_1.second;
-	WidgetInstanceIdentifier const & dmu_category__with_multiplicity_greater_than_1__for_current_child_uoa = uoa_child__which_multiplicity_is_greater_than_1.first;
-	if (debug_ordering)
-	{
-		if (highest_multiplicity_child_uoa > 1)
-		{
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &child_set_number, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_child, &sql_string, &highest_multiplicity_child_uoa, &dmu_category__with_multiplicity_greater_than_1__for_current_child_uoa](ColumnsInTempView::ColumnInTempView & view_column)
-			{
-				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-				{
-					if (view_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, dmu_category__with_multiplicity_greater_than_1__for_current_child_uoa))
-					{
-						if (view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
-						{
-							if (view_column.inner_table_set_number == child_set_number)
-							{
-								++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1_child;
-							}
-						}
-					}
-				}
-			});
-		}
-	}
-
 	// Add the ORDER BY column/s
 	if (debug_ordering)
 	{
