@@ -549,45 +549,50 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		{
 
 			// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
-			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa; ++inner_dmu_multiplicity)
 			{
 				for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
 				{
-					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_string, &first](ColumnsInTempView::ColumnInTempView & view_column)
+					int current_column_count = 0;
+					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &current_column_count, &number_columns_very_first_primary_variable_group_including_multiplicities, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_string, &first](ColumnsInTempView::ColumnInTempView & view_column)
 					{
-						if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+						if (current_column_count < number_columns_very_first_primary_variable_group_including_multiplicities)
 						{
-							if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+							if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 							{
-								if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
+								if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
 								{
-									if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
+									if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 									{
-										if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+										if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
 										{
-											if (!first)
+											if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 											{
-												sql_string += ", ";
-											}
-											else
-											{
-												sql_string += " ORDER BY ";
-											}
-											first = false;
-											if (view_column.primary_key_should_be_treated_as_numeric)
-											{
-												sql_string += "CAST (";
-											}
-											sql_string += view_column.column_name_in_temporary_table;
-											if (view_column.primary_key_should_be_treated_as_numeric)
-											{
-												sql_string += " AS INTEGER)";
+												if (!first)
+												{
+													sql_string += ", ";
+												}
+												else
+												{
+													sql_string += " ORDER BY ";
+												}
+												first = false;
+												if (view_column.primary_key_should_be_treated_as_numeric)
+												{
+													sql_string += "CAST (";
+												}
+												sql_string += view_column.column_name_in_temporary_table;
+												if (view_column.primary_key_should_be_treated_as_numeric)
+												{
+													sql_string += " AS INTEGER)";
+												}
 											}
 										}
 									}
 								}
 							}
 						}
+						++current_column_count;
 					});
 				}
 			}
@@ -598,10 +603,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		// ... If there are no primary key DMU categories for this top-level UOA with multiplicity greater than 1,
 		// then this section will order by all of this top-level's UOA primary key DMU categories.
 		int current_column = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &sql_string, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
 		{
 
-			if (current_column >= inner_table_column_count)
+			if (current_column >= number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table)
 			{
 				return;
 			}
@@ -609,9 +614,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			// Determine how many columns there are corresponding to the DMU category
 			int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
 			int column_count_nested = 0;
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column_nested)
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column_nested)
 			{
-				if (column_count_nested >= inner_table_column_count)
+				if (column_count_nested >= number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table)
 				{
 					return;
 				}
