@@ -819,9 +819,42 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 #	endif
 
-	std::for_each(current_row_of_data.indices_of_primary_key_columns.cbegin(), current_row_of_data.indices_of_primary_key_columns.cend(), [this, &current_row_of_data, &previous_row_of_data](int const primary_key_index)
+	bool match_failed = false;
+	std::for_each(current_row_of_data.indices_of_primary_key_columns.cbegin(), current_row_of_data.indices_of_primary_key_columns.cend(), [this, &current_row_of_data, &previous_row_of_data, &match_failed](std::pair<SQLExecutor::WHICH_BINDING, int> const & primary_key_index_info)
 	{
+		if (match_failed)
+		{
+			return;
+		}
+		SQLExecutor::WHICH_BINDING binding = primary_key_index_info.first;
+		int index = primary_key_index_info.second;
+		switch (binding)
+		{
+			case SQLExecutor::INT64:
+				{
+					if (current_row_of_data.current_parameter_ints[index] != previous_row_of_data.current_parameter_ints[index])
+					{
+						match_failed = true;
+					}
+				}
+				break;
+			case SQLExecutor::STRING:
+				{
+					if (!boost::iequals(current_row_of_data.current_parameter_ints[index], previous_row_of_data.current_parameter_ints[index]))
+					{
+						match_failed = true;
+					}
+				}
+				break;
+			case SQLExecutor::NULL_BINDING:
+				{
+					// nothing to do
+				}
+				break;
+		}
 	});
+
+	return !match_failed;
 
 }
 
