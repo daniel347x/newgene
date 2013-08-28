@@ -692,58 +692,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 	}
 
-	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
-	if (child_variable_group_raw_data_columns.has_no_datetime_columns_originally)
-	{
-		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
-		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
-		datetime_start_col_name += "_";
-		datetime_start_col_name += newUUID(true);
-
-		std::string alter_string;
-		alter_string += "ALTER TABLE ";
-		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
-		alter_string += datetime_start_col_name;
-		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(SQLExecutor(db, alter_string));
-
-		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
-		datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
-		datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
-		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
-		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_child;
-		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_child;
-		datetime_start_column.column_name_in_original_data_table = "";
-		datetime_start_column.inner_table_set_number = child_set_number;
-		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
-
-		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
-		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
-		datetime_end_col_name += "_";
-		datetime_end_col_name += newUUID(true);
-
-		alter_string.clear();
-		alter_string += "ALTER TABLE ";
-		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
-		alter_string += datetime_end_col_name;
-		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(SQLExecutor(db, alter_string));
-
-		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
-		datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
-		datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
-		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
-		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_child;
-		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_child;
-		datetime_end_column.column_name_in_original_data_table = "";
-		datetime_end_column.inner_table_set_number = child_set_number;
-		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
-	}
-
 	return result;
 
 }
