@@ -772,7 +772,9 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 	}
 
 
+	// If we're here, it's guaranteed that:
 	// current_row_of_data.datetime_start == first_incoming_row.datetime_start
+	// ... with overlap
 
 	if (current_row_of_data.datetime_end < first_incoming_row.datetime_end)
 	{
