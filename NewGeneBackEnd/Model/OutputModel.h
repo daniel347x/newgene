@@ -351,6 +351,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::int64_t> current_parameter_ints;
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
 
+						WidgetInstanceIdentifier primary_variable_group_associated_with_row;
+						WidgetInstanceIdentifier primary_uoa_associated_with_row;
+
 						bool failed;
 
 				};

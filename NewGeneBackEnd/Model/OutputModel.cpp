@@ -359,12 +359,17 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	datetime_start = 0;
 	datetime_end = 0;
 	failed = false;
+	primary_variable_group_associated_with_row = WidgetInstanceIdentifier();
+	primary_uoa_associated_with_row = WidgetInstanceIdentifier();
 }
 
 void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result)
 {
 
 	Clear();
+
+	primary_variable_group_associated_with_row = preliminary_sorted_top_level_variable_group_result_columns.columns_in_view[0].variable_group_associated_with_current_inner_table;
+	primary_uoa_associated_with_row = preliminary_sorted_top_level_variable_group_result_columns.columns_in_view[0].uoa_associated_with_variable_group_associated_with_current_inner_table;
 
 	int datetime_start_column_index_of_possible_duplicate = (int)preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.size() - 2;
 	int datetime_end_column_index_of_possible_duplicate = (int)preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.size() - 1;
@@ -689,6 +694,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 
 bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data)
 {
+
+	WidgetInstanceIdentifier variable_group = first_incoming_row.primary_variable_group_associated_with_row;
+	WidgetInstanceIdentifier uoa = first_incoming_row.primary_uoa_associated_with_row;
+	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &variable_group, &uoa](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+	{
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &primary_key, &variable_group, &uoa](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
+		{
+			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
+			{
+			}
+		});
+	});
 
 }
 
