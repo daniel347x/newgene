@@ -359,6 +359,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						WidgetInstanceIdentifier primary_variable_group_associated_with_row;
 						WidgetInstanceIdentifier primary_uoa_associated_with_row;
 
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns;
+
 						bool failed;
 
 				};

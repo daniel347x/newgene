@@ -361,6 +361,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	failed = false;
 	primary_variable_group_associated_with_row = WidgetInstanceIdentifier();
 	primary_uoa_associated_with_row = WidgetInstanceIdentifier();
+	indices_of_primary_key_columns.clear();
 }
 
 void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result)
@@ -373,8 +374,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 	int datetime_start_column_index_of_possible_duplicate = (int)preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.size() - 2;
 	int datetime_end_column_index_of_possible_duplicate = (int)preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.size() - 1;
-	std::int64_t datetime_start_of_possible_duplicate = sqlite3_column_int64(stmt, datetime_start_column_index_of_possible_duplicate);
-	std::int64_t datetime_end_of_possible_duplicate = sqlite3_column_int64(stmt, datetime_end_column_index_of_possible_duplicate);
+	std::int64_t datetime_start_of_possible_duplicate = sqlite3_column_int64(stmt_result, datetime_start_column_index_of_possible_duplicate);
+	std::int64_t datetime_end_of_possible_duplicate = sqlite3_column_int64(stmt_result, datetime_end_column_index_of_possible_duplicate);
 
 	datetime_start = datetime_start_of_possible_duplicate;
 	datetime_end = datetime_end_of_possible_duplicate;
@@ -392,6 +393,26 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			return;
 		}
 
+		bool add_as_primary_key_column = false;
+
+		if (possible_duplicate_view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+		{
+			if (possible_duplicate_view_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+			{
+				if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+				{
+					add_as_primary_key_column = true;
+				}
+			}
+			else
+			{
+				if (possible_duplicate_view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+				{
+					add_as_primary_key_column = true;
+				}
+			}
+		}
+
 		column_data_type = sqlite3_column_type(stmt_result, current_column);
 		switch (column_data_type)
 		{
@@ -401,6 +422,10 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					data_int64 = sqlite3_column_int64(stmt_result, current_column);
 					current_parameter_ints.push_back(data_int64);
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+					if (add_as_primary_key_column)
+					{
+						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)current_parameter_ints.size()-1));
+					}
 				}
 				break;
 
@@ -419,6 +444,10 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, current_column));
 					current_parameter_strings.push_back(data_string);
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+					if (add_as_primary_key_column)
+					{
+						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)current_parameter_strings.size()-1));
+					}
 				}
 				break;
 
@@ -433,6 +462,10 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			case SQLITE_NULL:
 				{
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+					if (add_as_primary_key_column)
+					{
+						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
+					}
 				}
 				break;
 
@@ -695,20 +728,35 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data)
 {
 
+
+}
+
+bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data)
+{
+
+	// The code in this #if block is not necessary, but is kept here for future reference.
+	// It should work (though it is untested); however, the same functionality is accomplished a different way.
+#	if 0
+
 	WidgetInstanceIdentifier variable_group = first_incoming_row.primary_variable_group_associated_with_row;
 	WidgetInstanceIdentifier uoa = first_incoming_row.primary_uoa_associated_with_row;
 	int number_primary_keys_selected_by_user_in_primary_variable_group = 0;
 	int number_primary_keys_in_each_inner_table_in_primary_variable_group = 0;
 	int number_variables_selected_by_user_in_primary_variable_group = 0;
-	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_primary_keys_in_each_inner_table_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &variable_group, &uoa](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+	std::vector<int> indices_of_primary_key_columns_with_multiplicity_greater_than_1;
+	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &indices_of_primary_key_columns_with_multiplicity_greater_than_1, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_primary_keys_in_each_inner_table_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &variable_group, &uoa](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 	{
-		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_primary_keys_in_each_inner_table_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &primary_key, &variable_group, &uoa](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &indices_of_primary_key_columns_with_multiplicity_greater_than_1, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_primary_keys_in_each_inner_table_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &primary_key, &variable_group, &uoa](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
 		{
 			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
 			{
 				if (primary_key_info.current_multiplicity == 1)
 				{
 					++number_primary_keys_in_each_inner_table_in_primary_variable_group;
+				}
+				if (primary_key_info.total_multiplicity > 1)
+				{
+					//indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back();
 				}
 				std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &variable_group, &primary_key_info](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
 				{
@@ -769,12 +817,11 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 
 	int number_of_variables_in_each_primary_group_inner_table = number_variables_selected_by_user_in_primary_variable_group + number_of_primary_keys_not_selected_by_user_in_primary_variable_group + number_of_datetime_columns_not_selected_by_user_in_primary_variable_group + number_of_internal_merge_datetime_columns_per_inner_table;
 
+#	endif
 
-
-}
-
-bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data)
-{
+	std::for_each(current_row_of_data.indices_of_primary_key_columns.cbegin(), current_row_of_data.indices_of_primary_key_columns.cend(), [this, &current_row_of_data, &previous_row_of_data](int const primary_key_index)
+	{
+	});
 
 }
 
