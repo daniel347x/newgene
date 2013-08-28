@@ -105,6 +105,44 @@ OutputModel::OutputGenerator::~OutputGenerator()
 
 	});
 
+	std::for_each(primary_group_final_results.begin(), primary_group_final_results.end(), [](SqlAndColumnSet & sql_and_column_set)
+	{
+
+		std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [](SQLExecutor & sql_executor)
+		{
+
+			sql_executor.Empty();
+
+		});
+
+	});
+
+	std::for_each(intermediate_merging_of_primary_groups_column_sets.begin(), intermediate_merging_of_primary_groups_column_sets.end(), [](SqlAndColumnSet & sql_and_column_set)
+	{
+
+		std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [](SQLExecutor & sql_executor)
+		{
+
+			sql_executor.Empty();
+
+		});
+
+	});
+
+	std::for_each(all_merged_results_unformatted.first.begin(), all_merged_results_unformatted.first.end(), [](SQLExecutor & sql_executor)
+	{
+
+		sql_executor.Empty();
+
+	});
+
+	std::for_each(final_result.first.begin(), final_result.first.end(), [](SQLExecutor & sql_executor)
+	{
+
+		sql_executor.Empty();
+
+	});
+
 }
 
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
