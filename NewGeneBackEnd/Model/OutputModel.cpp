@@ -275,13 +275,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 	int first_full_table_column_count = 0;
 	int number_columns_very_first_variable_group_including_multiplicities = 0; // corresponding to primary variable group #1
+	int top_level_inner_table_column_count = 0;
 	int second_table_column_count = 0;
 	WidgetInstanceIdentifier very_first_variable_group;
 
 	std::vector<std::string> previous_column_names;
 
 	// These columns are from the previous MF temporary table
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_full_table_column_count, &previous_column_names, &number_columns_very_first_variable_group_including_multiplicities, &very_first_variable_group](ColumnsInTempView::ColumnInTempView & previous_column)
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_full_table_column_count, &top_level_inner_table_column_count, &previous_column_names, &number_columns_very_first_variable_group_including_multiplicities, &very_first_variable_group](ColumnsInTempView::ColumnInTempView & previous_column)
 	{
 		previous_column_names.push_back(previous_column.column_name_in_temporary_table);
 		previous_column.column_name_in_temporary_table = previous_column.column_name_in_temporary_table_no_uuid;
@@ -302,10 +303,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	});
 
 	// These columns are from the new table (the current primary variable group final results being merged in) being added.
-	std::for_each(primary_variable_group_final_result.columns_in_view.cbegin(), primary_variable_group_final_result.columns_in_view.cend(), [&result_columns, &second_table_column_count, &previous_column_names, &count](ColumnsInTempView::ColumnInTempView const & new_column)
+	std::for_each(primary_variable_group_final_result.columns_in_view.cbegin(), primary_variable_group_final_result.columns_in_view.cend(), [&result_columns, &second_table_column_count, &previous_column_names, &count](ColumnsInTempView::ColumnInTempView const & new_table_column)
 	{
-		previous_column_names.push_back(new_column.column_name_in_temporary_table);
-		result_columns.columns_in_view.push_back(new_column);
+		previous_column_names.push_back(new_table_column.column_name_in_temporary_table);
+		result_columns.columns_in_view.push_back(new_table_column);
 		ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
 		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 		new_column.column_name_in_temporary_table += "_";
@@ -388,78 +389,44 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 								// Join on primary keys with multiplicity greater than 1
 								else
 								{
-									// Break this into different cases.
-
-									// Case 1: The highest multiplicity of the primary UOA's is greater than 1,
-									// but the DMU category of this child group does not match the one
-									// corresponding to that multiplicity.
-									// All columns therefore exist in the first inner table.
-									if (!boost::iequals(highest_multiplicity_primary_uoa_dmu_string_code, *primary_key.dmu_category.code))
-									{
-										if (current_multiplicity == 1)
-										{
-											// Same match condition as above.
-											match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
-										}
-									}
-
-									// Cases 2 & 3 correspond to the highest multiplicity of the primary UOA's being greater than 1,
-									// and the DMU category of this child group matches the one corresponding
-									// to that multiplicity.
-									else
-									{
-
-										// ... Case 2: The K-value for the *UOA* of the child group for this DMU category
-										// ... is less than the K-value for the *UOA* of the primary groups for this DMU category
-										// ... (due to current constraints enforced on the user's settings,
-										// ... the child group's K-value must in this scenario be equal to 1).
-										// ... We must therefore iterate through every column of this DMU category INSIDE each inner table,
-										// ... along with iterating through every inner table.
-										if (primary_key_info_this_variable_group.total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group < primary_key.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
-										{
-											desired_inner_table_index = (current_multiplicity - 1) / primary_key.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
-											match_condition = (current_multiplicity - 1 == new_column.primary_key_index_within_total_kad_for_dmu_category);
-										}
-
-										// ... Case 3: The K-value for the *UOA* of the child group for this DMU category
-										// ... matches the K-value for the *UOA* of the primary groups for this DMU category.
-										// ... Therefore, we need to iterate through every inner table,
-										// ... but inside each inner table, there is only one match for the child
-										// ... that includes all columns in that table for this DMU category.
-										else
-										{
-											desired_inner_table_index = current_multiplicity - 1;
-											match_condition = true;
-										}
-
-									}
-
+									desired_inner_table_index = current_multiplicity - 1;
+									match_condition = true;
 								}
 
 								if (column_count >= desired_inner_table_index * top_level_inner_table_column_count && column_count < (desired_inner_table_index + 1) * top_level_inner_table_column_count)
 								{
 									if (match_condition)
 									{
-										if (and_)
-										{
-											sql_string += " AND ";
-										}
-										and_ = true;
-										sql_string += "t1.";
-										sql_string += previous_column_names_first_table[column_count];
-										sql_string += " = t2.";
-										sql_string += primary_key_info_this_variable_group.table_column_name;
+										join_column_names_lhs.push_back(previous_column_names[column_count]);
 									}
 								}
 
 							}
+
 							++column_count;
+
 						});
 					}
 				}
 			});
 		});
 	}
+
+
+
+	if (match_condition)
+	{
+		if (and_)
+		{
+			sql_string += " AND ";
+		}
+		and_ = true;
+		sql_string += "t1.";
+		sql_string += previous_column_names_first_table[column_count];
+		sql_string += " = t2.";
+		sql_string += primary_key_info_this_variable_group.table_column_name;
+	}
+
 
 	// For use in ORDER BY clause
 	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
@@ -2840,22 +2807,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 	// Proceed to the secondary key columns.
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
 	{
-		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
 			return; // Add these columns last
 		}
 
-		if (new_column_.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
 			return; // We are populating secondary columns now, so exit if this isn't one
 		}
 
 		bool match = false;
-		std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&new_column_, &match](WidgetInstanceIdentifier const & variable_selected)
+		std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&new_column_secondary, &match](WidgetInstanceIdentifier const & variable_selected)
 		{
-			if (boost::iequals(new_column_.column_name_in_original_data_table, *variable_selected.code))
+			if (boost::iequals(new_column_secondary.column_name_in_original_data_table, *variable_selected.code))
 			{
 				match = true;
 			}
@@ -2863,7 +2830,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (match)
 		{
-			result_columns.columns_in_view.push_back(new_column_);
+			result_columns.columns_in_view.push_back(new_column_secondary);
 			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
@@ -2883,11 +2850,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 	// Proceed, finally, to the datetime columns, if they exist.  (If they don't, they will be added via ALTER TABLE to the temporary table under construction.)
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_datetime)
 	{
-		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+		if (new_column_datetime.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_datetime.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
 		{
-			result_columns.columns_in_view.push_back(new_column_);
+			result_columns.columns_in_view.push_back(new_column_datetime);
 			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
@@ -2897,11 +2864,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			++second_table_column_count;
 		}
 	});
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_datetime)
 	{
-		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		if (new_column_datetime.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_datetime.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
-			result_columns.columns_in_view.push_back(new_column_);
+			result_columns.columns_in_view.push_back(new_column_datetime);
 			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
@@ -3690,22 +3657,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 	// Proceed to the secondary key columns.
-	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&first, &child_set_number, &variable_group_child, &uoa_child, &variables_selected, &result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&first, &child_set_number, &variable_group_child, &uoa_child, &variables_selected, &result_columns, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
 	{
-		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
 			return; // Add these columns last
 		}
 
-		if (new_column_.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
 			return; // We are populating secondary columns now, so exit if this isn't one
 		}
 
 		bool match = false;
-		std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&new_column_, &match](WidgetInstanceIdentifier const & variable_selected)
+		std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&new_column_secondary, &match](WidgetInstanceIdentifier const & variable_selected)
 		{
-			if (boost::iequals(new_column_.column_name_in_original_data_table, *variable_selected.code))
+			if (boost::iequals(new_column_secondary.column_name_in_original_data_table, *variable_selected.code))
 			{
 				match = true;
 			}
@@ -3713,7 +3680,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (match)
 		{
-			result_columns.columns_in_view.push_back(new_column_);
+			result_columns.columns_in_view.push_back(new_column_secondary);
 			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
@@ -3748,11 +3715,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 	// Proceed, finally, to the datetime columns, if they exist.  (If they don't, they will be added via ALTER TABLE to the temporary table under construction.)
-	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &child_set_number, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &child_set_number, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_datetime)
 	{
-		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+		if (new_column_datetime.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_datetime.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
 		{
-			result_columns.columns_in_view.push_back(new_column_);
+			result_columns.columns_in_view.push_back(new_column_datetime);
 			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
@@ -3762,11 +3729,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			++second_table_column_count;
 		}
 	});
-	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &child_set_number, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_)
+	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &child_set_number, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_datetime)
 	{
-		if (new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		if (new_column_datetime.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_datetime.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
-			result_columns.columns_in_view.push_back(new_column_);
+			result_columns.columns_in_view.push_back(new_column_datetime);
 			ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
