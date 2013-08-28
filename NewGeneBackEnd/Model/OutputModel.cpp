@@ -737,7 +737,39 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 
 	int number_of_primary_keys_not_selected_by_user_in_primary_variable_group = number_primary_keys_in_each_inner_table_in_primary_variable_group - number_primary_keys_selected_by_user_in_primary_variable_group;
 
-	int number_of_variables_in_primary_group_inner_table = number_variables_selected_by_user_in_primary_variable_group + number_of_primary_keys_not_selected_by_user_in_primary_variable_group;
+	// Now determine selection state of datetime variables
+	std::string variable_group_table_name = Table_VariableGroupData::TableNameFromVGCode(*variable_group.code);
+	int number_of_datetime_columns_selected_by_user_in_primary_variable_group = 0;
+	WidgetInstanceIdentifiers & datetime_columns = input_model->t_vgp_data_metadata__datetime_columns.getIdentifiers(variable_group_table_name);
+	if (datetime_columns.size() == 2)
+	{
+		std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &datetime_columns, &variable_group, &number_of_datetime_columns_selected_by_user_in_primary_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
+		{
+			if (the_primary_variable_group.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
+			{
+				WidgetInstanceIdentifiers const & the_selected_variables = the_primary_variable_group.second;
+				std::for_each(the_selected_variables.cbegin(), the_selected_variables.cend(), [this, &datetime_columns, &number_of_datetime_columns_selected_by_user_in_primary_variable_group](WidgetInstanceIdentifier const & the_selected_variable)
+				{
+					if (boost::iequals(*datetime_columns[0].code, *the_selected_variable.code))
+					{
+						++number_of_datetime_columns_selected_by_user_in_primary_variable_group;
+					}
+					if (boost::iequals(*datetime_columns[1].code, *the_selected_variable.code))
+					{
+						++number_of_datetime_columns_selected_by_user_in_primary_variable_group;
+					}
+				});
+			}
+		});
+	}
+
+	int number_of_datetime_columns_not_selected_by_user_in_primary_variable_group = 2 - number_of_datetime_columns_selected_by_user_in_primary_variable_group;
+
+	int number_of_internal_merge_datetime_columns_per_inner_table = 2;
+
+	int number_of_variables_in_each_primary_group_inner_table = number_variables_selected_by_user_in_primary_variable_group + number_of_primary_keys_not_selected_by_user_in_primary_variable_group + number_of_datetime_columns_not_selected_by_user_in_primary_variable_group + number_of_internal_merge_datetime_columns_per_inner_table;
+
+
 
 }
 
