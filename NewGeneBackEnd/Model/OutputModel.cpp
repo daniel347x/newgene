@@ -290,6 +290,15 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
 
+		if (unformatted_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+		{
+			formatted_column.column_name_in_temporary_table += " (";
+			formatted_column.column_name_in_temporary_table += itoa(unformatted_column.current_multiplicity__corresponding_to__current_inner_table, c, 10);
+			formatted_column.column_name_in_temporary_table += ")";
+		}
+
+		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
+
 		switch (unformatted_column.column_type)
 		{
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
