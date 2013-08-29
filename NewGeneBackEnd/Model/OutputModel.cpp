@@ -322,6 +322,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	final_result = result;
 
+	final_result.second.most_recent_sql_statement_executed__index = -1;
+	ExecuteSQL(final_result);
+
 }
 
 void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
