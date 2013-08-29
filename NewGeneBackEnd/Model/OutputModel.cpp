@@ -1051,6 +1051,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	datetime_end = 0;
 	failed = false;
 	indices_of_primary_key_columns.clear();
+	is_index_a_primary_key.clear();
 }
 
 void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView & sorted_result_columns, sqlite3_stmt * stmt_result)
@@ -1088,6 +1089,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 		if (!possible_duplicate_view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
 		{
+			++current_column;
 			return;
 		}
 
@@ -1123,6 +1125,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					if (add_as_primary_key_column)
 					{
 						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)current_parameter_ints.size()-1));
+						is_index_a_primary_key.push_back(true);
+					}
+					else
+					{
+						is_index_a_primary_key.push_back(false);
 					}
 				}
 				break;
@@ -1145,6 +1152,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					if (add_as_primary_key_column)
 					{
 						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)current_parameter_strings.size()-1));
+						is_index_a_primary_key.push_back(true);
+					}
+					else
+					{
+						is_index_a_primary_key.push_back(false);
 					}
 				}
 				break;
@@ -1163,6 +1175,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					if (add_as_primary_key_column)
 					{
 						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
+						is_index_a_primary_key.push_back(true);
+					}
+					else
+					{
+						is_index_a_primary_key.push_back(false);
 					}
 				}
 				break;
@@ -1529,6 +1546,10 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 		// merge from:
 		// current_row_of_data.datetime_start to current_row_of_data.datetime_end
 		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row);
+		if (failed)
+		{
+			return false;
+		}
 		merged_data_row.datetime_start = current_row_of_data.datetime_start;
 		merged_data_row.datetime_end = current_row_of_data.datetime_end;
 		intermediate_rows_of_data.push_back(merged_data_row);
@@ -1545,6 +1566,10 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 		// merge from:
 		// current_row_of_data.datetime_start to current_row_of_data.datetime_end
 		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row);
+		if (failed)
+		{
+			return false;
+		}
 		merged_data_row.datetime_start = current_row_of_data.datetime_start;
 		merged_data_row.datetime_end = current_row_of_data.datetime_end;
 		intermediate_rows_of_data.push_back(merged_data_row);
@@ -1558,6 +1583,10 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 		// merge from:
 		// first_incoming_row.datetime_start to first_incoming_row.datetime_end
 		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row);
+		if (failed)
+		{
+			return false;
+		}
 		merged_data_row.datetime_start = first_incoming_row.datetime_start;
 		merged_data_row.datetime_end = first_incoming_row.datetime_end;
 		intermediate_rows_of_data.push_back(merged_data_row);
@@ -1583,6 +1612,15 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 		if (current_binding == SQLExecutor::NULL_BINDING && first_incoming_row_binding == SQLExecutor::NULL_BINDING)
 		{
 			merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+			if (current_row_of_data.is_index_a_primary_key[current_index])
+			{
+				merged_data_row.is_index_a_primary_key.push_back(true);
+				merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+			}
+			else
+			{
+				merged_data_row.is_index_a_primary_key.push_back(false);
+			}
 		}
 		else
 		{
@@ -1594,12 +1632,30 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 						{
 							merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 							merged_data_row.current_parameter_ints.push_back(current_row_of_data.current_parameter_ints[int_index_current]);
+							if (current_row_of_data.is_index_a_primary_key[current_index])
+							{
+								merged_data_row.is_index_a_primary_key.push_back(true);
+								merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, merged_data_row.current_parameter_ints.size()-1));
+							}
+							else
+							{
+								merged_data_row.is_index_a_primary_key.push_back(false);
+							}
 						}
 						break;
 					case SQLExecutor::STRING:
 						{
 							merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
 							merged_data_row.current_parameter_strings.push_back(current_row_of_data.current_parameter_strings[string_index_current]);
+							if (current_row_of_data.is_index_a_primary_key[current_index])
+							{
+								merged_data_row.is_index_a_primary_key.push_back(true);
+								merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, merged_data_row.current_parameter_strings.size()-1));
+							}
+							else
+							{
+								merged_data_row.is_index_a_primary_key.push_back(false);
+							}
 						}
 						break;
 				}
@@ -1612,12 +1668,30 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 						{
 							merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 							merged_data_row.current_parameter_ints.push_back(first_incoming_row.current_parameter_ints[int_index_incoming]);
+							if (current_row_of_data.is_index_a_primary_key[current_index])
+							{
+								merged_data_row.is_index_a_primary_key.push_back(true);
+								merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, merged_data_row.current_parameter_ints.size()-1));
+							}
+							else
+							{
+								merged_data_row.is_index_a_primary_key.push_back(false);
+							}
 						}
 						break;
 					case SQLExecutor::STRING:
 						{
 							merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
 							merged_data_row.current_parameter_strings.push_back(first_incoming_row.current_parameter_strings[string_index_incoming]);
+							if (current_row_of_data.is_index_a_primary_key[current_index])
+							{
+								merged_data_row.is_index_a_primary_key.push_back(true);
+								merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, merged_data_row.current_parameter_strings.size()-1));
+							}
+							else
+							{
+								merged_data_row.is_index_a_primary_key.push_back(false);
+							}
 						}
 						break;
 				}
@@ -1654,6 +1728,13 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 		++current_index;
 	});
+
+	// sanity checks
+	if (current_row_of_data.indices_of_primary_key_columns.size() != first_incoming_row.indices_of_primary_key_columns.size())
+	{
+		failed = true;
+		return merged_data_row;
+	}
 
 	return merged_data_row;
 }

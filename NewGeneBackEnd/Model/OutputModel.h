@@ -361,6 +361,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
 
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns;
+						std::vector<bool> is_index_a_primary_key;
 
 						bool failed;
 
