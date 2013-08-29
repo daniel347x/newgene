@@ -1747,38 +1747,135 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 #	endif
 
 	bool match_failed = false;
-	std::for_each(current_row_of_data.indices_of_primary_key_columns.cbegin(), current_row_of_data.indices_of_primary_key_columns.cend(), [this, &current_row_of_data, &previous_row_of_data, &match_failed](std::pair<SQLExecutor::WHICH_BINDING, int> const & primary_key_index_info)
+	int entry_number = 0;
+	std::for_each(current_row_of_data.indices_of_primary_key_columns.cbegin(), current_row_of_data.indices_of_primary_key_columns.cend(), [this, &entry_number, &current_row_of_data, &previous_row_of_data, &match_failed](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
+
 		if (match_failed)
 		{
 			return;
 		}
-		SQLExecutor::WHICH_BINDING binding = primary_key_index_info.first;
-		int index = primary_key_index_info.second;
-		switch (binding)
+
+		SQLExecutor::WHICH_BINDING binding_current = current_info.first;
+		int index_current = current_info.second;
+		std::int64_t data_int_current = 0;
+		std::string data_string_current;
+		bool data_null_current = false;
+
+		SQLExecutor::WHICH_BINDING binding_previous = previous_row_of_data.indices_of_primary_key_columns[entry_number].first;
+		int index_previous = previous_row_of_data.indices_of_primary_key_columns[entry_number].second;
+		std::int64_t data_int_previous = 0;
+		std::string data_string_previous;
+		bool data_null_previous = false;
+
+		switch (binding_current)
 		{
+
 			case SQLExecutor::INT64:
 				{
-					if (current_row_of_data.current_parameter_ints[index] != previous_row_of_data.current_parameter_ints[index])
+
+					data_int_current = current_row_of_data.current_parameter_ints[index_current];
+
+					switch (binding_previous)
 					{
-						match_failed = true;
+						case SQLExecutor::INT64:
+							{
+								data_int_previous = previous_row_of_data.current_parameter_ints[index_previous];
+								if (data_int_current != data_int_previous)
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::STRING:
+							{
+								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous];
+								if (boost::lexical_cast<std::int64_t>(data_string_previous) != data_int_current)
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::NULL_BINDING:
+							{
+								data_null_previous = true;
+								match_failed = true;
+							}
+							break;
 					}
+
 				}
 				break;
+
 			case SQLExecutor::STRING:
 				{
-					if (!boost::iequals(current_row_of_data.current_parameter_strings[index], previous_row_of_data.current_parameter_strings[index]))
+
+					data_string_current = current_row_of_data.current_parameter_strings[index_current];
+
+					switch (binding_previous)
 					{
-						match_failed = true;
+						case SQLExecutor::INT64:
+							{
+								data_int_previous = previous_row_of_data.current_parameter_ints[index_previous];
+								if (boost::lexical_cast<std::int64_t>(data_string_current) != data_int_previous)
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::STRING:
+							{
+								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous];
+								if (!boost::iequals(data_string_current, data_string_previous))
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::NULL_BINDING:
+							{
+								data_null_previous = true;
+								match_failed = true;
+							}
+							break;
 					}
+
 				}
 				break;
+
 			case SQLExecutor::NULL_BINDING:
 				{
-					// nothing to do
+
+					data_null_current = true;
+
+					switch (binding_previous)
+					{
+						case SQLExecutor::INT64:
+							{
+								data_int_previous = previous_row_of_data.current_parameter_ints[index_previous];
+								match_failed = true;
+							}
+							break;
+						case SQLExecutor::STRING:
+							{
+								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous];
+								match_failed = true;
+							}
+							break;
+						case SQLExecutor::NULL_BINDING:
+							{
+								data_null_previous = true;
+							}
+							break;
+					}
+
 				}
 				break;
+
 		}
+
+		++entry_number;
+
 	});
 
 	return !match_failed;
