@@ -299,7 +299,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						enum WHICH_BINDING
 						{
-							UNKNOWN_BINDING
+							  UNKNOWN_BINDING
 							, NULL_BINDING
 							, STRING
 							, INT64
