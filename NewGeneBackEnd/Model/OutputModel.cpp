@@ -326,6 +326,10 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		return;
 	}
 
+	// The structure of the table incoming to the following function is this:
+	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
+	//
+	// ... and so is the table that comes out
 	SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(intermediate_merging_of_primary_groups_column_sets.back().second, 0);
 	preliminary_sorted_kad_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(preliminary_sorted_kad_result);
@@ -335,6 +339,11 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		return;
 	}
 
+	// The structure of the table incoming to the following function is this:
+	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
+	//
+	// The structure of the table that comes out is:
+	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR_Z
 	SqlAndColumnSet duplicates_removed_kad_result = DuplicatesRemovedForTopLevelVariableGroup(preliminary_sorted_kad_result.second, 0);
 	intermediate_merging_of_primary_groups_column_sets.push_back(duplicates_removed_kad_result);
 	if (failed)
@@ -342,9 +351,11 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		return;
 	}
 
+	// The structure of the following table is:
+	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR_Z
 	all_merged_results_unformatted = duplicates_removed_kad_result;
 
-	// FULL OUTER JOIN on the previous "merge" function here
+	// FULL OUTER JOIN on the previous "merge" function above
 
 }
 
