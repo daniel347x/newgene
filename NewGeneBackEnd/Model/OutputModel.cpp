@@ -1144,10 +1144,10 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			first_variable_group = possible_duplicate_view_column.variable_group_associated_with_current_inner_table;
 		}
 
+		bool not_first_variable_group = false;
 		if (!possible_duplicate_view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
 		{
-			++current_column;
-			return;
+			not_first_variable_group = true;
 		}
 
 		bool add_as_primary_key_column = false;
@@ -1168,6 +1168,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					add_as_primary_key_column = true;
 				}
 			}
+		}
+
+		if (not_first_variable_group)
+		{
+			add_as_primary_key_column = false;
 		}
 
 		column_data_type = sqlite3_column_type(stmt_result, current_column);
