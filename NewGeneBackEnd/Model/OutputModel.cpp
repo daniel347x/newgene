@@ -225,17 +225,54 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	// Datetime columns incoming:
 	// The "X" tables have a single COLUMN_TYPE__DATETIMESTART and COLUMN_TYPE__DATETIMEEND (or COLUMN_TYPE__DATETIMESTART_INTERNAL and COLUMN_TYPE__DATETIMEEND_INTERNAL, if added by the generator)
 	// The "XR" tables have that, followed by COLUMN_TYPE__DATETIMESTART_MERGED and COLUMN_TYPE__DATETIMEEND_MERGED
-	// The X and XR table come in pairs; i.e. X XR X XR X XR X XR ... (one pair per multiplicity of the top-level variable group followed by one pair per multiplicity per each child variable group, noting that
+	// The X tables compose the XR table come in pairs; i.e. XR XR XR XR ... (one per multiplicity of the top-level variable group followed by one per multiplicity per each child variable group, noting that
 	//    the child multiplicity might occur on a different DMU category and might have a different numeric value)
-	// The individual top-level primary variable group results have all of the above, followed by a SINGLE COLUMN_TYPE__DATETIMESTART_MERGED_FINAL and COLUMN_TYPE__DATETIMEEND_MERGED_FINAL pair at the end of the entire
-	//    sequence of X XR X XR ... pairs, per top-level primary variable group.
+	// The individual top-level primary variable group results have all of the above, followed by a SINGLE COLUMN_TYPE__DATETIMESTART_MERGED_FINAL and COLUMN_TYPE__DATETIMEEND_MERGED_FINAL pair
+	//    (resulting from the removal of duplicates) at the end of the entire
+	//    sequence of XR XR ... pairs, per top-level primary variable group.
+	//
+	// So we have, for the incoming table:
+	// XR XR XR ... XRMF
+	//
+	// The final inner table, XRMF, of the incoming table, then, has 3 sets:
+	// COLUMN_TYPE__DATETIMESTART COLUMN_TYPE__DATETIMESTART_MERGED COLUMN_TYPE__DATETIMESTART_MERGED_FINAL
+
+
+
+	// XR tables:
+	// COLUMN_TYPE__DATETIMESTART
+	// COLUMN_TYPE__DATETIMESTART_MERGED
+
+	// XRMF tables:
+	// COLUMN_TYPE__DATETIMESTART
+	// COLUMN_TYPE__DATETIMESTART_MERGED
+	// COLUMN_TYPE__DATETIMESTART_MERGED_FINAL
+
+	// XRMFXR tables:
+	// COLUMN_TYPE__DATETIMESTART
+	// COLUMN_TYPE__DATETIMESTART_MERGED
+	// COLUMN_TYPE__DATETIMESTART_MERGED_FINAL
+	// COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS
+
+	// XRMFXR_Z tables:
+	// COLUMN_TYPE__DATETIMESTART
+	// COLUMN_TYPE__DATETIMESTART_MERGED
+	// COLUMN_TYPE__DATETIMESTART_MERGED_FINAL
+	// COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS
+	// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT
 
 	if (primary_group_final_results.size() == 1)
 	{
+		// If there is only one top-level primary group, skip the COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS and COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS columns,
+		// and just use the pre-existing single COLUMN_TYPE__DATETIMESTART_MERGED_FINAL and COLUMN_TYPE__DATETIMEEND_MERGED_FINAL.
+		//
+		// The following table is XRMF
 		intermediate_merging_of_primary_groups_column_sets.push_back(primary_group_final_results[0]);
 		all_merged_results_unformatted = intermediate_merging_of_primary_groups_column_sets.back();
 		return;
 	}
+
+	// The incoming table is XR XR ... XR XRMF
 
 	SqlAndColumnSet intermediate_merge_of_top_level_primary_group_results = primary_group_final_results[0];
 	intermediate_merge_of_top_level_primary_group_results.second.view_number = 1;
@@ -245,6 +282,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	});
 	intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
 
+	// The following table is XR XR ... XR XRMFXR
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryMergeXRTable(intermediate_merging_of_primary_groups_column_sets.back().second);
 	xr_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(xr_table_result);
@@ -260,6 +298,8 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	{
 		if (count != 1)
 		{
+			// The structure of the table returned from the following function is this:
+			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMF
 			intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, intermediate_merging_of_primary_groups_column_sets.back(), count);
 			intermediate_merge_of_top_level_primary_group_results.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(intermediate_merge_of_top_level_primary_group_results);
@@ -269,6 +309,8 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 				return;
 			}
 
+			// The structure of the table returned from the following function is this:
+			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
 			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count);
 			intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
 			if (failed)
