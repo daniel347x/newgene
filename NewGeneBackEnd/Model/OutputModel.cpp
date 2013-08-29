@@ -1404,7 +1404,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	}
 
 
-	int const minimum_desired_rows_per_transaction = 1024;
+	int const minimum_desired_rows_per_transaction = 256;
 	int current_rows_added = 0;
 	int current_rows_added_since_execution = 0;
 	std::string sql_add_xr_row;
@@ -5167,7 +5167,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 
 
-	int const minimum_desired_rows_per_transaction = 1024;
+	int const minimum_desired_rows_per_transaction = 256;
 
 	int current_rows_added = 0;
 	int current_rows_added_since_execution = 0;
