@@ -5004,11 +5004,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	std::string datetime_end_col_name_no_uuid;
 	if (xr_table_category == OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP || xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
 	{
-		datetime_end_col_name_no_uuid += "DATETIME_ROW_START_MERGED";
+		datetime_end_col_name_no_uuid += "DATETIME_ROW_END_MERGED";
 	}
 	else if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
 	{
-		datetime_end_col_name_no_uuid += "DATETIME_ROW_START_MERGED_BETWEEN_FINALS";
+		datetime_end_col_name_no_uuid += "DATETIME_ROW_END_MERGED_BETWEEN_FINALS";
 	}
 	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
 	datetime_end_col_name += "_";
