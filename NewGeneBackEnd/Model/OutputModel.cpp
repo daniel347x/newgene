@@ -1894,7 +1894,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 			switch (the_binding)
 			{
 
-				case SQLITE_INTEGER:
+				case SQLExecutor::INT64:
 					{
 						data_int64 = row_of_data.current_parameter_ints[int_index];
 						++int_index;
@@ -1903,16 +1903,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 					}
 					break;
 
-				case SQLITE_FLOAT:
-					{
-						// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
-						// Todo: Error message
-						failed = true;
-						return; // from lambda
-					}
-					break;
-
-				case SQLITE_TEXT:
+				case SQLExecutor::STRING:
 					{
 						data_string = row_of_data.current_parameter_strings[string_index];
 						++string_index;
@@ -1921,15 +1912,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 					}
 					break;
 
-				case SQLITE_BLOB:
-					{
-						// Todo: Error message
-						failed = true;
-						return; // from lambda
-					}
-					break;
-
-				case SQLITE_NULL:
+				case SQLExecutor::NULL_BINDING:
 					{
 						bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
 					}
