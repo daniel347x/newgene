@@ -237,9 +237,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	char c[256];
 
-	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
-	std::vector<SQLExecutor> & sql_strings = result.first;
-	ColumnsInTempView & result_columns = result.second;
+	final_result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	std::vector<SQLExecutor> & sql_strings = final_result.first;
+	ColumnsInTempView & result_columns = final_result.second;
 
 	std::string view_name = "KAD_Results";
 	result_columns.view_name_no_uuid = view_name;
@@ -345,8 +345,6 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	sql_string += " FROM ";
 	sql_string += all_merged_results_unformatted.second.view_name;
-
-	final_result = result;
 
 	final_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(final_result);
