@@ -217,6 +217,111 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	// Just do a SELECT ... AS ... to pluck out the desired columns and give them the proper names.
 	// Save this in "final_result"
 
+	char c[256];
+
+	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	std::vector<SQLExecutor> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+
+	std::string view_name = "KAD_Results";
+	result_columns.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	result_columns.view_name = view_name;
+
+	sql_strings.push_back(SQLExecutor(db));
+	std::string & sql_string = sql_strings.back().sql;
+
+	sql_string = "CREATE TABLE ";
+	sql_string += result_columns.view_name;
+	sql_string += " AS SELECT ";
+
+	WidgetInstanceIdentifier first_variable_group;
+
+	bool first = true;
+	int column_index = 0;
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&sql_string, &first, &first_variable_group, &result_columns, &variable_group, &uoa, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	{
+
+		if (column_index == 0)
+		{
+			first_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
+		}
+
+		if (!unformatted_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+		{
+			if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			{
+				return; // Only display primary key columns from the first primary variable group
+			}
+		}
+
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+		{
+			if (unformatted_column.current_multiplicity__corresponding_to__current_inner_table != 1)
+			{
+				if (unformatted_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+				{
+					return; // only display primary key columns of multiplicity 1 once - from the first inner table of the first primary variable group
+				}
+			}
+		}
+
+		switch (unformatted_column.column_type)
+		{
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_FINAL:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS:
+				{
+					return; // only display a single pair of time range columns
+				}
+				break;
+		}
+
+		result_columns.columns_in_view.push_back(unformatted_column);
+		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
+
+		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
+
+		switch (unformatted_column.column_type)
+		{
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
+				{
+					formatted_column.column_name_in_temporary_table = "DATETIME-START";
+				}
+				break;
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT:
+				{
+					formatted_column.column_name_in_temporary_table = "DATETIME-END";
+				}
+				break;
+		}
+
+		if (!first)
+		{
+			sql_string += ", ";
+		}
+		first = false;
+
+		sql_string += unformatted_column.column_name_in_temporary_table;
+		sql_string += " AS ";
+		sql_string += formatted_column.column_name_in_temporary_table;
+		++column_index;
+
+	});
+
+	sql_string += " FROM ";
+	sql_string += all_merged_results_unformatted.second.view_name;
+
+	final_result = result;
+
 }
 
 void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
