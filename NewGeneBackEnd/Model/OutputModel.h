@@ -396,9 +396,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
+				SqlAndColumnSet CreateInitialPrimaryMergeXRTable(ColumnsInTempView const & primary_variable_group_x1_columns);
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number);
 				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const child_set_number, int const current_child_view_name_index);
-				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_columns, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index);
+				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index);
 				SqlAndColumnSet CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(ColumnsInTempView const & final_xr_columns, int const primary_group_number);
 				SqlAndColumnSet DuplicatesRemovedForTopLevelVariableGroup(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number);
 
