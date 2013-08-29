@@ -2189,6 +2189,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	});
 
 	// Finally, order by the time range columns
+	sql_create_final_primary_group_table += ", ";
 	sql_create_final_primary_group_table += final_xr_or_xrmfxr_columns.columns_in_view[final_xr_or_xrmfxr_columns.columns_in_view.size()-2].column_name_in_temporary_table; // final merged datetime start column
 	sql_create_final_primary_group_table += ", ";
 	sql_create_final_primary_group_table += final_xr_or_xrmfxr_columns.columns_in_view[final_xr_or_xrmfxr_columns.columns_in_view.size()-1].column_name_in_temporary_table; // final merged datetime end column
