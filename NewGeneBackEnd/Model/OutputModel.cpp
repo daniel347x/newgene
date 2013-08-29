@@ -271,7 +271,10 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		++count;
 	});
 
+
+	// DN todo:
 	// Eliminate duplicates from final XR table
+	// FULL OUTER JOIN on the previous "merge" function here
 
 	// Save temporary table from the final iteration of the merging of the primary groups into "all_merged_results_unformatted"
 
