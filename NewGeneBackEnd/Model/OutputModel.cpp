@@ -321,12 +321,30 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		++count;
 	});
 
+	if (failed)
+	{
+		return;
+	}
 
-	// DN todo:
-	// Eliminate duplicates from final XR table (two-stage process, as for the final result for individual top-level primary variable groups)
+	SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(intermediate_merging_of_primary_groups_column_sets.back().second, 0);
+	preliminary_sorted_kad_result.second.most_recent_sql_statement_executed__index = -1;
+	ExecuteSQL(preliminary_sorted_kad_result);
+	intermediate_merging_of_primary_groups_column_sets.push_back(preliminary_sorted_kad_result);
+	if (failed)
+	{
+		return;
+	}
+
+	SqlAndColumnSet duplicates_removed_kad_result = DuplicatesRemovedForTopLevelVariableGroup(preliminary_sorted_kad_result.second, 0);
+	intermediate_merging_of_primary_groups_column_sets.push_back(duplicates_removed_kad_result);
+	if (failed)
+	{
+		return;
+	}
+
+	all_merged_results_unformatted = duplicates_removed_kad_result;
+
 	// FULL OUTER JOIN on the previous "merge" function here
-
-	// Save temporary table from the final iteration of the merging of the primary groups into "all_merged_results_unformatted"
 
 }
 
@@ -836,14 +854,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			sql_and_column_sets.push_back(x_table_result);
 			if (failed)
 			{
-				return SqlAndColumnSet();
+				return;
 			}
 
 			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
 			sql_and_column_sets.push_back(xr_table_result);
 			if (failed)
 			{
-				return SqlAndColumnSet();
+				return;
 			}
 
 			++current_child_view_name_index;
@@ -852,6 +870,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		++child_set_number;
 
 	});
+
+	if (failed)
+	{
+		return SqlAndColumnSet();
+	}
 
 	SqlAndColumnSet preliminary_sorted_top_level_variable_group_result = CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(xr_table_result.second, primary_group_number);
 	preliminary_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
