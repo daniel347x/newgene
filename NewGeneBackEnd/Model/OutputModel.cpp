@@ -344,7 +344,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	//
 	// The structure of the table that comes out is:
 	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR_Z
-	SqlAndColumnSet duplicates_removed_kad_result = DuplicatesRemovedForTopLevelVariableGroup(preliminary_sorted_kad_result.second, 0);
+	SqlAndColumnSet duplicates_removed_kad_result = RemoveDuplicates(preliminary_sorted_kad_result.second, 0);
 	intermediate_merging_of_primary_groups_column_sets.push_back(duplicates_removed_kad_result);
 	if (failed)
 	{
@@ -896,7 +896,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
-	SqlAndColumnSet duplicates_removed_top_level_variable_group_result = DuplicatesRemovedForTopLevelVariableGroup(preliminary_sorted_top_level_variable_group_result.second, primary_group_number);
+	SqlAndColumnSet duplicates_removed_top_level_variable_group_result = RemoveDuplicates(preliminary_sorted_top_level_variable_group_result.second, primary_group_number);
 	sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
 	if (failed)
 	{
@@ -915,36 +915,43 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	datetime_start = 0;
 	datetime_end = 0;
 	failed = false;
-	primary_variable_group_associated_with_row = WidgetInstanceIdentifier();
-	primary_uoa_associated_with_row = WidgetInstanceIdentifier();
 	indices_of_primary_key_columns.clear();
 }
 
-void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result)
+void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView & sorted_result_columns, sqlite3_stmt * stmt_result)
 {
 
 	Clear();
 
-	primary_variable_group_associated_with_row = preliminary_sorted_top_level_variable_group_result_columns.columns_in_view[0].variable_group_associated_with_current_inner_table;
-	primary_uoa_associated_with_row = preliminary_sorted_top_level_variable_group_result_columns.columns_in_view[0].uoa_associated_with_variable_group_associated_with_current_inner_table;
-
-	int datetime_start_column_index_of_possible_duplicate = (int)preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.size() - 2;
-	int datetime_end_column_index_of_possible_duplicate = (int)preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.size() - 1;
+	int datetime_start_column_index_of_possible_duplicate = (int)sorted_result_columns.columns_in_view.size() - 2;
+	int datetime_end_column_index_of_possible_duplicate = (int)sorted_result_columns.columns_in_view.size() - 1;
 	std::int64_t datetime_start_of_possible_duplicate = sqlite3_column_int64(stmt_result, datetime_start_column_index_of_possible_duplicate);
 	std::int64_t datetime_end_of_possible_duplicate = sqlite3_column_int64(stmt_result, datetime_end_column_index_of_possible_duplicate);
 
 	datetime_start = datetime_start_of_possible_duplicate;
 	datetime_end = datetime_end_of_possible_duplicate;
 
+	WidgetInstanceIdentifier first_variable_group;
+
 	int column_data_type = 0;
 	std::int64_t data_int64 = 0;
 	std::string data_string;
 	long double data_long = 0.0;
 	int current_column = 0;
-	std::for_each(preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.begin(), preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.end(), [this, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView & possible_duplicate_view_column)
+	std::for_each(sorted_result_columns.columns_in_view.begin(), sorted_result_columns.columns_in_view.end(), [this, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView & possible_duplicate_view_column)
 	{
 
 		if (failed)
+		{
+			return;
+		}
+
+		if (current_column == 0)
+		{
+			first_variable_group = possible_duplicate_view_column.variable_group_associated_with_current_inner_table;
+		}
+
+		if (!possible_duplicate_view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
 		{
 			return;
 		}
@@ -1040,19 +1047,33 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::DuplicatesRemovedForTopLevelVariableGroup(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates(ColumnsInTempView & sorted_result_columns, int const primary_group_number)
 {
 
 	char c[256];
+
+	bool is_xrmfxr_table = false;
+	if (primary_group_number == 0)
+	{
+		is_xrmfxr_table = true;
+	}
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
 
-	result_columns = preliminary_sorted_top_level_variable_group_result_columns;
+	result_columns = sorted_result_columns;
 	result_columns.most_recent_sql_statement_executed__index = -1;
 
-	std::string view_name = "Z";
+	std::string view_name;
+	if (!is_xrmfxr_table)
+	{
+		view_name += "Z";
+	}
+	else
+	{
+		view_name += "KAD";
+	}
 	view_name += itoa(primary_group_number, c, 10);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
@@ -1065,7 +1086,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 	sql_create_empty_table += "CREATE TABLE ";
 	sql_create_empty_table += result_columns.view_name;
 	sql_create_empty_table += " AS SELECT * FROM ";
-	sql_create_empty_table += preliminary_sorted_top_level_variable_group_result_columns.view_name;
+	sql_create_empty_table += sorted_result_columns.view_name;
 	sql_create_empty_table += " WHERE 0";
 	sql_strings.push_back(SQLExecutor(db, sql_create_empty_table));
 
@@ -1074,10 +1095,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 
 	// The variable group is that of the primary variable group for this final result set,
 	// which is obtained from the first column
-	WidgetInstanceIdentifier variable_group = preliminary_sorted_top_level_variable_group_result_columns.columns_in_view[0].variable_group_associated_with_current_inner_table;
-	WidgetInstanceIdentifier uoa = preliminary_sorted_top_level_variable_group_result_columns.columns_in_view[0].uoa_associated_with_variable_group_associated_with_current_inner_table;
+	WidgetInstanceIdentifier variable_group = sorted_result_columns.columns_in_view[0].variable_group_associated_with_current_inner_table;
+	WidgetInstanceIdentifier uoa = sorted_result_columns.columns_in_view[0].uoa_associated_with_variable_group_associated_with_current_inner_table;
 
-	std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START_MERGED_FINAL";
+	std::string datetime_start_col_name_no_uuid;
+	if (!is_xrmfxr_table)
+	{
+		datetime_start_col_name_no_uuid = "DATETIME_ROW_START_MERGED_FINAL";
+	}
+	else
+	{
+		datetime_start_col_name_no_uuid = "DATETIMESTART_MERGED_KAD_OUTPUT";
+	}
 	std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
 	datetime_start_col_name += "_";
 	datetime_start_col_name += newUUID(true);
@@ -1094,14 +1123,32 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
 	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
 	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
-	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_FINAL;
-	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
-	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
+	if (!is_xrmfxr_table)
+	{
+		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_FINAL;
+	}
+	else
+	{
+		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT;
+	}
+	if (!is_xrmfxr_table)
+	{
+		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
+		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
+	}
 	datetime_start_column.column_name_in_original_data_table = "";
 	datetime_start_column.inner_table_set_number = -1;
 	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 
-	std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED_FINAL";
+	std::string datetime_end_col_name_no_uuid;
+	if (!is_xrmfxr_table)
+	{
+		datetime_end_col_name_no_uuid = "DATETIME_ROW_END_MERGED_FINAL";
+	}
+	else
+	{
+		datetime_end_col_name_no_uuid = "DATETIMEEND_MERGED_KAD_OUTPUT";
+	}
 	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
 	datetime_end_col_name += "_";
 	datetime_end_col_name += newUUID(true);
@@ -1118,9 +1165,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
 	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
 	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
-	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL;
-	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
-	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
+	if (!is_xrmfxr_table)
+	{
+		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL;
+	}
+	else
+	{
+		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT;
+	}
+	if (!is_xrmfxr_table)
+	{
+		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
+		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
+	}
 	datetime_end_column.column_name_in_original_data_table = "";
 	datetime_end_column.inner_table_set_number = -1;
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
@@ -1143,7 +1200,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
 	sqlite3_stmt * the_prepared_stmt = nullptr;
 
-	ObtainData(preliminary_sorted_top_level_variable_group_result_columns);
+	ObtainData(sorted_result_columns);
 
 	if (failed)
 	{
@@ -1160,7 +1217,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 	while (StepData())
 	{
 
-		current_row_of_data.PopulateFromCurrentRowInDatabase(preliminary_sorted_top_level_variable_group_result_columns, stmt_result);
+		current_row_of_data.PopulateFromCurrentRowInDatabase(sorted_result_columns, stmt_result);
 		failed = current_row_of_data.failed;
 		if (failed)
 		{
@@ -1180,7 +1237,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 		if (!primary_keys_match)
 		{
 			outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-			WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, preliminary_sorted_top_level_variable_group_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+			WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 			if (failed)
 			{
 				return result;
@@ -1253,7 +1310,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Dupl
 	}
 
 	outgoing_rows_of_data.insert(outgoing_rows_of_data.cbegin(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, preliminary_sorted_top_level_variable_group_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 	if (failed)
 	{
 		return result;
@@ -1681,7 +1738,8 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 		}
 
 		// Set the list of bound parameters, regardless of whether or not the SQL string was created
-		int index = 0;
+		int int_index = 0;
+		int string_index = 0;
 		char cindex[256];
 		bool first_column_value = true;
 		std::int64_t data_int64 = 0;
@@ -1690,7 +1748,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 		bound_parameter_strings.clear();
 		bound_parameter_ints.clear();
 		bound_parameter_which_binding_to_use.clear();
-		std::for_each(row_of_data.current_parameter_which_binding_to_use.cbegin(), row_of_data.current_parameter_which_binding_to_use.cend(), [this, &row_of_data, &data_int64, &data_string, &data_long, &data_is_null, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](SQLExecutor::WHICH_BINDING const & the_binding)
+		std::for_each(row_of_data.current_parameter_which_binding_to_use.cbegin(), row_of_data.current_parameter_which_binding_to_use.cend(), [this, &row_of_data, &data_int64, &data_string, &data_long, &first_column_value, &int_index, &string_index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](SQLExecutor::WHICH_BINDING const & the_binding)
 		{
 
 			if (failed)
@@ -1704,6 +1762,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 				case SQLITE_INTEGER:
 					{
 						data_int64 = row_of_data.current_parameter_ints[int_index];
+						++int_index;
 						bound_parameter_ints.push_back(data_int64);
 						bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 					}
@@ -1721,6 +1780,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 				case SQLITE_TEXT:
 					{
 						data_string = row_of_data.current_parameter_strings[string_index];
+						++string_index;
 						bound_parameter_strings.push_back(data_string);
 						bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
 					}
@@ -1748,8 +1808,6 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 					}
 
 			}
-
-			++index;
 
 		});
 

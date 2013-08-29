@@ -360,9 +360,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::int64_t> current_parameter_ints;
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
 
-						WidgetInstanceIdentifier primary_variable_group_associated_with_row;
-						WidgetInstanceIdentifier primary_uoa_associated_with_row;
-
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns;
 
 						bool failed;
@@ -403,7 +400,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const child_set_number, int const current_child_view_name_index);
 				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index);
 				SqlAndColumnSet CreateSortedTable(ColumnsInTempView const & final_xr_columns, int const primary_group_number);
-				SqlAndColumnSet DuplicatesRemovedForTopLevelVariableGroup(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number);
+				SqlAndColumnSet RemoveDuplicates(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number);
 
 				// Helper functions used by the functions above
 				void BeginNewTransaction();
