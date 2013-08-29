@@ -330,7 +330,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
 	//
 	// ... and so is the table that comes out
-	SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(intermediate_merging_of_primary_groups_column_sets.back().second, 0);
+	SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTable(intermediate_merging_of_primary_groups_column_sets.back().second, 0);
 	preliminary_sorted_kad_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(preliminary_sorted_kad_result);
 	intermediate_merging_of_primary_groups_column_sets.push_back(preliminary_sorted_kad_result);
@@ -887,7 +887,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
-	SqlAndColumnSet preliminary_sorted_top_level_variable_group_result = CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(xr_table_result.second, primary_group_number);
+	SqlAndColumnSet preliminary_sorted_top_level_variable_group_result = CreateSortedTable(xr_table_result.second, primary_group_number);
 	preliminary_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(preliminary_sorted_top_level_variable_group_result);
 	sql_and_column_sets.push_back(preliminary_sorted_top_level_variable_group_result);
@@ -1768,19 +1768,33 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateSortedTableOfPreliminaryFinalResultsForTopLevelVariableGroup(ColumnsInTempView const & final_xr_columns, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateSortedTable(ColumnsInTempView const & final_xr_or_xrmfxr_columns, int const primary_group_number)
 {
 
 	char c[256];
+
+	bool is_xrmfxr_table = false;
+	if (primary_group_number == 0)
+	{
+		is_xrmfxr_table = true;
+	}
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
 
-	result_columns = final_xr_columns;
+	result_columns = final_xr_or_xrmfxr_columns;
 	result_columns.most_recent_sql_statement_executed__index = -1;
 
-	std::string view_name = "Y";
+	std::string view_name;
+	if (!is_xrmfxr_table)
+	{
+		view_name += "Y";
+	}
+	else
+	{
+		view_name += "MFXRMF";
+	}
 	view_name += itoa(primary_group_number, c, 10);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
@@ -1793,17 +1807,31 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_create_final_primary_group_table += "CREATE TABLE ";
 	sql_create_final_primary_group_table += result_columns.view_name;
 	sql_create_final_primary_group_table += " AS SELECT * FROM ";
-	sql_create_final_primary_group_table += final_xr_columns.view_name;
+	sql_create_final_primary_group_table += final_xr_or_xrmfxr_columns.view_name;
 
 	bool first = true;
+
+	WidgetInstanceIdentifier first_variable_group;
 
 	if (highest_multiplicity_primary_uoa > 1)
 	{
 
 		// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
+		first = true;
 		int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1](ColumnsInTempView::ColumnInTempView & view_column)
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &first_variable_group, &first, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1](ColumnsInTempView::ColumnInTempView & view_column)
 		{
+			if (first)
+			{
+				first_variable_group = view_column.variable_group_associated_with_current_inner_table;
+			}
+			first = false;
+
+			if (!view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+			{
+				return;
+			}
+
 			if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
 				if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
@@ -1820,12 +1848,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		});
 
 		// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
+		first = true;
 		for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
 		{
 			for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
 			{
-				std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_create_final_primary_group_table, &first](ColumnsInTempView::ColumnInTempView & view_column)
+				std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &first_variable_group, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_create_final_primary_group_table, &first, &is_xrmfxr_table](ColumnsInTempView::ColumnInTempView & view_column)
 				{
+					if (!view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+					{
+						return;
+					}
 					if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 					{
 						if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
@@ -1867,20 +1900,48 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	// Now order by remaining primary key columns (with multiplicity 1)
 	int current_column = 0;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_create_final_primary_group_table, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &first_variable_group, &sql_create_final_primary_group_table, &result_columns, &current_column, &first, &is_xrmfxr_table](ColumnsInTempView::ColumnInTempView & view_column)
 	{
-		if (current_column >= inner_table_column_count)
+		if (is_xrmfxr_table)
 		{
-			return;
+			if (!view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+			{
+				return;
+			}
+			if (view_column.current_multiplicity__corresponding_to__current_inner_table > 1)
+			{
+				return;
+			}
+		}
+		else
+		{
+			if (current_column >= inner_table_no_multiplicities_column_count)
+			{
+				return;
+			}
 		}
 		// Determine how many columns there are corresponding to the DMU category
 		int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
 		int column_count_nested = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView & view_column_nested)
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &is_xrmfxr_table, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView & view_column_nested)
 		{
-			if (column_count_nested >= inner_table_column_count)
+			if (is_xrmfxr_table)
 			{
-				return;
+				if (!view_column_nested.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+				{
+					return;
+				}
+				if (view_column_nested.current_multiplicity__corresponding_to__current_inner_table > 1)
+				{
+					return;
+				}
+			}
+			else
+			{
+				if (column_count_nested >= inner_table_no_multiplicities_column_count)
+				{
+					return;
+				}
 			}
 			if (view_column_nested.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
@@ -1935,9 +1996,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	});
 
 	// Finally, order by the time range columns
-	sql_create_final_primary_group_table += final_xr_columns.columns_in_view[final_xr_columns.columns_in_view.size()-2].column_name_in_temporary_table; // final merged datetime start column
+	sql_create_final_primary_group_table += final_xr_or_xrmfxr_columns.columns_in_view[final_xr_or_xrmfxr_columns.columns_in_view.size()-2].column_name_in_temporary_table; // final merged datetime start column
 	sql_create_final_primary_group_table += ", ";
-	sql_create_final_primary_group_table += final_xr_columns.columns_in_view[final_xr_columns.columns_in_view.size()-1].column_name_in_temporary_table; // final merged datetime end column
+	sql_create_final_primary_group_table += final_xr_or_xrmfxr_columns.columns_in_view[final_xr_or_xrmfxr_columns.columns_in_view.size()-1].column_name_in_temporary_table; // final merged datetime end column
 
 	sql_strings.push_back(SQLExecutor(db, sql_create_final_primary_group_table));
 
@@ -2970,7 +3031,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns.has_no_datetime_columns = false;
 
 	int first_full_table_column_count = 0;
-	inner_table_column_count = 0;
+	inner_table_no_multiplicities_column_count = 0;
 	int second_table_column_count = 0;
 
 	std::vector<std::string> previous_column_names_first_table;
@@ -3001,7 +3062,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 		if (in_first_inner_table)
 		{
-			++inner_table_column_count;
+			++inner_table_no_multiplicities_column_count;
 		}
 		if (reached_first_datetime_start_merged_column && reached_first_datetime_end_merged_column)
 		{
@@ -3178,7 +3239,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					int column_count = 0;
 					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &sql_string, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 					{
-						if (column_count < inner_table_column_count)
+						if (column_count < inner_table_no_multiplicities_column_count)
 						{
 							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
 							{
@@ -3440,7 +3501,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
 		{
 
-			if (current_column >= inner_table_column_count)
+			if (current_column >= inner_table_no_multiplicities_column_count)
 			{
 				return;
 			}
@@ -3450,7 +3511,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			int column_count_nested = 0;
 			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column_nested)
 			{
-				if (column_count_nested >= inner_table_column_count)
+				if (column_count_nested >= inner_table_no_multiplicities_column_count)
 				{
 					return;
 				}
