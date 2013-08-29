@@ -1832,7 +1832,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 			char cindex[256];
 
 			bool first_column_value = true;
-			std::for_each(row_of_data.current_parameter_which_binding_to_use.cbegin(), row_of_data.current_parameter_which_binding_to_use.cend(), [&first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING const &)
+			std::for_each(preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.cbegin(), preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.cend(), [&first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](ColumnsInTempView::ColumnInTempView const & column_in_view)
 			{
 
 				if (!first_column_value)
