@@ -4328,7 +4328,9 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 	if (swap_current_and_previous)
 	{
-		for (int n=0; n<number_nulls_to_add_at_end; ++n)
+		// The addition of 2 handles the fact that the new table being added
+		// has no MERGED time range columns
+		for (int n=0; n<number_nulls_to_add_at_end + 2; ++n)
 		{
 			bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
 		}
