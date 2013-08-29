@@ -222,6 +222,14 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 {
 
+	// Datetime columns incoming:
+	// The "X" tables have a single COLUMN_TYPE__DATETIMESTART and COLUMN_TYPE__DATETIMEEND (or COLUMN_TYPE__DATETIMESTART_INTERNAL and COLUMN_TYPE__DATETIMEEND_INTERNAL, if added by the generator)
+	// The "XR" tables have that, followed by COLUMN_TYPE__DATETIMESTART_MERGED and COLUMN_TYPE__DATETIMEEND_MERGED
+	// The X and XR table come in pairs; i.e. X XR X XR X XR X XR ... (one pair per multiplicity of the top-level variable group followed by one pair per multiplicity per each child variable group, noting that
+	//    the child multiplicity might occur on a different DMU category and might have a different numeric value)
+	// The individual top-level primary variable group results have all of the above, followed by a SINGLE COLUMN_TYPE__DATETIMESTART_MERGED_FINAL and COLUMN_TYPE__DATETIMEEND_MERGED_FINAL pair at the end of the entire
+	//    sequence of X XR X XR ... pairs, per top-level primary variable group.
+
 	if (primary_group_final_results.size() == 1)
 	{
 		intermediate_merging_of_primary_groups_column_sets.push_back(primary_group_final_results[0]);
