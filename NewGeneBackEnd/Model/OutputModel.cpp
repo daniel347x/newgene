@@ -4151,7 +4151,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	int number_columns_first_single_inner_table = 0;
 	WidgetInstanceIdentifier first_variable_group;
 	int the_column_index = 0;
-	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [&the_column_index, &number_columns_first_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	int first_inner_table_datetime_columns_count = 0;
+	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [&first_inner_table_datetime_columns_count, &the_column_index, &number_columns_first_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		if (the_column_index == 0)
 		{
@@ -4162,9 +4163,13 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			++the_column_index;
 			return;
 		}
-		if (column_in_view.current_multiplicity__corresponding_to__current_inner_table == 1)
+		if (first_inner_table_datetime_columns_count < 4)
 		{
 			++number_columns_first_single_inner_table;
+		}
+		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+		{
+			++first_inner_table_datetime_columns_count;
 		}
 		++the_column_index;
 	});
