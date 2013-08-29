@@ -208,6 +208,24 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	// Do an "ObtainData()" on this result, loop through,
 	// and write the output to a CSV file on disk.
 
+	return;
+
+	ObtainData(final_result.second);
+
+	if (failed)
+	{
+		return;
+	}
+
+	while (StepData())
+	{
+		if (failed)
+		{
+			return;
+		}
+		
+	}
+
 }
 
 void OutputModel::OutputGenerator::FormatResultsForOutput()
