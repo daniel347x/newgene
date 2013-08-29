@@ -580,40 +580,57 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	sql_string = "CREATE TABLE ";
 	sql_string += result_columns.view_name;
 	sql_string += " AS SELECT ";
+
+	std::string sql_select_left;
+	std::string sql_select_right;
 	bool first = true;
 	int column_count = 0;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first, &column_count, &first_full_table_column_count, &second_table_column_count, &previous_column_names](ColumnsInTempView::ColumnInTempView & new_column)
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_select_left, &sql_select_right, &first, &column_count, &first_full_table_column_count, &second_table_column_count, &previous_column_names](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		if (!first)
 		{
-			sql_string += ", ";
+			sql_select_left += ", ";
+			sql_select_right += ", ";
 		}
 		first = false;
 		if (column_count < first_full_table_column_count)
 		{
-			sql_string += "t1.";
+			sql_select_left += "t1.";
+			sql_select_right += "t2.";
 		}
 		else
 		{
-			sql_string += "t2.";
+			sql_select_left += "t2.";
+			sql_select_right += "t1.";
 		}
-		sql_string += previous_column_names[column_count];
-		sql_string += " AS ";
-		sql_string += new_column.column_name_in_temporary_table;
+
+		sql_select_left += previous_column_names[column_count];
+		sql_select_left += " AS ";
+		sql_select_left += new_column.column_name_in_temporary_table;
+
+		sql_select_right += previous_column_names[column_count];
+		sql_select_right += " AS ";
+		sql_select_right += new_column.column_name_in_temporary_table;
+
 		++column_count;
 	});
+
+	sql_string += sql_select_left;
+
 	sql_string += " FROM ";
+
 	sql_string += previous_merged_primary_variable_groups_table.second.view_name;
 	sql_string += " t1 LEFT OUTER JOIN ";
 	sql_string += primary_variable_group_final_result.view_name;
 	sql_string += " t2 ON ";
+
 	std::vector<std::string> join_column_names_lhs;
 	std::vector<std::string> join_column_names_rhs;
 	for (int current_multiplicity = 1; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
-		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &join_column_names_lhs, &join_column_names_rhs, &very_first_primary_variable_group, &very_last_primary_variable_group, &number_columns_very_first_primary_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &join_column_names_lhs, &join_column_names_rhs, &very_first_primary_variable_group, &very_last_primary_variable_group, &number_columns_very_first_primary_variable_group_including_multiplicities, &current_multiplicity, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 		{
-			std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &join_column_names_lhs, &join_column_names_rhs, &very_first_primary_variable_group, &very_last_primary_variable_group, &number_columns_very_first_primary_variable_group_including_multiplicities, &current_multiplicity, &sql_string, &primary_key, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info_this_variable_group)
+			std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &join_column_names_lhs, &join_column_names_rhs, &very_first_primary_variable_group, &very_last_primary_variable_group, &number_columns_very_first_primary_variable_group_including_multiplicities, &current_multiplicity, &primary_key, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info_this_variable_group)
 			{
 				if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_first_primary_variable_group)
 					||
@@ -622,7 +639,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					if (primary_key_info_this_variable_group.current_multiplicity == current_multiplicity)
 					{
 						int column_count = 0;
-						std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &current_multiplicity, &join_column_names_lhs, &join_column_names_rhs, &very_first_primary_variable_group, &very_last_primary_variable_group, &sql_string, &number_columns_very_first_primary_variable_group_including_multiplicities, &primary_key_info_this_variable_group, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names, &primary_key](ColumnsInTempView::ColumnInTempView const & new_column)
+						std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &current_multiplicity, &join_column_names_lhs, &join_column_names_rhs, &very_first_primary_variable_group, &very_last_primary_variable_group, &number_columns_very_first_primary_variable_group_including_multiplicities, &primary_key_info_this_variable_group, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names, &primary_key](ColumnsInTempView::ColumnInTempView const & new_column)
 						{
 
 							if (column_count < number_columns_very_first_primary_variable_group_including_multiplicities)
@@ -728,23 +745,66 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		return result;
 	}
 
+	std::string sql_join_on_left;
+	std::string sql_join_on_right;
+
+	std::string sql_null_clause;
+
 	int join_index = 0;
 	bool and_ = false;
-	std::for_each(join_column_names_lhs.cbegin(), join_column_names_lhs.cend(), [&join_index, &sql_string, &and_, &join_column_names_rhs](std::string const & join_column_name_lhs)
+	std::for_each(join_column_names_lhs.cbegin(), join_column_names_lhs.cend(), [&join_index, &sql_join_on_left, &sql_join_on_right, &sql_null_clause, &and_, &join_column_names_rhs](std::string const & join_column_name_lhs)
 	{
 		if (and_)
 		{
-			sql_string += " AND ";
+			sql_join_on_left += " AND ";
+			sql_join_on_right += " AND ";
+		}
+		else
+		{
+			// For now, only check a single field for NULL
+			sql_null_clause += "t1.";
+			sql_null_clause += join_column_name_lhs;
+			sql_null_clause += " IS NULL";
 		}
 		and_ = true;
-		sql_string += "t1.";
-		sql_string += join_column_name_lhs;
-		sql_string += " = t2.";
-		sql_string += join_column_names_rhs[join_index];
+
+		sql_join_on_left += "t1.";
+		sql_join_on_left += join_column_name_lhs;
+		sql_join_on_left += " = t2.";
+		sql_join_on_left += join_column_names_rhs[join_index];
+
+		sql_join_on_right += "t1.";
+		sql_join_on_right += join_column_names_rhs[join_index];
+		sql_join_on_right += " = t2.";
+		sql_join_on_right += join_column_name_lhs;
 
 		++join_index;
 	});
 
+	sql_string += sql_join_on_left;
+
+	// Left-side WHERE goes here for timerange limitation
+
+	sql_string += " UNION ALL ";
+
+	sql_string += " SELECT ";
+
+	sql_string += sql_select_right;
+
+	sql_string += " FROM ";
+	sql_string += primary_variable_group_final_result.view_name;
+	sql_string += " t1 LEFT OUTER JOIN ";
+	sql_string += previous_merged_primary_variable_groups_table.second.view_name;
+	sql_string += " t2 ON ";
+
+	sql_string += sql_join_on_right;
+
+	sql_string += " WHERE ";
+
+	// Right-side WHERE goes here for timerange limitation.
+	// Do not forget AND keyword.
+
+	sql_string += sql_null_clause;
 
 	// For use in ORDER BY clause
 	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
