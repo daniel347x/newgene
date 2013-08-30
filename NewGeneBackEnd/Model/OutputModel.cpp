@@ -351,20 +351,109 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	});
 
+
 	// Display secondary key columns
+
+	// First, do a quick calculation and save which secondary keys appear more than once, and stash that away
 	column_index = 0;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	WidgetInstanceIdentifier current_variable_group;
+	int inner_table_index_for_equivalent_variable_group = 0;
+	std::vector<bool> this_variable_group_appears_more_than_once;
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &this_variable_group_appears_more_than_once, &inner_table_index_for_equivalent_variable_group, &current_variable_group, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
+
+		if (column_index == 0)
+		{
+			current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
+		}
 
 		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
+			++column_index;
 			return;
+		}
+
+		if (column_index != 0)
+		{
+			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
+			{
+				if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
+					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
+					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
+					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL
+					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED
+					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+				{
+					if (inner_table_index_for_equivalent_variable_group == 1)
+					{
+						// it was just 0
+						this_variable_group_appears_more_than_once.push_back(false);
+					}
+					inner_table_index_for_equivalent_variable_group = 0;
+					current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
+				}
+			}
+		}
+
+		if (inner_table_index_for_equivalent_variable_group == 1)
+		{
+			this_variable_group_appears_more_than_once.push_back(true);
+		}
+
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+		{
+			++inner_table_index_for_equivalent_variable_group;
+		}
+
+		++column_index;
+
+	});
+
+	column_index = 0;
+	WidgetInstanceIdentifier current_variable_group;
+	int inner_table_index_for_equivalent_variable_group = 0;
+	int current_variable_group_number = 0;
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &current_variable_group_number, &this_variable_group_appears_more_than_once, &inner_table_index_for_equivalent_variable_group, &current_variable_group, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	{
+
+		if (column_index == 0)
+		{
+			current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
+		}
+
+		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			++column_index;
+			return;
+		}
+
+		if (column_index != 0)
+		{
+			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
+			{
+				if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
+					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
+					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
+					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL
+					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED
+					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+				{
+					inner_table_index_for_equivalent_variable_group = 0;
+					current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
+					++current_variable_group_number;
+				}
+			}
 		}
 
 		result_columns.columns_in_view.push_back(unformatted_column);
 		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
 
 		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
+		if (this_variable_group_appears_more_than_once[current_variable_group_number])
+		{
+			formatted_column.column_name_in_temporary_table += "_";
+			formatted_column.column_name_in_temporary_table += itoa(inner_table_index_for_equivalent_variable_group, c, 10);
+		}
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
 		if (!first)
@@ -376,6 +465,12 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		sql_string += unformatted_column.column_name_in_temporary_table;
 		sql_string += " AS ";
 		sql_string += formatted_column.column_name_in_temporary_table;
+
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+		{
+			++inner_table_index_for_equivalent_variable_group;
+		}
+
 		++column_index;
 
 	});
