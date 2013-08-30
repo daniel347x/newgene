@@ -256,6 +256,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	WidgetInstanceIdentifier first_variable_group;
 
+	// Display primary key columns
 	bool first = true;
 	int column_index = 0;
 	bool reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
@@ -305,6 +306,11 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 				break;
 		}
 
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			return; // display secondary keys only after primary keys
+		}
+
 		result_columns.columns_in_view.push_back(unformatted_column);
 		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
 
@@ -331,6 +337,35 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 				}
 				break;
 		}
+
+		if (!first)
+		{
+			sql_string += ", ";
+		}
+		first = false;
+
+		sql_string += unformatted_column.column_name_in_temporary_table;
+		sql_string += " AS ";
+		sql_string += formatted_column.column_name_in_temporary_table;
+		++column_index;
+
+	});
+
+	// Display secondary key columns
+	column_index = 0;
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	{
+
+		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			return;
+		}
+
+		result_columns.columns_in_view.push_back(unformatted_column);
+		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
+
+		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
+		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
 		if (!first)
 		{
