@@ -4415,7 +4415,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	std::int64_t data_int64 = 0;
 	std::string data_string;
 	long double data_long = 0.0;
-	bool data_is_null = false;
+	bool do_not_include_this_data = false;
 	int column_data_type = 0;
 	bound_parameter_strings.clear();
 	bound_parameter_ints.clear();
@@ -4426,7 +4426,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 	int which_inner_table = 0;
 
-	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [this, &which_inner_table, &inner_table_columns, &swap_current_and_previous_and_set_previous_to_null, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_each_single_inner_table, &highest_index_previous_table, &data_int64, &data_string, &data_long, &data_is_null, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [this, &which_inner_table, &inner_table_columns, &swap_current_and_previous_and_set_previous_to_null, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_each_single_inner_table, &highest_index_previous_table, &data_int64, &data_string, &data_long, &do_not_include_this_data, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
 		if (failed)
@@ -4452,7 +4452,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set = inner_table_columns.back().bindings__primary_keys_with_multiplicity_greater_than_1;
 
 
-		data_is_null = false;
+		do_not_include_this_data = false;
+
 
 		// The following "if" condition will only match for PRIMARY_VARIABLE_GROUP merges;
 		// otherwise, the "else" condition will be active
@@ -4477,16 +4478,22 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			{
 				if (!include_previous_data)
 				{
-					data_is_null = true;
-					bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+					if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+					{
+						do_not_include_this_data = true;
+						bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+					}
 				}
 			}
 			else
 			{
 				if (!include_current_data)
 				{
-					data_is_null = true;
-					bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+					if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+					{
+						do_not_include_this_data = true;
+						bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+					}
 				}
 			}
 
@@ -4500,7 +4507,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			{
 				if (!include_previous_data)
 				{
-					data_is_null = true;
+					do_not_include_this_data = true;
 					inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 					if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 					{
@@ -4512,7 +4519,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			{
 				if (!include_current_data)
 				{
-					data_is_null = true;
+					do_not_include_this_data = true;
 					inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 					if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 					{
@@ -4524,8 +4531,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 		}
 
-
-		if (!data_is_null)
+		if (!do_not_include_this_data)
 		{
 
 			column_data_type = sqlite3_column_type(stmt_result, index);
@@ -4648,8 +4654,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 				case SQLITE_NULL:
 					{
-
-						data_is_null = true;
 
 						// ... just populate the single data structures that hold all data across all inner tables
 						// ... (including possible null data for the newly added columns)
