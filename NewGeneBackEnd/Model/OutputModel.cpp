@@ -4478,7 +4478,15 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			{
 				if (!include_previous_data)
 				{
-					if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+					if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
+					{
+						if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+						{
+							do_not_include_this_data = true;
+							bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+						}
+					}
+					else
 					{
 						do_not_include_this_data = true;
 						bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
@@ -4489,7 +4497,15 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			{
 				if (!include_current_data)
 				{
-					if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+					if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
+					{
+						if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+						{
+							do_not_include_this_data = true;
+							bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+						}
+					}
+					else
 					{
 						do_not_include_this_data = true;
 						bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
