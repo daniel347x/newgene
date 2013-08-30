@@ -662,10 +662,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			if (previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_FINAL && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
 			{
 				++number_columns_very_first_primary_variable_group_including_multiplicities;
-			}
-			if (internal_datetime_column_count < 4)
-			{
-				++number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table;
+				if (internal_datetime_column_count < 4)
+				{
+					++number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table;
+				}
 			}
 		}
 
@@ -727,10 +727,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			if (new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_FINAL && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
 			{
 				++number_columns_very_last_primary_variable_group_including_multiplicities;
-			}
-			if (internal_datetime_column_count < 4)
-			{
-				++number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table;
+				if (internal_datetime_column_count < 4)
+				{
+					++number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table;
+				}
 			}
 		}
 
@@ -762,13 +762,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	// because those tables would precede the final single pair of datetime columns anyways)
 	number_columns_very_last_primary_variable_group_including_multiplicities += (4 * number_inner_tables__very_last_primary_variable_group);
 
-
-	sql_strings.push_back(SQLExecutor(db));
-	std::string & sql_string = sql_strings.back().sql;
-
-	sql_string = "CREATE TABLE ";
-	sql_string += result_columns.view_name;
-	sql_string += " AS SELECT ";
 
 	std::string sql_select_left;
 	std::string sql_select_right;
@@ -803,15 +796,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 		++column_count;
 	});
-
-	sql_string += sql_select_left;
-
-	sql_string += " FROM ";
-
-	sql_string += previous_merged_primary_variable_groups_table.second.view_name;
-	sql_string += " t1 LEFT OUTER JOIN ";
-	sql_string += primary_variable_group_final_result.view_name;
-	sql_string += " t2 ON ";
 
 	std::vector<std::string> join_column_names_lhs;
 	std::vector<std::string> join_column_names_rhs;
@@ -951,7 +935,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		}
 		and_ = true;
 
-		sql_null_clause += "t1.";
+		sql_null_clause += "t2.";
 		sql_null_clause += join_column_name_lhs;
 		sql_null_clause += " IS NULL";
 
@@ -968,30 +952,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		++join_index;
 	});
 
-	sql_string += sql_join_on_left;
 
-	// Left-side WHERE goes here for timerange limitation
-
-	sql_string += " UNION ALL ";
-
-	sql_string += " SELECT ";
-
-	sql_string += sql_select_right;
-
-	sql_string += " FROM ";
-	sql_string += primary_variable_group_final_result.view_name;
-	sql_string += " t1 LEFT OUTER JOIN ";
-	sql_string += previous_merged_primary_variable_groups_table.second.view_name;
-	sql_string += " t2 ON ";
-
-	sql_string += sql_join_on_right;
-
-	sql_string += " WHERE ";
-
-	// Right-side WHERE goes here for timerange limitation.
-	// Do not forget AND keyword.
-
-	sql_string += sql_null_clause;
+	std::string sql_order_by;
 
 	// For use in ORDER BY clause
 	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
@@ -1039,7 +1001,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 				for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
 				{
 					int current_column_count = 0;
-					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &current_column_count, &number_columns_very_first_primary_variable_group_including_multiplicities, &number_columns_very_last_primary_variable_group_including_multiplicities, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_string, &first](ColumnsInTempView::ColumnInTempView & view_column)
+					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_order_by, &current_column_count, &number_columns_very_first_primary_variable_group_including_multiplicities, &number_columns_very_last_primary_variable_group_including_multiplicities, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_string, &first](ColumnsInTempView::ColumnInTempView & view_column)
 					{
 						if (current_column_count < number_columns_very_first_primary_variable_group_including_multiplicities)
 						{
@@ -1055,21 +1017,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 											{
 												if (!first)
 												{
-													sql_string += ", ";
+													sql_order_by += ", ";
 												}
 												else
 												{
-													sql_string += " ORDER BY ";
+													sql_order_by += " ORDER BY ";
 												}
 												first = false;
 												if (view_column.primary_key_should_be_treated_as_numeric)
 												{
-													sql_string += "CAST (";
+													sql_order_by += "CAST (";
 												}
-												sql_string += view_column.column_name_in_temporary_table;
+												sql_order_by += view_column.column_name_in_temporary_table;
 												if (view_column.primary_key_should_be_treated_as_numeric)
 												{
-													sql_string += " AS INTEGER)";
+													sql_order_by += " AS INTEGER)";
 												}
 											}
 										}
@@ -1088,7 +1050,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		// ... If there are no primary key DMU categories for this top-level UOA with multiplicity greater than 1,
 		// then this section will order by all of this top-level's UOA primary key DMU categories.
 		int current_column = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &sql_string, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_order_by, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &sql_string, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
 		{
 
 			if (current_column >= number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table)
@@ -1133,21 +1095,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 							{
 								if (!first)
 								{
-									sql_string += ", ";
+									sql_order_by += ", ";
 								}
 								else
 								{
-									sql_string += " ORDER BY ";
+									sql_order_by += " ORDER BY ";
 								}
 								first = false;
 								if (view_column.primary_key_should_be_treated_as_numeric)
 								{
-									sql_string += "CAST (";
+									sql_order_by += "CAST (";
 								}
-								sql_string += view_column.column_name_in_temporary_table;
+								sql_order_by += view_column.column_name_in_temporary_table;
 								if (view_column.primary_key_should_be_treated_as_numeric)
 								{
-									sql_string += " AS INTEGER)";
+									sql_order_by += " AS INTEGER)";
 								}
 							}
 						}
@@ -1158,6 +1120,62 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		});
 
 	}
+
+
+	sql_strings.push_back(SQLExecutor(db));
+	std::string & sql_string = sql_strings.back().sql;
+
+	sql_string = "CREATE TABLE ";
+	sql_string += result_columns.view_name;
+	sql_string += " AS SELECT ";
+	sql_string += sql_select_left;
+
+	sql_string += " FROM ";
+
+	sql_string += previous_merged_primary_variable_groups_table.second.view_name;
+	sql_string += " t1 LEFT OUTER JOIN ";
+	sql_string += primary_variable_group_final_result.view_name;
+	sql_string += " t2 ON ";
+
+	sql_string += sql_join_on_left;
+
+	// Left-side WHERE goes here for timerange limitation
+
+	sql_string += " UNION ALL ";
+
+	sql_string += " SELECT ";
+
+	sql_string += sql_select_right;
+
+	sql_string += " FROM ";
+	sql_string += primary_variable_group_final_result.view_name;
+	sql_string += " t1 LEFT OUTER JOIN ";
+	sql_string += previous_merged_primary_variable_groups_table.second.view_name;
+	sql_string += " t2 ON ";
+
+	sql_string += sql_join_on_right;
+
+	sql_string += " WHERE ";
+
+	// Right-side WHERE goes here for timerange limitation.
+	// Do not forget AND keyword.
+
+	sql_string += sql_null_clause;
+
+	// Do not ORDER BY at this time.
+	// The "SORT" function cannot be used in an ORDER BY on a compound SELECT statement.
+	// To overcome this, new rows need to be added into the WHERE clause for both sub-SELECT's,
+	// and the ORDER BY must reference those columns.
+	// These columns would have to be added to the column metadata and accounted for everywhere.
+	// However, the ORDER BY at this stage is not a requirement for the algorithm,
+	// because the data will be ORDERED at a later stage prior to actual removal of duplicates.
+	// The ORDER BY is only here for debugging and development purposes.
+	bool use_order_by = false;
+	if (use_order_by)
+	{
+		sql_string += sql_order_by;
+	}
+
 
 	return result;
 
