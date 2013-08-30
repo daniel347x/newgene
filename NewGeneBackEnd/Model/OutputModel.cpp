@@ -1163,6 +1163,9 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			}
 			else
 			{
+				// Only primary keys have the following value set to anything but -1,
+				// and only those primary keys we wish to capture in inner tables beyond the first
+				// have the value greater than 1.
 				if (possible_duplicate_view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 				{
 					add_as_primary_key_column = true;
@@ -4458,8 +4461,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	{
 		// In the previous method, there is nothing to do here -
 		// the single bound_parameter data structures are filled.
-		// But in the new method, we sort the data by column set.
 
+		// But in the new method, we sort the data by column set.
 		bool new_method = true;
 		if (new_method)
 		{
