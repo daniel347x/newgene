@@ -369,6 +369,10 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
+			if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+			{
+				++inner_table_index_for_equivalent_variable_group;
+			}
 			++column_index;
 			return;
 		}
@@ -377,32 +381,19 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		{
 			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
 			{
-				if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
-					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
-					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL
-					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED
-					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+				if (inner_table_index_for_equivalent_variable_group == 1)
 				{
-					if (inner_table_index_for_equivalent_variable_group == 1)
-					{
-						// it was just 0
-						this_variable_group_appears_more_than_once.push_back(false);
-					}
-					inner_table_index_for_equivalent_variable_group = 0;
-					current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
+					// it was just 0
+					this_variable_group_appears_more_than_once.push_back(false);
 				}
+				inner_table_index_for_equivalent_variable_group = 0;
+				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
 			}
 		}
 
 		if (inner_table_index_for_equivalent_variable_group == 1)
 		{
 			this_variable_group_appears_more_than_once.push_back(true);
-		}
-
-		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
-		{
-			++inner_table_index_for_equivalent_variable_group;
 		}
 
 		++column_index;
@@ -422,6 +413,10 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
+			if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+			{
+				++inner_table_index_for_equivalent_variable_group;
+			}
 			++column_index;
 			return;
 		}
@@ -430,17 +425,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		{
 			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
 			{
-				if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
-					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
-					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL
-					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED
-					&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
-				{
-					inner_table_index_for_equivalent_variable_group = 0;
-					current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
-					++current_variable_group_number;
-				}
+				inner_table_index_for_equivalent_variable_group = 0;
+				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
+				++current_variable_group_number;
 			}
 		}
 
@@ -464,11 +451,6 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		sql_string += unformatted_column.column_name_in_temporary_table;
 		sql_string += " AS ";
 		sql_string += formatted_column.column_name_in_temporary_table;
-
-		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
-		{
-			++inner_table_index_for_equivalent_variable_group;
-		}
 
 		++column_index;
 
