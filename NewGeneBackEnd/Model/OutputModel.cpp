@@ -258,7 +258,8 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	bool first = true;
 	int column_index = 0;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	bool reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
 		if (column_index == 0)
@@ -276,7 +277,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 		{
-			if (unformatted_column.current_multiplicity__corresponding_to__current_inner_table != 1)
+			if (reached_end_of_first_inner_table_not_including_terminating_datetime_columns)
 			{
 				if (unformatted_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
 				{
@@ -298,6 +299,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS:
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS:
 				{
+					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
 					return; // only display a single pair of time range columns
 				}
 				break;
