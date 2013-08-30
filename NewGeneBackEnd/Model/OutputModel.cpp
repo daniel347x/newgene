@@ -873,15 +873,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		{
 			sql_join_on_left += " AND ";
 			sql_join_on_right += " AND ";
-		}
-		else
-		{
-			// For now, only check a single field for NULL
-			sql_null_clause += "t1.";
-			sql_null_clause += join_column_name_lhs;
-			sql_null_clause += " IS NULL";
+			sql_null_clause += " AND ";
 		}
 		and_ = true;
+
+		sql_null_clause += "t1.";
+		sql_null_clause += join_column_name_lhs;
+		sql_null_clause += " IS NULL";
 
 		sql_join_on_left += "t1.";
 		sql_join_on_left += join_column_name_lhs;
