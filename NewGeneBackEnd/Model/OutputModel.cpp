@@ -4154,11 +4154,11 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		--highest_index_previous_table;
 	});
 
-	int number_columns_first_single_inner_table = 0;
+	int number_columns_each_single_inner_table = 0;
 	WidgetInstanceIdentifier first_variable_group;
 	int the_column_index = 0;
 	int first_inner_table_datetime_columns_count = 0;
-	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [&first_inner_table_datetime_columns_count, &the_column_index, &number_columns_first_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [&first_inner_table_datetime_columns_count, &the_column_index, &number_columns_each_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		if (the_column_index == 0)
 		{
@@ -4171,7 +4171,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		}
 		if (first_inner_table_datetime_columns_count < 4)
 		{
-			++number_columns_first_single_inner_table;
+			++number_columns_each_single_inner_table;
 		}
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
 		{
@@ -4180,7 +4180,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		++the_column_index;
 	});
 
-	bool swap_current_and_previous = false;
+	bool swap_current_and_previous_and_set_previous_to_null = false;
 	if (xr_table_category == OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP)
 	{
 		if (include_current_data && !include_previous_data)
@@ -4188,7 +4188,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			// place current data at beginning, since there is no previous data.
 			// Because this is a primary variable group, the schema of all
 			// inner tables is the same.
-			swap_current_and_previous = true;
+			swap_current_and_previous_and_set_previous_to_null = true;
 		}
 	}
 
@@ -4205,7 +4205,14 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	bound_parameter_ints.clear();
 	bound_parameter_which_binding_to_use.clear();
 	int number_nulls_to_add_at_end = 0;
-	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [this, &swap_current_and_previous, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_first_single_inner_table, &highest_index_previous_table, &data_int64, &data_string, &data_long, &data_is_null, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
+
+	std::vector<std::vector<std::string>> inner_table_string_sets;
+	std::vector<std::vector<std::int64_t>> inner_table_int_sets;
+	std::vector<std::vector<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING>> inner_table__which_binding_to_use__sets;
+
+	int which_inner_table = 0;
+
+	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [this, &which_inner_table, &inner_table_string_sets, &inner_table_int_sets, &inner_table__which_binding_to_use__sets, &swap_current_and_previous_and_set_previous_to_null, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_each_single_inner_table, &highest_index_previous_table, &data_int64, &data_string, &data_long, &data_is_null, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
 		if (failed)
@@ -4213,17 +4220,38 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			return;
 		}
 
+		if (index % number_columns_each_single_inner_table == 0)
+		{
+			if (index > 0)
+			{
+				++which_inner_table;
+			}
+			inner_table_string_sets.push_back(std::vector<std::string>());
+			inner_table_int_sets.push_back(std::vector<std::int64_t>());
+			inner_table__which_binding_to_use__sets.push_back(std::vector<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING>());
+		}
+
+		std::vector<std::string> & inner_table_string_set = inner_table_string_sets.back();
+		std::vector<std::int64_t> & inner_table_int_set = inner_table_int_sets.back();
+		std::vector<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING> & inner_table__which_binding_to_use__set = inner_table__which_binding_to_use__sets.back();
+
 		data_is_null = false;
 
-		if (swap_current_and_previous)
+		if (swap_current_and_previous_and_set_previous_to_null)
 		{
-			if (index >= number_columns_first_single_inner_table)
+			// In this scenario, only the new data appears on the row, so no sorting is involved
+			if (index >= number_columns_each_single_inner_table)
 			{
 				++number_nulls_to_add_at_end;
 			}
 		}
 		else
 		{
+			// Ordering across inner tables only occurs here
+
+			// First, leave the previous method in place
+			// ... just populate the single data structures that hold all data across all inner tables
+			// ... (including possible null data for the newly added columns)
 			if (index <= highest_index_previous_table)
 			{
 				if (!include_previous_data)
@@ -4240,6 +4268,25 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 					bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
 				}
 			}
+
+			// Now, also save the data into sets broken down by inner table
+			if (index <= highest_index_previous_table)
+			{
+				if (!include_previous_data)
+				{
+					data_is_null = true;
+					inner_table__which_binding_to_use__set.push_back(SQLExecutor::NULL_BINDING);
+				}
+			}
+			else
+			{
+				if (!include_current_data)
+				{
+					data_is_null = true;
+					inner_table__which_binding_to_use__set.push_back(SQLExecutor::NULL_BINDING);
+				}
+			}
+
 		}
 
 		if (!data_is_null)
@@ -4251,8 +4298,13 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 				case SQLITE_INTEGER:
 					{
+
 						data_int64 = sqlite3_column_int64(stmt_result, index);
-						if (!swap_current_and_previous)
+
+						// First, leave the previous method in place
+						// ... just populate the single data structures that hold all data across all inner tables
+						// ... (including possible null data for the newly added columns)
+						if (!swap_current_and_previous_and_set_previous_to_null)
 						{
 							bound_parameter_ints.push_back(data_int64);
 							bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
@@ -4265,6 +4317,22 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 								bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 							}
 						}
+
+						// Now, also save the data into sets broken down by inner table
+						if (!swap_current_and_previous_and_set_previous_to_null)
+						{
+							inner_table_int_set.push_back(data_int64);
+							inner_table__which_binding_to_use__set.push_back(SQLExecutor::INT64);
+						}
+						else
+						{
+							if (index > highest_index_previous_table)
+							{
+								inner_table_int_set.push_back(data_int64);
+								inner_table__which_binding_to_use__set.push_back(SQLExecutor::INT64);
+							}
+						}
+
 					}
 					break;
 
@@ -4280,8 +4348,13 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 				case SQLITE_TEXT:
 					{
+
 						data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, index));
-						if (!swap_current_and_previous)
+
+						// First, leave the previous method in place
+						// ... just populate the single data structures that hold all data across all inner tables
+						// ... (including possible null data for the newly added columns)
+						if (!swap_current_and_previous_and_set_previous_to_null)
 						{
 							bound_parameter_strings.push_back(data_string);
 							bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
@@ -4294,6 +4367,22 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 								bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
 							}
 						}
+
+						// Now, also save the data into sets broken down by inner table
+						if (!swap_current_and_previous_and_set_previous_to_null)
+						{
+							inner_table_string_set.push_back(data_string);
+							inner_table__which_binding_to_use__set.push_back(SQLExecutor::STRING);
+						}
+						else
+						{
+							if (index > highest_index_previous_table)
+							{
+								inner_table_string_set.push_back(data_string);
+								inner_table__which_binding_to_use__set.push_back(SQLExecutor::STRING);
+							}
+						}
+
 					}
 					break;
 
@@ -4307,8 +4396,13 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 				case SQLITE_NULL:
 					{
+
 						data_is_null = true;
-						if (!swap_current_and_previous)
+
+						// First, leave the previous method in place
+						// ... just populate the single data structures that hold all data across all inner tables
+						// ... (including possible null data for the newly added columns)
+						if (!swap_current_and_previous_and_set_previous_to_null)
 						{
 							bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
 						}
@@ -4319,6 +4413,20 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 								bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
 							}
 						}
+
+						// Now, also save the data into sets broken down by inner table
+						if (!swap_current_and_previous_and_set_previous_to_null)
+						{
+							inner_table__which_binding_to_use__set.push_back(SQLExecutor::NULL_BINDING);
+						}
+						else
+						{
+							if (index > highest_index_previous_table)
+							{
+								inner_table__which_binding_to_use__set.push_back(SQLExecutor::NULL_BINDING);
+							}
+						}
+
 					}
 					break;
 
@@ -4337,13 +4445,25 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 	});
 
-	if (swap_current_and_previous)
+	if (swap_current_and_previous_and_set_previous_to_null)
 	{
 		// The addition of 2 handles the fact that the new table being added
 		// has no MERGED time range columns
 		for (int n=0; n<number_nulls_to_add_at_end + 2; ++n)
 		{
 			bound_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+		}
+	}
+	else
+	{
+		// In the previous method, there is nothing to do here -
+		// the single bound_parameter data structures are filled.
+		// But in the new method, we sort the data by column set.
+
+		bool new_method = true;
+		if (new_method)
+		{
+
 		}
 	}
 
