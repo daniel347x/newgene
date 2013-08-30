@@ -4365,6 +4365,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		--highest_index_previous_table;
 	});
 
+
+	// The following block only applies to PRIMARY_VARIABLE_GROUP merges
 	int number_columns_each_single_inner_table = 0;
 	WidgetInstanceIdentifier first_variable_group;
 	int the_column_index = 0;
@@ -4391,6 +4393,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		++the_column_index;
 	});
 
+
+	// The following block only applies to PRIMARY_VARIABLE_GROUP merges
 	bool swap_current_and_previous_and_set_previous_to_null = false;
 	if (xr_table_category == OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP)
 	{
@@ -4402,6 +4406,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			swap_current_and_previous_and_set_previous_to_null = true;
 		}
 	}
+
 
 	// Set the list of bound parameters, regardless of whether or not the SQL string was created
 	int index = 0;
@@ -4429,6 +4434,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			return;
 		}
 
+		// The following block only applies to PRIMARY_VARIABLE_GROUP merges
 		if (index % number_columns_each_single_inner_table == 0)
 		{
 			if (index > 0)
@@ -4438,16 +4444,20 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			inner_table_columns.push_back(ColumnSorter());
 		}
 
+
+		// The following variables only apply to PRIMARY_VARIABLE_GROUP merges
 		std::vector<std::string> & inner_table_string_set = inner_table_columns.back().strings;
 		std::vector<std::int64_t> & inner_table_int_set = inner_table_columns.back().ints;
 		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table_bindings = inner_table_columns.back().bindings;
 		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set = inner_table_columns.back().bindings__primary_keys_with_multiplicity_greater_than_1;
 
+
 		data_is_null = false;
 
 		if (swap_current_and_previous_and_set_previous_to_null)
 		{
-			// In this scenario, only the new data appears on the row, so no sorting is involved
+			// In this scenario, only the new data appears on the row, so no sorting is involved.
+			// Only applies to PRIMARY_VARIABLE_GROUP merges
 			if (index >= number_columns_each_single_inner_table)
 			{
 				++number_nulls_to_add_at_end;
