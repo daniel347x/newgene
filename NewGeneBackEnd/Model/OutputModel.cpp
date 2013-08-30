@@ -3776,7 +3776,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				new_column.current_multiplicity = current_multiplicity;
+				new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 				{
 					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
@@ -4902,7 +4902,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				new_column.current_multiplicity = current_multiplicity;
+				new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 				{
 					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
@@ -4961,7 +4961,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				new_column.current_multiplicity = current_multiplicity;
+				new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 				{
 					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
