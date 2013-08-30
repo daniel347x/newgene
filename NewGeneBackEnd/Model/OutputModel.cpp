@@ -823,6 +823,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			{
 				if (new_column.current_multiplicity__of__current_inner_table__within__current_vg == 1)
 				{
+					handled = true;
+				}
+				else
+				{
+					if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+					{
+						handled = true;
+					}
+				}
+				if (handled)
+				{
 					sql_select_left += "CASE WHEN t1.";
 					sql_select_left += previous_column_names[column_count];
 					sql_select_left += " IS NOT NULL THEN t1.";
@@ -832,23 +843,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_left += " END AS ";
 					sql_select_left += new_column.column_name_in_temporary_table;
 
-					handled = true;
-				}
-				else
-				{
-					if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
-					{
-						sql_select_left += "CASE WHEN t1.";
-						sql_select_left += previous_column_names[column_count];
-						sql_select_left += " IS NOT NULL THEN t1.";
-						sql_select_left += previous_column_names[column_count];
-						sql_select_left += " ELSE t2.";
-						sql_select_left += previous_column_names[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
-						sql_select_left += " END AS ";
-						sql_select_left += new_column.column_name_in_temporary_table;
-
-						handled = true;
-					}
+					sql_select_right += "CASE WHEN t2.";
+					sql_select_right += previous_column_names[column_count];
+					sql_select_right += " IS NOT NULL THEN t2.";
+					sql_select_right += previous_column_names[column_count];
+					sql_select_right += " ELSE t1.";
+					sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
+					sql_select_right += " END AS ";
+					sql_select_right += new_column.column_name_in_temporary_table;
 				}
 			}
 		}
@@ -857,6 +859,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
 				if (new_column.current_multiplicity__of__current_inner_table__within__current_vg == 1)
+				{
+					handled = true;
+				}
+				else
+				{
+					if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+					{
+						handled = true;
+					}
+				}
+				if (handled)
 				{
 					sql_select_right += "CASE WHEN t2.";
 					sql_select_right += previous_column_names[column_count];
@@ -867,23 +880,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_right += " END AS ";
 					sql_select_right += new_column.column_name_in_temporary_table;
 
-					handled = true;
-				}
-				else
-				{
-					if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
-					{
-						sql_select_right += "CASE WHEN t2.";
-						sql_select_right += previous_column_names[column_count];
-						sql_select_right += " IS NOT NULL THEN t2.";
-						sql_select_right += previous_column_names[column_count];
-						sql_select_right += " ELSE t1.";
-						sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
-						sql_select_right += " END AS ";
-						sql_select_right += new_column.column_name_in_temporary_table;
-
-						handled = true;
-					}
+					sql_select_left += "CASE WHEN t1.";
+					sql_select_left += previous_column_names[column_count];
+					sql_select_left += " IS NOT NULL THEN t1.";
+					sql_select_left += previous_column_names[column_count];
+					sql_select_left += " ELSE t2.";
+					sql_select_left += previous_column_names[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
+					sql_select_left += " END AS ";
+					sql_select_left += new_column.column_name_in_temporary_table;
 				}
 			}
 		}
@@ -911,6 +915,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		}
 
 		++column_count;
+
+		if (column_count == number_columns_very_first_primary_variable_group_including_multiplicities)
+		{
+			// Reset mappings to support populating NULL primary key values in one of the tables being merged
+			// with the corresponding non-NULL values from the other,
+			// now that the columns in the first table have been populated.
+			std::for_each(lhs_primary_keys.begin(), lhs_primary_keys.end(), [](std::pair<WidgetInstanceIdentifier const, std::pair<int, std::vector<int>>> & map_entry)
+			{
+				map_entry.second.first = 0;
+			});
+			std::for_each(rhs_primary_keys.begin(), rhs_primary_keys.end(), [](std::pair<WidgetInstanceIdentifier const, std::pair<int, std::vector<int>>> & map_entry)
+			{
+				map_entry.second.first = 0;
+			});
+		}
 
 	});
 
