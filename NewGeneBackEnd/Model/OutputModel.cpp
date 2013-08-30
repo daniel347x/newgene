@@ -637,11 +637,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	int first_full_table_column_count = 0;
 	int number_columns_very_first_primary_variable_group_including_multiplicities = 0; // corresponding to primary variable group #1
 	int number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table = 0;
-	int number_columns_very_last_primary_variable_group_including_multiplicities = 0; // corresponding to newly-being-added primary variable group (the last one)
-	int number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table = 0;
-	int second_table_column_count = 0;
 	WidgetInstanceIdentifier very_first_primary_variable_group;
-	WidgetInstanceIdentifier very_last_primary_variable_group;
 
 	std::vector<std::string> previous_column_names;
 
@@ -698,13 +694,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	// Datetime columns were not counted.  Add these counts now.
 	number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table += 4;
 
-	// The following does not include the two pairs of datetime columns stuck on the end of the final results of the top-level variable group
-	// (which would only be relevant if this top-level variable group has no child variable groups, because these tables would precede the final datetime columns)
+	// The following does not include the two pairs of datetime columns possibly stuck on the end
+	// (which would only be relevant if this top-level variable group has no child variable groups,
+	// because those tables would precede the final two pairs of datetime columns anyways)
 	number_columns_very_first_primary_variable_group_including_multiplicities += (4 * number_inner_tables__very_first_primary_variable_group);
 
 
+	int number_columns_very_last_primary_variable_group_including_multiplicities = 0; // corresponding to newly-being-added primary variable group (the last one)
+	int number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table = 0;
+	WidgetInstanceIdentifier very_last_primary_variable_group;
+	int second_table_column_count = 0;
+
 	// These columns are from the new table (the current primary variable group final results being merged in) being added.
-	std::for_each(primary_variable_group_final_result.columns_in_view.cbegin(), primary_variable_group_final_result.columns_in_view.cend(), [&result_columns, &number_columns_very_last_primary_variable_group_including_multiplicities, &number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table, &very_last_primary_variable_group, &second_table_column_count, &previous_column_names, &count](ColumnsInTempView::ColumnInTempView const & new_table_column)
+	// This data has a single extra pair of datetime columns at the very end of the very last inner table.
+	internal_datetime_column_count = 0;
+	std::for_each(primary_variable_group_final_result.columns_in_view.cbegin(), primary_variable_group_final_result.columns_in_view.cend(), [&internal_datetime_column_count, &result_columns, &number_columns_very_last_primary_variable_group_including_multiplicities, &number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table, &very_last_primary_variable_group, &second_table_column_count, &previous_column_names, &count](ColumnsInTempView::ColumnInTempView const & new_table_column)
 	{
 		previous_column_names.push_back(new_table_column.column_name_in_temporary_table);
 		result_columns.columns_in_view.push_back(new_table_column);
@@ -720,15 +724,44 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 		if (new_table_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_last_primary_variable_group))
 		{
-			++number_columns_very_last_primary_variable_group_including_multiplicities;
-			if (new_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+			if (new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_FINAL && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS && new_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
+			{
+				++number_columns_very_last_primary_variable_group_including_multiplicities;
+			}
+			if (internal_datetime_column_count < 4)
 			{
 				++number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table;
 			}
 		}
 
+		if (new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL || new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED || new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED || new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_FINAL || new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL || new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS || new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
+		{
+			++internal_datetime_column_count;
+		}
+
+		// after this for_each exits, this variable includes all datetime columns:
+		// the 2 pairs for all inner tables,
+		// and the additional single pair for this top-level primary variable group
 		++second_table_column_count;
 	});
+
+	// sanity check
+	if (number_columns_very_last_primary_variable_group_including_multiplicities % number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table != 0)
+	{
+		failed = true;
+		return result;
+	}
+
+	int number_inner_tables__very_last_primary_variable_group = number_columns_very_last_primary_variable_group_including_multiplicities / number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table;
+
+	// Datetime columns were not counted.  Add these counts now.
+	number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table += 4;
+
+	// The following does not include the single pair of datetime columns possibly stuck on the end
+	// (which would only be relevant if this top-level variable group has no child variable groups,
+	// because those tables would precede the final single pair of datetime columns anyways)
+	number_columns_very_last_primary_variable_group_including_multiplicities += (4 * number_inner_tables__very_last_primary_variable_group);
+
 
 	sql_strings.push_back(SQLExecutor(db));
 	std::string & sql_string = sql_strings.back().sql;
