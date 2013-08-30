@@ -531,6 +531,10 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 	// The following table is XR XR ... XR XRMFXR
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryMergeXRTable(intermediate_merging_of_primary_groups_column_sets.back().second);
+	if (failed)
+	{
+		return;
+	}
 	xr_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(xr_table_result);
 	intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
@@ -548,6 +552,10 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			// The structure of the table returned from the following function is this:
 			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMF
 			intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, intermediate_merging_of_primary_groups_column_sets.back(), count);
+			if (failed)
+			{
+				return;
+			}
 			intermediate_merge_of_top_level_primary_group_results.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(intermediate_merge_of_top_level_primary_group_results);
 			intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
@@ -637,8 +645,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 	std::vector<std::string> previous_column_names;
 
-	// These columns are from the previous MF temporary table
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_full_table_column_count, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &previous_column_names, &number_columns_very_first_primary_variable_group_including_multiplicities, &very_first_primary_variable_group](ColumnsInTempView::ColumnInTempView & previous_column)
+	// These columns are from the previous MFXR temporary table, which contains 2 pairs of datetime columns
+	// in every inner table except for those inner tables that mark the end of the entire top-level variable set final results,
+	// which have 4 pairs of datetime columns
+	int internal_datetime_column_count = 0;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&internal_datetime_column_count, &first_full_table_column_count, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &previous_column_names, &number_columns_very_first_primary_variable_group_including_multiplicities, &very_first_primary_variable_group](ColumnsInTempView::ColumnInTempView & previous_column)
 	{
 		previous_column_names.push_back(previous_column.column_name_in_temporary_table);
 		previous_column.column_name_in_temporary_table = previous_column.column_name_in_temporary_table_no_uuid;
@@ -652,15 +663,45 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 		if (previous_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_first_primary_variable_group))
 		{
-			++number_columns_very_first_primary_variable_group_including_multiplicities;
-			if (previous_column.current_multiplicity__corresponding_to__current_inner_table == 1)
+			if (previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_FINAL && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS && previous_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
+			{
+				++number_columns_very_first_primary_variable_group_including_multiplicities;
+			}
+			if (internal_datetime_column_count < 4)
 			{
 				++number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table;
 			}
 		}
 
+		if (previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL || previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED || previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED || previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_FINAL || previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL || previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS || previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
+		{
+			++internal_datetime_column_count;
+		}
+
+		// after this for_each exits, this variable includes all datetime columns:
+		// the 2 pairs for all inner tables,
+		// and the additional 2 pairs for each top-level primary variable group
+		// that is included in this set of previous top-level primary variable groups being merged into
+		// (represented by this for_each loop)
 		++first_full_table_column_count;
 	});
+
+	// sanity check
+	if (number_columns_very_first_primary_variable_group_including_multiplicities % number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table != 0)
+	{
+		failed = true;
+		return result;
+	}
+
+	int number_inner_tables__very_first_primary_variable_group = number_columns_very_first_primary_variable_group_including_multiplicities / number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table;
+
+	// Datetime columns were not counted.  Add these counts now.
+	number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table += 4;
+
+	// The following does not include the two pairs of datetime columns stuck on the end of the final results of the top-level variable group
+	// (which would only be relevant if this top-level variable group has no child variable groups, because these tables would precede the final datetime columns)
+	number_columns_very_first_primary_variable_group_including_multiplicities += (4 * number_inner_tables__very_first_primary_variable_group);
+
 
 	// These columns are from the new table (the current primary variable group final results being merged in) being added.
 	std::for_each(primary_variable_group_final_result.columns_in_view.cbegin(), primary_variable_group_final_result.columns_in_view.cend(), [&result_columns, &number_columns_very_last_primary_variable_group_including_multiplicities, &number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table, &very_last_primary_variable_group, &second_table_column_count, &previous_column_names, &count](ColumnsInTempView::ColumnInTempView const & new_table_column)
