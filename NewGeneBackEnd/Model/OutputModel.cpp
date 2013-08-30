@@ -4454,20 +4454,23 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 		data_is_null = false;
 
+		// The following "if" condition will only match for PRIMARY_VARIABLE_GROUP merges;
+		// otherwise, the "else" condition will be active
 		if (swap_current_and_previous_and_set_previous_to_null)
 		{
-			// In this scenario, only the new data appears on the row, so no sorting is involved.
+
 			// Only applies to PRIMARY_VARIABLE_GROUP merges
+			// In this scenario, only the new data appears on the row, so no sorting is involved.
 			if (index >= number_columns_each_single_inner_table)
 			{
 				++number_nulls_to_add_at_end;
 			}
+
 		}
+
 		else
 		{
-			// Ordering across inner tables only occurs here
 
-			// First, leave the previous method in place
 			// ... just populate the single data structures that hold all data across all inner tables
 			// ... (including possible null data for the newly added columns)
 			if (index <= highest_index_previous_table)
@@ -4487,6 +4490,11 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 				}
 			}
 
+
+			// Ordering across multiple inner tables only occurs using the data in the following block,
+			// and only applies for PRIMARY_VARIABLE_GROUP merges
+
+			// The following if/else block only applies to PRIMARY_VARIABLE_GROUP merges
 			// Now, also save the data into sets broken down by inner table
 			if (index <= highest_index_previous_table)
 			{
@@ -4513,7 +4521,9 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 				}
 			}
 
+
 		}
+
 
 		if (!data_is_null)
 		{
@@ -4527,7 +4537,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 						data_int64 = sqlite3_column_int64(stmt_result, index);
 
-						// First, leave the previous method in place
 						// ... just populate the single data structures that hold all data across all inner tables
 						// ... (including possible null data for the newly added columns)
 						if (!swap_current_and_previous_and_set_previous_to_null)
@@ -4544,6 +4553,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 							}
 						}
 
+						// The following if/else block only applies to PRIMARY_VARIABLE_GROUP merges
 						// Now, also save the data into sets broken down by inner table
 						if (!swap_current_and_previous_and_set_previous_to_null)
 						{
@@ -4585,7 +4595,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 						data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, index));
 
-						// First, leave the previous method in place
 						// ... just populate the single data structures that hold all data across all inner tables
 						// ... (including possible null data for the newly added columns)
 						if (!swap_current_and_previous_and_set_previous_to_null)
@@ -4602,6 +4611,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 							}
 						}
 
+						// The following if/else block only applies to PRIMARY_VARIABLE_GROUP merges
 						// Now, also save the data into sets broken down by inner table
 						if (!swap_current_and_previous_and_set_previous_to_null)
 						{
@@ -4641,7 +4651,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 						data_is_null = true;
 
-						// First, leave the previous method in place
 						// ... just populate the single data structures that hold all data across all inner tables
 						// ... (including possible null data for the newly added columns)
 						if (!swap_current_and_previous_and_set_previous_to_null)
@@ -4656,6 +4665,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 							}
 						}
 
+						// The following if/else block only applies to PRIMARY_VARIABLE_GROUP merges
 						// Now, also save the data into sets broken down by inner table
 						if (!swap_current_and_previous_and_set_previous_to_null)
 						{
@@ -4695,6 +4705,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 	});
 
+	// The following if/else block only applies to PRIMARY_VARIABLE_GROUP merges
 	if (swap_current_and_previous_and_set_previous_to_null)
 	{
 		// The addition of 2 handles the fact that the new table being added
