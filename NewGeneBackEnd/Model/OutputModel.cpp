@@ -863,7 +863,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_right += " IS NOT NULL THEN t2.";
 					sql_select_right += previous_column_names[column_count];
 					sql_select_right += " ELSE t1.";
-					sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
+					sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
 					sql_select_right += " END AS ";
 					sql_select_right += new_column.column_name_in_temporary_table;
 
@@ -878,7 +878,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 						sql_select_right += " IS NOT NULL THEN t2.";
 						sql_select_right += previous_column_names[column_count];
 						sql_select_right += " ELSE t1.";
-						sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
+						sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
 						sql_select_right += " END AS ";
 						sql_select_right += new_column.column_name_in_temporary_table;
 
