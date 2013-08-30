@@ -7207,152 +7207,152 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 		std::string rhs_value_string;
 		switch (rhs_binding.first)
 		{
-		case OutputModel::OutputGenerator::SQLExecutor::INT64:
-			{
-				rhs_value_int = rhs.ints[rhs_binding.second];
-			}
-			break;
-		case OutputModel::OutputGenerator::SQLExecutor::STRING:
-			{
-				rhs_value_string = rhs.strings[rhs_binding.second];
-			}
-			break;
-		case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
-			{
+			case OutputModel::OutputGenerator::SQLExecutor::INT64:
+				{
+					rhs_value_int = rhs.ints[rhs_binding.second];
+				}
+				break;
+			case OutputModel::OutputGenerator::SQLExecutor::STRING:
+				{
+					rhs_value_string = rhs.strings[rhs_binding.second];
+				}
+				break;
+			case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+				{
 
-			}
-			break;
+				}
+				break;
 		}
 		switch (lhs_binding.first)
 		{
-		case OutputModel::OutputGenerator::SQLExecutor::INT64:
-			{
-				std::int64_t lhs_value_int = ints[lhs_binding.second];
-				switch (rhs_binding.first)
+			case OutputModel::OutputGenerator::SQLExecutor::INT64:
 				{
-				case OutputModel::OutputGenerator::SQLExecutor::INT64:
+					std::int64_t lhs_value_int = ints[lhs_binding.second];
+					switch (rhs_binding.first)
 					{
-						if (lhs_value_int < rhs_value_int)
-						{
-							answered = true;
-							is_less_than = true;
-						}
-						else if (lhs_value_int > rhs_value_int)
-						{
-							answered = true;
-							is_less_than = false;
-						}
-						else
-						{
-							is_less_than = false;
-						}
+						case OutputModel::OutputGenerator::SQLExecutor::INT64:
+							{
+								if (lhs_value_int < rhs_value_int)
+								{
+									answered = true;
+									is_less_than = true;
+								}
+								else if (lhs_value_int > rhs_value_int)
+								{
+									answered = true;
+									is_less_than = false;
+								}
+								else
+								{
+									is_less_than = false;
+								}
+							}
+							break;
+						case OutputModel::OutputGenerator::SQLExecutor::STRING:
+							{
+								if (lhs_value_int < boost::lexical_cast<std::int64_t>(rhs_value_string))
+								{
+									answered = true;
+									is_less_than = true;
+								}
+								else if (lhs_value_int > boost::lexical_cast<std::int64_t>(rhs_value_string))
+								{
+									answered = true;
+									is_less_than = false;
+								}
+								else
+								{
+									is_less_than = false;
+								}
+							}
+							break;
+						case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+							{
+								// NULL is greater than anything
+								answered = true;
+								is_less_than = true;
+							}
+							break;
 					}
-					break;
-				case OutputModel::OutputGenerator::SQLExecutor::STRING:
-					{
-						if (lhs_value_int < boost::lexical_cast<std::int64_t>(rhs_value_string))
-						{
-							answered = true;
-							is_less_than = true;
-						}
-						else if (lhs_value_int > boost::lexical_cast<std::int64_t>(rhs_value_string))
-						{
-							answered = true;
-							is_less_than = false;
-						}
-						else
-						{
-							is_less_than = false;
-						}
-					}
-					break;
-				case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
-					{
-						// NULL is greater than anything
-						answered = true;
-						is_less_than = true;
-					}
-					break;
 				}
-			}
-			break;
-		case OutputModel::OutputGenerator::SQLExecutor::STRING:
-			{
-				std::string lhs_value_string = strings[lhs_binding.second];
-				switch (rhs_binding.first)
+				break;
+			case OutputModel::OutputGenerator::SQLExecutor::STRING:
 				{
-				case OutputModel::OutputGenerator::SQLExecutor::INT64:
+					std::string lhs_value_string = strings[lhs_binding.second];
+					switch (rhs_binding.first)
 					{
-						if (boost::lexical_cast<std::int64_t>(lhs_value_string) < rhs_value_int)
-						{
-							answered = true;
-							is_less_than = true;
-						}
-						else if (boost::lexical_cast<std::int64_t>(lhs_value_string) > rhs_value_int)
-						{
-							answered = true;
-							is_less_than = false;
-						}
-						else
-						{
-							is_less_than = false;
-						}
+						case OutputModel::OutputGenerator::SQLExecutor::INT64:
+							{
+								if (boost::lexical_cast<std::int64_t>(lhs_value_string) < rhs_value_int)
+								{
+									answered = true;
+									is_less_than = true;
+								}
+								else if (boost::lexical_cast<std::int64_t>(lhs_value_string) > rhs_value_int)
+								{
+									answered = true;
+									is_less_than = false;
+								}
+								else
+								{
+									is_less_than = false;
+								}
+							}
+							break;
+						case OutputModel::OutputGenerator::SQLExecutor::STRING:
+							{
+								if (lhs_value_string < rhs_value_string)
+								{
+									answered = true;
+									is_less_than = true;
+								}
+								else if (lhs_value_string > rhs_value_string)
+								{
+									answered = true;
+									is_less_than = false;
+								}
+								else
+								{
+									is_less_than = false;
+								}
+							}
+							break;
+						case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+							{
+								// NULL is greater than anything
+								answered = true;
+								is_less_than = true;
+							}
+							break;
 					}
-					break;
-				case OutputModel::OutputGenerator::SQLExecutor::STRING:
-					{
-						if (lhs_value_string < rhs_value_string)
-						{
-							answered = true;
-							is_less_than = true;
-						}
-						else if (lhs_value_string > rhs_value_string)
-						{
-							answered = true;
-							is_less_than = false;
-						}
-						else
-						{
-							is_less_than = false;
-						}
-					}
-					break;
-				case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
-					{
-						// NULL is greater than anything
-						answered = true;
-						is_less_than = true;
-					}
-					break;
 				}
-			}
-			break;
-		case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
-			{
-				switch (rhs_binding.first)
+				break;
+			case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
 				{
-				case OutputModel::OutputGenerator::SQLExecutor::INT64:
+					switch (rhs_binding.first)
 					{
-						// NULL is greater than anything
-						answered = true;
-						is_less_than = false;
+						case OutputModel::OutputGenerator::SQLExecutor::INT64:
+							{
+								// NULL is greater than anything
+								answered = true;
+								is_less_than = false;
+							}
+							break;
+						case OutputModel::OutputGenerator::SQLExecutor::STRING:
+							{
+								// NULL is greater than anything
+								answered = true;
+								is_less_than = false;
+							}
+							break;
+						case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+							{
+								is_less_than = false;
+							}
+							break;
 					}
-					break;
-				case OutputModel::OutputGenerator::SQLExecutor::STRING:
-					{
-						// NULL is greater than anything
-						answered = true;
-						is_less_than = false;
-					}
-					break;
-				case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
-					{
-						is_less_than = false;
-					}
-					break;
 				}
-			}
-			break;
+				break;
 		}
 		++index;
 	});
