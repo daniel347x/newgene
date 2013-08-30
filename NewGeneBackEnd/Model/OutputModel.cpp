@@ -3707,125 +3707,99 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	}
 
-	// Add the WHERE clause to guarantee that NULL primary key columns are at the right on each row,
-	// and that non-NULL primary key columns are sorted from left to right on each row
-	if (debug_ordering)
+	// Disable the WHERE clause because newly appended data tables
+	// whose data would appear after intermediate NULLs will not appear in the result set!
+	// instead, let the XR table handle this.
+	if (false)
 	{
-
-		// The following is guaranteed to be true given that this function is being called.
-		// Nonetheless, leave it for clarity.
-		if (highest_multiplicity_primary_uoa > 1)
+		// Add the WHERE clause to guarantee that NULL primary key columns are at the right on each row,
+		// and that non-NULL primary key columns are sorted from left to right on each row
+		if (debug_ordering)
 		{
-	
-			// Obtain the columns for the two primary keys being compared in a convenient vector.
-			// The number of columns within a single primary key corresponding to the DMU category with multiplicity greater than 1 can be more than 1.
-			for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity < highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
+
+			// The following is guaranteed to be true given that this function is being called.
+			// Nonetheless, leave it for clarity.
+			if (highest_multiplicity_primary_uoa > 1)
 			{
 
-				if (outer_dmu_multiplicity > 1)
-				{
-					sql_string += " AND ";
-				}
-				else
-				{
-					sql_string += " WHERE ";
-				}
-
-				sql_string += "( CASE ";
-
-				std::vector<ColumnsInTempView::ColumnInTempView> columns_for_active_dmu_category_lhs;
-				std::vector<ColumnsInTempView::ColumnInTempView> columns_for_active_dmu_category_rhs;
-
-				for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+				// Obtain the columns for the two primary keys being compared in a convenient vector.
+				// The number of columns within a single primary key corresponding to the DMU category with multiplicity greater than 1 can be more than 1.
+				for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity < highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
 				{
 
-					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_string, &columns_for_active_dmu_category_lhs, &columns_for_active_dmu_category_rhs](ColumnsInTempView::ColumnInTempView & view_column)
+					if (outer_dmu_multiplicity > 1)
 					{
-						if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+						sql_string += " AND ";
+					}
+					else
+					{
+						sql_string += " WHERE ";
+					}
+
+					sql_string += "( CASE ";
+
+					std::vector<ColumnsInTempView::ColumnInTempView> columns_for_active_dmu_category_lhs;
+					std::vector<ColumnsInTempView::ColumnInTempView> columns_for_active_dmu_category_rhs;
+
+					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+					{
+
+						std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_string, &columns_for_active_dmu_category_lhs, &columns_for_active_dmu_category_rhs](ColumnsInTempView::ColumnInTempView & view_column)
 						{
-							if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+							if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 							{
-								if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
+								if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
 								{
-									if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+									if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 									{
-										if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
+										if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 										{
-											columns_for_active_dmu_category_lhs.push_back(view_column);
-										}
-										else if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity + 1)
-										{
-											columns_for_active_dmu_category_rhs.push_back(view_column);
+											if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity)
+											{
+												columns_for_active_dmu_category_lhs.push_back(view_column);
+											}
+											else if (view_column.current_multiplicity__corresponding_to__current_inner_table == outer_dmu_multiplicity + 1)
+											{
+												columns_for_active_dmu_category_rhs.push_back(view_column);
+											}
 										}
 									}
 								}
 							}
-						}
-					});
+						});
 
-				}
-
-				sql_string += "WHEN ";
-				sql_string += columns_for_active_dmu_category_lhs[0].column_name_in_temporary_table; // The first column in any primary key group suffices for the NULL check
-				sql_string += " IS NULL AND ";
-				sql_string += columns_for_active_dmu_category_rhs[0].column_name_in_temporary_table;
-				sql_string += " IS NULL ";
-				sql_string += "THEN 1 ";
-
-				sql_string += "WHEN ";
-				sql_string += columns_for_active_dmu_category_lhs[0].column_name_in_temporary_table; // The first column in any primary key group suffices for the NULL check
-				sql_string += " IS NULL AND ";
-				sql_string += columns_for_active_dmu_category_rhs[0].column_name_in_temporary_table;
-				sql_string += " IS NOT NULL ";
-				sql_string += "THEN 0 ";
-
-				sql_string += "WHEN ";
-				sql_string += columns_for_active_dmu_category_lhs[0].column_name_in_temporary_table; // The first column in any primary key group suffices for the NULL check
-				sql_string += " IS NOT NULL AND ";
-				sql_string += columns_for_active_dmu_category_rhs[0].column_name_in_temporary_table;
-				sql_string += " IS NULL ";
-				sql_string += "THEN 1 ";
-
-				sql_string += "ELSE ";
-
-				if (number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 == 1)
-				{
-					if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
-					{
-						sql_string += "CAST (";
 					}
-					sql_string += columns_for_active_dmu_category_lhs[0].column_name_in_temporary_table;
-					if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
-					{
-						sql_string += " AS INTEGER)";
-					}
-					sql_string += " <= ";
-					if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
-					{
-						sql_string += "CAST (";
-					}
+
+					sql_string += "WHEN ";
+					sql_string += columns_for_active_dmu_category_lhs[0].column_name_in_temporary_table; // The first column in any primary key group suffices for the NULL check
+					sql_string += " IS NULL AND ";
 					sql_string += columns_for_active_dmu_category_rhs[0].column_name_in_temporary_table;
-					if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
-					{
-						sql_string += " AS INTEGER)";
-					}
-				}
-				else
-				{
-					sql_string += "( CASE";
+					sql_string += " IS NULL ";
+					sql_string += "THEN 1 ";
 
-					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+					sql_string += "WHEN ";
+					sql_string += columns_for_active_dmu_category_lhs[0].column_name_in_temporary_table; // The first column in any primary key group suffices for the NULL check
+					sql_string += " IS NULL AND ";
+					sql_string += columns_for_active_dmu_category_rhs[0].column_name_in_temporary_table;
+					sql_string += " IS NOT NULL ";
+					sql_string += "THEN 0 ";
+
+					sql_string += "WHEN ";
+					sql_string += columns_for_active_dmu_category_lhs[0].column_name_in_temporary_table; // The first column in any primary key group suffices for the NULL check
+					sql_string += " IS NOT NULL AND ";
+					sql_string += columns_for_active_dmu_category_rhs[0].column_name_in_temporary_table;
+					sql_string += " IS NULL ";
+					sql_string += "THEN 1 ";
+
+					sql_string += "ELSE ";
+
+					if (number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 == 1)
 					{
-						sql_string += " WHEN ";
-						sql_string += columns_for_active_dmu_category_lhs[inner_dmu_multiplicity].column_name_in_temporary_table;
-						sql_string += " != ";
-						sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity].column_name_in_temporary_table;
-						sql_string += " THEN ";
 						if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
 						{
 							sql_string += "CAST (";
 						}
-						sql_string += columns_for_active_dmu_category_lhs[inner_dmu_multiplicity].column_name_in_temporary_table;
+						sql_string += columns_for_active_dmu_category_lhs[0].column_name_in_temporary_table;
 						if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
 						{
 							sql_string += " AS INTEGER)";
@@ -3835,22 +3809,54 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						{
 							sql_string += "CAST (";
 						}
-						sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity].column_name_in_temporary_table;
+						sql_string += columns_for_active_dmu_category_rhs[0].column_name_in_temporary_table;
 						if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
 						{
 							sql_string += " AS INTEGER)";
 						}
 					}
+					else
+					{
+						sql_string += "( CASE";
 
-					sql_string += " ELSE 1 "; // Equal primary key column sets
+						for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+						{
+							sql_string += " WHEN ";
+							sql_string += columns_for_active_dmu_category_lhs[inner_dmu_multiplicity].column_name_in_temporary_table;
+							sql_string += " != ";
+							sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity].column_name_in_temporary_table;
+							sql_string += " THEN ";
+							if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
+							{
+								sql_string += "CAST (";
+							}
+							sql_string += columns_for_active_dmu_category_lhs[inner_dmu_multiplicity].column_name_in_temporary_table;
+							if (columns_for_active_dmu_category_lhs[0].primary_key_should_be_treated_as_numeric)
+							{
+								sql_string += " AS INTEGER)";
+							}
+							sql_string += " <= ";
+							if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
+							{
+								sql_string += "CAST (";
+							}
+							sql_string += columns_for_active_dmu_category_rhs[inner_dmu_multiplicity].column_name_in_temporary_table;
+							if (columns_for_active_dmu_category_rhs[0].primary_key_should_be_treated_as_numeric)
+							{
+								sql_string += " AS INTEGER)";
+							}
+						}
 
-					sql_string += "END )";
+						sql_string += " ELSE 1 "; // Equal primary key column sets
+
+						sql_string += "END )";
+					}
+
+					sql_string += " END )";
+
 				}
 
-				sql_string += " END )";
-
 			}
-
 		}
 	}
 
