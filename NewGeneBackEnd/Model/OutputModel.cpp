@@ -1109,6 +1109,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	failed = false;
 	indices_of_primary_key_columns.clear();
 	is_index_a_primary_key.clear();
+	single_inner_table__indices_of_primary_keys_with_multiplicity_greater_than_1__in_top_level_uoa.clear();
 }
 
 void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView & sorted_result_columns, sqlite3_stmt * stmt_result)
@@ -1151,6 +1152,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 		}
 
 		bool add_as_primary_key_column = false;
+		bool add_as_primary_key_with_multiplicity_greater_than_1_in_first_inner_table = false;
 
 		if (possible_duplicate_view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 		{
@@ -1159,6 +1161,10 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
 					add_as_primary_key_column = true;
+					if (possible_duplicate_view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+					{
+						add_as_primary_key_with_multiplicity_greater_than_1_in_first_inner_table = true;
+					}
 				}
 			}
 			else
@@ -1191,6 +1197,10 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					{
 						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)current_parameter_ints.size()-1));
 						is_index_a_primary_key.push_back(true);
+						if (add_as_primary_key_with_multiplicity_greater_than_1_in_first_inner_table)
+						{
+							single_inner_table__indices_of_primary_keys_with_multiplicity_greater_than_1__in_top_level_uoa.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)current_parameter_ints.size()-1));
+						}
 					}
 					else
 					{
@@ -1218,6 +1228,10 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					{
 						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)current_parameter_strings.size()-1));
 						is_index_a_primary_key.push_back(true);
+						if (add_as_primary_key_with_multiplicity_greater_than_1_in_first_inner_table)
+						{
+							single_inner_table__indices_of_primary_keys_with_multiplicity_greater_than_1__in_top_level_uoa.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)current_parameter_strings.size()-1));
+						}
 					}
 					else
 					{
@@ -1241,6 +1255,10 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					{
 						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
 						is_index_a_primary_key.push_back(true);
+						if (add_as_primary_key_with_multiplicity_greater_than_1_in_first_inner_table)
+						{
+							single_inner_table__indices_of_primary_keys_with_multiplicity_greater_than_1__in_top_level_uoa.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+						}
 					}
 					else
 					{
@@ -4209,13 +4227,11 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	bound_parameter_which_binding_to_use.clear();
 	int number_nulls_to_add_at_end = 0;
 
-	std::vector<std::vector<std::string>> inner_table_string_sets;
-	std::vector<std::vector<std::int64_t>> inner_table_int_sets;
-	std::vector<std::vector<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING>> inner_table__which_binding_to_use__sets;
+	std::vector<ColumnSorter> inner_table_columns;
 
 	int which_inner_table = 0;
 
-	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [this, &which_inner_table, &inner_table_string_sets, &inner_table_int_sets, &inner_table__which_binding_to_use__sets, &swap_current_and_previous_and_set_previous_to_null, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_each_single_inner_table, &highest_index_previous_table, &data_int64, &data_string, &data_long, &data_is_null, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_columns.columns_in_view.cbegin(), previous_x_columns.columns_in_view.cend(), [this, &which_inner_table, &inner_table_columns, &swap_current_and_previous_and_set_previous_to_null, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_each_single_inner_table, &highest_index_previous_table, &data_int64, &data_string, &data_long, &data_is_null, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
 		if (failed)
@@ -4229,14 +4245,13 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			{
 				++which_inner_table;
 			}
-			inner_table_string_sets.push_back(std::vector<std::string>());
-			inner_table_int_sets.push_back(std::vector<std::int64_t>());
-			inner_table__which_binding_to_use__sets.push_back(std::vector<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING>());
+			inner_table_columns.push_back(ColumnSorter());
 		}
 
-		std::vector<std::string> & inner_table_string_set = inner_table_string_sets.back();
-		std::vector<std::int64_t> & inner_table_int_set = inner_table_int_sets.back();
-		std::vector<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING> & inner_table__which_binding_to_use__set = inner_table__which_binding_to_use__sets.back();
+		std::vector<std::string> & inner_table_string_set = inner_table_columns.back().strings;
+		std::vector<std::int64_t> & inner_table_int_set = inner_table_columns.back().ints;
+		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table_bindings = inner_table_columns.back().bindings;
+		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set = inner_table_columns.back().bindings__primary_keys_with_multiplicity_greater_than_1;
 
 		data_is_null = false;
 
@@ -4278,7 +4293,11 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 				if (!include_previous_data)
 				{
 					data_is_null = true;
-					inner_table__which_binding_to_use__set.push_back(SQLExecutor::NULL_BINDING);
+					inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+					if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+					{
+						inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+					}
 				}
 			}
 			else
@@ -4286,7 +4305,11 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 				if (!include_current_data)
 				{
 					data_is_null = true;
-					inner_table__which_binding_to_use__set.push_back(SQLExecutor::NULL_BINDING);
+					inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+					if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+					{
+						inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+					}
 				}
 			}
 
@@ -4325,14 +4348,22 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						if (!swap_current_and_previous_and_set_previous_to_null)
 						{
 							inner_table_int_set.push_back(data_int64);
-							inner_table__which_binding_to_use__set.push_back(SQLExecutor::INT64);
+							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
+							if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+							{
+								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
+							}
 						}
 						else
 						{
 							if (index > highest_index_previous_table)
 							{
 								inner_table_int_set.push_back(data_int64);
-								inner_table__which_binding_to_use__set.push_back(SQLExecutor::INT64);
+								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
+								if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+								{
+									inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
+								}
 							}
 						}
 
@@ -4375,14 +4406,22 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						if (!swap_current_and_previous_and_set_previous_to_null)
 						{
 							inner_table_string_set.push_back(data_string);
-							inner_table__which_binding_to_use__set.push_back(SQLExecutor::STRING);
+							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
+							if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+							{
+								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
+							}
 						}
 						else
 						{
 							if (index > highest_index_previous_table)
 							{
 								inner_table_string_set.push_back(data_string);
-								inner_table__which_binding_to_use__set.push_back(SQLExecutor::STRING);
+								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
+								if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+								{
+									inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
+								}
 							}
 						}
 
@@ -4420,13 +4459,21 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						// Now, also save the data into sets broken down by inner table
 						if (!swap_current_and_previous_and_set_previous_to_null)
 						{
-							inner_table__which_binding_to_use__set.push_back(SQLExecutor::NULL_BINDING);
+							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+							if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+							{
+								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+							}
 						}
 						else
 						{
 							if (index > highest_index_previous_table)
 							{
-								inner_table__which_binding_to_use__set.push_back(SQLExecutor::NULL_BINDING);
+								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+								if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+								{
+									inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+								}
 							}
 						}
 
@@ -4462,11 +4509,42 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		// In the previous method, there is nothing to do here -
 		// the single bound_parameter data structures are filled.
 
-		// But in the new method, we sort the data by column set.
+		// But in the new method, we sort the data by inner table column set.
 		bool new_method = true;
-		if (new_method)
+		if (new_method && xr_table_category == OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP)
 		{
-
+			std::sort(inner_table_columns.begin(), inner_table_columns.end());
+			bound_parameter_ints.clear();
+			bound_parameter_strings.clear();
+			bound_parameter_which_binding_to_use.clear();
+			std::for_each(inner_table_columns.cbegin(), inner_table_columns.cend(), [&bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](ColumnSorter const & columns_in_single_inner_table)
+			{
+				int the_index = 0;
+				std::for_each(columns_in_single_inner_table.bindings.cbegin(), columns_in_single_inner_table.bindings.cend(), [&columns_in_single_inner_table, &the_index, &bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int> const & binding_info)
+				{
+					switch (binding_info.first)
+					{
+						case OutputModel::OutputGenerator::SQLExecutor::INT64:
+							{
+								bound_parameter_ints.push_back(columns_in_single_inner_table.ints[binding_info.second]);
+								bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
+							}
+							break;
+						case OutputModel::OutputGenerator::SQLExecutor::STRING:
+							{
+								bound_parameter_strings.push_back(columns_in_single_inner_table.strings[binding_info.second]);
+								bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::STRING);
+							}
+							break;
+						case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+							{
+								bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING);
+							}
+							break;
+					}
+					++the_index;
+				});
+			});
 		}
 	}
 
@@ -6998,4 +7076,172 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 		}
 
 	});
+}
+
+bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGenerator::ColumnSorter const & rhs) const
+{
+	int index = 0;
+	bool answered = false;
+	bool is_less_than = false;
+	std::for_each(bindings__primary_keys_with_multiplicity_greater_than_1.cbegin(), bindings__primary_keys_with_multiplicity_greater_than_1.cend(), [this, &index, &rhs, &answered, &is_less_than](std::pair<SQLExecutor::WHICH_BINDING, int> const & lhs_binding)
+	{
+		if (answered)
+		{
+			return;
+		}
+		std::pair<SQLExecutor::WHICH_BINDING, int> rhs_binding = rhs.bindings__primary_keys_with_multiplicity_greater_than_1[index];
+		std::int64_t rhs_value_int = 0;
+		std::string rhs_value_string;
+		switch (rhs_binding.first)
+		{
+		case OutputModel::OutputGenerator::SQLExecutor::INT64:
+			{
+				rhs_value_int = rhs.ints[rhs_binding.second];
+			}
+			break;
+		case OutputModel::OutputGenerator::SQLExecutor::STRING:
+			{
+				rhs_value_string = rhs.strings[rhs_binding.second];
+			}
+			break;
+		case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+			{
+
+			}
+			break;
+		}
+		switch (lhs_binding.first)
+		{
+		case OutputModel::OutputGenerator::SQLExecutor::INT64:
+			{
+				std::int64_t lhs_value_int = ints[lhs_binding.second];
+				switch (rhs_binding.first)
+				{
+				case OutputModel::OutputGenerator::SQLExecutor::INT64:
+					{
+						if (lhs_value_int < rhs_value_int)
+						{
+							answered = true;
+							is_less_than = true;
+						}
+						else if (lhs_value_int > rhs_value_int)
+						{
+							answered = true;
+							is_less_than = false;
+						}
+						else
+						{
+							is_less_than = false;
+						}
+					}
+					break;
+				case OutputModel::OutputGenerator::SQLExecutor::STRING:
+					{
+						if (lhs_value_int < boost::lexical_cast<std::int64_t>(rhs_value_string))
+						{
+							answered = true;
+							is_less_than = true;
+						}
+						else if (lhs_value_int > boost::lexical_cast<std::int64_t>(rhs_value_string))
+						{
+							answered = true;
+							is_less_than = false;
+						}
+						else
+						{
+							is_less_than = false;
+						}
+					}
+					break;
+				case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+					{
+						// NULL is greater than anything
+						answered = true;
+						is_less_than = true;
+					}
+					break;
+				}
+			}
+			break;
+		case OutputModel::OutputGenerator::SQLExecutor::STRING:
+			{
+				std::string lhs_value_string = strings[lhs_binding.second];
+				switch (rhs_binding.first)
+				{
+				case OutputModel::OutputGenerator::SQLExecutor::INT64:
+					{
+						if (boost::lexical_cast<std::int64_t>(lhs_value_string) < rhs_value_int)
+						{
+							answered = true;
+							is_less_than = true;
+						}
+						else if (boost::lexical_cast<std::int64_t>(lhs_value_string) > rhs_value_int)
+						{
+							answered = true;
+							is_less_than = false;
+						}
+						else
+						{
+							is_less_than = false;
+						}
+					}
+					break;
+				case OutputModel::OutputGenerator::SQLExecutor::STRING:
+					{
+						if (lhs_value_string < rhs_value_string)
+						{
+							answered = true;
+							is_less_than = true;
+						}
+						else if (lhs_value_string > rhs_value_string)
+						{
+							answered = true;
+							is_less_than = false;
+						}
+						else
+						{
+							is_less_than = false;
+						}
+					}
+					break;
+				case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+					{
+						// NULL is greater than anything
+						answered = true;
+						is_less_than = true;
+					}
+					break;
+				}
+			}
+			break;
+		case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+			{
+				switch (rhs_binding.first)
+				{
+				case OutputModel::OutputGenerator::SQLExecutor::INT64:
+					{
+						// NULL is greater than anything
+						answered = true;
+						is_less_than = false;
+					}
+					break;
+				case OutputModel::OutputGenerator::SQLExecutor::STRING:
+					{
+						// NULL is greater than anything
+						answered = true;
+						is_less_than = false;
+					}
+					break;
+				case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+					{
+						is_less_than = false;
+					}
+					break;
+				}
+			}
+			break;
+		}
+		++index;
+	});
+	return is_less_than;
 }

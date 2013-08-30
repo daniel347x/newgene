@@ -363,6 +363,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns;
 						std::vector<bool> is_index_a_primary_key;
 
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> single_inner_table__indices_of_primary_keys_with_multiplicity_greater_than_1__in_top_level_uoa;
+
 						bool failed;
 
 				};
@@ -372,6 +374,49 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 					  PRIMARY_VARIABLE_GROUP
 					, CHILD_VARIABLE_GROUP
 					, FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP
+				};
+
+				class ColumnSorter
+				{
+
+					public:
+	
+						std::vector<std::string> strings;
+						std::vector<std::int64_t> ints;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings__primary_keys_with_multiplicity_greater_than_1;
+
+						ColumnSorter()
+						{
+
+						}
+
+						ColumnSorter(
+							  std::vector<std::string> const & strings_
+							, std::vector<std::int64_t> const & ints_
+							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings_
+							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> const & bindings__primary_keys_with_multiplicity_greater_than_1_
+							)
+							:
+							  strings(strings_)
+							, ints(ints_)
+							, bindings(bindings_)
+							, bindings__primary_keys_with_multiplicity_greater_than_1(bindings__primary_keys_with_multiplicity_greater_than_1_)
+							  {
+
+							  }
+				
+						ColumnSorter(ColumnSorter const & rhs)
+							:
+							  strings(rhs.strings)
+							, ints(rhs.ints)
+							, bindings(rhs.bindings)
+							, bindings__primary_keys_with_multiplicity_greater_than_1(rhs.bindings__primary_keys_with_multiplicity_greater_than_1)
+						{
+
+						}
+
+						bool operator<(ColumnSorter const & rhs) const;
 				};
 
 				typedef std::pair<std::vector<SQLExecutor>, ColumnsInTempView> SqlAndColumnSet;
