@@ -410,8 +410,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	});
 
 	column_index = 0;
-	WidgetInstanceIdentifier current_variable_group;
-	int inner_table_index_for_equivalent_variable_group = 0;
+	inner_table_index_for_equivalent_variable_group = 0;
 	int current_variable_group_number = 0;
 	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &current_variable_group_number, &this_variable_group_appears_more_than_once, &inner_table_index_for_equivalent_variable_group, &current_variable_group, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
