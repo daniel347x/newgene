@@ -963,7 +963,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		if (highest_multiplicity_primary_uoa > 1)
 		{
 			int current_column_count = 0;
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &current_column_count, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa, &sql_string](ColumnsInTempView::ColumnInTempView & view_column)
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &current_column_count, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa](ColumnsInTempView::ColumnInTempView & view_column)
 			{
 				if (current_column_count < number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table)
 				{
@@ -1001,7 +1001,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 				for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
 				{
 					int current_column_count = 0;
-					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_order_by, &current_column_count, &number_columns_very_first_primary_variable_group_including_multiplicities, &number_columns_very_last_primary_variable_group_including_multiplicities, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_string, &first](ColumnsInTempView::ColumnInTempView & view_column)
+					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_order_by, &current_column_count, &number_columns_very_first_primary_variable_group_including_multiplicities, &number_columns_very_last_primary_variable_group_including_multiplicities, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &first](ColumnsInTempView::ColumnInTempView & view_column)
 					{
 						if (current_column_count < number_columns_very_first_primary_variable_group_including_multiplicities)
 						{
@@ -1050,7 +1050,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		// ... If there are no primary key DMU categories for this top-level UOA with multiplicity greater than 1,
 		// then this section will order by all of this top-level's UOA primary key DMU categories.
 		int current_column = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_order_by, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &sql_string, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_order_by, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
 		{
 
 			if (current_column >= number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table)
@@ -1061,7 +1061,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			// Determine how many columns there are corresponding to the DMU category
 			int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
 			int column_count_nested = 0;
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column_nested)
+			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1](ColumnsInTempView::ColumnInTempView & view_column_nested)
 			{
 				if (column_count_nested >= number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table)
 				{
@@ -1163,7 +1163,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	sql_string += sql_null_clause;
 
 	// Do not ORDER BY at this time.
-	// The "SORT" function cannot be used in an ORDER BY on a compound SELECT statement.
+	// The "CAST" operation cannot be used in an ORDER BY on a compound SELECT statement.
 	// To overcome this, new rows need to be added into the WHERE clause for both sub-SELECT's,
 	// and the ORDER BY must reference those columns.
 	// These columns would have to be added to the column metadata and accounted for everywhere.
