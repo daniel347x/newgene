@@ -328,12 +328,12 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		{
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
 				{
-					formatted_column.column_name_in_temporary_table = "DATETIME-START";
+					formatted_column.column_name_in_temporary_table = "DATETIME_START";
 				}
 				break;
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT:
 				{
-					formatted_column.column_name_in_temporary_table = "DATETIME-END";
+					formatted_column.column_name_in_temporary_table = "DATETIME_END";
 				}
 				break;
 		}
