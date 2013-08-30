@@ -400,6 +400,8 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	});
 
+	// now display the columns
+
 	column_index = 0;
 	inner_table_index_for_equivalent_variable_group = 0;
 	int current_variable_group_number = 0;
@@ -438,7 +440,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		if (this_variable_group_appears_more_than_once[current_variable_group_number])
 		{
 			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(inner_table_index_for_equivalent_variable_group, c, 10);
+			formatted_column.column_name_in_temporary_table += itoa(inner_table_index_for_equivalent_variable_group + 1, c, 10);
 		}
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
