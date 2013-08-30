@@ -109,7 +109,8 @@ class ColumnsInTempView
 					, primary_key_index_within_total_kad_for_dmu_category(-1)
 					, primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category(-1)
 					, primary_key_index_within_primary_uoa_for_dmu_category(-1)
-					, current_multiplicity__corresponding_to__current_inner_table(-1)
+					, current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg(-1)
+					, current_multiplicity__of__current_inner_table__within__current_vg(-1)
 					, total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group(-1)
 					, primary_key_should_be_treated_as_numeric(false)
 					, total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category(-1)
@@ -147,7 +148,8 @@ class ColumnsInTempView
 
 				int primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category;
 				int primary_key_index_within_primary_uoa_for_dmu_category;
-				int current_multiplicity__corresponding_to__current_inner_table;
+				int current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg;
+				int current_multiplicity__of__current_inner_table__within__current_vg;
 				int total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group;
 				int total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 				int total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category;
