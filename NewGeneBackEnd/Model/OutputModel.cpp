@@ -217,32 +217,9 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	// In the new method, child tables are merged in *after* top-level primary groups are merged together.
 	if (new_method)
 	{
+
 		SqlAndColumnSet x_table_result = primary_group_merged_results;
 		SqlAndColumnSet xr_table_result = x_table_result;
-
-		// Currently, the outgoing table is no different from the incoming table,
-		// and there is no need to add a new datetime column here.
-		if (false)
-		{
-			x_table_result = CreateInitialChildXTable(x_table_result.second);
-			x_table_result.second.most_recent_sql_statement_executed__index = -1;
-			ExecuteSQL(x_table_result);
-			merging_of_children_column_sets.push_back(x_table_result);
-			if (failed)
-			{
-				return;
-			}
-
-			SqlAndColumnSet xr_table_result = CreateInitialChildXRTable(x_table_result.second);
-			xr_table_result.second.most_recent_sql_statement_executed__index = -1;
-			ExecuteSQL(xr_table_result);
-			merging_of_children_column_sets.push_back(xr_table_result);
-			if (failed)
-			{
-				return;
-			}
-		}
-
 
 		// Child tables
 		int current_child_view_name_index = 1;
@@ -278,10 +255,10 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 		});
 
 		// The structure of the table incoming to the following function is this:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR
-		// ... the child tables appear last
+		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR (with the XR set at the end, optional)
+		// ... the child tables appear last (optionally)
 		//
-		// ... and so is the table that comes out
+		// ... and the same format for the table is returned
 		SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTable(merging_of_children_column_sets.back().second, 0);
 		preliminary_sorted_kad_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(preliminary_sorted_kad_result);
@@ -295,7 +272,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR
 		//
 		// The structure of the table that comes out is:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z
+		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z (or, if no child tables, the final is XRMFXR_Z)
 		SqlAndColumnSet duplicates_removed_kad_result = RemoveDuplicates(preliminary_sorted_kad_result.second, 0);
 		merging_of_children_column_sets.push_back(duplicates_removed_kad_result);
 		if (failed)
@@ -543,13 +520,12 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	WidgetInstanceIdentifier first_variable_group;
 	int highest_index_first_primary_vg_full_final_results_table = -1;
-	int highest_index_all_merged_top_level_tables_including_all_datetime_columns = -1;
 
 	// Display primary key columns
 	bool first = true;
 	int column_index = 0;
 	bool reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_all_merged_top_level_tables_including_all_datetime_columns, &highest_index_first_primary_vg_full_final_results_table, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
 		if (column_index == 0)
@@ -562,14 +538,6 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			if (highest_index_first_primary_vg_full_final_results_table == -1)
 			{
 				highest_index_first_primary_vg_full_final_results_table = column_index;
-			}
-		}
-
-		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
-		{
-			if (highest_index_all_merged_top_level_tables_including_all_datetime_columns == -1)
-			{
-				highest_index_all_merged_top_level_tables_including_all_datetime_columns = column_index;
 			}
 		}
 
@@ -783,7 +751,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	else
 	{
 		column_index = 0;
-		std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_all_merged_top_level_tables_including_all_datetime_columns, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+		std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 		{
 
 			if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
@@ -793,12 +761,6 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			}
 
 			if (unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
-			{
-				++column_index;
-				return;
-			}
-
-			if (column_index <= highest_index_all_merged_top_level_tables_including_all_datetime_columns)
 			{
 				++column_index;
 				return;
@@ -885,43 +847,10 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	// COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS
 	// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT
 
-	if (primary_group_final_results.size() == 1)
-	{
-		// If there is only one top-level primary group, skip the COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS and COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS columns,
-		// and just use the pre-existing single COLUMN_TYPE__DATETIMESTART_MERGED_FINAL and COLUMN_TYPE__DATETIMEEND_MERGED_FINAL.
-		//
-		// The following table is XRMF
-		intermediate_merging_of_primary_groups_column_sets.push_back(primary_group_final_results[0]);
-
-		bool new_method = true;
-		if (new_method)
-		{
-			// just append:
-			// COLUMN_TYPE__DATETIMESTART_MERGED_FINAL
-			// COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS
-			// ... to give the table a proper format for the new method
-			primary_group_merged_results = intermediate_merging_of_primary_groups_column_sets.back();
-		}
-		else
-		{
-			// just append:
-			// COLUMN_TYPE__DATETIMESTART_MERGED_FINAL
-			// COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS
-			// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT
-			// ... to give the table a proper format for the old method
-			all_merged_results_unformatted = intermediate_merging_of_primary_groups_column_sets.back();
-		}
-		return;
-	}
-
 	// The incoming table is XR XR ... XR XRMF
 
 	SqlAndColumnSet intermediate_merge_of_top_level_primary_group_results = primary_group_final_results[0];
 	intermediate_merge_of_top_level_primary_group_results.second.view_number = 1;
-	std::for_each(intermediate_merge_of_top_level_primary_group_results.second.columns_in_view.begin(), intermediate_merge_of_top_level_primary_group_results.second.columns_in_view.end(), [](ColumnsInTempView::ColumnInTempView & the_column)
-	{
-		// In case column metadata need adjusting
-	});
 	intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
 
 	// The following table is XR XR ... XR XRMFXR
@@ -2513,91 +2442,6 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data)
 {
-
-	// The code in this #if block is not necessary, but is kept here for future reference.
-	// It should work (though it is untested); however, the same functionality is accomplished a different way.
-#	if 0
-
-	WidgetInstanceIdentifier variable_group = first_incoming_row.primary_variable_group_associated_with_row;
-	WidgetInstanceIdentifier uoa = first_incoming_row.primary_uoa_associated_with_row;
-	int number_primary_keys_selected_by_user_in_primary_variable_group = 0;
-	int number_primary_keys_in_each_inner_table_in_primary_variable_group = 0;
-	int number_variables_selected_by_user_in_primary_variable_group = 0;
-	std::vector<int> indices_of_primary_key_columns_with_multiplicity_greater_than_1;
-	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &indices_of_primary_key_columns_with_multiplicity_greater_than_1, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_primary_keys_in_each_inner_table_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &variable_group, &uoa](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
-	{
-		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &indices_of_primary_key_columns_with_multiplicity_greater_than_1, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_primary_keys_in_each_inner_table_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &primary_key, &variable_group, &uoa](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
-		{
-			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
-			{
-				if (primary_key_info.current_multiplicity == 1)
-				{
-					++number_primary_keys_in_each_inner_table_in_primary_variable_group;
-				}
-				if (primary_key_info.total_multiplicity > 1)
-				{
-					//indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back();
-				}
-				std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &number_primary_keys_selected_by_user_in_primary_variable_group, &number_variables_selected_by_user_in_primary_variable_group, &variable_group, &primary_key_info](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
-				{
-					if (the_primary_variable_group.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
-					{
-						WidgetInstanceIdentifiers const & the_selected_variables = the_primary_variable_group.second;
-						number_variables_selected_by_user_in_primary_variable_group = the_selected_variables.size();
-						std::for_each(the_selected_variables.cbegin(), the_selected_variables.cend(), [this, &number_primary_keys_selected_by_user_in_primary_variable_group, &primary_key_info](WidgetInstanceIdentifier const & the_selected_variable)
-						{
-							if (boost::iequals(primary_key_info.table_column_name, *the_selected_variable.code))
-							{
-								if (!primary_key_info.table_column_name.empty())
-								{
-									if (primary_key_info.current_multiplicity == 1)
-									{
-										++number_primary_keys_selected_by_user_in_primary_variable_group;
-									}
-								}
-							}
-						});
-					}
-				});
-			}
-		});
-	});
-
-	int number_of_primary_keys_not_selected_by_user_in_primary_variable_group = number_primary_keys_in_each_inner_table_in_primary_variable_group - number_primary_keys_selected_by_user_in_primary_variable_group;
-
-	// Now determine selection state of datetime variables
-	std::string variable_group_table_name = Table_VariableGroupData::TableNameFromVGCode(*variable_group.code);
-	int number_of_datetime_columns_selected_by_user_in_primary_variable_group = 0;
-	WidgetInstanceIdentifiers & datetime_columns = input_model->t_vgp_data_metadata__datetime_columns.getIdentifiers(variable_group_table_name);
-	if (datetime_columns.size() == 2)
-	{
-		std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &datetime_columns, &variable_group, &number_of_datetime_columns_selected_by_user_in_primary_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
-		{
-			if (the_primary_variable_group.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
-			{
-				WidgetInstanceIdentifiers const & the_selected_variables = the_primary_variable_group.second;
-				std::for_each(the_selected_variables.cbegin(), the_selected_variables.cend(), [this, &datetime_columns, &number_of_datetime_columns_selected_by_user_in_primary_variable_group](WidgetInstanceIdentifier const & the_selected_variable)
-				{
-					if (boost::iequals(*datetime_columns[0].code, *the_selected_variable.code))
-					{
-						++number_of_datetime_columns_selected_by_user_in_primary_variable_group;
-					}
-					if (boost::iequals(*datetime_columns[1].code, *the_selected_variable.code))
-					{
-						++number_of_datetime_columns_selected_by_user_in_primary_variable_group;
-					}
-				});
-			}
-		});
-	}
-
-	int number_of_datetime_columns_not_selected_by_user_in_primary_variable_group = 2 - number_of_datetime_columns_selected_by_user_in_primary_variable_group;
-
-	int number_of_internal_merge_datetime_columns_per_inner_table = 2;
-
-	int number_of_variables_in_each_primary_group_inner_table = number_variables_selected_by_user_in_primary_variable_group + number_of_primary_keys_not_selected_by_user_in_primary_variable_group + number_of_datetime_columns_not_selected_by_user_in_primary_variable_group + number_of_internal_merge_datetime_columns_per_inner_table;
-
-#	endif
 
 	bool match_failed = false;
 	int entry_number = 0;
