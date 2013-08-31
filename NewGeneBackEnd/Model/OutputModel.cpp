@@ -607,6 +607,8 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL:
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS:
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_CHILD_MERGE:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE:
 				{
 					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
 					++column_index;
