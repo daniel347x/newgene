@@ -2665,7 +2665,6 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 		int index_previous = previous_row_of_data.indices_of_primary_key_columns[entry_number].second;
 		std::int64_t data_int_previous = 0;
 		std::string data_string_previous;
-		bool data_null_previous = false;
 
 		switch (binding_current)
 		{
@@ -2697,8 +2696,7 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 							break;
 						case SQLExecutor::NULL_BINDING:
 							{
-								data_null_previous = true;
-								match_failed = true;
+								// NULLs match against non-NULLs
 							}
 							break;
 					}
@@ -2733,8 +2731,7 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 							break;
 						case SQLExecutor::NULL_BINDING:
 							{
-								data_null_previous = true;
-								match_failed = true;
+								// NULLs match against non-NULLs
 							}
 							break;
 					}
@@ -2751,19 +2748,17 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 					{
 						case SQLExecutor::INT64:
 							{
-								data_int_previous = previous_row_of_data.current_parameter_ints[index_previous];
-								match_failed = true;
+								// NULLs match against non-NULLs
 							}
 							break;
 						case SQLExecutor::STRING:
 							{
-								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous];
-								match_failed = true;
+								// NULLs match against non-NULLs
 							}
 							break;
 						case SQLExecutor::NULL_BINDING:
 							{
-								data_null_previous = true;
+								// NULLs match against NULLs
 							}
 							break;
 					}
