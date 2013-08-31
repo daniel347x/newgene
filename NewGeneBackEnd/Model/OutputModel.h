@@ -100,6 +100,8 @@ class ColumnsInTempView
 					, COLUMN_TYPE__DATETIMEEND_MERGED_FINAL
 					, COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS
 					, COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS
+					, COLUMN_TYPE__DATETIMESTART_CHILD_MERGE
+					, COLUMN_TYPE__DATETIMEEND_CHILD_MERGE
 					, COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT
 					, COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT
 				};
@@ -438,11 +440,14 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count, std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary);
 				void LoopThroughPrimaryVariableGroups();
 				void MergeHighLevelGroupResults();
+				void MergeChildGroups();
 				void FormatResultsForOutput();
 				void WriteResultsToFileOrScreen();
 				SqlAndColumnSet ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
+				SqlAndColumnSet CreateInitialChildXTable(ColumnsInTempView const & primary_variable_group_merge_result_columns);
+				SqlAndColumnSet CreateInitialChildXRTable(ColumnsInTempView const & primary_variable_group_merge_result_x_columns);
 				SqlAndColumnSet CreateInitialPrimaryMergeXRTable(ColumnsInTempView const & primary_variable_group_x1_columns);
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number);
 				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const child_set_number, int const current_child_view_name_index);
@@ -489,6 +494,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::vector<SqlAndColumnSets> primary_variable_group_column_sets;
 				SqlAndColumnSets primary_group_final_results;
 				SqlAndColumnSets intermediate_merging_of_primary_groups_column_sets;
+				SqlAndColumnSets merging_of_children_column_sets;
+				SqlAndColumnSet primary_group_merged_results;
 				SqlAndColumnSet all_merged_results_unformatted;
 				SqlAndColumnSet final_result;
 
