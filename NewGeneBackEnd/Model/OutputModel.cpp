@@ -278,7 +278,8 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 		});
 
 		// The structure of the table incoming to the following function is this:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
+		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR
+		// ... the child tables appear last
 		//
 		// ... and so is the table that comes out
 		SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTable(merging_of_children_column_sets.back().second, 0);
@@ -291,10 +292,10 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 		}
 
 		// The structure of the table incoming to the following function is this:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
+		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR
 		//
 		// The structure of the table that comes out is:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR_Z
+		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z
 		SqlAndColumnSet duplicates_removed_kad_result = RemoveDuplicates(preliminary_sorted_kad_result.second, 0);
 		merging_of_children_column_sets.push_back(duplicates_removed_kad_result);
 		if (failed)
@@ -303,7 +304,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 		}
 
 		// The structure of the following table is:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR_Z
+		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z
 		all_merged_results_unformatted = duplicates_removed_kad_result;
 
 	}
@@ -316,7 +317,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Currently, the outgoing table is no different from the incoming table
 	if (false)
 	{
-		char c[256];
 
 		std::vector<SQLExecutor> & sql_strings = result.first;
 		ColumnsInTempView & result_columns = result.second;
@@ -544,12 +544,13 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	WidgetInstanceIdentifier first_variable_group;
 	int highest_index_first_primary_vg_full_final_results_table = -1;
+	int highest_index_all_merged_top_level_tables_including_all_datetime_columns = -1;
 
 	// Display primary key columns
 	bool first = true;
 	int column_index = 0;
 	bool reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_all_merged_top_level_tables_including_all_datetime_columns, &highest_index_first_primary_vg_full_final_results_table, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
 		if (column_index == 0)
@@ -562,6 +563,14 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			if (highest_index_first_primary_vg_full_final_results_table == -1)
 			{
 				highest_index_first_primary_vg_full_final_results_table = column_index;
+			}
+		}
+
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
+		{
+			if (highest_index_all_merged_top_level_tables_including_all_datetime_columns == -1)
+			{
+				highest_index_all_merged_top_level_tables_including_all_datetime_columns = column_index;
 			}
 		}
 
@@ -720,52 +729,105 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	});
 
 	// ... next, the secondary key columns from the child variable groups
-	column_index = 0;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	bool new_method = true;
+	if (!new_method)
 	{
-
-		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		column_index = 0;
+		std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 		{
+
+			if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+			{
+				++column_index;
+				return;
+			}
+
+			if (unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
+			{
+				++column_index;
+				return;
+			}
+
+			if (column_index > highest_index_first_primary_vg_full_final_results_table)
+			{
+				++column_index;
+				return;
+			}
+
+			result_columns.columns_in_view.push_back(unformatted_column);
+			ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
+
+			formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
+			if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
+			{
+				formatted_column.column_name_in_temporary_table += "_";
+				formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg, c, 10);
+			}
+			formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
+
+			if (!first)
+			{
+				sql_string += ", ";
+			}
+			first = false;
+
+			sql_string += unformatted_column.column_name_in_temporary_table;
+			sql_string += " AS ";
+			sql_string += formatted_column.column_name_in_temporary_table;
+
 			++column_index;
-			return;
-		}
 
-		if (unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
+		});
+	}
+	else
+	{
+		column_index = 0;
+		std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_all_merged_top_level_tables_including_all_datetime_columns, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 		{
+
+			if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+			{
+				++column_index;
+				return;
+			}
+
+			if (unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
+			{
+				++column_index;
+				return;
+			}
+
+			if (column_index <= highest_index_all_merged_top_level_tables_including_all_datetime_columns)
+			{
+				++column_index;
+				return;
+			}
+
+			result_columns.columns_in_view.push_back(unformatted_column);
+			ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
+
+			formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
+			if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
+			{
+				formatted_column.column_name_in_temporary_table += "_";
+				formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg, c, 10);
+			}
+			formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
+
+			if (!first)
+			{
+				sql_string += ", ";
+			}
+			first = false;
+
+			sql_string += unformatted_column.column_name_in_temporary_table;
+			sql_string += " AS ";
+			sql_string += formatted_column.column_name_in_temporary_table;
+
 			++column_index;
-			return;
-		}
 
-		if (column_index > highest_index_first_primary_vg_full_final_results_table)
-		{
-			++column_index;
-			return;
-		}
-
-		result_columns.columns_in_view.push_back(unformatted_column);
-		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
-
-		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
-		if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
-		{
-			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg, c, 10);
-		}
-		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
-
-		if (!first)
-		{
-			sql_string += ", ";
-		}
-		first = false;
-
-		sql_string += unformatted_column.column_name_in_temporary_table;
-		sql_string += " AS ";
-		sql_string += formatted_column.column_name_in_temporary_table;
-
-		++column_index;
-
-	});
+		});
+	}
 
 	sql_string += " FROM ";
 	sql_string += all_merged_results_unformatted.second.view_name;
@@ -798,6 +860,11 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	// XR tables:
 	// COLUMN_TYPE__DATETIMESTART
 	// COLUMN_TYPE__DATETIMESTART_MERGED
+
+	// XR_Z tables:
+	// COLUMN_TYPE__DATETIMESTART
+	// COLUMN_TYPE__DATETIMESTART_MERGED
+	// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT
 
 	// XRMF tables:
 	// COLUMN_TYPE__DATETIMESTART
@@ -1969,7 +2036,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	std::string view_name;
 	if (!is_xrmfxr_table)
 	{
-		view_name += "Z";
+		view_name += "DR";
 	}
 	else
 	{
@@ -2892,7 +2959,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	std::string view_name;
 	if (!is_xrmfxr_table)
 	{
-		view_name += "Y";
+		view_name += "S";
 	}
 	else
 	{
