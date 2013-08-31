@@ -255,12 +255,13 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	sql_string += " AS SELECT ";
 
 	WidgetInstanceIdentifier first_variable_group;
+	int highest_index_first_primary_vg_full_final_results_table = -1;
 
 	// Display primary key columns
 	bool first = true;
 	int column_index = 0;
 	bool reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
 		if (column_index == 0)
@@ -268,10 +269,19 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			first_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
 		}
 
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_FINAL)
+		{
+			if (highest_index_first_primary_vg_full_final_results_table == -1)
+			{
+				highest_index_first_primary_vg_full_final_results_table = column_index;
+			}
+		}
+
 		if (!unformatted_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
 		{
 			if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
+				++column_index;
 				return; // Only display primary key columns from the first primary variable group
 			}
 		}
@@ -282,6 +292,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			{
 				if (unformatted_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
 				{
+					++column_index;
 					return; // only display primary key columns of multiplicity 1 once - from the first inner table of the first primary variable group
 				}
 			}
@@ -308,6 +319,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
+			++column_index;
 			return; // display secondary keys only after primary keys
 		}
 
@@ -359,7 +371,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	WidgetInstanceIdentifier current_variable_group;
 	int inner_table_index_for_equivalent_variable_group = 0;
 	std::vector<bool> this_variable_group_appears_more_than_once;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &this_variable_group_appears_more_than_once, &inner_table_index_for_equivalent_variable_group, &current_variable_group, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &this_variable_group_appears_more_than_once, &inner_table_index_for_equivalent_variable_group, &current_variable_group, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
 		if (column_index == 0)
@@ -379,6 +391,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		if (column_index != 0)
 		{
+			// check for variable group switch
 			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
 			{
 				if (inner_table_index_for_equivalent_variable_group == 1)
@@ -400,8 +413,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	});
 
-	// now display the columns
+	// now display the secondary key columns themselves
 
+	// ... first, the secondary key columns from the primary variable groups
 	column_index = 0;
 	inner_table_index_for_equivalent_variable_group = 0;
 	int current_variable_group_number = 0;
@@ -431,6 +445,81 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
 				++current_variable_group_number;
 			}
+		}
+
+		if (!unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
+		{
+			++column_index;
+			return;
+		}
+
+		result_columns.columns_in_view.push_back(unformatted_column);
+		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
+
+		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
+		if (this_variable_group_appears_more_than_once[current_variable_group_number])
+		{
+			formatted_column.column_name_in_temporary_table += "_";
+			formatted_column.column_name_in_temporary_table += itoa(inner_table_index_for_equivalent_variable_group + 1, c, 10);
+		}
+		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
+
+		if (!first)
+		{
+			sql_string += ", ";
+		}
+		first = false;
+
+		sql_string += unformatted_column.column_name_in_temporary_table;
+		sql_string += " AS ";
+		sql_string += formatted_column.column_name_in_temporary_table;
+
+		++column_index;
+
+	});
+
+	// ... next, the secondary key columns from the child variable groups
+	column_index = 0;
+	inner_table_index_for_equivalent_variable_group = 0;
+	current_variable_group_number = 0;
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &current_variable_group_number, &this_variable_group_appears_more_than_once, &inner_table_index_for_equivalent_variable_group, &current_variable_group, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	{
+
+		if (column_index == 0)
+		{
+			current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
+		}
+
+		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
+			{
+				++inner_table_index_for_equivalent_variable_group;
+			}
+			++column_index;
+			return;
+		}
+
+		if (column_index != 0)
+		{
+			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
+			{
+				inner_table_index_for_equivalent_variable_group = 0;
+				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
+				++current_variable_group_number;
+			}
+		}
+
+		if (unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
+		{
+			++column_index;
+			return;
+		}
+
+		if (column_index > highest_index_first_primary_vg_full_final_results_table)
+		{
+			++column_index;
+			return;
 		}
 
 		result_columns.columns_in_view.push_back(unformatted_column);
@@ -839,7 +928,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_left += " IS NOT NULL THEN t1.";
 					sql_select_left += previous_column_names[column_count];
 					sql_select_left += " ELSE t2.";
-					sql_select_left += previous_column_names[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
+					sql_select_left += previous_column_names[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first]];
 					sql_select_left += " END AS ";
 					sql_select_left += new_column.column_name_in_temporary_table;
 
@@ -871,20 +960,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 				}
 				if (handled)
 				{
-					sql_select_right += "CASE WHEN t2.";
+					sql_select_right += "CASE WHEN t1.";
 					sql_select_right += previous_column_names[column_count];
-					sql_select_right += " IS NOT NULL THEN t2.";
+					sql_select_right += " IS NOT NULL THEN t1.";
 					sql_select_right += previous_column_names[column_count];
-					sql_select_right += " ELSE t1.";
-					sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
+					sql_select_right += " ELSE t2.";
+					sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first]];
 					sql_select_right += " END AS ";
 					sql_select_right += new_column.column_name_in_temporary_table;
 
-					sql_select_left += "CASE WHEN t1.";
+					sql_select_left += "CASE WHEN t2.";
 					sql_select_left += previous_column_names[column_count];
-					sql_select_left += " IS NOT NULL THEN t1.";
+					sql_select_left += " IS NOT NULL THEN t2.";
 					sql_select_left += previous_column_names[column_count];
-					sql_select_left += " ELSE t2.";
+					sql_select_left += " ELSE t1.";
 					sql_select_left += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
 					sql_select_left += " END AS ";
 					sql_select_left += new_column.column_name_in_temporary_table;
@@ -915,21 +1004,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		}
 
 		++column_count;
-
-		if (column_count == number_columns_very_first_primary_variable_group_including_multiplicities)
-		{
-			// Reset mappings to support populating NULL primary key values in one of the tables being merged
-			// with the corresponding non-NULL values from the other,
-			// now that the columns in the first table have been populated.
-			std::for_each(lhs_primary_keys.begin(), lhs_primary_keys.end(), [](std::pair<WidgetInstanceIdentifier const, std::pair<int, std::vector<int>>> & map_entry)
-			{
-				map_entry.second.first = 0;
-			});
-			std::for_each(rhs_primary_keys.begin(), rhs_primary_keys.end(), [](std::pair<WidgetInstanceIdentifier const, std::pair<int, std::vector<int>>> & map_entry)
-			{
-				map_entry.second.first = 0;
-			});
-		}
 
 	});
 
