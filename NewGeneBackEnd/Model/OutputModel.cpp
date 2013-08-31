@@ -2202,6 +2202,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			continue;
 		}
 
+		// ******************************************************************************************************** //
+		// Important note on matching primary key columns:
+		// A NULL primary key column will match against a non-NULL one.
+		// Noting that this algorithm orders primary key columns from left-to-right across columns
+		//    (for multiplicity > 1 keys),
+		// then we see that this primary key matching approach involving NULLs
+		// only works because SQLite orders rows with NULLs before rows with non-NULLs in the ORDER BY clause.
+		// If you think about it, the number of NULL columns can only decrease as new rows are introduced
+		//    in the current loop, which must match on all previous (non-NULL) columns.
+		// Therefore, it is impossible for two non-matching rows to both match against a previously processed
+		//    "matching" row (which had matched on some NULL columns)
+		//    which themselves do not match on all primary key columns.
+		// ******************************************************************************************************** //
 		bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(current_row_of_data, incoming_rows_of_data[0]);
 
 		if (!primary_keys_match)
