@@ -368,48 +368,19 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	// First, do a quick calculation and save which secondary keys appear more than once, and stash that away
 	column_index = 0;
-	WidgetInstanceIdentifier current_variable_group;
-	int inner_table_index_for_equivalent_variable_group = 0;
-	std::vector<bool> this_variable_group_appears_more_than_once;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &this_variable_group_appears_more_than_once, &inner_table_index_for_equivalent_variable_group, &current_variable_group, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::map<WidgetInstanceIdentifier, bool> variable_group_appears_more_than_once;
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &variable_group_appears_more_than_once, &highest_index_first_primary_vg_full_final_results_table, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
-
-		if (column_index == 0)
-		{
-			current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
-		}
 
 		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
-			if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
-			{
-				++inner_table_index_for_equivalent_variable_group;
-			}
 			++column_index;
 			return;
 		}
 
-		bool switched = false;
-		if (column_index != 0)
-		{
-			// check for variable group switch
-			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
-			{
-				if (inner_table_index_for_equivalent_variable_group == 1)
-				{
-					// it was just 0
-					this_variable_group_appears_more_than_once.push_back(false);
-				}
-				switched = true;
-				inner_table_index_for_equivalent_variable_group = 0;
-				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
-			}
-		}
-
-		if (switched && inner_table_index_for_equivalent_variable_group == 1)
-		{
-			this_variable_group_appears_more_than_once.push_back(true);
-		}
+		// A little trick: The highest multiplicity always appears last for any variable group,
+		// so if the variable group has a multiplicity greater than 1, its highest value which appears last will set the value to true
+		variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table] = (unformatted_column.current_multiplicity__of__current_inner_table__within__current_vg > 1);
 
 		++column_index;
 
@@ -419,46 +390,13 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	// ... first, the secondary key columns from the primary variable groups
 	column_index = 0;
-	inner_table_index_for_equivalent_variable_group = 0;
-	int current_variable_group_number = 0;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &current_variable_group_number, &this_variable_group_appears_more_than_once, &inner_table_index_for_equivalent_variable_group, &current_variable_group, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
-
-		if (column_index == 0)
-		{
-			current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
-		}
 
 		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
-			if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
-			{
-				++inner_table_index_for_equivalent_variable_group;
-			}
 			++column_index;
 			return;
-		}
-
-		bool switched = false;
-		if (column_index != 0)
-		{
-			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
-			{
-				// check for variable group switch
-				if (inner_table_index_for_equivalent_variable_group == 1)
-				{
-					// it was just 0
-					++current_variable_group_number;
-				}
-				switched = true;
-				inner_table_index_for_equivalent_variable_group = 0;
-				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
-			}
-		}
-
-		if (switched && inner_table_index_for_equivalent_variable_group == 1)
-		{
-			++current_variable_group_number;
 		}
 
 		if (!unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
@@ -471,10 +409,10 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
 
 		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
-		if (this_variable_group_appears_more_than_once[current_variable_group_number])
+		if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
 		{
 			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(inner_table_index_for_equivalent_variable_group + 1, c, 10);
+			formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg, c, 10);
 		}
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
@@ -494,46 +432,13 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	// ... next, the secondary key columns from the child variable groups
 	column_index = 0;
-	inner_table_index_for_equivalent_variable_group = 0;
-	current_variable_group_number = 0;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &current_variable_group_number, &this_variable_group_appears_more_than_once, &inner_table_index_for_equivalent_variable_group, &current_variable_group, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
-
-		if (column_index == 0)
-		{
-			current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
-		}
 
 		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
-			if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED)
-			{
-				++inner_table_index_for_equivalent_variable_group;
-			}
 			++column_index;
 			return;
-		}
-
-		bool switched = false;
-		if (column_index != 0)
-		{
-			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
-			{
-				// check for variable group switch
-				if (inner_table_index_for_equivalent_variable_group == 1)
-				{
-					// it was just 0
-					++current_variable_group_number;
-				}
-				switched = true;
-				inner_table_index_for_equivalent_variable_group = 0;
-				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
-			}
-		}
-
-		if (switched && inner_table_index_for_equivalent_variable_group == 1)
-		{
-			++current_variable_group_number;
 		}
 
 		if (unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
@@ -552,10 +457,10 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
 
 		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
-		if (this_variable_group_appears_more_than_once[current_variable_group_number])
+		if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
 		{
 			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(inner_table_index_for_equivalent_variable_group + 1, c, 10);
+			formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg, c, 10);
 		}
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
@@ -3984,9 +3889,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table += newUUID(true);
 			new_column.inner_table_set_number = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+			new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 				{
 					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
@@ -4028,9 +3933,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table += newUUID(true);
 			new_column.inner_table_set_number = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+			new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 				{
 					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
@@ -5184,9 +5089,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table += newUUID(true);
 			new_column.inner_table_set_number = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+			new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 				{
 					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
@@ -5243,9 +5148,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table += newUUID(true);
 			new_column.inner_table_set_number = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+			new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
 				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 				{
 					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
@@ -6658,6 +6563,8 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 
 		column_in_variable_group_data_table.variable_group_associated_with_current_inner_table = the_variable_group.first;
 
+		column_in_variable_group_data_table.current_multiplicity__of__current_inner_table__within__current_vg = 1;
+
 		if (!the_variable_group.first.identifier_parent)
 		{
 			failed = true;
@@ -6755,7 +6662,6 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 								column_in_variable_group_data_table.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_for_this_variable_groups_uoa;
 								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_primary_uoa;
 								column_in_variable_group_data_table.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_variable_group_primary_key_entry.current_multiplicity;
-								column_in_variable_group_data_table.current_multiplicity__of__current_inner_table__within__current_vg = current_variable_group_primary_key_entry.current_multiplicity;
 								column_in_variable_group_data_table.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group = current_variable_group_primary_key_entry.total_multiplicity;
 								column_in_variable_group_data_table.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category = k_count__corresponding_to_top_level_uoa__and_current_dmu_category;
 
