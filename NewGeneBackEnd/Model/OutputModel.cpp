@@ -441,10 +441,20 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		{
 			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
 			{
+				// check for variable group switch
+				if (inner_table_index_for_equivalent_variable_group == 1)
+				{
+					// it was just 0
+					++current_variable_group_number;
+				}
 				inner_table_index_for_equivalent_variable_group = 0;
 				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
-				++current_variable_group_number;
 			}
+		}
+
+		if (inner_table_index_for_equivalent_variable_group == 1)
+		{
+			++current_variable_group_number;
 		}
 
 		if (!unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
@@ -504,10 +514,20 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		{
 			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
 			{
+				// check for variable group switch
+				if (inner_table_index_for_equivalent_variable_group == 1)
+				{
+					// it was just 0
+					++current_variable_group_number;
+				}
 				inner_table_index_for_equivalent_variable_group = 0;
 				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
-				++current_variable_group_number;
 			}
+		}
+
+		if (inner_table_index_for_equivalent_variable_group == 1)
+		{
+			++current_variable_group_number;
 		}
 
 		if (unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
