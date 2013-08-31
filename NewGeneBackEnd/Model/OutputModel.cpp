@@ -389,6 +389,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			return;
 		}
 
+		bool switched = false;
 		if (column_index != 0)
 		{
 			// check for variable group switch
@@ -399,12 +400,13 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 					// it was just 0
 					this_variable_group_appears_more_than_once.push_back(false);
 				}
+				switched = true;
 				inner_table_index_for_equivalent_variable_group = 0;
 				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
 			}
 		}
 
-		if (inner_table_index_for_equivalent_variable_group == 1)
+		if (switched && inner_table_index_for_equivalent_variable_group == 1)
 		{
 			this_variable_group_appears_more_than_once.push_back(true);
 		}
@@ -437,6 +439,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			return;
 		}
 
+		bool switched = false;
 		if (column_index != 0)
 		{
 			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
@@ -447,12 +450,13 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 					// it was just 0
 					++current_variable_group_number;
 				}
+				switched = true;
 				inner_table_index_for_equivalent_variable_group = 0;
 				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
 			}
 		}
 
-		if (inner_table_index_for_equivalent_variable_group == 1)
+		if (switched && inner_table_index_for_equivalent_variable_group == 1)
 		{
 			++current_variable_group_number;
 		}
@@ -510,6 +514,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			return;
 		}
 
+		bool switched = false;
 		if (column_index != 0)
 		{
 			if (!current_variable_group.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, unformatted_column.variable_group_associated_with_current_inner_table))
@@ -520,12 +525,13 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 					// it was just 0
 					++current_variable_group_number;
 				}
+				switched = true;
 				inner_table_index_for_equivalent_variable_group = 0;
 				current_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
 			}
 		}
 
-		if (inner_table_index_for_equivalent_variable_group == 1)
+		if (switched && inner_table_index_for_equivalent_variable_group == 1)
 		{
 			++current_variable_group_number;
 		}
