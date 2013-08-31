@@ -456,6 +456,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index);
 				SqlAndColumnSet CreateSortedTable(ColumnsInTempView const & final_xr_columns, int const primary_group_number);
 				SqlAndColumnSet RemoveDuplicates(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number);
+				void RemoveDuplicatesFromPrimaryKeyMatches( SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView & sorted_result_columns, int current_rows_added, int &current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, int const minimum_desired_rows_per_transaction );
 
 				// Helper functions used by the functions above
 				void BeginNewTransaction();

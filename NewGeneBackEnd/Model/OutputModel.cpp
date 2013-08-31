@@ -2183,7 +2183,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	std::deque<SavedRowData> outgoing_rows_of_data;
 	std::deque<SavedRowData> rows_to_sort;
 	SavedRowData sorting_row_of_data;
-	SavedRowData current_row_of_data;
 
 	bool start_fresh = true;
 
@@ -2224,111 +2223,24 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		}
 		else
 		{
-
-			// perform sort here of rows in rows_to_sort ONLY on time columns
-			std::sort(rows_to_sort.begin(), rows_to_sort.end());
-
-			while (!rows_to_sort.empty())
-			{
-
-				current_row_of_data = rows_to_sort.front();
-				rows_to_sort.pop_front();
-
-				// If we're starting fresh, just add the current row of input to incoming_rows_of_data
-				// and proceed to the next row of input.
-				if (incoming_rows_of_data.empty())
-				{
-					incoming_rows_of_data.push_back(current_row_of_data);
-					continue;
-				}
-
-				// If the current row of input starts past
-				// the end of any of the saved rows, then
-				// there can be no overlap with these rows, and they are done.
-				// Move them to outgoing_rows_of_data.
-				while(!incoming_rows_of_data.empty())
-				{
-					SavedRowData & first_incoming_row = incoming_rows_of_data.front();
-					if (first_incoming_row.datetime_end <= current_row_of_data.datetime_start)
-					{
-						outgoing_rows_of_data.push_back(first_incoming_row);
-						incoming_rows_of_data.pop_front();
-					}
-					else
-					{
-						break;
-					}
-				}
-
-				// There is guaranteed to either:
-				// (1) be overlap of the current row of input with the first saved row,
-				// (2) have the current row be completely beyond the end of all saved rows
-				// (or, falling into the same category,
-				// the current row's starting datetime is exactly equal to the ending datetime
-				// of the last of the saved rows)
-				bool current_row_complete = false;
-				while (!current_row_complete)
-				{
-					if (incoming_rows_of_data.empty())
-					{
-						break;
-					}
-					SavedRowData & first_incoming_row = incoming_rows_of_data.front();
-					current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data);
-					if (failed)
-					{
-						return result;
-					}
-					incoming_rows_of_data.pop_front();
-				}
-
-				if (!current_row_complete)
-				{
-					intermediate_rows_of_data.push_back(current_row_of_data);
-				}
-
-				incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), intermediate_rows_of_data.cbegin(), intermediate_rows_of_data.cend());
-				intermediate_rows_of_data.clear();
-
-			}
-
-			outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-			WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+			RemoveDuplicatesFromPrimaryKeyMatches(result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
 			if (failed)
 			{
 				return result;
 			}
-			incoming_rows_of_data.clear();
-			outgoing_rows_of_data.clear();
-
-			if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
-			{
-				ExecuteSQL(result);
-				EndTransaction();
-				BeginNewTransaction();
-				current_rows_added_since_execution = 0;
-			}
-
 			rows_to_sort.push_back(sorting_row_of_data);
-
 		}
 
 	}
 
 	if (!rows_to_sort.empty())
 	{
-		// only if there is only one row total
-		incoming_rows_of_data.insert(incoming_rows_of_data.cend(), rows_to_sort.cbegin(), rows_to_sort.cend());
+		RemoveDuplicatesFromPrimaryKeyMatches(result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
+		if (failed)
+		{
+			return result;
+		}
 	}
-
-	outgoing_rows_of_data.insert(outgoing_rows_of_data.cbegin(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
-	if (failed)
-	{
-		return result;
-	}
-	incoming_rows_of_data.clear();
-	outgoing_rows_of_data.clear();
 
 	if (current_rows_added_since_execution > 0)
 	{
@@ -8099,6 +8011,95 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 		}
 
 	});
+}
+
+void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView & sorted_result_columns, int current_rows_added, int &current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, int const minimum_desired_rows_per_transaction )
+{
+	SavedRowData current_row_of_data;
+
+	// perform sort here of rows in rows_to_sort ONLY on time columns
+	std::sort(rows_to_sort.begin(), rows_to_sort.end());
+
+	while (!rows_to_sort.empty())
+	{
+
+		current_row_of_data = rows_to_sort.front();
+		rows_to_sort.pop_front();
+
+		// If we're starting fresh, just add the current row of input to incoming_rows_of_data
+		// and proceed to the next row of input.
+		if (incoming_rows_of_data.empty())
+		{
+			incoming_rows_of_data.push_back(current_row_of_data);
+			continue;
+		}
+
+		// If the current row of input starts past
+		// the end of any of the saved rows, then
+		// there can be no overlap with these rows, and they are done.
+		// Move them to outgoing_rows_of_data.
+		while(!incoming_rows_of_data.empty())
+		{
+			SavedRowData & first_incoming_row = incoming_rows_of_data.front();
+			if (first_incoming_row.datetime_end <= current_row_of_data.datetime_start)
+			{
+				outgoing_rows_of_data.push_back(first_incoming_row);
+				incoming_rows_of_data.pop_front();
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		// There is guaranteed to either:
+		// (1) be overlap of the current row of input with the first saved row,
+		// (2) have the current row be completely beyond the end of all saved rows
+		// (or, falling into the same category,
+		// the current row's starting datetime is exactly equal to the ending datetime
+		// of the last of the saved rows)
+		bool current_row_complete = false;
+		while (!current_row_complete)
+		{
+			if (incoming_rows_of_data.empty())
+			{
+				break;
+			}
+			SavedRowData & first_incoming_row = incoming_rows_of_data.front();
+			current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data);
+			if (failed)
+			{
+				return;
+			}
+			incoming_rows_of_data.pop_front();
+		}
+
+		if (!current_row_complete)
+		{
+			intermediate_rows_of_data.push_back(current_row_of_data);
+		}
+
+		incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), intermediate_rows_of_data.cbegin(), intermediate_rows_of_data.cend());
+		intermediate_rows_of_data.clear();
+
+	}
+
+	outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
+	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+	if (failed)
+	{
+		return;
+	}
+	incoming_rows_of_data.clear();
+	outgoing_rows_of_data.clear();
+
+	if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
+	{
+		ExecuteSQL(result);
+		EndTransaction();
+		BeginNewTransaction();
+		current_rows_added_since_execution = 0;
+	}
 }
 
 bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGenerator::ColumnSorter const & rhs) const
