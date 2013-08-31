@@ -4638,6 +4638,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			// ... (including possible null data for the newly added columns)
 			if (index <= highest_index_previous_table)
 			{
+				// No need to worry about inner_table stuff,
+				// because that only applies when both current and previous data is being populated
 				if (!include_previous_data)
 				{
 					if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
@@ -4657,6 +4659,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			}
 			else
 			{
+				// No need to worry about inner_table stuff,
+				// because that only applies when both current and previous data is being populated
 				if (!include_current_data)
 				{
 					if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
@@ -4690,6 +4694,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 						{
 							do_not_include_this_data = true;
+
+							// unused... confirm that this can be removed
 							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 							if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 							{
@@ -4700,6 +4706,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 					else
 					{
 						do_not_include_this_data = true;
+
+						// unused... confirm that this can be removed
 						inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 						if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 						{
@@ -4717,6 +4725,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 						{
 							do_not_include_this_data = true;
+
+							// unused... confirm that this can be removed
 							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 							if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 							{
@@ -4727,6 +4737,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 					else
 					{
 						do_not_include_this_data = true;
+
+						// unused... confirm that this can be removed
 						inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 						if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 						{
@@ -4782,6 +4794,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						{
 							if (index > highest_index_previous_table)
 							{
+								// unused... confirm that this can be removed
 								inner_table_int_set.push_back(data_int64);
 								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
 								if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
@@ -4840,6 +4853,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						{
 							if (index > highest_index_previous_table)
 							{
+								// unused... confirm that this can be removed
 								inner_table_string_set.push_back(data_string);
 								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
 								if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
@@ -4891,6 +4905,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						{
 							if (index > highest_index_previous_table)
 							{
+								// unused... confirm that this can be removed
 								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 								if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
 								{
@@ -4936,11 +4951,22 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		bool new_method = true;
 		if (new_method && xr_table_category == OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP)
 		{
+			int number_columns_first_sets = (int)inner_table_columns[0].bindings.size();
+			int number_columns_last_set = (int)inner_table_columns[inner_table_columns.size() - 1].bindings.size();
+			int number_inner_column_sets = (int)inner_table_columns.size();
+			// sanity check
+			if (number_columns_first_sets != number_columns_last_set + 2)
+			{
+				// The final inner column set is missing the "merged" datetime columns
+				failed = true;
+				return false;
+			}
 			std::sort(inner_table_columns.begin(), inner_table_columns.end());
 			bound_parameter_ints.clear();
 			bound_parameter_strings.clear();
 			bound_parameter_which_binding_to_use.clear();
-			std::for_each(inner_table_columns.cbegin(), inner_table_columns.cend(), [&bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](ColumnSorter const & columns_in_single_inner_table)
+			int current_inner_column_set = 0;
+			std::for_each(inner_table_columns.cbegin(), inner_table_columns.cend(), [&current_inner_column_set, &number_inner_column_sets, &number_columns_first_sets, &bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](ColumnSorter const & columns_in_single_inner_table)
 			{
 				int the_index = 0;
 				std::for_each(columns_in_single_inner_table.bindings.cbegin(), columns_in_single_inner_table.bindings.cend(), [&columns_in_single_inner_table, &the_index, &bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int> const & binding_info)
@@ -4967,6 +4993,73 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 					}
 					++the_index;
 				});
+				if (current_inner_column_set < number_inner_column_sets - 1)
+				{
+					// The current (new) inner column set being constructed here is not the last
+					if (columns_in_single_inner_table.bindings.size() == number_columns_first_sets)
+					{
+						// OK - the "merged" datetime columns have been added
+					}
+					else
+					{
+						// Must add them... just fill with 0; only the datetime column from the last set is used by the algorithm
+						bound_parameter_ints.push_back(0);
+						bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
+						bound_parameter_ints.push_back(0);
+						bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
+					}
+				}
+				else
+				{
+					// The current (new) inner column set being constructed here is the last one
+					if (columns_in_single_inner_table.bindings.size() == number_columns_first_sets)
+					{
+						// The "merged" datetime columns have been added, but they should not have been in this special case
+						OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING binding_1 = bound_parameter_which_binding_to_use.back();
+						bound_parameter_which_binding_to_use.pop_back();
+						OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING binding_2 = bound_parameter_which_binding_to_use.back();
+						bound_parameter_which_binding_to_use.pop_back();
+						switch (binding_1)
+						{
+							case OutputModel::OutputGenerator::SQLExecutor::INT64:
+								{
+									bound_parameter_ints.pop_back();
+								}
+								break;
+							case OutputModel::OutputGenerator::SQLExecutor::STRING:
+								{
+									bound_parameter_strings.pop_back();
+								}
+								break;
+							case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+								{
+								}
+								break;
+						}
+						switch (binding_2)
+						{
+							case OutputModel::OutputGenerator::SQLExecutor::INT64:
+								{
+									bound_parameter_ints.pop_back();
+								}
+								break;
+							case OutputModel::OutputGenerator::SQLExecutor::STRING:
+								{
+									bound_parameter_strings.pop_back();
+								}
+								break;
+							case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+								{
+								}
+								break;
+						}
+					}
+					else
+					{
+						// OK - the "merged" datetime columns have not been added
+					}
+				}
+				++current_inner_column_set;
 			});
 		}
 	}
