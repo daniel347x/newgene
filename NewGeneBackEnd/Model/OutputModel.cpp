@@ -4904,9 +4904,11 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		return false;
 	}
 
+	bool new_method = true;
+
 	int highest_index_previous_table = (int)previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.size() - 1;
 	bool found_highest_index = false;
-	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.crbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.crend(), [&highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.crbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.crend(), [&xr_table_category, &new_method, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		if (found_highest_index)
 		{
@@ -4914,10 +4916,32 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		}
 
 		// The following "if" condition handles primary groups, child groups, and final results from top-level primary groups
-		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
+		if (new_method)
 		{
-			found_highest_index = true;
-			return;
+			if (xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
+			{
+				if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE)
+				{
+					found_highest_index = true;
+					return;
+				}
+			}
+			else
+			{
+				if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
+				{
+					found_highest_index = true;
+					return;
+				}
+			}
+		}
+		else
+		{
+			if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
+			{
+				found_highest_index = true;
+				return;
+			}
 		}
 
 		--highest_index_previous_table;
