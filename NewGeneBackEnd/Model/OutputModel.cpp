@@ -373,7 +373,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialChildXRTable(ColumnsInTempView const & primary_variable_group_merge_result_x_columns)
 {
-	char c[256];
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
@@ -2225,7 +2224,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		}
 		else
 		{
+
 			// perform sort here of rows in rows_to_sort ONLY on time columns
+			std::sort(rows_to_sort.begin(), rows_to_sort.end());
 
 			while (!rows_to_sort.empty())
 			{
@@ -8266,4 +8267,35 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 		++index;
 	});
 	return is_less_than;
+}
+
+bool OutputModel::OutputGenerator::SavedRowData::operator<(SavedRowData const & rhs) const
+{
+	// special-purpose sort.
+	// In the algorithm, the only time this sort is called is when
+	// the SavedRowData instances being compared match on all primary key columns
+	// (perhaps with NULLs).
+	// This sort routine just sorts by the timestamps.
+
+	if (datetime_start < rhs.datetime_start)
+	{
+		return true;
+	}
+
+	if (datetime_start > rhs.datetime_start)
+	{
+		return false;
+	}
+
+	if (datetime_end < rhs.datetime_end)
+	{
+		return true;
+	}
+
+	if (datetime_end > rhs.datetime_end)
+	{
+		return false;
+	}
+
+	return false;
 }
