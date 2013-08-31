@@ -2182,23 +2182,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	std::deque<SavedRowData> incoming_rows_of_data;
 	std::deque<SavedRowData> intermediate_rows_of_data;
 	std::deque<SavedRowData> outgoing_rows_of_data;
+	std::deque<SavedRowData> rows_to_sort;
+	SavedRowData sorting_row_of_data;
 	SavedRowData current_row_of_data;
+
+	bool start_fresh = true;
 
 	while (StepData())
 	{
 
-		current_row_of_data.PopulateFromCurrentRowInDatabase(sorted_result_columns, stmt_result);
-		failed = current_row_of_data.failed;
+		sorting_row_of_data.PopulateFromCurrentRowInDatabase(sorted_result_columns, stmt_result);
+		failed = sorting_row_of_data.failed;
 		if (failed)
 		{
 			return result;
 		}
 
-		// If we're starting fresh, just add the current row of input to incoming_rows_of_data
-		// and proceed to the next row of input.
-		if (incoming_rows_of_data.empty())
+		if (start_fresh)
 		{
-			incoming_rows_of_data.push_back(current_row_of_data);
+			rows_to_sort.push_back(sorting_row_of_data);
+			start_fresh = false;
 			continue;
 		}
 
@@ -2215,10 +2218,79 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		//    "matching" row (which had matched on some NULL columns)
 		//    which themselves do not match on all primary key columns.
 		// ******************************************************************************************************** //
-		bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(current_row_of_data, incoming_rows_of_data[0]);
-
-		if (!primary_keys_match)
+		bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(sorting_row_of_data, rows_to_sort[0]);
+		if (primary_keys_match)
 		{
+			rows_to_sort.push_back(sorting_row_of_data);
+		}
+		else
+		{
+			// perform sort here of rows in rows_to_sort ONLY on time columns
+
+			while (!rows_to_sort.empty())
+			{
+
+				current_row_of_data = rows_to_sort.front();
+				rows_to_sort.pop_front();
+
+				// If we're starting fresh, just add the current row of input to incoming_rows_of_data
+				// and proceed to the next row of input.
+				if (incoming_rows_of_data.empty())
+				{
+					incoming_rows_of_data.push_back(current_row_of_data);
+					continue;
+				}
+
+				// If the current row of input starts past
+				// the end of any of the saved rows, then
+				// there can be no overlap with these rows, and they are done.
+				// Move them to outgoing_rows_of_data.
+				while(!incoming_rows_of_data.empty())
+				{
+					SavedRowData & first_incoming_row = incoming_rows_of_data.front();
+					if (first_incoming_row.datetime_end <= current_row_of_data.datetime_start)
+					{
+						outgoing_rows_of_data.push_back(first_incoming_row);
+						incoming_rows_of_data.pop_front();
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				// There is guaranteed to either:
+				// (1) be overlap of the current row of input with the first saved row,
+				// (2) have the current row be completely beyond the end of all saved rows
+				// (or, falling into the same category,
+				// the current row's starting datetime is exactly equal to the ending datetime
+				// of the last of the saved rows)
+				bool current_row_complete = false;
+				while (!current_row_complete)
+				{
+					if (incoming_rows_of_data.empty())
+					{
+						break;
+					}
+					SavedRowData & first_incoming_row = incoming_rows_of_data.front();
+					current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data);
+					if (failed)
+					{
+						return result;
+					}
+					incoming_rows_of_data.pop_front();
+				}
+
+				if (!current_row_complete)
+				{
+					intermediate_rows_of_data.push_back(current_row_of_data);
+				}
+
+				incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), intermediate_rows_of_data.cbegin(), intermediate_rows_of_data.cend());
+				intermediate_rows_of_data.clear();
+
+			}
+
 			outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
 			WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 			if (failed)
@@ -2227,69 +2299,25 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			}
 			incoming_rows_of_data.clear();
 			outgoing_rows_of_data.clear();
-			incoming_rows_of_data.push_back(current_row_of_data);
-			continue;
-		}
 
-		// If the current row of input starts past
-		// the end of any of the saved rows, then
-		// there can be no overlap with these rows, and they are done.
-		// Move them to outgoing_rows_of_data.
-		while(!incoming_rows_of_data.empty())
-		{
-			
-			SavedRowData & first_incoming_row = incoming_rows_of_data.front();
-
-			if (first_incoming_row.datetime_end <= current_row_of_data.datetime_start)
+			if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 			{
-				outgoing_rows_of_data.push_back(first_incoming_row);
-				incoming_rows_of_data.pop_front();
-			}
-			else
-			{
-				break;
+				ExecuteSQL(result);
+				EndTransaction();
+				BeginNewTransaction();
+				current_rows_added_since_execution = 0;
 			}
 
+			rows_to_sort.push_back(sorting_row_of_data);
+
 		}
 
-		// There is guaranteed to either:
-		// (1) be overlap of the current row of input with the first saved row,
-		// (2) have the current row be completely beyond the end of all saved rows
-		// (or, falling into the same category,
-		// the current row's starting datetime is exactly equal to the ending datetime
-		// of the last of the saved rows)
-		bool current_row_complete = false;
-		while (!current_row_complete)
-		{
-			if (incoming_rows_of_data.empty())
-			{
-				break;
-			}
-			SavedRowData & first_incoming_row = incoming_rows_of_data.front();
-			current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data);
-			if (failed)
-			{
-				return result;
-			}
-			incoming_rows_of_data.pop_front();
-		}
+	}
 
-		if (!current_row_complete)
-		{
-			intermediate_rows_of_data.push_back(current_row_of_data);
-		}
-
-		incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), intermediate_rows_of_data.cbegin(), intermediate_rows_of_data.cend());
-		intermediate_rows_of_data.clear();
-
-		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
-		{
-			ExecuteSQL(result);
-			EndTransaction();
-			BeginNewTransaction();
-			current_rows_added_since_execution = 0;
-		}
-
+	if (!rows_to_sort.empty())
+	{
+		// only if there is only one row total
+		incoming_rows_of_data.insert(incoming_rows_of_data.cend(), rows_to_sort.cbegin(), rows_to_sort.cend());
 	}
 
 	outgoing_rows_of_data.insert(outgoing_rows_of_data.cbegin(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
