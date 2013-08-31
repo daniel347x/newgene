@@ -218,7 +218,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	if (new_method)
 	{
 		SqlAndColumnSet x_table_result = primary_group_merged_results;
-		SqlAndColumnSet xr_table_result;
+		SqlAndColumnSet xr_table_result = x_table_result;
 
 		// Currently, the outgoing table is no different from the incoming table,
 		// and there is no need to add a new datetime column here.
