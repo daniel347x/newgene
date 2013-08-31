@@ -1419,7 +1419,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 		++child_set_number;
 
-	});
+	}); 
 
 	if (failed)
 	{
