@@ -4867,6 +4867,14 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 					return;
 				}
 			}
+			else if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
+			{
+				if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
+				{
+					found_highest_index = true;
+					return;
+				}
+			}
 			else
 			{
 				if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS)
@@ -6425,6 +6433,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	while (StepData())
 	{
+
+		int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
+		int current_data_type = sqlite3_column_type(stmt_result, current_datetime_start_column_index);
+		bool previous_datetime_is_null = (previous_data_type == SQLITE_NULL);
+		bool current_datetime_is_null = (current_data_type == SQLITE_NULL);
+
 		std::int64_t previous_datetime_start = sqlite3_column_int64(stmt_result, previous_datetime_start_column_index);
 		std::int64_t previous_datetime_end = sqlite3_column_int64(stmt_result, previous_datetime_end_column_index);
 		std::int64_t current_datetime_start = sqlite3_column_int64(stmt_result, current_datetime_start_column_index);
@@ -6444,7 +6458,51 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		bool added = false;
 
-		if (previous_is_0 && current_is_0)
+		if (previous_datetime_is_null && current_datetime_is_null)
+		{
+			// no data
+			continue;
+		}
+
+		else if (previous_datetime_is_null)
+		{
+
+			// Add only current data, setting time range to that of the previous data
+			added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, false, true, xr_table_category);
+			if (failed)
+			{
+				break;
+			}
+			if (added)
+			{
+				sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+				the_prepared_stmt = sql_strings.back().stmt;
+				++current_rows_added;
+				++current_rows_added_since_execution;
+			}
+
+		}
+		
+		else if (current_datetime_is_null)
+		{
+
+			// Add only previous data, setting time range to that of the previous data
+			added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, false, xr_table_category);
+			if (failed)
+			{
+				break;
+			}
+			if (added)
+			{
+				sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+				the_prepared_stmt = sql_strings.back().stmt;
+				++current_rows_added;
+				++current_rows_added_since_execution;
+			}
+
+		}
+
+		else if (previous_is_0 && current_is_0)
 		{
 
 			// Add row as-is, setting new time range columns to 0
@@ -6462,6 +6520,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 
 		}
+
 		else if (previous_is_0 && !current_is_0)
 		{
 
@@ -6480,6 +6539,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 
 		}
+
 		else if (!previous_is_0 && current_is_0)
 		{
 
@@ -6498,6 +6558,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 
 		}
+
 		else
 		{
 
