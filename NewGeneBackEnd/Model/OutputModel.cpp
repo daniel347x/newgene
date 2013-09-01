@@ -143,6 +143,8 @@ OutputModel::OutputGenerator::~OutputGenerator()
 
 	});
 
+	ClearTable(final_result);
+
 }
 
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
