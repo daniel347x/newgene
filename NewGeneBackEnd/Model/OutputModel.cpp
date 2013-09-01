@@ -76,12 +76,18 @@ OutputModel::OutputGenerator::OutputGenerator(OutputModel & model_)
 	: model(&model_)
 	, stmt_result(nullptr)
 	, executor(nullptr, false)
+	, initialized(false)
 {
 	debug_ordering = true;
 }
 
 OutputModel::OutputGenerator::~OutputGenerator()
 {
+
+	if (!initialized)
+	{
+		return;
+	}
 
 	if (executor.transaction_begun)
 	{
@@ -6632,6 +6638,8 @@ void OutputModel::OutputGenerator::Prepare()
 	db = input_model->getDb();
 
 	executor.db = db;
+
+	initialized = true;
 
 	PopulateUOAs();
 
