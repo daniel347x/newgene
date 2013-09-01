@@ -1675,8 +1675,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 	SqlAndColumnSet preliminary_sorted_top_level_variable_group_result = CreateSortedTable(xr_table_result.second, primary_group_number);
 	preliminary_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
-	ClearTables(sql_and_column_sets);
 	ExecuteSQL(preliminary_sorted_top_level_variable_group_result);
+	ClearTables(sql_and_column_sets);
 	sql_and_column_sets.push_back(preliminary_sorted_top_level_variable_group_result);
 	if (failed)
 	{
@@ -8015,7 +8015,7 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 			sql_string += table_name_to_clear;
 			sql_string += "'";
 
-			SQLExecutor table_remover(model->db, sql_string);
+			SQLExecutor table_remover(input_model->getDb(), sql_string);
 			table_remover.statement_type = OutputModel::OutputGenerator::SQLExecutor::RETURNS_ROWS;
 			table_remover.Execute();
 			bool row_exists = table_remover.Step();
@@ -8030,7 +8030,7 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 		std::string sql_string = "DROP TABLE IF EXISTS ";
 		sql_string += table_name_to_clear;
 
-		SQLExecutor table_remover(model->db, sql_string);
+		SQLExecutor table_remover(input_model->getDb(), sql_string);
 		table_remover.Execute();
 	}
 }
