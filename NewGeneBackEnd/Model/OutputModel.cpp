@@ -228,7 +228,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, 0, child_set_number, current_child_view_name_index);
 			x_table_result.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(x_table_result);
-			ClearTable(primary_group_merged_results);
+			ClearTable(xr_table_result);
 			merging_of_children_column_sets.push_back(x_table_result);
 			if (failed)
 			{
