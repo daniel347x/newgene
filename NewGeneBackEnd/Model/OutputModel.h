@@ -165,6 +165,7 @@ class ColumnsInTempView
 			, most_recent_sql_statement_executed__index(-1)
 			, has_no_datetime_columns(false)
 			, has_no_datetime_columns_originally(false)
+			, make_table_permanent(false)
 		{
 
 		}
@@ -181,6 +182,8 @@ class ColumnsInTempView
 		std::string view_name_no_uuid;
 
 		int most_recent_sql_statement_executed__index;
+
+		bool make_table_permanent;
 
 };
 
@@ -470,6 +473,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SavedRowData MergeRows(SavedRowData const & current_row_of_data, SavedRowData const & first_incoming_row);
 				void WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int & current_rows_added, int & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use);
 				SqlAndColumnSet MergeIndividualTopLevelGroupIntoPrevious(ColumnsInTempView const & primary_variable_group_final_result, OutputModel::OutputGenerator::SqlAndColumnSet & previous_merged_primary_variable_groups_table, int const count);
+				void ClearTables(SqlAndColumnSets const & tables_to_clear);
+				void ClearTable(SqlAndColumnSet const & table_to_clear);
 
 				// Save the SQL and column sets corresponding to each primary and child variable group in global data structures
 				//

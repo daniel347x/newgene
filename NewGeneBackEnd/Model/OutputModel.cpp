@@ -212,79 +212,75 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 void OutputModel::OutputGenerator::MergeChildGroups()
 {
 
-	bool new_method = true;
+	SqlAndColumnSet x_table_result = primary_group_merged_results;
+	SqlAndColumnSet xr_table_result = x_table_result;
 
-	// In the new method, child tables are merged in *after* top-level primary groups are merged together.
-	if (new_method)
+	// Child tables
+	int current_child_view_name_index = 1;
+	int child_set_number = 1;
+	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &current_child_view_name_index, &child_set_number, &x_table_result, &xr_table_result](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 
-		SqlAndColumnSet x_table_result = primary_group_merged_results;
-		SqlAndColumnSet xr_table_result = x_table_result;
-
-		// Child tables
-		int current_child_view_name_index = 1;
-		int child_set_number = 1;
-		std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &current_child_view_name_index, &child_set_number, &x_table_result, &xr_table_result](ColumnsInTempView const & child_variable_group_raw_data_columns)
+		WidgetInstanceIdentifier const & dmu_category_multiplicity_greater_than_1_for_child = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].first;
+		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
+		for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
 		{
-
-			WidgetInstanceIdentifier const & dmu_category_multiplicity_greater_than_1_for_child = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].first;
-			int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
-			for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
+			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, 0, child_set_number, current_child_view_name_index);
+			ClearTable(primary_group_merged_results);
+			x_table_result.second.most_recent_sql_statement_executed__index = -1;
+			ExecuteSQL(x_table_result);
+			merging_of_children_column_sets.push_back(x_table_result);
+			if (failed)
 			{
-				x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, 0, child_set_number, current_child_view_name_index);
-				x_table_result.second.most_recent_sql_statement_executed__index = -1;
-				ExecuteSQL(x_table_result);
-				merging_of_children_column_sets.push_back(x_table_result);
-				if (failed)
-				{
-					return;
-				}
-
-				xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
-				merging_of_children_column_sets.push_back(xr_table_result);
-				if (failed)
-				{
-					return;
-				}
-
-				++current_child_view_name_index;
+				return;
 			}
 
-			++child_set_number;
+			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
+			ClearTable(x_table_result);
+			merging_of_children_column_sets.push_back(xr_table_result);
+			if (failed)
+			{
+				return;
+			}
 
-		});
-
-		// The structure of the table incoming to the following function is this:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR (with the XR set at the end, optional)
-		// ... the child tables appear last (optionally)
-		//
-		// ... and the same format for the table is returned
-		SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTable(merging_of_children_column_sets.back().second, 0);
-		preliminary_sorted_kad_result.second.most_recent_sql_statement_executed__index = -1;
-		ExecuteSQL(preliminary_sorted_kad_result);
-		merging_of_children_column_sets.push_back(preliminary_sorted_kad_result);
-		if (failed)
-		{
-			return;
+			++current_child_view_name_index;
 		}
 
-		// The structure of the table incoming to the following function is this:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR
-		//
-		// The structure of the table that comes out is:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z (or, if no child tables, the final is XRMFXR_Z)
-		SqlAndColumnSet duplicates_removed_kad_result = RemoveDuplicates(preliminary_sorted_kad_result.second, 0);
-		merging_of_children_column_sets.push_back(duplicates_removed_kad_result);
-		if (failed)
-		{
-			return;
-		}
+		++child_set_number;
 
-		// The structure of the following table is:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z
-		all_merged_results_unformatted = duplicates_removed_kad_result;
+	});
 
+	// The structure of the table incoming to the following function is this:
+	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR (with the XR set at the end, optional)
+	// ... the child tables appear last (optionally)
+	//
+	// ... and the same format for the table is returned
+	SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTable(merging_of_children_column_sets.back().second, 0);
+	ClearTable(merging_of_children_column_sets.back());
+	preliminary_sorted_kad_result.second.most_recent_sql_statement_executed__index = -1;
+	ExecuteSQL(preliminary_sorted_kad_result);
+	merging_of_children_column_sets.push_back(preliminary_sorted_kad_result);
+	if (failed)
+	{
+		return;
 	}
+
+	// The structure of the table incoming to the following function is this:
+	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR
+	//
+	// The structure of the table that comes out is:
+	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z (or, if no child tables, the final is XRMFXR_Z)
+	SqlAndColumnSet duplicates_removed_kad_result = RemoveDuplicates(preliminary_sorted_kad_result.second, 0);
+	ClearTable(preliminary_sorted_kad_result);
+	merging_of_children_column_sets.push_back(duplicates_removed_kad_result);
+	if (failed)
+	{
+		return;
+	}
+
+	// The structure of the following table is:
+	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z
+	all_merged_results_unformatted = duplicates_removed_kad_result;
 
 }
 
@@ -797,6 +793,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	final_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(final_result);
+	ClearTable(all_merged_results_unformatted);
 
 }
 
@@ -859,6 +856,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	{
 		return;
 	}
+	ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 	xr_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(xr_table_result);
 	intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
@@ -880,6 +878,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			{
 				return;
 			}
+			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			intermediate_merge_of_top_level_primary_group_results.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(intermediate_merge_of_top_level_primary_group_results);
 			intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
@@ -891,6 +890,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			// The structure of the table returned from the following function is this:
 			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
 			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count);
+			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
 			if (failed)
 			{
@@ -909,39 +909,6 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
 	// Each XR set is a single top-level primary group.
 	primary_group_merged_results = intermediate_merging_of_primary_groups_column_sets.back();
-
-	bool new_method = true;
-	if (!new_method)
-	{
-		// The structure of the table incoming to the following function is this:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
-		//
-		// ... and so is the table that comes out
-		SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTable(intermediate_merging_of_primary_groups_column_sets.back().second, 0);
-		preliminary_sorted_kad_result.second.most_recent_sql_statement_executed__index = -1;
-		ExecuteSQL(preliminary_sorted_kad_result);
-		intermediate_merging_of_primary_groups_column_sets.push_back(preliminary_sorted_kad_result);
-		if (failed)
-		{
-			return;
-		}
-
-		// The structure of the table incoming to the following function is this:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
-		//
-		// The structure of the table that comes out is:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR_Z
-		SqlAndColumnSet duplicates_removed_kad_result = RemoveDuplicates(preliminary_sorted_kad_result.second, 0);
-		intermediate_merging_of_primary_groups_column_sets.push_back(duplicates_removed_kad_result);
-		if (failed)
-		{
-			return;
-		}
-
-		// The structure of the following table is:
-		// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR_Z
-		all_merged_results_unformatted = duplicates_removed_kad_result;
-	}
 
 }
 
@@ -1671,6 +1638,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(x_table_result.second, primary_group_number);
 	xr_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(xr_table_result);
+	ClearTables(sql_and_column_sets);
 	sql_and_column_sets.push_back(xr_table_result);
 	if (failed)
 	{
@@ -1683,6 +1651,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number);
 		x_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(x_table_result);
+		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(x_table_result);
 		if (failed)
 		{
@@ -1690,51 +1659,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		}
 
 		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
+		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed)
 		{
 			return SqlAndColumnSet();
 		}
 
-	}
-
-	bool new_method = true;
-
-	// In the new method, child tables are merged in *after* top-level primary groups are merged together.
-	if (!new_method)
-	{
-		// Child tables
-		int current_child_view_name_index = 1;
-		int child_set_number = 1;
-		std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &current_child_view_name_index, &child_set_number, &x_table_result, &xr_table_result, &primary_group_number, &sql_and_column_sets](ColumnsInTempView const & child_variable_group_raw_data_columns)
-		{
-
-			WidgetInstanceIdentifier const & dmu_category_multiplicity_greater_than_1_for_child = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].first;
-			int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
-			for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
-			{
-				x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number, child_set_number, current_child_view_name_index);
-				x_table_result.second.most_recent_sql_statement_executed__index = -1;
-				ExecuteSQL(x_table_result);
-				sql_and_column_sets.push_back(x_table_result);
-				if (failed)
-				{
-					return;
-				}
-
-				xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
-				sql_and_column_sets.push_back(xr_table_result);
-				if (failed)
-				{
-					return;
-				}
-
-				++current_child_view_name_index;
-			}
-
-			++child_set_number;
-
-		});
 	}
 
 	if (failed)
@@ -1744,6 +1675,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 	SqlAndColumnSet preliminary_sorted_top_level_variable_group_result = CreateSortedTable(xr_table_result.second, primary_group_number);
 	preliminary_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
+	ClearTables(sql_and_column_sets);
 	ExecuteSQL(preliminary_sorted_top_level_variable_group_result);
 	sql_and_column_sets.push_back(preliminary_sorted_top_level_variable_group_result);
 	if (failed)
@@ -1752,6 +1684,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	}
 
 	SqlAndColumnSet duplicates_removed_top_level_variable_group_result = RemoveDuplicates(preliminary_sorted_top_level_variable_group_result.second, primary_group_number);
+	ClearTables(sql_and_column_sets);
 	sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
 	if (failed)
 	{
@@ -8052,4 +7985,52 @@ bool OutputModel::OutputGenerator::SavedRowData::operator<(SavedRowData const & 
 	}
 
 	return false;
+}
+
+void OutputModel::OutputGenerator::ClearTables(SqlAndColumnSets const & tables_to_clear)
+{
+	std::for_each(tables_to_clear.cbegin(), tables_to_clear.cend(), [this](SqlAndColumnSet const & table_to_clear)
+	{
+		// Drop tables only if the "make_table_permanent" flag is not set
+		if (!table_to_clear.second.make_table_permanent)
+		{
+			ClearTable(table_to_clear);
+		}
+	});
+}
+
+void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_clear)
+{
+	// Drop tables only if the "make_table_permanent" flag is not set
+	if (!table_to_clear.second.make_table_permanent)
+	{
+		std::string table_name_to_clear = table_to_clear.second.view_name;
+
+		if (false)
+		{
+			// The method below is the established way to determine whether the table exists or not,
+			// but is not necessary
+			std::string sql_string;
+			sql_string += "SELECT name FROM sqlite_master WHERE type='table' and name='";
+			sql_string += table_name_to_clear;
+			sql_string += "'";
+
+			SQLExecutor table_remover(model->db, sql_string);
+			table_remover.statement_type = OutputModel::OutputGenerator::SQLExecutor::RETURNS_ROWS;
+			table_remover.Execute();
+			bool row_exists = table_remover.Step();
+
+			// If there is a row in the result set, then the table exists
+			if (!row_exists)
+			{
+				return;
+			}
+		}
+
+		std::string sql_string = "DROP TABLE IF EXISTS ";
+		sql_string += table_name_to_clear;
+
+		SQLExecutor table_remover(model->db, sql_string);
+		table_remover.Execute();
+	}
 }
