@@ -74,7 +74,7 @@ void UIActionManager::DoKAdCountChange(Messager & messager, WidgetActionItemRequ
 				{
 					OutputModel::OutputGenerator output_generator(output_model);
 					//output_model.GenerateOutput(change_response);
-					output_generator.GenerateOutput(change_response);
+					//output_generator.GenerateOutput(change_response);
 				}
 
 			});
