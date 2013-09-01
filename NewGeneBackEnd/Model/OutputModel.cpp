@@ -226,9 +226,9 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 		for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
 		{
 			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, 0, child_set_number, current_child_view_name_index);
-			ClearTable(primary_group_merged_results);
 			x_table_result.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(x_table_result);
+			ClearTable(primary_group_merged_results);
 			merging_of_children_column_sets.push_back(x_table_result);
 			if (failed)
 			{
@@ -256,9 +256,9 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	//
 	// ... and the same format for the table is returned
 	SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTable(merging_of_children_column_sets.back().second, 0);
-	ClearTable(merging_of_children_column_sets.back());
 	preliminary_sorted_kad_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(preliminary_sorted_kad_result);
+	ClearTable(merging_of_children_column_sets.back());
 	merging_of_children_column_sets.push_back(preliminary_sorted_kad_result);
 	if (failed)
 	{
@@ -856,9 +856,9 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	{
 		return;
 	}
-	ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 	xr_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(xr_table_result);
+	ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 	intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
 	if (failed)
 	{
@@ -878,9 +878,9 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			{
 				return;
 			}
-			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			intermediate_merge_of_top_level_primary_group_results.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(intermediate_merge_of_top_level_primary_group_results);
+			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
 			if (failed)
 			{
