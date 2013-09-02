@@ -50,14 +50,22 @@ NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceId
 
 }
 
-~NewGeneDateTimeWidget()
+NewGeneDateTimeWidget::~NewGeneDateTimeWidget()
 {
 
 }
 
 void NewGeneDateTimeWidget::RefreshAllWidgets()
 {
-	WidgetDataItemRequest_DATETIME_WIDGET request(value(), WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
+	QDateTime const & currentValue = dateTime();
+
+	QDate date_1970(1970, 1, 1);
+	QTime time_12am(0, 0);
+	QDateTime datetime_1970(date_1970, time_12am);
+
+	std::int64_t different_from_1970_in_ms = static_cast<std::int64_t>(datetime_1970.msecsTo(currentValue));
+
+	WidgetDataItemRequest_DATETIME_WIDGET request(different_from_1970_in_ms, WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	request.identifier = std::make_shared<WidgetInstanceIdentifier>(this->data_instance);
 	emit RefreshWidget(request);
 }
@@ -81,7 +89,7 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 void NewGeneDateTimeWidget::WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET widget_data)
 {
 
-	if (!data_instance.code || !widget_data.code || *widget_data.code != "0" || (widget_data.flags != "s" && widget_data.flags != "e"))
+	if (!data_instance.code || !widget_data.identifier || !widget_data.identifier->code || *widget_data.identifier->code != "0" || (widget_data.identifier->flags != "s" && widget_data.identifier->flags != "e"))
 	{
 		boost::format msg("Invalid widget refresh in NewGeneDateTimeWidget widget.");
 		QMessageBox msgBox;
@@ -90,7 +98,7 @@ void NewGeneDateTimeWidget::WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WID
 		return;
 	}
 
-	if (widget_data.flags != data_instance.flags)
+	if (widget_data.identifier->flags != data_instance.flags)
 	{
 		return;
 	}
@@ -120,7 +128,7 @@ void NewGeneDateTimeWidget::ReceiveVariableItemChanged(QDateTime const & newValu
 
 	InstanceActionItems actionItems;
 	actionItems.push_back(std::make_pair(data_instance, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__DateTime(different_from_1970_in_ms)))));
-	WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
+	WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
 	emit SignalReceiveVariableItemChanged(action_request);
 
 }
@@ -176,7 +184,7 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 													QDateTime datetime_newvalue = datetime_1970;
 													datetime_newvalue.addMSecs(packet->getValue());
 
-													setDateTime(datetime_newValue);
+													setDateTime(datetime_newvalue);
 												}
 
 											}
