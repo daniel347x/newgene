@@ -10,7 +10,7 @@
 bool UIMessager::ManagersInitialized = false;
 
 UIMessager::UIMessager(QObject *parent) :
-    QObject(parent)
+	QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , singleShotActive(false)
 {
@@ -157,6 +157,11 @@ void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPI
 }
 
 void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET & widgetData)
+{
+	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
+}
+
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET & widgetData)
 {
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }

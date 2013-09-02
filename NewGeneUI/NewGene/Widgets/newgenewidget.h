@@ -26,6 +26,7 @@ class NewGeneWidget
 		};
 
 	public:
+
 		NewGeneWidget( WidgetCreationInfo const & creation_info );
 
 		virtual ~NewGeneWidget();
@@ -45,36 +46,45 @@ class NewGeneWidget
 
 		// ****************************************************************************************************************************
 		// Pseudo-slots.
-		//     There will be a compile-time error if the following functions are not overridden in every widget
-		//     that calls PrepareInputWidget() or PrepareOutputWidget() during construction.
 		virtual void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 		virtual void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
-		virtual void RefreshAllWidgets() {};
+		//
+		/* Remove if unnecessary
+		virtual void RefreshAllWidgets() {}
+		*/
 		//
 	public:
 		//
-		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA) {};
-		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX) {};
-		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {};
-		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA) {};
-		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE) {};
-		virtual void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROLS_AREA) {};
-		virtual void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET) {};
+		// The following base class functions are not necessary.
+		// However, they do assist in assuring that derived classes use the same naming scheme.
+		// At some point, errors could be added to these otherwise empty functions to further
+		// encourage the proper naming scheme in derived classes.
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA) {}
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX) {}
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA) {}
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE) {}
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROLS_AREA) {}
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET) {}
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET) {}
 		// ****************************************************************************************************************************
 
 	protected:
 
 		// ****************************************************************************************************************************
 		// Pseudo-signals.
-		//     There will be a compile-time error if the following functions are not given a declaration in every widget
-		//     that calls PrepareInputWidget() or PrepareOutputWidget() during construction.
-		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {};
-		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {};
-		virtual void RefreshWidget(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {};
-		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA) {};
-		virtual void RefreshWidget(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE) {};
-		virtual void RefreshWidget(WidgetDataItem_KAD_SPIN_CONTROLS_AREA) {};
-		virtual void RefreshWidget(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET) {};
+		// The following base class functions are not necessary.
+		// However, they do assist in assuring that derived classes use the same naming scheme.
+		// At some point, errors could be added to these otherwise empty functions to further
+		// encourage the proper naming scheme in derived classes.
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET) {}
 		// ****************************************************************************************************************************
 
 
@@ -100,6 +110,7 @@ class NewGeneWidget
 
 class WidgetCreationInfo
 {
+
 	public:
 
 		WidgetCreationInfo(
@@ -155,8 +166,9 @@ class WidgetCreationInfo
 		NewGeneWidget::WIDGET_NATURE widget_nature;
 		DATA_WIDGETS widget_type;
 		UUID uuid_parent;
-		bool top_level;
+		bool top_level; // Is this widget class tied into a UI Form, or is it created dynamically in code via "new" from some other widget?
 		WidgetInstanceIdentifier data_instance;
+
 };
 
 #endif // NEWGENEWIDGET_H

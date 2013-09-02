@@ -56,6 +56,10 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		{
 			emit WidgetDataRefresh(widgetData);
 		}
+		void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET & widgetData)
+		{
+			emit WidgetDataRefresh(widgetData);
+		}
 
 	private:
 
@@ -77,6 +81,7 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE widget);
 		void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA widget);
 		void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET widget);
+		void RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET widget);
 
 		// Actions
 		void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED);

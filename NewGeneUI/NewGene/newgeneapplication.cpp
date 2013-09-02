@@ -20,6 +20,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>();
 	qRegisterMetaType<WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA>();
 	qRegisterMetaType<WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET>();
+	qRegisterMetaType<WidgetDataItemRequest_DATETIME_WIDGET>();
 
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>();
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>();
@@ -28,6 +29,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE>();
 	qRegisterMetaType<WidgetDataItem_KAD_SPIN_CONTROLS_AREA>();
 	qRegisterMetaType<WidgetDataItem_KAD_SPIN_CONTROL_WIDGET>();
+	qRegisterMetaType<WidgetDataItem_DATETIME_WIDGET>();
 
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>();
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE>();

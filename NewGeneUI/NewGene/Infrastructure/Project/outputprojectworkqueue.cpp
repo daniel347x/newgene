@@ -106,6 +106,13 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTRO
 	get()->getWorkService().post(DoRefreshOutputWidget<KAD_SPIN_CONTROL_WIDGET>(widget, this));
 }
 
+/************************************************************************/
+//
+/************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<DATETIME_WIDGET>(widget, this));
+}
 
 
 // Actions

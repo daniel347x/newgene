@@ -2,6 +2,9 @@
 #define DATAWIDGETS_H
 
 #include "..\Utilities\WidgetIdentifier.h"
+#include <cstdint>
+#ifndef Q_MOC_RUN
+#endif
 
 enum DATA_WIDGETS
 {
@@ -18,6 +21,7 @@ enum DATA_WIDGETS
 	, VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE
 	, KAD_SPIN_CONTROLS_AREA
 	, KAD_SPIN_CONTROL_WIDGET
+	, DATETIME_WIDGET
 
 	// Input project
 
@@ -394,5 +398,59 @@ public:
 	int count;
 };
 typedef WidgetDataItem<KAD_SPIN_CONTROL_WIDGET> WidgetDataItem_KAD_SPIN_CONTROL_WIDGET;
+
+
+/************************************************************************/
+// DATETIME_WIDGET
+/************************************************************************/
+template<>
+class WidgetDataItemRequest<DATETIME_WIDGET> : public WidgetDataItemRequest_base
+{
+public:
+	WidgetDataItemRequest<DATETIME_WIDGET>(std::int64_t const the_date_time_ = 0, WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
+		, the_date_time(the_date_time_)
+	{
+	}
+	WidgetDataItemRequest<DATETIME_WIDGET>(WidgetDataItemRequest<DATETIME_WIDGET> const & rhs)
+		: WidgetDataItemRequest_base(rhs)
+		, the_date_time(rhs.the_date_time)
+	{
+	}
+	std::int64_t the_date_time;
+};
+typedef WidgetDataItemRequest<DATETIME_WIDGET> WidgetDataItemRequest_DATETIME_WIDGET;
+
+template<>
+class WidgetDataItem<DATETIME_WIDGET> : public WidgetDataItem_base
+{
+public:
+	WidgetDataItem<DATETIME_WIDGET>(std::int64_t the_date_time_ = 0, WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
+		, the_date_time(the_date_time_)
+	{
+	}
+	WidgetDataItem<DATETIME_WIDGET>(WidgetDataItemRequest_base const & request_obj)
+		: WidgetDataItem_base(request_obj)
+	{
+		try
+		{
+			WidgetDataItemRequest_DATETIME_WIDGET const & date_time_request = dynamic_cast<WidgetDataItemRequest_DATETIME_WIDGET const &>(request_obj);
+			the_date_time = date_time_request.the_date_time;
+		}
+		catch (std::bad_cast &)
+		{
+			the_date_time = 0;
+		}
+	}
+	WidgetDataItem<DATETIME_WIDGET>(WidgetDataItem<DATETIME_WIDGET> const & rhs)
+		: WidgetDataItem_base(rhs)
+		, the_date_time(rhs.the_date_time)
+	{
+	}
+	std::int64 the_date_time;
+};
+typedef WidgetDataItem<DATETIME_WIDGET> WidgetDataItem_DATETIME_WIDGET;
+
 
 #endif

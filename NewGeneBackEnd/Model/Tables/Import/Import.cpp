@@ -12,37 +12,39 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 	switch(time_range_type)
 	{
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR:
-		{
-			std::shared_ptr<BaseField> const the_input_field = RetrieveDataField(input_file_fields[0], input_data_fields);
-			std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-			std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
-
-			if (!the_input_field || !the_output_field_year_start || !the_output_field_year_end)
 			{
-				// Todo: log warning
-				return;
+
+				std::shared_ptr<BaseField> const the_input_field = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field || !the_output_field_year_start || !the_output_field_year_end)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				Field<FIELD_TYPE_INT32> const & the_input_field_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field);
+				Field<FIELD_TYPE_INT64> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_start);
+				Field<FIELD_TYPE_INT64> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_end);
+
+				// convert year to ms since jan 1, 1970 00:00:00.000
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field_int32.GetValueReference(), 1, 1));
+				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field_int32.GetValueReference() + 1, 1, 1));
+
+				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+
+				the_output_field_year_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
+				the_output_field_year_end_int64.SetValue(diff_end_from_1970.total_milliseconds());
+
 			}
-
-			Field<FIELD_TYPE_INT32> const & the_input_field_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field);
-			Field<FIELD_TYPE_INT64> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_start);
-			Field<FIELD_TYPE_INT64> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_end);
-
-			// convert year to ms since jan 1, 1970 00:00:00.000
-			boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
-			boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field_int32.GetValueReference(), 1, 1));
-			boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field_int32.GetValueReference() + 1, 1, 1));
-
-			boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-			boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
-
-			the_output_field_year_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
-			the_output_field_year_end_int64.SetValue(diff_end_from_1970.total_milliseconds() - 1);
-
-		}
-		break;
+			break;
 
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__YR_MNTH_DAY:
 			{
+
 				std::shared_ptr<BaseField> const the_input_field_day = RetrieveDataField(input_file_fields[0], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_month = RetrieveDataField(input_file_fields[1], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_year = RetrieveDataField(input_file_fields[2], input_data_fields);
@@ -67,11 +69,13 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 
 				the_output_field_day_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
+
 			}
 			break;
 
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY:
 			{
+
 				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[0], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[2], input_data_fields);
@@ -108,6 +112,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				the_output_field_day_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
 				the_output_field_day_end_int64.SetValue(diff_end_from_1970.total_milliseconds());
+
 			}
 			break;
 	}

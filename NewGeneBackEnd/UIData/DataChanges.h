@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "../Utilities/WidgetIdentifier.h"
+#include <cstdint>
 
 enum DATA_CHANGE_TYPE
 {
@@ -29,6 +30,7 @@ enum DATA_CHANGE_TYPE
 
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE
+	, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__GENERATE_OUTPUT
 
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__LAST
@@ -99,6 +101,39 @@ class DataChangePacket_int : public DataChangePacket
 		}
 
 		int n;
+
+};
+
+class DataChangePacket_int64 : public DataChangePacket
+{
+
+	public:
+
+		DataChangePacket_int64(std::int64_t const n_)
+			: DataChangePacket()
+			, n(n_)
+		{
+
+		}
+
+		DataChangePacket_int64(DataChangePacket_int64 const & rhs)
+			: DataChangePacket(rhs)
+			, n(rhs.n)
+		{
+
+		}
+
+		void setValue(std::int64_t const n_)
+		{
+			n = n_;
+		}
+
+		std::int64_t getValue() const
+		{
+			return n;
+		}
+
+		std::int64_t n;
 
 };
 

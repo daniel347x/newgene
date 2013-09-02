@@ -11,6 +11,7 @@ enum WIDGET_ACTIONS
 
 	, ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
 	, ACTION_KAD_COUNT_CHANGE
+	, ACTION_DATETIME_RANGE_CHANGE
 	, ACTION_GENERATE_OUTPUT
 
 	, WIDGET_ACTIONS_LAST
@@ -56,6 +57,7 @@ class WidgetActionItem
 typedef std::shared_ptr<WidgetActionItem> WidgetActionItemSharedPtr;
 typedef std::pair<WidgetInstanceIdentifier, WidgetActionItemSharedPtr> InstanceActionItem;
 typedef std::vector<InstanceActionItem> InstanceActionItems;
+
 
 class WidgetActionItem__Checkbox : public WidgetActionItem
 {
@@ -137,6 +139,46 @@ class WidgetActionItem__Spinbox : public WidgetActionItem
 
 };
 
+class WidgetActionItem__DateTime : public WidgetActionItem
+{
+
+	public:
+
+		WidgetActionItem__DateTime(std::int64_t const value__)
+			: WidgetActionItem()
+			, value_(value__)
+		{
+
+		}
+
+		WidgetActionItem__DateTime(WidgetActionItem__DateTime const & rhs)
+			: WidgetActionItem(rhs)
+			, value_(rhs.value_)
+		{
+
+		}
+
+		~WidgetActionItem__DateTime()
+		{
+
+		}
+
+		void setValue(std::int64_t const value__)
+		{
+			value_ = value__;
+		}
+
+		std::int64_t getValue() const
+		{
+			return value_;
+		}
+
+	protected:
+
+		std::int64_t value_;
+
+};
+
 class WidgetActionItem__GenerateOutput : public WidgetActionItem
 {
 
@@ -191,6 +233,7 @@ class WidgetActionItemRequest : public WidgetActionItemRequest_base
 
 };
 
+
 /************************************************************************/
 // ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
 /************************************************************************/
@@ -226,6 +269,24 @@ class WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE> : public WidgetActionItem
 		}
 };
 typedef WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE> WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE;
+
+/************************************************************************/
+// ACTION_DATETIME_RANGE_CHANGE
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE> : public WidgetActionItemRequest_base
+{
+	public:
+		WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE>(WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
+};
+typedef WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE> WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE;
 
 /************************************************************************/
 // ACTION_GENERATE_OUTPUT
