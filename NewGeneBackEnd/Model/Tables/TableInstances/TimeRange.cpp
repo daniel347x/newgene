@@ -144,7 +144,6 @@ void Table_TIME_RANGE::Modify(sqlite3 * db)
 	WidgetInstanceIdentifier_Int64_Pair const & timerange_start_identifier = this->identifiers[0];
 	WidgetInstanceIdentifier_Int64_Pair const & timerange_end_identifier = this->identifiers[1];
 
-	char c_[64];
 	std::string sqlAdd("UPDATE TIMERANGE_SELECTED SET ");
 	sqlAdd += TIME_RANGE__TIME_RANGE_START;
 	sqlAdd += "=";

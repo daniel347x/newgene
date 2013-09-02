@@ -448,7 +448,7 @@ public:
 		, the_date_time(rhs.the_date_time)
 	{
 	}
-	std::int64 the_date_time;
+	std::int64_t the_date_time;
 };
 typedef WidgetDataItem<DATETIME_WIDGET> WidgetDataItem_DATETIME_WIDGET;
 

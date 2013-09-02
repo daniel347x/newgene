@@ -10,6 +10,8 @@
 #	include <boost/algorithm/string.hpp>
 #endif
 
+#include <cstdint>
+
 typedef std::string UUID;
 typedef std::vector<UUID> UUIDVector;
 

@@ -373,7 +373,7 @@ public:
 
 	}
 
-	WidgetInstanceIdentifiers_WithInts getIdentifiers()
+	WidgetInstanceIdentifiers_WithInt64s getIdentifiers()
 	{
 		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 		return identifiers;
