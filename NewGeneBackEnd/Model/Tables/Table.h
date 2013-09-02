@@ -379,11 +379,31 @@ public:
 		return identifiers;
 	}
 
-	bool getIdentifierFromStringCode(std::string const code, WidgetInstanceIdentifier_Int_Pair & the_identifier)
+	bool getIdentifierFromStringCodeAndFlags(std::string const code, std::string const & flags, WidgetInstanceIdentifier_Int64_Pair & the_identifier)
 	{
 		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 		bool found = false;
-		std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &found, &the_identifier](WidgetInstanceIdentifier_Int_Pair const & identifier)
+		std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &flags, &found, &the_identifier](WidgetInstanceIdentifier_Int64_Pair const & identifier)
+		{
+			if (found)
+			{
+				return;
+			}
+			if (identifier.first.code && boost::iequals(code, *identifier.first.code) && identifier.first.flags == flags)
+			{
+				the_identifier = identifier;
+				found = true;
+				return;
+			}
+		});
+		return found;
+	}
+
+	bool getIdentifierFromStringCode(std::string const code, WidgetInstanceIdentifier_Int64_Pair & the_identifier)
+	{
+		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+		bool found = false;
+		std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &found, &the_identifier](WidgetInstanceIdentifier_Int64_Pair const & identifier)
 		{
 			if (found)
 			{
@@ -399,12 +419,12 @@ public:
 		return found;
 	}
 
-	WidgetInstanceIdentifier_Int_Pair getIdentifier(UUID const & uuid_)
+	WidgetInstanceIdentifier_Int64_Pair getIdentifier(UUID const & uuid_)
 	{
 		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-		WidgetInstanceIdentifier_Int_Pair the_identifier;
+		WidgetInstanceIdentifier_Int64_Pair the_identifier;
 		bool found = false;
-		std::for_each(identifiers.cbegin(), identifiers.cend(), [&uuid_, &found, &the_identifier](WidgetInstanceIdentifier_Int_Pair const & identifier)
+		std::for_each(identifiers.cbegin(), identifiers.cend(), [&uuid_, &found, &the_identifier](WidgetInstanceIdentifier_Int64_Pair const & identifier)
 		{
 			if (found)
 			{
@@ -423,7 +443,7 @@ public:
 	void Sort()
 	{
 		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-		std::sort(identifiers.begin(), identifiers.end(), [](WidgetInstanceIdentifier_Int_Pair const & lhs, WidgetInstanceIdentifier_Int_Pair const & rhs)
+		std::sort(identifiers.begin(), identifiers.end(), [](WidgetInstanceIdentifier_Int64_Pair const & lhs, WidgetInstanceIdentifier_Int64_Pair const & rhs)
 		{
 			return lhs.first > rhs.first;
 		});
@@ -431,7 +451,7 @@ public:
 
 protected:
 
-	WidgetInstanceIdentifiers_WithInts identifiers;
+	WidgetInstanceIdentifiers_WithInt64s identifiers;
 
 };
 

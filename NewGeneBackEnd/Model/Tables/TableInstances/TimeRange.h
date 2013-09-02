@@ -31,7 +31,7 @@ public:
 
 private:
 
-	void Modify(sqlite3 * db, std::string const & dmu_category_code, int const value_);
+	void Modify(sqlite3 * db);
 
 };
 

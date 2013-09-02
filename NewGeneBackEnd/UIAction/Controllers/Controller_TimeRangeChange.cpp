@@ -72,7 +72,7 @@ void UIActionManager::DoTimeRangeChange(Messager & messager, WidgetActionItemReq
 				// ***************************************** //
 				// Update database and cache
 				// ***************************************** //
-				//output_model.t_kad_count.Update(output_model.getDb(), output_model, input_model, change_response);
+				output_model.t_time_range.Update(output_model.getDb(), output_model, input_model, change_response);
 
 			});
 

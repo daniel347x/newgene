@@ -124,13 +124,21 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	{
 		if (widget_request.identifier->flags == "s")
 		{
-			//WidgetInstanceIdentifier_Int_Pair spinControlData = output_model.t_kad_count.getIdentifier(*widget_request.identifier->uuid);
-			//timerange_datetimecontrol.the_date_time = spinControlData.second;
+			WidgetInstanceIdentifier_Int64_Pair timerange_start_identifier;
+			bool found = output_model.t_time_range.getIdentifierFromStringCodeAndFlags("0", "s", timerange_start_identifier);
+			if (found)
+			{
+				timerange_datetimecontrol.the_date_time = timerange_start_identifier.second;
+			}
 		}
 		else if (widget_request.identifier->flags == "e")
 		{
-			//WidgetInstanceIdentifier_Int_Pair spinControlData = output_model.t_kad_count.getIdentifier(*widget_request.identifier->uuid);
-			//timerange_datetimecontrol.the_date_time = spinControlData.second;
+			WidgetInstanceIdentifier_Int64_Pair timerange_end_identifier;
+			bool found = output_model.t_time_range.getIdentifierFromStringCodeAndFlags("0", "e", timerange_end_identifier);
+			if (found)
+			{
+				timerange_datetimecontrol.the_date_time = timerange_end_identifier.second;
+			}
 		}
 	}
 	messager.EmitOutputWidgetDataRefresh(timerange_datetimecontrol);

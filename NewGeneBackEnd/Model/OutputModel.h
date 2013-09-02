@@ -217,6 +217,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 		Table_VARIABLES_SELECTED t_variables_selected_identifiers;
 		Table_KAD_COUNT t_kad_count;
+		Table_TIME_RANGE t_time_range;
 
 	protected:
 

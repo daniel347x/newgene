@@ -2,6 +2,10 @@
 #include "../../InputModel.h"
 #include "../../OutputModel.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
+#ifndef Q_MOC_RUN
+#	include <boost/lexical_cast.hpp>
+#endif
+
 
 std::string const Table_TIME_RANGE::TIME_RANGE__TIME_RANGE_START = "TIMERANGE_START";
 std::string const Table_TIME_RANGE::TIME_RANGE__TIME_RANGE_END = "TIMERANGE_END";
@@ -34,7 +38,10 @@ void Table_TIME_RANGE::Load(sqlite3 * db, OutputModel * output_model_, InputMode
 		// The CODE is 0, and there is only a single row
 		WidgetInstanceIdentifier identifier("0");
 
+		identifier.flags = "s";
 		identifiers.push_back(std::make_pair(identifier, timerange_start));
+
+		identifier.flags = "e";
 		identifiers.push_back(std::make_pair(identifier, timerange_end));
 	}
 }
@@ -70,7 +77,8 @@ bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputMo
 							return; // from lambda
 						}
 
-						std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&db, &input_model_, &change, this](WidgetInstanceIdentifier const & child_identifier)
+						bool changes_made = false;
+						std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&db, &input_model_, &change, &changes_made, this](WidgetInstanceIdentifier const & child_identifier)
 						{
 							if (child_identifier.code && child_identifier.code->size() != 0)
 							{
@@ -79,18 +87,20 @@ bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputMo
 									DataChangePacket_int64 * packet = static_cast<DataChangePacket_int64 *>(change.getPacket());
 									if (packet)
 									{
-										std::for_each(this->identifiers.begin(), this->identifiers.end(), [&packet, &child_identifier](WidgetInstanceIdentifier_Int64_Pair & cache_identifier)
+										std::for_each(this->identifiers.begin(), this->identifiers.end(), [&packet, &child_identifier, &changes_made](WidgetInstanceIdentifier_Int64_Pair & cache_identifier)
 										{
-											if (boost::iequals(*child_identifier.uuid, *cache_identifier.first.uuid))
+											if (boost::iequals(*child_identifier.code, *cache_identifier.first.code))
 											{
-												if (packet->getValue() != cache_identifier.second)
+												if (child_identifier.flags == cache_identifier.first.flags)
 												{
-													cache_identifier.second = packet->getValue();
+													if (packet->getValue() != cache_identifier.second)
+													{
+														cache_identifier.second = packet->getValue();
+														changes_made = true;
+													}
 												}
-												return; // from lambda
 											}
 										});
-										Modify(db, *child_identifier.code, packet->getValue());
 									}
 									else
 									{
@@ -99,6 +109,11 @@ bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputMo
 								}
 							}
 						});
+
+						if (changes_made)
+						{
+							Modify(db);
+						}
 
 					}
 				case DATA_CHANGE_INTENTION__RESET_ALL:
@@ -118,18 +133,26 @@ bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputMo
 
 }
 
-void Table_KAD_COUNT::Modify(sqlite3 * db, std::string const & dmu_category_code, int const value_)
+void Table_TIME_RANGE::Modify(sqlite3 * db)
 {
+
+	if (this->identifiers.size() != 2)
+	{
+		return;
+	}
+
+	WidgetInstanceIdentifier_Int64_Pair const & timerange_start_identifier = this->identifiers[0];
+	WidgetInstanceIdentifier_Int64_Pair const & timerange_end_identifier = this->identifiers[1];
+
 	char c_[64];
-	std::string sqlAdd("UPDATE KAD_COUNT SET ");
-	sqlAdd += KAD_COUNT__COUNT;
+	std::string sqlAdd("UPDATE TIMERANGE_SELECTED SET ");
+	sqlAdd += TIME_RANGE__TIME_RANGE_START;
 	sqlAdd += "=";
-	sqlAdd += itoa(value_, c_, 10);
-	sqlAdd += " WHERE ";
-	sqlAdd += KAD_COUNT__DMU_CATEGORY_STRING_CODE;
-	sqlAdd += "='";
-	sqlAdd += dmu_category_code;
-	sqlAdd += "'";
+	sqlAdd += boost::lexical_cast<std::string>(timerange_start_identifier.second);
+	sqlAdd += ", ";
+	sqlAdd += TIME_RANGE__TIME_RANGE_END;
+	sqlAdd += "=";
+	sqlAdd += boost::lexical_cast<std::string>(timerange_end_identifier.second);
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sqlAdd.c_str(), sqlAdd.size() + 1, &stmt, NULL);
 	if (stmt == NULL)
