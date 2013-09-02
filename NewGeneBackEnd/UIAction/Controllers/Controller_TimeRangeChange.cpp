@@ -43,7 +43,11 @@ void UIActionManager::DoTimeRangeChange(Messager & messager, WidgetActionItemReq
 					return;
 				}
 				WidgetInstanceIdentifier const & identifier = instanceActionItem.first;
-				if (!identifier.uuid)
+				if (!identifier.code || *identifier.code != "0")
+				{
+					return;
+				}
+				if (identifier.flags != "s" && identifier.flags != "e")
 				{
 					return;
 				}

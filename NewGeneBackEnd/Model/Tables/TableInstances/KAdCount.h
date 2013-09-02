@@ -11,11 +11,13 @@ public:
 
 	static std::string const KAD_COUNT__DMU_CATEGORY_STRING_CODE;
 	static std::string const KAD_COUNT__COUNT;
+	static std::string const KAD_COUNT__FLAGS;
 
 	enum COLUMN_INDEX
 	{
 		  INDEX__KAD_COUNT__DMU_CATEGORY_STRING_CODE = 0
 		, INDEX__KAD_COUNT__COUNT
+		, INDEX__KAD_COUNT__FLAGS
 	};
 
 public:

@@ -120,10 +120,18 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 {
 	OutputModel & output_model = project.model();
 	WidgetDataItem_DATETIME_WIDGET timerange_datetimecontrol(widget_request);
-	if (widget_request.identifier && widget_request.identifier->uuid)
+	if (widget_request.identifier && widget_request.identifier->code && *widget_request.identifier->code == "0")
 	{
-		//WidgetInstanceIdentifier_Int_Pair spinControlData = output_model.t_kad_count.getIdentifier(*widget_request.identifier->uuid);
-		//timerange_datetimecontrol.the_date_time = spinControlData.second;
+		if (widget_request.identifier->flags == "s")
+		{
+			//WidgetInstanceIdentifier_Int_Pair spinControlData = output_model.t_kad_count.getIdentifier(*widget_request.identifier->uuid);
+			//timerange_datetimecontrol.the_date_time = spinControlData.second;
+		}
+		else if (widget_request.identifier->flags == "e")
+		{
+			//WidgetInstanceIdentifier_Int_Pair spinControlData = output_model.t_kad_count.getIdentifier(*widget_request.identifier->uuid);
+			//timerange_datetimecontrol.the_date_time = spinControlData.second;
+		}
 	}
 	messager.EmitOutputWidgetDataRefresh(timerange_datetimecontrol);
 }

@@ -43,14 +43,14 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="NewGeneDateTimeWidget" name="dateTimeEdit">
+        <widget class="NewGeneDateTimeWidget" name="dateTimeEdit_start">
          <property name="calendarPopup">
           <bool>true</bool>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="NewGeneDateTimeWidget" name="dateTimeEdit_2">
+        <widget class="NewGeneDateTimeWidget" name="dateTimeEdit_end">
          <property name="calendarPopup">
           <bool>true</bool>
          </property>

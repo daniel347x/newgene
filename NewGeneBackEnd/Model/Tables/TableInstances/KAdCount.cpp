@@ -5,6 +5,7 @@
 
 std::string const Table_KAD_COUNT::KAD_COUNT__DMU_CATEGORY_STRING_CODE = "DMU_CATEGORY_STRING_CODE";
 std::string const Table_KAD_COUNT::KAD_COUNT__COUNT = "COUNT";
+std::string const Table_KAD_COUNT::KAD_COUNT__FLAGS = "FLAGS";
 
 void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
 {
@@ -34,6 +35,7 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 		// ****************************************************************************************//
 		char const * code_dmu_category = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__KAD_COUNT__DMU_CATEGORY_STRING_CODE));
 		int const kad_count = sqlite3_column_int(stmt, INDEX__KAD_COUNT__COUNT);
+		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__KAD_COUNT__FLAGS));
 		if (code_dmu_category && strlen(code_dmu_category))
 		{
 			WidgetInstanceIdentifier identifier;

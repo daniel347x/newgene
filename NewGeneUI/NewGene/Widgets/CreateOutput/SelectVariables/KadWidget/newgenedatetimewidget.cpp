@@ -21,6 +21,17 @@ NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceId
 
 {
 
+	if (this->objectName() == "dateTimeEdit_start")
+	{
+		this->data_instance.code = std::make_shared<std::string>("0");
+		this->data_instance.flags = "s";
+	}
+	else if (this->objectName() == "dateTimeEdit_end")
+	{
+		this->data_instance.code = std::make_shared<std::string>("0");
+		this->data_instance.flags = "e";
+	}
+
    PrepareOutputWidget();
 
    connect(this, SIGNAL(dateTimeChanged(QDateTime const &)), this, SLOT(ReceiveVariableItemChanged(QDateTime const &)));
@@ -47,6 +58,7 @@ NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceId
 void NewGeneDateTimeWidget::RefreshAllWidgets()
 {
 	WidgetDataItemRequest_DATETIME_WIDGET request(value(), WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
+	request.identifier = std::make_shared<WidgetInstanceIdentifier>(this->data_instance);
 	emit RefreshWidget(request);
 }
 
@@ -69,12 +81,17 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 void NewGeneDateTimeWidget::WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET widget_data)
 {
 
-	if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid) )
+	if (!data_instance.code || !widget_data.code || *widget_data.code != "0" || (widget_data.flags != "s" && widget_data.flags != "e"))
 	{
 		boost::format msg("Invalid widget refresh in NewGeneDateTimeWidget widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
+		return;
+	}
+
+	if (widget_data.flags != data_instance.flags)
+	{
 		return;
 	}
 
@@ -135,7 +152,7 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 								std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&change, this](WidgetInstanceIdentifier const & child_identifier)
 								{
 
-									if (data_instance.uuid && child_identifier.uuid && *data_instance.uuid == *child_identifier.uuid)
+									if (data_instance.code && child_identifier.code && *data_instance.code == *child_identifier.code && data_instance.flags == child_identifier.flags)
 									{
 
 										if (change.change_intention == DATA_CHANGE_INTENTION__UPDATE)

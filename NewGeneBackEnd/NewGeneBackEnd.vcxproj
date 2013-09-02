@@ -98,6 +98,7 @@
     <ClInclude Include="Model\Tables\TableInstances\CMU.h" />
     <ClInclude Include="Model\Tables\TableInstances\DMU.h" />
     <ClInclude Include="Model\Tables\TableInstances\KAdCount.h" />
+    <ClInclude Include="Model\Tables\TableInstances\TimeRange.h" />
     <ClInclude Include="Model\Tables\TableInstances\UOA.h" />
     <ClInclude Include="Model\Tables\TableInstances\VariableGroup.h" />
     <ClInclude Include="Model\Tables\TableInstances\VariableGroupData.h" />
@@ -161,6 +162,7 @@
     <ClCompile Include="Model\Tables\TableInstances\CMU.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\DMU.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\KAdCount.cpp" />
+    <ClCompile Include="Model\Tables\TableInstances\TimeRange.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\UOA.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\VariableGroup.cpp" />
     <ClCompile Include="Model\Tables\TableInstances\VariableGroupData.cpp" />

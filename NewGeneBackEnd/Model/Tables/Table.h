@@ -39,6 +39,7 @@ enum TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT
+	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT64
 
 };
 
@@ -357,6 +358,80 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT> : pu
 	protected:
 
 		WidgetInstanceIdentifiers_WithInts identifiers;
+
+};
+
+template<>
+class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT64> : public Table_basemost
+{
+
+public:
+
+	Table_base(TABLE_MODEL_TYPE const table_model_type_)
+		: Table_basemost(table_model_type_)
+	{
+
+	}
+
+	WidgetInstanceIdentifiers_WithInts getIdentifiers()
+	{
+		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+		return identifiers;
+	}
+
+	bool getIdentifierFromStringCode(std::string const code, WidgetInstanceIdentifier_Int_Pair & the_identifier)
+	{
+		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+		bool found = false;
+		std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &found, &the_identifier](WidgetInstanceIdentifier_Int_Pair const & identifier)
+		{
+			if (found)
+			{
+				return;
+			}
+			if (identifier.first.code && boost::iequals(code, *identifier.first.code))
+			{
+				the_identifier = identifier;
+				found = true;
+				return;
+			}
+		});
+		return found;
+	}
+
+	WidgetInstanceIdentifier_Int_Pair getIdentifier(UUID const & uuid_)
+	{
+		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+		WidgetInstanceIdentifier_Int_Pair the_identifier;
+		bool found = false;
+		std::for_each(identifiers.cbegin(), identifiers.cend(), [&uuid_, &found, &the_identifier](WidgetInstanceIdentifier_Int_Pair const & identifier)
+		{
+			if (found)
+			{
+				return;
+			}
+			if (identifier.first.uuid && boost::iequals(uuid_, *identifier.first.uuid))
+			{
+				the_identifier = identifier;
+				found = true;
+				return;
+			}
+		});
+		return the_identifier;
+	}
+
+	void Sort()
+	{
+		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+		std::sort(identifiers.begin(), identifiers.end(), [](WidgetInstanceIdentifier_Int_Pair const & lhs, WidgetInstanceIdentifier_Int_Pair const & rhs)
+		{
+			return lhs.first > rhs.first;
+		});
+	}
+
+protected:
+
+	WidgetInstanceIdentifiers_WithInts identifiers;
 
 };
 

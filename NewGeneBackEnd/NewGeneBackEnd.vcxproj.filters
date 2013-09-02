@@ -324,6 +324,9 @@
     <ClInclude Include="Model\Tables\Import\ImportDefinitions.h">
       <Filter>Header Files\Model\Tables\Import</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Tables\TableInstances\TimeRange.h">
+      <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -520,6 +523,9 @@
     </ClCompile>
     <ClCompile Include="UIAction\Controllers\Controller_TimeRangeChange.cpp">
       <Filter>Source Files\UIAction\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableInstances\TimeRange.cpp">
+      <Filter>Source Files\Model\Tables\TableInstances</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

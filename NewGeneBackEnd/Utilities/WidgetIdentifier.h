@@ -256,39 +256,39 @@ public:
 	{
 		switch (check_type)
 		{
-		case EQUALITY_CHECK_TYPE__UUID:
-			{
-				if (uuid && uuid->size() != 0 && rhs.uuid && rhs.uuid->size() != 0)
+			case EQUALITY_CHECK_TYPE__UUID:
 				{
-					if (boost::iequals(*uuid, *rhs.uuid))
+					if (uuid && uuid->size() != 0 && rhs.uuid && rhs.uuid->size() != 0)
 					{
-						return true;
+						if (boost::iequals(*uuid, *rhs.uuid))
+						{
+							return true;
+						}
 					}
 				}
-			}
-			break;
-		case EQUALITY_CHECK_TYPE__STRING_CODE:
-			{
-				if (code && code->size() != 0 && rhs.code && rhs.code != 0)
+				break;
+			case EQUALITY_CHECK_TYPE__STRING_CODE:
 				{
-					if (boost::iequals(*code, *rhs.code))
+					if (code && code->size() != 0 && rhs.code && rhs.code != 0)
 					{
-						return true;
+						if (boost::iequals(*code, *rhs.code))
+						{
+							return true;
+						}
 					}
 				}
-			}
-			break;
-		case EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE:
-			{
-				if (uuid && uuid->size() != 0 && rhs.uuid && rhs.uuid->size() != 0 && code && code->size() != 0 && rhs.code && rhs.code != 0)
+				break;
+			case EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE:
 				{
-					if (boost::iequals(*uuid, *rhs.uuid) && boost::iequals(*code, *rhs.code))
+					if (uuid && uuid->size() != 0 && rhs.uuid && rhs.uuid->size() != 0 && code && code->size() != 0 && rhs.code && rhs.code != 0)
 					{
-						return true;
+						if (boost::iequals(*uuid, *rhs.uuid) && boost::iequals(*code, *rhs.code))
+						{
+							return true;
+						}
 					}
 				}
-			}
-			break;
+				break;
 		}
 		return false;
 	}
@@ -324,6 +324,9 @@ public:
 typedef std::vector<WidgetInstanceIdentifier> WidgetInstanceIdentifiers;
 typedef std::pair<WidgetInstanceIdentifier, int> WidgetInstanceIdentifier_Int_Pair;
 typedef std::vector<WidgetInstanceIdentifier_Int_Pair> WidgetInstanceIdentifiers_WithInts;
+typedef std::pair<WidgetInstanceIdentifier, std::int64_t> WidgetInstanceIdentifier_Int64_Pair;
+typedef std::vector<WidgetInstanceIdentifier_Int_Pair> WidgetInstanceIdentifiers_WithInts;
+typedef std::vector<WidgetInstanceIdentifier_Int64_Pair> WidgetInstanceIdentifiers_WithInt64s;
 
 WidgetInstanceIdentifier::Notes MakeNotes(char const * const notes1, char const * const notes2, char const * const notes3);
 WidgetInstanceIdentifier::Notes MakeNotes(std::string notes1, std::string notes2, std::string notes3);
