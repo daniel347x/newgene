@@ -22,7 +22,6 @@ void OutputModel::LoadTables()
 		t_kad_count.Sort();
 
 		t_time_range.Load(db, this, input_model.get());
-		t_kad_count.Sort(); // no need for this line, but for consistency it remains
 	}
 
 }

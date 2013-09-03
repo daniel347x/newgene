@@ -54,8 +54,6 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 		outp->UnregisterInterestInChanges(this);
 	}
 
-	NewGeneWidget::UpdateOutputConnections(connection_type, project);
-
 	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		/* For some reason, setting the "objectName" property in the form editor is not reflected here */
@@ -87,6 +85,13 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 			++project->number_timerange_widgets_created;
 		}
 
+	}
+
+	NewGeneWidget::UpdateOutputConnections(connection_type, project);
+
+	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	{
+
 		if (data_instance.uuid && project)
 		{
 
@@ -97,14 +102,8 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET)));
 		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE)));
+		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET)));
 
-		if (data_instance.uuid && project)
-		{
-
-			WidgetDataItemRequest_DATETIME_WIDGET request(0, WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
-			emit RefreshWidget(request);
-
-		}
 	}
 }
 

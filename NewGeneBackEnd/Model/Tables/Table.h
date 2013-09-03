@@ -440,15 +440,6 @@ public:
 		return the_identifier;
 	}
 
-	void Sort()
-	{
-		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-		std::sort(identifiers.begin(), identifiers.end(), [](WidgetInstanceIdentifier_Int64_Pair const & lhs, WidgetInstanceIdentifier_Int64_Pair const & rhs)
-		{
-			return lhs.first > rhs.first;
-		});
-	}
-
 protected:
 
 	WidgetInstanceIdentifiers_WithInt64s identifiers;
