@@ -148,7 +148,7 @@ class Messager
 		virtual void EmitChangeMessage(DataChangeMessage & changes) {}
 
 		virtual void ShowMessageBox(std::string) {}
-		virtual bool ShowQuestionMessageBox(std::string) { return false; }
+		virtual bool ShowQuestionMessageBox(std::string, std::string) { return false; } // title, question text
 
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData) {}

@@ -9,6 +9,7 @@
 #	include <boost/lexical_cast.hpp>
 #	include <deque>
 #	include <boost/filesystem.hpp>
+#	include <boost/format.hpp>
 #endif
 
 void OutputModel::LoadTables()
@@ -468,12 +469,9 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 		
 	}
 
-	bool overwrite_file = messager.ShowQuestionMessageBox("faulty, my oh my");
-
-	if (overwrite_file)
-	{
-		int mmm = 0;
-	}
+	boost::format overwrite_msg("The file %1% does not exist.  Overwrite?");
+	overwrite_msg % setting_path_to_kad_output->ToString();
+	bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
 
 	return;
 

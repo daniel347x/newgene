@@ -9,12 +9,15 @@ void UIOutputProject::SignalMessageBox(STD_STRING msg)
 	msgBox.exec();
 }
 
-bool UIOutputProject::QuestionMessageBox(STD_STRING msg)
+bool UIOutputProject::QuestionMessageBox(STD_STRING msg_title, STD_STRING msg_text)
 {
-	QMessageBox msgBox;
-	msgBox.setText( msg.c_str() );
-	msgBox.exec();
-	return true;
+	QMessageBox::StandardButton reply;
+	reply = QMessageBox::question(nullptr, QString(msg_title.c_str()), QString(msg_text.c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+	if (reply == QMessageBox::Yes)
+	{
+		return true;
+	}
+	return false;
 }
 
 bool UIOutputProject::is_model_equivalent(UIMessager & messager, UIOutputModel * model_)

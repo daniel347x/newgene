@@ -115,10 +115,10 @@ void UIMessagerInputProject::ShowMessageBox(std::string msg)
 	emit DisplayMessageBox(msg);
 }
 
-bool UIMessagerInputProject::ShowQuestionMessageBox(std::string msg)
+bool UIMessagerInputProject::ShowQuestionMessageBox(std::string msg_title, std::string msg_text)
 {
 	bool yes = false;
-	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( bool, yes ), Q_ARG( STD_STRING, msg ));
+	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( bool, yes ), Q_ARG( STD_STRING, msg_title ), Q_ARG( STD_STRING, msg_text ));
 	return yes;
 }
 
@@ -132,10 +132,10 @@ void UIMessagerOutputProject::ShowMessageBox(std::string msg)
 	emit DisplayMessageBox(msg);
 }
 
-bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg)
+bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg_title, std::string msg_text)
 {
 	bool yes = false;
-	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( bool, yes ), Q_ARG( STD_STRING, msg ));
+	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( bool, yes ), Q_ARG( STD_STRING, msg_title ), Q_ARG( STD_STRING, msg_text ));
 	return yes;
 }
 
