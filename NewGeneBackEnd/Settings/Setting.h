@@ -432,6 +432,7 @@ public:
 	PathSetting(Messager & messager, boost::filesystem::path const & setting)
 		: Setting(messager)
 		, StringSetting(messager, setting.string())
+		, path_setting(setting)
 	{}
 
 	boost::filesystem::path getPath() const { return path_setting; }
