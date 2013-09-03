@@ -12,6 +12,8 @@
 #	include <boost/format.hpp>
 #endif
 
+#include <fstream>
+
 void OutputModel::LoadTables()
 {
 
@@ -466,14 +468,22 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	bool output_file_exists = boost::filesystem::exists(setting_path_to_kad_output->ToString());
 	if (output_file_exists)
 	{
-		
+		boost::format overwrite_msg("The file %1% does not exist.  Overwrite?");
+		overwrite_msg % setting_path_to_kad_output->ToString();
+		bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
+		if (!overwrite_file)
+		{
+			return;
+		}
 	}
 
-	boost::format overwrite_msg("The file %1% does not exist.  Overwrite?");
-	overwrite_msg % setting_path_to_kad_output->ToString();
-	bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
-
-	return;
+	std::fstream output_file;
+	output_file.open(setting_path_to_kad_output->ToString(), std::ios::out | std::ios::trunc);
+	if (!output_file.good())
+	{
+		failed = true;
+		return;
+	}
 
 	ObtainData(final_result.second);
 
@@ -482,14 +492,124 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 		return;
 	}
 
+	int column_data_type = 0;
+	int column_index = 0;
+	bool first = true;
+	std::int64_t data_int64 = 0;
+	std::string data_string;
+	long double data_long = 0.0;
 	while (StepData())
 	{
 
 		if (failed)
 		{
+			break;
+		}
+
+		column_index = 0;
+		first = true;
+		std::map<WidgetInstanceIdentifier, bool> variable_group_appears_more_than_once;
+		std::for_each(final_result.second.columns_in_view.begin(), final_result.second.columns_in_view.end(), [this, &output_file, &data_int64, &data_string, &data_long, &first, &column_index, &column_data_type](ColumnsInTempView::ColumnInTempView & unformatted_column)
+		{
+
+			if (failed)
+			{
+				return;
+			}
+
+			column_data_type = sqlite3_column_type(stmt_result, column_index);
+
+			switch (column_data_type)
+			{
+
+				case SQLITE_INTEGER:
+					{
+
+						data_int64 = sqlite3_column_int64(stmt_result, column_index);
+						if (!first)
+						{
+							output_file << ",";
+						}
+						first = false;
+						output_file << data_int64;
+
+					}
+					break;
+
+				case SQLITE_FLOAT:
+					{
+						// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
+						data_long = sqlite3_column_double(stmt_result, column_index);
+						// Todo: Error message
+						failed = true;
+						return; // from lambda
+					}
+					break;
+
+				case SQLITE_TEXT:
+					{
+
+						data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, column_index));
+						if (!first)
+						{
+							output_file << ",";
+						}
+						first = false;
+						output_file << data_string;
+
+					}
+					break;
+
+				case SQLITE_BLOB:
+					{
+						// Todo: Error message
+						failed = true;
+						return; // from lambda
+					}
+					break;
+
+				case SQLITE_NULL:
+					{
+
+						if (!first)
+						{
+							output_file << ",";
+						}
+						first = false;
+
+					}
+					break;
+
+				default:
+					{
+						// Todo: Error message
+						failed = true;
+						return; // from lambda
+					}
+
+			}
+
+			++column_index;
+
+		});
+
+		if (failed)
+		{
 			return;
 		}
+
+		output_file << std::endl;
 		
+	}
+
+	if (failed)
+	{
+		return;
+	}
+
+	if (output_file.good())
+	{
+		output_file.close();
 	}
 
 }
