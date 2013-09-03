@@ -20,8 +20,13 @@ NewGeneGenerateOutput::~NewGeneGenerateOutput()
 
 void NewGeneGenerateOutput::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
-	NewGeneWidget::UpdateOutputConnections(connection_type, project);
-	connect(this, SIGNAL(GenerateOutputSignal(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE)));
+
+	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		NewGeneWidget::UpdateOutputConnections(connection_type, project);
+		connect(this, SIGNAL(GenerateOutputSignal(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)));
+	}
+
 }
 
 void NewGeneGenerateOutput::on_pushButtonGenerateOutput_clicked()
