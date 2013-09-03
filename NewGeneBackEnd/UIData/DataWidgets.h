@@ -454,4 +454,48 @@ public:
 typedef WidgetDataItem<DATETIME_WIDGET> WidgetDataItem_DATETIME_WIDGET;
 
 
+/************************************************************************/
+// GENERATE_OUTPUT_TAB
+/************************************************************************/
+template<>
+class WidgetDataItemRequest<GENERATE_OUTPUT_TAB> : public WidgetDataItemRequest_base
+{
+public:
+	WidgetDataItemRequest<GENERATE_OUTPUT_TAB>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
+	{
+	}
+	WidgetDataItemRequest<GENERATE_OUTPUT_TAB>(WidgetDataItemRequest<GENERATE_OUTPUT_TAB> const & rhs)
+		: WidgetDataItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItemRequest<GENERATE_OUTPUT_TAB> WidgetDataItemRequest_GENERATE_OUTPUT_TAB;
+
+template<>
+class WidgetDataItem<GENERATE_OUTPUT_TAB> : public WidgetDataItem_base
+{
+public:
+	WidgetDataItem<GENERATE_OUTPUT_TAB>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
+	{
+	}
+	WidgetDataItem<GENERATE_OUTPUT_TAB>(WidgetDataItemRequest_base const & request_obj)
+		: WidgetDataItem_base(request_obj)
+	{
+		try
+		{
+			WidgetDataItemRequest_GENERATE_OUTPUT_TAB const & date_time_request = dynamic_cast<WidgetDataItemRequest_GENERATE_OUTPUT_TAB const &>(request_obj);
+		}
+		catch (std::bad_cast &)
+		{
+		}
+	}
+	WidgetDataItem<GENERATE_OUTPUT_TAB>(WidgetDataItem<GENERATE_OUTPUT_TAB> const & rhs)
+		: WidgetDataItem_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItem<GENERATE_OUTPUT_TAB> WidgetDataItem_GENERATE_OUTPUT_TAB;
+
 #endif

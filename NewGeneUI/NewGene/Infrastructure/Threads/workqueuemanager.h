@@ -44,6 +44,7 @@ class WorkQueueManagerBase : public QObject
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROLS_AREA & widgetData) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET & widgetData) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET & widgetData) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB & widgetData) {}
 
 	signals:
 		// Signals for ALL specializations of WorkQueueManager go here,
@@ -60,6 +61,7 @@ class WorkQueueManagerBase : public QObject
 		void WidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROLS_AREA);
 		void WidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET);
 		void WidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET);
+		void WidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB);
 
 	public slots:
 		// Slots for ALL specializations go here,
@@ -81,6 +83,7 @@ class WorkQueueManagerBase : public QObject
 		virtual void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB) {}
 		//
 		// Action responses
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED) {}

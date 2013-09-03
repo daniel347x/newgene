@@ -67,6 +67,7 @@ class NewGeneWidget
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROLS_AREA) {}
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET) {}
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET) {}
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB) {}
 		// ****************************************************************************************************************************
 
 	protected:
@@ -85,6 +86,7 @@ class NewGeneWidget
 		virtual void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB) {}
 		// ****************************************************************************************************************************
 
 

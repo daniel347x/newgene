@@ -157,6 +157,7 @@ class Messager
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROLS_AREA & widgetData) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET & widgetData) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET & widgetData) {}
+		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB & widgetData) {}
 
 	protected:
 

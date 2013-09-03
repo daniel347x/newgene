@@ -165,3 +165,8 @@ void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIM
 {
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }
+
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB & widgetData)
+{
+	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
+}

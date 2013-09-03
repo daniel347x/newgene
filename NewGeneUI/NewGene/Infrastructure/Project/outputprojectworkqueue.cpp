@@ -149,3 +149,11 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 {
 	get()->getWorkService().post(GenerateOutput(action_request, this));
 }
+
+/************************************************************************/
+// GENERATE_OUTPUT_TAB
+/************************************************************************/
+void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_GENERATE_OUTPUT_TAB action_request)
+{
+	get()->getWorkService().post(GenerateOutput(action_request, this));
+}
