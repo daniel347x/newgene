@@ -33,7 +33,7 @@ class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL
 		void UpdateSetting(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting, T const & setting_value)
 		{
 			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
-			_settings_map[which_setting] = std::unique_ptr<BackendGlobalSetting>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
+			_settings_map[which_setting] = std::unique_ptr<BackendGlobalSetting>(NewSetting(messager, setting_info, setting_value.ToString()));
 			WriteSettingsToFile(messager);
 		}
 
@@ -48,7 +48,7 @@ class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL
 
 		void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 		BackendGlobalSetting * CloneSetting(Messager & messager, BackendGlobalSetting * current_setting, SettingInfo & setting_info) const;
-		BackendGlobalSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);
+		BackendGlobalSetting * NewSetting(Messager & messager, SettingInfo & setting_info, std::string const & setting_value_string);
 		void SetPTreeEntry(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND which_setting, boost::property_tree::ptree & pt);
 
 };

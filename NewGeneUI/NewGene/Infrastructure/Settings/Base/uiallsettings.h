@@ -65,7 +65,7 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				void UpdateSetting(Messager & messager, SETTINGS_ENUM const which_setting, T const & setting_value)
 				{
 					SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
-					_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
+					_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info, setting_value.ToString()));
 					WriteSettingsToFile(messager);
 				}
 

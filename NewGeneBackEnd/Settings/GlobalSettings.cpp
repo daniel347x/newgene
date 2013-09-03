@@ -96,7 +96,7 @@ BackendGlobalSetting * GlobalSettings::CloneSetting(Messager & messager, Backend
 
 }
 
-BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void)
+BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingInfo & setting_info, std::string const & setting_value_string)
 {
 
 	switch (setting_info.setting_class)
@@ -105,10 +105,7 @@ BackendGlobalSetting * GlobalSettings::NewSetting(Messager & messager, SettingIn
 	case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
 		{
 			std::string string_setting = setting_info.default_val_string;
-			if (setting_value_void)
-			{
-				string_setting = *((std::string *)(setting_value_void));
-			}
+			string_setting = setting_value_string;
 			return new GlobalSetting_Test(messager, string_setting);
 		}
 		break;

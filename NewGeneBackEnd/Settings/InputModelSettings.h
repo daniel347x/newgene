@@ -34,7 +34,7 @@ public:
 	void UpdateSetting(Messager & messager, INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS const which_setting, T const & setting_value)
 	{
 		SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
-		_settings_map[which_setting] = std::unique_ptr<InputModelSetting>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
+		_settings_map[which_setting] = std::unique_ptr<InputModelSetting>(NewSetting(messager, setting_info, setting_value.ToString()));
 		WriteSettingsToFile(messager);
 	}
 
@@ -47,7 +47,7 @@ public:
 
 	void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 	InputModelSetting * CloneSetting(Messager & messager, InputModelSetting * current_setting, SettingInfo & setting_info) const;
-	InputModelSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);
+	InputModelSetting * NewSetting(Messager & messager, SettingInfo & setting_info, std::string const & setting_value_string);
 	void SetPTreeEntry(Messager & messager, INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS which_setting, boost::property_tree::ptree & pt);
 
 };

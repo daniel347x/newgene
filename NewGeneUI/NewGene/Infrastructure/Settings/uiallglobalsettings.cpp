@@ -62,10 +62,7 @@ case GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_UI_SETTING_ENUM: \
 	case SettingInfo::SETTING_INFO_ENUM: \
 		{ \
 			std::string string_setting = setting_info.default_val_string; \
-			if (setting_value_void) \
-			{ \
-				string_setting = *((std::string *)(setting_value_void)); \
-			} \
+			string_setting = setting_value_string; \
 			return SettingFactory<SETTING_CLASS>()(messager, string_setting); \
 		} \
 		break; \
@@ -211,7 +208,7 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & m
 
 }
 
-UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & messager_, SettingInfo & setting_info, void const * setting_value_void)
+UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & messager_, SettingInfo & setting_info, std::string const & setting_value_string)
 {
 
 	UIMessager & messager = static_cast<UIMessager &>(messager_);

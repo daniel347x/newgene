@@ -101,7 +101,7 @@ UIProjectInputSetting * UIInputProjectSettings::CloneSetting(Messager & messager
 
 }
 
-UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager_, SettingInfo & setting_info, void const * /* setting_value_void */ )
+UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager_, SettingInfo & setting_info, std::string const & setting_value_string)
 {
 
 	UIMessager & messager = static_cast<UIMessager &>(messager_);
@@ -112,10 +112,7 @@ UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager_,
 		//case SettingInfo::SETTING_CLASS_BACKEND_GLOBAL_SETTING__TEST:
 		//	{
 		//		std::string string_setting = setting_info.default_val_string;
-		//		if (setting_value_void)
-		//		{
-		//			string_setting = *((std::string *)(setting_value_void));
-		//		}
+		//		string_setting = setting_value_string;
 		//		return new GlobalSetting_Test(messager, string_setting);
 		//	}
 		//	break;
