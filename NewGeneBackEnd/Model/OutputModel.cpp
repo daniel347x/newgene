@@ -166,7 +166,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	bool found = false;
 	WidgetInstanceIdentifier_Int64_Pair timerange_start_identifier;
-	bool found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "s", timerange_start_identifier);
+	found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "s", timerange_start_identifier);
 	if (!found)
 	{
 		failed = true;
