@@ -72,8 +72,8 @@ void UIActionManager::DoKAdCountChange(Messager & messager, WidgetActionItemRequ
 
 				if (actionItemSpinbox.getValue() == 4)
 				{
-					OutputModel::OutputGenerator output_generator(output_model);
-					output_generator.GenerateOutput(change_response);
+					//OutputModel::OutputGenerator output_generator(output_model);
+					//output_generator.GenerateOutput(change_response);
 				}
 
 			});
