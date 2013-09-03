@@ -97,7 +97,7 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
       <enum>QTabWidget::South</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="documentMode">
       <bool>true</bool>

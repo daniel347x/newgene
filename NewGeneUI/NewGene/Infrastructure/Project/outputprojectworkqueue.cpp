@@ -115,6 +115,14 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET
 	get()->getWorkService().post(DoRefreshOutputWidget<DATETIME_WIDGET>(widget, this));
 }
 
+/************************************************************************/
+//
+/************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<GENERATE_OUTPUT_TAB>(widget, this));
+}
+
 
 // Actions
 
@@ -146,14 +154,6 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 // ACTION_GENERATE_OUTPUT
 /************************************************************************/
 void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT action_request)
-{
-	get()->getWorkService().post(GenerateOutput(action_request, this));
-}
-
-/************************************************************************/
-// GENERATE_OUTPUT_TAB
-/************************************************************************/
-void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_GENERATE_OUTPUT_TAB action_request)
 {
 	get()->getWorkService().post(GenerateOutput(action_request, this));
 }

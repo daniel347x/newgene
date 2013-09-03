@@ -47,6 +47,11 @@ void NewGeneGenerateOutput::WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUT
 
 void NewGeneGenerateOutput::RefreshAllWidgets()
 {
-	WidgetDataItemRequest_GENERATE_OUTPUT_TAB request(value(), WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
+	WidgetDataItemRequest_GENERATE_OUTPUT_TAB request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
+}
+
+void NewGeneGenerateOutput::on_pushButton_clicked()
+{
+
 }
