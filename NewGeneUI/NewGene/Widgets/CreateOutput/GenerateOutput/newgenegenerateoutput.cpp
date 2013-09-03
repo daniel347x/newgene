@@ -93,3 +93,14 @@ void NewGeneGenerateOutput::on_pushButton_clicked()
 		}
 	}
 }
+
+void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_lostFocus()
+{
+	UIMessager messager;
+	QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
+	if (editControl)
+	{
+		QString the_path = editControl->text();
+		projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_path.toStdString()));
+	}
+}
