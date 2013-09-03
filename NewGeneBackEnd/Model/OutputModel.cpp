@@ -79,6 +79,8 @@ OutputModel::OutputGenerator::OutputGenerator(OutputModel & model_)
 	, stmt_result(nullptr)
 	, executor(nullptr, false)
 	, initialized(false)
+	, timerange_start(0)
+	, timerange_end(0)
 {
 	debug_ordering = true;
 }
@@ -161,6 +163,25 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	InputModel & input_model = model->getInputModel();
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, &input_model);
 	the_map = &the_map_;
+
+	bool found = false;
+	WidgetInstanceIdentifier_Int64_Pair timerange_start_identifier;
+	bool found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "s", timerange_start_identifier);
+	if (!found)
+	{
+		failed = true;
+		return;
+	}
+	timerange_start = timerange_start_identifier.second;
+	found = false;
+	WidgetInstanceIdentifier_Int64_Pair timerange_end_identifier;
+	found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "e", timerange_end_identifier);
+	if (!found)
+	{
+		failed = true;
+		return;
+	}
+	timerange_end = timerange_end_identifier.second;
 
 	Prepare();
 
@@ -292,66 +313,6 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z
 	all_merged_results_unformatted = duplicates_removed_kad_result;
 
-}
-
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialChildXTable(ColumnsInTempView const & primary_variable_group_merge_result_columns)
-{
-	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
-	// Currently, the outgoing table is no different from the incoming table
-	if (false)
-	{
-
-		std::vector<SQLExecutor> & sql_strings = result.first;
-		ColumnsInTempView & result_columns = result.second;
-
-		result_columns = primary_variable_group_merge_result_columns;
-
-		result_columns.view_number = 1;
-		result_columns.has_no_datetime_columns = false;
-		std::string view_name = "CM";
-		view_name += "1";
-		result_columns.view_name_no_uuid = view_name;
-		view_name += "_";
-		view_name += newUUID(true);
-		result_columns.view_name = view_name;
-
-		std::vector<std::string> previous_column_names;
-
-		// Make column names for this temporary table unique (not the same as the column names from the previous table that is being copied).
-		// Also, set the primary UOA flag.
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&previous_column_names](ColumnsInTempView::ColumnInTempView & new_column)
-		{
-			previous_column_names.push_back(new_column.column_name_in_temporary_table);
-			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
-			new_column.column_name_in_temporary_table += "_";
-			new_column.column_name_in_temporary_table += newUUID(true);
-		});
-
-		sql_strings.push_back(SQLExecutor(db));
-		std::string & sql_string = sql_strings.back().sql;
-
-		sql_string = "CREATE TABLE ";
-		sql_string += result_columns.view_name;
-		sql_string += " AS SELECT ";
-		int column_index = 0;
-		bool first = true;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&column_index, &previous_column_names, &sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
-		{
-			if (!first)
-			{
-				sql_string += ", ";
-			}
-			first = false;
-			sql_string += previous_column_names[column_index]; // This is the original column name
-			sql_string += " AS ";
-			sql_string += new_column.column_name_in_temporary_table;
-			++column_index;
-		});
-		sql_string += " FROM ";
-		sql_string += primary_variable_group_merge_result_columns.view_name;
-	}
-
-	return result;
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialChildXRTable(ColumnsInTempView const & primary_variable_group_merge_result_x_columns)
@@ -2522,6 +2483,23 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
 	{
+
+		bool do_no_check_time_range = false;
+		if (row_of_data.datetime_start == 0 && row_of_data.datetime_end == 0)
+		{
+			do_no_check_time_range = true;
+		}
+		if (!do_no_check_time_range)
+		{
+			if (row_of_data.datetime_start >= timerange_end)
+			{
+				return;
+			}
+			if (row_of_data.datetime_end <= timerange_start)
+			{
+				return;
+			}
+		}
 	
 		if (first_row_added)
 		{
@@ -3464,6 +3442,33 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += " FROM ";
 	sql_string += result_columns.original_table_names[0];
 
+	if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+	{
+		sql_string += " WHERE CASE WHEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += " = 0 AND ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += " = 0 ";
+		sql_string += " THEN 1 ";
+		sql_string += " WHEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += " < ";
+		sql_string += boost::lexical_cast<std::string>(timerange_end);
+		sql_string += " THEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += " > ";
+		sql_string += boost::lexical_cast<std::string>(timerange_start);
+		sql_string += " WHEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += " > ";
+		sql_string += boost::lexical_cast<std::string>(timerange_start);
+		sql_string += " THEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += " < ";
+		sql_string += boost::lexical_cast<std::string>(timerange_end);
+		sql_string += " END";
+	}
+
 	// Add the ORDER BY column/s
 	if (debug_ordering)
 	{
@@ -4202,6 +4207,33 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	}
 
+	if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+	{
+		sql_string += " WHERE CASE WHEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += " = 0 AND ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += " = 0 ";
+		sql_string += " THEN 1 ";
+		sql_string += " WHEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += " < ";
+		sql_string += boost::lexical_cast<std::string>(timerange_end);
+		sql_string += " THEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += " > ";
+		sql_string += boost::lexical_cast<std::string>(timerange_start);
+		sql_string += " WHEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += " > ";
+		sql_string += boost::lexical_cast<std::string>(timerange_start);
+		sql_string += " THEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += " < ";
+		sql_string += boost::lexical_cast<std::string>(timerange_end);
+		sql_string += " END";
+	}
+
 	// Add the ORDER BY column/s
 	if (debug_ordering)
 	{
@@ -4394,6 +4426,23 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	if (include_previous_data == false && include_current_data == false)
 	{
 		return false;
+	}
+
+	bool do_not_check_time_range = false;
+	if (datetime_start == 0 && datetime_end == 0)
+	{
+		do_not_check_time_range = true;
+	}
+	if (!do_not_check_time_range)
+	{
+		if (datetime_start >= timerange_end)
+		{
+			return false;
+		}
+		if (datetime_end <= timerange_start)
+		{
+			return false;
+		}
 	}
 
 	if (first_row_added)
@@ -5462,6 +5511,33 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 		});
 	});
+
+	if (!child_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+	{
+		sql_string += " WHERE CASE WHEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += " = 0 AND ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += " = 0 ";
+		sql_string += " THEN 1 ";
+		sql_string += " WHEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += " < ";
+		sql_string += boost::lexical_cast<std::string>(timerange_end);
+		sql_string += " THEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += " > ";
+		sql_string += boost::lexical_cast<std::string>(timerange_start);
+		sql_string += " WHEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += " > ";
+		sql_string += boost::lexical_cast<std::string>(timerange_start);
+		sql_string += " THEN ";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += " < ";
+		sql_string += boost::lexical_cast<std::string>(timerange_end);
+		sql_string += " END";
+	}
 
 	// For use in ORDER BY clause
 	// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1

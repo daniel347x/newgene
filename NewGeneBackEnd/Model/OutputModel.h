@@ -9,6 +9,7 @@
 #include "Tables/TableManager.h"
 #include <memory>
 #include <tuple>
+#include <cstdint>
 
 class PrimaryKeySequence
 {
@@ -452,7 +453,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
-				SqlAndColumnSet CreateInitialChildXTable(ColumnsInTempView const & primary_variable_group_merge_result_columns);
 				SqlAndColumnSet CreateInitialChildXRTable(ColumnsInTempView const & primary_variable_group_merge_result_x_columns);
 				SqlAndColumnSet CreateInitialPrimaryMergeXRTable(ColumnsInTempView const & primary_variable_group_x1_columns);
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number);
@@ -639,6 +639,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				// Helper variable saves the number of columns in the current primary variable group's inner table
 				int inner_table_no_multiplicities_column_count;
+
+				std::int64_t timerange_start;
+				std::int64_t timerange_end;
 
 				bool failed;
 
