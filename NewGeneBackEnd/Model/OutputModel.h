@@ -476,7 +476,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet MergeIndividualTopLevelGroupIntoPrevious(ColumnsInTempView const & primary_variable_group_final_result, OutputModel::OutputGenerator::SqlAndColumnSet & previous_merged_primary_variable_groups_table, int const count);
 				void ClearTables(SqlAndColumnSets const & tables_to_clear);
 				void ClearTable(SqlAndColumnSet const & table_to_clear);
-				OutputProjectPathToKadOutputFile * CheckOutputFileExists();
+				std::string CheckOutputFileExists();
 
 				// Save the SQL and column sets corresponding to each primary and child variable group in global data structures
 				//

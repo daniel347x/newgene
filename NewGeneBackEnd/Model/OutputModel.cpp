@@ -168,14 +168,14 @@ OutputModel::OutputGenerator::~OutputGenerator()
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
 {
 
-	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = CheckOutputFileExists();
+	std::string setting_path_to_kad_output = CheckOutputFileExists();
 
 	if (failed)
 	{
 		return;
 	}
 
-	if (setting_path_to_kad_output == nullptr)
+	if (setting_path_to_kad_output.empty())
 	{
 		return;
 	}
@@ -465,20 +465,20 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	// Do an "ObtainData()" on this result, loop through,
 	// and write the output to a CSV file on disk.
 
-	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = CheckOutputFileExists();
+	std::string setting_path_to_kad_output = CheckOutputFileExists();
 
 	if (failed)
 	{
 		return;
 	}
 
-	if (setting_path_to_kad_output == nullptr)
+	if (setting_path_to_kad_output.empty())
 	{
 		return;
 	}
 
 	std::fstream output_file;
-	output_file.open(setting_path_to_kad_output->ToString(), std::ios::out | std::ios::trunc);
+	output_file.open(setting_path_to_kad_output, std::ios::out | std::ios::trunc);
 	if (!output_file.good())
 	{
 		failed = true;
@@ -8278,7 +8278,7 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 	}
 }
 
-OutputProjectPathToKadOutputFile * OutputModel::OutputGenerator::CheckOutputFileExists()
+std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 {
 
 	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = nullptr;
@@ -8302,10 +8302,10 @@ OutputProjectPathToKadOutputFile * OutputModel::OutputGenerator::CheckOutputFile
 		bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
 		if (!overwrite_file)
 		{
-			return nullptr;
+			return std::string();
 		}
 	}
 
-	return setting_path_to_kad_output;
+	return setting_path_to_kad_output->ToString();
 
 }
