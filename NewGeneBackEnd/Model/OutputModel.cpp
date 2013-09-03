@@ -465,8 +465,10 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	bool output_file_exists = boost::filesystem::exists(setting_path_to_kad_output->ToString());
 	if (output_file_exists)
 	{
-
+		
 	}
+
+	messager.ShowQuestionMessageBox("faulty, my oh my");
 
 	return;
 

@@ -53,9 +53,7 @@ class UIMessagerErrorMessage : public QObject, public MessagerErrorMessage
 		UIMessagerErrorMessage(MESSAGER_MESSAGE_ENUM const TheMessage, std::string const & TheMessageText)
 			: MessagerErrorMessage(TheMessage, TheMessageText)
 		{
-			QObject::connect(this, SIGNAL(sendErrorMessageToBeDisplayed(std::string const)),
-								  QCoreApplication::instance(), SLOT(showErrorBox(std::string const)));
-
+			QObject::connect(this, SIGNAL(sendErrorMessageToBeDisplayed(std::string const)), QCoreApplication::instance(), SLOT(showErrorBox(std::string const)));
 			emit sendErrorMessageToBeDisplayed(TheMessageText);
 		}
 
@@ -85,6 +83,7 @@ class UIMessager : public QObject, public Messager
 	signals:
 		void PostStatus(STD_STRING, int, bool);
 		void DisplayMessageBox(STD_STRING);
+		void QuestionMessageBox(STD_STRING);
 
 	public slots:
 
@@ -115,6 +114,7 @@ class UIMessagerInputProject : public UIMessager
 		}
 
 		void ShowMessageBox(std::string);
+		void ShowQuestionMessageBox(std::string);
 
 		void EmitInputProjectChangeMessage(DataChangeMessage & changes);
 
@@ -134,6 +134,7 @@ class UIMessagerOutputProject : public UIMessager
 		}
 
 		void ShowMessageBox(std::string);
+		void ShowQuestionMessageBox(std::string);
 
 		void EmitOutputProjectChangeMessage(DataChangeMessage & changes);
 

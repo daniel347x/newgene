@@ -7,6 +7,8 @@
 #include "uistatusmanager.h"
 #include "uiloggingmanager.h"
 
+#include <QMetaObject>
+
 bool UIMessager::ManagersInitialized = false;
 
 UIMessager::UIMessager(QObject *parent) :
@@ -93,6 +95,7 @@ UIMessagerInputProject::UIMessagerInputProject(UIInputProject * inp_, QObject * 
 	if (ManagersInitialized)
 	{
 		connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
+		connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
 	}
 }
 
@@ -103,12 +106,18 @@ UIMessagerOutputProject::UIMessagerOutputProject(UIOutputProject * outp_, QObjec
 	if (ManagersInitialized)
 	{
 		connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
+		connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
 	}
 }
 
 void UIMessagerInputProject::ShowMessageBox(std::string msg)
 {
 	emit DisplayMessageBox(msg);
+}
+
+void UIMessagerInputProject::ShowQuestionMessageBox(std::string msg)
+{
+	emit QuestionMessageBox(msg);
 }
 
 void UIMessagerInputProject::EmitInputProjectChangeMessage(DataChangeMessage & changes)
@@ -119,6 +128,12 @@ void UIMessagerInputProject::EmitInputProjectChangeMessage(DataChangeMessage & c
 void UIMessagerOutputProject::ShowMessageBox(std::string msg)
 {
 	emit DisplayMessageBox(msg);
+}
+
+void UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg)
+{
+	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_ARG( STD_STRING, msg ));
+	//emit QuestionMessageBox(msg);
 }
 
 void UIMessagerOutputProject::EmitOutputProjectChangeMessage(DataChangeMessage & changes)

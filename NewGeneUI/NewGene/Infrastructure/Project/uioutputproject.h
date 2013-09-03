@@ -38,6 +38,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 	public slots:
 		void DataChangeMessageSlot(WidgetChangeMessages);
 		void SignalMessageBox(STD_STRING);
+		void QuestionMessageBox(STD_STRING);
 
 	public:
 
