@@ -32,8 +32,8 @@ void Table_TIME_RANGE::Load(sqlite3 * db, OutputModel * output_model_, InputMode
 	int step_result = 0;
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
-		std::int64_t const timerange_start = sqlite3_column_int(stmt, INDEX__TIME_RANGE_START);
-		std::int64_t const timerange_end = sqlite3_column_int(stmt, INDEX__TIME_RANGE_END);
+		std::int64_t const timerange_start = sqlite3_column_int64(stmt, INDEX__TIME_RANGE_START);
+		std::int64_t const timerange_end = sqlite3_column_int64(stmt, INDEX__TIME_RANGE_END);
 
 		// The CODE is 0, and there is only a single row
 		WidgetInstanceIdentifier identifier("0");

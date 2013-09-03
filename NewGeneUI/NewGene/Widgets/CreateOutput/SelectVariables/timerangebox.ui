@@ -27,7 +27,7 @@
        <item>
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Starting date &amp; time</string>
+          <string>Starting date &amp; time (min. 9/14/1752)</string>
          </property>
         </widget>
        </item>
