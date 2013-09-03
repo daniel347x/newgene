@@ -96,6 +96,10 @@ void NewGeneGenerateOutput::on_pushButton_clicked()
 
 void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_lostFocus()
 {
+}
+
+void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_editingFinished()
+{
 	UIMessager messager;
 	QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
 	if (editControl)

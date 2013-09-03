@@ -39,6 +39,7 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 
 	private slots:
 		void on_lineEditFilePathToKadOutput_lostFocus();
+		void on_lineEditFilePathToKadOutput_editingFinished();
 };
 
 #endif // NEWGENEGENERATEOUTPUT_H

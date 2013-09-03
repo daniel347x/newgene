@@ -168,6 +168,18 @@ OutputModel::OutputGenerator::~OutputGenerator()
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
 {
 
+	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = CheckOutputFileExists();
+
+	if (failed)
+	{
+		return;
+	}
+
+	if (setting_path_to_kad_output == nullptr)
+	{
+		return;
+	}
+
 	InputModel & input_model = model->getInputModel();
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, &input_model);
 	the_map = &the_map_;
@@ -453,28 +465,16 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	// Do an "ObtainData()" on this result, loop through,
 	// and write the output to a CSV file on disk.
 
-	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = nullptr;
-	std::unique_ptr<BackendProjectOutputSetting> & path_to_kad_output = project.projectSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
-	bool bad = false;
-	try
+	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = CheckOutputFileExists();
+
+	if (failed)
 	{
-		setting_path_to_kad_output = dynamic_cast<OutputProjectPathToKadOutputFile*>(path_to_kad_output.get());
-	}
-	catch (std::bad_cast &)
-	{
-		bad = true;
+		return;
 	}
 
-	bool output_file_exists = boost::filesystem::exists(setting_path_to_kad_output->ToString());
-	if (output_file_exists)
+	if (setting_path_to_kad_output == nullptr)
 	{
-		boost::format overwrite_msg("The file %1% does not exist.  Overwrite?");
-		overwrite_msg % setting_path_to_kad_output->ToString();
-		bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
-		if (!overwrite_file)
-		{
-			return;
-		}
+		return;
 	}
 
 	std::fstream output_file;
@@ -8276,4 +8276,36 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 		SQLExecutor table_remover(input_model->getDb(), sql_string);
 		table_remover.Execute();
 	}
+}
+
+OutputProjectPathToKadOutputFile * OutputModel::OutputGenerator::CheckOutputFileExists()
+{
+
+	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = nullptr;
+
+	std::unique_ptr<BackendProjectOutputSetting> & path_to_kad_output = project.projectSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
+	bool bad = false;
+	try
+	{
+		setting_path_to_kad_output = dynamic_cast<OutputProjectPathToKadOutputFile*>(path_to_kad_output.get());
+	}
+	catch (std::bad_cast &)
+	{
+		bad = true;
+	}
+
+	bool output_file_exists = boost::filesystem::exists(setting_path_to_kad_output->ToString());
+	if (output_file_exists)
+	{
+		boost::format overwrite_msg("The file %1% does already exists.  Overwrite this file?");
+		overwrite_msg % setting_path_to_kad_output->ToString();
+		bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
+		if (!overwrite_file)
+		{
+			return nullptr;
+		}
+	}
+
+	return setting_path_to_kad_output;
+
 }
