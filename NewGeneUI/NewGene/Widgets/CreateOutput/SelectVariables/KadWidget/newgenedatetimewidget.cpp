@@ -93,8 +93,6 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE, true, *data_instance.uuid);
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE, true, *data_instance.uuid);
 
-			UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
-
 		}
 
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET)));
