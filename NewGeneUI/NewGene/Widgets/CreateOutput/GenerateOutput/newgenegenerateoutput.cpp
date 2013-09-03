@@ -46,7 +46,30 @@ void NewGeneGenerateOutput::on_pushButtonGenerateOutput_clicked()
 
 void NewGeneGenerateOutput::WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB widget_data)
 {
+	UIMessager messager;
+	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = nullptr;
+	std::unique_ptr<BackendProjectOutputSetting> & path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
+	bool bad = false;
+	try
+	{
+		setting_path_to_kad_output = dynamic_cast<OutputProjectPathToKadOutputFile*>(path_to_kad_output.get());
+	}
+	catch (std::bad_cast &)
+	{
+		bad = true;
+	}
 
+	if (!bad)
+	{
+		if (setting_path_to_kad_output)
+		{
+			QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
+			if (editControl)
+			{
+				editControl->setText(QString(setting_path_to_kad_output->ToString().c_str()));
+			}
+		}
+	}
 }
 
 void NewGeneGenerateOutput::RefreshAllWidgets()
@@ -62,6 +85,10 @@ void NewGeneGenerateOutput::on_pushButton_clicked()
 	if (the_file.size())
 	{
 		projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_file.toStdString()));
+		QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
+		if (editControl)
+		{
+			editControl->setText(the_file);
+		}
 	}
-	//this->ShowMessageBox(the_file.toStdString());
 }
