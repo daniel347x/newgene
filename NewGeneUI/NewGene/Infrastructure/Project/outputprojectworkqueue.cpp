@@ -5,6 +5,7 @@
 #include "../UIData/uiwidgetdatarefresh.h"
 #include "../UIAction/variablegroupsetmemberselectionchange.h"
 #include "../UIAction/KAdCountChange.h"
+#include "../UIAction/TimeRangeChange.h"
 #include "../UIAction/GenerateOutput.h"
 #include <QStandardItem>
 
@@ -131,6 +132,14 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE action_request)
 {
 	get()->getWorkService().post(KAdCountChange(action_request, this));
+}
+
+/************************************************************************/
+// ACTION_DATETIME_RANGE_CHANGE
+/************************************************************************/
+void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE action_request)
+{
+	get()->getWorkService().post(TimeRangeChange(action_request, this));
 }
 
 /************************************************************************/

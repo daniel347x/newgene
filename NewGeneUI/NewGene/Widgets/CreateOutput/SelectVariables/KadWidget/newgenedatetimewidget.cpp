@@ -21,6 +21,8 @@ NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceId
 
 {
 
+	/* For some reason, setting the "objectName" property in the form editor is not reflected here */
+	/*
 	if (this->objectName() == "dateTimeEdit_start")
 	{
 		this->data_instance.code = std::make_shared<std::string>("0");
@@ -30,6 +32,20 @@ NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceId
 	{
 		this->data_instance.code = std::make_shared<std::string>("0");
 		this->data_instance.flags = "e";
+	}
+	*/
+
+	if (project->number_timerange_widgets_created == 0)
+	{
+		this->data_instance.code = std::make_shared<std::string>("0");
+		this->data_instance.flags = "s";
+		++project->number_timerange_widgets_created;
+	}
+	else if (project->number_timerange_widgets_created == 1)
+	{
+		this->data_instance.code = std::make_shared<std::string>("0");
+		this->data_instance.flags = "e";
+		++project->number_timerange_widgets_created;
 	}
 
    PrepareOutputWidget();

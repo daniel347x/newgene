@@ -23,6 +23,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 			: QObject(parent)
 			, UIProject(project_settings, model_settings, model)
 			, messager(this)
+			, number_timerange_widgets_created(0)
 		{
 
 		}
@@ -43,6 +44,8 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		UIMessagerOutputProject messager;
 
 		bool is_model_equivalent(UIMessager & messager, UIOutputModel * model);
+
+		int number_timerange_widgets_created;
 
 	protected:
 
