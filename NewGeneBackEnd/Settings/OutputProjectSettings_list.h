@@ -38,6 +38,10 @@ public:
 
 };
 
+
+/************************************************************************************************************************/
+// PATH_TO_MODEL
+/************************************************************************************************************************/
 template<>
 class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_MODEL_SETTINGS>
 {
@@ -46,5 +50,18 @@ public:
 };
 
 typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_MODEL_SETTINGS>::type OutputProjectPathToModel;
+
+
+/************************************************************************************************************************/
+// PATH_TO_KAD_OUTPUT_FILE
+/************************************************************************************************************************/
+template<>
+class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_KAD_OUTPUT_FILE>
+{
+public:
+	typedef OutputProjectBackendSetting__path<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE> type;
+};
+
+typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_KAD_OUTPUT_FILE>::type OutputProjectPathToKadOutputFile;
 
 #endif

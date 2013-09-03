@@ -59,6 +59,23 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				// SettingsRepository.)
 				// ***********************************************************************
 
+			public:
+
+				template<typename T>
+				void UpdateSetting(Messager & messager, SETTINGS_ENUM const which_setting, T const & setting_value)
+				{
+					SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+					_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
+					WriteSettingsToFile(messager);
+				}
+
+				void WriteSettingsToFile(Messager & messager)
+				{
+					boost::property_tree::ptree pt;
+					WriteSettingsToPtree(messager, pt);
+					WritePtreeToFile(messager, pt);
+				}
+
 			protected:
 
 				UIOnlySettings_base(UIMessager & messager, boost::filesystem::path const path_to_settings) : SettingsRepository<SETTINGS_ENUM, SETTING_CLASS>(messager, path_to_settings) {}

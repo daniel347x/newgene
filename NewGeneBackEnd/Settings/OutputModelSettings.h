@@ -30,6 +30,21 @@ public:
 
 	virtual ~OutputModelSettings() {}
 
+	template<typename T>
+	void UpdateSetting(Messager & messager, OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS const which_setting, T const & setting_value)
+	{
+		SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+		_settings_map[which_setting] = std::unique_ptr<OutputModelSetting>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
+		WriteSettingsToFile(messager);
+	}
+
+	void WriteSettingsToFile(Messager & messager)
+	{
+		boost::property_tree::ptree pt;
+		WriteSettingsToPtree(messager, pt);
+		WritePtreeToFile(messager, pt);
+	}
+
 	void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 	OutputModelSetting * CloneSetting(Messager & messager, OutputModelSetting * current_setting, SettingInfo & setting_info) const;
 	OutputModelSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);

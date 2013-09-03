@@ -34,6 +34,7 @@ public:
 
 		, SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING
 		, SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_MODEL_SETTINGS
+		, SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_KAD_OUTPUT_FILE
 
 		, SETTING_CLASS_MODEL_INPUT_SETTING
 		, SETTING_CLASS_MODEL_INPUT_SETTING__PATH_TO_MODEL_DATABASE
@@ -158,14 +159,6 @@ class SettingsRepository
 				}
 			}
 			return std::unique_ptr<SETTING_CLASS>(CloneSetting(messager, theSetting->second.get(), setting_info));
-		}
-
-		template<typename T>
-		void UpdateSetting(Messager & messager, SETTINGS_ENUM const which_setting, T const & setting_value)
-		{
-			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
-			_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
-			WriteSettingsToFile(Messager & messager);
 		}
 
 	protected:

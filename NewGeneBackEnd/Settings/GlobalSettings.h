@@ -29,6 +29,20 @@ class GlobalSettings : public Settings<GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL
 		GlobalSettings(Messager & messager, boost::filesystem::path const global_settings_path);
 		virtual ~GlobalSettings() {}
 
+		template<typename T>
+		void UpdateSetting(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting, T const & setting_value)
+		{
+			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+			_settings_map[which_setting] = std::unique_ptr<BackendGlobalSetting>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
+			WriteSettingsToFile(messager);
+		}
+
+		void WriteSettingsToFile(Messager & messager)
+		{
+			boost::property_tree::ptree pt;
+			WriteSettingsToPtree(messager, pt);
+			WritePtreeToFile(messager, pt);
+		}
 
 	protected:
 

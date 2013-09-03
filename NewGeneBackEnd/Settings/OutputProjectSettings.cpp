@@ -4,8 +4,14 @@
 #define S_PATH_TO_MODEL__1 PATH_TO_MODEL
 #define S_PATH_TO_MODEL__2 SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_MODEL_SETTINGS
 #define S_PATH_TO_MODEL__3 "PATH_TO_MODEL"
-#define S_PATH_TO_MODEL__4 "L:\\daniel347x\\__DanExtras\\NewGene\\Projects\\Output\\TestOutputModelSettings.xml"
+#define S_PATH_TO_MODEL__4 ""
 #define S_PATH_TO_MODEL__5 OutputProjectBackendSetting__path<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL>
+
+#define S_PATH_TO_KAD_OUTPUT_FILE__1 PATH_TO_KAD_OUTPUT_FILE
+#define S_PATH_TO_KAD_OUTPUT_FILE__2 SETTING_CLASS_BACKEND_PROJECT_OUTPUT_SETTING__PATH_TO_KAD_OUTPUT_FILE
+#define S_PATH_TO_KAD_OUTPUT_FILE__3 "PATH_TO_KAD_OUTPUT_FILE"
+#define S_PATH_TO_KAD_OUTPUT_FILE__4 ""
+#define S_PATH_TO_KAD_OUTPUT_FILE__5 OutputProjectBackendSetting__path<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE>
 
 std::string newgene_output_project_backend_root_node("newgene.project.output.backend.");
 
@@ -77,6 +83,10 @@ SettingInfo BackendProjectOutputSetting::GetSettingInfoFromEnum(Messager & messa
 		GET_OUTPUT_PROJECT_BACKEND_SETTING_INFO ( G_(__1), G_(__2), G_(__3), G_(__4) )
 		#undef G_
 
+		#define G_(Y) S_PATH_TO_KAD_OUTPUT_FILE##Y
+		GET_OUTPUT_PROJECT_BACKEND_SETTING_INFO ( G_(__1), G_(__2), G_(__3), G_(__4) )
+		#undef G_
+
 	default:
 		{
 			boost::format msg("Settings information is not available for OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND value %1%.  Using empty setting.");
@@ -97,6 +107,10 @@ void OutputProjectSettings::SetMapEntry(Messager & messager, SettingInfo & setti
 	{
 
 		#define G_(Y) S_PATH_TO_MODEL##Y
+		OUTPUT_PROJECT_BACKEND_SET_MAP_ENTRY__STRING ( G_(__2), G_(__5) )
+		#undef G_
+
+		#define G_(Y) S_PATH_TO_KAD_OUTPUT_FILE##Y
 		OUTPUT_PROJECT_BACKEND_SET_MAP_ENTRY__STRING ( G_(__2), G_(__5) )
 		#undef G_
 
@@ -122,6 +136,10 @@ BackendProjectOutputSetting * OutputProjectSettings::CloneSetting(Messager & mes
 		{
 
 			#define G_(Y) S_PATH_TO_MODEL##Y
+			OUTPUT_PROJECT_BACKEND_CLONE_SETTING__STRING ( G_(__2), G_(__5) )
+			#undef G_
+
+			#define G_(Y) S_PATH_TO_KAD_OUTPUT_FILE##Y
 			OUTPUT_PROJECT_BACKEND_CLONE_SETTING__STRING ( G_(__2), G_(__5) )
 			#undef G_
 
@@ -157,6 +175,10 @@ BackendProjectOutputSetting * OutputProjectSettings::NewSetting(Messager & messa
 		OUTPUT_PROJECT_BACKEND_NEW_SETTING__STRING ( G_(__2), G_(__5) )
 		#undef G_
 
+		#define G_(Y) S_PATH_TO_KAD_OUTPUT_FILE##Y
+		OUTPUT_PROJECT_BACKEND_NEW_SETTING__STRING ( G_(__2), G_(__5) )
+		#undef G_
+
 	default:
 		{
 			boost::format msg("Unknown output project backend setting \"%1%\" (\"%2%\") being updated.");
@@ -186,6 +208,10 @@ void OutputProjectSettings::SetPTreeEntry(Messager & messager, OUTPUT_PROJECT_SE
 	{
 
 		#define G_(Y) S_PATH_TO_MODEL##Y
+		OUTPUT_PROJECT_BACKEND_SET_PTREE_ENTRY__STRING ( G_(__2), G_(__5) )
+		#undef G_
+
+		#define G_(Y) S_PATH_TO_KAD_OUTPUT_FILE##Y
 		OUTPUT_PROJECT_BACKEND_SET_PTREE_ENTRY__STRING ( G_(__2), G_(__5) )
 		#undef G_
 

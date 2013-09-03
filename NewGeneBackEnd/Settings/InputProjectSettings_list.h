@@ -38,6 +38,10 @@ public:
 
 };
 
+
+/************************************************************************************************************************/
+// PATH_TO_MODEL
+/************************************************************************************************************************/
 template<>
 class SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_INPUT_SETTING__PATH_TO_MODEL_SETTINGS>
 {
@@ -46,5 +50,6 @@ public:
 };
 
 typedef SettingClassTypeTraits<SettingInfo::SETTING_CLASS_BACKEND_PROJECT_INPUT_SETTING__PATH_TO_MODEL_SETTINGS>::type InputProjectPathToModel;
+
 
 #endif

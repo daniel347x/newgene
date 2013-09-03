@@ -1,6 +1,10 @@
 #include "newgenegenerateoutput.h"
 #include "ui_newgenegenerateoutput.h"
 
+#include "globals.h"
+#include "../../../../NewGeneBackEnd/Settings/OutputProjectSettings_list.h"
+#include <QFileDialog>
+
 NewGeneGenerateOutput::NewGeneGenerateOutput(QWidget *parent) :
 	QWidget(parent),
 	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, GENERATE_OUTPUT_TAB, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
@@ -53,5 +57,11 @@ void NewGeneGenerateOutput::RefreshAllWidgets()
 
 void NewGeneGenerateOutput::on_pushButton_clicked()
 {
-
+	UIMessager messager;
+	QString the_file = QFileDialog::getSaveFileName(this, "Choose output file");
+	if (the_file.size())
+	{
+		projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_file.toStdString()));
+	}
+	//this->ShowMessageBox(the_file.toStdString());
 }

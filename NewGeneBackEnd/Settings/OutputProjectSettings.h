@@ -11,6 +11,7 @@ namespace OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE
 		  SETTING_FIRST = 0
 
 		, PATH_TO_MODEL
+		, PATH_TO_KAD_OUTPUT_FILE
 
 		, SETTING_LAST
 	};
@@ -29,6 +30,21 @@ public:
 	{}
 
 	virtual ~OutputProjectSettings() {}
+
+	template<typename T>
+	void UpdateSetting(Messager & messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting, T const & setting_value)
+	{
+		SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+		_settings_map[which_setting] = std::unique_ptr<BackendProjectOutputSetting>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
+		WriteSettingsToFile(messager);
+	}
+
+	void WriteSettingsToFile(Messager & messager)
+	{
+		boost::property_tree::ptree pt;
+		WriteSettingsToPtree(messager, pt);
+		WritePtreeToFile(messager, pt);
+	}
 
 	void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 	BackendProjectOutputSetting * CloneSetting(Messager & messager, BackendProjectOutputSetting * current_setting, SettingInfo & setting_info) const;
