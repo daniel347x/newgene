@@ -26,7 +26,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 
 			DataChangeMessage change_response(&project);
 
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &project, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 				if (!instanceActionItem.second)
 				{
@@ -51,8 +51,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				// ***************************************** //
 				// Generate output
 				// ***************************************** //
-				OutputModel::OutputGenerator output_generator(output_model);
-				//output_model.GenerateOutput(change_response);
+				OutputModel::OutputGenerator output_generator(messager, output_model, project);
 				output_generator.GenerateOutput(change_response);
 
 			});

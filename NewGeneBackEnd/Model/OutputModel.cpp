@@ -1,11 +1,14 @@
 #include "OutputModel.h"
 #include "..\Utilities\UUID.h"
 
+#include "..\Settings\OutputProjectSettings_list.h"
+
 #include <cstdint>
 
 #ifndef Q_MOC_RUN
 #	include <boost/lexical_cast.hpp>
 #	include <deque>
+#	include <boost/filesystem.hpp>
 #endif
 
 void OutputModel::LoadTables()
@@ -74,13 +77,15 @@ std::string OutputModel::StripUUIDFromVariableName(std::string const & variable_
 	return stripped_variable_name;
 }
 
-OutputModel::OutputGenerator::OutputGenerator(OutputModel & model_)
+OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel & model_, OutputProject & project_)
 	: model(&model_)
 	, stmt_result(nullptr)
 	, executor(nullptr, false)
 	, initialized(false)
 	, timerange_start(0)
 	, timerange_end(0)
+	, project(project_)
+	, messager(messager_)
 {
 	debug_ordering = true;
 }
@@ -445,6 +450,24 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	// Do an "ObtainData()" on this result, loop through,
 	// and write the output to a CSV file on disk.
 
+	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = nullptr;
+	std::unique_ptr<BackendProjectOutputSetting> & path_to_kad_output = project.projectSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
+	bool bad = false;
+	try
+	{
+		setting_path_to_kad_output = dynamic_cast<OutputProjectPathToKadOutputFile*>(path_to_kad_output.get());
+	}
+	catch (std::bad_cast &)
+	{
+		bad = true;
+	}
+
+	bool output_file_exists = boost::filesystem::exists(setting_path_to_kad_output->ToString());
+	if (output_file_exists)
+	{
+
+	}
+
 	return;
 
 	ObtainData(final_result.second);
@@ -456,6 +479,7 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 
 	while (StepData())
 	{
+
 		if (failed)
 		{
 			return;
