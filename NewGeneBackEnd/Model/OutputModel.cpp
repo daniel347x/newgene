@@ -183,6 +183,12 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	}
 	timerange_end = timerange_end_identifier.second;
 
+	if (timerange_end >= timerange_start)
+	{
+		failed = true;
+		return;
+	}
+
 	Prepare();
 
 	if (failed)
