@@ -76,6 +76,8 @@ class UIGlobalSetting_Projects_Files_List : public UIGlobalSetting, public Strin
 
 		std::vector<boost::filesystem::path> files;
 
+		std::string ToString() { return StringSetting::ToString(); }
+
 };
 
 template<>
