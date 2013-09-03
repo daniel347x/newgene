@@ -86,6 +86,7 @@ class WorkQueueManagerBase : public QObject
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE) {}
+		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT) {}
 
 	public:
 		virtual void SetConnections() {}

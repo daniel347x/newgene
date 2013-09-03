@@ -31,9 +31,8 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 	public slots:
 
 		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
-
-	private slots:
 		void on_pushButtonGenerateOutput_clicked();
+
 };
 
 #endif // NEWGENEGENERATEOUTPUT_H
