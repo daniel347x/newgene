@@ -114,11 +114,12 @@ SOURCES += main.cpp\
 	Infrastructure/UIAction/uiaction.cpp \
 	Infrastructure/UIAction/variablegroupsetmemberselectionchange.cpp \
 	Widgets/CreateOutput/SelectVariables/KadWidget/kadwidgetsscrollarea.cpp \
-    Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.cpp \
-    Infrastructure/UIAction/kadcountchange.cpp \
-    Infrastructure/UIAction/generateoutput.cpp \
-    Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.cpp \
-    Infrastructure/UIAction/timerangechange.cpp
+	Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.cpp \
+	Infrastructure/UIAction/kadcountchange.cpp \
+	Infrastructure/UIAction/generateoutput.cpp \
+	Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.cpp \
+	Infrastructure/UIAction/timerangechange.cpp \
+	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -222,11 +223,12 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/UIAction/uiuiactionmanager.h \
 	Infrastructure/UIAction/variablegroupsetmemberselectionchange.h \
 	Widgets/CreateOutput/SelectVariables/KadWidget/kadwidgetsscrollarea.h \
-    Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.h \
-    Infrastructure/UIAction/kadcountchange.h \
-    Infrastructure/UIAction/generateoutput.h \
-    Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.h \
-    Infrastructure/UIAction/timerangechange.h
+	Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.h \
+	Infrastructure/UIAction/kadcountchange.h \
+	Infrastructure/UIAction/generateoutput.h \
+	Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.h \
+	Infrastructure/UIAction/timerangechange.h \
+	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -238,7 +240,8 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummaryscrollarea.ui \
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.ui \
 	Widgets/CreateOutput/SelectVariables/kadcolumnselectionbox.ui \
-	Widgets/CreateOutput/SelectVariables/timerangebox.ui
+	Widgets/CreateOutput/SelectVariables/timerangebox.ui \
+	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
@@ -253,6 +256,7 @@ INCLUDEPATH += $$PWD/../../NewGeneBackEnd/Debug
 DEPENDPATH += $$PWD/../../NewGeneBackEnd/Debug
 INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/Widgets/CreateOutput
+INCLUDEPATH += $$PWD/Widgets/CreateOutput/GenerateOutput
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/VariableSummary
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/Variables
