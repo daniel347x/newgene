@@ -22,6 +22,8 @@ public:
 		//messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE__GENERAL_ERROR, msg.str()));
 	}
 
+	std::string ToString() { return ""; }
+
 };
 
 

@@ -36,6 +36,8 @@ public:
 		, PathSetting(messager, setting)
 	{}
 
+	std::string ToString() { return PathSetting::ToString(); }
+
 };
 
 

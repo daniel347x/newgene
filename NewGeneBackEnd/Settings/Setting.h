@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #ifndef Q_MOC_RUN
+#	include <boost/lexical_cast.hpp>
 #	include <boost/filesystem.hpp>
 #endif
 #include "..\Messager\Messager.h"
@@ -45,6 +46,8 @@ class Setting
 public:
 
 	friend class SettingRepository;
+
+	virtual std::string ToString() = 0;
 
 	virtual void DoSpecialParse(Messager &) {}
 
@@ -118,6 +121,7 @@ class BackendSetting : virtual public Setting
 		{
 
 		}
+		std::string ToString() { return ""; }
 };
 
 class InputSetting : virtual public Setting
@@ -128,6 +132,7 @@ class InputSetting : virtual public Setting
 		{
 
 		}
+		std::string ToString() { return ""; }
 };
 
 class OutputSetting : virtual public Setting
@@ -138,6 +143,7 @@ class OutputSetting : virtual public Setting
 		{
 
 		}
+		std::string ToString() { return ""; }
 };
 
 class GlobalSetting : virtual public Setting
@@ -148,6 +154,7 @@ class GlobalSetting : virtual public Setting
 		{
 
 		}
+		std::string ToString() { return ""; }
 };
 
 class ProjectSetting : virtual public Setting
@@ -158,6 +165,7 @@ class ProjectSetting : virtual public Setting
 		{
 
 		}
+		std::string ToString() { return ""; }
 };
 
 class ModelSetting : virtual public Setting
@@ -168,6 +176,7 @@ public:
 	{
 
 	}
+	std::string ToString() { return ""; }
 };
 
 class BackendGlobalSetting : virtual public BackendSetting, virtual public GlobalSetting
@@ -182,6 +191,7 @@ class BackendGlobalSetting : virtual public BackendSetting, virtual public Globa
 		}
 		SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 		static SETTING_CATEGORY category;
+		std::string ToString() { return ""; }
 };
 
 class BackendProjectSetting : virtual public BackendSetting, virtual public ProjectSetting
@@ -194,6 +204,7 @@ class BackendProjectSetting : virtual public BackendSetting, virtual public Proj
 		{
 
 		}
+		std::string ToString() { return ""; }
 };
 
 class BackendModelSetting : virtual public BackendSetting, virtual public ModelSetting
@@ -206,6 +217,7 @@ public:
 	{
 
 	}
+	std::string ToString() { return ""; }
 };
 
 class BackendInputSetting : virtual public BackendSetting, virtual public InputSetting
@@ -218,6 +230,7 @@ public:
 	{
 
 	}
+	std::string ToString() { return ""; }
 };
 
 class BackendOutputSetting : virtual public BackendSetting, virtual public OutputSetting
@@ -230,6 +243,7 @@ public:
 	{
 
 	}
+	std::string ToString() { return ""; }
 };
 
 class ProjectInputSetting : virtual public ProjectSetting, virtual public InputSetting
@@ -242,6 +256,7 @@ public:
 	{
 
 	}
+	std::string ToString() { return ""; }
 };
 
 class ProjectOutputSetting : virtual public ProjectSetting, virtual public OutputSetting
@@ -254,6 +269,7 @@ public:
 	{
 
 	}
+	std::string ToString() { return ""; }
 };
 
 // Regarding the underscore: Disambiguate from InputModelSetting to avoid careless, hard-to-debug mistakes
@@ -267,6 +283,7 @@ public:
 	{
 
 	}
+	std::string ToString() { return ""; }
 };
 
 // Regarding the underscore: Disambiguate from OutputModelSetting to avoid careless, hard-to-debug mistakes
@@ -280,6 +297,7 @@ public:
 	{
 
 	}
+	std::string ToString() { return ""; }
 };
 
 class BackendProjectInputSetting : public BackendProjectSetting, public BackendInputSetting, public ProjectInputSetting
@@ -298,6 +316,7 @@ public:
 	}
 	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 	static SETTING_CATEGORY category;
+	std::string ToString() { return ""; }
 };
 
 class BackendProjectOutputSetting : public BackendProjectSetting, public BackendOutputSetting, public ProjectOutputSetting
@@ -316,6 +335,7 @@ public:
 	}
 	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 	static SETTING_CATEGORY category;
+	std::string ToString() { return ""; }
 };
 
 class BackendModelInputSetting : public BackendModelSetting, public BackendInputSetting, public ModelInputSetting_
@@ -334,6 +354,7 @@ public:
 	}
 	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 	static SETTING_CATEGORY category;
+	std::string ToString() { return ""; }
 };
 
 class BackendModelOutputSetting : public BackendModelSetting, public BackendOutputSetting, public ModelOutputSetting_
@@ -352,6 +373,7 @@ public:
 	}
 	SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val);
 	static SETTING_CATEGORY category;
+	std::string ToString() { return ""; }
 };
 
 typedef BackendModelInputSetting InputModelSetting;
@@ -369,6 +391,7 @@ class StringSetting : virtual public Setting
 		{}
 
 		std::string getString() const { return string_setting; }
+		std::string ToString() { return getString(); }
 		void * getDefaultValue()
 		{
 			return (void*)(&string_setting);
@@ -394,6 +417,7 @@ class Int32Setting : virtual public Setting
 		{
 			return (void*)(&int32_setting);
 		}
+		std::string ToString() { return boost::lexical_cast<std::string>(int32_setting); }
 
 	protected:
 		std::int32_t int32_setting;
@@ -411,6 +435,7 @@ public:
 	{}
 
 	boost::filesystem::path getPath() const { return path_setting; }
+	std::string ToString() const { return getPath().string(); }
 
 	void * getDefaultValue()
 	{
