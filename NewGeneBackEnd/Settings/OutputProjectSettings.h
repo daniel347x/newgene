@@ -35,7 +35,7 @@ public:
 	void UpdateSetting(Messager & messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND const which_setting, T const & setting_value)
 	{
 		SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
-		_settings_map[which_setting] = std::unique_ptr<BackendProjectOutputSetting>(NewSetting(messager, setting_info, (void const *)(&setting_value)));
+		_settings_map[which_setting] = std::unique_ptr<BackendProjectOutputSetting>(NewSetting(messager, setting_info, setting_value.ToString()));
 		WriteSettingsToFile(messager);
 	}
 
@@ -48,7 +48,7 @@ public:
 
 	void SetMapEntry(Messager & messager, SettingInfo & setting_info, boost::property_tree::ptree & pt);
 	BackendProjectOutputSetting * CloneSetting(Messager & messager, BackendProjectOutputSetting * current_setting, SettingInfo & setting_info) const;
-	BackendProjectOutputSetting * NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void = NULL);
+	BackendProjectOutputSetting * NewSetting(Messager & messager, SettingInfo & setting_info, std::string const & setting_value_string);
 	void SetPTreeEntry(Messager & messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND which_setting, boost::property_tree::ptree & pt);
 
 };

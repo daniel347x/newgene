@@ -48,10 +48,7 @@ case SettingInfo::SETTING_INFO_ENUM: \
 case SettingInfo::SETTING_INFO_ENUM: \
 	{ \
 		std::string string_setting = setting_info.default_val_string; \
-		if (setting_value_void) \
-		{ \
-			string_setting = *((std::string *)(setting_value_void)); \
-		} \
+		string_setting = setting_value_string; \
 		return SettingFactory<SETTING_CLASS>()(messager, string_setting); \
 	} \
 	break; \
@@ -165,7 +162,7 @@ BackendProjectOutputSetting * OutputProjectSettings::CloneSetting(Messager & mes
 
 }
 
-BackendProjectOutputSetting * OutputProjectSettings::NewSetting(Messager & messager, SettingInfo & setting_info, void const * setting_value_void)
+BackendProjectOutputSetting * OutputProjectSettings::NewSetting(Messager & messager, SettingInfo & setting_info, std::string const & setting_value_string)
 {
 
 	switch (setting_info.setting_class)
