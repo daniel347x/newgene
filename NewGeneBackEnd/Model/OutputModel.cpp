@@ -2484,12 +2484,12 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
 	{
 
-		bool do_no_check_time_range = false;
+		bool do_not_check_time_range = false;
 		if (row_of_data.datetime_start == 0 && row_of_data.datetime_end == 0)
 		{
-			do_no_check_time_range = true;
+			do_not_check_time_range = true;
 		}
-		if (!do_no_check_time_range)
+		if (!do_not_check_time_range)
 		{
 			if (row_of_data.datetime_start >= timerange_end)
 			{
