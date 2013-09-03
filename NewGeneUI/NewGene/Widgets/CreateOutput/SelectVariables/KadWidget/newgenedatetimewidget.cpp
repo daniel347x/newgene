@@ -21,48 +21,9 @@ NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceId
 
 {
 
-	/* For some reason, setting the "objectName" property in the form editor is not reflected here */
-	/*
-	if (this->objectName() == "dateTimeEdit_start")
-	{
-		this->data_instance.code = std::make_shared<std::string>("0");
-		this->data_instance.flags = "s";
-	}
-	else if (this->objectName() == "dateTimeEdit_end")
-	{
-		this->data_instance.code = std::make_shared<std::string>("0");
-		this->data_instance.flags = "e";
-	}
-	*/
-
-	if (project->number_timerange_widgets_created == 0)
-	{
-		this->data_instance.code = std::make_shared<std::string>("0");
-		this->data_instance.flags = "s";
-		++project->number_timerange_widgets_created;
-	}
-	else if (project->number_timerange_widgets_created == 1)
-	{
-		this->data_instance.code = std::make_shared<std::string>("0");
-		this->data_instance.flags = "e";
-		++project->number_timerange_widgets_created;
-	}
-
    PrepareOutputWidget();
 
    connect(this, SIGNAL(dateTimeChanged(QDateTime const &)), this, SLOT(ReceiveVariableItemChanged(QDateTime const &)));
-
-   if (data_instance.uuid && project)
-   {
-
-	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE, true, *data_instance.uuid);
-	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE, true, *data_instance.uuid);
-
-	   UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
-	   WidgetDataItemRequest_DATETIME_WIDGET request(0, WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
-	   emit RefreshWidget(request);
-
-   }
 
 }
 
@@ -97,8 +58,55 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 
 	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
+		/* For some reason, setting the "objectName" property in the form editor is not reflected here */
+		/*
+		if (this->objectName() == "dateTimeEdit_start")
+		{
+			this->data_instance.code = std::make_shared<std::string>("0");
+			this->data_instance.flags = "s";
+		}
+		else if (this->objectName() == "dateTimeEdit_end")
+		{
+			this->data_instance.code = std::make_shared<std::string>("0");
+			this->data_instance.flags = "e";
+		}
+		*/
+
+		if (project->number_timerange_widgets_created == 0)
+		{
+			this->data_instance.code = std::make_shared<std::string>("0");
+			this->data_instance.uuid = this->data_instance.code;
+			this->data_instance.flags = "s";
+			++project->number_timerange_widgets_created;
+		}
+		else if (project->number_timerange_widgets_created == 1)
+		{
+			this->data_instance.code = std::make_shared<std::string>("0");
+			this->data_instance.uuid = this->data_instance.code;
+			this->data_instance.flags = "e";
+			++project->number_timerange_widgets_created;
+		}
+
+		if (data_instance.uuid && project)
+		{
+
+			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE, true, *data_instance.uuid);
+			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE, true, *data_instance.uuid);
+
+			UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+
+		}
+
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET)));
 		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE)));
+
+		if (data_instance.uuid && project)
+		{
+
+			WidgetDataItemRequest_DATETIME_WIDGET request(0, WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
+			emit RefreshWidget(request);
+
+		}
 	}
 }
 
