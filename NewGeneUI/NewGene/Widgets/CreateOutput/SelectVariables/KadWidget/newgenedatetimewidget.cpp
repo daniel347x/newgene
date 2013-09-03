@@ -128,8 +128,7 @@ void NewGeneDateTimeWidget::WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WID
 	QTime time_12am(0, 0);
 	QDateTime datetime_1970(date_1970, time_12am);
 
-	QDateTime proposed_date_time = datetime_1970;
-	proposed_date_time.addMSecs(widget_data.the_date_time);
+	QDateTime proposed_date_time = datetime_1970.addMSecs(widget_data.the_date_time);
 
 	if (dateTime() != proposed_date_time)
 	{
