@@ -114,7 +114,7 @@ class UIMessagerInputProject : public UIMessager
 		}
 
 		void ShowMessageBox(std::string);
-		void ShowQuestionMessageBox(std::string);
+		bool ShowQuestionMessageBox(std::string);
 
 		void EmitInputProjectChangeMessage(DataChangeMessage & changes);
 
@@ -134,7 +134,7 @@ class UIMessagerOutputProject : public UIMessager
 		}
 
 		void ShowMessageBox(std::string);
-		void ShowQuestionMessageBox(std::string);
+		bool ShowQuestionMessageBox(std::string);
 
 		void EmitOutputProjectChangeMessage(DataChangeMessage & changes);
 

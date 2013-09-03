@@ -8,11 +8,12 @@ void UIInputProject::SignalMessageBox(STD_STRING msg)
 	msgBox.exec();
 }
 
-void UIInputProject::QuestionMessageBox(STD_STRING msg)
+bool UIInputProject::QuestionMessageBox(STD_STRING msg)
 {
 	QMessageBox msgBox;
 	msgBox.setText( msg.c_str() );
 	msgBox.exec();
+	return true;
 }
 
 bool UIInputProject::is_model_equivalent(UIMessager & messager, UIInputModel * model_)

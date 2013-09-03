@@ -468,7 +468,12 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 		
 	}
 
-	messager.ShowQuestionMessageBox("faulty, my oh my");
+	bool overwrite_file = messager.ShowQuestionMessageBox("faulty, my oh my");
+
+	if (overwrite_file)
+	{
+		int mmm = 0;
+	}
 
 	return;
 

@@ -115,9 +115,11 @@ void UIMessagerInputProject::ShowMessageBox(std::string msg)
 	emit DisplayMessageBox(msg);
 }
 
-void UIMessagerInputProject::ShowQuestionMessageBox(std::string msg)
+bool UIMessagerInputProject::ShowQuestionMessageBox(std::string msg)
 {
-	emit QuestionMessageBox(msg);
+	bool yes = false;
+	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( bool, yes ), Q_ARG( STD_STRING, msg ));
+	return yes;
 }
 
 void UIMessagerInputProject::EmitInputProjectChangeMessage(DataChangeMessage & changes)
@@ -130,10 +132,11 @@ void UIMessagerOutputProject::ShowMessageBox(std::string msg)
 	emit DisplayMessageBox(msg);
 }
 
-void UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg)
+bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg)
 {
-	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_ARG( STD_STRING, msg ));
-	//emit QuestionMessageBox(msg);
+	bool yes = false;
+	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( bool, yes ), Q_ARG( STD_STRING, msg ));
+	return yes;
 }
 
 void UIMessagerOutputProject::EmitOutputProjectChangeMessage(DataChangeMessage & changes)

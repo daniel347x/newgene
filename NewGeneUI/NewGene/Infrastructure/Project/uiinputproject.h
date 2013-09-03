@@ -35,7 +35,7 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 	public slots:
 		void DataChangeMessageSlot(WidgetChangeMessages);
 		void SignalMessageBox(STD_STRING);
-		void QuestionMessageBox(STD_STRING);
+		bool QuestionMessageBox(STD_STRING);
 
 	public:
 
