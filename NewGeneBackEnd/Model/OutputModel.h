@@ -653,6 +653,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool debug_ordering;
 
 				bool initialized;
+				bool overwrite_if_output_file_already_exists;
 
 				static std::recursive_mutex is_generating_output_mutex;
 				static std::atomic<bool> is_generating_output;

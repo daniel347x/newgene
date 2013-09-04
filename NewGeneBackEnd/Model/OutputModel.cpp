@@ -93,6 +93,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, project(project_)
 	, messager(messager_)
 	, failed(false)
+	, overwrite_if_output_file_already_exists(false)
 {
 	debug_ordering = true;
 	messager.StartProgressBar(0, 1000);
@@ -8342,8 +8343,12 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 		bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
 		if (!overwrite_file)
 		{
-			return std::string();
+			if (!overwrite_if_output_file_already_exists)
+			{
+				return std::string();
+			}
 		}
+		overwrite_if_output_file_already_exists = true;
 	}
 
 	return setting_path_to_kad_output->ToString();
