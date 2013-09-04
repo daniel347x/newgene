@@ -8,6 +8,7 @@
 #include "newgenewidget.h"
 
 #include <memory>
+#include <map>
 
 namespace Ui
 {
@@ -40,6 +41,8 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 
 		friend class NewGeneWidget;
 
+		std::map<int, std::unique_ptr<QProgressBar>> status_bar_progress_bars;
+		std::map<int, std::unique_ptr<QProgressBar>> main_pane_progress_bars;
 
 };
 

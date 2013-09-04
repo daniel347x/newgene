@@ -138,17 +138,41 @@ void NewGeneMainWindow::SignalMessageBox(STD_STRING msg)
 
 void NewGeneMainWindow::ReceiveSignalStartProgressBar(int progress_bar_id, std::int64_t const min_value, std::int64_t const max_value)
 {
+	status_bar_progress_bars[progress_bar_id] = std::unique_ptr<QProgressBar>(new QProgressBar(this));
+	main_pane_progress_bars[progress_bar_id] = std::unique_ptr<QProgressBar>(new QProgressBar(this));
 
+	if (this->statusBar())
+	{
+		status_bar_progress_bars[progress_bar_id]->setMiniumum(min_value);
+		status_bar_progress_bars[progress_bar_id]->setMaximum(max_value);
+		status_bar_progress_bars[progress_bar_id]->setValue(min_value);
+		this->statusBar()->addPermanentWidget(status_bar_progress_bars[progress_bar_id].get());
+	}
 }
 
 void NewGeneMainWindow::ReceiveSignalStopProgressBar(int progress_bar_id)
 {
+	if (this->statusBar())
+	{
+		if (status_bar_progress_bars.find(progress_bar_id) != status_bar_progress_bars.cend())
+		{
+			this->statusBar()->removeWidget(status_bar_progress_bars[progress_bar_id].get());
+			status_bar_progress_bars.erase(progress_bar_id);
+		}
+	}
 
+	main_pane_progress_bars.erase(progress_bar_id);
 }
 
 void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(int progress_bar_id, std::int64_t const new_value)
 {
-
+	if (this->statusBar())
+	{
+		if (status_bar_progress_bars.find(progress_bar_id) != status_bar_progress_bars.cend())
+		{
+			status_bar_progress_bars[progress_bar_id]->setValue(min_value);
+		}
+	}
 }
 
 void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(int progress_bar_id, STD_STRING const status_bar_message)
