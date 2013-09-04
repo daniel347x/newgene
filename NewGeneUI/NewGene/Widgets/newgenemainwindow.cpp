@@ -125,7 +125,7 @@ void NewGeneMainWindow::doInitialize()
 	settingsManagerUI().globalSettings().InitializeEventLoop(&settingsManagerUI().globalSettings());
 	settingsManagerUI().globalSettings().WriteSettingsToFile(messager); // Write any defaults back to disk, along with values just read from disk
 
-	projectManagerUI().LoadOpenProjects(this);
+	projectManagerUI().LoadOpenProjects(this, this);
 
 }
 

@@ -182,7 +182,7 @@ class UIProjectManager : public QObject,
 		explicit UIProjectManager( QObject * parent = 0 );
 		~UIProjectManager();
 
-		void LoadOpenProjects(NewGeneMainWindow*);
+		void LoadOpenProjects(NewGeneMainWindow*, QObject*);
 
 		UIInputProject * getActiveUIInputProject();
 		UIOutputProject * getActiveUIOutputProject();

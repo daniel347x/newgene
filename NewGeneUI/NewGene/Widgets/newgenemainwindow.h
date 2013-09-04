@@ -3,8 +3,8 @@
 
 #include "globals.h"
 #include <QMainWindow>
-//#include <QProgressBar>
-//#include <QStatusBar>
+#include <QProgressBar>
+#include <QStatusBar>
 #include "newgenewidget.h"
 
 #include <memory>

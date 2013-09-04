@@ -14,7 +14,6 @@
 #include "../../../../NewGeneBackEnd/Settings/OutputModelSettings_list.h"
 #include "../newgenewidget.h"
 #include "uimessagersingleshot.h"
-#include "newgenemainwindow.h"
 
 UIProjectManager::UIProjectManager( QObject * parent )
 	: QObject(parent)
@@ -100,7 +99,7 @@ void UIProjectManager::EndAllLoops()
 
 };
 
-void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
+void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject * mainWindowObject)
 {
 	UIMessager messager;
 	UIMessagerSingleShot messager_(messager);
@@ -147,7 +146,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 			std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
 
 			input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, path_to_model_settings->getPath(), path_to_model_database->getPath()),
-															std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindow))));
+															std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
 			UIInputProject * project = getActiveUIInputProject();
 
@@ -222,7 +221,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow)
 			// Backend model does not know its settings, because multiple settings might point to the same model.
 			auto path_to_model_database = OutputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
 			std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(messager, path_to_model_database->getPath(), std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
-			std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model, mainWindow));
+			std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model, mainWindowObject));
 
 			output_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(output_project_settings_path, path_to_model_settings->getPath(), path_to_model_database->getPath()),
 															std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model))));
