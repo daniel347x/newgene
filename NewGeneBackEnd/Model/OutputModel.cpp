@@ -2,7 +2,6 @@
 #include "..\Utilities\UUID.h"
 
 #include "..\Settings\OutputProjectSettings_list.h"
-
 #include <cstdint>
 
 #ifndef Q_MOC_RUN
@@ -10,9 +9,13 @@
 #	include <deque>
 #	include <boost/filesystem.hpp>
 #	include <boost/format.hpp>
+#	include <boost/scope_exit.hpp>
 #endif
 
 #include <fstream>
+
+std::recursive_mutex OutputModel::OutputGenerator::is_generating_output_mutex;
+std::atomic<bool> OutputModel::OutputGenerator::is_generating_output = false;
 
 void OutputModel::LoadTables()
 {
@@ -171,6 +174,21 @@ OutputModel::OutputGenerator::~OutputGenerator()
 
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
 {
+
+	{
+		std::lock_guard<std::recursive_mutex> guard(is_generating_output_mutex);
+		if (is_generating_output)
+		{
+			messager.ShowMessageBox("Another K-ad output generation operation is in progress.  Please wait for that operation to complete first.");
+			return;
+		}
+		is_generating_output = true;
+	}
+
+	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex)
+	{
+		is_generating_output = false;
+	} BOOST_SCOPE_EXIT_END
 
 	std::string setting_path_to_kad_output = CheckOutputFileExists();
 

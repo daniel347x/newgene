@@ -10,6 +10,8 @@
 #include <memory>
 #include <tuple>
 #include <cstdint>
+#include <atomic>
+#include <mutex>
 
 class PrimaryKeySequence
 {
@@ -651,6 +653,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool debug_ordering;
 
 				bool initialized;
+
+				static std::recursive_mutex is_generating_output_mutex;
+				static std::atomic<bool> is_generating_output;
 
 				// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
 				std::string temp_dot;
