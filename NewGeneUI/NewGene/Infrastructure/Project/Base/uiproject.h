@@ -56,7 +56,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		typedef std::map<std::pair<UUID, UUID>, NewGeneWidget *> ParentWidgetUUIDAndChildDataUUID_to_WidgetPointer_Map; // uuid_parent, uuid_child
 		typedef std::multimap<NewGeneWidget * const, DataChangeInterest const> WidgetDataChangeInterestMap;
 
-		static int const number_worker_threads = 1; // For now, single thread only in pool
+		static int const number_worker_threads = 2; // For now, single thread only in pool
 
 		UIProject(std::shared_ptr<UI_PROJECT_SETTINGS_CLASS> const & ui_settings,
 				  std::shared_ptr<UI_MODEL_SETTINGS_CLASS> const & ui_model_settings,
