@@ -143,7 +143,7 @@ void NewGeneMainWindow::ReceiveSignalStartProgressBar(int progress_bar_id, std::
 
 	if (this->statusBar())
 	{
-		status_bar_progress_bars[progress_bar_id]->setMiniumum(min_value);
+		status_bar_progress_bars[progress_bar_id]->setMinimum(min_value);
 		status_bar_progress_bars[progress_bar_id]->setMaximum(max_value);
 		status_bar_progress_bars[progress_bar_id]->setValue(min_value);
 		this->statusBar()->addPermanentWidget(status_bar_progress_bars[progress_bar_id].get());
