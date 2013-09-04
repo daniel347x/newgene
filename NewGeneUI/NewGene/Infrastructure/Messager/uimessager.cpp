@@ -101,12 +101,12 @@ UIMessagerInputProject::UIMessagerInputProject(UIInputProject * inp_, QObject * 
 		{
 			connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
 			connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
-			if (get()->parent())
+			if (get()->mainWindowObject)
 			{
-				connect(this, SIGNAL(SignalStartProgressBar(int, std::int64_t const, std::int64_t const)), get()->parent(), SLOT(ReceiveSignalStartProgressBar(int, std::int64_t const, std::int64_t const)));
-				connect(this, SIGNAL(SignalEndProgressBar(int)), get()->parent(), SLOT(ReceiveSignalStopProgressBar(int)));
-				connect(this, SIGNAL(SignalUpdateProgressBarValue(int, std::int64_t const)), get()->parent(), SLOT(ReceiveSignalUpdateProgressBarValue(int, std::int64_t const)));
-				connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), get()->parent(), SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+				connect(this, SIGNAL(SignalStartProgressBar(int, std::int64_t const, std::int64_t const)), get()->mainWindowObject, SLOT(ReceiveSignalStartProgressBar(int, std::int64_t const, std::int64_t const)));
+				connect(this, SIGNAL(SignalEndProgressBar(int)), get()->mainWindowObject, SLOT(ReceiveSignalStopProgressBar(int)));
+				connect(this, SIGNAL(SignalUpdateProgressBarValue(int, std::int64_t const)), get()->mainWindowObject, SLOT(ReceiveSignalUpdateProgressBarValue(int, std::int64_t const)));
+				connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), get()->mainWindowObject, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
 			}
 		}
 	}
@@ -122,12 +122,12 @@ UIMessagerOutputProject::UIMessagerOutputProject(UIOutputProject * outp_, QObjec
 		{
 			connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
 			connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
-			if (get()->parent())
+			if (get()->mainWindowObject)
 			{
-				connect(this, SIGNAL(SignalStartProgressBar(int, std::int64_t const, std::int64_t const)), get()->parent(), SLOT(ReceiveSignalStartProgressBar(int, std::int64_t const, std::int64_t const)));
-				connect(this, SIGNAL(SignalEndProgressBar(int)), get()->parent(), SLOT(ReceiveSignalStopProgressBar(int)));
-				connect(this, SIGNAL(SignalUpdateProgressBarValue(int, std::int64_t const)), get()->parent(), SLOT(ReceiveSignalUpdateProgressBarValue(int, std::int64_t const)));
-				connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), get()->parent(), SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+				connect(this, SIGNAL(SignalStartProgressBar(int, std::int64_t const, std::int64_t const)), get()->mainWindowObject, SLOT(ReceiveSignalStartProgressBar(int, std::int64_t const, std::int64_t const)));
+				connect(this, SIGNAL(SignalEndProgressBar(int)), get()->mainWindowObject, SLOT(ReceiveSignalStopProgressBar(int)));
+				connect(this, SIGNAL(SignalUpdateProgressBarValue(int, std::int64_t const)), get()->mainWindowObject, SLOT(ReceiveSignalUpdateProgressBarValue(int, std::int64_t const)));
+				connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), get()->mainWindowObject, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
 			}
 		}
 	}

@@ -19,9 +19,11 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const & project_settings,
 						std::shared_ptr<UIOutputModelSettings> const & model_settings,
 						std::shared_ptr<UIOutputModel> const & model,
+						QObject * mainWindowObject_,
 						QObject * parent = NULL)
 			: QObject(parent)
 			, UIProject(project_settings, model_settings, model)
+			, mainWindowObject(mainWindowObject_)
 			, messager(this)
 			, number_timerange_widgets_created(0)
 		{
@@ -42,6 +44,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 
 	public:
 
+		QObject * mainWindowObject;
 		UIMessagerOutputProject messager;
 
 		bool is_model_equivalent(UIMessager & messager, UIOutputModel * model);

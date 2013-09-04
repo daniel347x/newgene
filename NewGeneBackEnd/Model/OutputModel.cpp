@@ -89,6 +89,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, timerange_end(0)
 	, project(project_)
 	, messager(messager_)
+	, failed(false)
 {
 	debug_ordering = true;
 	messager.StartProgressBar(0, 1000);
@@ -6874,8 +6875,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 void OutputModel::OutputGenerator::Prepare()
 {
-
-	failed = false;
 
 	// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
 	//temp_dot = "temp.";

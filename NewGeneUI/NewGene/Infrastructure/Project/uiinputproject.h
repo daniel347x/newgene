@@ -17,9 +17,11 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 		UIInputProject(std::shared_ptr<UIInputProjectSettings> const & project_settings,
 					   std::shared_ptr<UIInputModelSettings> const & model_settings,
 					   std::shared_ptr<UIInputModel> const & model,
+					   QObject * mainWindowObject_,
 					   QObject * parent = NULL)
 			: QObject(parent)
 			, UIProject(project_settings, model_settings, model)
+			, mainWindowObject(mainWindowObject_)
 			, messager(this)
 		{
 
@@ -39,6 +41,7 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 
 	public:
 
+		QObject * mainWindowObject;
 		UIMessagerInputProject messager;
 
 		bool is_model_equivalent(UIMessager & messager, UIInputModel * model);
