@@ -91,10 +91,13 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, messager(messager_)
 {
 	debug_ordering = true;
+	messager.StartProgressBar(0, 1000);
 }
 
 OutputModel::OutputGenerator::~OutputGenerator()
 {
+
+	messager.EndProgressBar();
 
 	if (!initialized)
 	{
@@ -225,6 +228,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	messager.UpdateProgressBarValue(250);
+
 	LoopThroughPrimaryVariableGroups();
 
 	if (failed)
@@ -232,6 +237,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// failed
 		return;
 	}
+
+	messager.UpdateProgressBarValue(500);
 
 	MergeHighLevelGroupResults();
 
@@ -241,6 +248,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	messager.UpdateProgressBarValue(750);
+
 	MergeChildGroups();
 
 	if (failed)
@@ -248,6 +257,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// failed
 		return;
 	}
+
+	messager.UpdateProgressBarValue(900);
 
 	FormatResultsForOutput();
 
@@ -257,12 +268,16 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	messager.UpdateProgressBarValue(950);
+
 	WriteResultsToFileOrScreen();
 
 	if (failed)
 	{
 		return;
 	}
+
+	messager.UpdateProgressBarValue(1000);
 
 }
 
