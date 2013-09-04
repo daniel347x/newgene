@@ -115,6 +115,10 @@ class UIMessagerInputProject : public UIMessager
 
 		void ShowMessageBox(std::string);
 		bool ShowQuestionMessageBox(std::string, std::string); // title, question text
+		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
+		virtual void EndProgressBar();
+		virtual void UpdateStatusBarValue(std::int64_t const);
+		virtual void UpdateStatusBarText(std::string const & status_bar_text);
 
 		void EmitInputProjectChangeMessage(DataChangeMessage & changes);
 
@@ -135,6 +139,10 @@ class UIMessagerOutputProject : public UIMessager
 
 		void ShowMessageBox(std::string);
 		bool ShowQuestionMessageBox(std::string, std::string); // title, question text
+		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
+		virtual void EndProgressBar();
+		virtual void UpdateStatusBarValue(std::int64_t const);
+		virtual void UpdateStatusBarText(std::string const & status_bar_text);
 
 		void EmitOutputProjectChangeMessage(DataChangeMessage & changes);
 

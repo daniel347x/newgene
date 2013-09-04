@@ -122,6 +122,22 @@ bool UIMessagerInputProject::ShowQuestionMessageBox(std::string msg_title, std::
 	return yes;
 }
 
+void UIMessagerInputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)
+{
+}
+
+void UIMessagerInputProject::EndProgressBar()
+{
+}
+
+void UIMessagerInputProject::UpdateStatusBarValue(std::int64_t const the_value)
+{
+}
+
+void UIMessagerInputProject::UpdateStatusBarText(std::string const & the_text)
+{
+}
+
 void UIMessagerInputProject::EmitInputProjectChangeMessage(DataChangeMessage & changes)
 {
 	get()->getQueueManager()->HandleChanges(changes);
@@ -137,6 +153,22 @@ bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg_title, std:
 	bool yes = false;
 	QMetaObject::invokeMethod(get(), "QuestionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( bool, yes ), Q_ARG( STD_STRING, msg_title ), Q_ARG( STD_STRING, msg_text ));
 	return yes;
+}
+
+void UIMessagerOutputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)
+{
+}
+
+void UIMessagerOutputProject::EndProgressBar()
+{
+}
+
+void UIMessagerOutputProject::UpdateStatusBarValue(std::int64_t const the_value)
+{
+}
+
+void UIMessagerOutputProject::UpdateStatusBarText(std::string const & the_text)
+{
 }
 
 void UIMessagerOutputProject::EmitOutputProjectChangeMessage(DataChangeMessage & changes)

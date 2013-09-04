@@ -135,3 +135,23 @@ void NewGeneMainWindow::SignalMessageBox(STD_STRING msg)
 	msgBox.setText( msg.c_str() );
 	msgBox.exec();
 }
+
+void NewGeneMainWindow::ReceiveSignalStartProgressBar(STD_STRING const, STD_STRING const)
+{
+
+}
+
+void NewGeneMainWindow::ReceiveSignalStopProgressBar()
+{
+
+}
+
+void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(std::int64_t const)
+{
+
+}
+
+void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(STD_STRING const)
+{
+
+}
