@@ -4,12 +4,25 @@
 #include "../../Project/OutputProject.h"
 #include "../../UIData/DataChanges.h"
 #include "../../UIAction/ActionChanges.h"
+#ifndef Q_MOC_RUN
+#	include <boost/scope_exit.hpp>
+#endif
 
 /************************************************************************/
 // ACTION_GENERATE_OUTPUT
 /************************************************************************/
 void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequest_ACTION_GENERATE_OUTPUT const & action_request, OutputProject & project)
 {
+
+	if (FailIfBusy(messager))
+	{
+		return;
+	}
+
+	BOOST_SCOPE_EXIT(this_)
+	{
+		this_->EndFailIfBusy();
+	} BOOST_SCOPE_EXIT_END
 
 	if (!action_request.items)
 	{

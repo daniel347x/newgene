@@ -4,6 +4,8 @@
 #include "../globals.h"
 #include "..\Manager.h"
 #include "../Messager/Messager.h"
+#include <atomic>
+#include <mutex>
 
 class InputProject;
 class OutputProject;
@@ -17,6 +19,14 @@ class UIActionManager : public Manager<UIActionManager, MANAGER_DESCRIPTION_NAME
 		void DoKAdCountChange(Messager & messager, WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE const & action_request, OutputProject & project);
 		void DoTimeRangeChange(Messager & messager, WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE const & action_request, OutputProject & project);
 		void DoGenerateOutput(Messager & messager, WidgetActionItemRequest_ACTION_GENERATE_OUTPUT const & action_request, OutputProject & project);
+
+	protected:
+
+		bool FailIfBusy(Messager & messager);
+		void EndFailIfBusy();
+
+		static std::recursive_mutex is_busy_mutex;
+		static std::atomic<bool> is_busy;
 
 };
 
