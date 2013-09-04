@@ -53,7 +53,7 @@ UIModelActionManager & modelactionManagerUI();
 Q_DECLARE_METATYPE(STD_STRING);
 Q_DECLARE_METATYPE(STD_INT64);
 
-Q_DECLARE_METATYPE(QVector<int>);
+//Q_DECLARE_METATYPE(QVector<int>);
 
 Q_DECLARE_METATYPE(WidgetChangeMessage);
 Q_DECLARE_METATYPE(WidgetChangeMessages);
