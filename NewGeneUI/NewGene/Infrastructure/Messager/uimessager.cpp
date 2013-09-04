@@ -155,7 +155,7 @@ void UIMessagerInputProject::EndProgressBar()
 	emit SignalEndProgressBar(current_messager_id);
 }
 
-void UIMessagerInputProject::UpdateProgessBarValue(std::int64_t const the_value)
+void UIMessagerInputProject::UpdateProgressBarValue(std::int64_t const the_value)
 {
 	emit SignalUpdateProgressBarValue(current_messager_id, the_value);
 }
@@ -184,7 +184,7 @@ bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg_title, std:
 
 void UIMessagerOutputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)
 {
-	emit SignalStartProgressBar(progress_bar_id, min_value, max_value);
+	emit SignalStartProgressBar(current_messager_id, min_value, max_value);
 }
 
 void UIMessagerOutputProject::EndProgressBar()

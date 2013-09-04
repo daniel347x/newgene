@@ -3,6 +3,8 @@
 
 #include "globals.h"
 #include <QMainWindow>
+//#include <QProgressBar>
+//#include <QStatusBar>
 #include "newgenewidget.h"
 
 #include <memory>
@@ -37,6 +39,8 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		Ui::NewGeneMainWindow * ui;
 
 		friend class NewGeneWidget;
+
+
 };
 
 #endif // NEWGENEMAINWINDOW_H

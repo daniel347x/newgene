@@ -14,6 +14,7 @@
 #include "../../../../NewGeneBackEnd/Settings/OutputModelSettings_list.h"
 #include "../newgenewidget.h"
 #include "uimessagersingleshot.h"
+#include "newgenemainwindow.h"
 
 UIProjectManager::UIProjectManager( QObject * parent )
 	: QObject(parent)

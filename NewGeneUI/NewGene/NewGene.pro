@@ -255,6 +255,7 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_files
 INCLUDEPATH += $$PWD/../../NewGeneBackEnd/Debug
 DEPENDPATH += $$PWD/../../NewGeneBackEnd/Debug
 INCLUDEPATH += $$PWD
+INCLUDEPATH += $$PWD/Widgets
 INCLUDEPATH += $$PWD/Widgets/CreateOutput
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/GenerateOutput
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables
