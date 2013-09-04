@@ -177,5 +177,8 @@ void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(int progress_bar_id,
 
 void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(int progress_bar_id, STD_STRING const status_bar_message)
 {
-
+	if (this->statusBar())
+	{
+		this->statusBar()->showMessage(QString(status_bar_message.c_str()));
+	}
 }

@@ -213,6 +213,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	boost::format msg_1("Generating output to file \"%1%\"");
+	msg_1 % boost::filesystem::path(setting_path_to_kad_output).filename().c_str();
+	messager.UpdateStatusBarText(msg_1.str().c_str());
+
 	Prepare();
 
 	if (failed)
@@ -279,6 +283,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	}
 
 	messager.UpdateProgressBarValue(1000);
+
+	boost::format msg_2("Output successfully generated (\"%1%\")");
+	msg_2 % boost::filesystem::path(setting_path_to_kad_output).filename().c_str();
+	messager.UpdateStatusBarText(msg_2.str().c_str());
 
 }
 
