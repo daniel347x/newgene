@@ -101,7 +101,6 @@ UIMessagerInputProject::UIMessagerInputProject(UIInputProject * inp_, QObject * 
 		if (get())
 		{
 			connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
-			connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
 			if (get()->mainWindowObject)
 			{
 				try
@@ -129,7 +128,6 @@ UIMessagerOutputProject::UIMessagerOutputProject(UIOutputProject * outp_, QObjec
 		if (get())
 		{
 			connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
-			connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
 			if (get()->mainWindowObject)
 			{
 				try
@@ -162,7 +160,7 @@ bool UIMessagerInputProject::ShowQuestionMessageBox(std::string msg_title, std::
 
 void UIMessagerInputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)
 {
-	emit SignalStartProgressBar(current_messager_id, min_value, max_value);
+	emit SignalStartProgressBar(current_messager_id, (STD_INT64)min_value, (STD_INT64)max_value);
 }
 
 void UIMessagerInputProject::EndProgressBar()
@@ -172,7 +170,7 @@ void UIMessagerInputProject::EndProgressBar()
 
 void UIMessagerInputProject::UpdateProgressBarValue(std::int64_t const the_value)
 {
-	emit SignalUpdateProgressBarValue(current_messager_id, the_value);
+	emit SignalUpdateProgressBarValue(current_messager_id, (STD_INT64)the_value);
 }
 
 void UIMessagerInputProject::UpdateStatusBarText(std::string const & the_text)
@@ -199,7 +197,7 @@ bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg_title, std:
 
 void UIMessagerOutputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)
 {
-	emit SignalStartProgressBar(current_messager_id, min_value, max_value);
+	emit SignalStartProgressBar(current_messager_id, (STD_INT64)min_value, (STD_INT64)max_value);
 }
 
 void UIMessagerOutputProject::EndProgressBar()
@@ -209,7 +207,7 @@ void UIMessagerOutputProject::EndProgressBar()
 
 void UIMessagerOutputProject::UpdateProgressBarValue(std::int64_t const the_value)
 {
-	emit SignalUpdateProgressBarValue(current_messager_id, the_value);
+	emit SignalUpdateProgressBarValue(current_messager_id, (STD_INT64)the_value);
 }
 
 void UIMessagerOutputProject::UpdateStatusBarText(std::string const & the_text)

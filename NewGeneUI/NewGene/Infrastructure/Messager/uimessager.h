@@ -87,7 +87,6 @@ class UIMessager : public QObject, public Messager
 
 		void PostStatus(STD_STRING, int, bool);
 		void DisplayMessageBox(STD_STRING);
-		void QuestionMessageBox(STD_STRING);
 		void SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const);
 		void SignalEndProgressBar(int);
 		void SignalUpdateProgressBarValue(int, STD_INT64 const);
