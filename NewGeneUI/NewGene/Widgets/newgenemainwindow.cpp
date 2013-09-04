@@ -170,7 +170,7 @@ void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(int progress_bar_id,
 	{
 		if (status_bar_progress_bars.find(progress_bar_id) != status_bar_progress_bars.cend())
 		{
-			status_bar_progress_bars[progress_bar_id]->setValue(min_value);
+			status_bar_progress_bars[progress_bar_id]->setValue(new_value);
 		}
 	}
 }
