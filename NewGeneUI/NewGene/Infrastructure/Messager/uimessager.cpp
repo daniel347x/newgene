@@ -6,6 +6,7 @@
 #include "uidocumentmanager.h"
 #include "uistatusmanager.h"
 #include "uiloggingmanager.h"
+#include "newgenemainwindow.h"
 
 #include <QMetaObject>
 
@@ -103,10 +104,17 @@ UIMessagerInputProject::UIMessagerInputProject(UIInputProject * inp_, QObject * 
 			connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
 			if (get()->mainWindowObject)
 			{
-				connect(this, SIGNAL(SignalStartProgressBar(int, std::int64_t const, std::int64_t const)), get()->mainWindowObject, SLOT(ReceiveSignalStartProgressBar(int, std::int64_t const, std::int64_t const)));
-				connect(this, SIGNAL(SignalEndProgressBar(int)), get()->mainWindowObject, SLOT(ReceiveSignalStopProgressBar(int)));
-				connect(this, SIGNAL(SignalUpdateProgressBarValue(int, std::int64_t const)), get()->mainWindowObject, SLOT(ReceiveSignalUpdateProgressBarValue(int, std::int64_t const)));
-				connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), get()->mainWindowObject, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+				try
+				{
+					NewGeneMainWindow * mainWindow = dynamic_cast<NewGeneMainWindow *>(get()->mainWindowObject);
+					connect(this, SIGNAL(SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)));
+					connect(this, SIGNAL(SignalEndProgressBar(int)), mainWindow, SLOT(ReceiveSignalStopProgressBar(int)));
+					connect(this, SIGNAL(SignalUpdateProgressBarValue(int, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const)));
+					connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+				}
+				catch (std::bad_cast &)
+				{
+				}
 			}
 		}
 	}
@@ -124,10 +132,17 @@ UIMessagerOutputProject::UIMessagerOutputProject(UIOutputProject * outp_, QObjec
 			connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
 			if (get()->mainWindowObject)
 			{
-				connect(this, SIGNAL(SignalStartProgressBar(int, std::int64_t const, std::int64_t const)), get()->mainWindowObject, SLOT(ReceiveSignalStartProgressBar(int, std::int64_t const, std::int64_t const)));
-				connect(this, SIGNAL(SignalEndProgressBar(int)), get()->mainWindowObject, SLOT(ReceiveSignalStopProgressBar(int)));
-				connect(this, SIGNAL(SignalUpdateProgressBarValue(int, std::int64_t const)), get()->mainWindowObject, SLOT(ReceiveSignalUpdateProgressBarValue(int, std::int64_t const)));
-				connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), get()->mainWindowObject, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+				try
+				{
+					NewGeneMainWindow * mainWindow = dynamic_cast<NewGeneMainWindow *>(get()->mainWindowObject);
+					connect(this, SIGNAL(SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)));
+					connect(this, SIGNAL(SignalEndProgressBar(int)), mainWindow, SLOT(ReceiveSignalStopProgressBar(int)));
+					connect(this, SIGNAL(SignalUpdateProgressBarValue(int, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const)));
+					connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+				}
+				catch (std::bad_cast &)
+				{
+				}
 			}
 		}
 	}

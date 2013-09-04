@@ -4,6 +4,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QApplication( argc, argv )
 {
 	qRegisterMetaType<STD_STRING>();
+	qRegisterMetaType<STD_INT64>();
 
 	qRegisterMetaType<QVector<int>>();
 

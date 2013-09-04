@@ -2,7 +2,9 @@
 #define GLOBALS_H
 
 #include <string>
+#include <cstdint>
 typedef std::string STD_STRING;
+typedef std::int64_t STD_INT64;
 
 #include "../../NewGeneBackEnd/globals.h"
 #include <QMessageBox>
@@ -49,6 +51,7 @@ UIUIActionManager & uiactionManagerUI();
 UIModelActionManager & modelactionManagerUI();
 
 Q_DECLARE_METATYPE(STD_STRING);
+Q_DECLARE_METATYPE(STD_INT64);
 
 Q_DECLARE_METATYPE(QVector<int>);
 

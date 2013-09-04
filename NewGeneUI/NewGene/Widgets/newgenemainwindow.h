@@ -28,9 +28,9 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 	public slots:
 		void doInitialize();
 		void SignalMessageBox(STD_STRING);
-		void ReceiveSignalStartProgressBar(int, std::int64_t const, std::int64_t const);
+		void ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const);
 		void ReceiveSignalStopProgressBar(int);
-		void ReceiveSignalUpdateProgressBarValue(int, std::int64_t const);
+		void ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const);
 		void ReceiveSignalUpdateStatusBarText(int, STD_STRING const);
 
 	protected:

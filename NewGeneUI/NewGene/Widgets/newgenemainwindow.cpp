@@ -136,7 +136,7 @@ void NewGeneMainWindow::SignalMessageBox(STD_STRING msg)
 	msgBox.exec();
 }
 
-void NewGeneMainWindow::ReceiveSignalStartProgressBar(int progress_bar_id, std::int64_t const min_value, std::int64_t const max_value)
+void NewGeneMainWindow::ReceiveSignalStartProgressBar(int progress_bar_id, STD_INT64 const min_value, STD_INT64 const max_value)
 {
 	status_bar_progress_bars[progress_bar_id] = std::unique_ptr<QProgressBar>(new QProgressBar(this));
 	main_pane_progress_bars[progress_bar_id] = std::unique_ptr<QProgressBar>(new QProgressBar(this));
@@ -164,7 +164,7 @@ void NewGeneMainWindow::ReceiveSignalStopProgressBar(int progress_bar_id)
 	main_pane_progress_bars.erase(progress_bar_id);
 }
 
-void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(int progress_bar_id, std::int64_t const new_value)
+void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(int progress_bar_id, STD_INT64 const new_value)
 {
 	if (this->statusBar())
 	{
