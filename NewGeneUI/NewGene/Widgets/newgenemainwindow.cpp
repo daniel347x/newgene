@@ -136,22 +136,22 @@ void NewGeneMainWindow::SignalMessageBox(STD_STRING msg)
 	msgBox.exec();
 }
 
-void NewGeneMainWindow::ReceiveSignalStartProgressBar(STD_STRING const, STD_STRING const)
+void NewGeneMainWindow::ReceiveSignalStartProgressBar(int progress_bar_id, std::int64_t const min_value, std::int64_t const max_value)
 {
 
 }
 
-void NewGeneMainWindow::ReceiveSignalStopProgressBar()
+void NewGeneMainWindow::ReceiveSignalStopProgressBar(int progress_bar_id)
 {
 
 }
 
-void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(std::int64_t const)
+void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(int progress_bar_id, std::int64_t const new_value)
 {
 
 }
 
-void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(STD_STRING const)
+void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(int progress_bar_id, STD_STRING const status_bar_message)
 {
 
 }

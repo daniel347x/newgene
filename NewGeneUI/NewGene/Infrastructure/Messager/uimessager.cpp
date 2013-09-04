@@ -10,12 +10,15 @@
 #include <QMetaObject>
 
 bool UIMessager::ManagersInitialized = false;
+int UIMessager::next_messager_id = 1;
 
 UIMessager::UIMessager(QObject *parent) :
 	QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , singleShotActive(false)
 {
+	current_messager_id = next_messager_id;
+	++next_messager_id;
 	if (ManagersInitialized)
 	{
 		QObject::connect(this, SIGNAL(PostStatus(STD_STRING, int, bool)), &statusManagerUI(), SLOT(ReceiveStatus(STD_STRING, int, bool)));
@@ -94,8 +97,18 @@ UIMessagerInputProject::UIMessagerInputProject(UIInputProject * inp_, QObject * 
 {
 	if (ManagersInitialized)
 	{
-		connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
-		connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
+		if (get())
+		{
+			connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
+			connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
+			if (get()->parent())
+			{
+				connect(this, SIGNAL(SignalStartProgressBar(int, std::int64_t const, std::int64_t const)), get()->parent(), SLOT(ReceiveSignalStartProgressBar(int, std::int64_t const, std::int64_t const)));
+				connect(this, SIGNAL(SignalEndProgressBar(int)), get()->parent(), SLOT(ReceiveSignalStopProgressBar(int)));
+				connect(this, SIGNAL(SignalUpdateProgressBarValue(int, std::int64_t const)), get()->parent(), SLOT(ReceiveSignalUpdateProgressBarValue(int, std::int64_t const)));
+				connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), get()->parent(), SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+			}
+		}
 	}
 }
 
@@ -105,8 +118,18 @@ UIMessagerOutputProject::UIMessagerOutputProject(UIOutputProject * outp_, QObjec
 {
 	if (ManagersInitialized)
 	{
-		connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
-		connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
+		if (get())
+		{
+			connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
+			connect(this, SIGNAL(QuestionMessageBox(STD_STRING)), get(), SLOT(QuestionMessageBox(STD_STRING)));
+			if (get()->parent())
+			{
+				connect(this, SIGNAL(SignalStartProgressBar(int, std::int64_t const, std::int64_t const)), get()->parent(), SLOT(ReceiveSignalStartProgressBar(int, std::int64_t const, std::int64_t const)));
+				connect(this, SIGNAL(SignalEndProgressBar(int)), get()->parent(), SLOT(ReceiveSignalStopProgressBar(int)));
+				connect(this, SIGNAL(SignalUpdateProgressBarValue(int, std::int64_t const)), get()->parent(), SLOT(ReceiveSignalUpdateProgressBarValue(int, std::int64_t const)));
+				connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), get()->parent(), SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+			}
+		}
 	}
 }
 
@@ -124,18 +147,22 @@ bool UIMessagerInputProject::ShowQuestionMessageBox(std::string msg_title, std::
 
 void UIMessagerInputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)
 {
+	emit SignalStartProgressBar(current_messager_id, min_value, max_value);
 }
 
 void UIMessagerInputProject::EndProgressBar()
 {
+	emit SignalEndProgressBar(current_messager_id);
 }
 
-void UIMessagerInputProject::UpdateStatusBarValue(std::int64_t const the_value)
+void UIMessagerInputProject::UpdateProgessBarValue(std::int64_t const the_value)
 {
+	emit SignalUpdateProgressBarValue(current_messager_id, the_value);
 }
 
 void UIMessagerInputProject::UpdateStatusBarText(std::string const & the_text)
 {
+	emit SignalUpdateStatusBarText(current_messager_id, the_text);
 }
 
 void UIMessagerInputProject::EmitInputProjectChangeMessage(DataChangeMessage & changes)
@@ -157,18 +184,22 @@ bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg_title, std:
 
 void UIMessagerOutputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)
 {
+	emit SignalStartProgressBar(progress_bar_id, min_value, max_value);
 }
 
 void UIMessagerOutputProject::EndProgressBar()
 {
+	emit SignalEndProgressBar(current_messager_id);
 }
 
-void UIMessagerOutputProject::UpdateStatusBarValue(std::int64_t const the_value)
+void UIMessagerOutputProject::UpdateProgressBarValue(std::int64_t const the_value)
 {
+	emit SignalUpdateProgressBarValue(current_messager_id, the_value);
 }
 
 void UIMessagerOutputProject::UpdateStatusBarText(std::string const & the_text)
 {
+	emit SignalUpdateStatusBarText(current_messager_id, the_text);
 }
 
 void UIMessagerOutputProject::EmitOutputProjectChangeMessage(DataChangeMessage & changes)

@@ -65,8 +65,11 @@ class UIMessagerErrorMessage : public QObject, public MessagerErrorMessage
 
 class UIMessager : public QObject, public Messager
 {
+
 		Q_OBJECT
+
 	public:
+
 		UIMessager(QObject *parent = 0);
 		~UIMessager();
 
@@ -81,9 +84,14 @@ class UIMessager : public QObject, public Messager
 		virtual void EmitOutputProjectChangeMessage(DataChangeMessage & changes) {}
 
 	signals:
+
 		void PostStatus(STD_STRING, int, bool);
 		void DisplayMessageBox(STD_STRING);
 		void QuestionMessageBox(STD_STRING);
+		void SignalStartProgressBar(int, std::int64_t const, std::int64_t const);
+		void SignalEndProgressBar(int);
+		void SignalUpdateProgressBarValue(int, std::int64_t const);
+		void SignalUpdateStatusBarText(int, STD_STRING const &);
 
 	public slots:
 
@@ -95,6 +103,8 @@ class UIMessager : public QObject, public Messager
 	protected:
 
 		bool singleShotActive;
+		int current_messager_id;
+		static int next_messager_id;
 
 	private:
 
@@ -117,7 +127,7 @@ class UIMessagerInputProject : public UIMessager
 		bool ShowQuestionMessageBox(std::string, std::string); // title, question text
 		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();
-		virtual void UpdateStatusBarValue(std::int64_t const);
+		virtual void UpdateProgressBarValue(std::int64_t const);
 		virtual void UpdateStatusBarText(std::string const & status_bar_text);
 
 		void EmitInputProjectChangeMessage(DataChangeMessage & changes);
@@ -141,7 +151,7 @@ class UIMessagerOutputProject : public UIMessager
 		bool ShowQuestionMessageBox(std::string, std::string); // title, question text
 		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();
-		virtual void UpdateStatusBarValue(std::int64_t const);
+		virtual void UpdateProgressBarValue(std::int64_t const);
 		virtual void UpdateStatusBarText(std::string const & status_bar_text);
 
 		void EmitOutputProjectChangeMessage(DataChangeMessage & changes);

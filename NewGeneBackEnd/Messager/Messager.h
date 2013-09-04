@@ -151,8 +151,8 @@ class Messager
 		virtual bool ShowQuestionMessageBox(std::string, std::string) { return false; } // title, question text
 		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();
+		virtual void UpdateProgressBarValue(std::int64_t const);
 		virtual void UpdateStatusBarText(std::string const &);
-		virtual void UpdateStatusBar(std::int64_t const, std::int64_t const);
 
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData) {}
