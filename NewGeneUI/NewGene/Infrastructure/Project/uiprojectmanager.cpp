@@ -106,6 +106,11 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 	InputProjectFilesList::instance input_project_list = InputProjectFilesList::get(messager);
 	OutputProjectFilesList::instance output_project_list = OutputProjectFilesList::get(messager);
 
+	connect(mainWindowObject, SIGNAL(SignalCloseCurrentInputDataset()), this, SLOT(CloseCurrentInputDataset()));
+	connect(mainWindowObject, SIGNAL(SignalCloseCurrentOutputDataset()), this, SLOT(CloseCurrentOutputDataset()));
+	connect(mainWindowObject, SIGNAL(SignalOpenInputDataset(STD_STRING)), this, SLOT(OpenInputDataset(STD_STRING)));
+	connect(mainWindowObject, SIGNAL(SignalOpenOutputDataset(STD_STRING)), this, SLOT(OpenOutputDataset(STD_STRING)));
+
 	if (input_project_list->files.size() == 1)
 	{
 

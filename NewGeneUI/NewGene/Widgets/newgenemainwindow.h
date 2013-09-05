@@ -42,6 +42,9 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 
 	private slots:
 		void on_actionClose_Current_Input_Dataset_triggered();
+		void on_actionOpen_Input_Dataset_triggered();
+		void on_actionOpen_Output_Dataset_triggered();
+		void on_actionClose_Current_Output_Dataset_triggered();
 
 	private:
 		Ui::NewGeneMainWindow * ui;

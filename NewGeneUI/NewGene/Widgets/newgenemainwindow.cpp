@@ -185,5 +185,20 @@ void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(int progress_bar_id, ST
 
 void NewGeneMainWindow::on_actionClose_Current_Input_Dataset_triggered()
 {
+	emit SignalCloseCurrentInputDataset();
+}
 
+void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
+{
+
+}
+
+void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
+{
+
+}
+
+void NewGeneMainWindow::on_actionClose_Current_Output_Dataset_triggered()
+{
+	emit SignalCloseCurrentOutputDataset();
 }
