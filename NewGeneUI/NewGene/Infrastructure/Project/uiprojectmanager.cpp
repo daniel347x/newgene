@@ -395,6 +395,8 @@ void UIProjectManager::OpenInputDataset(STD_STRING)
 
 	tabs.clear();
 
+	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, InputProjectFilesList(messager, ""));
+
 }
 
 void UIProjectManager::CloseCurrentInputDataset()
@@ -428,5 +430,7 @@ void UIProjectManager::CloseCurrentInputDataset()
 	project_ptr->deleteLater();
 
 	tabs.clear();
+
+	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, ""));
 
 }
