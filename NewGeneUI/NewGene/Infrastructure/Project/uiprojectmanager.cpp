@@ -459,7 +459,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	boost::filesystem::path path_to_model_settings = path_to_model_settings_->getPath();
 	if (path_to_model_settings.is_relative())
 	{
-		boost::filesystem::path new_path = input_project_settings_path;
+		boost::filesystem::path new_path = input_project_settings_path.parent_path();
 		new_path /= path_to_model_settings;
 		path_to_model_settings = new_path;
 	}
@@ -480,7 +480,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
 	if (path_to_model_database.is_relative())
 	{
-		boost::filesystem::path new_path = path_to_model_settings;
+		boost::filesystem::path new_path = path_to_model_settings.parent_path();
 		new_path /= path_to_model_database;
 		path_to_model_database = new_path;
 	}
@@ -567,7 +567,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	boost::filesystem::path path_to_model_settings = path_to_model_settings_->getPath();
 	if (path_to_model_settings.is_relative())
 	{
-		boost::filesystem::path new_path = output_project_settings_path;
+		boost::filesystem::path new_path = output_project_settings_path.parent_path();
 		new_path /= path_to_model_settings;
 		path_to_model_settings = new_path;
 	}
@@ -597,7 +597,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
 	if (path_to_model_database.is_relative())
 	{
-		boost::filesystem::path new_path = path_to_model_settings;
+		boost::filesystem::path new_path = path_to_model_settings.parent_path();
 		new_path /= path_to_model_database;
 		path_to_model_database = new_path;
 	}
