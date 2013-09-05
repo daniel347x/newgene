@@ -371,20 +371,29 @@ void UIProjectManager::OpenInputDataset(STD_STRING)
 void UIProjectManager::CloseCurrentInputDataset()
 {
 
+	// One per main window (currently only 1 supported per application)
 	if (input_tabs.size() > 1 || input_tabs.size() == 0)
 	{
 		return;
 	}
 	InputProjectTabs & tabs = *input_tabs.begin();
+
+	// One per project (corresponding to an actual physical tab; currently only 1 per main window supported)
 	if (tabs.size() > 1 || tabs.size() == 0)
 	{
 		return;
 	}
 	InputProjectTab & tab = *tabs.begin();
+
 	if (!tab.second)
 	{
+		tabs.clear();
 		return;
 	}
-	UIInputProject & input_project = tab.second.get();
+
+	emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+
+	UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
+	project_ptr->deleteLater();
 
 }

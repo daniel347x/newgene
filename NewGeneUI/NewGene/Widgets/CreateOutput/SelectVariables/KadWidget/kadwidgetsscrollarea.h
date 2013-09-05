@@ -7,22 +7,26 @@
 class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 {
 
-        Q_OBJECT
+		Q_OBJECT
 
-    public:
+	public:
 
-        explicit KadWidgetsScrollArea(QWidget *parent = 0);
+		explicit KadWidgetsScrollArea(QWidget *parent = 0);
 
-    signals:
+	signals:
 
-        void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA);
+		void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA);
 
-    public slots:
+	public slots:
 
-        void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
-        void RefreshAllWidgets();
-        void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROLS_AREA); // us, parent
-        void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET); // child
+		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void RefreshAllWidgets();
+		void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROLS_AREA); // us, parent
+		void WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET); // child
+
+	protected:
+
+		void Empty();
 
 };
 

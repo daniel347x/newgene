@@ -108,6 +108,10 @@ class NewGeneWidget
 		bool IsInputProjectWidget() const;
 		bool IsOutputProjectWidget() const;
 
+	protected:
+
+		virtual void Empty() {}
+
 };
 
 class WidgetCreationInfo

@@ -43,6 +43,10 @@ void NewGeneVariableGroupsScrollArea::UpdateOutputConnections(UIProjectManager::
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)));
 	}
+	else if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		Empty();
+	}
 }
 
 void NewGeneVariableGroupsScrollArea::TestSlot()
@@ -55,5 +59,10 @@ void NewGeneVariableGroupsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_VA
 
 void NewGeneVariableGroupsScrollArea::RefreshAllWidgets()
 {
+	if (outp == nullptr)
+	{
+		Empty();
+		return;
+	}
 	emit RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS));
 }

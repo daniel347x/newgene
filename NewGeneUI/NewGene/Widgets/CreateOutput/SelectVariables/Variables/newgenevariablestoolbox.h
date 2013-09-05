@@ -29,6 +29,10 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 
 		NewGeneVariableGroup * groups;
 
+	protected:
+
+		Empty();
+
 };
 
 #endif // NEWGENEVARIABLESTOOLBOX_H

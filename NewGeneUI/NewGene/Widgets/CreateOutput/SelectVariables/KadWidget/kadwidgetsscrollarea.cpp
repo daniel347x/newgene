@@ -30,17 +30,17 @@ void KadWidgetsScrollArea::UpdateOutputConnections(UIProjectManager::UPDATE_CONN
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET)));
 	}
+	else if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		Empty();
+	}
 }
 
 void KadWidgetsScrollArea::RefreshAllWidgets()
 {
 	if (outp == nullptr)
 	{
-		QLayoutItem *child;
-		while ((child = layout()->takeAt(0)) != 0)
-		{
-			delete child;
-		}
+		Empty();
 		return;
 	}
 	WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
@@ -50,11 +50,7 @@ void KadWidgetsScrollArea::RefreshAllWidgets()
 void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROLS_AREA widget_data)
 {
 
-	QLayoutItem *child;
-	while ((child = layout()->takeAt(0)) != 0)
-	{
-		delete child;
-	}
+	Empty();
 
 	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](WidgetInstanceIdentifier const & identifier)
 	{
@@ -96,5 +92,14 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 		{
 			child->WidgetDataRefreshReceive(widget_data);
 		}
+	}
+}
+
+void KadWidgetsScrollArea::Empty()
+{
+	QLayoutItem *child;
+	while ((child = layout()->takeAt(0)) != 0)
+	{
+		delete child;
 	}
 }

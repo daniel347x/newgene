@@ -40,6 +40,10 @@ class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget //
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA); // us, parent
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE); // child
 
+	protected:
+
+		void Empty();
+
 	private:
 
 		NewGeneVariableSummaryGroup * groups;

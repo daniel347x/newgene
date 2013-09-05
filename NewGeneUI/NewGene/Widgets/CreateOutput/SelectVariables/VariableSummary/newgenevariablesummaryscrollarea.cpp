@@ -47,17 +47,17 @@ void NewGeneVariableSummaryScrollArea::UpdateOutputConnections(UIProjectManager:
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)));
 	}
+	else if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		Empty();
+	}
 }
 
 void NewGeneVariableSummaryScrollArea::RefreshAllWidgets()
 {
 	if (outp == nullptr)
 	{
-		QLayoutItem *child;
-		while ((child = layout()->takeAt(0)) != 0)
-		{
-			delete child;
-		}
+		Empty();
 		return;
 	}
 	WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
@@ -67,11 +67,7 @@ void NewGeneVariableSummaryScrollArea::RefreshAllWidgets()
 void NewGeneVariableSummaryScrollArea::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA widget_data)
 {
 
-	QLayoutItem *child;
-	while ((child = layout()->takeAt(0)) != 0)
-	{
-		delete child;
-	}
+	Empty();
 
 	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](WidgetInstanceIdentifier const & identifier)
 	{
@@ -95,5 +91,14 @@ void NewGeneVariableSummaryScrollArea::WidgetDataRefreshReceive(WidgetDataItem_V
 		{
 			child->WidgetDataRefreshReceive(widget_data);
 		}
+	}
+}
+
+void NewGeneVariableSummaryScrollArea::Empty()
+{
+	QLayoutItem *child;
+	while ((child = layout()->takeAt(0)) != 0)
+	{
+		delete child;
 	}
 }

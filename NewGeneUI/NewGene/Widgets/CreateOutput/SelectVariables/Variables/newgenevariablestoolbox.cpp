@@ -23,25 +23,17 @@ void NewGeneVariablesToolbox::UpdateOutputConnections(UIProjectManager::UPDATE_C
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 	}
+	else if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	{
+		Empty();
+	}
 }
 
 void NewGeneVariablesToolbox::RefreshAllWidgets()
 {
 	if (outp == nullptr)
 	{
-		int nItems = count();
-		for (int n = 0; n < nItems; ++n)
-		{
-			QWidget * child = find(n);
-			removeItem(n);
-			if (child)
-			{
-				delete child;
-				child = nullptr;
-			}
-			--n;
-			--nItems;
-		}
+		Empty();
 		return;
 	}
 	WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
@@ -51,19 +43,7 @@ void NewGeneVariablesToolbox::RefreshAllWidgets()
 void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX widget_data)
 {
 
-	int nItems = count();
-	for (int n = 0; n < nItems; ++n)
-	{
-		QWidget * child = find(n);
-		removeItem(n);
-		if (child)
-		{
-			delete child;
-			child = nullptr;
-		}
-		--n;
-		--nItems;
-	}
+	Empty();
 
 	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [&](WidgetInstanceIdentifier const & identifier)
 	{
@@ -86,5 +66,22 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 		{
 			child->WidgetDataRefreshReceive(widget_data);
 		}
+	}
+}
+
+void NewGeneVariablesToolbox::Empty()
+{
+	int nItems = count();
+	for (int n = 0; n < nItems; ++n)
+	{
+		QWidget * child = find(n);
+		removeItem(n);
+		if (child)
+		{
+			delete child;
+			child = nullptr;
+		}
+		--n;
+		--nItems;
 	}
 }
