@@ -9,7 +9,8 @@
 #include <memory>
 #include "../Settings/uioutputmodelsettings.h"
 #include "outputprojectworkqueue.h"
-#include "newgenegenerateoutput.h"
+
+class NewGeneGenerateOutput;
 
 class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>
 {
@@ -21,23 +22,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 						std::shared_ptr<UIOutputModelSettings> const & model_settings,
 						std::shared_ptr<UIOutputModel> const & model,
 						QObject * mainWindowObject_,
-						QObject * parent = NULL)
-			: QObject(parent)
-			, UIProject(project_settings, model_settings, model)
-			, mainWindowObject(mainWindowObject_)
-			, messager(this)
-			, number_timerange_widgets_created(0)
-			, output_pane(nullptr)
-		{
-			try
-			{
-				output_pane = findChild<NewGeneGenerateOutput *>( "widgetOutputPane" );
-			}
-			catch (std::bad_cast &)
-			{
-
-			}
-		}
+						QObject * parent = NULL);
 
 		void UpdateConnections();
 		void DoRefreshAllWidgets();

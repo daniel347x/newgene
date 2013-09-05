@@ -1,6 +1,29 @@
 #include "uioutputproject.h"
 #include "uiinputmodel.h"
 #include "../../Widgets/newgenewidget.h"
+#include "newgenegenerateoutput.h"
+
+UIOutputProject::UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const & project_settings,
+				std::shared_ptr<UIOutputModelSettings> const & model_settings,
+				std::shared_ptr<UIOutputModel> const & model,
+				QObject * mainWindowObject_,
+				QObject * parent)
+	: QObject(parent)
+	, UIProject(project_settings, model_settings, model)
+	, mainWindowObject(mainWindowObject_)
+	, messager(this)
+	, number_timerange_widgets_created(0)
+	, output_pane(nullptr)
+{
+	try
+	{
+		output_pane = findChild<NewGeneGenerateOutput *>( "widgetOutputPane" );
+	}
+	catch (std::bad_cast &)
+	{
+
+	}
+}
 
 void UIOutputProject::SignalMessageBox(STD_STRING msg)
 {
