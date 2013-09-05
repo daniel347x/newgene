@@ -11,17 +11,28 @@ namespace Ui
 
 class KAdColumnSelectionBox : public QFrame, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
+
 		Q_OBJECT
 
 	public:
+
 		explicit KAdColumnSelectionBox( QWidget * parent = 0 );
 		~KAdColumnSelectionBox();
 
 	protected:
+
 		void changeEvent( QEvent * e );
 
 	private:
+
 		Ui::KAdColumnSelectionBox * ui;
+
+	public:
+
+	signals:
+
+	public slots:
+
 };
 
 #endif // KADCOLUMNSELECTIONBOX_H

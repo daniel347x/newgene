@@ -11,17 +11,28 @@ namespace Ui
 
 class NewGeneSelectVariables : public QWidget, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
+
 		Q_OBJECT
 
 	public:
+
 		explicit NewGeneSelectVariables( QWidget * parent = 0 );
 		~NewGeneSelectVariables();
 
 	protected:
+
 		void changeEvent( QEvent * e );
 
 	private:
+
 		Ui::NewGeneSelectVariables * ui;
+
+	public:
+
+	signals:
+
+	public slots:
+
 };
 
 #endif // NEWGENESELECTVARIABLES_H

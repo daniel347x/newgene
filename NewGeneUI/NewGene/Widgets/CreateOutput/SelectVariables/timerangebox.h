@@ -11,17 +11,28 @@ namespace Ui
 
 class TimeRangeBox : public QFrame, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {
+
 		Q_OBJECT
 
 	public:
+
 		explicit TimeRangeBox( QWidget * parent = 0 );
 		~TimeRangeBox();
 
 	protected:
+
 		void changeEvent( QEvent * e );
 
 	private:
+
 		Ui::TimeRangeBox * ui;
+
+	public:
+
+	signals:
+
+	public slots:
+
 };
 
 #endif // TIMERANGEBOX_H
