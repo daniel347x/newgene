@@ -70,8 +70,6 @@ void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_
 
 	if (!IsInputProjectWidget())
 	{
-		boost::format msg("Attempting to connect an input project to a widget that has not registered as an input widget.");
-		statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
 		return;
 	}
 
