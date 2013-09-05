@@ -648,7 +648,7 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 				default:
 					{
 						// Todo: Error message
-						boost::format msg("Unknown datatype in database column.");
+						boost::format msg("Unknown data type in database column.");
 						SetFailureMessage(msg.str());
 						failed = true;
 						return; // from lambda
@@ -2010,7 +2010,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					data_long = sqlite3_column_double(stmt_result, current_column);
 					// Todo: Error message
 					boost::format msg("Floating point values are not yet supported.");
-					SetFailureMessage(msg.str());
+					error_message = msg.str();
 					failed = true;
 					return; // from lambda
 				}
@@ -2041,7 +2041,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				{
 					// Todo: Error message
 					boost::format msg("BLOBs are not supported.");
-					SetFailureMessage(msg.str());
+					error_message = msg.str();
 					failed = true;
 					return; // from lambda
 				}
@@ -2070,7 +2070,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				{
 					// Todo: Error message
 					boost::format msg("Unknown data type in column in database.");
-					SetFailureMessage(msg.str());
+					error_message = msg.str();
 					failed = true;
 					return; // from lambda
 				}
@@ -2260,6 +2260,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		failed = sorting_row_of_data.failed;
 		if (failed)
 		{
+			SetFailureMessage(sorting_row_of_data.error_message);
 			return result;
 		}
 
@@ -3187,8 +3188,8 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView & column_set)
 	if (stmt_result == NULL)
 	{
 		sql_error = sqlite3_errmsg(db);
-		boost::format msg("SQLite database error when preparing SELECT * SQL statement for table %1%: %2%");
-		msg % column_set.view_name % sql_error;
+		boost::format msg("SQLite database error when preparing SELECT * SQL statement for table %1%: %2% (The SQL query is \"%3%\")");
+		msg % column_set.view_name % sql_error % sql;
 		msg % sql_error;
 		SetFailureMessage(msg.str());
 		failed = true;
@@ -3232,6 +3233,7 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 		if (sql_executor.failed)
 		{
 			// Error already posted
+			SetFailureMessage(sql_executor.error_message);
 			failed = true;
 			return;
 		}
@@ -3301,6 +3303,9 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 			if (stmt == NULL)
 			{
 				sql_error = sqlite3_errmsg(db);
+				boost::format msg("Unable to prepare SQL query \"%1%\": %2%");
+				msg % sql % sql_error;
+				error_message = msg.str();
 				failed = true;
 				return;
 			}
@@ -3421,6 +3426,9 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 					if (stmt == NULL)
 					{
 						sql_error = sqlite3_errmsg(db);
+						boost::format msg("Unable to prepare SQL query \"%1%\": %2%");
+						msg % sql % sql_error;
+						error_message = msg.str();
 						failed = true;
 						return;
 					}
@@ -3439,6 +3447,9 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 					if (stmt == NULL)
 					{
 						sql_error = sqlite3_errmsg(db);
+						boost::format msg("Unable to prepare SQL query \"%1%\": %2%");
+						msg % sql % sql_error;
+						error_message = msg.str();
 						failed = true;
 						return;
 					}
@@ -3508,6 +3519,9 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 				if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
 				{
 					sql_error = sqlite3_errmsg(db);
+					boost::format msg("Unexpected result when attempting to execute SQL query \"%1%\": %2%");
+					msg % sql % sql_error;
+					error_message = msg.str();
 					failed = true;
 					return;
 				}
@@ -3555,6 +3569,9 @@ bool OutputModel::OutputGenerator::SQLExecutor::Step()
 		}
 
 		sql_error = sqlite3_errmsg(db);
+		boost::format msg("Unexpected result (row not returned) when attempting to step through result set of SQL query \"%1%\": %2%");
+		msg % sql % sql_error;
+		error_message = msg.str();
 		failed = true;
 		return false;
 	}
@@ -5115,6 +5132,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
 						data_long = sqlite3_column_double(stmt_result, index);
 						// Todo: Error message
+						boost::format msg("Floating point values are not yet supported.  (Error while creating new timerange-managed row.)");
+						SetFailureMessage(msg.str());
 						failed = true;
 						return; // from lambda
 					}
@@ -5172,6 +5191,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 				case SQLITE_BLOB:
 					{
 						// Todo: Error message
+						boost::format msg("BLOBs are not supported.  (Error while creating new timerange-managed row.)");
+						SetFailureMessage(msg.str());
 						failed = true;
 						return; // from lambda
 					}
@@ -5223,6 +5244,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 				default:
 					{
 						// Todo: Error message
+						boost::format msg("Unknown data type in column.  (Error while creating new timerange-managed row.)");
+						SetFailureMessage(msg.str());
 						failed = true;
 						return; // from lambda
 					}
@@ -5261,6 +5284,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			if (number_columns_first_sets != number_columns_last_set + 2)
 			{
 				// The final inner column set is missing the "merged" datetime columns
+				boost::format msg("The number of columns in previous inner tables does not match the number of columns in the current inner table (not including timerange columns).  (Error while creating new timerange-managed row.)");
+				SetFailureMessage(msg.str());
 				failed = true;
 				return false;
 			}
@@ -7048,6 +7073,9 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 	WidgetInstanceIdentifiers & datetime_columns = input_model->t_vgp_data_metadata__datetime_columns.getIdentifiers(vg_data_table_name);
 	if (datetime_columns.size() > 0 && datetime_columns.size() != 2)
 	{
+		boost::format msg("The number of datetime columns in the raw data tables in the database is not either 0 or 2 (table %1%)");
+		msg % vg_data_table_name;
+		SetFailureMessage(msg.str());
 		failed = true;
 		return;
 	}
@@ -7078,7 +7106,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 		columns_in_variable_group_view.has_no_datetime_columns_originally = true;
 	}
 
-	std::for_each(variables_in_group_sorted.cbegin(), variables_in_group_sorted.cend(), [this, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group, &variables_in_group_primary_keys_metadata](WidgetInstanceIdentifier const & variable_group_set_member)
+	std::for_each(variables_in_group_sorted.cbegin(), variables_in_group_sorted.cend(), [this, &vg_data_table_name, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group, &variables_in_group_primary_keys_metadata](WidgetInstanceIdentifier const & variable_group_set_member)
 	{
 		columns_in_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & column_in_variable_group_data_table = columns_in_variable_group_view.columns_in_view.back();
@@ -7098,6 +7126,9 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 
 		if (!the_variable_group.first.identifier_parent)
 		{
+			boost::format msg("There is no unit of analysis that can be retrieved for table %1% while attempting to retrieve raw data from this table.");
+			msg % vg_data_table_name;
+			SetFailureMessage(msg.str());
 			failed = true;
 			return;
 		}
@@ -7312,6 +7343,9 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 			if (current_is_smaller || current_is_bigger)
 			{
 				// error in algorithm logic
+				boost::format msg("Unable to determine DMU counts for unit of analysis %1%.");
+				msg % *uoa__to__dmu_counts__pair.first.code;
+				SetFailureMessage(msg.str());
 				failed = true;
 				return; // from lambda
 			}
@@ -7326,6 +7360,8 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 		{
 			// overlapping UOA's: not yet implemented
 			// Todo: Error message
+			boost::format msg("Overlapping top-level variable groups are not yet supported.");
+			SetFailureMessage(msg.str());
 			failed = true;
 			return; // from labmda
 		}
@@ -7345,6 +7381,8 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 		else
 		{
 			// error in algorithm logic
+			boost::format msg("Unknown evaluation of DMU counts for top-level variable groups.");
+			SetFailureMessage(msg.str());
 			failed = true;
 			return; // from lambda
 		}
@@ -7376,6 +7414,8 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		WidgetInstanceIdentifier const & the_dmu_category = k_count_for_primary_uoa_for_given_dmu_category__info.first;
 		if (!the_dmu_category.uuid || !the_dmu_category.code)
 		{
+			boost::format msg("DMU code (or UUID) is unknown while validating units of analysis.");
+			SetFailureMessage(msg.str());
 			failed = true;
 			return; // from lambda
 		}
@@ -7391,6 +7431,18 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		{
 			// User's K-ad selection is too small in this DMU category to support the variables they have selected
 			// Todo: Error message
+			if (the_dmu_category.longhand)
+			{
+				boost::format msg("The choice of K in the spin control for DMU %1% (\"%2%\") (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis %5%.");
+				msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.code;
+				SetFailureMessage(msg.str());
+			}
+			else
+			{
+				boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis %4%.");
+				msg % *the_dmu_category.code % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.code;
+				SetFailureMessage(msg.str());
+			}
 			failed = true;
 			return; // from lambda
 		}
@@ -7402,6 +7454,23 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			{
 				++multiplicity;
 			}
+		}
+		if (multiplicity * uoa_count_current_dmu_category != kad_count_current_dmu_category)
+		{
+			if (the_dmu_category.longhand)
+			{
+				boost::format msg("The choice of K in the spin control for DMU %1% (\"%2%\") (%3%) is not an even multiple of the minimun K-value for the unit of analysis %4% (%5%).");
+				msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % *biggest_counts[0].first.code % uoa_count_current_dmu_category;
+				SetFailureMessage(msg.str());
+			}
+			else
+			{
+				boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is not an even multiple of the minimun K-value for the unit of analysis %3% (%4%).");
+				msg % *the_dmu_category.code % kad_count_current_dmu_category % *biggest_counts[0].first.code % uoa_count_current_dmu_category;
+				SetFailureMessage(msg.str());
+			}
+			failed = true;
+			return;
 		}
 		multiplicities_primary_uoa.push_back(multiplicity);
 		if (multiplicity > highest_multiplicity_primary_uoa)
@@ -7436,6 +7505,8 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				// A second DMU category's multiplicity is greater than 1 - for now, not allowed.  This can be implemented in the future.
 				// ********************************************************************************************************************** //
 				failed = true;
+				boost::format msg("Only a single DMU category may have its K value in the spin control set to larger than the minimum.  Future versions of NewGene may allow this.");
+				SetFailureMessage(msg.str());
 				return; // from lambda
 			}
 			any_primary_dmu_has_multiplicity_greater_than_1 = true;
@@ -7503,6 +7574,18 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 					{
 						// Todo: error message
 						// Invalid child UOA for this output
+						if (current_dmu_plus_count.first.longhand)
+						{
+							boost::format msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% (\"%2%\") may only be greater than 1 if it matches the K-value within the UOA of the top-level variable group/s.");
+							msg % *current_dmu_plus_count.first.code % *current_dmu_plus_count.first.longhand;
+							SetFailureMessage(msg.str());
+						}
+						else
+						{
+							boost::format msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% may only be greater than 1 if it matches the K-value within the UOA of the top-level variable group/s.");
+							msg % *current_dmu_plus_count.first.code;
+							SetFailureMessage(msg.str());
+						}
 						failed = true;
 						return; // from lambda
 					}
@@ -7531,6 +7614,18 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 							// *************************************************************************************** //
 
 							// Invalid child UOA for this output
+							if (current_dmu_plus_count.first.longhand)
+							{
+								boost::format msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% (\"%2%\") cannot currently be 1 if the K-value within the UOA of the top-level variable group/s is greater than 1 when that DMU category does not have multiplicity greater than 1 for the top-level variable group.");
+								msg % *current_dmu_plus_count.first.code % *current_dmu_plus_count.first.longhand;
+								SetFailureMessage(msg.str());
+							}
+							else
+							{
+								boost::format msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% cannot currently be 1 if the K-value within the UOA of the top-level variable group/s is greater than 1 when that DMU category does not have multiplicity greater than 1 for the top-level variable group.");
+								msg % *current_dmu_plus_count.first.code;
+								SetFailureMessage(msg.str());
+							}
 							failed = true;
 							return; // from lambda
 						}
@@ -7544,6 +7639,10 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		{
 			// Todo: error message
 			// Invalid child UOA for this output
+
+			boost::format msg("For child variable group with unit of analysis %1%, the K-value for more than one DMU category is less than the corresponding K-values within the UOA of the top-level variable group/s.  This is currently not supported by NewGene.");
+			msg % *uoa__to__dmu_counts__pair.first.code;
+			SetFailureMessage(msg.str());
 			failed = true;
 			return; // from lambda
 		}
@@ -7564,6 +7663,9 @@ void OutputModel::OutputGenerator::PopulateUOAs()
 		WidgetInstanceIdentifier const & uoa = uoa__to__variable_groups__pair.first;
 		if (!uoa.uuid)
 		{
+			boost::format msg("Unit of analysis %1% does not have a UUID.  (Error while populating metadata for units of analysis.)");
+			msg % *uoa.code;
+			SetFailureMessage(msg.str());
 			failed = true;
 			return; // from lambda
 		}
@@ -7598,6 +7700,8 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 			WidgetInstanceIdentifier const & the_dmu_category_identifier = dmu_category.first;
 			if (!the_dmu_category_identifier.uuid || !the_dmu_category_identifier.code)
 			{
+				boost::format msg("Unknown DMU identifier while obtaining metadata for child variable groups.");
+				SetFailureMessage(msg.str());
 				failed = true;
 				return; // from lambda
 			}
@@ -7616,6 +7720,18 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 			{
 				// User's K-ad selection is too small in this DMU category to support the variables they have selected
 				// Todo: Error message
+				if (the_dmu_category_identifier.longhand)
+				{
+					boost::format msg("The choice of K in the spin control for DMU %1% (\"%2%\") (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis %5%.");
+					msg % *the_dmu_category_identifier.code % *the_dmu_category_identifier.longhand % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category % *uoa_identifier.code;
+					SetFailureMessage(msg.str());
+				}
+				else
+				{
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis %4%.");
+					msg % *the_dmu_category_identifier.code % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category % *uoa_identifier.code;
+					SetFailureMessage(msg.str());
+				}
 				failed = true;
 				return; // from lambda
 			}
@@ -7672,6 +7788,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 		WidgetInstanceIdentifier const & the_dmu_category = k_count_for_primary_uoa_for_given_dmu_category__info.first;
 		if (!the_dmu_category.uuid || !the_dmu_category.code)
 		{
+			boost::format msg("Unknown DMU identifier while populating primary key sequence metadata.");
+			SetFailureMessage(msg.str());
 			failed = true;
 			return; // from lambda
 		}
@@ -7711,6 +7829,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				if (!the_variable_group.first.code)
 				{
 					// Todo: error message
+					boost::format msg("Unknown variable group identifier while populating primary key sequence metadata.");
+					SetFailureMessage(msg.str());
 					failed = true;
 					return;
 				}
@@ -7718,6 +7838,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				if (!the_variable_group.first.identifier_parent)
 				{
 					// Todo: error message
+					boost::format msg("Unknown unit of analysis identifier while populating primary key sequence metadata.");
+					SetFailureMessage(msg.str());
 					failed = true;
 					return;
 				}
@@ -7744,6 +7866,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				if (dmu_category_metadata__for_current_primary_or_child_uoa.size() == 0)
 				{
 					// Todo: error message
+					boost::format msg("Global data tables - i.e., tables of raw data with no DMU category primary key - are not yet supported in NewGene.");
+					SetFailureMessage(msg.str());
 					failed = true;
 					return;
 				}
@@ -7826,6 +7950,9 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								bool found_variable_group_set_member_identifier = input_model->t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(*current_variable_group__current_dmu_primary_key_instance.longhand, *the_variable_group.first.uuid, vg_setmember_identifier);
 								if (!found_variable_group_set_member_identifier)
 								{
+									boost::format msg("Unable to locate variable \"%1%\" (%2%) while populating primary key sequence metadata.");
+									msg % *current_variable_group__current_dmu_primary_key_instance.longhand % *the_variable_group.first.uuid;
+									SetFailureMessage(msg.str());
 									failed = true;
 									return; // from lambda
 								}
@@ -7880,6 +8007,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				if (!the_variable_group.first.code)
 				{
 					// Todo: error message
+					boost::format msg("Unknown variable group identifier while populating primary key sequence metadata.");
+					SetFailureMessage(msg.str());
 					failed = true;
 					return;
 				}
@@ -7887,6 +8016,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				if (!the_variable_group.first.identifier_parent)
 				{
 					// Todo: error message
+					boost::format msg("Unknown unit of analysis identifier while populating primary key sequence metadata.");
+					SetFailureMessage(msg.str());
 					failed = true;
 					return;
 				}
@@ -7913,6 +8044,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				if (dmu_category_metadata__for_current_primary_or_child_uoa.size() == 0)
 				{
 					// Todo: error message
+					boost::format msg("Global data tables - i.e., tables of raw data with no DMU category primary key - are not yet supported in NewGene.");
+					SetFailureMessage(msg.str());
 					failed = true;
 					return;
 				}
@@ -7990,6 +8123,9 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								bool found_variable_group_set_member_identifier = input_model->t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(*current_variable_group_current_dmu_primary_key.longhand, *the_variable_group.first.uuid, vg_setmember_identifier);
 								if (!found_variable_group_set_member_identifier)
 								{
+									boost::format msg("Unable to locate variable \"%1%\" (%2%) while populating primary key sequence metadata.");
+									msg % *current_variable_group_current_dmu_primary_key.longhand % *the_variable_group.first.uuid;
+									SetFailureMessage(msg.str());
 									failed = true;
 									return; // from lambda
 								}
