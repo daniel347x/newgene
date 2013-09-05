@@ -31,7 +31,7 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 
 	protected:
 
-		Empty();
+		void Empty();
 
 };
 

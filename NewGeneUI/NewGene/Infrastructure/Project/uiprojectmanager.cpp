@@ -361,17 +361,12 @@ void UIProjectManager::OpenOutputDataset(STD_STRING)
 void UIProjectManager::CloseCurrentOutputDataset()
 {
 
-}
-
-void UIProjectManager::OpenInputDataset(STD_STRING)
-{
-
 	// One per main window (currently only 1 supported per application)
 	if (output_tabs.size() > 1 || output_tabs.size() == 0)
 	{
 		return;
 	}
-	OutputProjectTabs & tabs = *output_tabs.begin();
+	OutputProjectTabs & tabs = (*output_tabs.begin()).second;
 
 	// One per project (corresponding to an actual physical tab; currently only 1 per main window supported)
 	if (tabs.size() > 1 || tabs.size() == 0)
@@ -388,14 +383,20 @@ void UIProjectManager::OpenInputDataset(STD_STRING)
 
 	UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
 
-	emit UpdateInputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+	emit UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 
 	project_ptr = static_cast<UIOutputProject*>(tab.second.release());
 	project_ptr->deleteLater();
 
 	tabs.clear();
 
+	UIMessager messager;
 	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, InputProjectFilesList(messager, ""));
+
+}
+
+void UIProjectManager::OpenInputDataset(STD_STRING)
+{
 
 }
 
@@ -407,7 +408,7 @@ void UIProjectManager::CloseCurrentInputDataset()
 	{
 		return;
 	}
-	InputProjectTabs & tabs = *input_tabs.begin();
+	InputProjectTabs & tabs = (*input_tabs.begin()).second;
 
 	// One per project (corresponding to an actual physical tab; currently only 1 per main window supported)
 	if (tabs.size() > 1 || tabs.size() == 0)
@@ -431,6 +432,7 @@ void UIProjectManager::CloseCurrentInputDataset()
 
 	tabs.clear();
 
+	UIMessager messager;
 	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, ""));
 
 }
