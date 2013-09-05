@@ -16,6 +16,8 @@
 #include "uimessagersingleshot.h"
 #include "newgenemainwindow.h"
 
+#include <QFileDialog>
+
 UIProjectManager::UIProjectManager( QObject * parent )
 	: QObject(parent)
 	, UIManager()
@@ -362,7 +364,38 @@ void UIProjectManager::OpenInputDataset(STD_STRING the_input_dataset, QObject * 
 
 	if (success)
 	{
+
 		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, the_input_dataset));
+
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(nullptr, QString("Open output project?"), QString("Would you also like to open an associated output project?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+		if (reply == QMessageBox::Yes)
+		{
+			OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
+			QWidget * mainWindow = nullptr;
+			try
+			{
+				mainWindow = dynamic_cast<QWidget*>(mainWindowObject);
+			}
+			catch (std::bad_cast &)
+			{
+
+			}
+			if (mainWindow)
+			{
+				QString the_file = QFileDialog::getOpenFileName(mainWindow, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene output settings file (*.newgene.out.xml)");
+				if (the_file.size())
+				{
+					if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
+					{
+						boost::filesystem::path file_path(the_file.toStdString());
+						settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, file_path.parent_path()));
+						OpenOutputDataset(file_path.string(), mainWindowObject);
+					}
+				}
+			}
+		}
+
 	}
 
 }
