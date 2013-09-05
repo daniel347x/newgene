@@ -8367,4 +8367,6 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 void OutputModel::OutputGenerator::SetFailureMessage(std::string const & failure_message_)
 {
 	failure_message = failure_message_;
+	messager.AppendKadStatusText(failure_message);
+	messager.UpdateStatusBarText(failure_message);
 }
