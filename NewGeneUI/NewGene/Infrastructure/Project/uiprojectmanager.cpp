@@ -365,11 +365,13 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_)
 
 }
 
-void UIProjectManager::OpenOutputDataset(STD_STRING)
+void UIProjectManager::OpenOutputDataset(STD_STRING the_output_dataset)
 {
 
 	// blocks - all widgets that respond to the UIProjectManager
 	CloseCurrentOutputDataset();
+
+	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, InputProjectFilesList(messager, the_output_dataset));
 
 }
 
@@ -411,11 +413,13 @@ void UIProjectManager::CloseCurrentOutputDataset()
 
 }
 
-void UIProjectManager::OpenInputDataset(STD_STRING)
+void UIProjectManager::OpenInputDataset(STD_STRING the_input_dataset)
 {
 
 	// blocks - all widgets that respond to the UIProjectManager
 	CloseCurrentInputDataset();
+
+	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, the_input_dataset));
 
 }
 
