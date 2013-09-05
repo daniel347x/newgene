@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "../../../../NewGeneBackEnd/Settings/OutputProjectSettings_list.h"
 #include <QFileDialog>
+#include <QPlainTextEdit>
 
 NewGeneGenerateOutput::NewGeneGenerateOutput(QWidget *parent) :
 	QWidget(parent),
@@ -77,6 +78,15 @@ void NewGeneGenerateOutput::RefreshAllWidgets()
 {
 	WidgetDataItemRequest_GENERATE_OUTPUT_TAB request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
+}
+
+void NewGeneGenerateOutput::ReceiveSignalAppendKadStatusText(int progress_bar_id, STD_STRING const kad_status_update)
+{
+	QPlainTextEdit * edit_pane = findChild<QPlainTextEdit *>( "plainTextEdit_KadStatus" );
+	if (edit_pane)
+	{
+		edit_pane->appendPlainText(kad_status_update.c_str());
+	}
 }
 
 void NewGeneGenerateOutput::on_pushButton_clicked()

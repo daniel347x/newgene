@@ -235,6 +235,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	boost::format msg_1("Generating output to file %1%");
 	msg_1 % boost::filesystem::path(setting_path_to_kad_output).filename();
 	messager.UpdateStatusBarText(msg_1.str().c_str());
+	messager.AppendKadStatusText("Beginning generation of K-ad output.");
+	messager.AppendKadStatusText("Initializing...");
 
 	Prepare();
 
@@ -244,6 +246,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	messager.AppendKadStatusText("Preparing input data...");
 	ObtainColumnInfoForRawDataTables();
 
 	if (failed)
@@ -254,6 +257,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	messager.UpdateProgressBarValue(250);
 
+	messager.AppendKadStatusText("Looping through top-level variable groups...");
 	LoopThroughPrimaryVariableGroups();
 
 	if (failed)
@@ -264,6 +268,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	messager.UpdateProgressBarValue(500);
 
+	messager.AppendKadStatusText("Merging top-level variable groups...");
 	MergeHighLevelGroupResults();
 
 	if (failed)
@@ -274,6 +279,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	messager.UpdateProgressBarValue(750);
 
+	messager.AppendKadStatusText("Merging child variable groups...");
 	MergeChildGroups();
 
 	if (failed)
@@ -284,6 +290,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	messager.UpdateProgressBarValue(900);
 
+	messager.AppendKadStatusText("Formatting results...");
 	FormatResultsForOutput();
 
 	if (failed)
@@ -294,6 +301,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	messager.UpdateProgressBarValue(950);
 
+	messager.AppendKadStatusText("Writing results to disk...");
 	WriteResultsToFileOrScreen();
 
 	if (failed)
@@ -306,6 +314,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	boost::format msg_2("Output successfully generated (%1%)");
 	msg_2 % boost::filesystem::path(setting_path_to_kad_output).filename();
 	messager.UpdateStatusBarText(msg_2.str().c_str());
+	messager.AppendKadStatusText("Done.");
 
 }
 

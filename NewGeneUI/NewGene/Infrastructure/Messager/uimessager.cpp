@@ -140,6 +140,10 @@ UIMessagerOutputProject::UIMessagerOutputProject(UIOutputProject * outp_, QObjec
 					connect(this, SIGNAL(SignalEndProgressBar(int)), mainWindow, SLOT(ReceiveSignalStopProgressBar(int)));
 					connect(this, SIGNAL(SignalUpdateProgressBarValue(int, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const)));
 					connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+					if (get()->output_pane)
+					{
+						connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
+					}
 				}
 				catch (std::bad_cast &)
 				{

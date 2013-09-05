@@ -35,6 +35,7 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 		void on_pushButtonGenerateOutput_clicked();
 		void WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB);
 		void RefreshAllWidgets();
+		void ReceiveSignalAppendKadStatusText(int, STD_STRING const);
 		void on_pushButton_clicked();
 
 	private slots:

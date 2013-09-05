@@ -1,6 +1,7 @@
 #include "uioutputproject.h"
 #include "uiinputmodel.h"
 #include "../../Widgets/newgenewidget.h"
+#include "newgenemainwindow.h"
 #include "newgenegenerateoutput.h"
 
 UIOutputProject::UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const & project_settings,
@@ -17,7 +18,11 @@ UIOutputProject::UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const 
 {
 	try
 	{
-		output_pane = findChild<NewGeneGenerateOutput *>( "widgetOutputPane" );
+		NewGeneMainWindow * theMainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+		if (theMainWindow)
+		{
+			output_pane = theMainWindow->findChild<NewGeneGenerateOutput *>( "widgetOutputPane" );
+		}
 	}
 	catch (std::bad_cast &)
 	{
