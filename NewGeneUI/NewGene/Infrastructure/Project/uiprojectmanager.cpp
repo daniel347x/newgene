@@ -368,6 +368,9 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_)
 void UIProjectManager::OpenOutputDataset(STD_STRING)
 {
 
+	// blocks - all widgets that respond to the UIProjectManager
+	CloseCurrentOutputDataset();
+
 }
 
 void UIProjectManager::CloseCurrentOutputDataset()
@@ -410,6 +413,9 @@ void UIProjectManager::CloseCurrentOutputDataset()
 
 void UIProjectManager::OpenInputDataset(STD_STRING)
 {
+
+	// blocks - all widgets that respond to the UIProjectManager
+	CloseCurrentInputDataset();
 
 }
 
