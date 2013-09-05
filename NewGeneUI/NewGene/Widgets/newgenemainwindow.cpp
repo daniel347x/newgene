@@ -193,6 +193,10 @@ void NewGeneMainWindow::on_actionClose_Current_Input_Dataset_triggered()
 
 void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 {
+
+	// blocks - handled by UIProjectManager, which is in the main thread, as are all widgets that respond to the UIProjectManager
+	emit SignalCloseCurrentInputDataset();
+
 	UIMessager messager;
 	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
 	QString the_file = QFileDialog::getOpenFileName(this, "Choose input dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene input settings file (*.newgene.in.xml)");
@@ -204,10 +208,15 @@ void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, file_path.parent_path()));
 		}
 	}
+
 }
 
 void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 {
+
+	// blocks - handled by UIProjectManager, which is in the main thread, as are all widgets that respond to the UIProjectManager
+	emit SignalCloseCurrentOutputDataset();
+
 	UIMessager messager;
 	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
 	QString the_file = QFileDialog::getOpenFileName(this, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene output settings file (*.newgene.out.xml)");
@@ -219,6 +228,7 @@ void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, file_path.parent_path()));
 		}
 	}
+
 }
 
 void NewGeneMainWindow::on_actionClose_Current_Output_Dataset_triggered()

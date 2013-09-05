@@ -172,7 +172,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 			project_model->UpdateConnections();
 			project->UpdateConnections();
 
-			emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+			// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+			emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
 
 			emit LoadFromDatabase(&project->model());
 
@@ -250,7 +251,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 			project_model->UpdateConnections();
 			project->UpdateConnections();
 
-			emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+			// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+			emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 
 		}
 
@@ -393,7 +395,8 @@ void UIProjectManager::CloseCurrentOutputDataset()
 
 	UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
 
-	emit UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+	emit UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, project_ptr);
 
 	project_ptr = static_cast<UIOutputProject*>(tab.second.release());
 	project_ptr->deleteLater();
@@ -435,7 +438,8 @@ void UIProjectManager::CloseCurrentInputDataset()
 
 	UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.get());
 
-	emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+	emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, project_ptr);
 
 	project_ptr = static_cast<UIInputProject*>(tab.second.release());
 	project_ptr->deleteLater();
