@@ -25,6 +25,7 @@ class GenerateOutput : public DoOutputAction<ACTION_GENERATE_OUTPUT>
 		void operator()()
 		{
 			UIMessagerSingleShot messager(queue->get()->messager);
+			messager.setMode(UIMessager::KAD_GENERATION);
 			uiactionManagerUI().getBackendManager().DoGenerateOutput(messager.get(), action_request, queue->get()->backend());
 		}
 

@@ -70,9 +70,17 @@ class UIMessager : public QObject, public Messager
 
 	public:
 
+		enum Mode
+		{
+			  NORMAL
+			, KAD_GENERATION
+		};
+
 		UIMessager(QObject *parent = 0);
 		~UIMessager();
 
+		void setMode(Mode const mode_) { mode = mode_; }
+		Mode getMode() const { return mode; }
 		void displayStatusMessages();
 
 		void InitializeSingleShot();
@@ -91,6 +99,7 @@ class UIMessager : public QObject, public Messager
 		void SignalEndProgressBar(int);
 		void SignalUpdateProgressBarValue(int, STD_INT64 const);
 		void SignalUpdateStatusBarText(int, STD_STRING const &);
+		void SignalAppendKadStatusText(int, STD_STRING const &);
 
 	public slots:
 
@@ -101,6 +110,7 @@ class UIMessager : public QObject, public Messager
 
 	protected:
 
+		Mode mode;
 		bool singleShotActive;
 		int current_messager_id;
 		static int next_messager_id;
@@ -152,6 +162,7 @@ class UIMessagerOutputProject : public UIMessager
 		virtual void EndProgressBar();
 		virtual void UpdateProgressBarValue(std::int64_t const);
 		virtual void UpdateStatusBarText(std::string const & status_bar_text);
+		virtual void AppendKadStatusText(std::string const & kad_status_text);
 
 		void EmitOutputProjectChangeMessage(DataChangeMessage & changes);
 

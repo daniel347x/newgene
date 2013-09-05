@@ -153,6 +153,7 @@ class Messager
 		virtual void EndProgressBar() {};
 		virtual void UpdateProgressBarValue(std::int64_t const) {};
 		virtual void UpdateStatusBarText(std::string const &) {};
+		virtual void AppendKadStatusText(std::string const &) {};
 
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData) {}

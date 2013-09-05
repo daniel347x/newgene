@@ -9,6 +9,7 @@
 #include <memory>
 #include "../Settings/uioutputmodelsettings.h"
 #include "outputprojectworkqueue.h"
+#include "newgenegenerateoutput.h"
 
 class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>
 {
@@ -26,8 +27,16 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 			, mainWindowObject(mainWindowObject_)
 			, messager(this)
 			, number_timerange_widgets_created(0)
+			, output_pane(nullptr)
 		{
+			try
+			{
+				output_pane = findChild<NewGeneGenerateOutput *>( "widgetOutputPane" );
+			}
+			catch (std::bad_cast &)
+			{
 
+			}
 		}
 
 		void UpdateConnections();
@@ -50,6 +59,8 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		bool is_model_equivalent(UIMessager & messager, UIOutputModel * model);
 
 		int number_timerange_widgets_created;
+
+		NewGeneGenerateOutput * output_pane;
 
 	protected:
 

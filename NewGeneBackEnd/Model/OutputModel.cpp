@@ -8354,3 +8354,8 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 	return setting_path_to_kad_output->ToString();
 
 }
+
+void OutputModel::OutputGenerator::SetFailureMessage(std::string const & failure_message_)
+{
+	failure_message = failure_message_;
+}

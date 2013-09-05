@@ -435,6 +435,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				typedef std::pair<std::vector<SQLExecutor>, ColumnsInTempView> SqlAndColumnSet;
 				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;
 
+				void SetFailureMessage(std::string const & failure_message_);
+
 				// Initialize generator
 				void Prepare();
 				void PopulateDMUCounts();
@@ -660,6 +662,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
 				std::string temp_dot;
+
+				std::string failure_message;
 
 		};
 

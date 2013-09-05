@@ -5,22 +5,34 @@
 
 class UIMessagerSingleShot
 {
-    public:
-        UIMessagerSingleShot(UIMessager & messager_);
-        UIMessagerSingleShot();
-        virtual ~UIMessagerSingleShot();
+	public:
+		UIMessagerSingleShot(UIMessager & messager_);
+		UIMessagerSingleShot();
+		virtual ~UIMessagerSingleShot();
 
-        UIMessager & get()
-        {
-            return messager;
-        }
+		UIMessager & get()
+		{
+			return messager;
+		}
 
-    private:
-        std::unique_ptr<UIMessager> p_messager;
+		void setMode(UIMessager::Mode const mode_)
+		{
+			messager.setMode(mode_);
+		}
 
-        // order of initialization important; do not reorder
-    public:
-        UIMessager & messager;
+	private:
+
+		std::unique_ptr<UIMessager> p_messager;
+
+		// order of initialization important; do not reorder
+
+	public:
+
+		UIMessager & messager;
+
+	protected:
+
+		UIMessager::Mode saved_mode;
 
 };
 

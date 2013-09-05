@@ -8,6 +8,8 @@
 #include "uiloggingmanager.h"
 #include "newgenemainwindow.h"
 
+#include <vector>
+
 #include <QMetaObject>
 
 bool UIMessager::ManagersInitialized = false;
@@ -17,6 +19,7 @@ UIMessager::UIMessager(QObject *parent) :
 	QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , singleShotActive(false)
+  , mode(NORMAL)
 {
 	current_messager_id = next_messager_id;
 	++next_messager_id;
@@ -37,19 +40,19 @@ UIMessager::~UIMessager()
 void UIMessager::displayStatusMessages()
 {
 
-	std::set<std::string> msgs;
+	std::vector<std::string> msgs;
 	std::pair<std::set<std::string>::iterator,bool> insert_result;
 	for (MessagesVector::const_iterator _m = _messages.cbegin(); _m != _messages.cend(); ++ _m)
 	{
 		if (_m->get()->_message_category & MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE)
 		{
-			insert_result = msgs.insert(_m->get()->_message_text);
+			msgs.push_back(_m->get()->_message_text);
 		}
 	}
 
 	std::string msg;
 	bool first = true;
-	for (std::set<std::string>::const_iterator _s = msgs.cbegin(); _s != msgs.cend(); ++_s)
+	for (std::vector<std::string>::const_iterator _s = msgs.cbegin(); _s != msgs.cend(); ++_s)
 	{
 		if (first == false)
 		{
@@ -213,6 +216,11 @@ void UIMessagerOutputProject::UpdateProgressBarValue(std::int64_t const the_valu
 void UIMessagerOutputProject::UpdateStatusBarText(std::string const & the_text)
 {
 	emit SignalUpdateStatusBarText(current_messager_id, the_text);
+}
+
+void UIMessagerOutputProject::AppendKadStatusText(std::string const & the_text)
+{
+	emit SignalAppendKadStatusText(current_messager_id, the_text);
 }
 
 void UIMessagerOutputProject::EmitOutputProjectChangeMessage(DataChangeMessage & changes)
