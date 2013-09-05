@@ -252,6 +252,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	DetermineTotalNumberRows();
+
+	if (failed)
+	{
+		// failed
+		return;
+	}
+
 	messager.AppendKadStatusText("Preparing input data...");
 	ObtainColumnInfoForRawDataTables();
 
@@ -385,7 +393,8 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	//
 	// The structure of the table that comes out is:
 	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z (or, if no child tables, the final is XRMFXR_Z)
-	SqlAndColumnSet duplicates_removed_kad_result = RemoveDuplicates(preliminary_sorted_kad_result.second, 0);
+	std::int64_t rows_added = 0;
+	SqlAndColumnSet duplicates_removed_kad_result = RemoveDuplicates(preliminary_sorted_kad_result.second, 0, rows_added);
 	ClearTable(preliminary_sorted_kad_result);
 	merging_of_children_column_sets.push_back(duplicates_removed_kad_result);
 	if (failed)
@@ -1799,6 +1808,93 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 }
 
+void OutputModel::OutputGenerator::DetermineTotalNumberRows()
+{
+
+	int primary_group_number = 1;
+	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	{
+
+		if (failed)
+		{
+			return;
+		}
+		SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, primary_group_number, false);
+		if (failed)
+		{
+			return;
+		}
+		x_table_result.first[0].Execute();
+		if (!x_table_result.first[0].Step())
+		{
+			if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
+			{
+				boost::format msg("Unable to determine row count for raw data table for variable group %1% (%2%)");
+				msg % *primary_variable_group_raw_data_columns.variable_groups[0].code % *primary_variable_group_raw_data_columns.variable_groups[0].longhand;
+				SetFailureMessage(msg.str());
+			}
+			else
+			{
+				boost::format msg("Unable to determine row count for raw data table for variable group %1%");
+				msg % *primary_variable_group_raw_data_columns.variable_groups[0].code;
+				SetFailureMessage(msg.str());
+			}
+			failed = true;
+			return;
+		}
+
+		std::int64_t number_rows = sqlite3_column_int64(x_table_result.first[0].stmt, 0);
+		total_number_incoming_rows[primary_variable_group_raw_data_columns.variable_groups[0]] = number_rows;
+
+		multiplicities[primary_variable_group_raw_data_columns.variable_groups[0]] = highest_multiplicity_primary_uoa;
+
+		++primary_group_number;
+
+	});
+
+	int child_set_number = 1;
+	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &child_set_number](ColumnsInTempView const & child_variable_group_raw_data_columns)
+	{
+
+		if (failed)
+		{
+			return;
+		}
+		SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(child_variable_group_raw_data_columns, child_set_number, false);
+		if (failed)
+		{
+			return;
+		}
+		x_table_result.first[0].Execute();
+		if (!x_table_result.first[0].Step())
+		{
+			if (child_variable_group_raw_data_columns.variable_groups[0].longhand)
+			{
+				boost::format msg("Unable to determine row count for raw data table for variable group %1% (%2%)");
+				msg % *child_variable_group_raw_data_columns.variable_groups[0].code % *child_variable_group_raw_data_columns.variable_groups[0].longhand;
+				SetFailureMessage(msg.str());
+			}
+			else
+			{
+				boost::format msg("Unable to determine row count for raw data table for variable group %1%");
+				msg % *child_variable_group_raw_data_columns.variable_groups[0].code;
+				SetFailureMessage(msg.str());
+			}
+			failed = true;
+			return;
+		}
+		std::int64_t number_rows = sqlite3_column_int64(x_table_result.first[0].stmt, 0);
+		total_number_incoming_rows[child_variable_group_raw_data_columns.variable_groups[0]] = number_rows;
+
+		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
+		multiplicities[child_variable_group_raw_data_columns.variable_groups[0]] = the_child_multiplicity;
+
+		++child_set_number;
+
+	});
+
+}
+
 void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 {
 
@@ -1825,7 +1921,7 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number)
 {
 
-	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable(primary_variable_group_raw_data_columns, primary_group_number);
+	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, primary_group_number, false);
 	x_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(x_table_result);
 	sql_and_column_sets.push_back(x_table_result);
@@ -1882,7 +1978,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
-	SqlAndColumnSet duplicates_removed_top_level_variable_group_result = RemoveDuplicates(preliminary_sorted_top_level_variable_group_result.second, primary_group_number);
+	std::int64_t rows_added = 0;
+	SqlAndColumnSet duplicates_removed_top_level_variable_group_result = RemoveDuplicates(preliminary_sorted_top_level_variable_group_result.second, primary_group_number, rows_added);
 	ClearTables(sql_and_column_sets);
 	sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
 	if (failed)
@@ -2083,7 +2180,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates(ColumnsInTempView & sorted_result_columns, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates(ColumnsInTempView & sorted_result_columns, int const primary_group_number, std::int64_t & current_rows_added)
 {
 
 	char c[256];
@@ -2227,7 +2324,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 
 	int const minimum_desired_rows_per_transaction = 256;
-	int current_rows_added = 0;
+	current_rows_added = 0;
 	int current_rows_added_since_execution = 0;
 	std::string sql_add_xr_row;
 	bool first_row_added = true;
@@ -2330,7 +2427,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 }
 
-bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data)
+bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data, std::int64_t & current_rows_added)
 {
 
 	if (current_row_of_data.datetime_start >= first_incoming_row.datetime_end)
@@ -2719,7 +2816,7 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 }
 
-void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int & current_rows_added, int & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
+void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, int & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
 {
 
 	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
@@ -3580,7 +3677,7 @@ bool OutputModel::OutputGenerator::SQLExecutor::Step()
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXTable_OrCount(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number, bool const count_only)
 {
 	char c[256];
 
@@ -3691,21 +3788,37 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_strings.push_back(SQLExecutor(db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	sql_string = "CREATE TABLE ";
-	sql_string += result_columns.view_name;
-	sql_string += " AS SELECT ";
-	first = true;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	if (!count_only)
 	{
-		if (!first)
-		{
-			sql_string += ", ";
-		}
-		first = false;
-		sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
+		sql_string = "CREATE TABLE ";
+		sql_string += result_columns.view_name;
 		sql_string += " AS ";
-		sql_string += new_column.column_name_in_temporary_table;
-	});
+	}
+	else
+	{
+		sql_strings.back().statement_type = SQLExecutor::RETURNS_ROWS;
+	}
+	sql_string += "SELECT ";
+	if (count_only)
+	{
+		sql_string += "COUNT(*)";
+	}
+	else
+	{
+		first = true;
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
+		{
+			if (!first)
+			{
+				sql_string += ", ";
+			}
+			first = false;
+			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
+			sql_string += " AS ";
+			sql_string += new_column.column_name_in_temporary_table;
+		});
+	}
+
 	sql_string += " FROM ";
 	sql_string += result_columns.original_table_names[0];
 
@@ -3737,7 +3850,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 
 	// Add the ORDER BY column/s
-	if (debug_ordering)
+	if (!count_only && debug_ordering)
 	{
 
 		bool first = true;
@@ -3860,56 +3973,59 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	}
 
-	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
-	if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+	if (!count_only)
 	{
-		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
-		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
-		datetime_start_col_name += "_";
-		datetime_start_col_name += newUUID(true);
+		// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
+		if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+		{
+			std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
+			std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
+			datetime_start_col_name += "_";
+			datetime_start_col_name += newUUID(true);
 
-		std::string alter_string;
-		alter_string += "ALTER TABLE ";
-		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
-		alter_string += datetime_start_col_name;
-		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(SQLExecutor(db, alter_string));
+			std::string alter_string;
+			alter_string += "ALTER TABLE ";
+			alter_string += result_columns.view_name;
+			alter_string += " ADD COLUMN ";
+			alter_string += datetime_start_col_name;
+			alter_string += " INTEGER DEFAULT 0";
+			sql_strings.push_back(SQLExecutor(db, alter_string));
 
-		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
-		datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
-		datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
-		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
-		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_saved;
-		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
-		datetime_start_column.column_name_in_original_data_table = "";
-		datetime_start_column.inner_table_set_number = 0;
-		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+			result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+			ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+			datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
+			datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
+			datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
+			datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_saved;
+			datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
+			datetime_start_column.column_name_in_original_data_table = "";
+			datetime_start_column.inner_table_set_number = 0;
+			datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 
-		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
-		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
-		datetime_end_col_name += "_";
-		datetime_end_col_name += newUUID(true);
+			std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
+			std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
+			datetime_end_col_name += "_";
+			datetime_end_col_name += newUUID(true);
 
-		alter_string.clear();
-		alter_string += "ALTER TABLE ";
-		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
-		alter_string += datetime_end_col_name;
-		alter_string += " INTEGER DEFAULT 0";
-		sql_strings.push_back(SQLExecutor(db, alter_string));
+			alter_string.clear();
+			alter_string += "ALTER TABLE ";
+			alter_string += result_columns.view_name;
+			alter_string += " ADD COLUMN ";
+			alter_string += datetime_end_col_name;
+			alter_string += " INTEGER DEFAULT 0";
+			sql_strings.push_back(SQLExecutor(db, alter_string));
 
-		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
-		datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
-		datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
-		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
-		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_saved;
-		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
-		datetime_end_column.column_name_in_original_data_table = "";
-		datetime_end_column.inner_table_set_number = 0;
-		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+			result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+			ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+			datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
+			datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
+			datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
+			datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_saved;
+			datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
+			datetime_end_column.column_name_in_original_data_table = "";
+			datetime_end_column.inner_table_set_number = 0;
+			datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+		}
 	}
 
 	return result;
@@ -8171,7 +8287,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 	});
 }
 
-void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView & sorted_result_columns, int current_rows_added, int &current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, int const minimum_desired_rows_per_transaction )
+void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView & sorted_result_columns, std::int64_t & current_rows_added, int & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, int const minimum_desired_rows_per_transaction )
 {
 	SavedRowData current_row_of_data;
 
@@ -8224,7 +8340,7 @@ void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( SqlAnd
 				break;
 			}
 			SavedRowData & first_incoming_row = incoming_rows_of_data.front();
-			current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data);
+			current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, current_rows_added);
 			if (failed)
 			{
 				return;
