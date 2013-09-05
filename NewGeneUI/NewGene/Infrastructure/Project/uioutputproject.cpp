@@ -16,18 +16,6 @@ UIOutputProject::UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const 
 	, number_timerange_widgets_created(0)
 	, output_pane(nullptr)
 {
-	try
-	{
-		NewGeneMainWindow * theMainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
-		if (theMainWindow)
-		{
-			output_pane = theMainWindow->findChild<NewGeneGenerateOutput *>( "widgetOutputPane" );
-		}
-	}
-	catch (std::bad_cast &)
-	{
-
-	}
 }
 
 void UIOutputProject::SignalMessageBox(STD_STRING msg)
