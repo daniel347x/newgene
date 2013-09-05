@@ -16,10 +16,10 @@ void NewGeneVariablesToolbox::UpdateOutputConnections(UIProjectManager::UPDATE_C
 	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX)));
-	
+
 		// *** This is a parent (top-level) widget, so connect to refreshes here (... child widgets don't connect to refreshes) *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX)));
-	
+
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE)));
 	}
@@ -27,6 +27,23 @@ void NewGeneVariablesToolbox::UpdateOutputConnections(UIProjectManager::UPDATE_C
 
 void NewGeneVariablesToolbox::RefreshAllWidgets()
 {
+	if (outp == nullptr)
+	{
+		int nItems = count();
+		for (int n = 0; n < nItems; ++n)
+		{
+			QWidget * child = find(n);
+			removeItem(n);
+			if (child)
+			{
+				delete child;
+				child = nullptr;
+			}
+			--n;
+			--nItems;
+		}
+		return;
+	}
 	WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }

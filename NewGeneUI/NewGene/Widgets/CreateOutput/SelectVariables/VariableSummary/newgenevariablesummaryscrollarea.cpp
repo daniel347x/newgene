@@ -40,10 +40,10 @@ void NewGeneVariableSummaryScrollArea::UpdateOutputConnections(UIProjectManager:
 	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)));
-	
+
 		// *** This is a parent (top-level) widget, so connect to refreshes here (... child widgets don't connect to refreshes) *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)));
-	
+
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)));
 	}
@@ -51,6 +51,15 @@ void NewGeneVariableSummaryScrollArea::UpdateOutputConnections(UIProjectManager:
 
 void NewGeneVariableSummaryScrollArea::RefreshAllWidgets()
 {
+	if (outp == nullptr)
+	{
+		QLayoutItem *child;
+		while ((child = layout()->takeAt(0)) != 0)
+		{
+			delete child;
+		}
+		return;
+	}
 	WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS);
 	emit RefreshWidget(request);
 }

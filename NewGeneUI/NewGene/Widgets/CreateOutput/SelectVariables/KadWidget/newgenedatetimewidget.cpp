@@ -34,6 +34,11 @@ NewGeneDateTimeWidget::~NewGeneDateTimeWidget()
 
 void NewGeneDateTimeWidget::RefreshAllWidgets()
 {
+	if (outp == nullptr)
+	{
+		return;
+	}
+
 	QDateTime const & currentValue = dateTime();
 
 	QDate date_1970(1970, 1, 1);
