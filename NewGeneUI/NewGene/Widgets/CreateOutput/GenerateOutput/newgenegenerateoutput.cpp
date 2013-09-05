@@ -52,7 +52,15 @@ void NewGeneGenerateOutput::on_pushButtonGenerateOutput_clicked()
 
 void NewGeneGenerateOutput::WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB widget_data)
 {
-	UIMessager messager;
+
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
 	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = nullptr;
 	std::unique_ptr<BackendProjectOutputSetting> & path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
 	bool bad = false;
@@ -76,6 +84,7 @@ void NewGeneGenerateOutput::WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUT
 			}
 		}
 	}
+
 }
 
 void NewGeneGenerateOutput::RefreshAllWidgets()
@@ -100,7 +109,15 @@ void NewGeneGenerateOutput::ReceiveSignalAppendKadStatusText(int progress_bar_id
 
 void NewGeneGenerateOutput::on_pushButton_clicked()
 {
-	UIMessager messager;
+
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
 	QString the_file = QFileDialog::getSaveFileName(this, "Choose output file");
 	if (the_file.size())
 	{
@@ -111,6 +128,7 @@ void NewGeneGenerateOutput::on_pushButton_clicked()
 			editControl->setText(the_file);
 		}
 	}
+
 }
 
 void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_lostFocus()
@@ -119,11 +137,20 @@ void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_lostFocus()
 
 void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_editingFinished()
 {
-	UIMessager messager;
+
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
 	QLineEdit * editControl = this->findChild<QLineEdit*>("lineEditFilePathToKadOutput");
 	if (editControl)
 	{
 		QString the_path = editControl->text();
 		projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().UpdateSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE, OutputProjectPathToKadOutputFile(messager, the_path.toStdString()));
 	}
+
 }

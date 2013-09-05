@@ -99,6 +99,7 @@ void NewGeneVariableSummaryScrollArea::Empty()
 	QLayoutItem *child;
 	while ((child = layout()->takeAt(0)) != 0)
 	{
+		delete child->widget();
 		delete child;
 	}
 }

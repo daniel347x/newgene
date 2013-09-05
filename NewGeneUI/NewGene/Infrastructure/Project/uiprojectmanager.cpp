@@ -39,8 +39,9 @@ UIProjectManager::~UIProjectManager()
 		InputProjectTabs & tabs = windows.second;
 		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
+			// Release the pointer so that when the "tabs" map is destroyed, its destructor will do the job
 			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
-			project_ptr->deleteLater();
+			RawCloseInputProject(project_ptr);
 		});
 
 	});
@@ -52,7 +53,7 @@ UIProjectManager::~UIProjectManager()
 		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
 			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
-			project_ptr->deleteLater();
+			RawCloseOutputProject(project_ptr);
 		});
 
 	});
@@ -289,7 +290,9 @@ void UIProjectManager::OpenOutputDataset(STD_STRING the_output_dataset, QObject 
 	if (!input_project)
 	{
 		boost::format msg("Please open an input dataset before attempting to open an output dataset.");
-		messager.DisplayMessageBox(msg.str().c_str());
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
 		return;
 	}
 
@@ -330,7 +333,7 @@ void UIProjectManager::CloseCurrentOutputDataset()
 		return;
 	}
 
-	UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
+	UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
 	RawCloseOutputProject(project_ptr);
 
 	tabs.clear();
@@ -390,7 +393,7 @@ void UIProjectManager::CloseCurrentInputDataset()
 		return;
 	}
 
-	UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.get());
+	UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
 	RawCloseInputProject(project_ptr);
 
 	tabs.clear();
@@ -532,6 +535,8 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 	emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+
+	emit LoadFromDatabase(&getActiveUIOutputProject()->model());
 
 	boost::format msg("%1% successfully loaded.");
 	msg % output_project_settings_path;
