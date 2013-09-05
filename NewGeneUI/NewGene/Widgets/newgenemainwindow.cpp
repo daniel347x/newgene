@@ -16,8 +16,10 @@
 #include "uiprojectmanager.h"
 #include "uiinputproject.h"
 #include "uioutputproject.h"
+#include "uiallglobalsettings_list.h"
 #ifndef Q_MOC_RUN
 #	include <boost/thread/thread.hpp>
+#	include <boost/filesystem.hpp>
 #endif
 
 NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
@@ -190,12 +192,32 @@ void NewGeneMainWindow::on_actionClose_Current_Input_Dataset_triggered()
 
 void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 {
-
+	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
+	UIMessager messager;
+	QString the_file = QFileDialog::getOpenFileName(this, "Choose input dataset", folder_path ? folder_path->getPath().str().c_str(), "XML settings file (*.xml)");
+	if (the_file.size())
+	{
+		if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
+		{
+			boost::filesystem::path file_path(the_file.toStdString());
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, file_path.parent_path()));
+		}
+	}
 }
 
 void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 {
-
+	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
+	UIMessager messager;
+	QString the_file = QFileDialog::getOpenFileName(this, "Choose output dataset", folder_path ? folder_path->getPath().str().c_str(), "XML settings file (*.xml)");
+	if (the_file.size())
+	{
+		if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
+		{
+			boost::filesystem::path file_path(the_file.toStdString());
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, file_path.parent_path()));
+		}
+	}
 }
 
 void NewGeneMainWindow::on_actionClose_Current_Output_Dataset_triggered()

@@ -18,14 +18,26 @@
 #define S_OPEN_INPUT_PROJECTS_LIST__1 OPEN_INPUT_PROJECTS_LIST
 #define S_OPEN_INPUT_PROJECTS_LIST__2 SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_PROJECTS_LIST
 #define S_OPEN_INPUT_PROJECTS_LIST__3 "OPEN_INPUT_PROJECTS_LIST"
-#define S_OPEN_INPUT_PROJECTS_LIST__4 "L:\\daniel347x\\__DanExtras\\NewGene\\Projects\\Input\\TestInputProjectSettings.xml"
+#define S_OPEN_INPUT_PROJECTS_LIST__4 ""
 #define S_OPEN_INPUT_PROJECTS_LIST__5 UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST>
 
 #define S_OPEN_OUTPUT_PROJECTS_LIST__1 OPEN_OUTPUT_PROJECTS_LIST
 #define S_OPEN_OUTPUT_PROJECTS_LIST__2 SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_PROJECTS_LIST
 #define S_OPEN_OUTPUT_PROJECTS_LIST__3 "OPEN_OUTPUT_PROJECTS_LIST"
-#define S_OPEN_OUTPUT_PROJECTS_LIST__4 "L:\\daniel347x\\__DanExtras\\NewGene\\Projects\\Output\\TestOutputProjectSettings.xml"
+#define S_OPEN_OUTPUT_PROJECTS_LIST__4 ""
 #define S_OPEN_OUTPUT_PROJECTS_LIST__5 UIGlobalSetting_Projects_Files_List<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST>
+
+#define S_OPEN_OUTPUT_PROJECTS_LIST__1 OPEN_INPUT_DATASET_FOLDER_PATH
+#define S_OPEN_OUTPUT_PROJECTS_LIST__2 SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_INPUT_DATASET_FOLDER_PATH
+#define S_OPEN_OUTPUT_PROJECTS_LIST__3 "OPEN_INPUT_DATASET_FOLDER_PATH"
+#define S_OPEN_OUTPUT_PROJECTS_LIST__4 ""
+#define S_OPEN_OUTPUT_PROJECTS_LIST__5 UIGlobalSetting_Path<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH>
+
+#define S_OPEN_OUTPUT_PROJECTS_LIST__1 OPEN_OUTPUT_DATASET_FOLDER_PATH
+#define S_OPEN_OUTPUT_PROJECTS_LIST__2 SETTING_CLASS_UI_GLOBAL_SETTING__OPEN_OUTPUT_DATASET_FOLDER_PATH
+#define S_OPEN_OUTPUT_PROJECTS_LIST__3 "OPEN_OUTPUT_DATASET_FOLDER_PATH"
+#define S_OPEN_OUTPUT_PROJECTS_LIST__4 ""
+#define S_OPEN_OUTPUT_PROJECTS_LIST__5 UIGlobalSetting_Path<GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH>
 
 std::string newgene_global_ui_root_node("newgene.global.ui.");
 
@@ -108,6 +120,14 @@ SettingInfo UIGlobalSetting::GetSettingInfoFromEnum(Messager & messager_, int co
 		GET_GLOBAL_UI_SETTING_INFO ( G_(__1), G_(__2), G_(__3), G_(__4) )
 		#undef G_
 
+		#define G_(Y) S_OPEN_INPUT_DATASET_FOLDER_PATH##Y
+		GET_GLOBAL_UI_SETTING_INFO ( G_(__1), G_(__2), G_(__3), G_(__4) )
+		#undef G_
+
+		#define G_(Y) S_OPEN_OUTPUT_DATASET_FOLDER_PATH##Y
+		GET_GLOBAL_UI_SETTING_INFO ( G_(__1), G_(__2), G_(__3), G_(__4) )
+		#undef G_
+
 		default:
 			{
 				boost::format msg("Settings information is not available for GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI value %1%.  Using empty setting.");
@@ -142,6 +162,14 @@ void UIAllGlobalSettings::UIOnlySettings::SetMapEntry(Messager & messager_, Sett
 		#undef G_
 
 		#define G_(Y) S_OPEN_OUTPUT_PROJECTS_LIST##Y
+		GLOBAL_UI_SET_MAP_ENTRY__STRING ( G_(__2), G_(__5) )
+		#undef G_
+
+		#define G_(Y) S_OPEN_INPUT_DATASET_FOLDER_PATH##Y
+		GLOBAL_UI_SET_MAP_ENTRY__STRING ( G_(__2), G_(__5) )
+		#undef G_
+
+		#define G_(Y) S_OPEN_OUTPUT_DATASET_FOLDER_PATH##Y
 		GLOBAL_UI_SET_MAP_ENTRY__STRING ( G_(__2), G_(__5) )
 		#undef G_
 
@@ -185,6 +213,15 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::CloneSetting(Messager & m
 			#define G_(Y) S_OPEN_OUTPUT_PROJECTS_LIST##Y
 			GLOBAL_UI_CLONE_SETTING__STRING ( G_(__2), G_(__5) )
 			#undef G_
+
+			#define G_(Y) S_OPEN_INPUT_DATASET_FOLDER_PATH##Y
+			GLOBAL_UI_CLONE_SETTING__STRING ( G_(__2), G_(__5) )
+			#undef G_
+
+			#define G_(Y) S_OPEN_OUTPUT_DATASET_FOLDER_PATH##Y
+			GLOBAL_UI_CLONE_SETTING__STRING ( G_(__2), G_(__5) )
+			#undef G_
+
 
 			default:
 				{
@@ -234,6 +271,14 @@ UIGlobalSetting * UIAllGlobalSettings::UIOnlySettings::NewSetting(Messager & mes
 		GLOBAL_UI_NEW_SETTING__STRING ( G_(__2), G_(__5) )
 		#undef G_
 
+		#define G_(Y) S_OPEN_INPUT_DATASET_FOLDER_PATH##Y
+		GLOBAL_UI_NEW_SETTING__STRING ( G_(__2), G_(__5) )
+		#undef G_
+
+		#define G_(Y) S_OPEN_OUTPUT_DATASET_FOLDER_PATH##Y
+		GLOBAL_UI_NEW_SETTING__STRING ( G_(__2), G_(__5) )
+		#undef G_
+
 		default:
 			{
 				boost::format msg("Unknown UI global setting \"%1%\" (\"%2%\") being updated.");
@@ -277,6 +322,14 @@ void UIAllGlobalSettings::UIOnlySettings::SetPTreeEntry(Messager & messager, GLO
 		#undef G_
 
 		#define G_(Y) S_OPEN_OUTPUT_PROJECTS_LIST##Y
+		GLOBAL_UI_SET_PTREE_ENTRY__STRING ( G_(__2), G_(__5) )
+		#undef G_
+
+		#define G_(Y) S_OPEN_INPUT_DATASET_FOLDER_PATH##Y
+		GLOBAL_UI_SET_PTREE_ENTRY__STRING ( G_(__2), G_(__5) )
+		#undef G_
+
+		#define G_(Y) S_OPEN_OUTPUT_DATASET_FOLDER_PATH##Y
 		GLOBAL_UI_SET_PTREE_ENTRY__STRING ( G_(__2), G_(__5) )
 		#undef G_
 
