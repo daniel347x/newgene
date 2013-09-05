@@ -7,6 +7,7 @@
 #include "uistatusmanager.h"
 #include "uiloggingmanager.h"
 #include "newgenemainwindow.h"
+#include "newgenegenerateoutput.h"
 
 #include <vector>
 
