@@ -233,6 +233,11 @@ class UIProjectManager : public QObject,
 			return work_queue;
 		}
 
+	private:
+
+		bool RawOpenInputProject(UIMessager * messager, boost::filesystem::path const & input_project_settings_path, QObject * mainWindowObject);
+		bool RawOpenOutputProject(UIMessager * messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject);
+
 };
 
 #endif // UIPROJECTMANAGER_H

@@ -111,6 +111,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 	connect(mainWindowObject, SIGNAL(SignalOpenInputDataset(STD_STRING)), this, SLOT(OpenInputDataset(STD_STRING)));
 	connect(mainWindowObject, SIGNAL(SignalOpenOutputDataset(STD_STRING)), this, SLOT(OpenOutputDataset(STD_STRING)));
 
+	bool success = false;
+
 	if (input_project_list->files.size() == 1)
 	{
 
@@ -135,53 +137,13 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 		if (create_new_instance)
 		{
 
-			// Internally creates both an instance of UI-layer project settings, and an instance of backend-layer project settings
-			// via SettingsRepositoryFactory
-			std::shared_ptr<UIInputProjectSettings> project_settings(new UIInputProjectSettings(messager, input_project_settings_path));
-			project_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
-
-			// Internally creates an instance of backend-layer model settings via SettingsRepositoryFactory
-			auto path_to_model_settings = InputProjectPathToModel::get(messager, project_settings->getBackendSettings());
-			std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings->getPath()));
-			model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
-
-			// Backend model does not know its settings, because multiple settings might point to the same model.
-			auto path_to_model_database = InputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
-			std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(messager, path_to_model_database->getPath()));
-			std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
-
-			input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, path_to_model_settings->getPath(), path_to_model_database->getPath()),
-															std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
-
-			UIInputProject * project = getActiveUIInputProject();
-
-			if (!project)
-			{
-				boost::format msg("No input dataset is open.");
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
-				return;
-			}
-
-			project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
-			project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
-			project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
-			project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
-
-			project_settings->UpdateConnections();
-			model_settings->UpdateConnections();
-			project_model->UpdateConnections();
-			project->UpdateConnections();
-
-			// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-			emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
-
-			emit LoadFromDatabase(&project->model());
+			success = RawOpenInputProject(messager, input_project_settings_path, mainWindowObject);
 
 		}
 
 	}
 
-	if (output_project_list->files.size() == 1)
+	if (success && output_project_list->files.size() == 1)
 	{
 
 		boost::filesystem::path output_project_settings_path = output_project_list->files[0];
@@ -205,54 +167,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 		if (create_new_instance)
 		{
 
-			// Internally creates both an instance of UI-layer project settings, and an instance of backend-layer project settings
-			// via SettingsRepositoryFactory
-			std::shared_ptr<UIOutputProjectSettings> project_settings(new UIOutputProjectSettings(messager, output_project_settings_path));
-			project_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
-
-			// Internally creates an instance of backend-layer model settings via SettingsRepositoryFactory
-			auto path_to_model_settings = OutputProjectPathToModel::get(messager, project_settings->getBackendSettings());
-			std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(messager, path_to_model_settings->getPath()));
-			model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
-
-			// The input model and settings are necessary in order to instantiate the output model
-			UIInputProject * input_project = getActiveUIInputProject();
-			if (!input_project)
-			{
-				boost::format msg("NULL input project during attempt to instantiate output project.");
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
-				return;
-			}
-
-			// Backend model does not know its settings, because multiple settings might point to the same model.
-			auto path_to_model_database = OutputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
-			std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(messager, path_to_model_database->getPath(), std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
-			std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
-
-			output_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(output_project_settings_path, path_to_model_settings->getPath(), path_to_model_database->getPath()),
-															std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject))));
-
-			UIOutputProject * project = getActiveUIOutputProject();
-
-			if (!project)
-			{
-				boost::format msg("NULL output project during attempt to instantiate project.");
-				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
-				return;
-			}
-
-			project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
-			project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
-			project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
-			project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
-
-			project_settings->UpdateConnections();
-			model_settings->UpdateConnections();
-			project_model->UpdateConnections();
-			project->UpdateConnections();
-
-			// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-			emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+			success = RawOpenOutputProject(messager, output_project_settings_path, mainWindowObject);
 
 		}
 
@@ -371,7 +286,26 @@ void UIProjectManager::OpenOutputDataset(STD_STRING the_output_dataset)
 	// blocks - all widgets that respond to the UIProjectManager
 	CloseCurrentOutputDataset();
 
-	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, InputProjectFilesList(messager, the_output_dataset));
+	UIInputProject * input_project = getActiveUIInputProject();
+	if (!input_project)
+	{
+		boost::format msg("Please open an input dataset before attempting to open an output dataset.");
+		messager.DisplayMessageBox(msg.str().c_str());
+		return;
+	}
+
+	bool success = false;
+
+	UIMessager messager;
+	if (boost::filesystem::exists(the_output_dataset) && !boost::filesystem::is_directory(the_output_dataset))
+	{
+		success = RawOpenOutputProject(messager, boost::filesystem::path(the_output_dataset), mainWindowObject);
+	}
+
+	if (success)
+	{
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, InputProjectFilesList(messager, the_output_dataset));
+	}
 
 }
 
@@ -417,14 +351,31 @@ void UIProjectManager::OpenInputDataset(STD_STRING the_input_dataset)
 {
 
 	// blocks - all widgets that respond to the UIProjectManager
+	CloseCurrentOutputDataset();
+
+	// blocks - all widgets that respond to the UIProjectManager
 	CloseCurrentInputDataset();
 
-	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, the_input_dataset));
+	bool success = false;
+
+	UIMessager messager;
+	if (boost::filesystem::exists(the_input_dataset) && !boost::filesystem::is_directory(the_input_dataset))
+	{
+		success = RawOpenInputProject(messager, boost::filesystem::path(the_input_dataset), mainWindowObject);
+	}
+
+	if (success)
+	{
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, the_input_dataset));
+	}
 
 }
 
 void UIProjectManager::CloseCurrentInputDataset()
 {
+
+	// Blocks - All happens in main thread
+	CloseCurrentOutputDataset();
 
 	// One per main window (currently only 1 supported per application)
 	if (input_tabs.size() > 1 || input_tabs.size() == 0)
@@ -458,5 +409,106 @@ void UIProjectManager::CloseCurrentInputDataset()
 
 	UIMessager messager;
 	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, ""));
+
+}
+
+bool UIProjectManager::RawOpenInputProject(UIMessager * messager, boost::filesystem::path const & input_project_settings_path, QObject * mainWindowObject)
+{
+
+	// Internally creates both an instance of UI-layer project settings, and an instance of backend-layer project settings
+	// via SettingsRepositoryFactory
+	std::shared_ptr<UIInputProjectSettings> project_settings(new UIInputProjectSettings(messager, input_project_settings_path));
+	project_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
+
+	// Internally creates an instance of backend-layer model settings via SettingsRepositoryFactory
+	auto path_to_model_settings = InputProjectPathToModel::get(messager, project_settings->getBackendSettings());
+	std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings->getPath()));
+	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
+
+	// Backend model does not know its settings, because multiple settings might point to the same model.
+	auto path_to_model_database = InputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
+	std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(messager, path_to_model_database->getPath()));
+	std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
+
+	input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, path_to_model_settings->getPath(), path_to_model_database->getPath()),
+													std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
+
+	UIInputProject * project = getActiveUIInputProject();
+
+	if (!project)
+	{
+		boost::format msg("No input dataset is open.");
+		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+		return;
+	}
+
+	project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
+	project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
+	project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
+	project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
+
+	project_settings->UpdateConnections();
+	model_settings->UpdateConnections();
+	project_model->UpdateConnections();
+	project->UpdateConnections();
+
+	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+	emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
+
+	emit LoadFromDatabase(&project->model());
+
+}
+
+bool UIProjectManager::RawOpenOutputProject(UIMessager * messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject)
+{
+
+	// Internally creates both an instance of UI-layer project settings, and an instance of backend-layer project settings
+	// via SettingsRepositoryFactory
+	std::shared_ptr<UIOutputProjectSettings> project_settings(new UIOutputProjectSettings(messager, output_project_settings_path));
+	project_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
+
+	// Internally creates an instance of backend-layer model settings via SettingsRepositoryFactory
+	auto path_to_model_settings = OutputProjectPathToModel::get(messager, project_settings->getBackendSettings());
+	std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(messager, path_to_model_settings->getPath()));
+	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
+
+	// The input model and settings are necessary in order to instantiate the output model
+	UIInputProject * input_project = getActiveUIInputProject();
+	if (!input_project)
+	{
+		boost::format msg("NULL input project during attempt to instantiate output project.");
+		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+		return;
+	}
+
+	// Backend model does not know its settings, because multiple settings might point to the same model.
+	auto path_to_model_database = OutputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
+	std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(messager, path_to_model_database->getPath(), std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
+	std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
+
+	output_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(output_project_settings_path, path_to_model_settings->getPath(), path_to_model_database->getPath()),
+													std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject))));
+
+	UIOutputProject * project = getActiveUIOutputProject();
+
+	if (!project)
+	{
+		boost::format msg("NULL output project during attempt to instantiate project.");
+		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
+		return;
+	}
+
+	project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
+	project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
+	project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
+	project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance
+
+	project_settings->UpdateConnections();
+	model_settings->UpdateConnections();
+	project_model->UpdateConnections();
+	project->UpdateConnections();
+
+	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+	emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 
 }
