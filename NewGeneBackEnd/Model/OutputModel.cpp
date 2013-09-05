@@ -212,6 +212,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "s", timerange_start_identifier);
 	if (!found)
 	{
+		boost::format msg("Cannot determine time range from database.");
+		SetFailureMessage(msg.str());
 		failed = true;
 		return;
 	}
@@ -221,6 +223,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "e", timerange_end_identifier);
 	if (!found)
 	{
+		boost::format msg("Cannot determine time range end value from database.");
+		SetFailureMessage(msg.str());
 		failed = true;
 		return;
 	}
@@ -228,6 +232,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (timerange_end <= timerange_start)
 	{
+		boost::format msg("The ending value of the time range must be greater than the starting value.");
+		SetFailureMessage(msg.str());
 		failed = true;
 		return;
 	}
@@ -533,6 +539,9 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	output_file.open(setting_path_to_kad_output, std::ios::out | std::ios::trunc);
 	if (!output_file.good())
 	{
+		boost::format msg("Cannot open output file %1%");
+		msg % setting_path_to_kad_output;
+		SetFailureMessage(msg.str());
 		failed = true;
 		return;
 	}
@@ -593,6 +602,8 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 						// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
 						data_long = sqlite3_column_double(stmt_result, column_index);
 						// Todo: Error message
+						boost::format msg("Floating point values are not yet supported.");
+						SetFailureMessage(msg.str());
 						failed = true;
 						return; // from lambda
 					}
@@ -615,6 +626,8 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 				case SQLITE_BLOB:
 					{
 						// Todo: Error message
+						boost::format msg("Blob values are not supported.");
+						SetFailureMessage(msg.str());
 						failed = true;
 						return; // from lambda
 					}
@@ -635,6 +648,8 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 				default:
 					{
 						// Todo: Error message
+						boost::format msg("Unknown datatype in database column.");
+						SetFailureMessage(msg.str());
 						failed = true;
 						return; // from lambda
 					}
@@ -1182,6 +1197,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	// sanity check
 	if (number_columns_very_first_primary_variable_group_including_multiplicities % number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table != 0)
 	{
+		boost::format msg("The number of columns in the full set of inner tables for the first primary variable group is not an even multiple of the number of columns in the first inner table.");
+		SetFailureMessage(msg.str());
 		failed = true;
 		return result;
 	}
@@ -1262,6 +1279,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	// sanity check
 	if (number_columns_very_last_primary_variable_group_including_multiplicities % number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table != 0)
 	{
+		boost::format msg("The number of columns in the full set of inner tables for the last primary variable group is not an even multiple of the number of columns in its first inner table.");
+		SetFailureMessage(msg.str());
 		failed = true;
 		return result;
 	}
@@ -1511,6 +1530,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	// sanity check
 	if (join_column_names_lhs.size() != join_column_names_rhs.size())
 	{
+		boost::format msg("The number of JOIN primary key columns in a previous top-level variable group does not match the number in the current top-level variable group.");
+		SetFailureMessage(msg.str());
 		failed = true;
 		return result;
 	}
@@ -1988,6 +2009,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
 					data_long = sqlite3_column_double(stmt_result, current_column);
 					// Todo: Error message
+					boost::format msg("Floating point values are not yet supported.");
+					SetFailureMessage(msg.str());
 					failed = true;
 					return; // from lambda
 				}
@@ -2017,6 +2040,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			case SQLITE_BLOB:
 				{
 					// Todo: Error message
+					boost::format msg("BLOBs are not supported.");
+					SetFailureMessage(msg.str());
 					failed = true;
 					return; // from lambda
 				}
@@ -2044,6 +2069,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			default:
 				{
 					// Todo: Error message
+					boost::format msg("Unknown data type in column in database.");
+					SetFailureMessage(msg.str());
 					failed = true;
 					return; // from lambda
 				}
@@ -2307,6 +2334,9 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 
 	if (current_row_of_data.datetime_start >= first_incoming_row.datetime_end)
 	{
+		boost::format msg("Time range error during merging of data tables: the starting datetime of the current row (%1%) is greater than or equal to the ending datetime of the previous row (%2%).");
+		msg % current_row_of_data.datetime_start % first_incoming_row.datetime_end;
+		SetFailureMessage(msg.str());
 		failed = true;
 		return false;
 	}
@@ -2544,6 +2574,9 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	// sanity checks
 	if (current_row_of_data.indices_of_primary_key_columns.size() != first_incoming_row.indices_of_primary_key_columns.size())
 	{
+		boost::format msg("The number of primary key columns in the current row (%1%) is not equal to the number of primary keys of the previous row (%2%).");
+		msg % current_row_of_data.indices_of_primary_key_columns.size() % first_incoming_row.indices_of_primary_key_columns.size();
+		SetFailureMessage(msg.str());
 		failed = true;
 		return merged_data_row;
 	}
@@ -2838,6 +2871,8 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 				default:
 					{
 						// Todo: Error message
+						boost::format msg("Unknown data type binding in column when writing row to database.");
+						SetFailureMessage(msg.str());
 						failed = true;
 						return; // from lambda
 					}
@@ -3124,6 +3159,9 @@ bool OutputModel::OutputGenerator::StepData()
 		}
 
 		sql_error = sqlite3_errmsg(db);
+		boost::format msg("SQLite database error when iterating through rows: %1%");
+		msg % sql_error;
+		SetFailureMessage(msg.str());
 		failed = true;
 		return false;
 	}
@@ -3149,6 +3187,10 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView & column_set)
 	if (stmt_result == NULL)
 	{
 		sql_error = sqlite3_errmsg(db);
+		boost::format msg("SQLite database error when preparing SELECT * SQL statement for table %1%: %2%");
+		msg % column_set.view_name % sql_error;
+		msg % sql_error;
+		SetFailureMessage(msg.str());
 		failed = true;
 		return;
 	}
@@ -3189,6 +3231,7 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 		sql_executor.Execute();
 		if (sql_executor.failed)
 		{
+			// Error already posted
 			failed = true;
 			return;
 		}
