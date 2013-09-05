@@ -352,3 +352,23 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_)
 	getActiveUIOutputProject()->DoRefreshAllWidgets();
 
 }
+
+void UIProjectManager::OpenOutputDataset(STD_STRING)
+{
+
+}
+
+void UIProjectManager::CloseCurrentOutputDataset()
+{
+
+}
+
+void UIProjectManager::OpenInputDataset(STD_STRING)
+{
+
+}
+
+void UIProjectManager::CloseCurrentInputDataset()
+{
+
+}

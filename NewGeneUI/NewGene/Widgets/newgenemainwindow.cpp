@@ -182,3 +182,8 @@ void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(int progress_bar_id, ST
 		this->statusBar()->showMessage(QString(status_bar_message.c_str()));
 	}
 }
+
+void NewGeneMainWindow::on_actionClose_Current_Input_Dataset_triggered()
+{
+
+}

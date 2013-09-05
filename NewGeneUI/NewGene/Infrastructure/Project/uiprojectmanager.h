@@ -204,6 +204,10 @@ class UIProjectManager : public QObject,
 		void SignalMessageBox(STD_STRING);
 		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR);
 		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR);
+		void OpenOutputDataset(STD_STRING);
+		void CloseCurrentOutputDataset();
+		void OpenInputDataset(STD_STRING);
+		void CloseCurrentInputDataset();
 
 	private:
 
