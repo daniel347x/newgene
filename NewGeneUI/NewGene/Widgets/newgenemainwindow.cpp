@@ -21,6 +21,7 @@
 #	include <boost/thread/thread.hpp>
 #	include <boost/filesystem.hpp>
 #endif
+#include <QFileDialog>
 
 NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	QMainWindow( parent ),
@@ -192,9 +193,9 @@ void NewGeneMainWindow::on_actionClose_Current_Input_Dataset_triggered()
 
 void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 {
-	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
 	UIMessager messager;
-	QString the_file = QFileDialog::getOpenFileName(this, "Choose input dataset", folder_path ? folder_path->getPath().str().c_str(), "XML settings file (*.xml)");
+	OpenInputFilePath::instance folder_path = OpenInputFilePath::get(messager);
+	QString the_file = QFileDialog::getOpenFileName(this, "Choose input dataset", folder_path ? folder_path->getPath().string().c_str() : "", "XML settings file (*.xml)");
 	if (the_file.size())
 	{
 		if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
@@ -207,9 +208,9 @@ void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 
 void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 {
-	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
 	UIMessager messager;
-	QString the_file = QFileDialog::getOpenFileName(this, "Choose output dataset", folder_path ? folder_path->getPath().str().c_str(), "XML settings file (*.xml)");
+	OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
+	QString the_file = QFileDialog::getOpenFileName(this, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "", "XML settings file (*.xml)");
 	if (the_file.size())
 	{
 		if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
