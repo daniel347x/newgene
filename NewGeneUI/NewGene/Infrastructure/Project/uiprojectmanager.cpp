@@ -444,7 +444,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		QMessageBox msgBox;
 		boost::format msg("%1%, the input project settings filename, is not a valid file.");
 		msg % input_project_settings_path.string();
-		msgBox.setText(msg);
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
@@ -468,11 +468,11 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		QMessageBox msgBox;
 		boost::format msg("%1%, the input model settings filename, is not a valid file.");
 		msg % path_to_model_settings.string();
-		msgBox.setText(msg);
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
-	std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings->getPath()));
+	std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
 	// Backend model does not know its settings, because multiple settings might point to the same model.
@@ -489,11 +489,11 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		QMessageBox msgBox;
 		boost::format msg("%1%, the input model database filename, is not a valid file.");
 		msg % path_to_model_database.string();
-		msgBox.setText(msg);
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
-	std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(messager, path_to_model_database->getPath()));
+	std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(messager, path_to_model_database));
 	std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
 
 	NewGeneMainWindow * mainWindow = nullptr;
@@ -511,7 +511,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		return false;
 	}
 
-	input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, path_to_model_settings->getPath(), path_to_model_database->getPath()),
+	input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
 													std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
 	UIInputProject * project = getActiveUIInputProject();
@@ -552,7 +552,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		QMessageBox msgBox;
 		boost::format msg("%1%, the input project settings filename, is not a valid file.");
 		msg % output_project_settings_path.string();
-		msgBox.setText(msg);
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
@@ -576,11 +576,11 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		QMessageBox msgBox;
 		boost::format msg("%1%, the output model settings filename, is not a valid file.");
 		msg % path_to_model_settings.string();
-		msgBox.setText(msg);
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
-	std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(messager, path_to_model_settings->getPath()));
+	std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(messager, path_to_model_settings));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
 	// The input model and settings are necessary in order to instantiate the output model
@@ -606,11 +606,11 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		QMessageBox msgBox;
 		boost::format msg("%1%, the output model database filename, is not a valid file.");
 		msg % path_to_model_database.string();
-		msgBox.setText(msg);
+		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
 		return false;
 	}
-	std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(messager, path_to_model_database->getPath(), std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
+	std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(messager, path_to_model_database, std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
 	std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
 
 	NewGeneMainWindow * mainWindow = nullptr;
@@ -628,7 +628,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		return false;
 	}
 
-	output_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(output_project_settings_path, path_to_model_settings->getPath(), path_to_model_database->getPath()),
+	output_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
 													std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
 	UIOutputProject * project = getActiveUIOutputProject();
