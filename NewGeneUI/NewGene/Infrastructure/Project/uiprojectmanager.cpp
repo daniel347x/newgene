@@ -366,6 +366,35 @@ void UIProjectManager::CloseCurrentOutputDataset()
 void UIProjectManager::OpenInputDataset(STD_STRING)
 {
 
+	// One per main window (currently only 1 supported per application)
+	if (output_tabs.size() > 1 || output_tabs.size() == 0)
+	{
+		return;
+	}
+	OutputProjectTabs & tabs = *output_tabs.begin();
+
+	// One per project (corresponding to an actual physical tab; currently only 1 per main window supported)
+	if (tabs.size() > 1 || tabs.size() == 0)
+	{
+		return;
+	}
+	OutputProjectTab & tab = *tabs.begin();
+
+	if (!tab.second)
+	{
+		tabs.clear();
+		return;
+	}
+
+	UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
+
+	emit UpdateInputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+
+	project_ptr = static_cast<UIOutputProject*>(tab.second.release());
+	project_ptr->deleteLater();
+
+	tabs.clear();
+
 }
 
 void UIProjectManager::CloseCurrentInputDataset()
@@ -391,9 +420,13 @@ void UIProjectManager::CloseCurrentInputDataset()
 		return;
 	}
 
+	UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.get());
+
 	emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 
-	UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
+	project_ptr = static_cast<UIInputProject*>(tab.second.release());
 	project_ptr->deleteLater();
+
+	tabs.clear();
 
 }
