@@ -439,18 +439,60 @@ void UIProjectManager::CloseCurrentInputDataset()
 bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesystem::path const & input_project_settings_path, QObject * mainWindowObject)
 {
 
+	if (!boost::filesystem::exists(input_project_settings_path) || boost::filesystem::is_directory(input_project_settings_path))
+	{
+		QMessageBox msgBox;
+		boost::format msg("%1%, the input project settings filename, is not a valid file.");
+		msg % input_project_settings_path.string();
+		msgBox.setText(msg);
+		msgBox.exec();
+		return false;
+	}
+
 	// Internally creates both an instance of UI-layer project settings, and an instance of backend-layer project settings
 	// via SettingsRepositoryFactory
 	std::shared_ptr<UIInputProjectSettings> project_settings(new UIInputProjectSettings(messager, input_project_settings_path));
 	project_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
 	// Internally creates an instance of backend-layer model settings via SettingsRepositoryFactory
-	auto path_to_model_settings = InputProjectPathToModel::get(messager, project_settings->getBackendSettings());
+	auto path_to_model_settings_ = InputProjectPathToModel::get(messager, project_settings->getBackendSettings());
+	boost::filesystem::path path_to_model_settings = path_to_model_settings_->getPath();
+	if (path_to_model_settings.is_relative())
+	{
+		boost::filesystem::path new_path = input_project_settings_path;
+		new_path /= path_to_model_settings;
+		path_to_model_settings = new_path;
+	}
+	if (!boost::filesystem::exists(path_to_model_settings) || boost::filesystem::is_directory(path_to_model_settings))
+	{
+		QMessageBox msgBox;
+		boost::format msg("%1%, the input model settings filename, is not a valid file.");
+		msg % path_to_model_settings.string();
+		msgBox.setText(msg);
+		msgBox.exec();
+		return false;
+	}
 	std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings->getPath()));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
 	// Backend model does not know its settings, because multiple settings might point to the same model.
-	auto path_to_model_database = InputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
+	auto path_to_model_database_ = InputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
+	boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
+	if (path_to_model_database.is_relative())
+	{
+		boost::filesystem::path new_path = path_to_model_settings;
+		new_path /= path_to_model_database;
+		path_to_model_database = new_path;
+	}
+	if (!boost::filesystem::exists(path_to_model_database) || boost::filesystem::is_directory(path_to_model_database))
+	{
+		QMessageBox msgBox;
+		boost::format msg("%1%, the input model database filename, is not a valid file.");
+		msg % path_to_model_database.string();
+		msgBox.setText(msg);
+		msgBox.exec();
+		return false;
+	}
 	std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(messager, path_to_model_database->getPath()));
 	std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
 
@@ -505,13 +547,39 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject)
 {
 
+	if (!boost::filesystem::exists(output_project_settings_path) || boost::filesystem::is_directory(output_project_settings_path))
+	{
+		QMessageBox msgBox;
+		boost::format msg("%1%, the input project settings filename, is not a valid file.");
+		msg % output_project_settings_path.string();
+		msgBox.setText(msg);
+		msgBox.exec();
+		return false;
+	}
+
 	// Internally creates both an instance of UI-layer project settings, and an instance of backend-layer project settings
 	// via SettingsRepositoryFactory
 	std::shared_ptr<UIOutputProjectSettings> project_settings(new UIOutputProjectSettings(messager, output_project_settings_path));
 	project_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
 	// Internally creates an instance of backend-layer model settings via SettingsRepositoryFactory
-	auto path_to_model_settings = OutputProjectPathToModel::get(messager, project_settings->getBackendSettings());
+	auto path_to_model_settings_ = OutputProjectPathToModel::get(messager, project_settings->getBackendSettings());
+	boost::filesystem::path path_to_model_settings = path_to_model_settings_->getPath();
+	if (path_to_model_settings.is_relative())
+	{
+		boost::filesystem::path new_path = output_project_settings_path;
+		new_path /= path_to_model_settings;
+		path_to_model_settings = new_path;
+	}
+	if (!boost::filesystem::exists(path_to_model_settings) || boost::filesystem::is_directory(path_to_model_settings))
+	{
+		QMessageBox msgBox;
+		boost::format msg("%1%, the output model settings filename, is not a valid file.");
+		msg % path_to_model_settings.string();
+		msgBox.setText(msg);
+		msgBox.exec();
+		return false;
+	}
 	std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(messager, path_to_model_settings->getPath()));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
@@ -525,7 +593,23 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	}
 
 	// Backend model does not know its settings, because multiple settings might point to the same model.
-	auto path_to_model_database = OutputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
+	auto path_to_model_database_ = OutputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
+	boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
+	if (path_to_model_database.is_relative())
+	{
+		boost::filesystem::path new_path = path_to_model_settings;
+		new_path /= path_to_model_database;
+		path_to_model_database = new_path;
+	}
+	if (!boost::filesystem::exists(path_to_model_database) || boost::filesystem::is_directory(path_to_model_database))
+	{
+		QMessageBox msgBox;
+		boost::format msg("%1%, the output model database filename, is not a valid file.");
+		msg % path_to_model_database.string();
+		msgBox.setText(msg);
+		msgBox.exec();
+		return false;
+	}
 	std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(messager, path_to_model_database->getPath(), std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
 	std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
 
