@@ -186,11 +186,6 @@ void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(int progress_bar_id, ST
 	}
 }
 
-void NewGeneMainWindow::on_actionClose_Current_Input_Dataset_triggered()
-{
-	emit SignalCloseCurrentInputDataset();
-}
-
 void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 {
 
@@ -204,10 +199,15 @@ void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 			boost::filesystem::path file_path(the_file.toStdString());
 			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, file_path.parent_path()));
 
-			emit SignalOpenInputDataset(the_file.toStdString());
+			emit SignalOpenInputDataset(the_file.toStdString(), this);
 		}
 	}
 
+}
+
+void NewGeneMainWindow::on_actionClose_Current_Input_Dataset_triggered()
+{
+	emit SignalCloseCurrentInputDataset();
 }
 
 void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
@@ -223,7 +223,7 @@ void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 			boost::filesystem::path file_path(the_file.toStdString());
 			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, file_path.parent_path()));
 
-			emit SignalOpenOutputDataset(the_file.toStdString());
+			emit SignalOpenOutputDataset(the_file.toStdString(), this);
 		}
 	}
 
