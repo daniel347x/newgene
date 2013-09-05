@@ -111,7 +111,7 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET)));
 
 	}
-	else if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	else if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
 	}

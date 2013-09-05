@@ -40,6 +40,7 @@ void NewGeneWidget::PrepareOutputWidget()
 		return;
 	}
 	self->connect(&projectManagerUI(), SIGNAL(UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
+	self->connect(&projectManagerUI(), SIGNAL(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
 }
 
 NewGeneMainWindow & NewGeneWidget::mainWindow()
@@ -57,6 +58,15 @@ void NewGeneWidget::ShowMessageBox(std::string msg)
 
 void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
+
+	if (IsOutputProjectWidget())
+	{
+		if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_INPUT_PROJECT)
+		{
+			Empty();
+			return;
+		}
+	}
 
 	if (!IsInputProjectWidget())
 	{
