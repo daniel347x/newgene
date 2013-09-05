@@ -332,6 +332,11 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_)
 		return;
 	}
 
+	if (getActiveUIOutputProject() == nullptr)
+	{
+		return;
+	}
+
 	emit LoadFromDatabase(&getActiveUIOutputProject()->model());
 
 }
