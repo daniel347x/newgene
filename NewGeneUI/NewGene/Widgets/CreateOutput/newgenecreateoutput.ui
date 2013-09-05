@@ -97,7 +97,7 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
       <enum>QTabWidget::South</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <property name="documentMode">
       <bool>true</bool>
@@ -136,37 +136,6 @@ border-bottom: 5px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
          <property name="styleSheet">
           <string notr="true">QWidget {
 border-bottom: 0px;;
-}</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="tabColumnOrder">
-      <property name="styleSheet">
-       <string notr="true">QWidget {
-/* border-bottom: 3px solid #f9dac7; */
-border-bottom: 5px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #ededed,
-                                 stop: 1.0 #f9dac7
-                                 );
-}</string>
-      </property>
-      <attribute name="title">
-       <string> Set column order </string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_4">
-       <property name="margin">
-        <number>0</number>
-       </property>
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <item row="0" column="0">
-        <widget class="QWidget" name="widgetColumnOrderPane" native="true">
-         <property name="styleSheet">
-          <string notr="true">QWidget {
-border-bottom: 0px;
 }</string>
          </property>
         </widget>

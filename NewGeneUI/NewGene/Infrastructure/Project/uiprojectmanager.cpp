@@ -152,7 +152,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 
 			if (!project)
 			{
-				boost::format msg("NULL input project during attempt to instantiate project.");
+				boost::format msg("No input dataset is open.");
 				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
 				return;
 			}
@@ -370,5 +370,21 @@ void UIProjectManager::OpenInputDataset(STD_STRING)
 
 void UIProjectManager::CloseCurrentInputDataset()
 {
+
+	if (input_tabs.size() > 1 || input_tabs.size() == 0)
+	{
+		return;
+	}
+	InputProjectTabs & tabs = *input_tabs.begin();
+	if (tabs.size() > 1 || tabs.size() == 0)
+	{
+		return;
+	}
+	InputProjectTab & tab = *tabs.begin();
+	if (!tab.second)
+	{
+		return;
+	}
+	UIInputProject & input_project = tab.second.get();
 
 }
