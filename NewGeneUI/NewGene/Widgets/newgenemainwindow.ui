@@ -162,34 +162,40 @@ border-bottom: 9px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
     <property name="title">
      <string>Input</string>
     </property>
+    <addaction name="actionOpen_Input_Dataset"/>
+    <addaction name="actionClose_Current_Input_Dataset"/>
    </widget>
    <widget class="QMenu" name="menuOutput">
     <property name="title">
      <string>Output</string>
     </property>
-   </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>View</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuOptions">
-    <property name="title">
-     <string>Options</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuHelp">
-    <property name="title">
-     <string>Help</string>
-    </property>
+    <addaction name="actionOpen_Output_Dataset"/>
+    <addaction name="actionClose_Current_Output_Dataset"/>
    </widget>
    <addaction name="menuInput"/>
    <addaction name="menuOutput"/>
-   <addaction name="menuView"/>
-   <addaction name="menuOptions"/>
-   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen_Input_Dataset">
+   <property name="text">
+    <string>Open Input Dataset...</string>
+   </property>
+  </action>
+  <action name="actionOpen_Output_Dataset">
+   <property name="text">
+    <string>Open Output Dataset...</string>
+   </property>
+  </action>
+  <action name="actionClose_Current_Input_Dataset">
+   <property name="text">
+    <string>Close Current Input Dataset</string>
+   </property>
+  </action>
+  <action name="actionClose_Current_Output_Dataset">
+   <property name="text">
+    <string>Close Current Output Dataset</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
