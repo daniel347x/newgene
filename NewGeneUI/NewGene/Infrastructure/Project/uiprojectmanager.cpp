@@ -68,13 +68,11 @@ void UIProjectManager::EndAllLoops()
 		InputProjectTabs & tabs = windows.second;
 		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
+
 			ProjectPaths & paths = tab.first;
 			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
-			emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-			project_ptr->model().EndLoopAndBackgroundPool(); // blocks
-			project_ptr->modelSettings().EndLoopAndBackgroundPool(); // blocks
-			project_ptr->projectSettings().EndLoopAndBackgroundPool(); // blocks
-			project_ptr->EndLoopAndBackgroundPool(); // blocks
+			RawCloseInputProject(project_ptr);
+
 		});
 
 	});
@@ -85,13 +83,11 @@ void UIProjectManager::EndAllLoops()
 		OutputProjectTabs & tabs = windows.second;
 		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
+
 			ProjectPaths & paths = tab.first;
 			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
-			emit this->UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, project_ptr); // blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-			project_ptr->model().EndLoopAndBackgroundPool(); // blocks
-			project_ptr->modelSettings().EndLoopAndBackgroundPool(); // blocks
-			project_ptr->projectSettings().EndLoopAndBackgroundPool(); // blocks
-			project_ptr->EndLoopAndBackgroundPool(); // blocks
+			RawCloseOutputProject(project_ptr);
+
 		});
 
 	});
@@ -109,8 +105,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 
 	connect(mainWindowObject, SIGNAL(SignalCloseCurrentInputDataset()), this, SLOT(CloseCurrentInputDataset()));
 	connect(mainWindowObject, SIGNAL(SignalCloseCurrentOutputDataset()), this, SLOT(CloseCurrentOutputDataset()));
-	connect(mainWindowObject, SIGNAL(SignalOpenInputDataset(STD_STRING)), this, SLOT(OpenInputDataset(STD_STRING)));
-	connect(mainWindowObject, SIGNAL(SignalOpenOutputDataset(STD_STRING)), this, SLOT(OpenOutputDataset(STD_STRING)));
+	connect(mainWindowObject, SIGNAL(SignalOpenInputDataset(STD_STRING, QObject *)), this, SLOT(OpenInputDataset(STD_STRING, QObject *)));
+	connect(mainWindowObject, SIGNAL(SignalOpenOutputDataset(STD_STRING, QObject *)), this, SLOT(OpenOutputDataset(STD_STRING, QObject *)));
 
 	bool success = false;
 
@@ -335,12 +331,7 @@ void UIProjectManager::CloseCurrentOutputDataset()
 	}
 
 	UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
-
-	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-	emit UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, project_ptr);
-
-	project_ptr = static_cast<UIOutputProject*>(tab.second.release());
-	project_ptr->deleteLater();
+	RawCloseOutputProject(project_ptr);
 
 	tabs.clear();
 
@@ -400,12 +391,7 @@ void UIProjectManager::CloseCurrentInputDataset()
 	}
 
 	UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.get());
-
-	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-	emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, project_ptr);
-
-	project_ptr = static_cast<UIInputProject*>(tab.second.release());
-	project_ptr->deleteLater();
+	RawCloseInputProject(project_ptr);
 
 	tabs.clear();
 
@@ -473,6 +459,10 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
 
 	emit LoadFromDatabase(&project->model());
+
+	boost::format msg("%1% successfully loaded.");
+	msg % input_project_settings_path;
+	messager.UpdateStatusBarText(msg.str());
 
 }
 
@@ -542,5 +532,39 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 	emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+
+	boost::format msg("%1% successfully loaded.");
+	msg % output_project_settings_path;
+	messager.UpdateStatusBarText(msg.str());
+
+}
+
+void UIProjectManager::RawCloseInputProject(UIInputProject * input_project)
+{
+
+	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+	emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, input_project);
+
+	input_project->model().EndLoopAndBackgroundPool(); // blocks
+	input_project->modelSettings().EndLoopAndBackgroundPool(); // blocks
+	input_project->projectSettings().EndLoopAndBackgroundPool(); // blocks
+	input_project->EndLoopAndBackgroundPool(); // blocks
+
+	input_project->deleteLater();
+
+}
+
+void UIProjectManager::RawCloseOutputProject(UIOutputProject * output_project)
+{
+
+	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
+	emit this->UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, output_project);
+
+	output_project->model().EndLoopAndBackgroundPool(); // blocks
+	output_project->modelSettings().EndLoopAndBackgroundPool(); // blocks
+	output_project->projectSettings().EndLoopAndBackgroundPool(); // blocks
+	output_project->EndLoopAndBackgroundPool(); // blocks
+
+	output_project->deleteLater();
 
 }

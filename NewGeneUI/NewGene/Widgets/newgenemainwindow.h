@@ -24,9 +24,9 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		~NewGeneMainWindow();
 
 	signals:
-		void SignalOpenOutputDataset(STD_STRING, QObject * mainWindowObject);
+		void SignalOpenOutputDataset(STD_STRING, QObject *);
 		void SignalCloseCurrentOutputDataset();
-		void SignalOpenInputDataset(STD_STRING, QObject * mainWindowObject);
+		void SignalOpenInputDataset(STD_STRING, QObject *);
 		void SignalCloseCurrentInputDataset();
 
 	public slots:

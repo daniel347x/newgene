@@ -24,7 +24,19 @@ public:
 
 	void operator()()
 	{
-		work_service.run();
+		try
+		{
+			work_service.run();
+		}
+		catch (std::exception & e)
+		{
+			std::string the_error = e.what();
+			std::string copy_error = the_error; // to add a line for debugging purposes only
+		}
+		catch (boost::exception &)
+		{
+			//std::string err = e.
+		}
 	}
 
 	void stop()

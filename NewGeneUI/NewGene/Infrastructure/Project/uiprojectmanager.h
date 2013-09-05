@@ -204,9 +204,9 @@ class UIProjectManager : public QObject,
 		void SignalMessageBox(STD_STRING);
 		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR);
 		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR);
-		void OpenOutputDataset(STD_STRING, QObject * mainWindowObject);
+		void OpenOutputDataset(STD_STRING, QObject *);
 		void CloseCurrentOutputDataset();
-		void OpenInputDataset(STD_STRING, QObject * mainWindowObject);
+		void OpenInputDataset(STD_STRING, QObject *);
 		void CloseCurrentInputDataset();
 
 	private:
@@ -237,6 +237,9 @@ class UIProjectManager : public QObject,
 
 		bool RawOpenInputProject(UIMessager & messager, boost::filesystem::path const & input_project_settings_path, QObject * mainWindowObject);
 		bool RawOpenOutputProject(UIMessager & messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject);
+
+		void RawCloseInputProject(UIInputProject * input_project);
+		void RawCloseOutputProject(UIOutputProject * output_project);
 
 };
 
