@@ -5,6 +5,7 @@
 #include <vector>
 
 ImportDefinition Development__CreateImportDefinition_Maoz();
+ImportDefinition Development__CreateImportDefinition_COW();
 ImportDefinition Development__CreateImportDefinition_Cty();
 ImportDefinition Development__CreateImportDefinition_MidNames();
 ImportDefinition Development__CreateImportDefinition_Mid();

@@ -568,6 +568,21 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 		return;
 	}
 
+	// Write columns headers
+	int column_index = 0;
+	bool first = true;
+	std::for_each(final_result.second.columns_in_view.begin(), final_result.second.columns_in_view.end(), [this, &output_file, &first, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	{
+		++column_index;
+		if (!first)
+		{
+			output_file << ",";
+		}
+		first = false;
+		output_file << unformatted_column.column_name_in_temporary_table;
+	});
+	output_file << std::endl;
+
 	ObtainData(final_result.second);
 
 	if (failed)
@@ -576,8 +591,8 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	}
 
 	int column_data_type = 0;
-	int column_index = 0;
-	bool first = true;
+	column_index = 0;
+	first = true;
 	std::int64_t data_int64 = 0;
 	std::string data_string;
 	long double data_long = 0.0;

@@ -19,6 +19,11 @@ ImportDefinition ImportDefinitions::CreateImportDefinition(std::string const & v
 		new_definition = Development__CreateImportDefinition_Maoz();
 		definitions.push_back(new_definition);
 	}
+	else if (boost::iequals(vg_code, "VG_CTY_MID_COW"))
+	{
+		new_definition = Development__CreateImportDefinition_COW();
+		definitions.push_back(new_definition);
+	}
 	else if (boost::iequals(vg_code, "VG_CTY"))
 	{
 		new_definition = Development__CreateImportDefinition_Cty();
@@ -37,6 +42,117 @@ ImportDefinition ImportDefinitions::CreateImportDefinition(std::string const & v
 
 	return new_definition;
 
+}
+
+ImportDefinition Development__CreateImportDefinition_COW()
+{
+	ImportDefinition import_definition__cow;
+
+	import_definition__cow.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
+	import_definition__cow.input_file = "L:\\daniel347x\\__DanExtras\\EuGene\\InputDat\\MIDB_3.10.csv";
+	import_definition__cow.first_row_is_header_row = true;
+	import_definition__cow.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
+
+	Schema schema_input;
+	Schema schema_output;
+
+	SchemaVector input_schema_vector;
+	SchemaVector output_schema_vector;
+
+	input_schema_vector.push_back(SchemaEntry("MID", FIELD_TYPE_STRING_FIXED, "dispnum"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "stabb"));
+	input_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "ccode"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "stday"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "stmon"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "styear"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endday"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endmon"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endyear"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "sidea"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revstate"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revtype1"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revtype2"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "fatality"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "fatalpre"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "hiact"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "hostlev"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "orig"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "version"));
+
+	output_schema_vector.push_back(SchemaEntry("MID", FIELD_TYPE_STRING_FIXED, "dispnum"), true);
+	output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "ccode"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "stabb"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_START", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_END", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "stday"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "stmon"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "styear"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endday"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endmon"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endyear"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "sidea"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revstate"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revtype1"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revtype2"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "fatality"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "fatalpre"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "hiact"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "hostlev"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "orig"), true);
+
+	ImportDefinition::ImportMappings mappings;
+
+	// Time-range mapping
+	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__RANGE__FROM__YR_MNTH_DAY);
+	FieldTypeEntries input_file_fields;
+	FieldTypeEntries output_table_fields;
+	FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "stday"), FIELD_TYPE_INT32);
+	FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "stmon"), FIELD_TYPE_INT32);
+	FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "styear"), FIELD_TYPE_INT32);
+	FieldTypeEntry input_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "endday"), FIELD_TYPE_INT32);
+	FieldTypeEntry input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "endmon"), FIELD_TYPE_INT32);
+	FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "endyear"), FIELD_TYPE_INT32);
+	input_file_fields.push_back(input_time_field__DayStart);
+	input_file_fields.push_back(input_time_field__MonthStart);
+	input_file_fields.push_back(input_time_field__YearStart);
+	input_file_fields.push_back(input_time_field__DayEnd);
+	input_file_fields.push_back(input_time_field__MonthEnd);
+	input_file_fields.push_back(input_time_field__YearEnd);
+	FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
+	FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+	output_table_fields.push_back(output_time_field__DayStart);
+	output_table_fields.push_back(output_time_field__DayEnd);
+	time_range_mapping->input_file_fields = input_file_fields;
+	time_range_mapping->output_table_fields = output_table_fields;
+	mappings.push_back(time_range_mapping);
+
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "dispnum"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "dispnum"), FIELD_TYPE_STRING_FIXED)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "ccode"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "ccode"), FIELD_TYPE_STRING_FIXED)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "stabb"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "stabb"), FIELD_TYPE_STRING_FIXED)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "stday"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "stday"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "stmon"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "stmon"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "styear"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "styear"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "endday"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "endday"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "endmon"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "endmon"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "endyear"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "endyear"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "sidea"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "sidea"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "revstate"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "revstate"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "revtype1"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "revtype1"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "revtype2"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "revtype2"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "fatality"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "fatality"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "hiact"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "hiact"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "hostlev"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "hostlev"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "orig"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "orig"), FIELD_TYPE_INT32)));
+
+	schema_input.schema = input_schema_vector;
+	schema_output.schema = output_schema_vector;
+
+	import_definition__cow.input_schema = schema_input;
+	import_definition__cow.output_schema = schema_output;
+
+	import_definition__cow.mappings = mappings;
+
+	return import_definition__cow;
 }
 
 ImportDefinition Development__CreateImportDefinition_Maoz()
@@ -165,6 +281,7 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "Duration", true));
 
 	ImportDefinition::ImportMappings mappings;
+
 	// Time-range mapping
 	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
 	FieldTypeEntries input_file_fields;
