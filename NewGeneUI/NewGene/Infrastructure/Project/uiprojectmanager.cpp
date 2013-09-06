@@ -664,6 +664,11 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 void UIProjectManager::RawCloseInputProject(UIInputProject * input_project)
 {
 
+	if (!input_project)
+	{
+		return;
+	}
+
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 	emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, input_project);
 
@@ -678,6 +683,11 @@ void UIProjectManager::RawCloseInputProject(UIInputProject * input_project)
 
 void UIProjectManager::RawCloseOutputProject(UIOutputProject * output_project)
 {
+
+	if (!output_project)
+	{
+		return;
+	}
 
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 	emit this->UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, output_project);

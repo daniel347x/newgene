@@ -104,7 +104,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, delete_tables(true)
 {
 	debug_ordering = true;
-	delete_tables = false;
+	//delete_tables = false;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -1104,6 +1104,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			intermediate_merge_of_top_level_primary_group_results.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(intermediate_merge_of_top_level_primary_group_results);
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
+			ClearTable(primary_variable_group_final_result);
 			intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
 			if (failed)
 			{
