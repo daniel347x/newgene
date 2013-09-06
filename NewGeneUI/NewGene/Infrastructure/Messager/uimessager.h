@@ -100,6 +100,7 @@ class UIMessager : public QObject, public Messager
 		void SignalUpdateProgressBarValue(int, STD_INT64 const);
 		void SignalUpdateStatusBarText(int, STD_STRING const &);
 		void SignalAppendKadStatusText(int, STD_STRING const &);
+		void SignalSetPerformanceLabel(int, STD_STRING const &);
 
 	public slots:
 
@@ -163,6 +164,7 @@ class UIMessagerOutputProject : public UIMessager
 		virtual void UpdateProgressBarValue(std::int64_t const);
 		virtual void UpdateStatusBarText(std::string const & status_bar_text);
 		virtual void AppendKadStatusText(std::string const & kad_status_text);
+		virtual void SetPerformanceLabel(std::string const & kad_status_text);
 
 		void EmitOutputProjectChangeMessage(DataChangeMessage & changes);
 

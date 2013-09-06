@@ -150,6 +150,7 @@ UIMessagerOutputProject::UIMessagerOutputProject(UIOutputProject * outp_, QObjec
 						if (get()->output_pane)
 						{
 							connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
+							connect(this, SIGNAL(SignalSetPerformanceLabel(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalSetPerformanceLabel(int, STD_STRING const)));
 						}
 					}
 				}
@@ -233,6 +234,11 @@ void UIMessagerOutputProject::UpdateStatusBarText(std::string const & the_text)
 void UIMessagerOutputProject::AppendKadStatusText(std::string const & the_text)
 {
 	emit SignalAppendKadStatusText(current_messager_id, the_text);
+}
+
+void UIMessagerOutputProject::SetPerformanceLabel(std::string const & the_text)
+{
+	emit SignalSetPerformanceLabel(current_messager_id, the_text);
 }
 
 void UIMessagerOutputProject::EmitOutputProjectChangeMessage(DataChangeMessage & changes)

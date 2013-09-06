@@ -41,7 +41,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="labelOutputFile">
          <property name="text">
           <string>Output file:</string>
          </property>
@@ -148,7 +148,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="labelStatus">
        <property name="text">
         <string>Status:</string>
        </property>
@@ -161,6 +161,13 @@
        </property>
        <property name="backgroundVisible">
         <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelOngoingPerformance">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>

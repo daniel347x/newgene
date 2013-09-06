@@ -107,6 +107,15 @@ void NewGeneGenerateOutput::ReceiveSignalAppendKadStatusText(int progress_bar_id
 	}
 }
 
+void NewGeneGenerateOutput::ReceiveSignalSetPerformanceLabel(int progress_bar_id, STD_STRING const performance_measure_text)
+{
+	QLabel * label_ = findChild<QLabel *>( "labelOngoingPerformance" );
+	if (label_)
+	{
+		label_->text(performance_measure_text.c_str());
+	}
+}
+
 void NewGeneGenerateOutput::on_pushButton_clicked()
 {
 
