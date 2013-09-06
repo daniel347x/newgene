@@ -9021,8 +9021,10 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 void OutputModel::OutputGenerator::SetFailureMessage(std::string const & failure_message_)
 {
 	failure_message = failure_message_;
-	messager.AppendKadStatusText(failure_message);
-	messager.UpdateStatusBarText(failure_message);
+	std::string report_failure_message = "Failed: ";
+	report_failure_message += failure_message;
+	messager.AppendKadStatusText(report_failure_message);
+	messager.UpdateStatusBarText(report_failure_message);
 }
 
 void OutputModel::OutputGenerator::UpdateProgressBarToNextStage(std::string const helper_text_first_choice, std::string helper_text_second_choice)
