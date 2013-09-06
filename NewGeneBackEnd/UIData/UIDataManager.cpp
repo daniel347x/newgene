@@ -70,6 +70,7 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	InputModel & input_model = project.model().getInputModel();
 	WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA variable_groups(widget_request);
 	variable_groups.identifiers = input_model.t_vgp_identifiers.getIdentifiers();
+	std::sort(variable_groups.identifiers.begin(), variable_groups.identifiers.end());
 	messager.EmitOutputWidgetDataRefresh(variable_groups);
 }
 
