@@ -197,9 +197,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		is_generating_output = true;
 	}
 
-	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex)
+	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager)
 	{
 		is_generating_output = false;
+		messager.SetPerformanceLabel("");
 	} BOOST_SCOPE_EXIT_END
 
 	setting_path_to_kad_output = CheckOutputFileExists();
@@ -339,7 +340,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.UpdateProgressBarValue(1000);
 
 	boost::format msg_2("Output successfully generated (%1%)");
-	messager.SetPerformanceLabel("");
 	msg_2 % boost::filesystem::path(setting_path_to_kad_output).filename();
 	messager.UpdateStatusBarText(msg_2.str().c_str());
 	messager.AppendKadStatusText("Done.");
@@ -366,9 +366,20 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 		for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
 		{
 
-			boost::format msg("Joining multiplicity %1% with previous merged data for %2%...");
-			msg % current_multiplicity % *child_variable_group_raw_data_columns.variable_groups[0].code;
-			messager.SetPerformanceLabel(msg.str().c_str());
+			std::int64_t previous_count = ObtainCount(xr_table_result.second);
+			std::int64_t current_count = ObtainCount(child_variable_group_raw_data_columns);
+			if (child_variable_group_raw_data_columns.variable_groups[0].longhand)
+			{
+				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows)...");
+				msg % current_multiplicity % current_count % *child_variable_group_raw_data_columns.variable_groups[0].longhand % previous_count;
+				messager.SetPerformanceLabel(msg.str().c_str());
+			}
+			else
+			{
+				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows)...");
+				msg % current_multiplicity % current_count % *child_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
+				messager.SetPerformanceLabel(msg.str().c_str());
+			}
 			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, 0, child_set_number, current_child_view_name_index);
 			x_table_result.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(x_table_result);
@@ -382,7 +393,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 			current_number_x_rows = number_of_rows;
 
-			UpdateProgressBarToNextStage();
+			UpdateProgressBarToNextStage(child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand : "", child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : "");
 			rows_estimate *= raw_rows_count;
 			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index, rows_estimate);
 			ClearTable(x_table_result);
@@ -1097,7 +1108,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 	// The incoming table is XR XR ... XR XRMF
 
-	UpdateProgressBarToNextStage();
+	UpdateProgressBarToNextStage(primary_group_final_results[0].second.variable_groups[0].longhand ? *primary_group_final_results[0].second.variable_groups[0].longhand : "", primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : "");
 
 	SqlAndColumnSet intermediate_merge_of_top_level_primary_group_results = primary_group_final_results[0];
 	intermediate_merge_of_top_level_primary_group_results.second.view_number = 1;
@@ -1132,9 +1143,18 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		{
 			// The structure of the table returned from the following function is this:
 			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMF
-			boost::format msg("Merging data %1% with previous data...");
-			msg % *primary_variable_group_final_result.second.variable_groups[0].code;
-			messager.SetPerformanceLabel(msg.str().c_str());
+			if (primary_variable_group_final_result.second.variable_groups[0].longhand)
+			{
+				boost::format msg("Merging data \"%1%\" with previous data...");
+				msg % *primary_variable_group_final_result.second.variable_groups[0].longhand;
+				messager.SetPerformanceLabel(msg.str().c_str());
+			}
+			else
+			{
+				boost::format msg("Merging data %1% with previous data...");
+				msg % *primary_variable_group_final_result.second.variable_groups[0].code;
+				messager.SetPerformanceLabel(msg.str().c_str());
+			}
 			intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, intermediate_merging_of_primary_groups_column_sets.back(), count);
 			if (failed)
 			{
@@ -1155,7 +1175,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 			// The structure of the table returned from the following function is this:
 			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
-			UpdateProgressBarToNextStage();
+			UpdateProgressBarToNextStage(primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand : "", primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : "");
 			rows_estimate += raw_rows_count;
 			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count, rows_estimate);
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
@@ -2019,7 +2039,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	std::int64_t raw_rows_count = total_number_incoming_rows[primary_variable_group_raw_data_columns.variable_groups[0]];
 	std::int64_t rows_estimate = raw_rows_count;
 
-	UpdateProgressBarToNextStage();
+	UpdateProgressBarToNextStage(primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand : "", primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : "");
 
 	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, primary_group_number, false);
 	x_table_result.second.most_recent_sql_statement_executed__index = -1;
@@ -2043,9 +2063,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
 
-		boost::format msg("Joining multiplicity %1% with previous merged data for %2%...");
-		msg % current_multiplicity % *primary_variable_group_raw_data_columns.variable_groups[0].code;
-		messager.SetPerformanceLabel(msg.str().c_str());
+		std::int64_t previous_count = ObtainCount(xr_table_result.second);
+		std::int64_t current_count = ObtainCount(primary_variable_group_raw_data_columns);
+		if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
+		{
+			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows)...");
+			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].longhand % previous_count;
+			messager.SetPerformanceLabel(msg.str().c_str());
+		}
+		else
+		{
+			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows)...");
+			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
+			messager.SetPerformanceLabel(msg.str().c_str());
+		}
 		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number);
 		x_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(x_table_result);
@@ -2059,7 +2090,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 		current_number_x_rows = number_of_rows;
 
-		UpdateProgressBarToNextStage();
+		UpdateProgressBarToNextStage(primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand : "", primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : "");
 		rows_estimate *= raw_rows_count;
 		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity, rows_estimate);
 		ClearTables(sql_and_column_sets);
@@ -3404,7 +3435,7 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView & column_set)
 
 }
 
-std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView & column_set)
+std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const & column_set)
 {
 
 	if (stmt_result)
@@ -7270,7 +7301,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 			boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
 			msg % current_rows_stepped % current_number_x_rows;
-			messager.SetPerformanceLabel();
+			messager.SetPerformanceLabel(msg.str());
 			EndTransaction();
 			BeginNewTransaction();
 			current_rows_added_since_execution = 0;
@@ -7281,7 +7312,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 			boost::format msg("Processed %1% of %2% temporary rows this stage.");
 			msg % current_rows_stepped % current_number_x_rows;
-			messager.SetPerformanceLabel();
+			messager.SetPerformanceLabel(msg.str());
 		}
 
 	}
@@ -7289,7 +7320,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	ExecuteSQL(result);
 	boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
 	msg % current_rows_stepped % current_number_x_rows;
-	messager.SetPerformanceLabel();
+	messager.SetPerformanceLabel(msg.str());
 	EndTransaction();
 
 	if (failed)
@@ -7761,15 +7792,33 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			// Todo: Error message
 			if (the_dmu_category.longhand)
 			{
-				boost::format msg("The choice of K in the spin control for DMU %1% (\"%2%\") (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis %5%.");
-				msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.code;
-				SetFailureMessage(msg.str());
+				if (biggest_counts[0].first.longhand)
+				{
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis \"%5%\".");
+					msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.longhand;
+					SetFailureMessage(msg.str());
+				}
+				else
+				{
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis %5%.");
+					msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.code;
+					SetFailureMessage(msg.str());
+				}
 			}
 			else
 			{
-				boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis %4%.");
-				msg % *the_dmu_category.code % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.code;
-				SetFailureMessage(msg.str());
+				if (biggest_counts[0].first.longhand)
+				{
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis \"%4%\".");
+					msg % *the_dmu_category.code % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.longhand;
+					SetFailureMessage(msg.str());
+				}
+				else
+				{
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis %4%.");
+					msg % *the_dmu_category.code % kad_count_current_dmu_category % uoa_count_current_dmu_category % *biggest_counts[0].first.code;
+					SetFailureMessage(msg.str());
+				}
 			}
 			failed = true;
 			return; // from lambda
@@ -7787,15 +7836,33 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		{
 			if (the_dmu_category.longhand)
 			{
-				boost::format msg("The choice of K in the spin control for DMU %1% (\"%2%\") (%3%) is not an even multiple of the minimun K-value for the unit of analysis %4% (%5%).");
-				msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % *biggest_counts[0].first.code % uoa_count_current_dmu_category;
-				SetFailureMessage(msg.str());
+				if (biggest_counts[0].first.longhand)
+				{
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is not an even multiple of the minimun K-value for the unit of analysis %4% (%5%).");
+					msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % *biggest_counts[0].first.longhand % uoa_count_current_dmu_category;
+					SetFailureMessage(msg.str());
+				}
+				else
+				{
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is not an even multiple of the minimun K-value for the unit of analysis %4% (%5%).");
+					msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % *biggest_counts[0].first.code % uoa_count_current_dmu_category;
+					SetFailureMessage(msg.str());
+				}
 			}
 			else
 			{
-				boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is not an even multiple of the minimun K-value for the unit of analysis %3% (%4%).");
-				msg % *the_dmu_category.code % kad_count_current_dmu_category % *biggest_counts[0].first.code % uoa_count_current_dmu_category;
-				SetFailureMessage(msg.str());
+				if (biggest_counts[0].first.longhand)
+				{
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is not an even multiple of the minimun K-value for the unit of analysis %3% (%4%).");
+					msg % *the_dmu_category.code % kad_count_current_dmu_category % *biggest_counts[0].first.longhand % uoa_count_current_dmu_category;
+					SetFailureMessage(msg.str());
+				}
+				else
+				{
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is not an even multiple of the minimun K-value for the unit of analysis %3% (%4%).");
+					msg % *the_dmu_category.code % kad_count_current_dmu_category % *biggest_counts[0].first.code % uoa_count_current_dmu_category;
+					SetFailureMessage(msg.str());
+				}
 			}
 			failed = true;
 			return;
@@ -7904,7 +7971,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 						// Invalid child UOA for this output
 						if (current_dmu_plus_count.first.longhand)
 						{
-							boost::format msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% (\"%2%\") may only be greater than 1 if it matches the K-value within the UOA of the top-level variable group/s.");
+							boost::format msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% (%2%) may only be greater than 1 if it matches the K-value within the UOA of the top-level variable group/s.");
 							msg % *current_dmu_plus_count.first.code % *current_dmu_plus_count.first.longhand;
 							SetFailureMessage(msg.str());
 						}
@@ -7944,7 +8011,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 							// Invalid child UOA for this output
 							if (current_dmu_plus_count.first.longhand)
 							{
-								boost::format msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% (\"%2%\") cannot currently be 1 if the K-value within the UOA of the top-level variable group/s is greater than 1 when that DMU category does not have multiplicity greater than 1 for the top-level variable group.");
+								boost::format msg("For child variable groups, the K-value within the unit of analysis for DMU category %1% (%2%) cannot currently be 1 if the K-value within the UOA of the top-level variable group/s is greater than 1 when that DMU category does not have multiplicity greater than 1 for the top-level variable group.");
 								msg % *current_dmu_plus_count.first.code % *current_dmu_plus_count.first.longhand;
 								SetFailureMessage(msg.str());
 							}
@@ -8050,15 +8117,33 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 				// Todo: Error message
 				if (the_dmu_category_identifier.longhand)
 				{
-					boost::format msg("The choice of K in the spin control for DMU %1% (\"%2%\") (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis %5%.");
-					msg % *the_dmu_category_identifier.code % *the_dmu_category_identifier.longhand % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category % *uoa_identifier.code;
-					SetFailureMessage(msg.str());
+					if (uoa_identifier.longhand)
+					{
+						boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis \"%5%\".");
+						msg % *the_dmu_category_identifier.code % *the_dmu_category_identifier.longhand % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category % *uoa_identifier.longhand;
+						SetFailureMessage(msg.str());
+					}
+					else
+					{
+						boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %4% for unit of analysis %5%.");
+						msg % *the_dmu_category_identifier.code % *the_dmu_category_identifier.longhand % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category % *uoa_identifier.code;
+						SetFailureMessage(msg.str());
+					}
 				}
 				else
 				{
-					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis %4%.");
-					msg % *the_dmu_category_identifier.code % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category % *uoa_identifier.code;
-					SetFailureMessage(msg.str());
+					if (uoa_identifier.longhand)
+					{
+						boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis \"%4%\".");
+						msg % *the_dmu_category_identifier.code % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category % *uoa_identifier.longhand;
+						SetFailureMessage(msg.str());
+					}
+					else
+					{
+						boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is too small to support the unit/s of analysis for the variables selected, with required minimum K-value %3% for unit of analysis %4%.");
+						msg % *the_dmu_category_identifier.code % k_spin_control_count__current_dmu_category % uoa_k_count__current_dmu_category % *uoa_identifier.code;
+						SetFailureMessage(msg.str());
+					}
 				}
 				failed = true;
 				return; // from lambda
@@ -8881,7 +8966,7 @@ void OutputModel::OutputGenerator::SetFailureMessage(std::string const & failure
 	messager.UpdateStatusBarText(failure_message);
 }
 
-void OutputModel::OutputGenerator::UpdateProgressBarToNextStage()
+void OutputModel::OutputGenerator::UpdateProgressBarToNextStage(std::string const helper_text_first_choice, std::string helper_text_second_choice)
 {
 	++current_progress_stage;
 
@@ -8889,9 +8974,24 @@ void OutputModel::OutputGenerator::UpdateProgressBarToNextStage()
 	msg_1 % boost::filesystem::path(setting_path_to_kad_output).filename() % current_progress_stage % total_progress_stages;
 	messager.UpdateStatusBarText(msg_1.str().c_str());
 
-	boost::format msg_2("Stage %1% of %2%");
-	msg_2 % current_progress_stage % total_progress_stages;
-	messager.AppendKadStatusText(msg_2.str().c_str());
+	if (helper_text_first_choice.size() > 0)
+	{
+		boost::format msg_2("Stage %1% of %2% (%3%)");
+		msg_2 % current_progress_stage % total_progress_stages % helper_text_first_choice;
+		messager.AppendKadStatusText(msg_2.str().c_str());
+	}
+	else if (helper_text_second_choice.size())
+	{
+		boost::format msg_2("Stage %1% of %2% (%3%)");
+		msg_2 % current_progress_stage % total_progress_stages % helper_text_second_choice;
+		messager.AppendKadStatusText(msg_2.str().c_str());
+	}
+	else
+	{
+		boost::format msg_2("Stage %1% of %2%");
+		msg_2 % current_progress_stage % total_progress_stages;
+		messager.AppendKadStatusText(msg_2.str().c_str());
+	}
 
 	messager.UpdateProgressBarValue(0);
 
@@ -8900,6 +9000,14 @@ void OutputModel::OutputGenerator::UpdateProgressBarToNextStage()
 
 void OutputModel::OutputGenerator::CheckProgressUpdate(std::int64_t const current_rows_added_, std::int64_t const rows_estimate_, std::int64_t const starting_value_this_stage)
 {
+
+	bool disable_this_progress_bar_approach = true;
+
+	if (disable_this_progress_bar_approach)
+	{
+		return;
+	}
+
 	std::int64_t fraction = current_rows_added_ / rows_estimate_;
 	std::int64_t increment_value = fraction * progress_increment_per_stage;
 	std::int64_t max_value_this_stage = starting_value_this_stage + progress_increment_per_stage;
@@ -8916,4 +9024,21 @@ void OutputModel::OutputGenerator::CheckProgressUpdate(std::int64_t const curren
 	{
 		messager.UpdateProgressBarValue(desired_current_value);
 	}
+
+}
+
+void OutputModel::OutputGenerator::CheckProgressUpdateMethod2(Messager & messager, std::int64_t const current_rows_stepped)
+{
+
+	boost::format msg("Processed %1% of %2% temporary rows this stage.");
+	msg % current_rows_stepped % current_number_x_rows;
+	messager.SetPerformanceLabel(msg.str());
+
+	int current_progress_bar_value = (int)(((long double)(current_rows_stepped) / (long double)(current_number_x_rows)) * 1000.0);
+	if (current_progress_bar_value > 1000)
+	{
+		current_progress_bar_value = 1000;
+	}
+	messager.UpdateProgressBarValue(current_progress_bar_value);
+
 }

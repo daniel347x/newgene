@@ -475,7 +475,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void EndTransaction();
 				void ExecuteSQL(SqlAndColumnSet & sql_and_column_set);
 				void ObtainData(ColumnsInTempView & column_set);
-				std::int64_t ObtainCount(ColumnsInTempView & column_set);
+				std::int64_t ObtainCount(ColumnsInTempView const & column_set);
 				bool StepData();
 				bool CreateNewXRRow(bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_columns, ColumnsInTempView & current_xr_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category);
 				bool TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data);
@@ -489,8 +489,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				// Progress bar variables
 				void DetermineTotalNumberRows();
-				void UpdateProgressBarToNextStage();
+				void UpdateProgressBarToNextStage(std::string const helper_text_first_choice, std::string helper_text_second_choice);
 				void CheckProgressUpdate(std::int64_t const current_rows_added_, std::int64_t const rows_estimate_, std::int64_t const starting_value_this_stage);
+				void CheckProgressUpdateMethod2(Messager & messager, std::int64_t const current_rows_stepped);
 				std::map<WidgetInstanceIdentifier, std::int64_t> total_number_incoming_rows;
 				std::map<WidgetInstanceIdentifier, int> multiplicities;
 				std::map<WidgetInstanceIdentifier, std::int64_t> total_number_primary_merged_rows;
