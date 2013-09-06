@@ -94,6 +94,13 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, messager(messager_)
 	, failed(false)
 	, overwrite_if_output_file_already_exists(false)
+	, rough_progress_range(0)
+	, rough_progress_increment_one_percent(0)
+	, total_number_primary_rows(0)
+	, current_progress_stage(0)
+	, total_progress_stages(0)
+	, progress_increment_per_stage(0)
+	, current_progress_value(0)
 {
 	debug_ordering = true;
 	messager.StartProgressBar(0, 1000);
@@ -191,7 +198,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		is_generating_output = false;
 	} BOOST_SCOPE_EXIT_END
 
-	std::string setting_path_to_kad_output = CheckOutputFileExists();
+	setting_path_to_kad_output = CheckOutputFileExists();
 
 	if (failed)
 	{
@@ -238,6 +245,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	current_progress_stage = 0;
 	boost::format msg_1("Generating output to file %1%");
 	msg_1 % boost::filesystem::path(setting_path_to_kad_output).filename();
 	messager.UpdateStatusBarText(msg_1.str().c_str());
@@ -268,8 +276,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// failed
 		return;
 	}
-
-	messager.UpdateProgressBarValue(250);
 
 	messager.AppendKadStatusText("Looping through top-level variable groups...");
 	LoopThroughPrimaryVariableGroups();
@@ -344,6 +350,9 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &current_child_view_name_index, &child_set_number, &x_table_result, &xr_table_result](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 
+		std::int64_t raw_rows_count = total_number_incoming_rows[secondary_variable_groups_column_info.variable_groups[0]];
+		std::int64_t rows_estimate = raw_rows_count;
+
 		WidgetInstanceIdentifier const & dmu_category_multiplicity_greater_than_1_for_child = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].first;
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
 		for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
@@ -358,7 +367,9 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 				return;
 			}
 
-			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
+			UpdateProgressBarToNextStage();
+			rows_estimate *= raw_rows_count;
+			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index, rows_estimate);
 			ClearTable(x_table_result);
 			merging_of_children_column_sets.push_back(xr_table_result);
 			if (failed)
@@ -1048,6 +1059,8 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 	// The incoming table is XR XR ... XR XRMF
 
+	UpdateProgressBarToNextStage();
+
 	SqlAndColumnSet intermediate_merge_of_top_level_primary_group_results = primary_group_final_results[0];
 	intermediate_merge_of_top_level_primary_group_results.second.view_number = 1;
 	intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
@@ -1067,10 +1080,16 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		return;
 	}
 	
+	std::int64_t raw_rows_count = 0;
+	std::int64_t rows_estimate = 0;
+
 	// The primary variable group data is stored in primary_group_final_results
 	int count = 1;
-	std::for_each(primary_group_final_results.cbegin(), primary_group_final_results.cend(), [this, &xr_table_result, &intermediate_merge_of_top_level_primary_group_results, &count](SqlAndColumnSet const & primary_variable_group_final_result)
+	std::for_each(primary_group_final_results.cbegin(), primary_group_final_results.cend(), [this, &rows_estimate, &raw_rows_count, &xr_table_result, &intermediate_merge_of_top_level_primary_group_results, &count](SqlAndColumnSet const & primary_variable_group_final_result)
 	{
+
+		raw_rows_count = total_number_incoming_rows[intermediate_merging_of_primary_groups_column_sets.back().second.columns_in_view[0].variable_group_associated_with_current_inner_table];
+
 		if (count != 1)
 		{
 			// The structure of the table returned from the following function is this:
@@ -1091,13 +1110,19 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 			// The structure of the table returned from the following function is this:
 			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
-			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count);
+			UpdateProgressBarToNextStage();
+			rows_estimate += raw_rows_count;
+			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count, rows_estimate);
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
 			if (failed)
 			{
 				return;
 			}
+		}
+		else
+		{
+			rows_estimate = raw_rows_count;
 		}
 		++count;
 	});
@@ -1811,6 +1836,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 void OutputModel::OutputGenerator::DetermineTotalNumberRows()
 {
 
+	total_number_primary_rows = 0;
+	total_progress_stages = 0;
+
 	int primary_group_number = 1;
 	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
@@ -1819,7 +1847,7 @@ void OutputModel::OutputGenerator::DetermineTotalNumberRows()
 		{
 			return;
 		}
-		SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, primary_group_number, false);
+		SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, primary_group_number, true);
 		if (failed)
 		{
 			return;
@@ -1848,6 +1876,10 @@ void OutputModel::OutputGenerator::DetermineTotalNumberRows()
 
 		multiplicities[primary_variable_group_raw_data_columns.variable_groups[0]] = highest_multiplicity_primary_uoa;
 
+		total_number_primary_rows += (highest_multiplicity_primary_uoa * number_rows);
+
+		total_progress_stages += highest_multiplicity_primary_uoa;
+
 		++primary_group_number;
 
 	});
@@ -1860,7 +1892,7 @@ void OutputModel::OutputGenerator::DetermineTotalNumberRows()
 		{
 			return;
 		}
-		SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(child_variable_group_raw_data_columns, child_set_number, false);
+		SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(child_variable_group_raw_data_columns, child_set_number, true);
 		if (failed)
 		{
 			return;
@@ -1889,9 +1921,27 @@ void OutputModel::OutputGenerator::DetermineTotalNumberRows()
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
 		multiplicities[child_variable_group_raw_data_columns.variable_groups[0]] = the_child_multiplicity;
 
+		total_progress_stages += the_child_multiplicity;
+
 		++child_set_number;
 
 	});
+
+	total_progress_stages += primary_variable_groups_column_info.size(); // merging of top-level groups
+
+	rough_progress_range = 0;
+	std::for_each(total_number_incoming_rows.cbegin(), total_number_incoming_rows.cend(), [this](std::pair<WidgetInstanceIdentifier const, std::int64_t> const & the_pair)
+	{
+		WidgetInstanceIdentifier const & variable_group = the_pair.first;
+		std::int64_t number_raw_rows = the_pair.second;
+		int the_multiplicity = multiplicities[variable_group];
+		rough_progress_range += number_raw_rows * the_multiplicity;
+	});
+
+	// unused for now
+	rough_progress_increment_one_percent = rough_progress_range / 125; // leave an extra 20% for the merging of primary groups
+
+	progress_increment_per_stage = 1000 / total_progress_stages;
 
 }
 
@@ -1920,6 +1970,11 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets, int const primary_group_number)
 {
+
+	std::int64_t raw_rows_count = total_number_incoming_rows[primary_variable_group_raw_data_columns.variable_groups[0]];
+	std::int64_t rows_estimate = raw_rows_count;
+
+	UpdateProgressBarToNextStage();
 
 	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, primary_group_number, false);
 	x_table_result.second.most_recent_sql_statement_executed__index = -1;
@@ -1953,7 +2008,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			return SqlAndColumnSet();
 		}
 
-		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
+		UpdateProgressBarToNextStage();
+		rows_estimate *= raw_rows_count;
+		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity, rows_estimate);
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed)
@@ -1986,6 +2043,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	{
 		return SqlAndColumnSet();
 	}
+	total_number_primary_merged_rows[primary_variable_group_raw_data_columns.variable_groups[0]] = rows_added;
 
 	return duplicates_removed_top_level_variable_group_result;
 
@@ -6156,8 +6214,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index, std::int64_t & rows_estimated)
 {
+
+	std::int64_t saved_initial_progress_bar_value = current_progress_value;
 
 	char c[256];
 
@@ -7070,6 +7130,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			EndTransaction();
 			BeginNewTransaction();
 			current_rows_added_since_execution = 0;
+			CheckProgressUpdate(current_rows_added, rows_estimated, saved_initial_progress_bar_value);
 		}
 
 	}
@@ -7088,6 +7149,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 		return result;
 	}
+
+	messager.UpdateProgressBarValue(1000);
+
+	rows_estimated = current_rows_added;
 
 	return result;
 
@@ -8664,4 +8729,33 @@ void OutputModel::OutputGenerator::SetFailureMessage(std::string const & failure
 	failure_message = failure_message_;
 	messager.AppendKadStatusText(failure_message);
 	messager.UpdateStatusBarText(failure_message);
+}
+
+void OutputModel::OutputGenerator::UpdateProgressBarToNextStage()
+{
+	boost::format msg_1("Generating output to file %1%: Stage %2% of %3%");
+	msg_1 % boost::filesystem::path(setting_path_to_kad_output).filename() % ++current_progress_stage % total_progress_stages;
+	messager.UpdateStatusBarText(msg_1.str().c_str());
+	messager.AppendKadStatusText(msg_1.str().c_str());
+	messager.UpdateProgressBarValue(0);
+}
+
+void OutputModel::OutputGenerator::CheckProgressUpdate(std::int64_t const current_rows_added_, std::int64_t const rows_estimate_, std::int64_t const starting_value_this_stage)
+{
+	std::int64_t fraction = current_rows_added_ / rows_estimate_;
+	std::int64_t increment_value = fraction * progress_increment_per_stage;
+	std::int64_t max_value_this_stage = starting_value_this_stage + progress_increment_per_stage;
+	std::int64_t desired_current_value = starting_value_this_stage + increment_value;
+	if (desired_current_value > current_progress_value)
+	{
+		if (desired_current_value <= max_value_this_stage)
+		{
+			// no-op - each stage resets to 0
+		}
+	}
+	desired_current_value = fraction * 1000;
+	if (desired_current_value > current_progress_value)
+	{
+		messager.UpdateProgressBarValue(desired_current_value);
+	}
 }

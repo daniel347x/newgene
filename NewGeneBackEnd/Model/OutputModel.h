@@ -465,7 +465,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreateInitialPrimaryMergeXRTable(ColumnsInTempView const & primary_variable_group_x1_columns);
 				SqlAndColumnSet CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number);
 				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const child_set_number, int const current_child_view_name_index);
-				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index);
+				SqlAndColumnSet CreateXRTable(ColumnsInTempView & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index, std::int64_t & rows_created);
 				SqlAndColumnSet CreateSortedTable(ColumnsInTempView const & final_xr_columns, int const primary_group_number);
 				SqlAndColumnSet RemoveDuplicates(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number, std::int64_t & current_rows_added);
 				void RemoveDuplicatesFromPrimaryKeyMatches( SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView & sorted_result_columns, std::int64_t & current_rows_added, int &current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, int const minimum_desired_rows_per_transaction );
@@ -488,8 +488,19 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				// Help with progress bar
 				void DetermineTotalNumberRows();
+				void UpdateProgressBarToNextStage();
+				void CheckProgressUpdate(std::int64_t const current_rows_added_, std::int64_t const rows_estimate_, std::int64_t const starting_value_this_stage);
 				std::map<WidgetInstanceIdentifier, std::int64_t> total_number_incoming_rows;
 				std::map<WidgetInstanceIdentifier, int> multiplicities;
+				std::map<WidgetInstanceIdentifier, std::int64_t> total_number_primary_merged_rows;
+				std::int64_t rough_progress_range;
+				std::int64_t rough_progress_increment_one_percent;
+				std::int64_t total_number_primary_rows;
+				int current_progress_stage;
+				int total_progress_stages;
+				int progress_increment_per_stage;
+				std::string setting_path_to_kad_output;
+				int current_progress_value;
 
 				// Save the SQL and column sets corresponding to each primary and child variable group in global data structures
 				//
