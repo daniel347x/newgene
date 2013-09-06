@@ -3182,7 +3182,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 		else
 		{
-			if (current_column >= inner_table_no_multiplicities__with_or_without_datetime_columns_included__column_count)
+			if (current_column >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
 			{
 				return;
 			}
@@ -3206,7 +3206,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 			else
 			{
-				if (column_count_nested >= inner_table_no_multiplicities__with_or_without_datetime_columns_included__column_count)
+				if (column_count_nested >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
 				{
 					return;
 				}
@@ -4451,7 +4451,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns.has_no_datetime_columns = false;
 
 	int first_full_table_column_count = 0;
-	inner_table_no_multiplicities__with_or_without_datetime_columns_included__column_count = 0;
+	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = 0;
 	int second_table_column_count = 0;
 
 	std::vector<std::string> previous_column_names_first_table;
@@ -4472,17 +4472,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		new_column.column_name_in_temporary_table += "_";
 		new_column.column_name_in_temporary_table += newUUID(true);
 		++first_full_table_column_count;
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED)
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
 		{
 			reached_first_datetime_start_merged_column = true;
 		}
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED)
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
 		{
 			reached_first_datetime_end_merged_column = true;
 		}
 		if (in_first_inner_table)
 		{
-			++inner_table_no_multiplicities__with_or_without_datetime_columns_included__column_count;
+			++inner_table_no_multiplicities__with_all_datetime_columns_included__column_count;
 		}
 		if (reached_first_datetime_start_merged_column && reached_first_datetime_end_merged_column)
 		{
@@ -4661,7 +4661,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					int column_count = 0;
 					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &sql_string, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 					{
-						if (column_count < inner_table_no_multiplicities__with_or_without_datetime_columns_included__column_count)
+						if (column_count < inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
 						{
 							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
 							{
@@ -4803,7 +4803,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
 		{
 
-			if (current_column >= inner_table_no_multiplicities__with_or_without_datetime_columns_included__column_count)
+			if (current_column >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
 			{
 				return;
 			}
@@ -4813,7 +4813,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			int column_count_nested = 0;
 			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column_nested)
 			{
-				if (column_count_nested >= inner_table_no_multiplicities__with_or_without_datetime_columns_included__column_count)
+				if (column_count_nested >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
 				{
 					return;
 				}

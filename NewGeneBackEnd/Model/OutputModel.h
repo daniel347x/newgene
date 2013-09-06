@@ -669,7 +669,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				Executor executor;
 
 				// Helper variable saves the number of columns in the current primary variable group's inner table
-				int inner_table_no_multiplicities__with_or_without_datetime_columns_included__column_count;
+				int inner_table_no_multiplicities__with_all_datetime_columns_included__column_count;
 
 				std::int64_t timerange_start;
 				std::int64_t timerange_end;
