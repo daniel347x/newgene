@@ -4546,7 +4546,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Proceed to the secondary key columns.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
 	{
-		if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
+		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
+		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
+		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
 			return; // Add these columns last
 		}
