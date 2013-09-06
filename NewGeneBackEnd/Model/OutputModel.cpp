@@ -6650,7 +6650,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 
 
-	int const minimum_desired_rows_per_transaction = 256;
+	int const minimum_desired_rows_per_transaction = 1024 * 1024;
 
 	int current_rows_added = 0;
 	int current_rows_added_since_execution = 0;
@@ -7194,26 +7194,24 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		}
 
+		ExecuteSQL(result);
+
+		if (current_rows_added % 1000 == 0)
+		{
+			CheckProgressUpdate(current_rows_added, rows_estimated, saved_initial_progress_bar_value);
+		}
+
 		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 		{
-			ExecuteSQL(result);
 			EndTransaction();
 			BeginNewTransaction();
 			current_rows_added_since_execution = 0;
-			CheckProgressUpdate(current_rows_added, rows_estimated, saved_initial_progress_bar_value);
 		}
 
 	}
 
-	if (current_rows_added_since_execution > 0)
-	{
-		ExecuteSQL(result);
-		EndTransaction();
-	}
-	else
-	{
-		EndTransaction();
-	}
+	ExecuteSQL(result);
+	EndTransaction();
 
 	if (failed)
 	{
