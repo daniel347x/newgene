@@ -8766,9 +8766,9 @@ void OutputModel::OutputGenerator::UpdateProgressBarToNextStage()
 	msg_1 % boost::filesystem::path(setting_path_to_kad_output).filename() % ++current_progress_stage % total_progress_stages;
 	messager.UpdateStatusBarText(msg_1.str().c_str());
 
-	boost::format msg_1("Stage %1% of %2%");
-	msg_1 % ++current_progress_stage % total_progress_stages;
-	messager.AppendKadStatusText(msg_1.str().c_str());
+	boost::format msg_2("Stage %1% of %2%");
+	msg_2 % ++current_progress_stage % total_progress_stages;
+	messager.AppendKadStatusText(msg_2.str().c_str());
 
 	messager.UpdateProgressBarValue(1000);
 }
