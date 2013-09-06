@@ -103,6 +103,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, current_progress_value(0)
 	, delete_tables(true)
 	, ms_elapsed(0)
+	, current_number_x_rows(0)
 {
 	debug_ordering = true;
 	//delete_tables = false;
@@ -377,6 +378,9 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			{
 				return;
 			}
+
+			std::int64_t number_of_rows = ObtainCount(x_table_result.second);
+			current_number_x_rows = number_of_rows;
 
 			UpdateProgressBarToNextStage();
 			rows_estimate *= raw_rows_count;
@@ -1145,6 +1149,9 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			{
 				return;
 			}
+
+			std::int64_t number_of_rows = ObtainCount(intermediate_merge_of_top_level_primary_group_results.second);
+			current_number_x_rows = number_of_rows;
 
 			// The structure of the table returned from the following function is this:
 			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
@@ -2049,6 +2056,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			return SqlAndColumnSet();
 		}
 
+		std::int64_t number_of_rows = ObtainCount(x_table_result.second);
+		current_number_x_rows = number_of_rows;
+
 		UpdateProgressBarToNextStage();
 		rows_estimate *= raw_rows_count;
 		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity, rows_estimate);
@@ -2424,7 +2434,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 	int const minimum_desired_rows_per_transaction = 256;
 	current_rows_added = 0;
-	int current_rows_added_since_execution = 0;
+	std::int64_t current_rows_added_since_execution = 0;
 	std::string sql_add_xr_row;
 	bool first_row_added = true;
 	std::vector<std::string> bound_parameter_strings;
@@ -2915,7 +2925,7 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 }
 
-void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, int & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
+void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
 {
 
 	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
@@ -3391,6 +3401,60 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView & column_set)
 		failed = true;
 		return;
 	}
+
+}
+
+std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView & column_set)
+{
+
+	if (stmt_result)
+	{
+		sqlite3_finalize(stmt_result);
+		stmt_result = nullptr;
+	}
+
+	std::string sql;
+	sql += "SELECT COUNT (*) FROM ";
+	sql += column_set.view_name;
+
+	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt_result, NULL);
+	if (stmt_result == NULL)
+	{
+		sql_error = sqlite3_errmsg(db);
+		boost::format msg("SQLite database error when preparing SELECT * SQL statement for table %1%: %2% (The SQL query is \"%3%\")");
+		msg % column_set.view_name % sql_error % sql;
+		msg % sql_error;
+		SetFailureMessage(msg.str());
+		failed = true;
+		return 0;
+	}
+
+	int step_result = 0;
+	if ((step_result = sqlite3_step(stmt_result)) != SQLITE_ROW)
+	{
+
+		if (step_result == SQLITE_DONE)
+		{
+			return 0;
+		}
+
+		sql_error = sqlite3_errmsg(db);
+		boost::format msg("Unexpected result (row not returned) when attempting to step through result set of SQL query \"%1%\": %2%");
+		msg % sql % sql_error;
+		SetFailureMessage(msg.str());
+		failed = true;
+		return 0;
+	}
+
+	std::int64_t data_int64 = sqlite3_column_int64(stmt_result, 0);
+
+	if (stmt_result)
+	{
+		sqlite3_finalize(stmt_result);
+		stmt_result = nullptr;
+	}
+
+	return data_int64;
 
 }
 
@@ -6652,8 +6716,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	int const minimum_desired_rows_per_transaction = 1024 * 1024;
 
-	int current_rows_added = 0;
-	int current_rows_added_since_execution = 0;
+	std::int64_t current_rows_added = 0;
+	std::int64_t current_rows_stepped = 0;
+	std::int64_t current_rows_added_since_execution = 0;
 	std::string sql_add_xr_row;
 	bool first_row_added = true;
 	std::vector<std::string> bound_parameter_strings;
@@ -7203,14 +7268,28 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 		{
+			boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+			msg % current_rows_stepped % current_number_x_rows;
+			messager.SetPerformanceLabel();
 			EndTransaction();
 			BeginNewTransaction();
 			current_rows_added_since_execution = 0;
 		}
 
+		++current_rows_stepped;
+		if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_x_rows)
+		{
+			boost::format msg("Processed %1% of %2% temporary rows this stage.");
+			msg % current_rows_stepped % current_number_x_rows;
+			messager.SetPerformanceLabel();
+		}
+
 	}
 
 	ExecuteSQL(result);
+	boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+	msg % current_rows_stepped % current_number_x_rows;
+	messager.SetPerformanceLabel();
 	EndTransaction();
 
 	if (failed)
@@ -8420,7 +8499,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 	});
 }
 
-void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView & sorted_result_columns, std::int64_t & current_rows_added, int & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, int const minimum_desired_rows_per_transaction )
+void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, int const minimum_desired_rows_per_transaction )
 {
 	SavedRowData current_row_of_data;
 

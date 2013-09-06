@@ -144,6 +144,9 @@ void NewGeneMainWindow::ReceiveSignalStartProgressBar(int progress_bar_id, STD_I
 	status_bar_progress_bars[progress_bar_id] = std::unique_ptr<QProgressBar>(new QProgressBar(this));
 	main_pane_progress_bars[progress_bar_id] = std::unique_ptr<QProgressBar>(new QProgressBar(this));
 
+	status_bar_progress_bars[progress_bar_id]->hide();
+	main_pane_progress_bars[progress_bar_id]->hide();
+
 	if (this->statusBar())
 	{
 		status_bar_progress_bars[progress_bar_id]->setMinimum(min_value);
