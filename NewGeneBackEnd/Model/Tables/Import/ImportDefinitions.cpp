@@ -79,26 +79,26 @@ ImportDefinition Development__CreateImportDefinition_COW()
 	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "orig"));
 	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "version"));
 
-	output_schema_vector.push_back(SchemaEntry("MID", FIELD_TYPE_STRING_FIXED, "dispnum"), true);
-	output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "ccode"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "stabb"), true);
+	output_schema_vector.push_back(SchemaEntry("MID", FIELD_TYPE_STRING_FIXED, "dispnum", true));
+	output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "ccode", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "stabb", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_START", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_END", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "stday"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "stmon"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "styear"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endday"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endmon"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endyear"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "sidea"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revstate"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revtype1"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revtype2"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "fatality"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "fatalpre"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "hiact"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "hostlev"), true);
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "orig"), true);
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "stday", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "stmon", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "styear", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endday", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endmon", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "endyear", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "sidea", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revstate", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revtype1", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "revtype2", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "fatality", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "fatalpre", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "hiact", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "hostlev", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "orig", true));
 
 	ImportDefinition::ImportMappings mappings;
 

@@ -59,7 +59,7 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 			}
 		});
 	}
-	std::sort(variable_groups.identifiers.begin(), variable_groups.identifiers.end());
+	std::sort(variable_group.identifiers.begin(), variable_group.identifiers.end());
 	messager.EmitOutputWidgetDataRefresh(variable_group);
 }
 
