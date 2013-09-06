@@ -286,7 +286,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	messager.UpdateProgressBarValue(500);
+	//messager.UpdateProgressBarValue(500);
 
 	messager.AppendKadStatusText("Merging top-level variable groups...");
 	MergeHighLevelGroupResults();
@@ -297,7 +297,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	messager.UpdateProgressBarValue(750);
+	//messager.UpdateProgressBarValue(750);
 
 	messager.AppendKadStatusText("Merging child variable groups...");
 	MergeChildGroups();
@@ -308,7 +308,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	messager.UpdateProgressBarValue(900);
+	//messager.UpdateProgressBarValue(900);
 
 	messager.AppendKadStatusText("Formatting results...");
 	FormatResultsForOutput();
@@ -319,7 +319,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	messager.UpdateProgressBarValue(950);
+	//messager.UpdateProgressBarValue(950);
 
 	messager.AppendKadStatusText("Writing results to disk...");
 	WriteResultsToFileOrScreen();
@@ -350,7 +350,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &current_child_view_name_index, &child_set_number, &x_table_result, &xr_table_result](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 
-		std::int64_t raw_rows_count = total_number_incoming_rows[secondary_variable_groups_column_info.variable_groups[0]];
+		std::int64_t raw_rows_count = total_number_incoming_rows[child_variable_group_raw_data_columns.variable_groups[0]];
 		std::int64_t rows_estimate = raw_rows_count;
 
 		WidgetInstanceIdentifier const & dmu_category_multiplicity_greater_than_1_for_child = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].first;
