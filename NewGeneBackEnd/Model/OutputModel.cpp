@@ -596,6 +596,7 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	std::int64_t data_int64 = 0;
 	std::string data_string;
 	long double data_long = 0.0;
+	std::int64_t rows_written = 0;
 	while (StepData())
 	{
 
@@ -703,6 +704,8 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 		}
 
 		output_file << std::endl;
+
+		++rows_written;
 		
 	}
 
@@ -715,6 +718,10 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	{
 		output_file.close();
 	}
+
+	boost::format msg("%1% rows written to output.");
+	msg % rows_written;
+	messager.AppendKadStatusText(msg.str());
 
 }
 
