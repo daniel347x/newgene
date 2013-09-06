@@ -102,6 +102,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, progress_increment_per_stage(0)
 	, current_progress_value(0)
 	, delete_tables(true)
+	, ms_elapsed(0)
 {
 	debug_ordering = true;
 	//delete_tables = false;
@@ -314,6 +315,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	//messager.UpdateProgressBarValue(900);
 
 	messager.AppendKadStatusText("Formatting results...");
+	messager.SetPerformanceLabel("Formatting results...");
 	FormatResultsForOutput();
 
 	if (failed)
@@ -325,6 +327,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	//messager.UpdateProgressBarValue(950);
 
 	messager.AppendKadStatusText("Writing results to disk...");
+	messager.SetPerformanceLabel("Writing results to disk...");
 	WriteResultsToFileOrScreen();
 
 	if (failed)
@@ -335,6 +338,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.UpdateProgressBarValue(1000);
 
 	boost::format msg_2("Output successfully generated (%1%)");
+	messager.SetPerformanceLabel("");
 	msg_2 % boost::filesystem::path(setting_path_to_kad_output).filename();
 	messager.UpdateStatusBarText(msg_2.str().c_str());
 	messager.AppendKadStatusText("Done.");
@@ -360,6 +364,10 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
 		for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
 		{
+
+			boost::format msg("Joining multiplicity %1% with previous merged data for %2%...");
+			msg % current_multiplicity % child_variable_group_raw_data_columns.variable_groups[0];
+			messager.SetPerformanceLabel(msg.str().c_str());
 			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, 0, child_set_number, current_child_view_name_index);
 			x_table_result.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(x_table_result);
@@ -381,6 +389,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			}
 
 			++current_child_view_name_index;
+
 		}
 
 		++child_set_number;
@@ -1119,6 +1128,9 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		{
 			// The structure of the table returned from the following function is this:
 			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMF
+			boost::format msg("Merging data %1% with previous data...");
+			msg % primary_variable_group_final_result.variable_groups[0];
+			messager.SetPerformanceLabel(msg.str().c_str());
 			intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, intermediate_merging_of_primary_groups_column_sets.back(), count);
 			if (failed)
 			{
@@ -2024,6 +2036,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
 
+		boost::format msg("Joining multiplicity %1% with previous merged data for %2%...");
+		msg % current_multiplicity % primary_variable_group_raw_data_columns.variable_groups[0];
+		messager.SetPerformanceLabel(msg.str().c_str());
 		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number);
 		x_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(x_table_result);
@@ -8802,6 +8817,8 @@ void OutputModel::OutputGenerator::UpdateProgressBarToNextStage()
 	messager.AppendKadStatusText(msg_2.str().c_str());
 
 	messager.UpdateProgressBarValue(0);
+
+	messager.SetPerformanceLabel("");
 }
 
 void OutputModel::OutputGenerator::CheckProgressUpdate(std::int64_t const current_rows_added_, std::int64_t const rows_estimate_, std::int64_t const starting_value_this_stage)

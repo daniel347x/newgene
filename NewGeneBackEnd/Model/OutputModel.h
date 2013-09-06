@@ -486,7 +486,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void ClearTable(SqlAndColumnSet const & table_to_clear);
 				std::string CheckOutputFileExists();
 
-				// Help with progress bar
+				// Progress bar variables
 				void DetermineTotalNumberRows();
 				void UpdateProgressBarToNextStage();
 				void CheckProgressUpdate(std::int64_t const current_rows_added_, std::int64_t const rows_estimate_, std::int64_t const starting_value_this_stage);
@@ -501,6 +501,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				int progress_increment_per_stage;
 				std::string setting_path_to_kad_output;
 				int current_progress_value;
+				std::int64_t ms_elapsed;
 
 				// Save the SQL and column sets corresponding to each primary and child variable group in global data structures
 				//
