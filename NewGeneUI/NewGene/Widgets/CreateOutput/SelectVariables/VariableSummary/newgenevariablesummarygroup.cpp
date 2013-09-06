@@ -231,13 +231,27 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 
 									   if (change.change_intention == DATA_CHANGE_INTENTION__ADD)
 									   {
-										   QStandardItem * item = new QStandardItem();
-										   item->setText(QString(child_identifier.longhand->c_str()));
-										   QVariant v;
-										   v.setValue(child_identifier);
-										   item->setData(v);
-										   model->insertRow( number_variables, item );
-
+										   for (int n=0; n<number_variables; ++n)
+										   {
+											   QStandardItem * currentItem = model->item(n);
+											   if (currentItem)
+											   {
+												   QVariant currentIdentifier = currentItem->data();
+												   WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
+												   if (child_identifier < identifier)
+												   {
+													   QStandardItem * item = new QStandardItem();
+													   item->setText(QString(child_identifier.longhand->c_str()));
+													   QVariant v;
+													   v.setValue(child_identifier);
+													   item->setData(v);
+													   model->insertRow( n, item );
+													   ++n;
+													   ++number_variables;
+													   break;
+												   }
+											   }
+										   }
 									   }
 								   }
 
