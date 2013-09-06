@@ -416,54 +416,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 		merging_of_children_column_sets.push_back(xr_table_result);
 	}
 
-
-	std::int64_t number_of_rows_to_sort = ObtainCount(merging_of_children_column_sets.back().second);
-	current_number_x_rows = number_of_rows_to_sort;
-
-	boost::format msg("sorting final K-ad results - a lengthy internal SQLite operation on %1% rows");
-	msg % number_of_rows_to_sort;
-	UpdateProgressBarToNextStage(msg.str(), std::string());
-
-	// The structure of the table incoming to the following function is this:
-	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR (with the XR set at the end, optional)
-	// ... the child tables appear last (optionally)
-	//
-	// ... and the same format for the table is returned
-	SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTable(merging_of_children_column_sets.back().second, 0);
-	preliminary_sorted_kad_result.second.most_recent_sql_statement_executed__index = -1;
-	ExecuteSQL(preliminary_sorted_kad_result);
-	if (secondary_variable_groups_column_info.size() != 0)
-	{
-		ClearTable(merging_of_children_column_sets.back());
-	}
-	merging_of_children_column_sets.push_back(preliminary_sorted_kad_result);
-	if (failed)
-	{
-		return;
-	}
-
-
-	boost::format msg_2("removing duplicates from final K-ad results - %1% rows");
-	msg_2 % number_of_rows_to_sort;
-	UpdateProgressBarToNextStage(msg_2.str(), std::string());
-
-	// The structure of the table incoming to the following function is this:
-	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR
-	//
-	// The structure of the table that comes out is:
-	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z (or, if no child tables, the final is XRMFXR_Z)
-	std::int64_t rows_added = 0;
-	SqlAndColumnSet duplicates_removed_kad_result = RemoveDuplicates(preliminary_sorted_kad_result.second, 0, rows_added);
-	ClearTable(preliminary_sorted_kad_result);
-	merging_of_children_column_sets.push_back(duplicates_removed_kad_result);
-	if (failed)
-	{
-		return;
-	}
-
-	// The structure of the following table is:
-	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR XR_Z
-	all_merged_results_unformatted = duplicates_removed_kad_result;
+	all_merged_results_unformatted = SortAndRemoveDuplicates(merging_of_children_column_sets.back().second, WidgetInstanceIdentifier(), std::string("sorting final K-ad results"), std::string("removing duplicates from final K-ad results"), -1, 0, merging_of_children_column_sets, secondary_variable_groups_column_info.size() != 0);
 
 }
 
@@ -2087,6 +2040,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
+	SqlAndColumnSet duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("sorting results"), std::string("removing duplicates"), 1, primary_group_number, sql_and_column_sets, true);
+
 	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
 
@@ -2104,7 +2059,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
 			messager.SetPerformanceLabel(msg.str().c_str());
 		}
-		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, primary_group_number);
+		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, duplicates_removed.second, current_multiplicity, primary_group_number);
 		x_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(x_table_result);
 		ClearTables(sql_and_column_sets);
@@ -2127,6 +2082,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			return SqlAndColumnSet();
 		}
 
+		duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("sorting results"), std::string("removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true);
+
 	}
 
 	if (failed)
@@ -2134,58 +2091,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
-
-	std::int64_t number_of_rows_to_sort = ObtainCount(xr_table_result.second);
-	current_number_x_rows = number_of_rows_to_sort;
-
-	if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
-	{
-		boost::format msg("sorting results for %1% (%2%) - a lengthy internal SQLite operation on %3% rows");
-		msg % *primary_variable_group_raw_data_columns.variable_groups[0].code % *primary_variable_group_raw_data_columns.variable_groups[0].longhand % number_of_rows_to_sort;
-		UpdateProgressBarToNextStage(msg.str(), std::string());
-	}
-	else
-	{
-		boost::format msg("sorting results for %1% - a lengthy internal SQLite operation on %2% rows");
-		msg % *primary_variable_group_raw_data_columns.variable_groups[0].code % number_of_rows_to_sort;
-		UpdateProgressBarToNextStage(msg.str(), std::string());
-	}
-
-	SqlAndColumnSet preliminary_sorted_top_level_variable_group_result = CreateSortedTable(xr_table_result.second, primary_group_number);
-	preliminary_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
-	ExecuteSQL(preliminary_sorted_top_level_variable_group_result);
-	ClearTables(sql_and_column_sets);
-	sql_and_column_sets.push_back(preliminary_sorted_top_level_variable_group_result);
-	if (failed)
-	{
-		return SqlAndColumnSet();
-	}
-
-
-	if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
-	{
-		boost::format msg("removing duplicates for %1% (%2%) - %3% rows");
-		msg % *primary_variable_group_raw_data_columns.variable_groups[0].code % *primary_variable_group_raw_data_columns.variable_groups[0].longhand % number_of_rows_to_sort;
-		UpdateProgressBarToNextStage(msg.str(), std::string());
-	}
-	else
-	{
-		boost::format msg("removing duplicates for %1% - %2% rows");
-		msg % *primary_variable_group_raw_data_columns.variable_groups[0].code % number_of_rows_to_sort;
-		UpdateProgressBarToNextStage(msg.str(), std::string());
-	}
-
-	std::int64_t rows_added = 0;
-	SqlAndColumnSet duplicates_removed_top_level_variable_group_result = RemoveDuplicates(preliminary_sorted_top_level_variable_group_result.second, primary_group_number, rows_added);
-	ClearTables(sql_and_column_sets);
-	sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
-	if (failed)
-	{
-		return SqlAndColumnSet();
-	}
-	total_number_primary_merged_rows[primary_variable_group_raw_data_columns.variable_groups[0]] = rows_added;
-
-	return duplicates_removed_top_level_variable_group_result;
+	return sql_and_column_sets.back();
 
 }
 
@@ -9101,5 +9007,118 @@ void OutputModel::OutputGenerator::CheckProgressUpdateMethod2(Messager & message
 		current_progress_bar_value = 1000;
 	}
 	messager.UpdateProgressBarValue(current_progress_bar_value);
+
+}
+
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::SortAndRemoveDuplicates(ColumnsInTempView const & column_set, WidgetInstanceIdentifier const & variable_group, std::string & msg_sort_preface, std::string & msg_remove_duplicates_preface, int const current_multiplicity, int const primary_group_number, SqlAndColumnSets & sql_and_column_sets, bool const do_clear_table)
+{
+
+	std::int64_t number_of_rows_to_sort = ObtainCount(column_set);
+	current_number_x_rows = number_of_rows_to_sort;
+
+	if (variable_group.code)
+	{
+		if (variable_group.longhand)
+		{
+			if (current_multiplicity >= 0)
+			{
+				boost::format msg("%5% for %1% (%2%) for current multiplicity %3% - a lengthy internal SQLite operation on %4% rows.  Patience...");
+				msg % *variable_group.code % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
+				UpdateProgressBarToNextStage(msg.str(), std::string());
+			}
+			else
+			{
+				boost::format msg("%4% for %1% (%2%) - a lengthy internal SQLite operation on %3% rows.  Patience...");
+				msg % *variable_group.code % *variable_group.longhand % number_of_rows_to_sort % msg_sort_preface;
+				UpdateProgressBarToNextStage(msg.str(), std::string());
+			}
+		}
+		else
+		{
+			if (current_multiplicity >= 0)
+			{
+				boost::format msg("%4% for %1% for current multiplicity %2% - a lengthy internal SQLite operation on %3% rows.  Patience...");
+				msg % *variable_group.code % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
+				UpdateProgressBarToNextStage(msg.str(), std::string());
+			}
+			else
+			{
+				boost::format msg("%3% for %1% - a lengthy internal SQLite operation on %2% rows.  Patience...");
+				msg % *variable_group.code % number_of_rows_to_sort % msg_sort_preface;
+				UpdateProgressBarToNextStage(msg.str(), std::string());
+			}
+		}
+	}
+	else
+	{
+		boost::format msg("%2% - a lengthy internal SQLite operation on %1% rows");
+		msg % number_of_rows_to_sort % msg_sort_preface;
+		UpdateProgressBarToNextStage(msg.str(), std::string());
+	}
+
+	SqlAndColumnSet intermediate_sorted_top_level_variable_group_result = CreateSortedTable(column_set, primary_group_number);
+	intermediate_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
+	ExecuteSQL(intermediate_sorted_top_level_variable_group_result);
+	if (do_clear_table)
+	{
+		ClearTables(sql_and_column_sets);
+	}
+	sql_and_column_sets.push_back(intermediate_sorted_top_level_variable_group_result);
+	if (failed)
+	{
+		return SqlAndColumnSet();
+	}
+
+
+	if (variable_group.code)
+	{
+		if (variable_group.longhand)
+		{
+			if (current_multiplicity >= 0)
+			{
+				boost::format msg("%5% for %1% (%2%) for current multiplicity %3% - %4% rows");
+				msg % *variable_group.code % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
+				UpdateProgressBarToNextStage(msg.str(), std::string());
+			}
+			else
+			{
+				boost::format msg("%4% for %1% (%2%) - %3% rows");
+				msg % *variable_group.code % *variable_group.longhand % number_of_rows_to_sort % msg_remove_duplicates_preface;
+				UpdateProgressBarToNextStage(msg.str(), std::string());
+			}
+		}
+		else
+		{
+			if (current_multiplicity >= 0)
+			{
+				boost::format msg("%4% for %1% for current multiplicity %2% - %3% rows");
+				msg % *variable_group.code % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
+				UpdateProgressBarToNextStage(msg.str(), std::string());
+			}
+			else
+			{
+				boost::format msg("%3% for %1% - %2% rows");
+				msg % *variable_group.code % number_of_rows_to_sort % msg_remove_duplicates_preface;
+				UpdateProgressBarToNextStage(msg.str(), std::string());
+			}
+		}
+	}
+	else
+	{
+		boost::format msg_2("%2% - %1% rows");
+		msg_2 % number_of_rows_to_sort % msg_remove_duplicates_preface;
+		UpdateProgressBarToNextStage(msg_2.str(), std::string());
+	}
+
+	std::int64_t rows_added = 0;
+	SqlAndColumnSet duplicates_removed_top_level_variable_group_result = RemoveDuplicates(intermediate_sorted_top_level_variable_group_result.second, primary_group_number, rows_added);
+	ClearTables(sql_and_column_sets);
+	sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
+	if (failed)
+	{
+		return SqlAndColumnSet();
+	}
+
+	return duplicates_removed_top_level_variable_group_result;
 
 }
