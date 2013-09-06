@@ -370,13 +370,13 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			std::int64_t current_count = ObtainCount(child_variable_group_raw_data_columns);
 			if (child_variable_group_raw_data_columns.variable_groups[0].longhand)
 			{
-				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows)...");
+				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows).  Patience...");
 				msg % current_multiplicity % current_count % *child_variable_group_raw_data_columns.variable_groups[0].longhand % previous_count;
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
 			else
 			{
-				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows)...");
+				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows).  Patience...");
 				msg % current_multiplicity % current_count % *child_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
@@ -2094,13 +2094,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		std::int64_t current_count = ObtainCount(primary_variable_group_raw_data_columns);
 		if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
 		{
-			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows)...");
+			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows).  Patience...");
 			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].longhand % previous_count;
 			messager.SetPerformanceLabel(msg.str().c_str());
 		}
 		else
 		{
-			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows)...");
+			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows).  Patience...");
 			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
 			messager.SetPerformanceLabel(msg.str().c_str());
 		}
