@@ -7,9 +7,10 @@ bool TableManager::TableExists(sqlite3 * db, std::string table_name)
 
 	if (db)
 	{
-		std::string sql_exists("SELECT ");
+		std::string sql_exists;
+		sql_exists += "SELECT name FROM sqlite_master WHERE type='table' AND name='";
 		sql_exists += table_name;
-		sql_exists += " FROM sqlite_master WHERE type='table' AND name='table_name';";
+		sql_exists += "';";
 
 		sqlite3_stmt * stmt = NULL;
 		sqlite3_prepare_v2(db, sql_exists.c_str(), sql_exists.size() + 1, &stmt, NULL);

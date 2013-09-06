@@ -231,6 +231,7 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 
 									   if (change.change_intention == DATA_CHANGE_INTENTION__ADD)
 									   {
+										   bool added = false;
 										   for (int n=0; n<number_variables; ++n)
 										   {
 											   QStandardItem * currentItem = model->item(n);
@@ -248,9 +249,20 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 													   model->insertRow( n, item );
 													   ++n;
 													   ++number_variables;
+													   added = true;
 													   break;
 												   }
 											   }
+										   }
+										   if (!added)
+										   {
+											   QStandardItem * item = new QStandardItem();
+											   item->setText(QString(child_identifier.longhand->c_str()));
+											   QVariant v;
+											   v.setValue(child_identifier);
+											   item->setData(v);
+											   model->insertRow( number_variables, item );
+											   added = true;
 										   }
 									   }
 								   }
