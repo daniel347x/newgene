@@ -40,6 +40,10 @@ NewGeneVariableSummaryGroup::NewGeneVariableSummaryGroup( QWidget * parent, Widg
 
 NewGeneVariableSummaryGroup::~NewGeneVariableSummaryGroup()
 {
+	if (outp)
+	{
+		outp->UnregisterInterestInChanges(this);
+	}
 	delete ui;
 }
 

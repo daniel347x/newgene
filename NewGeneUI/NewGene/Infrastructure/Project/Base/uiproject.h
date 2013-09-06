@@ -179,7 +179,10 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		void UnregisterInterestInChanges(NewGeneWidget * widget)
 		{
 			std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
-			data_change_interest_map.erase(widget);
+			if (data_change_interest_map.find(widget) != data_change_interest_map.cend())
+			{
+				data_change_interest_map.erase(widget);
+			}
 		}
 
 		virtual void PassChangeMessageToWidget(NewGeneWidget * widget, DataChangeMessage const & change_message) {}

@@ -35,6 +35,10 @@ KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance
 
 KadSpinBox::~KadSpinBox()
 {
+	if (outp)
+	{
+		outp->UnregisterInterestInChanges(this);
+	}
 }
 
 void KadSpinBox::RefreshAllWidgets()

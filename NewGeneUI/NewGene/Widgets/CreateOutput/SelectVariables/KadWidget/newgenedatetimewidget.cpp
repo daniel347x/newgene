@@ -29,7 +29,10 @@ NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceId
 
 NewGeneDateTimeWidget::~NewGeneDateTimeWidget()
 {
-
+	if (outp)
+	{
+		outp->UnregisterInterestInChanges(this);
+	}
 }
 
 void NewGeneDateTimeWidget::RefreshAllWidgets()

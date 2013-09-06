@@ -43,7 +43,7 @@ void UIMessager::displayStatusMessages()
 
 	std::vector<std::string> msgs;
 	std::pair<std::set<std::string>::iterator,bool> insert_result;
-	for (MessagesVector::const_iterator _m = _messages.cbegin(); _m != _messages.cend(); ++ _m)
+	for (MessagesVector::const_iterator _m = _messages.cbegin(); _m != _messages.cend(); ++_m)
 	{
 		if (_m->get()->_message_category & MESSAGER_MESSAGE_CATEGORY__STATUS_MESSAGE)
 		{
