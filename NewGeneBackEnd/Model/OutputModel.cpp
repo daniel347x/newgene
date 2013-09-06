@@ -411,6 +411,19 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 
 	});
 
+	if (secondary_variable_groups_column_info.size() == 0)
+	{
+		merging_of_children_column_sets.push_back(xr_table_result);
+	}
+
+
+	std::int64_t number_of_rows_to_sort = ObtainCount(merging_of_children_column_sets.back().second);
+	current_number_x_rows = number_of_rows_to_sort;
+
+	boost::format msg("sorting final K-ad results - a lengthy internal SQLite operation on %1% rows");
+	msg % number_of_rows_to_sort;
+	UpdateProgressBarToNextStage(msg.str(), std::string());
+
 	// The structure of the table incoming to the following function is this:
 	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR (with the XR set at the end, optional)
 	// ... the child tables appear last (optionally)
@@ -419,12 +432,20 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	SqlAndColumnSet preliminary_sorted_kad_result = CreateSortedTable(merging_of_children_column_sets.back().second, 0);
 	preliminary_sorted_kad_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(preliminary_sorted_kad_result);
-	ClearTable(merging_of_children_column_sets.back());
+	if (secondary_variable_groups_column_info.size() != 0)
+	{
+		ClearTable(merging_of_children_column_sets.back());
+	}
 	merging_of_children_column_sets.push_back(preliminary_sorted_kad_result);
 	if (failed)
 	{
 		return;
 	}
+
+
+	boost::format msg_2("removing duplicates from final K-ad results - %1% rows");
+	msg_2 % number_of_rows_to_sort;
+	UpdateProgressBarToNextStage(msg_2.str(), std::string());
 
 	// The structure of the table incoming to the following function is this:
 	// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR
@@ -1992,7 +2013,13 @@ void OutputModel::OutputGenerator::DetermineTotalNumberRows()
 
 	});
 
-	total_progress_stages += primary_variable_groups_column_info.size(); // merging of top-level groups
+	// merging of top-level groups
+	total_progress_stages += primary_variable_groups_column_info.size();
+
+	// Sort and RemoveDuplicates stages, for both single primary groups and child groups - 2 x 2 = 4
+	// Todo: Also add for merging of primary groups!  Currently no removal of duplicates happens there,
+	//    which means child merges occur over an excess number of rows
+	total_progress_stages += 4;
 
 	rough_progress_range = 0;
 	std::for_each(total_number_incoming_rows.cbegin(), total_number_incoming_rows.cend(), [this](std::pair<WidgetInstanceIdentifier const, std::int64_t> const & the_pair)
@@ -2107,6 +2134,23 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
+
+	std::int64_t number_of_rows_to_sort = ObtainCount(xr_table_result.second);
+	current_number_x_rows = number_of_rows_to_sort;
+
+	if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
+	{
+		boost::format msg("sorting results for %1% (%2%) - a lengthy internal SQLite operation on %3% rows");
+		msg % *primary_variable_group_raw_data_columns.variable_groups[0].code % *primary_variable_group_raw_data_columns.variable_groups[0].longhand % number_of_rows_to_sort;
+		UpdateProgressBarToNextStage(msg.str(), std::string());
+	}
+	else
+	{
+		boost::format msg("sorting results for %1% - a lengthy internal SQLite operation on %2% rows");
+		msg % *primary_variable_group_raw_data_columns.variable_groups[0].code % number_of_rows_to_sort;
+		UpdateProgressBarToNextStage(msg.str(), std::string());
+	}
+
 	SqlAndColumnSet preliminary_sorted_top_level_variable_group_result = CreateSortedTable(xr_table_result.second, primary_group_number);
 	preliminary_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(preliminary_sorted_top_level_variable_group_result);
@@ -2115,6 +2159,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	if (failed)
 	{
 		return SqlAndColumnSet();
+	}
+
+
+	if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
+	{
+		boost::format msg("removing duplicates for %1% (%2%) - %3% rows");
+		msg % *primary_variable_group_raw_data_columns.variable_groups[0].code % *primary_variable_group_raw_data_columns.variable_groups[0].longhand % number_of_rows_to_sort;
+		UpdateProgressBarToNextStage(msg.str(), std::string());
+	}
+	else
+	{
+		boost::format msg("removing duplicates for %1% - %2% rows");
+		msg % *primary_variable_group_raw_data_columns.variable_groups[0].code % number_of_rows_to_sort;
+		UpdateProgressBarToNextStage(msg.str(), std::string());
 	}
 
 	std::int64_t rows_added = 0;
@@ -2463,8 +2521,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	}
 
 
-	int const minimum_desired_rows_per_transaction = 256;
+	int const minimum_desired_rows_per_transaction = 1024 * 1024;
 	current_rows_added = 0;
+	std::int64_t current_rows_stepped = 0;
 	std::int64_t current_rows_added_since_execution = 0;
 	std::string sql_add_xr_row;
 	bool first_row_added = true;
@@ -2528,7 +2587,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		}
 		else
 		{
-			RemoveDuplicatesFromPrimaryKeyMatches(result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
+			RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
 			if (failed)
 			{
 				return result;
@@ -2536,26 +2595,30 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			rows_to_sort.push_back(sorting_row_of_data);
 		}
 
+		++current_rows_stepped;
+
+		if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_x_rows)
+		{
+			CheckProgressUpdateMethod2(messager, current_rows_stepped);
+		}
+
 	}
 
 	if (!rows_to_sort.empty())
 	{
-		RemoveDuplicatesFromPrimaryKeyMatches(result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
+		RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
 		if (failed)
 		{
 			return result;
 		}
 	}
 
-	if (current_rows_added_since_execution > 0)
-	{
-		ExecuteSQL(result);
-		EndTransaction();
-	}
-	else
-	{
-		EndTransaction();
-	}
+	ExecuteSQL(result);
+	messager.UpdateProgressBarValue(1000);
+	boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+	msg % current_rows_stepped % current_number_x_rows;
+	messager.SetPerformanceLabel(msg.str());
+	EndTransaction();
 
 	if (failed)
 	{
@@ -2567,7 +2630,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 }
 
-bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data, std::int64_t & current_rows_added)
+bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data)
 {
 
 	if (current_row_of_data.datetime_start >= first_incoming_row.datetime_end)
@@ -7292,11 +7355,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		ExecuteSQL(result);
 
-		if (current_rows_added % 1000 == 0)
-		{
-			CheckProgressUpdate(current_rows_added, rows_estimated, saved_initial_progress_bar_value);
-		}
-
 		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 		{
 			boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
@@ -7310,14 +7368,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		++current_rows_stepped;
 		if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_x_rows)
 		{
-			boost::format msg("Processed %1% of %2% temporary rows this stage.");
-			msg % current_rows_stepped % current_number_x_rows;
-			messager.SetPerformanceLabel(msg.str());
+			CheckProgressUpdateMethod2(messager, current_rows_stepped);
 		}
 
 	}
 
 	ExecuteSQL(result);
+	messager.UpdateProgressBarValue(1000);
 	boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
 	msg % current_rows_stepped % current_number_x_rows;
 	messager.SetPerformanceLabel(msg.str());
@@ -7327,8 +7384,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 		return result;
 	}
-
-	messager.UpdateProgressBarValue(1000);
 
 	rows_estimated = current_rows_added;
 
@@ -8584,7 +8639,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 	});
 }
 
-void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, int const minimum_desired_rows_per_transaction )
+void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction )
 {
 	SavedRowData current_row_of_data;
 
@@ -8637,7 +8692,7 @@ void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( SqlAnd
 				break;
 			}
 			SavedRowData & first_incoming_row = incoming_rows_of_data.front();
-			current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, current_rows_added);
+			current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data);
 			if (failed)
 			{
 				return;
@@ -8664,9 +8719,13 @@ void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( SqlAnd
 	incoming_rows_of_data.clear();
 	outgoing_rows_of_data.clear();
 
+	ExecuteSQL(result);
+
 	if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 	{
-		ExecuteSQL(result);
+		boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+		msg % current_rows_stepped % current_number_x_rows;
+		messager.SetPerformanceLabel(msg.str());
 		EndTransaction();
 		BeginNewTransaction();
 		current_rows_added_since_execution = 0;
