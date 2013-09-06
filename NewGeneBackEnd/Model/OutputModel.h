@@ -673,6 +673,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool failed;
 
 				bool debug_ordering;
+				bool delete_tables;
 
 				bool initialized;
 				bool overwrite_if_output_file_already_exists;

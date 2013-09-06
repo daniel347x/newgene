@@ -101,8 +101,10 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, total_progress_stages(0)
 	, progress_increment_per_stage(0)
 	, current_progress_value(0)
+	, delete_tables(true)
 {
 	debug_ordering = true;
+	delete_tables = false;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -121,13 +123,13 @@ OutputModel::OutputGenerator::~OutputGenerator()
 		EndTransaction();
 	}
 
-	std::for_each(primary_variable_group_column_sets.begin(), primary_variable_group_column_sets.end(), [](SqlAndColumnSets & sql_and_column_sets)
+	std::for_each(primary_variable_group_column_sets.begin(), primary_variable_group_column_sets.end(), [this](SqlAndColumnSets & sql_and_column_sets)
 	{
 		
-		std::for_each(sql_and_column_sets.begin(), sql_and_column_sets.end(), [](SqlAndColumnSet & sql_and_column_set)
+		std::for_each(sql_and_column_sets.begin(), sql_and_column_sets.end(), [this](SqlAndColumnSet & sql_and_column_set)
 		{
 
-			std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [](SQLExecutor & sql_executor)
+			std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [this](SQLExecutor & sql_executor)
 			{
 				
 				sql_executor.Empty();
@@ -138,10 +140,10 @@ OutputModel::OutputGenerator::~OutputGenerator()
 
 	});
 
-	std::for_each(primary_group_final_results.begin(), primary_group_final_results.end(), [](SqlAndColumnSet & sql_and_column_set)
+	std::for_each(primary_group_final_results.begin(), primary_group_final_results.end(), [this](SqlAndColumnSet & sql_and_column_set)
 	{
 
-		std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [](SQLExecutor & sql_executor)
+		std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [this](SQLExecutor & sql_executor)
 		{
 
 			sql_executor.Empty();
@@ -150,10 +152,10 @@ OutputModel::OutputGenerator::~OutputGenerator()
 
 	});
 
-	std::for_each(intermediate_merging_of_primary_groups_column_sets.begin(), intermediate_merging_of_primary_groups_column_sets.end(), [](SqlAndColumnSet & sql_and_column_set)
+	std::for_each(intermediate_merging_of_primary_groups_column_sets.begin(), intermediate_merging_of_primary_groups_column_sets.end(), [this](SqlAndColumnSet & sql_and_column_set)
 	{
 
-		std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [](SQLExecutor & sql_executor)
+		std::for_each(sql_and_column_set.first.begin(), sql_and_column_set.first.end(), [this](SQLExecutor & sql_executor)
 		{
 
 			sql_executor.Empty();
@@ -162,14 +164,14 @@ OutputModel::OutputGenerator::~OutputGenerator()
 
 	});
 
-	std::for_each(all_merged_results_unformatted.first.begin(), all_merged_results_unformatted.first.end(), [](SQLExecutor & sql_executor)
+	std::for_each(all_merged_results_unformatted.first.begin(), all_merged_results_unformatted.first.end(), [this](SQLExecutor & sql_executor)
 	{
 
 		sql_executor.Empty();
 
 	});
 
-	std::for_each(final_result.first.begin(), final_result.first.end(), [](SQLExecutor & sql_executor)
+	std::for_each(final_result.first.begin(), final_result.first.end(), [this](SQLExecutor & sql_executor)
 	{
 
 		sql_executor.Empty();
@@ -8684,36 +8686,39 @@ void OutputModel::OutputGenerator::ClearTables(SqlAndColumnSets const & tables_t
 void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_clear)
 {
 	// Drop tables only if the "make_table_permanent" flag is not set
-	if (!table_to_clear.second.make_table_permanent)
+	if (delete_tables)
 	{
-		std::string table_name_to_clear = table_to_clear.second.view_name;
-
-		if (false)
+		if (!table_to_clear.second.make_table_permanent)
 		{
-			// The method below is the established way to determine whether the table exists or not,
-			// but is not necessary
-			std::string sql_string;
-			sql_string += "SELECT name FROM sqlite_master WHERE type='table' and name='";
+			std::string table_name_to_clear = table_to_clear.second.view_name;
+
+			if (false)
+			{
+				// The method below is the established way to determine whether the table exists or not,
+				// but is not necessary
+				std::string sql_string;
+				sql_string += "SELECT name FROM sqlite_master WHERE type='table' and name='";
+				sql_string += table_name_to_clear;
+				sql_string += "'";
+
+				SQLExecutor table_remover(input_model->getDb(), sql_string);
+				table_remover.statement_type = OutputModel::OutputGenerator::SQLExecutor::RETURNS_ROWS;
+				table_remover.Execute();
+				bool row_exists = table_remover.Step();
+
+				// If there is a row in the result set, then the table exists
+				if (!row_exists)
+				{
+					return;
+				}
+			}
+
+			std::string sql_string = "DROP TABLE IF EXISTS ";
 			sql_string += table_name_to_clear;
-			sql_string += "'";
 
 			SQLExecutor table_remover(input_model->getDb(), sql_string);
-			table_remover.statement_type = OutputModel::OutputGenerator::SQLExecutor::RETURNS_ROWS;
 			table_remover.Execute();
-			bool row_exists = table_remover.Step();
-
-			// If there is a row in the result set, then the table exists
-			if (!row_exists)
-			{
-				return;
-			}
 		}
-
-		std::string sql_string = "DROP TABLE IF EXISTS ";
-		sql_string += table_name_to_clear;
-
-		SQLExecutor table_remover(input_model->getDb(), sql_string);
-		table_remover.Execute();
 	}
 }
 
