@@ -103,7 +103,14 @@ void NewGeneGenerateOutput::ReceiveSignalAppendKadStatusText(int progress_bar_id
 	QPlainTextEdit * edit_pane = findChild<QPlainTextEdit *>( "plainTextEdit_KadStatus" );
 	if (edit_pane)
 	{
-		edit_pane->appendPlainText(kad_status_update.c_str());
+		if (kad_status_update.length())
+		{
+			edit_pane->appendPlainText(kad_status_update.c_str());
+		}
+		else
+		{
+			edit_pane->clear();
+		}
 	}
 }
 

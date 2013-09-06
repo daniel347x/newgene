@@ -251,6 +251,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	boost::format msg_1("Generating output to file %1%");
 	msg_1 % boost::filesystem::path(setting_path_to_kad_output).filename();
 	messager.UpdateStatusBarText(msg_1.str().c_str());
+	messager.AppendKadStatusText(""); // This will clear the pane
 	messager.AppendKadStatusText("Beginning generation of K-ad output.");
 	messager.AppendKadStatusText("Initializing...");
 
