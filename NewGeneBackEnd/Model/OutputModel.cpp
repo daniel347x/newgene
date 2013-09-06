@@ -8772,7 +8772,7 @@ void OutputModel::OutputGenerator::UpdateProgressBarToNextStage()
 	msg_2 % current_progress_stage % total_progress_stages;
 	messager.AppendKadStatusText(msg_2.str().c_str());
 
-	messager.UpdateProgressBarValue(1000);
+	messager.UpdateProgressBarValue(0);
 }
 
 void OutputModel::OutputGenerator::CheckProgressUpdate(std::int64_t const current_rows_added_, std::int64_t const rows_estimate_, std::int64_t const starting_value_this_stage)
