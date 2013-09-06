@@ -119,7 +119,7 @@ void NewGeneGenerateOutput::ReceiveSignalSetPerformanceLabel(int progress_bar_id
 	QLabel * label_ = findChild<QLabel *>( "labelOngoingPerformance" );
 	if (label_)
 	{
-		label_->text(performance_measure_text.c_str());
+		label_->setText(performance_measure_text.c_str());
 	}
 }
 
