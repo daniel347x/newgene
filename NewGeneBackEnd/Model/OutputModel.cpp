@@ -260,7 +260,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	DetermineTotalNumberRows();
+	messager.AppendKadStatusText("Preparing input data...");
+	ObtainColumnInfoForRawDataTables();
 
 	if (failed)
 	{
@@ -268,8 +269,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	messager.AppendKadStatusText("Preparing input data...");
-	ObtainColumnInfoForRawDataTables();
+	DetermineTotalNumberRows();
 
 	if (failed)
 	{
@@ -3882,29 +3882,58 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
-		sql_string += " WHERE CASE WHEN ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-		sql_string += " = 0 AND ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-		sql_string += " = 0 ";
-		sql_string += " THEN 1 ";
-		sql_string += " WHEN ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-		sql_string += " < ";
-		sql_string += boost::lexical_cast<std::string>(timerange_end);
-		sql_string += " THEN ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-		sql_string += " > ";
-		sql_string += boost::lexical_cast<std::string>(timerange_start);
-		sql_string += " WHEN ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-		sql_string += " > ";
-		sql_string += boost::lexical_cast<std::string>(timerange_start);
-		sql_string += " THEN ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-		sql_string += " < ";
-		sql_string += boost::lexical_cast<std::string>(timerange_end);
-		sql_string += " END";
+		if (count_only)
+		{
+			sql_string += " WHERE CASE WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid;
+			sql_string += " = 0 AND ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid;
+			sql_string += " = 0 ";
+			sql_string += " THEN 1 ";
+			sql_string += " WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid;
+			sql_string += " < ";
+			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " THEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid;
+			sql_string += " > ";
+			sql_string += boost::lexical_cast<std::string>(timerange_start);
+			sql_string += " WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid;
+			sql_string += " > ";
+			sql_string += boost::lexical_cast<std::string>(timerange_start);
+			sql_string += " THEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid;
+			sql_string += " < ";
+			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " END";
+		}
+		else
+		{
+			sql_string += " WHERE CASE WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " = 0 AND ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " = 0 ";
+			sql_string += " THEN 1 ";
+			sql_string += " WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " < ";
+			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " THEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " > ";
+			sql_string += boost::lexical_cast<std::string>(timerange_start);
+			sql_string += " WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " > ";
+			sql_string += boost::lexical_cast<std::string>(timerange_start);
+			sql_string += " THEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " < ";
+			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " END";
+		}
 	}
 
 	// Add the ORDER BY column/s
