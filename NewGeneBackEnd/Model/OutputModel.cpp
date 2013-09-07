@@ -3399,7 +3399,6 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_s
 		sql_error = sqlite3_errmsg(db);
 		boost::format msg("SQLite database error when preparing SELECT * SQL statement for table %1%: %2% (The SQL query is \"%3%\")");
 		msg % column_set.view_name % sql_error % sql;
-		msg % sql_error;
 		SetFailureMessage(msg.str());
 		failed = true;
 		return;
@@ -3436,7 +3435,6 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 		sql_error = sqlite3_errmsg(db);
 		boost::format msg("SQLite database error when preparing SELECT * SQL statement for table %1%: %2% (The SQL query is \"%3%\")");
 		msg % column_set.view_name % sql_error % sql;
-		msg % sql_error;
 		SetFailureMessage(msg.str());
 		failed = true;
 		return 0;
