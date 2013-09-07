@@ -400,7 +400,6 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			current_number_rows_to_sort = number_of_rows;
 
 			UpdateProgressBarToNextStage(child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand : "", child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : "");
-			rows_estimate *= raw_rows_count;
 
 
 			// Current block (at end) has timerange columns:
@@ -412,7 +411,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			// COLUMN_TYPE__DATETIMESTART_CHILD_MERGE / COLUMN_TYPE__DATETIMEEND_CHILD_MERGE
 			//
 			// ... These latter columns will be added at the end
-			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index, rows_estimate);
+			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
 			ClearTable(x_table_result);
 			merging_of_children_column_sets.push_back(xr_table_result);
 			if (failed)
@@ -1023,7 +1022,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			rows_estimate += raw_rows_count;
 
 			// Adds DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS columns at end
-			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count, rows_estimate);
+			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count);
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
 			if (failed)
@@ -1949,7 +1948,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		rows_estimate *= raw_rows_count;
 
 		// Adds COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED columns at end
-		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity, rows_estimate);
+		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed)
@@ -2004,7 +2003,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	std::string data_string;
 	long double data_long = 0.0;
 	int current_column = 0;
-	std::for_each(sorted_result_columns.columns_in_view.begin(), sorted_result_columns.columns_in_view.end(), [this, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView & possible_duplicate_view_column)
+	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 
 		if (failed)
@@ -2429,7 +2428,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 		++current_rows_stepped;
 
-		if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_x_rows)
+		if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
 		{
 			CheckProgressUpdateMethod2(messager, current_rows_stepped);
 		}
@@ -2851,7 +2850,7 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 }
 
-void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
+void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
 {
 
 	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
@@ -3117,7 +3116,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
 			{
-				std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &first_variable_group, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_create_final_primary_group_table, &first, &is_xrmfxr_table](ColumnsInTempView::ColumnInTempView & view_column)
+				std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &first_variable_group, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_create_final_primary_group_table, &first](ColumnsInTempView::ColumnInTempView & view_column)
 				{
 					if (!view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
 					{
@@ -3164,7 +3163,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	// Now order by remaining primary key columns (with multiplicity 1)
 	int current_column = 0;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &sql_create_final_primary_group_table, &result_columns, &current_column, &first, &is_xrmfxr_table](ColumnsInTempView::ColumnInTempView & view_column)
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &sql_create_final_primary_group_table, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
 	{
 		switch (xr_table_category)
 		{
@@ -3197,7 +3196,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		// Determine how many columns there are corresponding to the DMU category
 		int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
 		int column_count_nested = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &is_xrmfxr_table, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView & view_column_nested)
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView & view_column_nested)
 		{
 			switch (xr_table_category)
 			{
@@ -4949,7 +4948,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView & previous_x_or_mergedfinalplusnewfinal_columns, ColumnsInTempView & current_xr_or_completemerge_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category)
+bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView const & previous_x_or_mergedfinalplusnewfinal_columns, ColumnsInTempView & current_xr_or_completemerge_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category)
 {
 
 	if (include_previous_data == false && include_current_data == false)
@@ -6317,7 +6316,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView const & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index, std::int64_t & rows_estimated)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView const & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index)
 {
 
 	std::int64_t saved_initial_progress_bar_value = current_progress_value;
@@ -7272,7 +7271,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 		{
 			boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
-			msg % current_rows_stepped % current_number_x_rows;
+			msg % current_rows_stepped % current_number_rows_to_sort;
 			messager.SetPerformanceLabel(msg.str());
 			EndTransaction();
 			BeginNewTransaction();
@@ -7280,7 +7279,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 
 		++current_rows_stepped;
-		if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_x_rows)
+		if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
 		{
 			CheckProgressUpdateMethod2(messager, current_rows_stepped);
 		}
@@ -7290,7 +7289,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	ExecuteSQL(result);
 	messager.UpdateProgressBarValue(1000);
 	boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
-	msg % current_rows_stepped % current_number_x_rows;
+	msg % current_rows_stepped % current_number_rows_to_sort;
 	messager.SetPerformanceLabel(msg.str());
 	EndTransaction();
 
@@ -7298,8 +7297,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 		return result;
 	}
-
-	rows_estimated = current_rows_added;
 
 	return result;
 
@@ -8553,7 +8550,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 	});
 }
 
-void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction )
+void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction )
 {
 	SavedRowData current_row_of_data;
 
@@ -9006,10 +9003,10 @@ void OutputModel::OutputGenerator::CheckProgressUpdateMethod2(Messager & message
 {
 
 	boost::format msg("Processed %1% of %2% temporary rows this stage.");
-	msg % current_rows_stepped % current_number_x_rows;
+	msg % current_rows_stepped % current_number_rows_to_sort;
 	messager.SetPerformanceLabel(msg.str());
 
-	int current_progress_bar_value = (int)(((long double)(current_rows_stepped) / (long double)(current_number_x_rows)) * 1000.0);
+	int current_progress_bar_value = (int)(((long double)(current_rows_stepped) / (long double)(current_number_rows_to_sort)) * 1000.0);
 	if (current_progress_bar_value > 1000)
 	{
 		current_progress_bar_value = 1000;
