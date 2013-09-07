@@ -2415,8 +2415,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	std::vector<std::string> bound_parameter_strings;
 	std::vector<std::int64_t> bound_parameter_ints;
 	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
+
+
 	sqlite3_stmt * the_prepared_stmt = nullptr;
 	std::shared_ptr<bool> statement_is_prepared = std::make_shared<bool>(false);
+	BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared)
+	{
+		if (the_prepared_stmt && *statement_is_prepared)
+		{
+			sqlite3_finalize(the_prepared_stmt);
+			++SQLExecutor::number_statement_finalizes;
+			the_prepared_stmt = nullptr;
+			*statement_is_prepared = false;
+		}
+	} BOOST_SCOPE_EXIT_END
 
 	{
 
@@ -6829,8 +6841,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		std::vector<std::string> bound_parameter_strings;
 		std::vector<std::int64_t> bound_parameter_ints;
 		std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
+
 		sqlite3_stmt * the_prepared_stmt = nullptr;
 		std::shared_ptr<bool> & statement_is_prepared(std::make_shared<bool>(false));
+		BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared)
+		{
+			if (the_prepared_stmt && *statement_is_prepared)
+			{
+				sqlite3_finalize(the_prepared_stmt);
+				++SQLExecutor::number_statement_finalizes;
+				the_prepared_stmt = nullptr;
+				*statement_is_prepared = false;
+			}
+		} BOOST_SCOPE_EXIT_END
 
 		BeginNewTransaction();
 
