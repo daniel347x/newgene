@@ -4122,6 +4122,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid;
 			sql_string += " < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " ELSE 0";
 			sql_string += " END";
 		}
 		else
@@ -4148,6 +4149,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
 			sql_string += " < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " ELSE 0";
 			sql_string += " END";
 		}
 	}
@@ -4923,6 +4925,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
 		sql_string += " < ";
 		sql_string += boost::lexical_cast<std::string>(timerange_end);
+		sql_string += " ELSE 0";
 		sql_string += " END";
 	}
 
@@ -6243,6 +6246,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
 		sql_string += " < ";
 		sql_string += boost::lexical_cast<std::string>(timerange_end);
+		sql_string += " ELSE 0";
 		sql_string += " END";
 	}
 
