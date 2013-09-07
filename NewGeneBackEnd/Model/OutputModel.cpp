@@ -954,8 +954,6 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 		if (count != 1)
 		{
-			// The structure of the table returned from the following function is this:
-			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMF
 			if (primary_variable_group_final_result.second.variable_groups[0].longhand)
 			{
 				boost::format msg("Merging data \"%1%\" with previous data...");
@@ -969,8 +967,14 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
 
-			// Adds new block of raw data columns,
-			// and adds COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL columns at end
+			// Adds new block of top-level primary variable group columns,
+			// and simply does a JOIN, without adding any new timerange columns.
+			//
+			// So the last two columns of the previous merged block/s are
+			// COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+			//
+			// while the last two columns of the newly-added top-level block are
+			// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 			intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, intermediate_merging_of_primary_groups_column_sets.back(), count);
 			if (failed)
 			{
@@ -994,7 +998,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			UpdateProgressBarToNextStage(primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand : "", primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : "");
 			rows_estimate += raw_rows_count;
 
-			// Adds 
+			// Adds DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS columns at end
 			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count, rows_estimate);
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
@@ -1002,6 +1006,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			{
 				return;
 			}
+
 		}
 		++count;
 	});
@@ -5036,8 +5041,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		if (xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
 		{
 			if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-				|| column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-				|| column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE)
+			 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+			 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE)
 			{
 				found_highest_index = true;
 				return;
@@ -5069,34 +5074,42 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	int number_columns_each_single_inner_table = 0;
 	WidgetInstanceIdentifier first_variable_group;
 	int the_column_index = 0;
-	int first_inner_table_datetime_columns_count = 0;
-	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [&first_inner_table_datetime_columns_count, &the_column_index, &number_columns_each_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	bool first_datetime_column_already_reached = false;
+	bool stop_incrementing_single_inner_table_column_count = false;
+	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [&first_datetime_column_already_reached, &stop_incrementing_single_inner_table_column_count, &the_column_index, &number_columns_each_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
+
 		if (the_column_index == 0)
 		{
 			first_variable_group = column_in_view.variable_group_associated_with_current_inner_table;
 		}
+
+		if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
+		 && column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			first_datetime_column_already_reached = true;
+		}
+		else
+		{
+			if (first_datetime_column_already_reached)
+			{
+				stop_incrementing_single_inner_table_column_count = true;
+			}
+		}
+
+		if (!stop_incrementing_single_inner_table_column_count)
+		{
+			++number_columns_each_single_inner_table;
+		}
+
 		if (!column_in_view.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
 		{
 			++the_column_index;
 			return;
 		}
-		if (first_inner_table_datetime_columns_count < 4)
-		{
-			++number_columns_each_single_inner_table;
-		}
-		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-		 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
-		 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
-		 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL
-		 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-		 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-		 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-		 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
-		{
-			++first_inner_table_datetime_columns_count;
-		}
+
 		++the_column_index;
+
 	});
 
 
@@ -6363,9 +6376,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				datetime_start_col_name_no_uuid += "DATETIME_ROW_START_CHILD_MERGE";
 			}
 			break;
+			// So the last two columns of the previous merged block/s are
+			// COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+			//
+			// while the last two columns of the newly-added top-level block are
+			// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
 			{
-				datetime_start_col_name_no_uuid += "DATETIME_ROW_START_MERGED_BETWEEN_FINALS";
+				datetime_start_col_name_no_uuid += "DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS";
 			}
 			break;
 	}
@@ -6441,7 +6459,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			break;
 		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
 			{
-				datetime_end_col_name_no_uuid += "DATETIME_ROW_END_MERGED_BETWEEN_FINALS";
+				datetime_end_col_name_no_uuid += "DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS";
 			}
 			break;
 	}
@@ -6508,7 +6526,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	int current_datetime_start_column_index = -1;
 	int current_datetime_end_column_index = -1;
 	int column_index = (int)previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.size() - 1;
-	std::for_each(previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.crbegin(), previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.crend(), [&new_method, &xr_table_category, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index](ColumnsInTempView::ColumnInTempView const & schema_column)
+	std::for_each(previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.crbegin(), previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.crend(), [&xr_table_category, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index](ColumnsInTempView::ColumnInTempView const & schema_column)
 	{
 
 		// The previous values are always located after the current values, but in arbitrary order,
