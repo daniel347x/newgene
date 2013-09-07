@@ -3421,12 +3421,10 @@ void OutputModel::OutputGenerator::CloseObtainData()
 std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const & column_set)
 {
 
-	if (stmt_result)
+	BOOST_SCOPE_EXIT(this_)
 	{
-		sqlite3_finalize(stmt_result);
-		++SQLExecutor::number_statement_finalizes;
-		stmt_result = nullptr;
-	}
+		this_->CloseObtainData();
+	} BOOST_SCOPE_EXIT_END
 
 	std::string sql;
 	sql += "SELECT COUNT (*) FROM ";
