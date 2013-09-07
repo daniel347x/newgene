@@ -220,6 +220,19 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	debug_sql_path = setting_path_to_kad_output;
+	debug_sql_path /= ".debugsql.txt";
+
+	BOOST_SCOPE_EXIT(this_)
+	{
+		if (this_->debug_sql_file.is_open())
+		{
+			this_->debug_sql_file.close();
+		}
+	} BOOST_SCOPE_EXIT_END
+
+	debug_sql_file.open(debug_sql_path.string(), std::ios::out | std::ios::trunc);
+
 	InputModel & input_model = model->getInputModel();
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, &input_model);
 	the_map = &the_map_;
@@ -258,10 +271,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	current_progress_stage = 0;
 	boost::format msg_1("Generating output to file %1%");
 	msg_1 % boost::filesystem::path(setting_path_to_kad_output).filename();
-	messager.UpdateStatusBarText(msg_1.str().c_str());
-	messager.AppendKadStatusText(""); // This will clear the pane
-	messager.AppendKadStatusText("Beginning generation of K-ad output.");
-	messager.AppendKadStatusText("Initializing...");
+	messager.UpdateStatusBarText(msg_1.str().c_str(), this);
+	messager.AppendKadStatusText("", nullptr); // This will clear the pane
+	messager.AppendKadStatusText("Beginning generation of K-ad output.", this);
+	messager.AppendKadStatusText("Initializing...", this);
 
 	Prepare();
 
@@ -271,7 +284,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	messager.AppendKadStatusText("Preparing input data...");
+	messager.AppendKadStatusText("Preparing input data...", this);
 	ObtainColumnInfoForRawDataTables();
 
 	if (failed)
@@ -288,7 +301,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	messager.AppendKadStatusText("Looping through top-level variable groups...");
+	messager.AppendKadStatusText("Looping through top-level variable groups...", this);
 	LoopThroughPrimaryVariableGroups();
 
 	if (failed)
@@ -299,7 +312,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	//messager.UpdateProgressBarValue(500);
 
-	messager.AppendKadStatusText("Merging top-level variable groups...");
+	messager.AppendKadStatusText("Merging top-level variable groups...", this);
 	MergeHighLevelGroupResults();
 
 	if (failed)
@@ -310,7 +323,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	//messager.UpdateProgressBarValue(750);
 
-	messager.AppendKadStatusText("Merging child variable groups...");
+	messager.AppendKadStatusText("Merging child variable groups...", this);
 	MergeChildGroups();
 
 	if (failed)
@@ -321,7 +334,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	//messager.UpdateProgressBarValue(900);
 
-	messager.AppendKadStatusText("Formatting results...");
+	messager.AppendKadStatusText("Formatting results...", this);
 	messager.SetPerformanceLabel("Formatting results...");
 	FormatResultsForOutput();
 
@@ -333,7 +346,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	//messager.UpdateProgressBarValue(950);
 
-	messager.AppendKadStatusText("Writing results to disk...");
+	messager.AppendKadStatusText("Writing results to disk...", this);
 	messager.SetPerformanceLabel("Writing results to disk...");
 	WriteResultsToFileOrScreen();
 
@@ -346,8 +359,25 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	boost::format msg_2("Output successfully generated (%1%)");
 	msg_2 % boost::filesystem::path(setting_path_to_kad_output).filename();
-	messager.UpdateStatusBarText(msg_2.str().c_str());
-	messager.AppendKadStatusText("Done.");
+	messager.UpdateStatusBarText(msg_2.str().c_str(), this);
+	messager.AppendKadStatusText("Done.", this);
+
+	boost::format msg1("Number transactions begun: %1%");
+	msg1 % OutputModel::OutputGenerator::number_transaction_begins;
+	boost::format msg2("Number transactions ended: %1%");
+	msg2 % OutputModel::OutputGenerator::number_transaction_ends;
+	boost::format msg3("Number statements prepared: %1%");
+	msg3 % OutputModel::OutputGenerator::SQLExecutor::number_statement_prepares;
+	boost::format msg4("Number statements finalized: %1%");
+	msg4 % OutputModel::OutputGenerator::SQLExecutor::number_statement_finalizes;
+
+	if (debug_sql_file.is_open())
+	{
+		debug_sql_file << msg1.str() << std::endl;
+		debug_sql_file << msg2.str() << std::endl;
+		debug_sql_file << msg3.str() << std::endl;
+		debug_sql_file << msg4.str() << std::endl;
+	}
 
 }
 
@@ -652,7 +682,7 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 
 		boost::format msg("%1% rows written to output.");
 		msg % rows_written;
-		messager.AppendKadStatusText(msg.str());
+		messager.AppendKadStatusText(msg.str(), this);
 
 	}
 
@@ -9062,8 +9092,8 @@ void OutputModel::OutputGenerator::SetFailureMessage(std::string const & failure
 	failure_message = failure_message_;
 	std::string report_failure_message = "Failed: ";
 	report_failure_message += failure_message;
-	messager.AppendKadStatusText(report_failure_message);
-	messager.UpdateStatusBarText(report_failure_message);
+	messager.AppendKadStatusText(report_failure_message, this);
+	messager.UpdateStatusBarText(report_failure_message, nullptr);
 }
 
 void OutputModel::OutputGenerator::UpdateProgressBarToNextStage(std::string const helper_text_first_choice, std::string helper_text_second_choice)
@@ -9072,30 +9102,31 @@ void OutputModel::OutputGenerator::UpdateProgressBarToNextStage(std::string cons
 
 	boost::format msg_1("Generating output to file %1%: Stage %2% of %3%");
 	msg_1 % boost::filesystem::path(setting_path_to_kad_output).filename() % current_progress_stage % total_progress_stages;
-	messager.UpdateStatusBarText(msg_1.str().c_str());
+	messager.UpdateStatusBarText(msg_1.str().c_str(), this);
 
 	if (helper_text_first_choice.size() > 0)
 	{
 		boost::format msg_2("Stage %1% of %2% (%3%)");
 		msg_2 % current_progress_stage % total_progress_stages % helper_text_first_choice;
-		messager.AppendKadStatusText(msg_2.str().c_str());
+		messager.AppendKadStatusText(msg_2.str().c_str(), this);
 	}
 	else if (helper_text_second_choice.size())
 	{
 		boost::format msg_2("Stage %1% of %2% (%3%)");
 		msg_2 % current_progress_stage % total_progress_stages % helper_text_second_choice;
-		messager.AppendKadStatusText(msg_2.str().c_str());
+		messager.AppendKadStatusText(msg_2.str().c_str(), this);
 	}
 	else
 	{
 		boost::format msg_2("Stage %1% of %2%");
 		msg_2 % current_progress_stage % total_progress_stages;
-		messager.AppendKadStatusText(msg_2.str().c_str());
+		messager.AppendKadStatusText(msg_2.str().c_str(), this);
 	}
 
 	messager.UpdateProgressBarValue(0);
 
 	messager.SetPerformanceLabel("");
+
 }
 
 void OutputModel::OutputGenerator::CheckProgressUpdate(std::int64_t const current_rows_added_, std::int64_t const rows_estimate_, std::int64_t const starting_value_this_stage)

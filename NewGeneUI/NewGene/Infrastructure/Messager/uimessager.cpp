@@ -96,6 +96,16 @@ void UIMessager::EmitChangeMessage(DataChangeMessage & changes)
 	}
 }
 
+void UIMessager::UpdateStatusBarText(std::string const & the_text, void * generator)
+{
+	Messager::UpdateStatusBarText(the_text, generator);
+}
+
+void UIMessager::AppendKadStatusText(std::string const & kad_status_text, void * generator)
+{
+	Messager::AppendKadStatusText(kad_status_text, generator);
+}
+
 UIMessagerInputProject::UIMessagerInputProject(UIInputProject * inp_, QObject * parent)
 	: UIMessager(parent)
 	, inp(inp_)
@@ -226,13 +236,15 @@ void UIMessagerOutputProject::UpdateProgressBarValue(std::int64_t const the_valu
 	emit SignalUpdateProgressBarValue(current_messager_id, (STD_INT64)the_value);
 }
 
-void UIMessagerOutputProject::UpdateStatusBarText(std::string const & the_text)
+void UIMessagerOutputProject::UpdateStatusBarText(std::string const & the_text, void * generator)
 {
+	Messager::UpdateStatusBarText(the_text, generator);
 	emit SignalUpdateStatusBarText(current_messager_id, the_text);
 }
 
-void UIMessagerOutputProject::AppendKadStatusText(std::string const & the_text)
+void UIMessagerOutputProject::AppendKadStatusText(std::string const & the_text, void * generator)
 {
+	Messager::AppendKadStatusText(the_text, generator);
 	emit SignalAppendKadStatusText(current_messager_id, the_text);
 }
 

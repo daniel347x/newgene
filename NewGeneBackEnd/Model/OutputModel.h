@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <atomic>
 #include <mutex>
+#include <fstream>
 
 class PrimaryKeySequence
 {
@@ -702,6 +703,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::string failure_message;
 
 			public:
+
+				boost::filesystem::path debug_sql_path;
+				std::fstream debug_sql_file;
 
 				static int number_transaction_begins;
 				static int number_transaction_ends;

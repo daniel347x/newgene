@@ -1,4 +1,5 @@
 #include "Messager.h"
+#include "../Model/OutputModel.h"
 
 void Messager::AppendMessage(MessagerMessage * message)
 {
@@ -80,4 +81,36 @@ bool Messager::IsErrorCatastrophic()
 		}
 	}
 	return isErrorCatastrophic;
+}
+
+void Messager::UpdateStatusBarText(std::string const & the_text, void * generator)
+{
+	if (generator)
+	{
+		// Very ugly, but it's the only way to avoid major circular #include hassles
+		OutputModel::OutputGenerator * the_generator = reinterpret_cast<OutputModel::OutputGenerator *>(generator);
+		if (the_generator)
+		{
+			if (the_generator->debug_sql_file.is_open())
+			{
+				the_generator->debug_sql_file << the_text << std::endl << std::endl;
+			}
+		}
+	}
+}
+
+void Messager::AppendKadStatusText(std::string const & kad_status_text, void * generator)
+{
+	if (generator)
+	{
+		// Very ugly, but it's the only way to avoid major circular #include hassles
+		OutputModel::OutputGenerator * the_generator = reinterpret_cast<OutputModel::OutputGenerator *>(generator);
+		if (the_generator)
+		{
+			if (the_generator->debug_sql_file.is_open())
+			{
+				the_generator->debug_sql_file << kad_status_text << std::endl << std::endl;
+			}
+		}
+	}
 }

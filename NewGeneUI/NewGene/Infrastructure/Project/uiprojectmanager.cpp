@@ -540,7 +540,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 
 	boost::format msg("%1% successfully loaded.");
 	msg % input_project_settings_path;
-	messager.UpdateStatusBarText(msg.str());
+	messager.UpdateStatusBarText(msg.str(), nullptr);
 
 }
 
@@ -657,7 +657,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 
 	boost::format msg("%1% successfully loaded.");
 	msg % output_project_settings_path;
-	messager.UpdateStatusBarText(msg.str());
+	messager.UpdateStatusBarText(msg.str(), nullptr);
 
 }
 

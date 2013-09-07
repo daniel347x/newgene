@@ -88,6 +88,9 @@ class UIMessager : public QObject, public Messager
 
 		void EmitChangeMessage(DataChangeMessage & widgetData);
 
+		virtual void UpdateStatusBarText(std::string const &, void *);
+		virtual void AppendKadStatusText(std::string const &, void *);
+
 		virtual void EmitInputProjectChangeMessage(DataChangeMessage & changes) {}
 		virtual void EmitOutputProjectChangeMessage(DataChangeMessage & changes) {}
 
@@ -124,6 +127,7 @@ class UIMessager : public QObject, public Messager
 
 class UIMessagerInputProject : public UIMessager
 {
+
 	public:
 
 		UIMessagerInputProject(UIInputProject * inp_, QObject * parent = 0);
@@ -145,11 +149,14 @@ class UIMessagerInputProject : public UIMessager
 	protected:
 
 		UIInputProject * inp;
+
 };
 
 class UIMessagerOutputProject : public UIMessager
 {
+
 	public:
+
 		UIMessagerOutputProject(UIOutputProject * outp_, QObject * parent = 0);
 
 		UIOutputProject * get()
@@ -162,8 +169,8 @@ class UIMessagerOutputProject : public UIMessager
 		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();
 		virtual void UpdateProgressBarValue(std::int64_t const);
-		virtual void UpdateStatusBarText(std::string const & status_bar_text);
-		virtual void AppendKadStatusText(std::string const & kad_status_text);
+		virtual void UpdateStatusBarText(std::string const & status_bar_text, void *);
+		virtual void AppendKadStatusText(std::string const & kad_status_text, void *);
 		virtual void SetPerformanceLabel(std::string const & kad_status_text);
 
 		void EmitOutputProjectChangeMessage(DataChangeMessage & changes);
@@ -181,6 +188,7 @@ class UIMessagerOutputProject : public UIMessager
 	protected:
 
 		UIOutputProject * outp;
+
 };
 
 #endif // UIMESSAGER_H
