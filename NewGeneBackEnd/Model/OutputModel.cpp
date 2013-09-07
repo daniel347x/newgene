@@ -5813,7 +5813,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Also, the first columns always correspond to the primary variable group.
 	bool first = true;
 	bool not_yet_reached_any_datetime_columns = true;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&not_yet_reached_any_datetime_columns, &first_full_table_column_count, &top_level_inner_table_column_count, &previous_column_names_first_table, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	bool reached_second_inner_table = false;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&not_yet_reached_any_datetime_columns, &reached_second_inner_table, &first_full_table_column_count, &top_level_inner_table_column_count, &previous_column_names_first_table, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		previous_column_names_first_table.push_back(new_column.column_name_in_temporary_table);
 		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
@@ -5824,10 +5825,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (new_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
 		 && new_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
+			// This is a datetime column
 			not_yet_reached_any_datetime_columns = false;
 		}
+		else
+		{
+			// This is not a datetime column
+			if (!not_yet_reached_any_datetime_columns)
+			{
+				reached_second_inner_table = true;
+			}
+		}
 
-		if (not_yet_reached_any_datetime_columns)
+		if (!reached_second_inner_table)
 		{
 			++top_level_inner_table_column_count;
 		}
