@@ -1184,15 +1184,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		++first_full_table_column_count;
 	});
 
-	// sanity check
-	if (number_columns_very_first_primary_variable_group_including_multiplicities % number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table != 0)
-	{
-		boost::format msg("The number of columns in the full set of inner tables for the first primary variable group is not an even multiple of the number of columns in the first inner table.");
-		SetFailureMessage(msg.str());
-		failed = true;
-		return result;
-	}
-
 
 	int number_columns_very_last_primary_variable_group_including_multiplicities = 0; // corresponding to newly-being-added primary variable group (the last one)
 	int number_columns__in__very_last_primary_variable_group__and__only_its_first_inner_table = 0;
@@ -1917,7 +1908,7 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 			return;
 		}
 
-		// The LAST inner table has three pairs at its end:
+		// EVERY inner table, including the LAST, has three pairs at its end:
 		// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
 		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
 		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
