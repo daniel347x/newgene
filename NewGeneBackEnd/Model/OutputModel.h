@@ -296,7 +296,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				void GenerateOutput(DataChangeMessage & change_response);
 			
-			private:
+			public:
 
 				class SQLExecutor
 				{
@@ -349,7 +349,14 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						std::string error_message;
 
+					public:
+
+						static int number_statement_prepares;
+						static int number_statement_finalizes;
+
 				};
+
+			private:
 
 				class SavedRowData
 				{
@@ -690,6 +697,11 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::string temp_dot;
 
 				std::string failure_message;
+
+			public:
+
+				static int number_transaction_begins;
+				static int number_transaction_ends;
 
 		};
 

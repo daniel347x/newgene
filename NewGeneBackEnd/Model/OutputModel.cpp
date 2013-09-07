@@ -17,6 +17,11 @@
 std::recursive_mutex OutputModel::OutputGenerator::is_generating_output_mutex;
 std::atomic<bool> OutputModel::OutputGenerator::is_generating_output = false;
 
+int OutputModel::OutputGenerator::SQLExecutor::number_statement_prepares = 0;
+int OutputModel::OutputGenerator::SQLExecutor::number_statement_finalizes = 0;
+int OutputModel::OutputGenerator::number_transaction_begins = 0;
+int OutputModel::OutputGenerator::number_transaction_ends = 0;
+
 void OutputModel::LoadTables()
 {
 
@@ -3366,6 +3371,7 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_s
 	if (stmt_result)
 	{
 		sqlite3_finalize(stmt_result);
+		++SQLExecutor::number_statement_finalizes;
 		stmt_result = nullptr;
 	}
 
@@ -3374,6 +3380,7 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_s
 	sql += column_set.view_name;
 
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt_result, NULL);
+	++SQLExecutor::number_statement_prepares;
 	if (stmt_result == NULL)
 	{
 		sql_error = sqlite3_errmsg(db);
@@ -3393,6 +3400,7 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 	if (stmt_result)
 	{
 		sqlite3_finalize(stmt_result);
+		++SQLExecutor::number_statement_finalizes;
 		stmt_result = nullptr;
 	}
 
@@ -3401,6 +3409,7 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 	sql += column_set.view_name;
 
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt_result, NULL);
+	++SQLExecutor::number_statement_prepares;
 	if (stmt_result == NULL)
 	{
 		sql_error = sqlite3_errmsg(db);
@@ -3434,6 +3443,7 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 	if (stmt_result)
 	{
 		sqlite3_finalize(stmt_result);
+		++SQLExecutor::number_statement_finalizes;
 		stmt_result = nullptr;
 	}
 
@@ -3443,11 +3453,13 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 
 void OutputModel::OutputGenerator::BeginNewTransaction()
 {
+	++number_transaction_begins;
 	executor.BeginTransaction();
 }
 
 void OutputModel::OutputGenerator::EndTransaction()
 {
+	++number_transaction_ends;
 	executor.success();
 	executor.EndTransaction();
 }
@@ -3543,6 +3555,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 		if (!statement_is_prepared)
 		{
 			sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+			++number_statement_prepares;
 			if (stmt == NULL)
 			{
 				sql_error = sqlite3_errmsg(db);
@@ -3629,6 +3642,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 	if (statement_is_owned && stmt)
 	{
 		sqlite3_finalize(stmt);
+		++number_statement_finalizes;
 		stmt = nullptr;
 	}
 
@@ -3666,6 +3680,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 				if (statement_is_owned && !statement_is_prepared)
 				{
 					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+					++number_statement_prepares;
 					if (stmt == NULL)
 					{
 						sql_error = sqlite3_errmsg(db);
@@ -3687,6 +3702,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 				if (statement_is_owned && !statement_is_prepared)
 				{
 					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+					++number_statement_prepares;
 					if (stmt == NULL)
 					{
 						sql_error = sqlite3_errmsg(db);

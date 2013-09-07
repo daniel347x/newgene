@@ -67,6 +67,20 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				OutputModel::OutputGenerator output_generator(messager, output_model, project);
 				output_generator.GenerateOutput(change_response);
 
+				boost::format msg1("Number transactions begun: %1%");
+				msg1 % OutputModel::OutputGenerator::number_transaction_begins;
+				boost::format msg2("Number transactions ended: %1%");
+				msg2 % OutputModel::OutputGenerator::number_transaction_ends;
+				boost::format msg3("Number statements prepared: %1%");
+				msg3 % OutputModel::OutputGenerator::SQLExecutor::number_statement_prepares;
+				boost::format msg4("Number statements finalized: %1%");
+				msg4 % OutputModel::OutputGenerator::SQLExecutor::number_statement_finalizes;
+
+				messager.AppendKadStatusText(msg1.str());
+				messager.AppendKadStatusText(msg2.str());
+				messager.AppendKadStatusText(msg3.str());
+				messager.AppendKadStatusText(msg4.str());
+
 			});
 
 			messager.EmitChangeMessage(change_response);
