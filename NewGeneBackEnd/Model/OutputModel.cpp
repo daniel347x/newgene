@@ -221,7 +221,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	}
 
 	debug_sql_path = setting_path_to_kad_output;
-	debug_sql_path /= ".debugsql.txt";
+	debug_sql_path.replace_extension(".debugsql.txt");
 
 	BOOST_SCOPE_EXIT(this_)
 	{
@@ -232,6 +232,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	} BOOST_SCOPE_EXIT_END
 
 	debug_sql_file.open(debug_sql_path.string(), std::ios::out | std::ios::trunc);
+
+	if (!debug_sql_file.is_open())
+	{
+		int m = 0;
+	}
 
 	InputModel & input_model = model->getInputModel();
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, &input_model);
