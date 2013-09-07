@@ -5630,9 +5630,15 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 	});
 
+	// ************************************************************************* //
 	// The following if/else block only applies to PRIMARY_VARIABLE_GROUP merges
+	// ************************************************************************* //
 	if (swap_current_and_previous_and_set_previous_to_null)
 	{
+		// ************************************************************************* //
+		// Only applies to PRIMARY_VARIABLE_GROUP merges
+		// ************************************************************************* //
+
 		// The addition of 2 handles the fact that the new table being added
 		// has no MERGED time range columns
 		for (int n=0; n<number_nulls_to_add_at_end + 2; ++n)
@@ -5642,25 +5648,16 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 	}
 	else
 	{
-		// In the previous method, there is nothing to do here -
-		// the single bound_parameter data structures are filled.
+		// ************************************************************************* //
+		// Only applies to PRIMARY_VARIABLE_GROUP merges
+		// ************************************************************************* //
 
-		// But in the new method, we sort the data by inner table column set.
-		bool new_method = true;
-		if (new_method && xr_table_category == OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP)
+		// Sort the data by inner table column set.
+		if (xr_table_category == OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP)
 		{
 			int number_columns_first_sets = (int)inner_table_columns[0].bindings.size();
 			int number_columns_last_set = (int)inner_table_columns[inner_table_columns.size() - 1].bindings.size();
 			int number_inner_column_sets = (int)inner_table_columns.size();
-			// sanity check
-			if (number_columns_first_sets != number_columns_last_set + 2)
-			{
-				// The final inner column set is missing the "merged" datetime columns
-				boost::format msg("The number of columns in previous inner tables does not match the number of columns in the current inner table (not including timerange columns).  (Error while creating new timerange-managed row.)");
-				SetFailureMessage(msg.str());
-				failed = true;
-				return false;
-			}
 			std::sort(inner_table_columns.begin(), inner_table_columns.end());
 			bound_parameter_ints.clear();
 			bound_parameter_strings.clear();
