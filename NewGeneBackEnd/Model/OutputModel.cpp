@@ -922,52 +922,6 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 {
 
-	// Datetime columns incoming:
-	// The "X" tables have a single COLUMN_TYPE__DATETIMESTART and COLUMN_TYPE__DATETIMEEND (or COLUMN_TYPE__DATETIMESTART_INTERNAL and COLUMN_TYPE__DATETIMEEND_INTERNAL, if added by the generator)
-	// The "XR" tables have that, followed by COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED and COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	// The X tables compose the XR table come in pairs; i.e. XR XR XR XR ... (one per multiplicity of the top-level variable group followed by one per multiplicity per each child variable group, noting that
-	//    the child multiplicity might occur on a different DMU category and might have a different numeric value)
-	// The individual top-level primary variable group results have all of the above, followed by a SINGLE COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED and COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED pair
-	//    (resulting from the removal of duplicates) at the end of the entire
-	//    sequence of XR XR ... pairs, per top-level primary variable group.
-	//
-	// So we have, for the incoming table:
-	// XR XR XR ... XRMF
-	//
-	// The final inner table, XRMF, of the incoming table, then, has 3 sets:
-	// COLUMN_TYPE__DATETIMESTART COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-
-
-
-	// XR tables:
-	// COLUMN_TYPE__DATETIMESTART
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-
-	// XR_Z tables:
-	// COLUMN_TYPE__DATETIMESTART
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT
-
-	// XRMF tables:
-	// COLUMN_TYPE__DATETIMESTART
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-
-	// XRMFXR tables:
-	// COLUMN_TYPE__DATETIMESTART
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS
-
-	// XRMFXR_Z tables:
-	// COLUMN_TYPE__DATETIMESTART
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS
-	// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT
-
-	// The incoming table is XR XR ... XR XRMF
-
 	UpdateProgressBarToNextStage(primary_group_final_results[0].second.variable_groups[0].longhand ? *primary_group_final_results[0].second.variable_groups[0].longhand : "", primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : "");
 
 	SqlAndColumnSet intermediate_merge_of_top_level_primary_group_results = primary_group_final_results[0];
@@ -1948,6 +1902,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
 			messager.SetPerformanceLabel(msg.str().c_str());
 		}
+
+		// Adds new block of raw data columns,
+		// and adds COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL columns at end
 		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, duplicates_removed.second, current_multiplicity, primary_group_number);
 		x_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(x_table_result);
@@ -2174,7 +2131,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates(ColumnsInTempView & sorted_result_columns, int const primary_group_number, std::int64_t & current_rows_added, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates(ColumnsInTempView const & sorted_result_columns, int const primary_group_number, std::int64_t & current_rows_added, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category)
 {
 
 	char c[256];
@@ -6286,7 +6243,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index, std::int64_t & rows_estimated)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView const & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index, std::int64_t & rows_estimated)
 {
 
 	std::int64_t saved_initial_progress_bar_value = current_progress_value;
@@ -6370,6 +6327,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Pull from the simple datetime columns at the end of the previous X table, which are guaranteed to be in place
 	WidgetInstanceIdentifier variable_group = previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view[previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.size()-1].variable_group_associated_with_current_inner_table;
 	WidgetInstanceIdentifier uoa = previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view[previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.size()-1].uoa_associated_with_variable_group_associated_with_current_inner_table;
+
 
 	std::string datetime_start_col_name_no_uuid;
 	switch (xr_table_category)
@@ -6544,16 +6502,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 			case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
 				{
-					// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED can only be for the previous data
-					if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED)
+					// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED can only be for the previous data
+					if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
 					{
 						if (previous_datetime_start_column_index == -1)
 						{
 							previous_datetime_start_column_index = column_index;
 						}
 					}
-					// COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED can only be for the previous data
-					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED)
+					// COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED can only be for the previous data
+					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
 					{
 						if (previous_datetime_end_column_index == -1)
 						{
