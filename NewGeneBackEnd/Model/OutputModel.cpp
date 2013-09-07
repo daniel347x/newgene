@@ -7920,14 +7920,17 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 				{
 					if (current_dmu_plus_count.second == k_count_for_primary_uoa_for_given_dmu_category__info.second) // biggest_dmu_plus_count.second is the K-value of the unit of analysis, not the K-value chosen by the user in the spin control
 					{
-						if (highest_multiplicity_primary_uoa > 1)
+						if (boost::iequals(*current_dmu_plus_count.first.code, highest_multiplicity_primary_uoa_dmu_string_code))
 						{
-							// Special case:
-							// The child UOA has the same K-value in this DMU category
-							// as the K-value of the primary UOA,
-							// but the K-value chosen by the user in the spin control for this DMU category
-							// has incremented the multiplicity of the primary UOA for this DMU category greater than 1.
-							++primary_dmu_categories_for_which_child_has_less;
+							if (highest_multiplicity_primary_uoa > 1)
+							{
+								// Special case:
+								// The child UOA has the same K-value in this DMU category
+								// as the K-value of the primary UOA,
+								// but the K-value chosen by the user in the spin control for this DMU category
+								// has incremented the multiplicity of the primary UOA for this DMU category greater than 1.
+								++primary_dmu_categories_for_which_child_has_less;
+							}
 						}
 						return; // from lambda
 					}
@@ -8013,9 +8016,12 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 
 void OutputModel::OutputGenerator::PopulateUOAs()
 {
-	std::for_each(the_map->cbegin(), the_map->cend(), [this](std::pair<WidgetInstanceIdentifier /* UOA identifier */,
-		Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map> /* map: VG identifier => List of variables */
-		const & uoa__to__variable_groups__pair)
+
+	std::for_each(the_map->cbegin(), the_map->cend(), [this](std::pair</* UOA identifier */
+																	   WidgetInstanceIdentifier,
+																	   /* map: VG identifier => List of variables */
+																	   Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map>
+															 const & uoa__to__variable_groups__pair)
 	{
 		if (failed)
 		{
@@ -8033,6 +8039,7 @@ void OutputModel::OutputGenerator::PopulateUOAs()
 		Table_UOA_Identifier::DMU_Counts dmu_counts = input_model->t_uoa_category.RetrieveDMUCounts(input_model->getDb(), input_model, *uoa.uuid);
 		UOAs.push_back(std::make_pair(uoa, dmu_counts));
 	});
+
 }
 
 void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()

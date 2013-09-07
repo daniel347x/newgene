@@ -557,7 +557,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// UOAs is:
 				// Vector of: UOA identifier and its associated list of [DMU Category / Count].
 				// Note that each UOA appears exactly once (regardless of whether variables
-				// are selected by the user for any variable groups associated with this UOA).
+				// are selected by the user for multiple variable groups associated with this UOA).
+				// A given UOA will NOT appear unless at least one variable is selected
+				// in at least one variable group corresponding to this UOA.
 				// 
 				// But, these UOA's are those defined / imported by the USER,
 				// so if the USER chooses to have two UOA's that are identical,
@@ -582,7 +584,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// Therefore, there could be multiple UOA's in biggest_counts,
 				// each different but with exactly the same primary keys.
 				// Also, specifically reiterating the time granularity issue, multiple UOA's can
-				// (and must, if the primary keys are the same)
 				// be defined that have different TIME GRANULARITY, even if the primary keys
 				// are exactly the same.
 				// ******************************************************************************************* //
