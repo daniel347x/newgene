@@ -3666,6 +3666,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 	{
 		sqlite3_finalize(stmt);
 		++number_statement_finalizes;
+		statement_is_prepared = false;
 		stmt = nullptr;
 	}
 
@@ -3812,6 +3813,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 				{
 					sqlite3_finalize(stmt);
 					++number_statement_finalizes;
+					statement_is_prepared = false;
 					stmt = nullptr;
 				}
 
