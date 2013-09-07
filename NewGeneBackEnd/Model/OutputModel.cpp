@@ -3681,7 +3681,7 @@ void OutputModel::OutputGenerator::SQLExecutor::CopyOwned(SQLExecutor & rhs)
 void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 {
 
-	if (statement_is_owned && stmt)
+	if (statement_is_owned && !(*statement_is_prepared) && stmt)
 	{
 		sqlite3_finalize(stmt);
 		++number_statement_finalizes;
