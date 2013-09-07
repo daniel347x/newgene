@@ -112,7 +112,7 @@ bool Table_VARIABLES_SELECTED::Update(sqlite3 * db, OutputModel & output_model_,
 							else
 							{
 								// selections exist in this variable group category
-								WidgetInstanceIdentifiers current_identifiers = this->identifiers_map[*change.parent_identifier.uuid];
+								WidgetInstanceIdentifiers & current_identifiers = this->identifiers_map[*change.parent_identifier.uuid];
 								int number_variables = current_identifiers.size();
 								bool found = false;
 								for (int n=0; n < number_variables; ++n)
