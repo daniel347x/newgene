@@ -319,9 +319,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							, INT64
 						};
 
-						SQLExecutor(sqlite3 * db_);
-						SQLExecutor(sqlite3 * db_, std::string const & sql_);
-						SQLExecutor(sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & stmt_is_prepared, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
+						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_);
+						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_);
+						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & stmt_is_prepared, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
 						SQLExecutor(SQLExecutor const & rhs);
 						SQLExecutor(SQLExecutor && rhs);
 						SQLExecutor & operator=(SQLExecutor const & rhs);
@@ -351,6 +351,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						bool statement_is_shared;
 
 						std::string error_message;
+
+						OutputModel::OutputGenerator * generator;
 
 					public:
 
