@@ -3754,7 +3754,10 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 	if (bound_parameter_which_binding_to_use.size() > 0)
 	{
 
-		sqlite3_reset(stmt); // OK even if the prepared statement has not been executed yet
+		if (*statement_is_prepared)
+		{
+			sqlite3_reset(stmt); // OK even if the prepared statement has not been executed yet
+		}
 
 		int current_string_index = 0;
 		int current_int64_index = 0;
