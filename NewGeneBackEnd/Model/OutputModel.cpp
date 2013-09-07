@@ -928,6 +928,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	intermediate_merge_of_top_level_primary_group_results.second.view_number = 1;
 	intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
 
+	// Adds DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS columns at end
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryMergeXRTable(intermediate_merging_of_primary_groups_column_sets.back().second);
 	if (failed)
 	{
