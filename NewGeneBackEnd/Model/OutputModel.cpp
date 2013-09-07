@@ -2416,6 +2416,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	std::vector<std::int64_t> bound_parameter_ints;
 	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
 	sqlite3_stmt * the_prepared_stmt = nullptr;
+	std::shared_ptr<bool> statement_is_prepared = std::make_shared<bool>(false);
 
 	{
 
@@ -2479,7 +2480,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			}
 			else
 			{
-				RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
+				RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
 				if (failed)
 				{
 					return result;
@@ -2498,7 +2499,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 		if (!rows_to_sort.empty())
 		{
-			RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
+			RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
 			if (failed)
 			{
 				return result;
@@ -2913,10 +2914,10 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 }
 
-void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
+void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
 {
 
-	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
+	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &statement_is_prepared, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
 	{
 
 		bool do_not_check_time_range = false;
@@ -3082,7 +3083,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 		bound_parameter_ints.push_back(row_of_data.datetime_end);
 		bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 		
-		sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+		sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 		the_prepared_stmt = sql_strings.back().stmt;
 		++current_rows_added;
 		++current_rows_added_since_execution;
@@ -3544,7 +3545,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_)
 	, stmt(nullptr)
 	, failed(false)
 	, statement_is_owned(true)
-	, statement_is_prepared(false)
+	, statement_is_prepared(std::make_shared<bool>(false))
 {
 
 }
@@ -3556,26 +3557,27 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 	, stmt(nullptr)
 	, failed(false)
 	, statement_is_owned(true)
-	, statement_is_prepared(false)
+	, statement_is_prepared(std::make_shared<bool>(false))
 {
 
 }
 
-OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
+OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & statement_is_prepared_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
 	: sql(sql_)
 	, statement_type(DOES_NOT_RETURN_ROWS)
 	, db(db_)
 	, stmt(stmt_to_use)
 	, failed(false)
 	, statement_is_owned(false)
-	, statement_is_prepared(stmt_to_use != nullptr)
+	, statement_is_prepared(statement_is_prepared_)
 	, bound_parameter_strings(bound_parameter_strings_)
 	, bound_parameter_ints(bound_parameter_ints_)
 	, bound_parameter_which_binding_to_use(bound_parameter_which_binding_to_use_)
 {
+
 	if (!failed && prepare_statement_if_null && stmt == nullptr)
 	{
-		if (!statement_is_prepared)
+		if (!(*statement_is_prepared))
 		{
 			sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 			if (stmt == NULL)
@@ -3589,7 +3591,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 			}
 			++number_statement_prepares;
 			statement_is_owned = true;
-			statement_is_prepared = true;
+			*statement_is_prepared = true;
 		}
 	}
 }
@@ -3666,7 +3668,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 	{
 		sqlite3_finalize(stmt);
 		++number_statement_finalizes;
-		statement_is_prepared = false;
+		*statement_is_prepared = false;
 		stmt = nullptr;
 	}
 
@@ -3680,7 +3682,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 
 	if (statement_is_owned)
 	{
-		statement_is_prepared = false;
+		*statement_is_prepared = false;
 	}
 
 	failed = false;
@@ -3701,7 +3703,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		case DOES_NOT_RETURN_ROWS:
 			{
 
-				if (statement_is_owned && !statement_is_prepared)
+				if (statement_is_owned && !(*statement_is_prepared))
 				{
 					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 					if (stmt == NULL)
@@ -3714,7 +3716,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 						return;
 					}
 					++number_statement_prepares;
-					statement_is_prepared = true;
+					*statement_is_prepared = true;
 				}
 
 			}
@@ -3723,7 +3725,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		case RETURNS_ROWS:
 			{
 
-				if (statement_is_owned && !statement_is_prepared)
+				if (statement_is_owned && !(*statement_is_prepared))
 				{
 					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 					if (stmt == NULL)
@@ -3736,7 +3738,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 						return;
 					}
 					++number_statement_prepares;
-					statement_is_prepared = true;
+					*statement_is_prepared = true;
 				}
 
 			}
@@ -3813,7 +3815,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 				{
 					sqlite3_finalize(stmt);
 					++number_statement_finalizes;
-					statement_is_prepared = false;
+					*statement_is_prepared = false;
 					stmt = nullptr;
 				}
 
@@ -3840,7 +3842,7 @@ bool OutputModel::OutputGenerator::SQLExecutor::Step()
 		return false;
 	}
 
-	if (!statement_is_prepared)
+	if (!(*statement_is_prepared))
 	{
 		return false;
 	}
@@ -6820,6 +6822,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		std::vector<std::int64_t> bound_parameter_ints;
 		std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
 		sqlite3_stmt * the_prepared_stmt = nullptr;
+		std::shared_ptr<bool> & statement_is_prepared(std::make_shared<bool>(false));
 
 		BeginNewTransaction();
 
@@ -6867,7 +6870,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				if (added)
 				{
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -6886,7 +6889,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				if (added)
 				{
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -6905,7 +6908,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				if (added)
 				{
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -6924,7 +6927,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				if (added)
 				{
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -6943,7 +6946,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				if (added)
 				{
-					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 					the_prepared_stmt = sql_strings.back().stmt;
 					++current_rows_added;
 					++current_rows_added_since_execution;
@@ -7067,7 +7070,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						}
 						if (added)
 						{
-							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 							the_prepared_stmt = sql_strings.back().stmt;
 							++current_rows_added;
 							++current_rows_added_since_execution;
@@ -7089,7 +7092,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						}
 						if (added)
 						{
-							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row,bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row,bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 							the_prepared_stmt = sql_strings.back().stmt;
 							++current_rows_added;
 							++current_rows_added_since_execution;
@@ -7107,7 +7110,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							}
 							if (added)
 							{
-								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 								the_prepared_stmt = sql_strings.back().stmt;
 								++current_rows_added;
 								++current_rows_added_since_execution;
@@ -7130,7 +7133,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						}
 						if (added)
 						{
-							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 							the_prepared_stmt = sql_strings.back().stmt;
 							++current_rows_added;
 							++current_rows_added_since_execution;
@@ -7149,7 +7152,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							}
 							if (added)
 							{
-								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 								the_prepared_stmt = sql_strings.back().stmt;
 								++current_rows_added;
 								++current_rows_added_since_execution;
@@ -7183,7 +7186,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							}
 							if (added)
 							{
-								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 								the_prepared_stmt = sql_strings.back().stmt;
 								++current_rows_added;
 								++current_rows_added_since_execution;
@@ -7202,7 +7205,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							}
 							if (added)
 							{
-								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 								the_prepared_stmt = sql_strings.back().stmt;
 								++current_rows_added;
 								++current_rows_added_since_execution;
@@ -7230,7 +7233,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							}
 							if (added)
 							{
-								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 								the_prepared_stmt = sql_strings.back().stmt;
 								++current_rows_added;
 								++current_rows_added_since_execution;
@@ -7254,7 +7257,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							}
 							if (added)
 							{
-								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 								the_prepared_stmt = sql_strings.back().stmt;
 								++current_rows_added;
 								++current_rows_added_since_execution;
@@ -7276,7 +7279,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							}
 							if (added)
 							{
-								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 								the_prepared_stmt = sql_strings.back().stmt;
 								++current_rows_added;
 								++current_rows_added_since_execution;
@@ -7295,7 +7298,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								}
 								if (added)
 								{
-									sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+									sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 									the_prepared_stmt = sql_strings.back().stmt;
 									++current_rows_added;
 									++current_rows_added_since_execution;
@@ -7320,7 +7323,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							}
 							if (added)
 							{
-								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 								the_prepared_stmt = sql_strings.back().stmt;
 								++current_rows_added;
 								++current_rows_added_since_execution;
@@ -7339,7 +7342,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								}
 								if (added)
 								{
-									sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+									sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 									the_prepared_stmt = sql_strings.back().stmt;
 									++current_rows_added;
 									++current_rows_added_since_execution;
@@ -8647,7 +8650,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 	});
 }
 
-void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, sqlite3_stmt * the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction )
+void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction )
 {
 	SavedRowData current_row_of_data;
 
@@ -8719,7 +8722,7 @@ void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( std::i
 	}
 
 	outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 	if (failed)
 	{
 		return;
