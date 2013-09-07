@@ -1914,6 +1914,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
+	std::int64_t previous_count = ObtainCount(xr_table_result.second);
+
 	// Incoming:
 	// The LAST (and only) inner table has two pairs at its end:
 	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
@@ -1929,7 +1931,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
 
-		std::int64_t previous_count = ObtainCount(xr_table_result.second);
 		std::int64_t current_count = ObtainCount(primary_variable_group_raw_data_columns);
 		if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
 		{
@@ -1992,6 +1993,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		{
 			return SqlAndColumnSet();
 		}
+
+		previous_count = ObtainCount(xr_table_result.second);
 
 		// Incoming:
 		// The LAST inner table has two pairs at its end:
