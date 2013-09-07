@@ -101,8 +101,8 @@ class ColumnsInTempView
 					, COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
 					, COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 					, COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-					, COLUMN_TYPE__DATETIMESTART_MERGED_BETWEEN_FINALS
-					, COLUMN_TYPE__DATETIMEEND_MERGED_BETWEEN_FINALS
+					, COLUMN_TYPE__DATETIMESTART_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+					, COLUMN_TYPE__DATETIMEEND_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
 					, COLUMN_TYPE__DATETIMESTART_CHILD_MERGE
 					, COLUMN_TYPE__DATETIMEEND_CHILD_MERGE
 					, COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT
@@ -365,7 +365,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						}
 
 						void Clear();
-						void PopulateFromCurrentRowInDatabase(ColumnsInTempView & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result);
+						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result);
 
 						std::int64_t datetime_start;
 						std::int64_t datetime_end;
