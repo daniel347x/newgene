@@ -3441,6 +3441,10 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_s
 	sql += "SELECT * FROM ";
 	sql += column_set.view_name;
 
+	if (debug_sql_file.is_open())
+	{
+		debug_sql_file << sql << std::endl << std::endl;
+	}
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt_result, NULL);
 	if (stmt_result == NULL)
 	{
@@ -3629,6 +3633,10 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(OutputModel::OutputGenera
 	{
 		if (!(*statement_is_prepared))
 		{
+			if (generator && generator->debug_sql_file.is_open() && !boost::iequals(sql.substr(0, strlen("INSERT")), std::string("INSERT")))
+			{
+				generator->debug_sql_file << sql << std::endl << std::endl;
+			}
 			sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 			if (stmt == NULL)
 			{
@@ -3759,6 +3767,10 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 
 				if (statement_is_owned && !(*statement_is_prepared))
 				{
+					if (generator && generator->debug_sql_file.is_open() && !boost::iequals(sql.substr(0, strlen("INSERT")), std::string("INSERT")))
+					{
+						generator->debug_sql_file << sql << std::endl << std::endl;
+					}
 					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 					if (stmt == NULL)
 					{
@@ -3781,6 +3793,10 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 
 				if (statement_is_owned && !(*statement_is_prepared))
 				{
+					if (generator && generator->debug_sql_file.is_open() && !boost::iequals(sql.substr(0, strlen("INSERT")), std::string("INSERT")))
+					{
+						generator->debug_sql_file << sql << std::endl << std::endl;
+					}
 					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 					if (stmt == NULL)
 					{
