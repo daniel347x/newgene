@@ -347,6 +347,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::int64_t> bound_parameter_ints;
 						std::vector<WHICH_BINDING> bound_parameter_which_binding_to_use;
 
+						bool statement_is_shared;
+
 						std::string error_message;
 
 					public:

@@ -3546,6 +3546,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_)
 	, failed(false)
 	, statement_is_owned(true)
 	, statement_is_prepared(std::make_shared<bool>(false))
+	, statement_is_shared(false)
 {
 
 }
@@ -3558,6 +3559,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 	, failed(false)
 	, statement_is_owned(true)
 	, statement_is_prepared(std::make_shared<bool>(false))
+	, statement_is_shared(false)
 {
 
 }
@@ -3573,6 +3575,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 	, bound_parameter_strings(bound_parameter_strings_)
 	, bound_parameter_ints(bound_parameter_ints_)
 	, bound_parameter_which_binding_to_use(bound_parameter_which_binding_to_use_)
+	, statement_is_shared(true)
 {
 
 	if (!failed && prepare_statement_if_null && stmt == nullptr)
@@ -3641,6 +3644,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Copy(SQLExecutor const & rhs)
 	this->statement_is_prepared = rhs.statement_is_prepared;
 	this->statement_type = rhs.statement_type;
 	this->stmt = rhs.stmt;
+	this->statement_is_shared = rhs.statement_is_shared;
 }
 
 void OutputModel::OutputGenerator::SQLExecutor::CopyOwned(SQLExecutor & rhs)
@@ -3659,6 +3663,7 @@ void OutputModel::OutputGenerator::SQLExecutor::CopyOwned(SQLExecutor & rhs)
 	this->statement_is_prepared = rhs.statement_is_prepared;
 	this->statement_type = rhs.statement_type;
 	this->stmt = rhs.stmt;
+	this->statement_is_shared = rhs.statement_is_shared;
 }
 
 void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
@@ -3814,7 +3819,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 					return;
 				}
 
-				if (stmt)
+				if (stmt && statement_is_owned && !statement_is_shared)
 				{
 					sqlite3_finalize(stmt);
 					++number_statement_finalizes;
