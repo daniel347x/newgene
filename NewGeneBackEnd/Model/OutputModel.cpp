@@ -103,7 +103,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, current_progress_value(0)
 	, delete_tables(true)
 	, ms_elapsed(0)
-	, current_number_x_rows(0)
+	, current_number_rows_to_sort(0)
 {
 	debug_ordering = true;
 	//delete_tables = false;
@@ -391,7 +391,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			}
 
 			std::int64_t number_of_rows = ObtainCount(x_table_result.second);
-			current_number_x_rows = number_of_rows;
+			current_number_rows_to_sort = number_of_rows;
 
 			UpdateProgressBarToNextStage(child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand : "", child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : "");
 			rows_estimate *= raw_rows_count;
@@ -985,7 +985,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			}
 
 			std::int64_t number_of_rows = ObtainCount(intermediate_merge_of_top_level_primary_group_results.second);
-			current_number_x_rows = number_of_rows;
+			current_number_rows_to_sort = number_of_rows;
 
 			// The structure of the table returned from the following function is this:
 			// XR XR ... XR XRMFXR ... XR XR ... XR XRMFXR ... XR XR ... XRMFXR
@@ -1916,7 +1916,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		}
 
 		std::int64_t number_of_rows = ObtainCount(x_table_result.second);
-		current_number_x_rows = number_of_rows;
+		current_number_rows_to_sort = number_of_rows;
 
 		UpdateProgressBarToNextStage(primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand : "", primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : "");
 		rows_estimate *= raw_rows_count;
@@ -2994,16 +2994,10 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateSortedTable(ColumnsInTempView const & final_xr_or_xrmfxr_columns, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateSortedTable(ColumnsInTempView const & final_xr_or_xrmfxr_columns, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category)
 {
 
 	char c[256];
-
-	bool is_xrmfxr_table = false;
-	if (primary_group_number == 0)
-	{
-		is_xrmfxr_table = true;
-	}
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
@@ -3013,13 +3007,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns.most_recent_sql_statement_executed__index = -1;
 
 	std::string view_name;
-	if (!is_xrmfxr_table)
+	switch (xr_table_category)
 	{
-		view_name += "S";
-	}
-	else
-	{
-		view_name += "MFXRMF";
+		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
+			{
+				view_name += "S";
+			}
+			break;
+		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
+			{
+				view_name += "MFXRMF";
+			}
+			break;
+		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
+			{
+			}
+			break;
 	}
 	view_name += itoa(primary_group_number, c, 10);
 	result_columns.view_name_no_uuid = view_name;
@@ -3126,50 +3129,69 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	// Now order by remaining primary key columns (with multiplicity 1)
 	int current_column = 0;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &first_variable_group, &sql_create_final_primary_group_table, &result_columns, &current_column, &first, &is_xrmfxr_table](ColumnsInTempView::ColumnInTempView & view_column)
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &sql_create_final_primary_group_table, &result_columns, &current_column, &first, &is_xrmfxr_table](ColumnsInTempView::ColumnInTempView & view_column)
 	{
-		if (is_xrmfxr_table)
+		switch (xr_table_category)
 		{
-			if (!view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
-			{
-				return;
-			}
-			if (view_column.current_multiplicity__of__current_inner_table__within__current_vg > 1)
-			{
-				return;
-			}
-		}
-		else
-		{
-			if (current_column >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
-			{
-				return;
-			}
+			case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
+				{
+					if (current_column >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
+					{
+						return;
+					}
+				}
+				break;
+			case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
+				{
+					if (!view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+					{
+						return;
+					}
+					if (view_column.current_multiplicity__of__current_inner_table__within__current_vg > 1)
+					{
+						return;
+					}
+				}
+				break;
+			case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
+				{
+				}
+				break;
 		}
 
 		// Determine how many columns there are corresponding to the DMU category
 		int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
 		int column_count_nested = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &first_variable_group, &is_xrmfxr_table, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView & view_column_nested)
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &is_xrmfxr_table, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView & view_column_nested)
 		{
-			if (is_xrmfxr_table)
+			switch (xr_table_category)
 			{
-				if (!view_column_nested.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
-				{
-					return;
-				}
-				if (view_column_nested.current_multiplicity__of__current_inner_table__within__current_vg > 1)
-				{
-					return;
-				}
+				case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
+					{
+						if (column_count_nested >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
+						{
+							return;
+						}
+					}
+					break;
+				case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
+					{
+						if (!view_column_nested.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+						{
+							return;
+						}
+						if (view_column_nested.current_multiplicity__of__current_inner_table__within__current_vg > 1)
+						{
+							return;
+						}
+					}
+					break;
+				case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
+					{
+					}
+					break;
 			}
-			else
-			{
-				if (column_count_nested >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
-				{
-					return;
-				}
-			}
+
 			if (view_column_nested.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
 				if (view_column_nested.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
@@ -8931,7 +8953,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 {
 
 	std::int64_t number_of_rows_to_sort = ObtainCount(column_set);
-	current_number_x_rows = number_of_rows_to_sort;
+	current_number_rows_to_sort = number_of_rows_to_sort;
 
 	if (variable_group.code)
 	{
