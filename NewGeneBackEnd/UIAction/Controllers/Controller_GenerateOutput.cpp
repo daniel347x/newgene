@@ -67,6 +67,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				OutputModel::OutputGenerator output_generator(messager, output_model, project);
 				output_generator.GenerateOutput(change_response);
 
+#				if 0
 				boost::format msg1("Number transactions begun: %1%");
 				msg1 % OutputModel::OutputGenerator::number_transaction_begins;
 				boost::format msg2("Number transactions ended: %1%");
@@ -80,6 +81,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				messager.AppendKadStatusText(msg2.str());
 				messager.AppendKadStatusText(msg3.str());
 				messager.AppendKadStatusText(msg4.str());
+#				endif
 
 			});
 
