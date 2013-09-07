@@ -5812,10 +5812,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Further, the "current_multiplicity" of these columns is guaranteed to be correct.
 	// Also, the first columns always correspond to the primary variable group.
 	bool first = true;
-	bool in_first_inner_table = true;
-	bool reached_first_datetime_start_merged_column = false;
-	bool reached_first_datetime_end_merged_column = false;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_full_table_column_count, &top_level_inner_table_column_count, &in_first_inner_table, &reached_first_datetime_start_merged_column, &reached_first_datetime_end_merged_column, &previous_column_names_first_table, &first](ColumnsInTempView::ColumnInTempView & new_column)
+	bool not_yet_reached_any_datetime_columns = true;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&not_yet_reached_any_datetime_columns, &first_full_table_column_count, &top_level_inner_table_column_count, &previous_column_names_first_table, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
 		previous_column_names_first_table.push_back(new_column.column_name_in_temporary_table);
 		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
@@ -5823,21 +5821,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		new_column.column_name_in_temporary_table += newUUID(true);
 		++first_full_table_column_count;
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
+		if (new_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
+		 && new_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
-			reached_first_datetime_start_merged_column = true;
+			not_yet_reached_any_datetime_columns = false;
 		}
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
-		{
-			reached_first_datetime_end_merged_column = true;
-		}
-		if (in_first_inner_table)
+
+		if (not_yet_reached_any_datetime_columns)
 		{
 			++top_level_inner_table_column_count;
-		}
-		if (reached_first_datetime_start_merged_column && reached_first_datetime_end_merged_column)
-		{
-			in_first_inner_table = false;
 		}
 	});
 
@@ -6045,14 +6037,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &current_multiplicity, &sql_string, &primary_key_info_this_variable_group, &first_full_table_column_count, &top_level_inner_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 					{
 
-						// The following 2 "if" checks are redundant and do the same thing.
-						// They are both here in order to help understand the use of the metadata.
 						if (!new_column.is_within_inner_table_corresponding_to_top_level_uoa)
-						{
-							++column_count;
-							return;
-						}
-						if (column_count >= highest_multiplicity_primary_uoa * top_level_inner_table_column_count)
 						{
 							++column_count;
 							return;
