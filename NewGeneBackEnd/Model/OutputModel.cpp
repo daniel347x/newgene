@@ -3807,6 +3807,13 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 					return;
 				}
 
+				if (stmt)
+				{
+					sqlite3_finalize(stmt);
+					++number_statement_finalizes;
+					stmt = nullptr;
+				}
+
 			}
 			break;
 

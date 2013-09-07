@@ -50,6 +50,11 @@ void Table_UOA_Identifier::Load(sqlite3 * db, InputModel * input_model_)
 			identifiers.push_back(uoa_category_identifier);
 		}
 	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 
 }
 
@@ -82,6 +87,12 @@ void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
 
 			// Todo: Add sort by sequence number
 		}
+	}
+
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
 	}
 }
 

@@ -107,6 +107,11 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string code, Import
 				executor.success();
 				return true;
 			}
+			if (stmt)
+			{
+				sqlite3_finalize(stmt);
+				stmt = nullptr;
+			}
 		}
 	}
 
@@ -314,10 +319,20 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 	if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
 	{
 		// TODO: Log error
+		if (stmt)
+		{
+			sqlite3_finalize(stmt);
+			stmt = nullptr;
+		}
 		return false;
 	}
 
 	executor.success();
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 	return true;
 
 }
@@ -420,6 +435,11 @@ void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * in
 		}
 	}
 
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }
 
 void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel * input_model_)
@@ -451,4 +471,9 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 		identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_datetime_end_column_name)));
 	}
 
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }

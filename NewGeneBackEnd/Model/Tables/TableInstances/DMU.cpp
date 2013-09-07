@@ -53,6 +53,11 @@ void Table_DMU_Identifier::Load(sqlite3 * db, InputModel * input_model_)
 			identifiers.push_back(DMU_category_identifier);
 		}
 	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }
 
 void Table_DMU_Instance::Load(sqlite3 * db, InputModel * input_model_)
@@ -85,5 +90,11 @@ void Table_DMU_Instance::Load(sqlite3 * db, InputModel * input_model_)
 		{
 			identifiers_map[fk_DMU_uuid].push_back(WidgetInstanceIdentifier(uuid, input_model_->t_dmu_category.getIdentifier(fk_DMU_uuid), code, longhand, 0, flags, TIME_GRANULARITY__NONE, MakeNotes(notes1, notes2, notes3)));
 		}
+	}
+
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
 	}
 }

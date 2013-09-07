@@ -44,6 +44,11 @@ void Table_TIME_RANGE::Load(sqlite3 * db, OutputModel * output_model_, InputMode
 		identifier.flags = "e";
 		identifiers.push_back(std::make_pair(identifier, timerange_end));
 	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }
 
 bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
@@ -159,4 +164,9 @@ void Table_TIME_RANGE::Modify(sqlite3 * db)
 		return;
 	}
 	sqlite3_step(stmt);
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }

@@ -21,7 +21,17 @@ bool TableManager::TableExists(sqlite3 * db, std::string table_name)
 		int step_result = 0;
 		while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 		{
+			if (stmt)
+			{
+				sqlite3_finalize(stmt);
+				stmt = nullptr;
+			}
 			return true;
+		}
+		if (stmt)
+		{
+			sqlite3_finalize(stmt);
+			stmt = nullptr;
 		}
 	}
 

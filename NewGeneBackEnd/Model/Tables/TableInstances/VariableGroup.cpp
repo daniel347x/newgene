@@ -57,6 +57,11 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 			identifiers.push_back(vg_category_identifier);
 		}
 	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }
 
 void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
@@ -93,4 +98,9 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 		}
 	}
 
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }

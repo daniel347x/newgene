@@ -47,6 +47,11 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 		}
 
 	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }
 
 bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
@@ -162,6 +167,11 @@ void Table_KAD_COUNT::Remove(sqlite3 * db, std::string const & dmu_category_code
 		return;
 	}
 	sqlite3_step(stmt);
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }
 
 void Table_KAD_COUNT::Modify(sqlite3 * db, std::string const & dmu_category_code, int const value_)
@@ -183,4 +193,9 @@ void Table_KAD_COUNT::Modify(sqlite3 * db, std::string const & dmu_category_code
 		return;
 	}
 	sqlite3_step(stmt);
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }

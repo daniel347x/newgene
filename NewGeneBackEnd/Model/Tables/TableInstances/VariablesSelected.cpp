@@ -51,6 +51,12 @@ void Table_VARIABLES_SELECTED::Load(sqlite3 * db, OutputModel * output_model_, I
 		}
 
 	}
+
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }
 
 bool Table_VARIABLES_SELECTED::Update(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
@@ -195,6 +201,11 @@ void Table_VARIABLES_SELECTED::Add(sqlite3 * db, std::string const & vg_set_memb
 		return;
 	}
 	sqlite3_step(stmt);
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }
 
 void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_member_code, std::string const & vg_category_code)
@@ -215,6 +226,11 @@ void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_m
 		return;
 	}
 	sqlite3_step(stmt);
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 }
 
 Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSelectedVariablesByUOA(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
