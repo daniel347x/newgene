@@ -506,43 +506,51 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 	});
 	output_file << std::endl;
 
-	ObtainData(final_result.second);
 
-	if (failed)
 	{
-		return;
-	}
 
-	int column_data_type = 0;
-	column_index = 0;
-	first = true;
-	std::int64_t data_int64 = 0;
-	std::string data_string;
-	long double data_long = 0.0;
-	std::int64_t rows_written = 0;
-	while (StepData())
-	{
+		BOOST_SCOPE_EXIT(this_)
+		{
+			this_->CloseObtainData();
+		} BOOST_SCOPE_EXIT_END
+
+		ObtainData(final_result.second);
 
 		if (failed)
 		{
-			break;
+			return;
 		}
 
+		int column_data_type = 0;
 		column_index = 0;
 		first = true;
-		std::map<WidgetInstanceIdentifier, bool> variable_group_appears_more_than_once;
-		std::for_each(final_result.second.columns_in_view.begin(), final_result.second.columns_in_view.end(), [this, &output_file, &data_int64, &data_string, &data_long, &first, &column_index, &column_data_type](ColumnsInTempView::ColumnInTempView & unformatted_column)
+		std::int64_t data_int64 = 0;
+		std::string data_string;
+		long double data_long = 0.0;
+		std::int64_t rows_written = 0;
+		while (StepData())
 		{
 
 			if (failed)
 			{
-				return;
+				break;
 			}
 
-			column_data_type = sqlite3_column_type(stmt_result, column_index);
-
-			switch (column_data_type)
+			column_index = 0;
+			first = true;
+			std::map<WidgetInstanceIdentifier, bool> variable_group_appears_more_than_once;
+			std::for_each(final_result.second.columns_in_view.begin(), final_result.second.columns_in_view.end(), [this, &output_file, &data_int64, &data_string, &data_long, &first, &column_index, &column_data_type](ColumnsInTempView::ColumnInTempView & unformatted_column)
 			{
+
+				if (failed)
+				{
+					return;
+				}
+
+				column_data_type = sqlite3_column_type(stmt_result, column_index);
+
+				switch (column_data_type)
+				{
 
 				case SQLITE_INTEGER:
 					{
@@ -615,36 +623,38 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 						return; // from lambda
 					}
 
+				}
+
+				++column_index;
+
+			});
+
+			if (failed)
+			{
+				return;
 			}
 
-			++column_index;
+			output_file << std::endl;
 
-		});
+			++rows_written;
+
+		}
 
 		if (failed)
 		{
 			return;
 		}
 
-		output_file << std::endl;
+		if (output_file.good())
+		{
+			output_file.close();
+		}
 
-		++rows_written;
-		
+		boost::format msg("%1% rows written to output.");
+		msg % rows_written;
+		messager.AppendKadStatusText(msg.str());
+
 	}
-
-	if (failed)
-	{
-		return;
-	}
-
-	if (output_file.good())
-	{
-		output_file.close();
-	}
-
-	boost::format msg("%1% rows written to output.");
-	msg % rows_written;
-	messager.AppendKadStatusText(msg.str());
 
 }
 
@@ -2404,97 +2414,106 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
 	sqlite3_stmt * the_prepared_stmt = nullptr;
 
-	ObtainData(sorted_result_columns);
-
-	if (failed)
-	{
-		return result;
-	}
-
-	BeginNewTransaction();
-
-	std::deque<SavedRowData> incoming_rows_of_data;
-	std::deque<SavedRowData> intermediate_rows_of_data;
-	std::deque<SavedRowData> outgoing_rows_of_data;
-	std::deque<SavedRowData> rows_to_sort;
-	SavedRowData sorting_row_of_data;
-
-	bool start_fresh = true;
-
-	while (StepData())
 	{
 
-		sorting_row_of_data.PopulateFromCurrentRowInDatabase(sorted_result_columns, stmt_result);
-		failed = sorting_row_of_data.failed;
+		BOOST_SCOPE_EXIT(this_)
+		{
+			this_->CloseObtainData();
+		} BOOST_SCOPE_EXIT_END
+
+		ObtainData(sorted_result_columns);
+
 		if (failed)
 		{
-			SetFailureMessage(sorting_row_of_data.error_message);
 			return result;
 		}
 
-		if (start_fresh)
+		BeginNewTransaction();
+
+		std::deque<SavedRowData> incoming_rows_of_data;
+		std::deque<SavedRowData> intermediate_rows_of_data;
+		std::deque<SavedRowData> outgoing_rows_of_data;
+		std::deque<SavedRowData> rows_to_sort;
+		SavedRowData sorting_row_of_data;
+
+		bool start_fresh = true;
+
+		while (StepData())
 		{
-			rows_to_sort.push_back(sorting_row_of_data);
-			start_fresh = false;
-			continue;
+
+			sorting_row_of_data.PopulateFromCurrentRowInDatabase(sorted_result_columns, stmt_result);
+			failed = sorting_row_of_data.failed;
+			if (failed)
+			{
+				SetFailureMessage(sorting_row_of_data.error_message);
+				return result;
+			}
+
+			if (start_fresh)
+			{
+				rows_to_sort.push_back(sorting_row_of_data);
+				start_fresh = false;
+				continue;
+			}
+
+			// ******************************************************************************************************** //
+			// Important note on matching primary key columns:
+			// A NULL primary key column will match against a non-NULL one.
+			// Noting that this algorithm orders primary key columns from left-to-right across columns
+			//    (for multiplicity > 1 keys),
+			// then we see that this primary key matching approach involving NULLs
+			// only works because SQLite orders rows with NULLs before rows with non-NULLs in the ORDER BY clause.
+			// If you think about it, the number of NULL columns can only decrease as new rows are introduced
+			//    in the current loop, which must match on all previous (non-NULL) columns.
+			// Therefore, it is impossible for two non-matching rows to both match against a previously processed
+			//    "matching" row (which had matched on some NULL columns)
+			//    which themselves do not match on all primary key columns.
+			// ******************************************************************************************************** //
+			bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(sorting_row_of_data, rows_to_sort[0]);
+			if (primary_keys_match)
+			{
+				rows_to_sort.push_back(sorting_row_of_data);
+			}
+			else
+			{
+				RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
+				if (failed)
+				{
+					return result;
+				}
+				rows_to_sort.push_back(sorting_row_of_data);
+			}
+
+			++current_rows_stepped;
+
+			if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
+			{
+				CheckProgressUpdateMethod2(messager, current_rows_stepped);
+			}
+
 		}
 
-		// ******************************************************************************************************** //
-		// Important note on matching primary key columns:
-		// A NULL primary key column will match against a non-NULL one.
-		// Noting that this algorithm orders primary key columns from left-to-right across columns
-		//    (for multiplicity > 1 keys),
-		// then we see that this primary key matching approach involving NULLs
-		// only works because SQLite orders rows with NULLs before rows with non-NULLs in the ORDER BY clause.
-		// If you think about it, the number of NULL columns can only decrease as new rows are introduced
-		//    in the current loop, which must match on all previous (non-NULL) columns.
-		// Therefore, it is impossible for two non-matching rows to both match against a previously processed
-		//    "matching" row (which had matched on some NULL columns)
-		//    which themselves do not match on all primary key columns.
-		// ******************************************************************************************************** //
-		bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(sorting_row_of_data, rows_to_sort[0]);
-		if (primary_keys_match)
-		{
-			rows_to_sort.push_back(sorting_row_of_data);
-		}
-		else
+		if (!rows_to_sort.empty())
 		{
 			RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
 			if (failed)
 			{
 				return result;
 			}
-			rows_to_sort.push_back(sorting_row_of_data);
 		}
 
-		++current_rows_stepped;
+		ExecuteSQL(result);
+		messager.UpdateProgressBarValue(1000);
+		boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+		msg % current_rows_stepped % current_number_rows_to_sort;
+		messager.SetPerformanceLabel(msg.str());
+		EndTransaction();
 
-		if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
-		{
-			CheckProgressUpdateMethod2(messager, current_rows_stepped);
-		}
-
-	}
-
-	if (!rows_to_sort.empty())
-	{
-		RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
 		if (failed)
 		{
 			return result;
 		}
-	}
 
-	ExecuteSQL(result);
-	messager.UpdateProgressBarValue(1000);
-	boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
-	msg % current_rows_stepped % current_number_rows_to_sort;
-	messager.SetPerformanceLabel(msg.str());
-	EndTransaction();
-
-	if (failed)
-	{
-		return result;
 	}
 
 
@@ -3368,19 +3387,13 @@ bool OutputModel::OutputGenerator::StepData()
 void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_set)
 {
 
-	if (stmt_result)
-	{
-		sqlite3_finalize(stmt_result);
-		++SQLExecutor::number_statement_finalizes;
-		stmt_result = nullptr;
-	}
+	CloseObtainData();
 
 	std::string sql;
 	sql += "SELECT * FROM ";
 	sql += column_set.view_name;
 
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt_result, NULL);
-	++SQLExecutor::number_statement_prepares;
 	if (stmt_result == NULL)
 	{
 		sql_error = sqlite3_errmsg(db);
@@ -3391,7 +3404,18 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_s
 		failed = true;
 		return;
 	}
+	++SQLExecutor::number_statement_prepares;
 
+}
+
+void OutputModel::OutputGenerator::CloseObtainData()
+{
+	if (stmt_result)
+	{
+		sqlite3_finalize(stmt_result);
+		++SQLExecutor::number_statement_finalizes;
+		stmt_result = nullptr;
+	}
 }
 
 std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const & column_set)
@@ -3409,7 +3433,6 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 	sql += column_set.view_name;
 
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt_result, NULL);
-	++SQLExecutor::number_statement_prepares;
 	if (stmt_result == NULL)
 	{
 		sql_error = sqlite3_errmsg(db);
@@ -3420,6 +3443,7 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 		failed = true;
 		return 0;
 	}
+	++SQLExecutor::number_statement_prepares;
 
 	int step_result = 0;
 	if ((step_result = sqlite3_step(stmt_result)) != SQLITE_ROW)
@@ -3555,7 +3579,6 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 		if (!statement_is_prepared)
 		{
 			sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
-			++number_statement_prepares;
 			if (stmt == NULL)
 			{
 				sql_error = sqlite3_errmsg(db);
@@ -3565,6 +3588,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(sqlite3 * db_, std::strin
 				failed = true;
 				return;
 			}
+			++number_statement_prepares;
 			statement_is_owned = true;
 			statement_is_prepared = true;
 		}
@@ -3680,7 +3704,6 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 				if (statement_is_owned && !statement_is_prepared)
 				{
 					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
-					++number_statement_prepares;
 					if (stmt == NULL)
 					{
 						sql_error = sqlite3_errmsg(db);
@@ -3690,6 +3713,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 						failed = true;
 						return;
 					}
+					++number_statement_prepares;
 					statement_is_prepared = true;
 				}
 
@@ -3702,7 +3726,6 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 				if (statement_is_owned && !statement_is_prepared)
 				{
 					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
-					++number_statement_prepares;
 					if (stmt == NULL)
 					{
 						sql_error = sqlite3_errmsg(db);
@@ -3712,6 +3735,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 						failed = true;
 						return;
 					}
+					++number_statement_prepares;
 					statement_is_prepared = true;
 				}
 
@@ -6762,441 +6786,262 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 
 
-	ObtainData(previous_x_or_final_columns_being_cleaned_over_timerange);
-
-	if (failed)
-	{
-		return result;
-	}
-
-
-	int const minimum_desired_rows_per_transaction = 1024 * 1024;
-
-	std::int64_t current_rows_added = 0;
-	std::int64_t current_rows_stepped = 0;
-	std::int64_t current_rows_added_since_execution = 0;
-	std::string sql_add_xr_row;
-	bool first_row_added = true;
-	std::vector<std::string> bound_parameter_strings;
-	std::vector<std::int64_t> bound_parameter_ints;
-	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
-	sqlite3_stmt * the_prepared_stmt = nullptr;
-
-	BeginNewTransaction();
-
-	while (StepData())
 	{
 
-		int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
-		int current_data_type = sqlite3_column_type(stmt_result, current_datetime_start_column_index);
-		bool previous_datetime_is_null = (previous_data_type == SQLITE_NULL);
-		bool current_datetime_is_null = (current_data_type == SQLITE_NULL);
-
-		std::int64_t previous_datetime_start = sqlite3_column_int64(stmt_result, previous_datetime_start_column_index);
-		std::int64_t previous_datetime_end = sqlite3_column_int64(stmt_result, previous_datetime_end_column_index);
-		std::int64_t current_datetime_start = sqlite3_column_int64(stmt_result, current_datetime_start_column_index);
-		std::int64_t current_datetime_end = sqlite3_column_int64(stmt_result, current_datetime_end_column_index);
-
-		bool previous_is_0 = false;
-		if (previous_datetime_start == 0 && previous_datetime_end == 0)
+		BOOST_SCOPE_EXIT(this_)
 		{
-			previous_is_0 = true;
+			this_->CloseObtainData();
+		} BOOST_SCOPE_EXIT_END
+
+		ObtainData(previous_x_or_final_columns_being_cleaned_over_timerange);
+
+		if (failed)
+		{
+			return result;
 		}
 
-		bool current_is_0 = false;
-		if (current_datetime_start == 0 && current_datetime_end == 0)
-		{
-			current_is_0 = true;
-		}
 
-		bool added = false;
+		int const minimum_desired_rows_per_transaction = 1024 * 1024;
 
-		if (previous_datetime_is_null && current_datetime_is_null)
-		{
-			// no data
-			continue;
-		}
+		std::int64_t current_rows_added = 0;
+		std::int64_t current_rows_stepped = 0;
+		std::int64_t current_rows_added_since_execution = 0;
+		std::string sql_add_xr_row;
+		bool first_row_added = true;
+		std::vector<std::string> bound_parameter_strings;
+		std::vector<std::int64_t> bound_parameter_ints;
+		std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
+		sqlite3_stmt * the_prepared_stmt = nullptr;
 
-		else if (previous_datetime_is_null)
-		{
+		BeginNewTransaction();
 
-			// Add only current data, setting time range to that of the previous data
-			added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, false, true, xr_table_category);
-			if (failed)
-			{
-				break;
-			}
-			if (added)
-			{
-				sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-				the_prepared_stmt = sql_strings.back().stmt;
-				++current_rows_added;
-				++current_rows_added_since_execution;
-			}
-
-		}
-		
-		else if (current_datetime_is_null)
+		while (StepData())
 		{
 
-			// Add only previous data, setting time range to that of the previous data
-			added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, false, xr_table_category);
-			if (failed)
-			{
-				break;
-			}
-			if (added)
-			{
-				sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-				the_prepared_stmt = sql_strings.back().stmt;
-				++current_rows_added;
-				++current_rows_added_since_execution;
-			}
+			int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
+			int current_data_type = sqlite3_column_type(stmt_result, current_datetime_start_column_index);
+			bool previous_datetime_is_null = (previous_data_type == SQLITE_NULL);
+			bool current_datetime_is_null = (current_data_type == SQLITE_NULL);
 
-		}
+			std::int64_t previous_datetime_start = sqlite3_column_int64(stmt_result, previous_datetime_start_column_index);
+			std::int64_t previous_datetime_end = sqlite3_column_int64(stmt_result, previous_datetime_end_column_index);
+			std::int64_t current_datetime_start = sqlite3_column_int64(stmt_result, current_datetime_start_column_index);
+			std::int64_t current_datetime_end = sqlite3_column_int64(stmt_result, current_datetime_end_column_index);
 
-		else if (previous_is_0 && current_is_0)
-		{
-
-			// Add row as-is, setting new time range columns to 0
-			added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, 0, 0, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, true, xr_table_category);
-			if (failed)
+			bool previous_is_0 = false;
+			if (previous_datetime_start == 0 && previous_datetime_end == 0)
 			{
-				break;
-			}
-			if (added)
-			{
-				sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-				the_prepared_stmt = sql_strings.back().stmt;
-				++current_rows_added;
-				++current_rows_added_since_execution;
+				previous_is_0 = true;
 			}
 
-		}
-
-		else if (previous_is_0 && !current_is_0)
-		{
-
-			// Add row as-is, setting new time range columns to current time range values
-			added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, true, xr_table_category);
-			if (failed)
+			bool current_is_0 = false;
+			if (current_datetime_start == 0 && current_datetime_end == 0)
 			{
-				break;
-			}
-			if (added)
-			{
-				sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-				the_prepared_stmt = sql_strings.back().stmt;
-				++current_rows_added;
-				++current_rows_added_since_execution;
+				current_is_0 = true;
 			}
 
-		}
+			bool added = false;
 
-		else if (!previous_is_0 && current_is_0)
-		{
-
-			// Add row as-is, setting new time range columns to previous time range values
-			added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, true, xr_table_category);
-			if (failed)
+			if (previous_datetime_is_null && current_datetime_is_null)
 			{
-				break;
-			}
-			if (added)
-			{
-				sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-				the_prepared_stmt = sql_strings.back().stmt;
-				++current_rows_added;
-				++current_rows_added_since_execution;
-			}
-
-		}
-
-		else
-		{
-
-			// Both current and previous rows have non-zero time range columns.
-			// Perform the algorithm that possibly splits the row into multiple rows,
-			// one for each time range sub-region in the overlap of the time ranges between current and previous.
-
-			// Rule out garbage
-			if (previous_datetime_start >= previous_datetime_end)
-			{
-				// invalid previous time range values
-				continue;
-			}
-			else if (current_datetime_start >= current_datetime_end)
-			{
-				// invalid current time range values
+				// no data
 				continue;
 			}
 
-			// Both current and previous time range windows
-			// are now guaranteed to have a non-zero, and positive, width
-
-			std::int64_t lower_range_start = 0;
-			std::int64_t lower_range_end = 0;
-			std::int64_t upper_range_start = 0;
-			std::int64_t upper_range_end = 0;
-
-			bool previous_is_lower = false;
-			if (previous_datetime_start <= current_datetime_start)
+			else if (previous_datetime_is_null)
 			{
-				lower_range_start = previous_datetime_start;
-				lower_range_end = previous_datetime_end;
-				upper_range_start = current_datetime_start;
-				upper_range_end = current_datetime_end;
-				previous_is_lower = true;
+
+				// Add only current data, setting time range to that of the previous data
+				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, false, true, xr_table_category);
+				if (failed)
+				{
+					break;
+				}
+				if (added)
+				{
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+				}
+
 			}
+
+			else if (current_datetime_is_null)
+			{
+
+				// Add only previous data, setting time range to that of the previous data
+				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, false, xr_table_category);
+				if (failed)
+				{
+					break;
+				}
+				if (added)
+				{
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+				}
+
+			}
+
+			else if (previous_is_0 && current_is_0)
+			{
+
+				// Add row as-is, setting new time range columns to 0
+				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, 0, 0, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, true, xr_table_category);
+				if (failed)
+				{
+					break;
+				}
+				if (added)
+				{
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+				}
+
+			}
+
+			else if (previous_is_0 && !current_is_0)
+			{
+
+				// Add row as-is, setting new time range columns to current time range values
+				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, true, xr_table_category);
+				if (failed)
+				{
+					break;
+				}
+				if (added)
+				{
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+				}
+
+			}
+
+			else if (!previous_is_0 && current_is_0)
+			{
+
+				// Add row as-is, setting new time range columns to previous time range values
+				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, true, xr_table_category);
+				if (failed)
+				{
+					break;
+				}
+				if (added)
+				{
+					sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+					the_prepared_stmt = sql_strings.back().stmt;
+					++current_rows_added;
+					++current_rows_added_since_execution;
+				}
+
+			}
+
 			else
 			{
-				lower_range_start = current_datetime_start;
-				lower_range_end = current_datetime_end;
-				upper_range_start = previous_datetime_start;
-				upper_range_end = previous_datetime_end;
-			}
 
-			bool previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
-			bool previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = true;
-			bool previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
-			bool previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
-			bool current__DO_include_lower_range_data__DO_include_upper_range_data = true;
-			bool current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
-			bool current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = true;
-			bool current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
-			if (!previous_is_lower)
-			{
-				previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
-				previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
-				previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = true;
-				previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
-				current__DO_include_lower_range_data__DO_include_upper_range_data = true;
-				current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = true;
-				current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
-				current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
-			}
+				// Both current and previous rows have non-zero time range columns.
+				// Perform the algorithm that possibly splits the row into multiple rows,
+				// one for each time range sub-region in the overlap of the time ranges between current and previous.
 
-			if (xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
-			{
-				if (previous_is_lower)
+				// Rule out garbage
+				if (previous_datetime_start >= previous_datetime_end)
 				{
-					previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
-					previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = true;
-					previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
-					previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
-					current__DO_include_lower_range_data__DO_include_upper_range_data = true;
-					current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
-					current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false; // Even though current data exists, do not include it if there is no lower data
-					current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+					// invalid previous time range values
+					continue;
+				}
+				else if (current_datetime_start >= current_datetime_end)
+				{
+					// invalid current time range values
+					continue;
+				}
+
+				// Both current and previous time range windows
+				// are now guaranteed to have a non-zero, and positive, width
+
+				std::int64_t lower_range_start = 0;
+				std::int64_t lower_range_end = 0;
+				std::int64_t upper_range_start = 0;
+				std::int64_t upper_range_end = 0;
+
+				bool previous_is_lower = false;
+				if (previous_datetime_start <= current_datetime_start)
+				{
+					lower_range_start = previous_datetime_start;
+					lower_range_end = previous_datetime_end;
+					upper_range_start = current_datetime_start;
+					upper_range_end = current_datetime_end;
+					previous_is_lower = true;
 				}
 				else
+				{
+					lower_range_start = current_datetime_start;
+					lower_range_end = current_datetime_end;
+					upper_range_start = previous_datetime_start;
+					upper_range_end = previous_datetime_end;
+				}
+
+				bool previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
+				bool previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = true;
+				bool previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
+				bool previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+				bool current__DO_include_lower_range_data__DO_include_upper_range_data = true;
+				bool current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+				bool current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = true;
+				bool current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+				if (!previous_is_lower)
 				{
 					previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
 					previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
 					previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = true;
 					previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
 					current__DO_include_lower_range_data__DO_include_upper_range_data = true;
-					current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false; // Even though current data exists, do not include it if there is no lower data
+					current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = true;
 					current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
 					current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
 				}
-			}
 
-			if (lower_range_start == upper_range_start)
-			{
+				if (xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
+				{
+					if (previous_is_lower)
+					{
+						previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
+						previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = true;
+						previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
+						previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+						current__DO_include_lower_range_data__DO_include_upper_range_data = true;
+						current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+						current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false; // Even though current data exists, do not include it if there is no lower data
+						current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+					}
+					else
+					{
+						previous__DO_include_lower_range_data__DO_include_upper_range_data = true;
+						previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+						previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data = true;
+						previous__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+						current__DO_include_lower_range_data__DO_include_upper_range_data = true;
+						current__DO_include_lower_range_data__DO_NOT_include_upper_range_data = false; // Even though current data exists, do not include it if there is no lower data
+						current__DO_NOT_include_lower_range_data__DO_include_upper_range_data = false;
+						current__DO_NOT_include_lower_range_data__DO_NOT_include_upper_range_data = false;
+					}
+				}
 
-				// special case: The lower range and the upper range
-				// begin at the same time value
-
-
-				// There is guaranteed to be overlap between the lower range
-				// and the upper range
-
-				if (lower_range_end == upper_range_end)
+				if (lower_range_start == upper_range_start)
 				{
 
 					// special case: The lower range and the upper range
-					// end at the same time value
+					// begin at the same time value
 
-					// Add row as-is, setting new time range columns
-					// to either the previous or the current time range columns,
-					// because they are the same
-					added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-					if (failed)
-					{
-						break;
-					}
-					if (added)
-					{
-						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-						the_prepared_stmt = sql_strings.back().stmt;
-						++current_rows_added;
-						++current_rows_added_since_execution;
-					}
-
-				}
-				else if (lower_range_end < upper_range_end)
-				{
-
-					// The upper range ends higher than the lower range
-
-					// First, add a row that includes all data,
-					// setting new time range columns to:
-					// lower_range_start - lower_range_end
-					added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-					if (failed)
-					{
-						break;
-					}
-					if (added)
-					{
-						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row,bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-						the_prepared_stmt = sql_strings.back().stmt;
-						++current_rows_added;
-						++current_rows_added_since_execution;
-					}
-
-					// Second, add a row that includes only the upper range's data,
-					// setting new time range columns to:
-					// lower_range_end - upper_range_end
-					if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || !previous_is_lower)
-					{
-						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_end, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-						if (failed)
-						{
-							break;
-						}
-						if (added)
-						{
-							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-							the_prepared_stmt = sql_strings.back().stmt;
-							++current_rows_added;
-							++current_rows_added_since_execution;
-						}
-					}
-
-				}
-				else
-				{
-
-					// The lower range ends higher than the upper range
-
-					// First, add a row that includes all data,
-					// setting new time range columns to:
-					// upper_range_start - upper_range_end
-					added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-					if (failed)
-					{
-						break;
-					}
-					if (added)
-					{
-						sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-						the_prepared_stmt = sql_strings.back().stmt;
-						++current_rows_added;
-						++current_rows_added_since_execution;
-					}
-
-
-					// Second, add a row that includes only the lower range's data,
-					// setting new time range columns to:
-					// upper_range_end - lower_range_end
-					if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
-					{
-						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
-						if (failed)
-						{
-							break;
-						}
-						if (added)
-						{
-							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-							the_prepared_stmt = sql_strings.back().stmt;
-							++current_rows_added;
-							++current_rows_added_since_execution;
-						}
-					}
-
-
-				}
-
-			}
-			else
-			{
-
-				// The lower range is guaranteed to start
-				// before the upper range starts
-
-				if (lower_range_end <= upper_range_start)
-				{
-
-					// No overlap between the lower range and the upper range
-
-					// First, add a row corresponding to the lower range,
-					// setting new time range columns to:
-					// lower_range_start - lower_range_end
-					if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
-					{
-						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
-						if (failed)
-						{
-							break;
-						}
-						if (added)
-						{
-							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-							the_prepared_stmt = sql_strings.back().stmt;
-							++current_rows_added;
-							++current_rows_added_since_execution;
-						}
-					}
-
-					// Second, add a row corresponding to the upper range,
-					// setting new time range columns to:
-					// upper_range_start - upper_range_end
-					if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || !previous_is_lower)
-					{
-						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-						if (failed)
-						{
-							break;
-						}
-						if (added)
-						{
-							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-							the_prepared_stmt = sql_strings.back().stmt;
-							++current_rows_added;
-							++current_rows_added_since_execution;
-						}
-					}
-
-				}
-				else
-				{
 
 					// There is guaranteed to be overlap between the lower range
 					// and the upper range
-
-					// First, add a row to cover the region of the lower range
-					// that is before the upper range begins,
-					// i.e., including only the lower range's data,
-					// setting new time range columns to:
-					// lower_range_start - upper_range_start
-					if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
-					{
-						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, upper_range_start, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
-						if (failed)
-						{
-							break;
-						}
-						if (added)
-						{
-							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
-							the_prepared_stmt = sql_strings.back().stmt;
-							++current_rows_added;
-							++current_rows_added_since_execution;
-						}
-					}
 
 					if (lower_range_end == upper_range_end)
 					{
@@ -7204,11 +7049,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// special case: The lower range and the upper range
 						// end at the same time value
 
-						// So second, add a row that covers the entire upper range
-						// that includes all data,
-						// therefore setting new time range columns to:
-						// upper_range_start - upper_range_end
-						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+						// Add row as-is, setting new time range columns
+						// to either the previous or the current time range columns,
+						// because they are the same
+						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 						if (failed)
 						{
 							break;
@@ -7227,24 +7071,23 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 						// The upper range ends higher than the lower range
 
-						// So second, add a row that includes all data,
+						// First, add a row that includes all data,
 						// setting new time range columns to:
-						// upper_range_start - lower_range_end
-						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+						// lower_range_start - lower_range_end
+						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 						if (failed)
 						{
 							break;
 						}
 						if (added)
 						{
-							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+							sql_strings.push_back(SQLExecutor(db, sql_add_xr_row,bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
 							the_prepared_stmt = sql_strings.back().stmt;
 							++current_rows_added;
 							++current_rows_added_since_execution;
 						}
 
-
-						// And third, add a row that includes only the upper range's data,
+						// Second, add a row that includes only the upper range's data,
 						// setting new time range columns to:
 						// lower_range_end - upper_range_end
 						if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || !previous_is_lower)
@@ -7263,16 +7106,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							}
 						}
 
-
 					}
 					else
 					{
 
 						// The lower range ends higher than the upper range
 
-						// So second, add a row that covers the entire upper range
-						// that includes all data,
-						// therefore setting new time range columns to:
+						// First, add a row that includes all data,
+						// setting new time range columns to:
 						// upper_range_start - upper_range_end
 						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 						if (failed)
@@ -7288,7 +7129,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						}
 
 
-						// And third, add a row that includes only the lower range's data,
+						// Second, add a row that includes only the lower range's data,
 						// setting new time range columns to:
 						// upper_range_end - lower_range_end
 						if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
@@ -7307,44 +7148,236 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							}
 						}
 
+
+					}
+
+				}
+				else
+				{
+
+					// The lower range is guaranteed to start
+					// before the upper range starts
+
+					if (lower_range_end <= upper_range_start)
+					{
+
+						// No overlap between the lower range and the upper range
+
+						// First, add a row corresponding to the lower range,
+						// setting new time range columns to:
+						// lower_range_start - lower_range_end
+						if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
+						{
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
+							if (failed)
+							{
+								break;
+							}
+							if (added)
+							{
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								the_prepared_stmt = sql_strings.back().stmt;
+								++current_rows_added;
+								++current_rows_added_since_execution;
+							}
+						}
+
+						// Second, add a row corresponding to the upper range,
+						// setting new time range columns to:
+						// upper_range_start - upper_range_end
+						if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || !previous_is_lower)
+						{
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+							if (failed)
+							{
+								break;
+							}
+							if (added)
+							{
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								the_prepared_stmt = sql_strings.back().stmt;
+								++current_rows_added;
+								++current_rows_added_since_execution;
+							}
+						}
+
+					}
+					else
+					{
+
+						// There is guaranteed to be overlap between the lower range
+						// and the upper range
+
+						// First, add a row to cover the region of the lower range
+						// that is before the upper range begins,
+						// i.e., including only the lower range's data,
+						// setting new time range columns to:
+						// lower_range_start - upper_range_start
+						if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
+						{
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, upper_range_start, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
+							if (failed)
+							{
+								break;
+							}
+							if (added)
+							{
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								the_prepared_stmt = sql_strings.back().stmt;
+								++current_rows_added;
+								++current_rows_added_since_execution;
+							}
+						}
+
+						if (lower_range_end == upper_range_end)
+						{
+
+							// special case: The lower range and the upper range
+							// end at the same time value
+
+							// So second, add a row that covers the entire upper range
+							// that includes all data,
+							// therefore setting new time range columns to:
+							// upper_range_start - upper_range_end
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+							if (failed)
+							{
+								break;
+							}
+							if (added)
+							{
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								the_prepared_stmt = sql_strings.back().stmt;
+								++current_rows_added;
+								++current_rows_added_since_execution;
+							}
+
+						}
+						else if (lower_range_end < upper_range_end)
+						{
+
+							// The upper range ends higher than the lower range
+
+							// So second, add a row that includes all data,
+							// setting new time range columns to:
+							// upper_range_start - lower_range_end
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+							if (failed)
+							{
+								break;
+							}
+							if (added)
+							{
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								the_prepared_stmt = sql_strings.back().stmt;
+								++current_rows_added;
+								++current_rows_added_since_execution;
+							}
+
+
+							// And third, add a row that includes only the upper range's data,
+							// setting new time range columns to:
+							// lower_range_end - upper_range_end
+							if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || !previous_is_lower)
+							{
+								added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_end, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+								if (failed)
+								{
+									break;
+								}
+								if (added)
+								{
+									sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+									the_prepared_stmt = sql_strings.back().stmt;
+									++current_rows_added;
+									++current_rows_added_since_execution;
+								}
+							}
+
+
+						}
+						else
+						{
+
+							// The lower range ends higher than the upper range
+
+							// So second, add a row that covers the entire upper range
+							// that includes all data,
+							// therefore setting new time range columns to:
+							// upper_range_start - upper_range_end
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+							if (failed)
+							{
+								break;
+							}
+							if (added)
+							{
+								sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+								the_prepared_stmt = sql_strings.back().stmt;
+								++current_rows_added;
+								++current_rows_added_since_execution;
+							}
+
+
+							// And third, add a row that includes only the lower range's data,
+							// setting new time range columns to:
+							// upper_range_end - lower_range_end
+							if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
+							{
+								added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
+								if (failed)
+								{
+									break;
+								}
+								if (added)
+								{
+									sql_strings.push_back(SQLExecutor(db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, the_prepared_stmt, true));
+									the_prepared_stmt = sql_strings.back().stmt;
+									++current_rows_added;
+									++current_rows_added_since_execution;
+								}
+							}
+
+						}
+
 					}
 
 				}
 
 			}
 
+			ExecuteSQL(result);
+
+			if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
+			{
+				boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+				msg % current_rows_stepped % current_number_rows_to_sort;
+				messager.SetPerformanceLabel(msg.str());
+				EndTransaction();
+				BeginNewTransaction();
+				current_rows_added_since_execution = 0;
+			}
+
+			++current_rows_stepped;
+			if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
+			{
+				CheckProgressUpdateMethod2(messager, current_rows_stepped);
+			}
+
 		}
 
 		ExecuteSQL(result);
+		messager.UpdateProgressBarValue(1000);
+		boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+		msg % current_rows_stepped % current_number_rows_to_sort;
+		messager.SetPerformanceLabel(msg.str());
+		EndTransaction();
 
-		if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
+		if (failed)
 		{
-			boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
-			msg % current_rows_stepped % current_number_rows_to_sort;
-			messager.SetPerformanceLabel(msg.str());
-			EndTransaction();
-			BeginNewTransaction();
-			current_rows_added_since_execution = 0;
+			return result;
 		}
 
-		++current_rows_stepped;
-		if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
-		{
-			CheckProgressUpdateMethod2(messager, current_rows_stepped);
-		}
-
-	}
-
-	ExecuteSQL(result);
-	messager.UpdateProgressBarValue(1000);
-	boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
-	msg % current_rows_stepped % current_number_rows_to_sort;
-	messager.SetPerformanceLabel(msg.str());
-	EndTransaction();
-
-	if (failed)
-	{
-		return result;
 	}
 
 	return result;
