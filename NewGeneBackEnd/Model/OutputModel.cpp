@@ -915,7 +915,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 	UpdateProgressBarToNextStage(primary_group_final_results[0].second.variable_groups[0].longhand ? *primary_group_final_results[0].second.variable_groups[0].longhand : "", primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : "");
 
-	// The LAST inner table has three pairs at its end:
+	// The LAST inner table of any top-level primary group set of inner tables has three pairs at its end:
 	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
 	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
 	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
@@ -930,7 +930,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 	//
 	// Outgoing:
-	// The LAST inner table has four pairs at its end:
+	// The LAST inner table of the first top-level primary group set has four pairs at its end:
 	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
 	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
 	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
@@ -1012,10 +1012,11 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			// Last two columns of the PREVIOUS merged block:
 			// COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
 			//
-			// Last two columns of the newly-added top-level block:
+			// Last two columns of the newly-added top-level block (it has three pairs of timerange columns; see entry to this function):
 			// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 			//
 			// Outgoing:
+			// The last inner table of the most recently merged group now has 4 pairs of timerange columns. 
 			// Last two columns:
 			// DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
 			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count);
