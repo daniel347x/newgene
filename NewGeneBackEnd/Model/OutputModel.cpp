@@ -670,13 +670,12 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	sql_string += " AS SELECT ";
 
 	WidgetInstanceIdentifier first_variable_group;
-	int highest_index_first_primary_vg_full_final_results_table = -1;
 
 	// Display primary key columns
 	bool first = true;
 	int column_index = 0;
 	bool reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
 		if (column_index == 0)
@@ -691,12 +690,6 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 				++column_index;
 				return; // Only display primary key columns from the first primary variable group
 			}
-		}
-
-		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
-		{
-			// This will pull the last one of the first group
-			highest_index_first_primary_vg_full_final_results_table = column_index;
 		}
 
 		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
@@ -790,7 +783,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	// First, do a quick calculation and save which secondary keys appear more than once, and stash that away
 	column_index = 0;
 	std::map<WidgetInstanceIdentifier, bool> variable_group_appears_more_than_once;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &variable_group_appears_more_than_once, &highest_index_first_primary_vg_full_final_results_table, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
 		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
@@ -852,99 +845,46 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	});
 
 	// ... next, the secondary key columns from the child variable groups
-	bool new_method = true;
-	if (!new_method)
+	column_index = 0;
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
-		column_index = 0;
-		std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &highest_index_first_primary_vg_full_final_results_table, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+
+		if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
-
-			if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
-			{
-				++column_index;
-				return;
-			}
-
-			if (unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
-			{
-				++column_index;
-				return;
-			}
-
-			if (column_index > highest_index_first_primary_vg_full_final_results_table)
-			{
-				++column_index;
-				return;
-			}
-
-			result_columns.columns_in_view.push_back(unformatted_column);
-			ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
-
-			formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
-			if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
-			{
-				formatted_column.column_name_in_temporary_table += "_";
-				formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg, c, 10);
-			}
-			formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
-
-			if (!first)
-			{
-				sql_string += ", ";
-			}
-			first = false;
-
-			sql_string += unformatted_column.column_name_in_temporary_table;
-			sql_string += " AS ";
-			sql_string += formatted_column.column_name_in_temporary_table;
-
 			++column_index;
+			return;
+		}
 
-		});
-	}
-	else
-	{
-		column_index = 0;
-		std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &variable_group_appears_more_than_once, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+		if (unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
 		{
-
-			if (unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
-			{
-				++column_index;
-				return;
-			}
-
-			if (unformatted_column.is_within_inner_table_corresponding_to_top_level_uoa)
-			{
-				++column_index;
-				return;
-			}
-
-			result_columns.columns_in_view.push_back(unformatted_column);
-			ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
-
-			formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
-			if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
-			{
-				formatted_column.column_name_in_temporary_table += "_";
-				formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg, c, 10);
-			}
-			formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
-
-			if (!first)
-			{
-				sql_string += ", ";
-			}
-			first = false;
-
-			sql_string += unformatted_column.column_name_in_temporary_table;
-			sql_string += " AS ";
-			sql_string += formatted_column.column_name_in_temporary_table;
-
 			++column_index;
+			return;
+		}
 
-		});
-	}
+		result_columns.columns_in_view.push_back(unformatted_column);
+		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
+
+		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
+		if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
+		{
+			formatted_column.column_name_in_temporary_table += "_";
+			formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg, c, 10);
+		}
+		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
+
+		if (!first)
+		{
+			sql_string += ", ";
+		}
+		first = false;
+
+		sql_string += unformatted_column.column_name_in_temporary_table;
+		sql_string += " AS ";
+		sql_string += formatted_column.column_name_in_temporary_table;
+
+		++column_index;
+
+	});
 
 	sql_string += " FROM ";
 	sql_string += all_merged_results_unformatted.second.view_name;
