@@ -2785,6 +2785,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 		bool start_fresh = true;
 
+		int which_previous_row_index_to_test_against = 0;
+		bool use_newest_row_index = false;
+
 		while (StepData())
 		{
 
@@ -2816,14 +2819,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			//    "matching" row (which had matched on some NULL columns)
 			//    which themselves do not match on all primary key columns.
 			// ******************************************************************************************************** //
-			bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(sorting_row_of_data, rows_to_sort[0]);
+			bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(sorting_row_of_data, rows_to_sort[which_previous_row_index_to_test_against], use_newest_row_index);
 			if (primary_keys_match)
 			{
 				rows_to_sort.push_back(sorting_row_of_data);
+				which_previous_row_index_to_test_against = (int)rows_to_sort.size() - 1;
 			}
 			else
 			{
+				use_newest_row_index = false;
 				RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction, xr_table_category);
+				which_previous_row_index_to_test_against = 0;
 				if (failed)
 				{
 					return result;
@@ -2843,6 +2849,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		if (!rows_to_sort.empty())
 		{
 			RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction, xr_table_category);
+			which_previous_row_index_to_test_against = 0;
 			if (failed)
 			{
 				return result;
@@ -3499,13 +3506,14 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	return merged_data_row;
 }
 
-bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data)
+bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index)
 {
 
 	bool match_failed = false;
 	int entry_number = 0;
+	use_newest_row_index = false;
 
-	// First test multiplicity =1 columns, which must match exactly in sequence between the two rows being compared
+	// First test multiplicity = 1 columns, which must match exactly in sequence between the two rows being compared
 	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cend(), [this, &entry_number, &current_row_of_data, &previous_row_of_data, &match_failed](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
 
@@ -3637,12 +3645,17 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 		return false;
 	}
 
+
+
+
+	// ************************************************************************************************** //
 	// Special handling required to test the single DMU category with multiplicity greater than 1,
 	// because there could be NULL values that offset what would otherwise be a match.
 	// i.e.:
 	// 2   200
 	// 200
 	// ... should match, because the NULL can be overwritten by the 2 if the 200 were in the second column
+	// ************************************************************************************************** //
 
 	std::set<std::vector<std::string>> saved_strings_previous_vector;
 	std::set<std::vector<std::int64_t>> saved_ints_previous_vector;
@@ -3766,6 +3779,11 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 		}
 
 	});
+
+	if (number_nulls_current == 0)
+	{
+		use_newest_row_index = true;
+	}
 
 	if (saved_strings_current_vector.size() > 0 && saved_ints_current_vector.size() > 0)
 	{
