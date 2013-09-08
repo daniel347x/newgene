@@ -50,8 +50,8 @@ public:
 			//
 			int sequence_number_within_dmu_category_for_this_variable_groups_uoa;
 			int current_multiplicity;
-			int total_multiplicity;
-			int total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group;
+			int total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
+			int total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group;
 			int total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group;
 			int total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category;
 
@@ -70,7 +70,7 @@ public:
 			int sequence_number_in_all_primary_keys;
 			int total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
 			int total_kad_spin_count_for_this_dmu_category;
-			int total_multiplicity_of_uoa_corresponding_to_top_level_variable_group_for_the_current_dmu_category;
+			int total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group;
 			std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys; // one per variable group 
 
 	};
@@ -115,9 +115,9 @@ class ColumnsInTempView
 					, primary_key_index_within_total_kad_for_dmu_category(-1)
 					, primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category(-1)
 					, primary_key_index_within_primary_uoa_for_dmu_category(-1)
-					, current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg(-1)
-					, current_multiplicity__of__current_inner_table__within__current_vg(-1)
-					, total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group(-1)
+					, current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg(-1)
+					, current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set(-1)
+					, total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group(-1)
 					, primary_key_should_be_treated_as_numeric(false)
 					, total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category(-1)
 					, total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category(-1)
@@ -154,9 +154,9 @@ class ColumnsInTempView
 
 				int primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category;
 				int primary_key_index_within_primary_uoa_for_dmu_category;
-				int current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg;
-				int current_multiplicity__of__current_inner_table__within__current_vg;
-				int total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group;
+				int current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg;
+				int current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+				int total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
 				int total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 				int total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category;
 				int total_k_spin_count_across_multiplicities_for_dmu_category;

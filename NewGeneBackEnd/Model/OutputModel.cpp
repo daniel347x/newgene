@@ -746,7 +746,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		{
 			if (reached_end_of_first_inner_table_not_including_terminating_datetime_columns)
 			{
-				if (unformatted_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+				if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
 					++column_index;
 					return; // only display primary key columns of multiplicity 1 once - from the first inner table of the first primary variable group
@@ -792,10 +792,10 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
 
-		if (unformatted_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+		if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 		{
 			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(unformatted_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg, c, 10);
+			formatted_column.column_name_in_temporary_table += itoa(unformatted_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg, c, 10);
 		}
 
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
@@ -844,7 +844,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		// A little trick: The highest multiplicity always appears last for any variable group,
 		// so if the variable group has a multiplicity greater than 1, its highest value which appears last will set the value to true
-		variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table] = (unformatted_column.current_multiplicity__of__current_inner_table__within__current_vg > 1);
+		variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table] = (unformatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 1);
 
 		++column_index;
 
@@ -876,7 +876,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
 		{
 			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg, c, 10);
+			formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set, c, 10);
 		}
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
@@ -918,7 +918,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
 		{
 			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg, c, 10);
+			formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set, c, 10);
 		}
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
@@ -1154,14 +1154,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 			if (previous_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (previous_column.current_multiplicity__of__current_inner_table__within__current_vg == 1)
+				if (previous_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
 				{
 					lhs_primary_keys[previous_column.primary_key_dmu_category_identifier].first = 0;
 					lhs_primary_keys[previous_column.primary_key_dmu_category_identifier].second.push_back((int)(previous_column_names.size()) - 1);
 				}
 				else
 				{
-					if (previous_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+					if (previous_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 					{
 						lhs_primary_keys[previous_column.primary_key_dmu_category_identifier].first = 0;
 						lhs_primary_keys[previous_column.primary_key_dmu_category_identifier].second.push_back((int)(previous_column_names.size()) - 1);
@@ -1228,14 +1228,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 			if (new_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (new_table_column.current_multiplicity__of__current_inner_table__within__current_vg == 1)
+				if (new_table_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
 				{
 					rhs_primary_keys[new_table_column.primary_key_dmu_category_identifier].first = 0;
 					rhs_primary_keys[new_table_column.primary_key_dmu_category_identifier].second.push_back((int)(previous_column_names.size()) - 1);
 				}
 				else
 				{
-					if (new_table_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+					if (new_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 					{
 						rhs_primary_keys[new_table_column.primary_key_dmu_category_identifier].first = 0;
 						rhs_primary_keys[new_table_column.primary_key_dmu_category_identifier].second.push_back((int)(previous_column_names.size()) - 1);
@@ -1280,13 +1280,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		{
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (new_column.current_multiplicity__of__current_inner_table__within__current_vg == 1)
+				if (new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
 				{
 					handled = true;
 				}
 				else
 				{
-					if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+					if (new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 					{
 						handled = true;
 					}
@@ -1317,13 +1317,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		{
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (new_column.current_multiplicity__of__current_inner_table__within__current_vg == 1)
+				if (new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
 				{
 					handled = true;
 				}
 				else
 				{
-					if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+					if (new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 					{
 						handled = true;
 					}
@@ -1408,11 +1408,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 										bool match_condition = false;
 
 										// First, join on primary keys whose total multiplicity is 1
-										if (primary_key_info_this_variable_group.total_multiplicity == 1)
+										if (primary_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 										{
 											if (current_multiplicity == 1)
 											{
-												if (new_column.current_multiplicity__of__current_inner_table__within__current_vg == 1)
+												if (new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
 												{
 													match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
 												}
@@ -1451,11 +1451,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 										bool match_condition = false;
 
 										// First, join on primary keys whose total multiplicity is 1
-										if (primary_key_info_this_variable_group.total_multiplicity == 1)
+										if (primary_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 										{
 											if (current_multiplicity == 1)
 											{
-												if (new_column.current_multiplicity__of__current_inner_table__within__current_vg == 1)
+												if (new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
 												{
 													match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
 												}
@@ -1553,9 +1553,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					{
 						if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 						{
-							if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+							if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 							{
-								if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg == 1)
+								if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == 1)
 								{
 									++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa;
 								}
@@ -1589,11 +1589,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 						{
 							if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 							{
-								if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+								if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 								{
 									if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 									{
-										if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg == outer_dmu_multiplicity)
+										if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == outer_dmu_multiplicity)
 										{
 											if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 											{
@@ -1653,7 +1653,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 				{
 					if (view_column_nested.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
 					{
-						if (view_column_nested.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+						if (view_column_nested.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 						{
 							if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 							{
@@ -1667,7 +1667,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 			if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+				if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
 					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_of_1; ++inner_dmu_multiplicity)
 					{
@@ -2118,12 +2118,12 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 		if (possible_duplicate_view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 		{
-			if (possible_duplicate_view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg == 1)
+			if (possible_duplicate_view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == 1)
 			{
 				if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
 					add_as_primary_key_column = true;
-					if (possible_duplicate_view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+					if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 					{
 						add_as_primary_key_with_multiplicity_greater_than_1_in_first_inner_table = true;
 					}
@@ -2134,7 +2134,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				// Only primary keys have the following value set to anything but -1,
 				// and only those primary keys we wish to capture in inner tables beyond the first
 				// have the value greater than 1.
-				if (possible_duplicate_view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+				if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 				{
 					add_as_primary_key_column = true;
 				}
@@ -3212,9 +3212,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 				if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 				{
-					if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+					if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 					{
-						if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg == 1)
+						if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == 1)
 						{
 							++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
 						}
@@ -3237,11 +3237,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					}
 					if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 					{
-						if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+						if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 						{
 							if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 							{
-								if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg == outer_dmu_multiplicity)
+								if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == outer_dmu_multiplicity)
 								{
 									if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 									{
@@ -3294,7 +3294,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						return;
 					}
-					if (view_column.current_multiplicity__of__current_inner_table__within__current_vg > 1)
+					if (view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 1)
 					{
 						return;
 					}
@@ -3327,7 +3327,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						{
 							return;
 						}
-						if (view_column_nested.current_multiplicity__of__current_inner_table__within__current_vg > 1)
+						if (view_column_nested.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 1)
 						{
 							return;
 						}
@@ -3343,7 +3343,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 				if (view_column_nested.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
 				{
-					if (view_column_nested.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+					if (view_column_nested.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 					{
 						if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 						{
@@ -3357,7 +3357,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 		{
-			if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+			if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 			{
 				for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_of_1; ++inner_dmu_multiplicity)
 				{
@@ -4171,7 +4171,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 					{
-						if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+						if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 						{
 							++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
 						}
@@ -4186,7 +4186,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 					{
-						if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+						if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 						{
 							if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 							{
@@ -4230,7 +4230,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					if (view_column_.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
 					{
-						if (view_column_.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+						if (view_column_.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 						{
 							if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 							{
@@ -4243,7 +4243,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+				if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
 					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_of_1; ++inner_dmu_multiplicity)
 					{
@@ -4711,12 +4711,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table += newUUID(true);
 			new_column.inner_table_set_number = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
-			new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
+			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+				if (new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 				{
-					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
+					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity; // update current multiplicity
 					new_column.primary_key_index_within_total_kad_for_dmu_category = new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
 						+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 				}
@@ -4758,12 +4758,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table += newUUID(true);
 			new_column.inner_table_set_number = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
-			new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
+			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+				if (new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 				{
-					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
+					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity; // update current multiplicity
 					new_column.primary_key_index_within_total_kad_for_dmu_category = new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
 						+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 				}
@@ -4842,9 +4842,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
 			{
-				if (primary_key_info.total_multiplicity == 1)
+				// Only join on primary keys whose total multiplicity is 1
+				if (primary_key_info.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
-					// Only join on primary keys whose total multiplicity is 1
 					int column_count = 0;
 					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &sql_string, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 					{
@@ -4888,9 +4888,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 					{
-						if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+						if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 						{
-							if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg == 1)
+							if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == 1)
 							{
 								++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
 							}
@@ -4947,11 +4947,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 						{
-							if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+							if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 							{
 								if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 								{
-									if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg == outer_dmu_multiplicity)
+									if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == outer_dmu_multiplicity)
 									{
 										if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 										{
@@ -5009,7 +5009,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					if (view_column_nested.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
 					{
-						if (view_column_nested.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+						if (view_column_nested.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 						{
 							if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 							{
@@ -5023,7 +5023,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+				if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
 					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_of_1; ++inner_dmu_multiplicity)
 					{
@@ -5451,7 +5451,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 							// unused... confirm that this can be removed
 							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-							if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+							if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 							{
 								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 							}
@@ -5463,7 +5463,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 						// unused... confirm that this can be removed
 						inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-						if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+						if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 						{
 							inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 						}
@@ -5482,7 +5482,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 							// unused... confirm that this can be removed
 							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-							if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+							if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 							{
 								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 							}
@@ -5494,7 +5494,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 
 						// unused... confirm that this can be removed
 						inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-						if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+						if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 						{
 							inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 						}
@@ -5539,7 +5539,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						{
 							inner_table_int_set.push_back(data_int64);
 							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
-							if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+							if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 							{
 								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
 							}
@@ -5551,7 +5551,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 								// unused... confirm that this can be removed
 								inner_table_int_set.push_back(data_int64);
 								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
-								if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+								if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 								{
 									inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
 								}
@@ -5600,7 +5600,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						{
 							inner_table_string_set.push_back(data_string);
 							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
-							if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+							if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 							{
 								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
 							}
@@ -5612,7 +5612,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 								// unused... confirm that this can be removed
 								inner_table_string_set.push_back(data_string);
 								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
-								if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+								if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 								{
 									inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
 								}
@@ -5654,7 +5654,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						if (!swap_current_and_previous_and_set_previous_to_null)
 						{
 							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-							if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+							if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 							{
 								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 							}
@@ -5665,7 +5665,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 							{
 								// unused... confirm that this can be removed
 								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-								if (column_in_view.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+								if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 								{
 									inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 								}
@@ -5939,12 +5939,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table += newUUID(true);
 			new_column.inner_table_set_number = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
-			new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
+			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+				if (new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 				{
-					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
+					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity; // update current multiplicity
 					if (new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category < new_column.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category)
 					{
 						new_column.primary_key_index_within_total_kad_for_dmu_category = current_multiplicity;
@@ -6001,12 +6001,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table += newUUID(true);
 			new_column.inner_table_set_number = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
-			new_column.current_multiplicity__of__current_inner_table__within__current_vg = current_multiplicity;
+			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (new_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group > 1)
+				if (new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 				{
-					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_multiplicity; // update current multiplicity
+					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity; // update current multiplicity
 					if (new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category < new_column.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category)
 					{
 						new_column.primary_key_index_within_total_kad_for_dmu_category = current_multiplicity;
@@ -6102,7 +6102,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 			if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group_child))
 			{
-				if (primary_key_info_this_variable_group.current_multiplicity == current_multiplicity)
+				if (primary_key_info_this_variable_group.current_multiplicity == current_multiplicity
+				 || primary_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
 					int column_count = 0;
 					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &current_multiplicity, &sql_string, &primary_key_info_this_variable_group, &first_full_table_column_count, &top_level_inner_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
@@ -6120,7 +6121,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							bool match_condition = false;
 
 							// First, join on primary keys whose total multiplicity is 1
-							if (primary_key_info_this_variable_group.total_multiplicity == 1)
+							if (primary_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 							{
 								if (current_multiplicity == 1)
 								{
@@ -6270,9 +6271,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 					{
-						if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+						if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 						{
-							if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg == 1)
+							if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == 1)
 							{
 								if (view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_top_level_vg))
 								{
@@ -6304,11 +6305,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 						{
-							if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == highest_multiplicity_primary_uoa)
+							if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 							{
 								if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
 								{
-									if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg == outer_dmu_multiplicity)
+									if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == outer_dmu_multiplicity)
 									{
 										if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 										{
@@ -6370,7 +6371,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					if (view_column_nested.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
 					{
-						if (view_column_nested.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+						if (view_column_nested.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 						{
 							if (view_column_nested.is_within_inner_table_corresponding_to_top_level_uoa)
 							{
@@ -6384,7 +6385,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (view_column.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group == 1)
+				if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
 					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_of_only_1__for_top_level_uoa; ++inner_dmu_multiplicity)
 					{
@@ -7628,7 +7629,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 
 		column_in_variable_group_data_table.variable_group_associated_with_current_inner_table = the_variable_group.first;
 
-		column_in_variable_group_data_table.current_multiplicity__of__current_inner_table__within__current_vg = 1;
+		column_in_variable_group_data_table.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
 
 		if (!the_variable_group.first.identifier_parent)
 		{
@@ -7729,8 +7730,8 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category = primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_spin_control;
 								column_in_variable_group_data_table.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category = current_variable_group_primary_key_entry.sequence_number_within_dmu_category_for_this_variable_groups_uoa;
 								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category = primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_primary_uoa;
-								column_in_variable_group_data_table.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_vg = current_variable_group_primary_key_entry.current_multiplicity;
-								column_in_variable_group_data_table.total_multiplicity__of_current_dmu_category__within_uoa_corresponding_to_the_current_inner_tables_variable_group = current_variable_group_primary_key_entry.total_multiplicity;
+								column_in_variable_group_data_table.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_variable_group_primary_key_entry.current_multiplicity;
+								column_in_variable_group_data_table.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = current_variable_group_primary_key_entry.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
 								column_in_variable_group_data_table.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category = k_count__corresponding_to_top_level_uoa__and_current_dmu_category;
 
 								std::for_each(dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cbegin(), dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cend(), [this, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities](Table_UOA_Identifier::DMU_Plus_Count const & dmu_count)
@@ -8383,10 +8384,10 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 			current_primary_key_sequence.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category = k_count_for_primary_uoa_for_given_dmu_category;
 			current_primary_key_sequence.total_kad_spin_count_for_this_dmu_category = total_spin_control_k_count_for_given_dmu_category;
 
-			std::map<WidgetInstanceIdentifier, int> map__dmu_category__total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group;
+			std::map<WidgetInstanceIdentifier, int> map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group;
 
 			int view_count = 0;
-			std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &map__dmu_category__total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+			std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 			{
 				if (failed)
 				{
@@ -8439,33 +8440,34 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 					return;
 				}
 
-				int total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group = 0;
-				std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, the_dmu_category, &total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_primary_or_child_variable_group__current_dmu_category__primary_key_instance)
+				int total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group = 0;
+				std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, the_dmu_category, &total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_primary_or_child_variable_group__current_dmu_category__primary_key_instance)
 				{
 					if (current_primary_or_child_variable_group__current_dmu_category__primary_key_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu_category))
 					{
-						++total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
+						++total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
 					}
 				});
 
-				int multiplicity_current_primary_or_child_uoa = 0;
-				if (total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group > 0)
+				int outer_multiplicity_current_primary_or_child_uoa = 0;
+				if (total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group > 0)
 				{
-					multiplicity_current_primary_or_child_uoa = 1;
-					int test_kad_count = total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
+					outer_multiplicity_current_primary_or_child_uoa = 1;
+					int test_kad_count = total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
 					while (test_kad_count <= total_spin_control_k_count_for_given_dmu_category)
 					{
-						test_kad_count += total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
+						test_kad_count += total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
 						if (test_kad_count <= total_spin_control_k_count_for_given_dmu_category)
 						{
-							++multiplicity_current_primary_or_child_uoa;
+							++outer_multiplicity_current_primary_or_child_uoa;
 						}
 					}
 				}
 
 				// The current iteration is through primary variable groups
-				current_primary_key_sequence.total_multiplicity_of_uoa_corresponding_to_top_level_variable_group_for_the_current_dmu_category = multiplicity_current_primary_or_child_uoa;
-				map__dmu_category__total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group[the_dmu_category] = multiplicity_current_primary_or_child_uoa;
+				current_primary_key_sequence.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group = outer_multiplicity_current_primary_or_child_uoa;
+
+				map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group[the_dmu_category] = outer_multiplicity_current_primary_or_child_uoa;
 
 				variable_group_info_for_primary_keys.push_back(PrimaryKeySequence::VariableGroup_PrimaryKey_Info());
 				PrimaryKeySequence::VariableGroup_PrimaryKey_Info & current_variable_group_current_primary_key_info = variable_group_info_for_primary_keys.back();
@@ -8474,10 +8476,10 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				current_variable_group_current_primary_key_info.associated_uoa_identifier = current_uoa_identifier;
 
 				int current_variable_group_current_primary_key_dmu_category__total_sequence_number = 0;
-				for (int m=0; m<multiplicity_current_primary_or_child_uoa; ++m)
+				for (int m=0; m<outer_multiplicity_current_primary_or_child_uoa; ++m)
 				{
 					int current_variable_group_current_primary_key_dmu_category__internal_sequence_number = 0;
-					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &multiplicity_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category__total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category__internal_sequence_number, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group__current_dmu_primary_key_instance)
+					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &outer_multiplicity_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category__total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category__internal_sequence_number, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group__current_dmu_primary_key_instance)
 					{
 						if (failed)
 						{
@@ -8493,8 +8495,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group__current_dmu_primary_key_instance.longhand;
 								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_for_this_variable_groups_uoa = current_variable_group_current_primary_key_dmu_category__internal_sequence_number;
 								current_variable_group_current_primary_key_info.current_multiplicity = m+1;
-								current_variable_group_current_primary_key_info.total_multiplicity = multiplicity_current_primary_or_child_uoa;
-								current_variable_group_current_primary_key_info.total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group = current_primary_key_sequence.total_multiplicity_of_uoa_corresponding_to_top_level_variable_group_for_the_current_dmu_category;
+								current_variable_group_current_primary_key_info.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = outer_multiplicity_current_primary_or_child_uoa;
+								current_variable_group_current_primary_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group = current_primary_key_sequence.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group;
 								current_variable_group_current_primary_key_info.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category = k_count_for_primary_uoa_for_given_dmu_category;
 
 								// We are currently iterating through primary variable groups, so this is easy
@@ -8505,7 +8507,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								std::string this_variable_group__this_primary_key__unique_name;
 								this_variable_group__this_primary_key__unique_name += *current_variable_group__current_dmu_primary_key_instance.longhand;
 								current_variable_group_current_primary_key_info.column_name_no_uuid = this_variable_group__this_primary_key__unique_name;
-								if (multiplicity_current_primary_or_child_uoa > 1)
+								if (outer_multiplicity_current_primary_or_child_uoa > 1)
 								{
 									this_variable_group__this_primary_key__unique_name += "_";
 									this_variable_group__this_primary_key__unique_name += itoa(m+1, ns__, 10);
@@ -8564,7 +8566,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 			}
 
 			view_count = 0;
-			std::for_each(secondary_variable_groups_vector.cbegin(), secondary_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &map__dmu_category__total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
+			std::for_each(secondary_variable_groups_vector.cbegin(), secondary_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 			{
 				if (failed)
 				{
@@ -8646,7 +8648,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				current_variable_group_current_primary_key_info.vg_identifier = the_variable_group.first;
 				current_variable_group_current_primary_key_info.is_primary_column_selected = false;
 				current_variable_group_current_primary_key_info.associated_uoa_identifier = current_uoa_identifier;
-				current_variable_group_current_primary_key_info.total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group = map__dmu_category__total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group[the_dmu_category];
+				current_variable_group_current_primary_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group = map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group[the_dmu_category];
 
 				int current_variable_group_current_primary_key_dmu_category__total_sequence_number = 0;
 				for (int m=0; m<multiplicity_current_primary_or_child_uoa; ++m)
@@ -8668,8 +8670,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group_current_dmu_primary_key.longhand;
 								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_for_this_variable_groups_uoa = current_variable_group_current_primary_key_dmu_category__internal_sequence_number;
 								current_variable_group_current_primary_key_info.current_multiplicity = m+1;
-								current_variable_group_current_primary_key_info.total_multiplicity = multiplicity_current_primary_or_child_uoa;
-								current_variable_group_current_primary_key_info.total_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group = current_primary_key_sequence.total_multiplicity_of_uoa_corresponding_to_top_level_variable_group_for_the_current_dmu_category;
+								current_variable_group_current_primary_key_info.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = multiplicity_current_primary_or_child_uoa;
+								current_variable_group_current_primary_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group = current_primary_key_sequence.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group;
 								current_variable_group_current_primary_key_info.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category = k_count_for_primary_uoa_for_given_dmu_category;
 								current_variable_group_current_primary_key_info.total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group = total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
 
