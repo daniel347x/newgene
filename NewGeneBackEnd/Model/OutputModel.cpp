@@ -7815,6 +7815,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 
 
+	// ***************************************************************************************************************************************** //
+	// Locate the indices of the datetime columns corresponding to the currently-being-added new inner table
+	// (its columns are at the end, and the final two columns are always its datetime-start and datetime-end columns)
+	// ... and corresponding to the previous "row" being merged into - which corresponds to all the columns at the left
+	// (and the final two of THESE columns - which the algorithm below searches for - are ITS datetime-start and datetime-end columns).
+	// ***************************************************************************************************************************************** //
+
 	int previous_datetime_start_column_index = -1;
 	int previous_datetime_end_column_index = -1;
 	int current_datetime_start_column_index = -1;
@@ -7967,6 +7974,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		return result;
 	}
 
+
+
+	// ***************************************************************************************************************************************** //
+	// Now step through every row to merge the first set of columns (at the left of each row)
+	// with the new set of columns (at the right of each row).
+	// Specifically check for TIME RANGE OVERLAP - that is the entire purpose of this loop.
+	// If the time ranges do not match, then create two new separate rows,
+	// one containing only the data from the left columns (with NULL for the remaining columns),
+	// and one containing only the data from the right columns (with NULL for the remaining columns).
+	// Further, if the left columns are NULL, then swap the position of the right columns to place them at the left,
+	// since all column sets being merged together have the same schema (albeit the columns at the left may have
+	// more than one block of columns with this schema - i.e., multiple "inner tables".
+	// For overlapping or invalid time range overlaps, handle those cases appropriately, adding between 0 and 3 new rows.
+	// ***************************************************************************************************************************************** //
 
 	{
 
