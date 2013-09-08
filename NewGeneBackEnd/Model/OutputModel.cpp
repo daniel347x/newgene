@@ -1810,7 +1810,9 @@ void OutputModel::OutputGenerator::DetermineTotalNumberRows()
 
 		total_number_primary_rows += (highest_multiplicity_primary_uoa * number_rows);
 
-		total_progress_stages += highest_multiplicity_primary_uoa;
+		total_progress_stages += highest_multiplicity_primary_uoa; // One stage directly inside the loop over multiplicities for each primary group
+		total_progress_stages += (2 * highest_multiplicity_primary_uoa); // ... and another two stages hidden in the call to SortAndRemoveDuplicates() inside the loop over multiplicities for each primary group
+		++total_progress_stages; // a final one for each primary group - corresponding to the merging of primary groups
 
 		++primary_group_number;
 
@@ -1824,6 +1826,8 @@ void OutputModel::OutputGenerator::DetermineTotalNumberRows()
 		{
 			return;
 		}
+
+		// Call the following function, even though this is a child variable group, just to get a count
 		SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(child_variable_group_raw_data_columns, child_set_number, true);
 		if (failed)
 		{
@@ -1859,13 +1863,7 @@ void OutputModel::OutputGenerator::DetermineTotalNumberRows()
 
 	});
 
-	// merging of top-level groups
-	total_progress_stages += primary_variable_groups_column_info.size();
-
-	// Sort and RemoveDuplicates stages, for both single primary groups and child groups - 2 x 2 = 4
-	// Todo: Also add for merging of primary groups!  Currently no removal of duplicates happens there,
-	//    which means child merges occur over an excess number of rows
-	total_progress_stages += 4;
+	total_progress_stages += 2; // one call to the SortAndRemoveDuplicates() in MergeChildGroups() has 2 stages
 
 	rough_progress_range = 0;
 	std::for_each(total_number_incoming_rows.cbegin(), total_number_incoming_rows.cend(), [this](std::pair<WidgetInstanceIdentifier const, std::int64_t> const & the_pair)
@@ -7598,6 +7596,8 @@ void OutputModel::OutputGenerator::Prepare()
 
 	executor.db = db;
 
+	tables_deleted.clear();
+
 	initialized = true;
 
 	PopulateUOAs();
@@ -9191,10 +9191,9 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 	{
 		if (!table_to_clear.second.make_table_permanent)
 		{
-			if (!(*table_to_clear.second.table_deleted))
+			std::string table_name_to_clear = table_to_clear.second.view_name;
+			if (tables_deleted.find(table_name_to_clear) == tables_deleted.cend())
 			{
-				std::string table_name_to_clear = table_to_clear.second.view_name;
-
 				std::string sql_string = "DROP TABLE IF EXISTS ";
 				sql_string += table_name_to_clear;
 
@@ -9202,7 +9201,7 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 				table_remover.Execute();
 				if (!table_remover.failed)
 				{
-					*table_to_clear.second.table_deleted = true;
+					tables_deleted.insert(table_name_to_clear);
 				}
 			}
 		}

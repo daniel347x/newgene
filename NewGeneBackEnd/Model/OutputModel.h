@@ -13,6 +13,8 @@
 #include <atomic>
 #include <mutex>
 #include <fstream>
+#include <set>
+#include <string>
 
 class PrimaryKeySequence
 {
@@ -170,7 +172,6 @@ class ColumnsInTempView
 			, has_no_datetime_columns(false)
 			, has_no_datetime_columns_originally(false)
 			, make_table_permanent(false)
-			, table_deleted(std::make_shared<bool>(false))
 		{
 
 		}
@@ -189,7 +190,6 @@ class ColumnsInTempView
 		int most_recent_sql_statement_executed__index;
 
 		bool make_table_permanent;
-		mutable std::shared_ptr<bool> table_deleted;
 
 };
 
@@ -710,6 +710,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				boost::filesystem::path debug_sql_path;
 				std::fstream debug_sql_file;
+				std::set<std::string> tables_deleted;
 
 				static int number_transaction_begins;
 				static int number_transaction_ends;
