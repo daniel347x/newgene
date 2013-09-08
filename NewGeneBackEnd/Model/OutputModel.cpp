@@ -8111,13 +8111,13 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			{
 				if (biggest_counts[0].first.longhand)
 				{
-					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is not an even multiple of the minimun K-value for the unit of analysis %4% (%5%).");
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is not an even multiple of the minimum K-value for the unit of analysis %4% (%5%).");
 					msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % *biggest_counts[0].first.longhand % uoa_count_current_dmu_category;
 					SetFailureMessage(msg.str());
 				}
 				else
 				{
-					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is not an even multiple of the minimun K-value for the unit of analysis %4% (%5%).");
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) (%3%) is not an even multiple of the minimum K-value for the unit of analysis %4% (%5%).");
 					msg % *the_dmu_category.code % *the_dmu_category.longhand % kad_count_current_dmu_category % *biggest_counts[0].first.code % uoa_count_current_dmu_category;
 					SetFailureMessage(msg.str());
 				}
@@ -8126,13 +8126,13 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			{
 				if (biggest_counts[0].first.longhand)
 				{
-					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is not an even multiple of the minimun K-value for the unit of analysis %3% (%4%).");
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is not an even multiple of the minimum K-value for the unit of analysis %3% (%4%).");
 					msg % *the_dmu_category.code % kad_count_current_dmu_category % *biggest_counts[0].first.longhand % uoa_count_current_dmu_category;
 					SetFailureMessage(msg.str());
 				}
 				else
 				{
-					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is not an even multiple of the minimun K-value for the unit of analysis %3% (%4%).");
+					boost::format msg("The choice of K in the spin control for DMU %1% (%2%) is not an even multiple of the minimum K-value for the unit of analysis %3% (%4%).");
 					msg % *the_dmu_category.code % kad_count_current_dmu_category % *biggest_counts[0].first.code % uoa_count_current_dmu_category;
 					SetFailureMessage(msg.str());
 				}
