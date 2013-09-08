@@ -244,6 +244,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, &input_model);
 	the_map = &the_map_;
 
+	if (the_map->size() == 0)
+	{
+		boost::format msg("No variables are selected for output.");
+		SetFailureMessage(msg.str());
+		failed = true;
+		return;
+	}
+
 	bool found = false;
 	WidgetInstanceIdentifier_Int64_Pair timerange_start_identifier;
 	found = model->t_time_range.getIdentifierFromStringCodeAndFlags("0", "s", timerange_start_identifier);
