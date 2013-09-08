@@ -9367,14 +9367,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("%5% for %1% (%2%), multiplicity %3% - %4% rows.  Patience.");
-				msg % *variable_group.code % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
+				boost::format msg("%4% for \"%1%\", multiplicity %2% - %3% rows.  Patience.");
+				msg % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("%4% for %1% (%2%) - %3% rows.  Patience.");
-				msg % *variable_group.code % *variable_group.longhand % number_of_rows_to_sort % msg_sort_preface;
+				boost::format msg("%3% for \"%1%\" - %2% rows.  Patience.");
+				msg % *variable_group.longhand % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 		}
@@ -9428,14 +9428,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("%5% for %1% (%2%), multiplicity %3% - %4% rows");
-				msg % *variable_group.code % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
+				boost::format msg("%4% for \"%1%\", multiplicity %2% - %3% rows");
+				msg % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("%4% for %1% (%2%) - %3% rows");
-				msg % *variable_group.code % *variable_group.longhand % number_of_rows_to_sort % msg_remove_duplicates_preface;
+				boost::format msg("%3% for \"%1%\" - %2% rows");
+				msg % *variable_group.longhand % number_of_rows_to_sort % msg_remove_duplicates_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 		}
