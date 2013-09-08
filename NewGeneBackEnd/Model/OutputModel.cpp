@@ -110,7 +110,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, delete_tables(true)
 	, ms_elapsed(0)
 	, current_number_rows_to_sort(0)
-	, multiplicity_1_keys_come_first(true)
+	, remove_self_kads(true)
 {
 	debug_ordering = true;
 	//delete_tables = false;
@@ -5138,7 +5138,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			return;
 		}
 
-		// The following "if" condition handles primary groups, child groups, and final results from top-level primary groups
 		if (xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
 		{
 			if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
@@ -5269,6 +5268,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 		std::vector<std::int64_t> & inner_table_int_set = inner_table_columns.back().ints;
 		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table_bindings = inner_table_columns.back().bindings;
 		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set = inner_table_columns.back().bindings__primary_keys_with_multiplicity_greater_than_1;
+		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table__all_primary_keys__which_binding_to_use__set = inner_table_columns.back().bindings__all_primary_keys;
 
 
 		do_not_include_this_data = false;
@@ -5295,8 +5295,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			// ... (including possible null data for the newly added columns)
 			if (index <= highest_index_previous_table)
 			{
-				// No need to worry about inner_table stuff,
-				// because that only applies when both current and previous data is being populated
 				if (!include_previous_data)
 				{
 					if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
@@ -5316,8 +5314,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			}
 			else
 			{
-				// No need to worry about inner_table stuff,
-				// because that only applies when both current and previous data is being populated
 				if (!include_current_data)
 				{
 					if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
@@ -5346,23 +5342,14 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			{
 				if (!include_previous_data)
 				{
-					if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
+					inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+					if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 					{
-						if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-						{
-							do_not_include_this_data = true;
-						}
+						inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 					}
-					else
+					if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 					{
-						do_not_include_this_data = true;
-
-						// unused... confirm that this can be removed
-						inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-						if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
-						{
-							inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-						}
+						inner_table__all_primary_keys__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 					}
 				}
 			}
@@ -5370,30 +5357,14 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			{
 				if (!include_current_data)
 				{
-					if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
+					inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+					if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 					{
-						if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-						{
-							do_not_include_this_data = true;
-
-							// unused... confirm that this can be removed
-							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-							if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
-							{
-								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-							}
-						}
+						inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 					}
-					else
+					if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 					{
-						do_not_include_this_data = true;
-
-						// unused... confirm that this can be removed
-						inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-						if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
-						{
-							inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-						}
+						inner_table__all_primary_keys__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 					}
 				}
 			}
@@ -5439,17 +5410,24 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 							{
 								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
 							}
+							if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+							{
+								inner_table__all_primary_keys__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
+							}
 						}
 						else
 						{
 							if (index > highest_index_previous_table)
 							{
-								// unused... confirm that this can be removed
 								inner_table_int_set.push_back(data_int64);
 								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
 								if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 								{
 									inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
+								}
+								if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+								{
+									inner_table__all_primary_keys__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)inner_table_int_set.size() - 1));
 								}
 							}
 						}
@@ -5500,17 +5478,24 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 							{
 								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
 							}
+							if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+							{
+								inner_table__all_primary_keys__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
+							}
 						}
 						else
 						{
 							if (index > highest_index_previous_table)
 							{
-								// unused... confirm that this can be removed
 								inner_table_string_set.push_back(data_string);
 								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
 								if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 								{
 									inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
+								}
+								if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+								{
+									inner_table__all_primary_keys__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)inner_table_string_set.size() - 1));
 								}
 							}
 						}
@@ -5554,6 +5539,10 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 							{
 								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 							}
+							if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+							{
+								inner_table__all_primary_keys__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+							}
 						}
 						else
 						{
@@ -5564,6 +5553,10 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 								if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 								{
 									inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+								}
+								if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+								{
+									inner_table__all_primary_keys__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 								}
 							}
 						}
@@ -5617,6 +5610,152 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			int number_columns_last_set = (int)inner_table_columns[inner_table_columns.size() - 1].bindings.size();
 			int number_inner_column_sets = (int)inner_table_columns.size();
 			std::sort(inner_table_columns.begin(), inner_table_columns.end());
+
+			// First, check if there are self-kads that should be skipped
+			if (remove_self_kads)
+			{
+				ColumnSorter previous_columns;
+				int current_column_set = 0;
+				bool do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys = false;
+				std::for_each(inner_table_columns.cbegin(), inner_table_columns.cend(), [&do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys, &current_column_set, &previous_columns, &number_inner_column_sets, &number_columns_first_sets, &number_columns_last_set](ColumnSorter const & new_columns_to_test)
+				{
+					if (current_column_set == 0)
+					{
+						previous_columns = new_columns_to_test;
+					}
+					else
+					{
+						int testing_index = 0;
+						bool inner_tables_have_different_primary_keys = false;
+						std::for_each(previous_columns.bindings__all_primary_keys.cbegin(), previous_columns.bindings__all_primary_keys.cend(), [&inner_tables_have_different_primary_keys, &testing_index, &previous_columns, &new_columns_to_test](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding)
+						{
+							std::pair<SQLExecutor::WHICH_BINDING, int> const & test_binding = new_columns_to_test.bindings__all_primary_keys[testing_index];
+							switch (binding.first)
+							{
+								case OutputModel::OutputGenerator::SQLExecutor::INT64:
+								{
+
+									std::int64_t binding_value_int = previous_columns.ints[binding.second];
+
+									switch (test_binding.first)
+									{
+										case OutputModel::OutputGenerator::SQLExecutor::INT64:
+										{
+
+											std::int64_t test_binding_value_int = new_columns_to_test.ints[test_binding.second];
+											
+											if (binding_value_int != test_binding_value_int)
+											{
+												inner_tables_have_different_primary_keys = true;
+											}
+
+										}
+										break;
+										case OutputModel::OutputGenerator::SQLExecutor::STRING:
+										{
+
+											std::string test_binding_value_string = new_columns_to_test.strings[test_binding.second];
+
+											if (binding_value_int != boost::lexical_cast<std::int64_t>(test_binding_value_string))
+											{
+												inner_tables_have_different_primary_keys = true;
+											}
+
+										}
+										break;
+										case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+										{
+											inner_tables_have_different_primary_keys = true;
+										}
+										break;
+									}
+								}
+								break;
+							case OutputModel::OutputGenerator::SQLExecutor::STRING:
+								{
+
+									std::string binding_value_string = previous_columns.strings[binding.second];
+
+									switch (test_binding.first)
+									{
+										case OutputModel::OutputGenerator::SQLExecutor::INT64:
+										{
+
+											std::int64_t test_binding_value_int = new_columns_to_test.ints[test_binding.second];
+
+											if (boost::lexical_cast<std::int64_t>(binding_value_string) != test_binding_value_int)
+											{
+												inner_tables_have_different_primary_keys = true;
+											}
+
+										}
+										break;
+										case OutputModel::OutputGenerator::SQLExecutor::STRING:
+										{
+
+											std::string test_binding_value_string = new_columns_to_test.strings[test_binding.second];
+
+											if (!boost::iequals(binding_value_string, test_binding_value_string))
+											{
+												inner_tables_have_different_primary_keys = true;
+											}
+
+										}
+										break;
+
+										case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+										{
+											inner_tables_have_different_primary_keys = true;
+										}
+										break;
+									}
+								}
+								break;
+								case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+								{
+
+									switch (test_binding.first)
+									{
+
+										case OutputModel::OutputGenerator::SQLExecutor::INT64:
+											{
+												inner_tables_have_different_primary_keys = true;
+											}
+											break;
+										case OutputModel::OutputGenerator::SQLExecutor::STRING:
+											{
+												inner_tables_have_different_primary_keys = true;
+											}
+											break;
+										case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+											{
+											}
+											break;
+									}
+								}
+								break;
+							}
+							++testing_index;
+						});
+
+						if (!inner_tables_have_different_primary_keys)
+						{
+							do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys = true;
+						}
+
+						previous_columns = new_columns_to_test;
+
+					}
+					++current_column_set;
+				});
+
+				if (do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys)
+				{
+					return false;
+				}
+
+			}
+
 			bound_parameter_ints.clear();
 			bound_parameter_strings.clear();
 			bound_parameter_which_binding_to_use.clear();

@@ -416,6 +416,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::int64_t> ints;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings__primary_keys_with_multiplicity_greater_than_1;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings__all_primary_keys;
 
 						ColumnSorter()
 						{
@@ -427,12 +428,14 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							, std::vector<std::int64_t> const & ints_
 							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings_
 							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> const & bindings__primary_keys_with_multiplicity_greater_than_1_
+							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> const & bindings__all_primary_keys_
 							)
 							:
 							  strings(strings_)
 							, ints(ints_)
 							, bindings(bindings_)
 							, bindings__primary_keys_with_multiplicity_greater_than_1(bindings__primary_keys_with_multiplicity_greater_than_1_)
+							, bindings__all_primary_keys(bindings__all_primary_keys_)
 							  {
 
 							  }
@@ -443,11 +446,13 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							, ints(rhs.ints)
 							, bindings(rhs.bindings)
 							, bindings__primary_keys_with_multiplicity_greater_than_1(rhs.bindings__primary_keys_with_multiplicity_greater_than_1)
+							, bindings__all_primary_keys(rhs.bindings__all_primary_keys)
 						{
 
 						}
 
 						bool operator<(ColumnSorter const & rhs) const;
+
 				};
 
 				typedef std::pair<std::vector<SQLExecutor>, ColumnsInTempView> SqlAndColumnSet;
@@ -708,11 +713,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				std::string failure_message;
 
-
-
-				// Options - to be integrated with UI and Output Project or database settings at some point
-				bool multiplicity_1_keys_come_first; // currently not used
-
 			public:
 
 				boost::filesystem::path debug_sql_path;
@@ -721,6 +721,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				static int number_transaction_begins;
 				static int number_transaction_ends;
+
+
+				// To be options / settings integrated later
+				bool remove_self_kads;
 
 		};
 
