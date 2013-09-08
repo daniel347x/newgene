@@ -113,7 +113,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, remove_self_kads(true)
 {
 	debug_ordering = true;
-	//delete_tables = false;
+	delete_tables = false;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -7305,7 +7305,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_create_empty_table += ", ";
 		}
 		first = false;
+
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_create_empty_table += "CAST(";
+		}
+
 		sql_create_empty_table += previous_table_column_names[the_index];
+
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_create_empty_table += " AS INTEGER)";
+		}
+
 		sql_create_empty_table += " AS ";
 		sql_create_empty_table += new_column.column_name_in_temporary_table;
 		++the_index;
