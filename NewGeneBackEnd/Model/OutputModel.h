@@ -709,8 +709,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 
 				// Options - to be integrated with UI and Output Project or database settings at some point
-
-				bool multiplicity_1_keys_come_first;
+				bool multiplicity_1_keys_come_first; // currently not used
 
 			public:
 

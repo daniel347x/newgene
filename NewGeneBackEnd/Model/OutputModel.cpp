@@ -3256,6 +3256,130 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	WidgetInstanceIdentifier first_variable_group;
 
+	if (first)
+	{
+		// highest_multiplicity_primary_uoa is 1 so the above block was not entered
+		first_variable_group = result_columns.columns_in_view.front().variable_group_associated_with_current_inner_table;
+	}
+
+	// Now order by remaining primary key columns (with multiplicity 1)
+	int current_column = 0;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &sql_create_final_primary_group_table, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
+	{
+		switch (xr_table_category)
+		{
+		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
+			{
+				if (current_column >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
+				{
+					return;
+				}
+			}
+			break;
+		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
+			{
+				if (!view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+				{
+					return;
+				}
+				if (view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 1)
+				{
+					return;
+				}
+			}
+			break;
+		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
+			{
+			}
+			break;
+		}
+
+		// Determine how many columns there are corresponding to the DMU category
+		int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
+		int column_count_nested = 0;
+		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView & view_column_nested)
+		{
+			switch (xr_table_category)
+			{
+			case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
+				{
+					if (column_count_nested >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
+					{
+						return;
+					}
+				}
+				break;
+			case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
+				{
+					if (!view_column_nested.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+					{
+						return;
+					}
+					if (view_column_nested.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 1)
+					{
+						return;
+					}
+				}
+				break;
+			case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
+				{
+				}
+				break;
+			}
+
+			if (view_column_nested.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			{
+				if (view_column_nested.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
+				{
+					if (view_column_nested.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+					{
+						if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+						{
+							++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
+						}
+					}
+				}
+			}
+			++column_count_nested;
+		});
+
+		if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+		{
+			if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+			{
+				for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_of_1; ++inner_dmu_multiplicity)
+				{
+					if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
+					{
+						if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+						{
+							if (!first)
+							{
+								sql_create_final_primary_group_table += ", ";
+							}
+							else
+							{
+								sql_create_final_primary_group_table += " ORDER BY ";
+							}
+							first = false;
+							if (view_column.primary_key_should_be_treated_as_numeric)
+							{
+								sql_create_final_primary_group_table += "CAST (";
+							}
+							sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
+							if (view_column.primary_key_should_be_treated_as_numeric)
+							{
+								sql_create_final_primary_group_table += " AS INTEGER)";
+							}
+						}
+					}
+				}
+			}
+		}
+		++current_column;
+	});
+
+
 	if (highest_multiplicity_primary_uoa > 1)
 	{
 
@@ -3341,128 +3465,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	}
 
-	if (first)
-	{
-		// highest_multiplicity_primary_uoa is 1 so the above block was not entered
-		first_variable_group = result_columns.columns_in_view.front().variable_group_associated_with_current_inner_table;
-	}
-
-	// Now order by remaining primary key columns (with multiplicity 1)
-	int current_column = 0;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &sql_create_final_primary_group_table, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
-	{
-		switch (xr_table_category)
-		{
-			case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
-				{
-					if (current_column >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
-					{
-						return;
-					}
-				}
-				break;
-			case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
-				{
-					if (!view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
-					{
-						return;
-					}
-					if (view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 1)
-					{
-						return;
-					}
-				}
-				break;
-			case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
-				{
-				}
-				break;
-		}
-
-		// Determine how many columns there are corresponding to the DMU category
-		int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
-		int column_count_nested = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView & view_column_nested)
-		{
-			switch (xr_table_category)
-			{
-				case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
-					{
-						if (column_count_nested >= inner_table_no_multiplicities__with_all_datetime_columns_included__column_count)
-						{
-							return;
-						}
-					}
-					break;
-				case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
-					{
-						if (!view_column_nested.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
-						{
-							return;
-						}
-						if (view_column_nested.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 1)
-						{
-							return;
-						}
-					}
-					break;
-				case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
-					{
-					}
-					break;
-			}
-
-			if (view_column_nested.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-			{
-				if (view_column_nested.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
-				{
-					if (view_column_nested.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
-					{
-						if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
-						{
-							++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
-						}
-					}
-				}
-			}
-			++column_count_nested;
-		});
-
-		if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-		{
-			if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
-			{
-				for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_of_1; ++inner_dmu_multiplicity)
-				{
-					if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
-					{
-						if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
-						{
-							if (!first)
-							{
-								sql_create_final_primary_group_table += ", ";
-							}
-							else
-							{
-								sql_create_final_primary_group_table += " ORDER BY ";
-							}
-							first = false;
-							if (view_column.primary_key_should_be_treated_as_numeric)
-							{
-								sql_create_final_primary_group_table += "CAST (";
-							}
-							sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
-							if (view_column.primary_key_should_be_treated_as_numeric)
-							{
-								sql_create_final_primary_group_table += " AS INTEGER)";
-							}
-						}
-					}
-				}
-			}
-		}
-		++current_column;
-	});
 
 	// Finally, order by the time range columns
 	sql_create_final_primary_group_table += ", ";
