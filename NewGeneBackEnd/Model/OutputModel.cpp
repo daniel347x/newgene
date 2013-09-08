@@ -5622,144 +5622,209 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 			// First, check if there are self-kads that should be skipped
 			if (remove_self_kads)
 			{
-				ColumnSorter previous_columns;
-				int current_column_set = 0;
-				bool do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys = false;
-				std::for_each(inner_table_columns.cbegin(), inner_table_columns.cend(), [&do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys, &current_column_set, &previous_columns, &number_inner_column_sets, &number_columns_first_sets, &number_columns_last_set](ColumnSorter const & new_columns_to_test)
+
+				bool continue_checking = true;
+
+				while (continue_checking)
 				{
-					if (current_column_set == 0)
+
+					ColumnSorter previous_columns;
+					int current_column_set = 0;
+					bool do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys = false;
+					std::for_each(inner_table_columns.begin(), inner_table_columns.end(), [&do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys, &current_column_set, &previous_columns, &number_inner_column_sets, &number_columns_first_sets, &number_columns_last_set](ColumnSorter & new_columns_to_test)
 					{
-						previous_columns = new_columns_to_test;
+						if (current_column_set == 0)
+						{
+							previous_columns = new_columns_to_test;
+						}
+						else
+						{
+							int testing_index = 0;
+							bool inner_tables_have_different_primary_keys = false;
+							std::for_each(previous_columns.bindings__all_primary_keys.cbegin(), previous_columns.bindings__all_primary_keys.cend(), [&inner_tables_have_different_primary_keys, &testing_index, &previous_columns, &new_columns_to_test](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding)
+							{
+
+								std::pair<SQLExecutor::WHICH_BINDING, int> const & test_binding = new_columns_to_test.bindings__all_primary_keys[testing_index];
+
+								switch (binding.first)
+								{
+
+									case OutputModel::OutputGenerator::SQLExecutor::INT64:
+										{
+
+											std::int64_t binding_value_int = previous_columns.ints[binding.second];
+
+											switch (test_binding.first)
+											{
+
+												case OutputModel::OutputGenerator::SQLExecutor::INT64:
+													{
+
+														std::int64_t test_binding_value_int = new_columns_to_test.ints[test_binding.second];
+
+														if (binding_value_int != test_binding_value_int)
+														{
+															inner_tables_have_different_primary_keys = true;
+														}
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::STRING:
+													{
+
+														std::string test_binding_value_string = new_columns_to_test.strings[test_binding.second];
+
+														if (binding_value_int != boost::lexical_cast<std::int64_t>(test_binding_value_string))
+														{
+															inner_tables_have_different_primary_keys = true;
+														}
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+													{
+
+														inner_tables_have_different_primary_keys = true;
+
+													}
+													break;
+
+											}
+										}
+										break;
+
+									case OutputModel::OutputGenerator::SQLExecutor::STRING:
+										{
+
+											std::string binding_value_string = previous_columns.strings[binding.second];
+
+											switch (test_binding.first)
+											{
+
+												case OutputModel::OutputGenerator::SQLExecutor::INT64:
+													{
+
+														std::int64_t test_binding_value_int = new_columns_to_test.ints[test_binding.second];
+
+														if (boost::lexical_cast<std::int64_t>(binding_value_string) != test_binding_value_int)
+														{
+															inner_tables_have_different_primary_keys = true;
+														}
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::STRING:
+													{
+
+														std::string test_binding_value_string = new_columns_to_test.strings[test_binding.second];
+
+														if (!boost::iequals(binding_value_string, test_binding_value_string))
+														{
+
+															inner_tables_have_different_primary_keys = true;
+
+														}
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+													{
+
+														inner_tables_have_different_primary_keys = true;
+
+													}
+													break;
+
+											}
+										}
+										break;
+
+									case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+										{
+
+											switch (test_binding.first)
+											{
+
+												case OutputModel::OutputGenerator::SQLExecutor::INT64:
+													{
+
+														inner_tables_have_different_primary_keys = true;
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::STRING:
+													{
+
+														inner_tables_have_different_primary_keys = true;
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+													{
+
+														// All NULL inner tables are considered different from other all NULL inner tables
+														// ... This avoids an infinite loop that would result from continuously setting an all NULL
+														// ... inner table to all NULL because it continues to match a previous all NULL inner table
+														inner_tables_have_different_primary_keys = true;
+
+													}
+													break;
+
+											}
+										}
+										break;
+								}
+
+								++testing_index;
+
+							});
+
+							if (!inner_tables_have_different_primary_keys)
+							{
+								// set the new inner table to all NULL.  It will be sorted to the right later.
+								std::for_each(new_columns_to_test.bindings.begin(), new_columns_to_test.bindings.end(), [](std::pair<SQLExecutor::WHICH_BINDING, int> & binding)
+								{
+									binding.first = OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING;
+									binding.second = 0;
+								});
+								std::for_each(new_columns_to_test.bindings__all_primary_keys.begin(), new_columns_to_test.bindings__all_primary_keys.end(), [](std::pair<SQLExecutor::WHICH_BINDING, int> & binding)
+								{
+									binding.first = OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING;
+									binding.second = 0;
+								});
+								std::for_each(new_columns_to_test.bindings__primary_keys_with_multiplicity_greater_than_1.begin(), new_columns_to_test.bindings__primary_keys_with_multiplicity_greater_than_1.end(), [](std::pair<SQLExecutor::WHICH_BINDING, int> & binding)
+								{
+									binding.first = OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING;
+									binding.second = 0;
+								});
+								new_columns_to_test.ints.clear();
+								new_columns_to_test.strings.clear();
+								do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys = true;
+							}
+							else
+							{
+								previous_columns = new_columns_to_test;
+							}
+
+						}
+						++current_column_set;
+					});
+
+					if (do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys)
+					{
+						std::sort(inner_table_columns.begin(), inner_table_columns.end());
 					}
 					else
 					{
-						int testing_index = 0;
-						bool inner_tables_have_different_primary_keys = false;
-						std::for_each(previous_columns.bindings__all_primary_keys.cbegin(), previous_columns.bindings__all_primary_keys.cend(), [&inner_tables_have_different_primary_keys, &testing_index, &previous_columns, &new_columns_to_test](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding)
-						{
-							std::pair<SQLExecutor::WHICH_BINDING, int> const & test_binding = new_columns_to_test.bindings__all_primary_keys[testing_index];
-							switch (binding.first)
-							{
-								case OutputModel::OutputGenerator::SQLExecutor::INT64:
-								{
-
-									std::int64_t binding_value_int = previous_columns.ints[binding.second];
-
-									switch (test_binding.first)
-									{
-										case OutputModel::OutputGenerator::SQLExecutor::INT64:
-										{
-
-											std::int64_t test_binding_value_int = new_columns_to_test.ints[test_binding.second];
-											
-											if (binding_value_int != test_binding_value_int)
-											{
-												inner_tables_have_different_primary_keys = true;
-											}
-
-										}
-										break;
-										case OutputModel::OutputGenerator::SQLExecutor::STRING:
-										{
-
-											std::string test_binding_value_string = new_columns_to_test.strings[test_binding.second];
-
-											if (binding_value_int != boost::lexical_cast<std::int64_t>(test_binding_value_string))
-											{
-												inner_tables_have_different_primary_keys = true;
-											}
-
-										}
-										break;
-										case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
-										{
-											inner_tables_have_different_primary_keys = true;
-										}
-										break;
-									}
-								}
-								break;
-							case OutputModel::OutputGenerator::SQLExecutor::STRING:
-								{
-
-									std::string binding_value_string = previous_columns.strings[binding.second];
-
-									switch (test_binding.first)
-									{
-										case OutputModel::OutputGenerator::SQLExecutor::INT64:
-										{
-
-											std::int64_t test_binding_value_int = new_columns_to_test.ints[test_binding.second];
-
-											if (boost::lexical_cast<std::int64_t>(binding_value_string) != test_binding_value_int)
-											{
-												inner_tables_have_different_primary_keys = true;
-											}
-
-										}
-										break;
-										case OutputModel::OutputGenerator::SQLExecutor::STRING:
-										{
-
-											std::string test_binding_value_string = new_columns_to_test.strings[test_binding.second];
-
-											if (!boost::iequals(binding_value_string, test_binding_value_string))
-											{
-												inner_tables_have_different_primary_keys = true;
-											}
-
-										}
-										break;
-
-										case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
-										{
-											inner_tables_have_different_primary_keys = true;
-										}
-										break;
-									}
-								}
-								break;
-								case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
-								{
-
-									switch (test_binding.first)
-									{
-
-										case OutputModel::OutputGenerator::SQLExecutor::INT64:
-											{
-												inner_tables_have_different_primary_keys = true;
-											}
-											break;
-										case OutputModel::OutputGenerator::SQLExecutor::STRING:
-											{
-												inner_tables_have_different_primary_keys = true;
-											}
-											break;
-										case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
-											{
-											}
-											break;
-									}
-								}
-								break;
-							}
-							++testing_index;
-						});
-
-						if (!inner_tables_have_different_primary_keys)
-						{
-							do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys = true;
-						}
-
-						previous_columns = new_columns_to_test;
-
+						continue_checking = false;
 					}
-					++current_column_set;
-				});
 
-				if (do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys)
-				{
-					return false;
 				}
 
 			}
