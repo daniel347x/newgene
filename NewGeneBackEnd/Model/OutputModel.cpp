@@ -4761,7 +4761,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
 			{
-				sql_string += " AS INTEGER)"
+				sql_string += " AS INTEGER)";
 			}
 
 			sql_string += " AS ";
