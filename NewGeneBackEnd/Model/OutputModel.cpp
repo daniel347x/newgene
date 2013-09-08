@@ -8698,7 +8698,10 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				{
 
 					// *************************************************************************************************************** //
-					// Then, iterate through the inner multiplicity (i.e., iterate through the columns within a single inner table)
+					// Then, iterate through the inner multiplicity (i.e., iterate through the columns within a single inner table).
+					//
+					// The inner multiplicity is simply given by the number of rows in the primary key metadata table
+					// for the given variable group, for the given DMU category.
 					// *************************************************************************************************************** //
 
 					int current_variable_group_current_primary_key_dmu_category__internal_sequence_number = 0;
