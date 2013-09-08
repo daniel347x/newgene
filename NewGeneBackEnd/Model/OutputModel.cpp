@@ -498,7 +498,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	// Outgoing:
 	// Last two columns are:
 	// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT / COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT
-	all_merged_results_unformatted = SortAndRemoveDuplicates(merging_of_children_column_sets.back().second, WidgetInstanceIdentifier(), std::string("sorting final K-ad results"), std::string("removing duplicates from final K-ad results"), -1, 0, merging_of_children_column_sets, secondary_variable_groups_column_info.size() != 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP);
+	all_merged_results_unformatted = SortAndRemoveDuplicates(merging_of_children_column_sets.back().second, WidgetInstanceIdentifier(), std::string("Sorting final K-ad results"), std::string("Removing duplicates from final K-ad results"), -1, 0, merging_of_children_column_sets, secondary_variable_groups_column_info.size() != 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP);
 
 }
 
@@ -1977,7 +1977,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
 	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = xr_table_result.second.columns_in_view.size(); // This class-global variable must be set
-	SqlAndColumnSet duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("sorting results"), std::string("removing duplicates"), 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP);
+	SqlAndColumnSet duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("sorting results"), std::string("Removing duplicates"), 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP);
 
 	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
@@ -2061,7 +2061,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
 		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
 		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-		duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("sorting results"), std::string("removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP);
+		duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Semoving duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP);
 
 	}
 
@@ -9367,13 +9367,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("Sorting %5% for %1% (%2%), multiplicity %3% - %4% rows.  Patience.");
+				boost::format msg("%5% for %1% (%2%), multiplicity %3% - %4% rows.  Patience.");
 				msg % *variable_group.code % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("Sorting %4% for %1% (%2%) - %3% rows.  Patience.");
+				boost::format msg("%4% for %1% (%2%) - %3% rows.  Patience.");
 				msg % *variable_group.code % *variable_group.longhand % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -9382,13 +9382,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("Sorting %4% for %1%, multiplicity %2% - %3% rows.  Patience.");
+				boost::format msg("%4% for %1%, multiplicity %2% - %3% rows.  Patience.");
 				msg % *variable_group.code % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("Sorting %3% for %1% - %2% rows.  Patience.");
+				boost::format msg("%3% for %1% - %2% rows.  Patience.");
 				msg % *variable_group.code % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -9396,7 +9396,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	}
 	else
 	{
-		boost::format msg("Sorting %2% - %1% rows.  Patience.");
+		boost::format msg("%2% - %1% rows.  Patience.");
 		msg % number_of_rows_to_sort % msg_sort_preface;
 		UpdateProgressBarToNextStage(msg.str(), std::string());
 	}
@@ -9428,13 +9428,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("Removing duplicates for %5% for %1% (%2%), multiplicity %3% - %4% rows");
+				boost::format msg("%5% for %1% (%2%), multiplicity %3% - %4% rows");
 				msg % *variable_group.code % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("Removing duplicates for %4% for %1% (%2%) - %3% rows");
+				boost::format msg("%4% for %1% (%2%) - %3% rows");
 				msg % *variable_group.code % *variable_group.longhand % number_of_rows_to_sort % msg_remove_duplicates_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -9443,13 +9443,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("Removing duplicates for %4% for %1%, multiplicity %2% - %3% rows");
+				boost::format msg("%4% for %1%, multiplicity %2% - %3% rows");
 				msg % *variable_group.code % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("Removing duplicates for %3% for %1% - %2% rows");
+				boost::format msg("%3% for %1% - %2% rows");
 				msg % *variable_group.code % number_of_rows_to_sort % msg_remove_duplicates_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -9457,7 +9457,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	}
 	else
 	{
-		boost::format msg_2("Removing duplicates for %2% - %1% rows");
+		boost::format msg_2("%2% - %1% rows");
 		msg_2 % number_of_rows_to_sort % msg_remove_duplicates_preface;
 		UpdateProgressBarToNextStage(msg_2.str(), std::string());
 	}
