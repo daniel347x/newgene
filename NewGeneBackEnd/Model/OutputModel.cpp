@@ -2823,7 +2823,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			if (primary_keys_match)
 			{
 				rows_to_sort.push_back(sorting_row_of_data);
-				which_previous_row_index_to_test_against = (int)rows_to_sort.size() - 1;
+				if (use_newest_row_index)
+				{
+					which_previous_row_index_to_test_against = (int)rows_to_sort.size() - 1;
+				}
 			}
 			else
 			{
