@@ -10,6 +10,7 @@
 #	include <boost/filesystem.hpp>
 #	include <boost/format.hpp>
 #	include <boost/scope_exit.hpp>
+#	include <boost/date_time/local_time/local_time.hpp>
 #endif
 
 #include <fstream>
@@ -800,29 +801,49 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
+		bool handled_date = false;
 		switch (unformatted_column.column_type)
 		{
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
 				{
 					formatted_column.column_name_in_temporary_table = "DATETIME_START";
+
+					if (!first)
+					{
+						sql_string += ", ";
+					}
+					first = false;
+
+					sql_string += unformatted_column.column_name_in_temporary_table;
+					sql_string += " AS ";
+					sql_string += formatted_column.column_name_in_temporary_table;
+
+					handled_date = true;
 				}
 				break;
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT:
 				{
 					formatted_column.column_name_in_temporary_table = "DATETIME_END";
+
+					handled_date = true;
 				}
 				break;
 		}
 
-		if (!first)
-		{
-			sql_string += ", ";
-		}
-		first = false;
 
-		sql_string += unformatted_column.column_name_in_temporary_table;
-		sql_string += " AS ";
-		sql_string += formatted_column.column_name_in_temporary_table;
+		if (!handled_date)
+		{
+			if (!first)
+			{
+				sql_string += ", ";
+			}
+			first = false;
+
+			sql_string += unformatted_column.column_name_in_temporary_table;
+			sql_string += " AS ";
+			sql_string += formatted_column.column_name_in_temporary_table;
+		}
+
 		++column_index;
 
 	});
@@ -9123,34 +9144,20 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 	{
 		if (!table_to_clear.second.make_table_permanent)
 		{
-			std::string table_name_to_clear = table_to_clear.second.view_name;
-
-			if (false)
+			if (!table_to_clear.second.table_deleted)
 			{
-				// The method below is the established way to determine whether the table exists or not,
-				// but is not necessary
-				std::string sql_string;
-				sql_string += "SELECT name FROM sqlite_master WHERE type='table' and name='";
+				std::string table_name_to_clear = table_to_clear.second.view_name;
+
+				std::string sql_string = "DROP TABLE IF EXISTS ";
 				sql_string += table_name_to_clear;
-				sql_string += "'";
 
 				SQLExecutor table_remover(this, input_model->getDb(), sql_string);
-				table_remover.statement_type = OutputModel::OutputGenerator::SQLExecutor::RETURNS_ROWS;
 				table_remover.Execute();
-				bool row_exists = table_remover.Step();
-
-				// If there is a row in the result set, then the table exists
-				if (!row_exists)
+				if (!table_remover.failed)
 				{
-					return;
+					table_to_clear.second.table_deleted = true;
 				}
 			}
-
-			std::string sql_string = "DROP TABLE IF EXISTS ";
-			sql_string += table_name_to_clear;
-
-			SQLExecutor table_remover(this, input_model->getDb(), sql_string);
-			table_remover.Execute();
 		}
 	}
 }

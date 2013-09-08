@@ -170,6 +170,7 @@ class ColumnsInTempView
 			, has_no_datetime_columns(false)
 			, has_no_datetime_columns_originally(false)
 			, make_table_permanent(false)
+			, table_deleted(false)
 		{
 
 		}
@@ -188,6 +189,7 @@ class ColumnsInTempView
 		int most_recent_sql_statement_executed__index;
 
 		bool make_table_permanent;
+		bool table_deleted;
 
 };
 
