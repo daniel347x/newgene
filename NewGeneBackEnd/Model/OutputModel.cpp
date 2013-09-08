@@ -801,48 +801,29 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
-		bool handled_date = false;
 		switch (unformatted_column.column_type)
 		{
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
 				{
 					formatted_column.column_name_in_temporary_table = "DATETIME_START";
-
-					if (!first)
-					{
-						sql_string += ", ";
-					}
-					first = false;
-
-					sql_string += unformatted_column.column_name_in_temporary_table;
-					sql_string += " AS ";
-					sql_string += formatted_column.column_name_in_temporary_table;
-
-					handled_date = true;
 				}
 				break;
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT:
 				{
 					formatted_column.column_name_in_temporary_table = "DATETIME_END";
-
-					handled_date = true;
 				}
 				break;
 		}
 
-
-		if (!handled_date)
+		if (!first)
 		{
-			if (!first)
-			{
-				sql_string += ", ";
-			}
-			first = false;
-
-			sql_string += unformatted_column.column_name_in_temporary_table;
-			sql_string += " AS ";
-			sql_string += formatted_column.column_name_in_temporary_table;
+			sql_string += ", ";
 		}
+		first = false;
+
+		sql_string += unformatted_column.column_name_in_temporary_table;
+		sql_string += " AS ";
+		sql_string += formatted_column.column_name_in_temporary_table;
 
 		++column_index;
 
@@ -2348,6 +2329,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			}
 			break;
 	}
+
 	std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
 	datetime_start_col_name += "_";
 	datetime_start_col_name += newUUID(true);
@@ -2357,7 +2339,25 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	alter_string += result_columns.view_name;
 	alter_string += " ADD COLUMN ";
 	alter_string += datetime_start_col_name;
-	alter_string += " INTEGER DEFAULT 0";
+	
+	switch (xr_table_category)
+	{
+		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
+			{
+				alter_string += " INTEGER DEFAULT 0";
+			}
+			break;
+		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
+			{
+				alter_string += " TEXT"; // this is the final output
+			}
+			break;
+		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
+			{
+			}
+			break;
+	}
+
 	sql_strings.push_back(SQLExecutor(this, db, alter_string));
 
 	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
@@ -2420,7 +2420,25 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	alter_string += result_columns.view_name;
 	alter_string += " ADD COLUMN ";
 	alter_string += datetime_end_col_name;
-	alter_string += " INTEGER DEFAULT 0";
+
+	switch (xr_table_category)
+	{
+		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
+			{
+				alter_string += " INTEGER DEFAULT 0";
+			}
+			break;
+		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
+			{
+				alter_string += " TEXT"; // this is the final output
+			}
+			break;
+		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
+			{
+			}
+			break;
+	}
+
 	sql_strings.push_back(SQLExecutor(this, db, alter_string));
 
 	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
@@ -2550,7 +2568,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			}
 			else
 			{
-				RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
+				RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction, xr_table_category);
 				if (failed)
 				{
 					return result;
@@ -2569,7 +2587,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 		if (!rows_to_sort.empty())
 		{
-			RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction);
+			RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, incoming_rows_of_data, outgoing_rows_of_data, intermediate_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction, xr_table_category);
 			if (failed)
 			{
 				return result;
@@ -2984,10 +3002,10 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 }
 
-void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use)
+void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, XR_TABLE_CATEGORY const xr_table_category)
 {
 
-	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &statement_is_prepared, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
+	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &xr_table_category, &statement_is_prepared, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
 	{
 
 		bool do_not_check_time_range = false;
@@ -3147,11 +3165,40 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 		});
 
+
 		// The two new "merged" time range columns
-		bound_parameter_ints.push_back(row_of_data.datetime_start);
-		bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
-		bound_parameter_ints.push_back(row_of_data.datetime_end);
-		bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+
+		switch (xr_table_category)
+		{
+			case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
+				{
+					bound_parameter_ints.push_back(row_of_data.datetime_start);
+					bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+					bound_parameter_ints.push_back(row_of_data.datetime_end);
+					bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+				}
+				break;
+			case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
+				{
+					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+
+					boost::posix_time::ptime time_start_database = time_t_epoch__1970 + boost::posix_time::milliseconds(row_of_data.datetime_start);
+					boost::posix_time::ptime time_end_database = time_t_epoch__1970 + boost::posix_time::milliseconds(row_of_data.datetime_end);
+
+					std::string time_start_formatted = boost::posix_time::to_simple_string(time_start_database);
+					std::string time_end_formatted = boost::posix_time::to_simple_string(time_end_database);
+
+					bound_parameter_strings.push_back(time_start_formatted);
+					bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+					bound_parameter_strings.push_back(time_end_formatted);
+					bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+				}
+				break;
+			case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
+				{
+				}
+				break;
+		}
 		
 		sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 		the_prepared_stmt = sql_strings.back().stmt;
@@ -8833,7 +8880,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 	});
 }
 
-void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction )
+void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction, XR_TABLE_CATEGORY const xr_table_category)
 {
 	SavedRowData current_row_of_data;
 
@@ -8905,7 +8952,7 @@ void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches( std::i
 	}
 
 	outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category);
 	if (failed)
 	{
 		return;
