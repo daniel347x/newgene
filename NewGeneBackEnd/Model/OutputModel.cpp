@@ -4836,6 +4836,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += primary_variable_group_raw_data_columns.original_table_names[0];
 	sql_string += " t2 ON ";
 	bool and_ = false;
+
+
+
+
+	// ********************************************************************************************* //
+	// See corresponding block in CreateChildXTable() for helpful comments
+	// ********************************************************************************************* //
+
 	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &sql_string, &variable_group, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 	{
 		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &sql_string, &variable_group, &primary_key, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
@@ -6111,13 +6119,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 				if (
 					
-					// Match against a primary key within the same inner table number as we are building an inner table for
+					// Match against a primary key that states itself to be in the same inner table number as we are building an inner table for
 					primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group == current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group
 
 
-					// Or,
-					// this is a primary key within the first inner table and is the first inner table for this child variable group, and the total multiplicity of this DMU category for this variable group is 1, so all keys of this DMU category in the inner table match
+					// Or, for those primary keys that appear identically in all inner tables,
+					// i.e. have multiplicity of 1 in this VG's UOA,
+					// the primary key will state itself to belong to the FIRST inner table, yet ALL child tables have the same value
+					// as the first inner table for this primary key,
+					// ... so always match against these primary keys.
 				 || (   primary_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1
+
+					// redundant, but safe check - these primary keys only appear once in the list of primary keys, and they therefore all have a value of 1
 					 && primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group == 1)
 
 					)
