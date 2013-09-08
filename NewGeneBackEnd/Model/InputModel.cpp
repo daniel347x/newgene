@@ -30,7 +30,7 @@ void InputModel::LoadTables()
 		WidgetInstanceIdentifiers variable_group_identifiers = t_vgp_identifiers.getIdentifiers();
 		std::for_each(variable_group_identifiers.cbegin(), variable_group_identifiers.cend(), [this](WidgetInstanceIdentifier const & variable_group_identifier)
 		{
-			if (true && variable_group_identifier.code)
+			if (false && variable_group_identifier.code)
 			{
 				std::unique_ptr<Table_VariableGroupData> vg_instance_data(new Table_VariableGroupData(*variable_group_identifier.code));
 #				if 0
