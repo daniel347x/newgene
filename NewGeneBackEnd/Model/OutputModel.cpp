@@ -3414,7 +3414,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		});
 
 		// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
-		first = true;
 		for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
 		{
 			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
@@ -6247,7 +6246,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								// All columns exist in the first inner table.
 								if (highest_multiplicity_primary_uoa == 1)
 								{
-									if (current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group == 1)
+									if (primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group == current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group)
 									{
 										match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
 									}
