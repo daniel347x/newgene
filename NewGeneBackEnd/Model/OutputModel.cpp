@@ -9191,7 +9191,7 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 	{
 		if (!table_to_clear.second.make_table_permanent)
 		{
-			if (!table_to_clear.second.table_deleted)
+			if (!(*table_to_clear.second.table_deleted))
 			{
 				std::string table_name_to_clear = table_to_clear.second.view_name;
 
@@ -9202,7 +9202,7 @@ void OutputModel::OutputGenerator::ClearTable(SqlAndColumnSet const & table_to_c
 				table_remover.Execute();
 				if (!table_remover.failed)
 				{
-					table_to_clear.second.table_deleted = true;
+					*table_to_clear.second.table_deleted = true;
 				}
 			}
 		}

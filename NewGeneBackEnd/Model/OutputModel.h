@@ -170,7 +170,7 @@ class ColumnsInTempView
 			, has_no_datetime_columns(false)
 			, has_no_datetime_columns_originally(false)
 			, make_table_permanent(false)
-			, table_deleted(false)
+			, table_deleted(std::make_shared<bool>(false))
 		{
 
 		}
@@ -189,7 +189,7 @@ class ColumnsInTempView
 		int most_recent_sql_statement_executed__index;
 
 		bool make_table_permanent;
-		mutable bool table_deleted;
+		mutable std::shared_ptr<bool> table_deleted;
 
 };
 
