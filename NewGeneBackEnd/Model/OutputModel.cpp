@@ -5351,13 +5351,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(bool & first_row_added, std::s
 						if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 						{
 							do_not_include_this_data = true;
-
-							// unused... confirm that this can be removed
-							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-							if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
-							{
-								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-							}
 						}
 					}
 					else
