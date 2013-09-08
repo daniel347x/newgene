@@ -834,7 +834,18 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		}
 		first = false;
 
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += "CAST (";
+		}
+
 		sql_string += unformatted_column.column_name_in_temporary_table;
+
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += " AS INTEGER)";
+		}
+
 		sql_string += " AS ";
 		sql_string += formatted_column.column_name_in_temporary_table;
 
@@ -1316,19 +1327,63 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 				{
 					sql_select_left += "CASE WHEN t1.";
 					sql_select_left += previous_column_names[column_count];
-					sql_select_left += " IS NOT NULL THEN t1.";
+					sql_select_left += " IS NOT NULL THEN ";
+
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_left += "CAST (";
+					}
+					sql_select_left += "t1.";
 					sql_select_left += previous_column_names[column_count];
-					sql_select_left += " ELSE t2.";
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_left += " AS INTEGER)";
+					}
+
+					sql_select_left += " ELSE ";
+
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_left += "CAST (";
+					}
+					sql_select_left += "t2.";
 					sql_select_left += previous_column_names[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first]];
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_left += " AS INTEGER)";
+					}
+
 					sql_select_left += " END AS ";
 					sql_select_left += new_column.column_name_in_temporary_table;
 
 					sql_select_right += "CASE WHEN t2.";
 					sql_select_right += previous_column_names[column_count];
-					sql_select_right += " IS NOT NULL THEN t2.";
+					sql_select_right += " IS NOT NULL THEN ";
+
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_right += "CAST (";
+					}
+					sql_select_right += "t2.";
 					sql_select_right += previous_column_names[column_count];
-					sql_select_right += " ELSE t1.";
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_right += " AS INTEGER)";
+					}
+
+					sql_select_right += " ELSE ";
+
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_right += "CAST (";
+					}
+					sql_select_right += "t1.";
 					sql_select_right += previous_column_names[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_right += " AS INTEGER)";
+					}
+
 					sql_select_right += " END AS ";
 					sql_select_right += new_column.column_name_in_temporary_table;
 				}
@@ -1353,19 +1408,63 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 				{
 					sql_select_right += "CASE WHEN t1.";
 					sql_select_right += previous_column_names[column_count];
-					sql_select_right += " IS NOT NULL THEN t1.";
+					sql_select_right += " IS NOT NULL THEN ";
+
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_right += "CAST (";
+					}
+					sql_select_right += "t1.";
 					sql_select_right += previous_column_names[column_count];
-					sql_select_right += " ELSE t2.";
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_right += " AS INTEGER)";
+					}
+
+					sql_select_right += " ELSE ";
+
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_right += "CAST (";
+					}
+					sql_select_right += "t2.";
 					sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first]];
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_right += " AS INTEGER)";
+					}
+
 					sql_select_right += " END AS ";
 					sql_select_right += new_column.column_name_in_temporary_table;
 
 					sql_select_left += "CASE WHEN t2.";
 					sql_select_left += previous_column_names[column_count];
-					sql_select_left += " IS NOT NULL THEN t2.";
+					sql_select_left += " IS NOT NULL THEN ";
+
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_left += "CAST (";
+					}
+					sql_select_left += "t2.";
 					sql_select_left += previous_column_names[column_count];
-					sql_select_left += " ELSE t1.";
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_left += " AS INTEGER)";
+					}
+
+					sql_select_left += " ELSE ";
+
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_left += "CAST (";
+					}
+					sql_select_left += "t1.";
 					sql_select_left += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
+					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					{
+						sql_select_left += " AS INTEGER)";
+					}
+
 					sql_select_left += " END AS ";
 					sql_select_left += new_column.column_name_in_temporary_table;
 				}
@@ -1374,6 +1473,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 		if (!handled)
 		{
+
+			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			{
+				sql_select_left += "CAST (";
+			}
+
 			if (column_count < first_full_table_column_count)
 			{
 				sql_select_left += "t1.";
@@ -1386,10 +1491,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			}
 
 			sql_select_left += previous_column_names[column_count];
+
+			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			{
+				sql_select_left += " AS INTEGER)";
+			}
+
 			sql_select_left += " AS ";
 			sql_select_left += new_column.column_name_in_temporary_table;
 
+			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			{
+				sql_select_right += "CAST (";
+			}
+
 			sql_select_right += previous_column_names[column_count];
+
+			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			{
+				sql_select_right += " AS INTEGER)";
+			}
+
 			sql_select_right += " AS ";
 			sql_select_right += new_column.column_name_in_temporary_table;
 		}
@@ -4629,7 +4751,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				sql_string += ", ";
 			}
 			first = false;
+
+			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			{
+				sql_string += "CAST (";
+			}
+
 			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
+
+			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			{
+				sql_string += " AS INTEGER)"
+			}
+
 			sql_string += " AS ";
 			sql_string += new_column.column_name_in_temporary_table;
 		});
@@ -4944,7 +5078,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += ", ";
 		}
 		first = false;
+
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += "CAST (";
+		}
+
 		sql_string += primary_variable_group_x1_columns.columns_in_view[the_index].column_name_in_temporary_table; // This is the original column name
+
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += " AS INTEGER)";
+		}
+
 		sql_string += " AS ";
 		sql_string += new_column.column_name_in_temporary_table;
 		++the_index;
@@ -5073,7 +5219,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += ", ";
 		}
 		first = false;
+
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += "CAST (";
+		}
+
 		sql_string += first_final_primary_variable_group_columns.columns_in_view[the_index].column_name_in_temporary_table; // This is the original column name
+
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += " AS INTEGER)";
+		}
+
 		sql_string += " AS ";
 		sql_string += new_column.column_name_in_temporary_table;
 		++the_index;
@@ -5358,6 +5516,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += ", ";
 		}
 		first = false;
+
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += "CAST (";
+		}
+
 		if (column_count < first_full_table_column_count)
 		{
 			sql_string += "t1.";
@@ -5368,6 +5532,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += "t2.";
 			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
 		}
+
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += " AS INTEGER)";
+		}
+
 		sql_string += " AS ";
 		sql_string += new_column.column_name_in_temporary_table;
 		++column_count;
@@ -6810,6 +6980,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += ", ";
 		}
 		first = false;
+
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += "CAST (";
+		}
+
 		if (column_count < first_full_table_column_count)
 		{
 			sql_string += "t1.";
@@ -6820,6 +6996,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += "t2.";
 			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
 		}
+
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += " AS INTEGER)";
+		}
+
 		sql_string += " AS ";
 		sql_string += new_column.column_name_in_temporary_table;
 		++column_count;
