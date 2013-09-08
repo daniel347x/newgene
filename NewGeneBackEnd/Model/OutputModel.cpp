@@ -2942,6 +2942,11 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 		++current_index;
 	});
 
+	int_index_current = 0;
+	string_index_current = 0;
+	int_index_incoming = 0;
+	string_index_incoming = 0;
+
 
 	bool use_strings = false;
 	if (!saved_strings_vector.empty())
