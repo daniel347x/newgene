@@ -3262,7 +3262,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		first_variable_group = result_columns.columns_in_view.front().variable_group_associated_with_current_inner_table;
 	}
 
-	// Now order by remaining primary key columns (with multiplicity 1)
+	// Order by remaining primary key columns (with multiplicity 1)
 	int current_column = 0;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &sql_create_final_primary_group_table, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
 	{
@@ -3384,7 +3384,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 
 		// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
-		first = true;
 		int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
 		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &first_variable_group, &first, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1](ColumnsInTempView::ColumnInTempView & view_column)
 		{
