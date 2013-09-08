@@ -2950,7 +2950,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	}
 
 	bool use_ints = false;
-	if (!saved_strings_vector.empty())
+	if (!saved_ints_vector.empty())
 	{
 		use_ints = true;
 	}
