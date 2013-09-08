@@ -104,11 +104,12 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
 				boost::gregorian::date row_start_date(the_input_field_year_start_int32.GetValueReference(), the_input_field_month_start_int32.GetValueReference() > 0 ? the_input_field_month_start_int32.GetValueReference() : 1, the_input_field_day_start_int32.GetValueReference() > 0 ? the_input_field_day_start_int32.GetValueReference() : 1);
 				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
-				boost::gregorian::date row_end_date(the_input_field_year_end_int32.GetValueReference(), the_input_field_month_end_int32.GetValueReference() > 0 ? the_input_field_month_end_int32.GetValueReference() : 1, the_input_field_day_end_int32.GetValueReference() > 0 ? the_input_field_day_end_int32.GetValueReference() : 1);
+				boost::gregorian::date row_end_date(the_input_field_year_end_int32.GetValueReference(), the_input_field_month_end_int32.GetValueReference() > 0 ? the_input_field_month_end_int32.GetValueReference() : 1, (the_input_field_day_end_int32.GetValueReference() > 0 ? the_input_field_day_end_int32.GetValueReference() : 1));
 				boost::posix_time::ptime time_t_epoch__rowdateend(row_end_date);
+				boost::posix_time::ptime time_t_epoch__rowdateend_plus_one_day = time_t_epoch__rowdateend + boost::posix_time::hours(24);
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend_plus_one_day - time_t_epoch__1970;
 
 				the_output_field_day_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
 				the_output_field_day_end_int64.SetValue(diff_end_from_1970.total_milliseconds());
@@ -147,7 +148,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
 				boost::gregorian::date row_start_date(the_input_field_year_start_int32.GetValueReference(), 1, 1);
 				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
-				boost::gregorian::date row_end_date(the_input_field_year_end_int32.GetValueReference(), 1, 1);
+				boost::gregorian::date row_end_date(the_input_field_year_end_int32.GetValueReference() + 1, 1, 1);
 				boost::posix_time::ptime time_t_epoch__rowdateend(row_end_date);
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
