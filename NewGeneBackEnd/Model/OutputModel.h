@@ -388,7 +388,11 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
 
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns_with_multiplicity_greater_than_1;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns_with_multiplicity_equal_to_1;
 						std::vector<bool> is_index_a_primary_key;
+						std::vector<bool> is_index_a_primary_key_with_multiplicity_greater_than_1;
+						std::vector<bool> is_index_a_primary_key_with_multiplicity_equal_to_1;
 
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> single_inner_table__indices_of_primary_keys_with_multiplicity_greater_than_1__in_top_level_uoa;
 
