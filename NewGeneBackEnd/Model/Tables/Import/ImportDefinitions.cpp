@@ -14,7 +14,7 @@ ImportDefinition ImportDefinitions::CreateImportDefinition(std::string const & v
 
 	ImportDefinition new_definition;
 
-	if (boost::iequals(vg_code, "VG_CTY_MID_MAOZ"))
+	if (boost::iequals(vg_code, "VG_CTY_CTY_MID_MAOZ"))
 	{
 		new_definition = Development__CreateImportDefinition_Maoz();
 		definitions.push_back(new_definition);
