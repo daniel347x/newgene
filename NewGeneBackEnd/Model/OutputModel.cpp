@@ -2101,6 +2101,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	indices_of_primary_key_columns_with_multiplicity_greater_than_1.clear();
 	is_index_a_primary_key_with_multiplicity_greater_than_1.clear();
 	indices_of_primary_key_columns_with_multiplicity_equal_to_1.clear();
+	number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = 0;
 }
 
 void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & sorted_result_columns, sqlite3_stmt * stmt_result)
@@ -2203,6 +2204,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 							indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, (int)current_parameter_ints.size()-1));
 							is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(true);
 							is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(false);
+							number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 						}
 						else
 						{
@@ -2254,6 +2256,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 							indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, (int)current_parameter_strings.size()-1));
 							is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(true);
 							is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(false);
+							number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 						}
 						else
 						{
@@ -2301,6 +2304,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 							indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 							is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(true);
 							is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(false);
+							number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 						}
 						else
 						{
@@ -2815,6 +2819,9 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	int string_index_incoming = 0;
 	int current_index = 0;
 	SavedRowData merged_data_row;
+
+	merged_data_row.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one;
+
 	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&current_row_of_data, &int_index_current, &string_index_current, &int_index_incoming, &string_index_incoming, &current_index, &first_incoming_row, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
 	{
 		SQLExecutor::WHICH_BINDING const first_incoming_row_binding = first_incoming_row.current_parameter_which_binding_to_use[current_index];
@@ -3212,14 +3219,34 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 	// 200
 	// ... should match, because the NULL can be overwritten by the 2 if the 200 were in the second column
 
-	std::set<std::string> saved_strings_previous;
-	std::set<std::int64_t> saved_ints_previous;
-	std::set<std::string> saved_strings_current;
-	std::set<std::int64_t> saved_ints_current;
+	std::set<std::vector<std::string>> saved_strings_previous_vector;
+	std::set<std::vector<std::int64_t>> saved_ints_previous_vector;
+	std::set<std::vector<std::string>> saved_strings_current_vector;
+	std::set<std::vector<std::int64_t>> saved_ints_current_vector;
 	int number_nulls_previous = 0;
 	int number_nulls_current = 0;
-	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &number_nulls_previous, &number_nulls_current, &saved_strings_previous, &saved_ints_previous, &saved_strings_current, &saved_ints_current, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
+
+	int current_inner_multiplicity = 0;
+	int the_index = 0;
+	std::vector<std::string> inner_multiplicity_string_vector;
+	std::vector<std::int64_t> inner_multiplicity_int_vector;
+	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &current_inner_multiplicity, &number_nulls_previous, &number_nulls_current, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
+
+		if (current_inner_multiplicity == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		{
+			if (!inner_multiplicity_int_vector.empty())
+			{
+				saved_ints_current_vector.insert(inner_multiplicity_int_vector);
+				inner_multiplicity_int_vector.clear();
+			}
+			if (!inner_multiplicity_string_vector.empty())
+			{
+				saved_strings_current_vector.insert(inner_multiplicity_string_vector);
+				inner_multiplicity_string_vector.clear();
+			}
+			current_inner_multiplicity = 0;
+		}
 
 		SQLExecutor::WHICH_BINDING binding = current_info.first;
 		int index = current_info.second;
@@ -3233,14 +3260,14 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 			case SQLExecutor::INT64:
 				{
 					data_int = current_row_of_data.current_parameter_ints[index];
-					saved_ints_current.insert(data_int);
+					inner_multiplicity_int_vector.push_back(data_int);
 				}
 				break;
 
 			case SQLExecutor::STRING:
 				{
 					data_string = current_row_of_data.current_parameter_strings[index];
-					saved_strings_current.insert(data_string);
+					inner_multiplicity_string_vector.push_back(data_string);
 				}
 				break;
 
@@ -3252,10 +3279,32 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 		}
 
+		++the_index;
+		++current_inner_multiplicity;
+
 	});
 
-	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &number_nulls_previous, &number_nulls_current, &saved_strings_previous, &saved_ints_previous, &saved_strings_current, &saved_ints_current, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & previous_info)
+	inner_multiplicity_string_vector.clear();
+	inner_multiplicity_int_vector.clear();
+	current_inner_multiplicity = 0;
+	the_index = 0;
+	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &current_inner_multiplicity, &number_nulls_previous, &number_nulls_current, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
+
+		if (current_inner_multiplicity == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		{
+			if (!inner_multiplicity_int_vector.empty())
+			{
+				saved_ints_previous_vector.insert(inner_multiplicity_int_vector);
+				inner_multiplicity_int_vector.clear();
+			}
+			if (!inner_multiplicity_string_vector.empty())
+			{
+				saved_strings_previous_vector.insert(inner_multiplicity_string_vector);
+				inner_multiplicity_string_vector.clear();
+			}
+			current_inner_multiplicity = 0;
+		}
 
 		SQLExecutor::WHICH_BINDING binding = previous_info.first;
 		int index = previous_info.second;
@@ -3269,14 +3318,14 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 		case SQLExecutor::INT64:
 			{
 				data_int = previous_row_of_data.current_parameter_ints[index];
-				saved_ints_previous.insert(data_int);
+				inner_multiplicity_int_vector.push_back(data_int);
 			}
 			break;
 
 		case SQLExecutor::STRING:
 			{
 				data_string = previous_row_of_data.current_parameter_strings[index];
-				saved_strings_previous.insert(data_string);
+					inner_multiplicity_string_vector.push_back(data_string);
 			}
 			break;
 
@@ -3288,46 +3337,49 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 
 		}
 
+		++the_index;
+		++current_inner_multiplicity;
+
 	});
 
-	if (saved_strings_current.size() > 0 && saved_ints_current.size() > 0)
+	if (saved_strings_current_vector.size() > 0 && saved_ints_current_vector.size() > 0)
 	{
 		return false;
 	}
 
-	if (saved_strings_previous.size() > 0 && saved_ints_previous.size() > 0)
+	if (saved_strings_previous_vector.size() > 0 && saved_ints_previous_vector.size() > 0)
 	{
 		return false;
 	}
 
-	if (saved_strings_current.size() > 0 && saved_ints_previous.size() > 0)
+	if (saved_strings_current_vector.size() > 0 && saved_ints_previous_vector.size() > 0)
 	{
 		return false;
 	}
 
-	if (saved_ints_current.size() > 0 && saved_strings_previous.size() > 0)
+	if (saved_ints_current_vector.size() > 0 && saved_strings_previous_vector.size() > 0)
 	{
 		return false;
 	}
 
 	// sets are automatically sorted
-	if (saved_strings_current.size() > 0)
+	if (saved_strings_current_vector.size() > 0)
 	{
-		if (saved_strings_previous.size() == 0)
+		if (saved_strings_previous_vector.size() == 0)
 		{
 			// One of the rows is all NULL in the primary keys with multiplicity greater than 1
 			// This counts as a match, as the NULLs will be overwritten when the rows are merged
 			return true;
 		}
 
-		int biggest_size = (int)saved_strings_current.size();
-		if (saved_strings_previous.size() > saved_strings_current.size())
+		int biggest_size = (int)saved_strings_current_vector.size();
+		if (saved_strings_previous_vector.size() > saved_strings_current_vector.size())
 		{
-			biggest_size = (int)saved_strings_previous.size();
+			biggest_size = (int)saved_strings_previous_vector.size();
 		}
 
-		std::set<std::string> test_strings = saved_strings_current;
-		test_strings.insert(saved_strings_previous.cbegin(), saved_strings_previous.cend());
+		std::set<std::vector<std::string>> test_strings = saved_strings_current_vector;
+		test_strings.insert(saved_strings_previous_vector.cbegin(), saved_strings_previous_vector.cend());
 
 		if ((int)test_strings.size() > biggest_size)
 		{
@@ -3336,23 +3388,23 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 		}
 	}
 
-	else if (saved_ints_current.size() > 0)
+	else if (saved_ints_current_vector.size() > 0)
 	{
-		if (saved_ints_previous.size() == 0)
+		if (saved_ints_previous_vector.size() == 0)
 		{
 			// One of the rows is all NULL in the primary keys with multiplicity greater than 1
 			// This counts as a match, as the NULLs will be overwritten when the rows are merged
 			return true;
 		}
 
-		int biggest_size = (int)saved_ints_current.size();
-		if (saved_ints_previous.size() > saved_ints_current.size())
+		int biggest_size = (int)saved_ints_current_vector.size();
+		if (saved_ints_previous_vector.size() > saved_ints_current_vector.size())
 		{
-			biggest_size = (int)saved_ints_previous.size();
+			biggest_size = (int)saved_ints_previous_vector.size();
 		}
 
-		std::set<std::int64_t> test_ints = saved_ints_current;
-		test_ints.insert(saved_ints_previous.cbegin(), saved_ints_previous.cend());
+		std::set<std::vector<std::int64_t>> test_ints = saved_ints_current_vector;
+		test_ints.insert(saved_ints_previous_vector.cbegin(), saved_ints_previous_vector.cend());
 
 		if ((int)test_ints.size() > biggest_size)
 		{
