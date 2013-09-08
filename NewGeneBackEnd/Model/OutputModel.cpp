@@ -6103,7 +6103,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group_child))
 			{
 				if (primary_key_info_this_variable_group.current_multiplicity == current_multiplicity
-				 || primary_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+				 || (   primary_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1
+					 && primary_key_info_this_variable_group.current_multiplicity == 1)
+				   )
 				{
 					int column_count = 0;
 					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &current_multiplicity, &sql_string, &primary_key_info_this_variable_group, &first_full_table_column_count, &top_level_inner_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
@@ -6120,12 +6122,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							int desired_inner_table_index = 0;
 							bool match_condition = false;
 
-							// First, join on primary keys whose total multiplicity is 1
+							// First, join on primary keys whose total multiplicity in this child variable group (against the full K-ad spin count) is 1.
+							// All the keys are in the first inner table (of the top-level group).
 							if (primary_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 							{
-								if (current_multiplicity == 1)
+								if (primary_key_info_this_variable_group.current_multiplicity == 1)
 								{
-									match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0 && (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
+									match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0
+													  &&
+													  (new_column.primary_key_index_within_total_kad_for_dmu_category == primary_key.sequence_number_within_dmu_category_spin_control));
 								}
 							}
 
