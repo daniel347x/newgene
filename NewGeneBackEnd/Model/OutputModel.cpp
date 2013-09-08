@@ -2988,12 +2988,12 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 	}
 }
 
-OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRows(SavedRowData const & current_row_of_data, SavedRowData const & first_incoming_row)
+OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRows(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data)
 {
 	int int_index_current = 0;
 	int string_index_current = 0;
-	int int_index_incoming = 0;
-	int string_index_incoming = 0;
+	int int_index_previous = 0;
+	int string_index_previous = 0;
 	SavedRowData merged_data_row;
 
 	merged_data_row.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one;
@@ -3005,15 +3005,74 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	std::vector<std::int64_t> inner_multiplicity_int_vector;
 
 	int inner_multiplicity_current_index = 0;
+	int inner_multiplicity_previous_index = 0;
+
 	int current_index = 0;
+	int previous_index = 0;
 
 
 	// Populate a set of primary key groups - one group from each inner table, corresponding only to the DMU with multiplicity greater than 1.
 	// We do this because NULL's in each group could offset the group as a whole, making it more difficult to test for a match.
 	// So instead of testing for a match on these groups, just save the non-NULL ones into a set, and add the set later in sorted order.
 
-	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&inner_multiplicity_current_index, &saved_strings_vector, &saved_ints_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &current_row_of_data, &int_index_current, &string_index_current, &int_index_incoming, &string_index_incoming, &current_index, &first_incoming_row, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&inner_multiplicity_current_index, &saved_strings_vector, &saved_ints_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &current_row_of_data, &int_index_current, &string_index_current, &current_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
 	{
+
+		if (current_binding == SQLExecutor::NULL_BINDING)
+		{
+
+			// no-op - assume that if any primary key column within a single inner table is null for DMU category,
+			// then so will the others
+			// ... therefore, this is a NULL primary key group and we don't need to save it
+
+		}
+		else
+		{
+			switch (current_binding)
+			{
+			case SQLExecutor::INT64:
+				{
+
+					if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
+					{
+						inner_multiplicity_int_vector.push_back(current_row_of_data.current_parameter_ints[int_index_current]);
+					}
+
+				}
+				break;
+			case SQLExecutor::STRING:
+				{
+
+					if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
+					{
+						inner_multiplicity_string_vector.push_back(current_row_of_data.current_parameter_strings[string_index_current]);
+					}
+
+				}
+				break;
+			}
+		}
+
+		switch (current_binding)
+		{
+			case SQLExecutor::INT64:
+				{
+					++int_index_current;
+				}
+				break;
+			case SQLExecutor::STRING:
+				{
+					++string_index_current;
+				}
+				break;
+		}
+
+		if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
+		{
+			++inner_multiplicity_current_index;
+		}
+
+		++current_index;
 
 		if (inner_multiplicity_current_index == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
 		{
@@ -3033,9 +3092,26 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			inner_multiplicity_int_vector.clear();
 		}
 
-		SQLExecutor::WHICH_BINDING const first_incoming_row_binding = first_incoming_row.current_parameter_which_binding_to_use[current_index];
+	});
 
-		if (current_binding == SQLExecutor::NULL_BINDING && first_incoming_row_binding == SQLExecutor::NULL_BINDING)
+	int_index_current = 0;
+	string_index_current = 0;
+	int_index_previous = 0;
+	string_index_previous = 0;
+
+	inner_multiplicity_string_vector.clear();
+	inner_multiplicity_int_vector.clear();
+
+	inner_multiplicity_current_index = 0;
+	inner_multiplicity_previous_index = 0;
+
+	current_index = 0;
+	previous_index = 0;
+
+	std::for_each(previous_row_of_data.current_parameter_which_binding_to_use.cbegin(), previous_row_of_data.current_parameter_which_binding_to_use.cend(), [&inner_multiplicity_previous_index, &saved_strings_vector, &saved_ints_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &previous_row_of_data, &int_index_previous, &string_index_previous, &previous_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & previous_binding)
+	{
+
+		if (previous_binding == SQLExecutor::NULL_BINDING)
 		{
 
 			// no-op - assume that if any primary key column within a single inner table is null for DMU category,
@@ -3045,100 +3121,76 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 		}
 		else
 		{
-			if (current_binding != SQLExecutor::NULL_BINDING)
+			switch (previous_binding)
 			{
-				switch (current_binding)
-				{
-					case SQLExecutor::INT64:
+				case SQLExecutor::INT64:
+					{
+
+						if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[previous_index])
 						{
-
-							if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
-							{
-								inner_multiplicity_int_vector.push_back(current_row_of_data.current_parameter_ints[int_index_current]);
-							}
-
+							inner_multiplicity_int_vector.push_back(previous_row_of_data.current_parameter_ints[int_index_previous]);
 						}
-						break;
-					case SQLExecutor::STRING:
+
+					}
+					break;
+				case SQLExecutor::STRING:
+					{
+
+						if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[previous_index])
 						{
-
-							if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
-							{
-								inner_multiplicity_string_vector.push_back(current_row_of_data.current_parameter_strings[string_index_current]);
-							}
-
+							inner_multiplicity_string_vector.push_back(previous_row_of_data.current_parameter_strings[string_index_previous]);
 						}
-						break;
-				}
-			}
-			else
-			{
-				switch (first_incoming_row_binding)
-				{
-					case SQLExecutor::INT64:
-						{
 
-							if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
-							{
-								inner_multiplicity_int_vector.push_back(first_incoming_row.current_parameter_ints[int_index_incoming]);
-							}
-
-						}
-						break;
-					case SQLExecutor::STRING:
-						{
-
-							if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
-							{
-								inner_multiplicity_string_vector.push_back(first_incoming_row.current_parameter_strings[string_index_incoming]);
-							}
-
-						}
-						break;
-				}
+					}
+					break;
 			}
 		}
 
-		switch (current_binding)
+		switch (previous_binding)
 		{
 			case SQLExecutor::INT64:
 				{
-					++int_index_current;
+					++int_index_previous;
 				}
 				break;
 			case SQLExecutor::STRING:
 				{
-					++string_index_current;
+					++string_index_previous;
 				}
 				break;
 		}
 
-		switch (first_incoming_row_binding)
+		if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[previous_index])
 		{
-			case SQLExecutor::INT64:
-				{
-					++int_index_incoming;
-				}
-				break;
-			case SQLExecutor::STRING:
-				{
-					++string_index_incoming;
-				}
-				break;
+			++inner_multiplicity_previous_index;
 		}
 
-		if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
+		++previous_index;
+
+		if (inner_multiplicity_previous_index == previous_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
 		{
-			++inner_multiplicity_current_index;
+			inner_multiplicity_previous_index = 0;
+
+			if (!inner_multiplicity_string_vector.empty())
+			{
+				saved_strings_vector.insert(inner_multiplicity_string_vector);
+			}
+
+			if (!inner_multiplicity_int_vector.empty())
+			{
+				saved_ints_vector.insert(inner_multiplicity_int_vector);
+			}
+
+			inner_multiplicity_string_vector.clear();
+			inner_multiplicity_int_vector.clear();
 		}
 
-		++current_index;
 	});
 
 	int_index_current = 0;
 	string_index_current = 0;
-	int_index_incoming = 0;
-	string_index_incoming = 0;
+	int_index_previous = 0;
+	string_index_previous = 0;
 
 
 	bool use_strings = false;
@@ -3174,7 +3226,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	saved_ints_deque.insert(saved_ints_deque.begin(), saved_ints_vector.begin(), saved_ints_vector.end());
 
 	
-	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&use_strings, &use_ints, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &current_row_of_data, &int_index_current, &string_index_current, &int_index_incoming, &string_index_incoming, &current_index, &first_incoming_row, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&use_strings, &use_ints, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &current_row_of_data, &int_index_current, &string_index_current, &int_index_previous, &string_index_previous, &current_index, &previous_row_of_data, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
 	{
 
 		if (inner_multiplicity_current_index == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
@@ -3196,7 +3248,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			inner_multiplicity_current_index = 0;
 		}
 
-		SQLExecutor::WHICH_BINDING const first_incoming_row_binding = first_incoming_row.current_parameter_which_binding_to_use[current_index];
+		SQLExecutor::WHICH_BINDING const previous_row_binding = previous_row_of_data.current_parameter_which_binding_to_use[current_index];
 
 
 		// Special case: handle the primary key group with multiplicity greater than one
@@ -3248,7 +3300,12 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 		else
 		{
 
-			if (current_binding == SQLExecutor::NULL_BINDING && first_incoming_row_binding == SQLExecutor::NULL_BINDING)
+			// *************************************************************************************** //
+			// Standard processing - just merge non-NULLs over NULLs in exact columnwise sequence,
+			// because these are not primary key columns with multiplicity greater than one.
+			// *************************************************************************************** //
+
+			if (current_binding == SQLExecutor::NULL_BINDING && previous_row_binding == SQLExecutor::NULL_BINDING)
 			{
 
 				merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
@@ -3370,13 +3427,13 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 				}
 				else
 				{
-					switch (first_incoming_row_binding)
+					switch (previous_row_binding)
 					{
 						case SQLExecutor::INT64:
 							{
 
 								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
-								merged_data_row.current_parameter_ints.push_back(first_incoming_row.current_parameter_ints[int_index_incoming]);
+								merged_data_row.current_parameter_ints.push_back(previous_row_of_data.current_parameter_ints[int_index_previous]);
 
 								if (current_row_of_data.is_index_a_primary_key[current_index])
 								{
@@ -3414,7 +3471,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 							{
 
 								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
-								merged_data_row.current_parameter_strings.push_back(first_incoming_row.current_parameter_strings[string_index_incoming]);
+								merged_data_row.current_parameter_strings.push_back(previous_row_of_data.current_parameter_strings[string_index_previous]);
 
 								if (current_row_of_data.is_index_a_primary_key[current_index])
 								{
@@ -3469,16 +3526,16 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 				break;
 		}
 
-		switch (first_incoming_row_binding)
+		switch (previous_row_binding)
 		{
 			case SQLExecutor::INT64:
 				{
-					++int_index_incoming;
+					++int_index_previous;
 				}
 				break;
 			case SQLExecutor::STRING:
 				{
-					++string_index_incoming;
+					++string_index_previous;
 				}
 				break;
 		}
@@ -3497,10 +3554,10 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 
 	// sanity checks
-	if (current_row_of_data.indices_of_primary_key_columns.size() != first_incoming_row.indices_of_primary_key_columns.size())
+	if (current_row_of_data.indices_of_primary_key_columns.size() != previous_row_of_data.indices_of_primary_key_columns.size())
 	{
 		boost::format msg("The number of primary key columns in the current row (%1%) is not equal to the number of primary keys of the previous row (%2%).");
-		msg % current_row_of_data.indices_of_primary_key_columns.size() % first_incoming_row.indices_of_primary_key_columns.size();
+		msg % current_row_of_data.indices_of_primary_key_columns.size() % previous_row_of_data.indices_of_primary_key_columns.size();
 		SetFailureMessage(msg.str());
 		failed = true;
 		return merged_data_row;
