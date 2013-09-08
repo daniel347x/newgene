@@ -3288,7 +3288,7 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 	inner_multiplicity_int_vector.clear();
 	current_inner_multiplicity = 0;
 	the_index = 0;
-	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &current_inner_multiplicity, &number_nulls_previous, &number_nulls_current, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
+	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &current_inner_multiplicity, &number_nulls_previous, &number_nulls_current, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & previous_info)
 	{
 
 		if (current_inner_multiplicity == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
