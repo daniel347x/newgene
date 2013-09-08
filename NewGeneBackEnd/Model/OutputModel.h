@@ -49,7 +49,7 @@ public:
 			// ^114 ^214 ^124 ^224 ^134 ^234 ^144 ^244
 			//
 			int sequence_number_within_dmu_category_for_this_variable_groups_uoa;
-			int current_multiplicity;
+			int current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group;
 			int total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
 			int total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group;
 			int total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group;
