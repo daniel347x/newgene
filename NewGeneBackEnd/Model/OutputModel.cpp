@@ -450,7 +450,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 			current_number_rows_to_sort = number_of_rows;
 
-			boost::format msg_("Merging child variable group %1, multiplicity %2%");
+			boost::format msg_("Merging child variable group %1%, multiplicity %2%");
 			msg_ % (child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand
 				: child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 				% current_multiplicity;
@@ -955,7 +955,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 {
 
-	boost::format msg_("Merging top-level variable groups: %1");
+	boost::format msg_("Merging top-level variable groups: %1%");
 	msg_ % (primary_group_final_results[0].second.variable_groups[0].longhand ? *primary_group_final_results[0].second.variable_groups[0].longhand
 		: primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : std::string());
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
@@ -1050,7 +1050,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			std::int64_t number_of_rows = ObtainCount(intermediate_merge_of_top_level_primary_group_results.second);
 			current_number_rows_to_sort = number_of_rows;
 
-			boost::format msg_("Merging top-level variable groups: %1");
+			boost::format msg_("Merging top-level variable groups: %1%");
 			msg_ % (primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand
 				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string());
 			UpdateProgressBarToNextStage(msg_.str(), std::string());
@@ -1926,7 +1926,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	std::int64_t raw_rows_count = total_number_incoming_rows[primary_variable_group_raw_data_columns.variable_groups[0]];
 	std::int64_t rows_estimate = raw_rows_count;
 
-	boost::format msg_("Constructing output for top-level primary group (%1), multiplicity 1");
+	boost::format msg_("Constructing output for top-level primary group (%1%), multiplicity 1");
 	msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 		: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string());
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
@@ -2021,7 +2021,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 		current_number_rows_to_sort = number_of_rows;
 
-		boost::format msg_("Constructing output for top-level primary group (%1), multiplicity %2%");
+		boost::format msg_("Constructing output for top-level primary group (%1%), multiplicity %2%");
 		msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 			% current_multiplicity;
