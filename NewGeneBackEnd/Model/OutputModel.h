@@ -189,7 +189,7 @@ class ColumnsInTempView
 		int most_recent_sql_statement_executed__index;
 
 		bool make_table_permanent;
-		bool table_deleted;
+		mutable bool table_deleted;
 
 };
 
