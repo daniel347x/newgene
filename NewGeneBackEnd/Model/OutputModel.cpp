@@ -110,6 +110,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, delete_tables(true)
 	, ms_elapsed(0)
 	, current_number_rows_to_sort(0)
+	, multiplicity_1_keys_come_first(true)
 {
 	debug_ordering = true;
 	//delete_tables = false;
@@ -3338,6 +3339,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 		}
 
+	}
+
+	if (first)
+	{
+		// highest_multiplicity_primary_uoa is 1 so the above block was not entered
+		first_variable_group = result_columns.columns_in_view.front().variable_group_associated_with_current_inner_table;
 	}
 
 	// Now order by remaining primary key columns (with multiplicity 1)

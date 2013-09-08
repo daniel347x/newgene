@@ -706,6 +706,12 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				std::string failure_message;
 
+
+
+				// Options - to be integrated with UI and Output Project or database settings at some point
+
+				bool multiplicity_1_keys_come_first;
+
 			public:
 
 				boost::filesystem::path debug_sql_path;

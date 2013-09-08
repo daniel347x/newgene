@@ -103,7 +103,7 @@ ImportDefinition Development__CreateImportDefinition_COW()
 	ImportDefinition::ImportMappings mappings;
 
 	// Time-range mapping
-	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__RANGE__FROM__YR_MNTH_DAY);
+	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
 	FieldTypeEntries input_file_fields;
 	FieldTypeEntries output_table_fields;
 	FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "stday"), FIELD_TYPE_INT32);
