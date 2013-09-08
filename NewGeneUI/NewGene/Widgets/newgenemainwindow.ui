@@ -87,7 +87,7 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
        <enum>QTabWidget::Triangular</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -124,7 +124,7 @@ border-bottom: 9px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
 </string>
        </property>
        <attribute name="title">
-        <string> Manage input dataset </string>
+        <string> Manage input</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3"/>
       </widget>
