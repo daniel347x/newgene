@@ -2293,11 +2293,16 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	std::string data_string;
 	long double data_long = 0.0;
 	int current_column = 0;
-	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
+	bool reached_first_dates = false;
+	bool on_other_side_of_first_dates = false;
+	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 
 		inner_table_number.push_back(possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
-		number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+		if (possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category > number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		{
+			number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+		}
 
 		if (failed)
 		{
@@ -2309,11 +2314,27 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			first_variable_group = possible_duplicate_view_column.variable_group_associated_with_current_inner_table;
 		}
 
+		if (possible_duplicate_view_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
+			&& possible_duplicate_view_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			reached_first_dates = true;
+		}
+		else
+		{
+			if (reached_first_dates)
+			{
+				if (!on_other_side_of_first_dates)
+				{
+					number_of_columns_in_inner_table = current_column;
+				}
+				on_other_side_of_first_dates = true;
+			}
+		}
+
 		bool not_first_variable_group = false;
 		if (!possible_duplicate_view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
 		{
 			not_first_variable_group = true;
-			number_of_columns_in_inner_table = current_column;
 		}
 
 		bool add_as_primary_key_column = false;
