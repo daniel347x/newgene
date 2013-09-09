@@ -3381,6 +3381,12 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			previous_inner_table_index_offset = 0;
 		}
 
+		if (xr_table_category != XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
+		{
+			use_nulls_previous = false;
+			use_nulls_current = false;
+		}
+
 
 		SQLExecutor::WHICH_BINDING current_row_binding = current_row_of_data.current_parameter_which_binding_to_use[current_index];
 		SQLExecutor::WHICH_BINDING previous_row_binding = previous_row_of_data.current_parameter_which_binding_to_use[current_index];
@@ -3462,15 +3468,75 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			// !use_nulls_previous means the previous inner table has data associated with the current stored multiplicity data being used.
 			// ****************************************************************************************************************************** //
 
-			if (
-				(!use_nulls_current && current_row_binding == SQLExecutor::NULL_BINDING) 
-				|| 
-				(!use_nulls_previous && previous_row_binding == SQLExecutor::NULL_BINDING)
-				||
-				(use_nulls_current && use_nulls_previous)
-				||
-				(xr_table_category != XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP && current_row_binding == SQLExecutor::NULL_BINDING && previous_row_binding == SQLExecutor::NULL_BINDING)
-				)
+			bool do_null = false;
+			if (use_nulls_current && use_nulls_previous)
+			{
+				do_null = true;
+			}
+			if (!use_nulls_current && use_nulls_previous)
+			{
+				if (current_row_binding == SQLExecutor::NULL_BINDING)
+				{
+					do_null = true;
+				}
+			}
+			if (use_nulls_current && !use_nulls_previous)
+			{
+				if (previous_row_binding == SQLExecutor::NULL_BINDING)
+				{
+					do_null = true;
+				}
+			}
+			if (!use_nulls_current && !use_nulls_previous)
+			{
+				if (current_row_binding == SQLExecutor::NULL_BINDING 
+					&&
+					previous_row_binding == SQLExecutor::NULL_BINDING)
+				{
+					do_null = true;
+				}
+			}
+
+			bool use_current = false;
+			bool use_previous = false;
+			if (!do_null)
+			{
+				if (!use_nulls_current && !use_nulls_previous)
+				{
+					if (previous_row_binding == SQLExecutor::NULL_BINDING)
+					{
+						use_current = true;
+					}
+					else if (current_row_binding == SQLExecutor::NULL_BINDING)
+					{
+						use_previous = true;
+					}
+					else
+					{
+						use_current = true;
+					}
+				}
+				if (use_nulls_current && !use_nulls_previous)
+				{
+					use_previous = true;
+				}
+				if (!use_nulls_current && use_nulls_previous)
+				{
+					use_current = true;
+				}
+			}
+
+			if (use_current && use_previous)
+			{
+				use_previous = false;
+			}
+
+			if (!use_current && !use_previous)
+			{
+				do_null = true;
+			}
+
+			if (do_null)
 			{
 
 				merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
@@ -3509,9 +3575,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			}
 			else
 			{
-				if ( !use_nulls_current 
-					||
-					(xr_table_category != XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP && current_row_binding != SQLExecutor::NULL_BINDING))
+				if (use_current)
 				{
 					switch (current_row_binding)
 					{
