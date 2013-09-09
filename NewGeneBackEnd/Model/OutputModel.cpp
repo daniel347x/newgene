@@ -275,7 +275,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	}
 	timerange_end = timerange_end_identifier.second;
 
-	if (timerange_end <= timerange_start)
+	// The time range controls are only accurate to 1 second
+	if (timerange_end <= (timerange_start + 1001))
 	{
 		boost::format msg("The ending value of the time range must be greater than the starting value.");
 		SetFailureMessage(msg.str());
