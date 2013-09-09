@@ -3467,7 +3467,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 								}
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)merged_data_row.current_parameter_ints.size()-1));
 
-								if (current_row_of_data.is_index_a_primary_key[current_index + current_inner_table_index_offset])
+								if (current_row_of_data.is_index_a_primary_key[current_index])
 								{
 									merged_data_row.is_index_a_primary_key.push_back(true);
 									merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, merged_data_row.current_parameter_ints.size()-1));
@@ -3477,7 +3477,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									merged_data_row.is_index_a_primary_key.push_back(false);
 								}
 
-								if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index + current_inner_table_index_offset])
+								if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
 								{
 									merged_data_row.is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(true);
 									merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, merged_data_row.current_parameter_ints.size()-1));
@@ -3487,7 +3487,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									merged_data_row.is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(false);
 								}
 
-								if (current_row_of_data.is_index_a_primary_key_with_multiplicity_equal_to_1[current_index + current_inner_table_index_offset])
+								if (current_row_of_data.is_index_a_primary_key_with_multiplicity_equal_to_1[current_index])
 								{
 									merged_data_row.is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(true);
 									merged_data_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, merged_data_row.current_parameter_ints.size()-1));
@@ -3514,7 +3514,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 								}
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)merged_data_row.current_parameter_strings.size()-1));
 
-								if (current_row_of_data.is_index_a_primary_key[current_index + current_inner_table_index_offset])
+								if (current_row_of_data.is_index_a_primary_key[current_index])
 								{
 									merged_data_row.is_index_a_primary_key.push_back(true);
 									merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, merged_data_row.current_parameter_strings.size()-1));
@@ -3524,7 +3524,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									merged_data_row.is_index_a_primary_key.push_back(false);
 								}
 
-								if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index + current_inner_table_index_offset])
+								if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
 								{
 									merged_data_row.is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(true);
 									merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, merged_data_row.current_parameter_strings.size()-1));
@@ -3534,7 +3534,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									merged_data_row.is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(false);
 								}
 
-								if (current_row_of_data.is_index_a_primary_key_with_multiplicity_equal_to_1[current_index + current_inner_table_index_offset])
+								if (current_row_of_data.is_index_a_primary_key_with_multiplicity_equal_to_1[current_index])
 								{
 									merged_data_row.is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(true);
 									merged_data_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, merged_data_row.current_parameter_strings.size()-1));
@@ -3567,7 +3567,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 								}
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)merged_data_row.current_parameter_ints.size()-1));
 
-								if (previous_row_of_data.is_index_a_primary_key[current_index + previous_inner_table_index_offset])
+								if (previous_row_of_data.is_index_a_primary_key[current_index])
 								{
 									merged_data_row.is_index_a_primary_key.push_back(true);
 									merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, merged_data_row.current_parameter_ints.size()-1));
@@ -3577,7 +3577,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									merged_data_row.is_index_a_primary_key.push_back(false);
 								}
 
-								if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index + previous_inner_table_index_offset])
+								if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
 								{
 									merged_data_row.is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(true);
 									merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, merged_data_row.current_parameter_ints.size()-1));
@@ -3587,7 +3587,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									merged_data_row.is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(false);
 								}
 
-								if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_equal_to_1[current_index + previous_inner_table_index_offset])
+								if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_equal_to_1[current_index])
 								{
 									merged_data_row.is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(true);
 									merged_data_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, merged_data_row.current_parameter_ints.size()-1));
@@ -3614,7 +3614,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 								}
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)merged_data_row.current_parameter_strings.size()-1));
 
-								if (previous_row_of_data.is_index_a_primary_key[current_index + previous_inner_table_index_offset])
+								if (previous_row_of_data.is_index_a_primary_key[current_index])
 								{
 									merged_data_row.is_index_a_primary_key.push_back(true);
 									merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, merged_data_row.current_parameter_strings.size()-1));
@@ -3624,7 +3624,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									merged_data_row.is_index_a_primary_key.push_back(false);
 								}
 
-								if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index + previous_inner_table_index_offset])
+								if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
 								{
 									merged_data_row.is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(true);
 									merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, merged_data_row.current_parameter_strings.size()-1));
@@ -3634,7 +3634,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									merged_data_row.is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(false);
 								}
 
-								if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_equal_to_1[current_index + previous_inner_table_index_offset])
+								if (previous_row_of_data.is_index_a_primary_key_with_multiplicity_equal_to_1[current_index])
 								{
 									merged_data_row.is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(true);
 									merged_data_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, merged_data_row.current_parameter_strings.size()-1));
