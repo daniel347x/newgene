@@ -3308,13 +3308,13 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 			if (country1vec.size() == 1 && country2vec.size() == 1 && country3vec.size() == 1)
 			{
-				int country_1 = country1vec[0];
-				int country_2 = country2vec[0];
-				int country_3 = country3vec[0];
-				if (country_1 == 200 && country_2 == 220 && country_3 == 315)
-				{
-					bool break_ = true;
-				}
+				//int country_1 = country1vec[0];
+				//int country_2 = country2vec[0];
+				//int country_3 = country3vec[0];
+				//if (country_1 == 200 && country_2 == 220 && country_3 == 315)
+				//{
+				//	bool break_ = true;
+				//}
 			}
 		}
 	}
@@ -6544,7 +6544,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData & current_row_of_
 	long double data_long = 0.0;
 	bool do_not_include_this_data = false;
 	//int column_data_type = 0;
-	SQLExecutor::WHICH_BINDING column_data_type = 0;
+	SQLExecutor::WHICH_BINDING column_data_type = SQLExecutor::UNKNOWN_BINDING;
 	bound_parameter_strings.clear();
 	bound_parameter_ints.clear();
 	bound_parameter_which_binding_to_use.clear();
