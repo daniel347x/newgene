@@ -3468,6 +3468,8 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 				(!use_nulls_previous && previous_row_binding == SQLExecutor::NULL_BINDING)
 				||
 				(use_nulls_current && use_nulls_previous)
+				||
+				(xr_table_category != XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP && current_row_binding == SQLExecutor::NULL_BINDING && previous_row_binding == SQLExecutor::NULL_BINDING)
 				)
 			{
 
@@ -3507,7 +3509,9 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			}
 			else
 			{
-				if ( !use_nulls_current )
+				if ( !use_nulls_current 
+					||
+					(xr_table_category != XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP && current_row_binding != SQLExecutor::NULL_BINDING))
 				{
 					switch (current_row_binding)
 					{
