@@ -3381,21 +3381,6 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			previous_inner_table_index_offset = 0;
 		}
 
-		// sanity check
-		if (use_nulls_current != use_nulls_previous)
-		{
-			boost::format msg("Internal logic error: use_nulls_current != use_nulls_previous");
-			SetFailureMessage(msg.str());
-			failed = true;
-			return;
-		}
-
-		bool use_nulls = false;
-		if (use_nulls_current || use_nulls_previous)
-		{
-			use_nulls = true;
-		}
-
 
 		SQLExecutor::WHICH_BINDING current_row_binding = current_row_of_data.current_parameter_which_binding_to_use[current_index];
 		SQLExecutor::WHICH_BINDING previous_row_binding = previous_row_of_data.current_parameter_which_binding_to_use[current_index];
@@ -3472,12 +3457,18 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 		else
 		{
 
-			// *************************************************************************************** //
-			// Standard processing - just merge non-NULLs over NULLs in exact columnwise sequence,
-			// because these are not primary key columns with multiplicity greater than one.
-			// *************************************************************************************** //
+			// ****************************************************************************************************************************** //
+			// !use_nulls_current means the current inner table has data associated with the current stored multiplicity data being used.
+			// !use_nulls_previous means the previous inner table has data associated with the current stored multiplicity data being used.
+			// ****************************************************************************************************************************** //
 
-			if (use_nulls || (current_row_binding == SQLExecutor::NULL_BINDING && previous_row_binding == SQLExecutor::NULL_BINDING))
+			if (
+				(!use_nulls_current && current_row_binding == SQLExecutor::NULL_BINDING) 
+				|| 
+				(!use_nulls_previous && previous_row_binding == SQLExecutor::NULL_BINDING)
+				||
+				(use_nulls_current && use_nulls_previous)
+				)
 			{
 
 				merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
@@ -3516,7 +3507,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			}
 			else
 			{
-				if (current_row_binding != SQLExecutor::NULL_BINDING)
+				if ( !use_nulls_current )
 				{
 					switch (current_row_binding)
 					{
