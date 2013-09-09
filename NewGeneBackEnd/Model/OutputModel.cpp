@@ -210,36 +210,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.SetPerformanceLabel("");
 	} BOOST_SCOPE_EXIT_END
 
-	setting_path_to_kad_output = CheckOutputFileExists();
-
-	if (failed)
-	{
-		return;
-	}
-
-	if (setting_path_to_kad_output.empty())
-	{
-		return;
-	}
-
-	debug_sql_path = setting_path_to_kad_output;
-	debug_sql_path.replace_extension(".debugsql.txt");
-
-	BOOST_SCOPE_EXIT(this_)
-	{
-		if (this_->debug_sql_file.is_open())
-		{
-			this_->debug_sql_file.close();
-		}
-	} BOOST_SCOPE_EXIT_END
-
-	debug_sql_file.open(debug_sql_path.string(), std::ios::out | std::ios::trunc);
-
-	if (!debug_sql_file.is_open())
-	{
-		int m = 0;
-	}
-
 	InputModel & input_model = model->getInputModel();
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, &input_model);
 	the_map = &the_map_;
@@ -282,6 +252,36 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		SetFailureMessage(msg.str());
 		failed = true;
 		return;
+	}
+
+	setting_path_to_kad_output = CheckOutputFileExists();
+
+	if (failed)
+	{
+		return;
+	}
+
+	if (setting_path_to_kad_output.empty())
+	{
+		return;
+	}
+
+	debug_sql_path = setting_path_to_kad_output;
+	debug_sql_path.replace_extension(".debugsql.txt");
+
+	BOOST_SCOPE_EXIT(this_)
+	{
+		if (this_->debug_sql_file.is_open())
+		{
+			this_->debug_sql_file.close();
+		}
+	} BOOST_SCOPE_EXIT_END
+
+		debug_sql_file.open(debug_sql_path.string(), std::ios::out | std::ios::trunc);
+
+	if (!debug_sql_file.is_open())
+	{
+		int m = 0;
 	}
 
 	current_progress_stage = 0;
