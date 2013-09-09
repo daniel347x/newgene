@@ -3388,14 +3388,14 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 		// It will step off the end, because the time range rows have not been appended yet.
 		// These, however, will be populated later, so they don't need to be correct here.
-		if (current_index + current_inner_table_index_offset < (int)current_row_of_data.current_parameter_which_binding_to_use.size())
+		if (!use_nulls_current && current_index + current_inner_table_index_offset < (int)current_row_of_data.current_parameter_which_binding_to_use.size())
 		{
 			current_row_binding = current_row_of_data.current_parameter_which_binding_to_use[current_index + current_inner_table_index_offset];
 		}
 
 		// It will step off the end, because the time range rows have not been appended yet.
 		// These, however, will be populated later, so they don't need to be correct here.
-		if (current_index + previous_inner_table_index_offset < (int)previous_row_of_data.current_parameter_which_binding_to_use.size())
+		if (!use_nulls_previous && current_index + previous_inner_table_index_offset < (int)previous_row_of_data.current_parameter_which_binding_to_use.size())
 		{
 			previous_row_binding = previous_row_of_data.current_parameter_which_binding_to_use[current_index + previous_inner_table_index_offset];
 		}
