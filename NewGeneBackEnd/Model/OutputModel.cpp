@@ -3329,8 +3329,22 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			previous_inner_table_index_offset = 0;
 		}
 
-		SQLExecutor::WHICH_BINDING const current_row_binding = current_row_of_data.current_parameter_which_binding_to_use[current_index + current_inner_table_index_offset];
-		SQLExecutor::WHICH_BINDING const previous_row_binding = previous_row_of_data.current_parameter_which_binding_to_use[current_index + previous_inner_table_index_offset];
+		SQLExecutor::WHICH_BINDING current_row_binding = current_row_of_data.current_parameter_which_binding_to_use[current_index];
+		SQLExecutor::WHICH_BINDING previous_row_binding = previous_row_of_data.current_parameter_which_binding_to_use[current_index];
+
+		// It will step off the end, because the time range rows have not been appended yet.
+		// These, however, will be populated later, so they don't need to be correct here.
+		if (current_index + current_inner_table_index_offset < (int)current_row_of_data.current_parameter_which_binding_to_use.size())
+		{
+			current_row_binding = current_row_of_data.current_parameter_which_binding_to_use[current_index + current_inner_table_index_offset];
+		}
+
+		// It will step off the end, because the time range rows have not been appended yet.
+		// These, however, will be populated later, so they don't need to be correct here.
+		if (current_index + previous_inner_table_index_offset < (int)previous_row_of_data.current_parameter_which_binding_to_use.size())
+		{
+			previous_row_binding = previous_row_of_data.current_parameter_which_binding_to_use[current_index + previous_inner_table_index_offset];
+		}
 
 		int test = current_row_of_data.inner_table_number[current_index];
 		merged_data_row.inner_table_number.push_back(current_row_of_data.inner_table_number[current_index]);
