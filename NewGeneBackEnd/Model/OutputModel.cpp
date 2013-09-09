@@ -3681,7 +3681,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 				break;
 		}
 
-		if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index + current_inner_table_index_offset])
+		if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
 		{
 			++inner_multiplicity_current_index;
 		}
