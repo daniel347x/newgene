@@ -428,13 +428,13 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			std::int64_t current_count = ObtainCount(child_variable_group_raw_data_columns);
 			if (child_variable_group_raw_data_columns.variable_groups[0].longhand)
 			{
-				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows).  Patience...");
+				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows).");
 				msg % current_multiplicity % current_count % *child_variable_group_raw_data_columns.variable_groups[0].longhand % previous_count;
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
 			else
 			{
-				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows).  Patience...");
+				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows).");
 				msg % current_multiplicity % current_count % *child_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
@@ -2161,13 +2161,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		std::int64_t current_count = ObtainCount(primary_variable_group_raw_data_columns);
 		if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
 		{
-			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows).  Patience...");
+			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows).");
 			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].longhand % previous_count;
 			messager.SetPerformanceLabel(msg.str().c_str());
 		}
 		else
 		{
-			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows).  Patience...");
+			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows).");
 			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
 			messager.SetPerformanceLabel(msg.str().c_str());
 		}
@@ -10377,13 +10377,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("%4% for \"%1%\", multiplicity %2% - %3% rows.  Patience.");
+				boost::format msg("%4% for \"%1%\", multiplicity %2% - %3% rows.");
 				msg % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("%3% for \"%1%\" - %2% rows.  Patience.");
+				boost::format msg("%3% for \"%1%\" - %2% rows.");
 				msg % *variable_group.longhand % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -10392,13 +10392,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("%4% for %1%, multiplicity %2% - %3% rows.  Patience.");
+				boost::format msg("%4% for %1%, multiplicity %2% - %3% rows.");
 				msg % *variable_group.code % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("%3% for %1% - %2% rows.  Patience.");
+				boost::format msg("%3% for %1% - %2% rows.");
 				msg % *variable_group.code % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -10406,7 +10406,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	}
 	else
 	{
-		boost::format msg("%2% - %1% rows.  Patience.");
+		boost::format msg("%2% - %1% rows.");
 		msg % number_of_rows_to_sort % msg_sort_preface;
 		UpdateProgressBarToNextStage(msg.str(), std::string());
 	}
