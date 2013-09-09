@@ -2835,6 +2835,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		{
 
 			sorting_row_of_data.PopulateFromCurrentRowInDatabase(sorted_result_columns, stmt_result);
+
 			failed = sorting_row_of_data.failed;
 			if (failed)
 			{
@@ -7922,7 +7923,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView const & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index)
 {
 
 	std::int64_t saved_initial_progress_bar_value = current_progress_value;
@@ -7933,7 +7934,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
 
-	result_columns = previous_x_or_final_columns_being_cleaned_over_timerange;
+	result_columns = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another;
 	result_columns.most_recent_sql_statement_executed__index = -1;
 
 	std::string view_name;
@@ -8010,14 +8011,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	});
 
 	sql_create_empty_table += " FROM ";
-	sql_create_empty_table += previous_x_or_final_columns_being_cleaned_over_timerange.view_name;
+	sql_create_empty_table += previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.view_name;
 	sql_create_empty_table += " WHERE 0";
 	sql_strings.push_back(SQLExecutor(this, db, sql_create_empty_table));
 
 	
 	// Pull from the simple datetime columns at the end of the previous X table, which are guaranteed to be in place
-	WidgetInstanceIdentifier variable_group = previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view[previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.size()-1].variable_group_associated_with_current_inner_table;
-	WidgetInstanceIdentifier uoa = previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view[previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.size()-1].uoa_associated_with_variable_group_associated_with_current_inner_table;
+	WidgetInstanceIdentifier variable_group = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view[previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.size()-1].variable_group_associated_with_current_inner_table;
+	WidgetInstanceIdentifier uoa = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view[previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.size()-1].uoa_associated_with_variable_group_associated_with_current_inner_table;
 
 
 	std::string datetime_start_col_name_no_uuid;
@@ -8060,7 +8061,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
 	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
 	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
-	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
 
 	switch (xr_table_category)
 	{
@@ -8138,7 +8139,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
 	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
 	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
-	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
 	switch (xr_table_category)
 	{
 		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
@@ -8192,8 +8193,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	int previous_datetime_end_column_index = -1;
 	int current_datetime_start_column_index = -1;
 	int current_datetime_end_column_index = -1;
-	int column_index = (int)previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.size() - 1;
-	std::for_each(previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.crbegin(), previous_x_or_final_columns_being_cleaned_over_timerange.columns_in_view.crend(), [&xr_table_category, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index](ColumnsInTempView::ColumnInTempView const & schema_column)
+	int column_index = (int)previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.size() - 1;
+	std::for_each(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.crbegin(), previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.crend(), [&xr_table_category, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index](ColumnsInTempView::ColumnInTempView const & schema_column)
 	{
 
 		// The previous values are always located after the current values, but in arbitrary order,
@@ -8362,7 +8363,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			this_->CloseObtainData();
 		} BOOST_SCOPE_EXIT_END
 
-		ObtainData(previous_x_or_final_columns_being_cleaned_over_timerange);
+		ObtainData(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 
 		if (failed)
 		{
@@ -8398,19 +8399,50 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		// To deal with multiple rows with the same ID that are being merged in, but some with proper date range and some without,
 		// add a little cache loop here...
+		std::deque<SavedRowData> rows_to_check_for_duplicates_in_newly_joined_primary_key_columns;
+		SavedRowData sorting_row_of_data;
 
 		while (StepData())
 		{
 
-			int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
-			int current_data_type = sqlite3_column_type(stmt_result, current_datetime_start_column_index);
-			bool previous_datetime_is_null = (previous_data_type == SQLITE_NULL);
-			bool current_datetime_is_null = (current_data_type == SQLITE_NULL);
+			sorting_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result);
 
-			std::int64_t previous_datetime_start = sqlite3_column_int64(stmt_result, previous_datetime_start_column_index);
-			std::int64_t previous_datetime_end = sqlite3_column_int64(stmt_result, previous_datetime_end_column_index);
-			std::int64_t current_datetime_start = sqlite3_column_int64(stmt_result, current_datetime_start_column_index);
-			std::int64_t current_datetime_end = sqlite3_column_int64(stmt_result, current_datetime_end_column_index);
+			if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
+			{
+
+			}
+
+			//int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
+			SQLExecutor::WHICH_BINDING previous_data_type = sorting_row_of_data.indices_of_all_columns[previous_datetime_start_column_index].first;
+
+			//int current_data_type = sqlite3_column_type(stmt_result, current_datetime_start_column_index);
+			SQLExecutor::WHICH_BINDING current_data_type = sorting_row_of_data.indices_of_all_columns[current_datetime_start_column_index].first;
+
+			//bool previous_datetime_is_null = (previous_data_type == SQLITE_NULL);
+			//bool current_datetime_is_null = (current_data_type == SQLITE_NULL);
+			bool previous_datetime_is_null = (previous_data_type == SQLExecutor::NULL_BINDING);
+			bool current_datetime_is_null = (current_data_type == SQLExecutor::NULL_BINDING);
+
+			std::int64_t previous_datetime_start = 0;
+			std::int64_t previous_datetime_end = 0;
+			std::int64_t current_datetime_start = 0;
+			std::int64_t current_datetime_end = 0;
+
+			if (!previous_datetime_is_null)
+			{
+				//previous_datetime_start = sqlite3_column_int64(stmt_result, previous_datetime_start_column_index);
+				//previous_datetime_end = sqlite3_column_int64(stmt_result, previous_datetime_end_column_index);
+				previous_datetime_start = sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_all_columns[previous_datetime_start_column_index].second];
+				previous_datetime_end = sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_all_columns[previous_datetime_end_column_index].second];
+			}
+
+			if (!current_datetime_is_null)
+			{
+				//current_datetime_start = sqlite3_column_int64(stmt_result, current_datetime_start_column_index);
+				//current_datetime_end = sqlite3_column_int64(stmt_result, current_datetime_end_column_index);
+				current_datetime_start = sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_all_columns[current_datetime_start_column_index].second];
+				current_datetime_end = sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_all_columns[current_datetime_end_column_index].second];
+			}
 
 			bool previous_is_0 = false;
 			if (previous_datetime_start == 0 && previous_datetime_end == 0)
@@ -8436,7 +8468,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 
 				// Add only current data, setting time range to that of the previous data
-				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, false, true, xr_table_category);
+				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, false, true, xr_table_category);
 				if (failed)
 				{
 					break;
@@ -8455,7 +8487,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 
 				// Add only previous data, setting time range to that of the previous data
-				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, false, xr_table_category);
+				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, false, xr_table_category);
 				if (failed)
 				{
 					break;
@@ -8474,7 +8506,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 
 				// Add row as-is, setting new time range columns to 0
-				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, 0, 0, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, true, xr_table_category);
+				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, 0, 0, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category);
 				if (failed)
 				{
 					break;
@@ -8493,7 +8525,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 
 				// Add row as-is, setting new time range columns to current time range values
-				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, true, xr_table_category);
+				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category);
 				if (failed)
 				{
 					break;
@@ -8512,7 +8544,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 
 				// Add row as-is, setting new time range columns to previous time range values
-				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, true, true, xr_table_category);
+				added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category);
 				if (failed)
 				{
 					break;
@@ -8636,7 +8668,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// Add row as-is, setting new time range columns
 						// to either the previous or the current time range columns,
 						// because they are the same
-						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 						if (failed)
 						{
 							break;
@@ -8658,7 +8690,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// First, add a row that includes all data,
 						// setting new time range columns to:
 						// lower_range_start - lower_range_end
-						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 						if (failed)
 						{
 							break;
@@ -8676,7 +8708,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// lower_range_end - upper_range_end
 						if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || !previous_is_lower)
 						{
-							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_end, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_end, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 							if (failed)
 							{
 								break;
@@ -8699,7 +8731,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// First, add a row that includes all data,
 						// setting new time range columns to:
 						// upper_range_start - upper_range_end
-						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+						added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 						if (failed)
 						{
 							break;
@@ -8718,7 +8750,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// upper_range_end - lower_range_end
 						if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
 						{
-							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
 							if (failed)
 							{
 								break;
@@ -8752,7 +8784,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// lower_range_start - lower_range_end
 						if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
 						{
-							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
 							if (failed)
 							{
 								break;
@@ -8771,7 +8803,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// upper_range_start - upper_range_end
 						if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || !previous_is_lower)
 						{
-							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 							if (failed)
 							{
 								break;
@@ -8799,7 +8831,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// lower_range_start - upper_range_start
 						if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
 						{
-							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, upper_range_start, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, upper_range_start, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
 							if (failed)
 							{
 								break;
@@ -8823,7 +8855,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							// that includes all data,
 							// therefore setting new time range columns to:
 							// upper_range_start - upper_range_end
-							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 							if (failed)
 							{
 								break;
@@ -8845,7 +8877,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							// So second, add a row that includes all data,
 							// setting new time range columns to:
 							// upper_range_start - lower_range_end
-							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 							if (failed)
 							{
 								break;
@@ -8864,7 +8896,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							// lower_range_end - upper_range_end
 							if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || !previous_is_lower)
 							{
-								added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_end, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+								added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_end, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 								if (failed)
 								{
 									break;
@@ -8889,7 +8921,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							// that includes all data,
 							// therefore setting new time range columns to:
 							// upper_range_start - upper_range_end
-							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+							added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
 							if (failed)
 							{
 								break;
@@ -8908,7 +8940,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							// upper_range_end - lower_range_end
 							if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || previous_is_lower)
 							{
-								added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_x_or_final_columns_being_cleaned_over_timerange, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
+								added = CreateNewXRRow(first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
 								if (failed)
 								{
 									break;
