@@ -113,7 +113,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, remove_self_kads(true)
 {
 	debug_ordering = true;
-	delete_tables = false;
+	//delete_tables = false;
 	messager.StartProgressBar(0, 1000);
 }
 
