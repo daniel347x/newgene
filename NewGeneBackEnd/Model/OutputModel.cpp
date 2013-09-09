@@ -3278,49 +3278,101 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	saved_ints_deque.insert(saved_ints_deque.begin(), saved_ints_vector.begin(), saved_ints_vector.end());
 
 	
-	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&xr_table_category, &current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &use_strings, &use_ints, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &current_row_of_data, &int_index_current, &string_index_current, &int_index_previous, &string_index_previous, &current_index, &previous_row_of_data, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	int most_recent_current_offset = -1;
+	int most_recent_previous_offset = -1;
+
+	int current__current_inner_table = -1;
+	int previous__current_inner_table = -1;
+
+	int current_row_inner_table_data_to_use = -1;
+	int previous_row_inner_table_data_to_use = -1;
+
+	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [this, &current_row_inner_table_data_to_use, &previous_row_inner_table_data_to_use, &current__current_inner_table, &previous__current_inner_table, &most_recent_current_offset, &most_recent_previous_offset, &xr_table_category, &current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &use_strings, &use_ints, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &current_row_of_data, &int_index_current, &string_index_current, &int_index_previous, &string_index_previous, &current_index, &previous_row_of_data, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
 	{
 
-		int current_row_inner_table_data_to_use = -1;
-		int previous_row_inner_table_data_to_use = -1;
-		if (use_ints)
+		if (failed)
 		{
-			inner_multiplicity_int_vector = saved_ints_deque.front();
-			if (current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.find(inner_multiplicity_int_vector) != current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.cend())
-			{
-				current_row_inner_table_data_to_use = current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number[inner_multiplicity_int_vector];
-			}
-			if (previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.find(inner_multiplicity_int_vector) != previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.cend())
-			{
-				previous_row_inner_table_data_to_use = previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number[inner_multiplicity_int_vector];
-			}
-		}
-		if (use_strings)
-		{
-			inner_multiplicity_string_vector = saved_strings_deque.front();
-			if (current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number.find(inner_multiplicity_string_vector) != current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number.cend())
-			{
-				current_row_inner_table_data_to_use = current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number[inner_multiplicity_string_vector];
-			}
-			if (previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number.find(inner_multiplicity_string_vector) != previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number.cend())
-			{
-				previous_row_inner_table_data_to_use = previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number[inner_multiplicity_string_vector];
-			}
+			return;
 		}
 
+		if (current_index % current_row_of_data.number_of_columns_in_inner_table == 0)
+		{
+			current_row_inner_table_data_to_use = -1;
+			if (use_ints)
+			{
+				if (!saved_ints_deque.empty())
+				{
+					inner_multiplicity_int_vector = saved_ints_deque.front();
+					if (current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.find(inner_multiplicity_int_vector) != current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.cend())
+					{
+						current_row_inner_table_data_to_use = current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number[inner_multiplicity_int_vector];
+					}
+				}
+			}
+			if (use_strings)
+			{
+				if (!saved_strings_deque.empty())
+				{
+					inner_multiplicity_string_vector = saved_strings_deque.front();
+					if (current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number.find(inner_multiplicity_string_vector) != current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number.cend())
+					{
+						current_row_inner_table_data_to_use = current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number[inner_multiplicity_string_vector];
+					}
+				}
+			}
+		}
 
-		int current_inner_table_being_walked_through = current_row_of_data.inner_table_number[current_index];
-		int previous_inner_table_being_walked_through = previous_row_of_data.inner_table_number[current_index];
+		if (current_index % previous_row_of_data.number_of_columns_in_inner_table == 0)
+		{
+			previous_row_inner_table_data_to_use = -1;
+			if (use_ints)
+			{
+				if (!saved_ints_deque.empty())
+				{
+					inner_multiplicity_int_vector = saved_ints_deque.front();
+					if (previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.find(inner_multiplicity_int_vector) != previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.cend())
+					{
+						previous_row_inner_table_data_to_use = previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number[inner_multiplicity_int_vector];
+					}
+				}
+			}
+			if (use_strings)
+			{
+				if (!saved_strings_deque.empty())
+				{
+					inner_multiplicity_string_vector = saved_strings_deque.front();
+					if (previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number.find(inner_multiplicity_string_vector) != previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number.cend())
+					{
+						previous_row_inner_table_data_to_use = previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number[inner_multiplicity_string_vector];
+					}
+				}
+			}
+		}
 
-		int current_inner_table_index_offset = (current_row_inner_table_data_to_use - current_inner_table_being_walked_through) * current_row_of_data.number_of_columns_in_inner_table;
-		int previous_inner_table_index_offset = (previous_row_inner_table_data_to_use - previous_inner_table_being_walked_through) * previous_row_of_data.number_of_columns_in_inner_table;
+		bool use_nulls_current = false;
 		if (current_row_inner_table_data_to_use == -1)
 		{
-			current_inner_table_index_offset = 0;
+			use_nulls_current = true;
 		}
+
+		bool use_nulls_previous = false;
 		if (previous_row_inner_table_data_to_use == -1)
 		{
-			previous_inner_table_index_offset = 0;
+			use_nulls_previous = true;
+		}
+
+		int current_inner_table_index_offset = -1;
+		if (!use_nulls_current)
+		{
+			int current_inner_table_being_walked_through = current_row_of_data.inner_table_number[current_index];
+			current_inner_table_index_offset = (current_row_inner_table_data_to_use - current_inner_table_being_walked_through) * current_row_of_data.number_of_columns_in_inner_table;
+		}
+
+		int previous_inner_table_index_offset = -1;
+		if (!use_nulls_previous)
+		{
+			int previous_inner_table_being_walked_through = previous_row_of_data.inner_table_number[current_index];
+			previous_inner_table_index_offset = (previous_row_inner_table_data_to_use - previous_inner_table_being_walked_through) * previous_row_of_data.number_of_columns_in_inner_table;
 		}
 
 		if (xr_table_category != XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
@@ -3329,8 +3381,25 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			previous_inner_table_index_offset = 0;
 		}
 
+		// sanity check
+		if (use_nulls_current != use_nulls_previous)
+		{
+			boost::format msg("Internal logic error: use_nulls_current != use_nulls_previous");
+			SetFailureMessage(msg.str());
+			failed = true;
+			return;
+		}
+
+		bool use_nulls = false;
+		if (use_nulls_current || use_nulls_previous)
+		{
+			use_nulls = true;
+		}
+
+
 		SQLExecutor::WHICH_BINDING current_row_binding = current_row_of_data.current_parameter_which_binding_to_use[current_index];
 		SQLExecutor::WHICH_BINDING previous_row_binding = previous_row_of_data.current_parameter_which_binding_to_use[current_index];
+
 
 		// It will step off the end, because the time range rows have not been appended yet.
 		// These, however, will be populated later, so they don't need to be correct here.
@@ -3408,7 +3477,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			// because these are not primary key columns with multiplicity greater than one.
 			// *************************************************************************************** //
 
-			if (current_row_binding == SQLExecutor::NULL_BINDING && previous_row_binding == SQLExecutor::NULL_BINDING)
+			if (use_nulls || (current_row_binding == SQLExecutor::NULL_BINDING && previous_row_binding == SQLExecutor::NULL_BINDING))
 			{
 
 				merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
