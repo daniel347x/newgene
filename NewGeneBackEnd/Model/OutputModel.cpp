@@ -113,7 +113,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, remove_self_kads(true)
 {
 	debug_ordering = true;
-	delete_tables = false;
+	//delete_tables = false;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -3276,6 +3276,47 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 	saved_strings_deque.insert(saved_strings_deque.begin(), saved_strings_vector.begin(), saved_strings_vector.end());
 	saved_ints_deque.insert(saved_ints_deque.begin(), saved_ints_vector.begin(), saved_ints_vector.end());
+
+
+	// debugging individual cases
+	bool debugging = false;
+	if (debugging)
+	{
+		if (saved_ints_deque.size() == 3)
+		{
+			std::vector<std::int64_t> country1vec;
+			std::vector<std::int64_t> country2vec;
+			std::vector<std::int64_t> country3vec;
+			int index = 0;
+			std::for_each(saved_ints_deque.cbegin(), saved_ints_deque.cend(), [&index, &country1vec, &country2vec, &country3vec](std::vector<std::int64_t> const & vec)
+			{
+				switch(index)
+				{
+				case 0:
+					country1vec = vec;
+					break;
+				case 1:
+					country2vec = vec;
+					break;
+				case 2:
+					country3vec = vec;
+					break;
+				}
+				++index;
+			});
+
+			if (country1vec.size() == 1 && country2vec.size() == 1 && country3vec.size() == 1)
+			{
+				int country_1 = country1vec[0];
+				int country_2 = country2vec[0];
+				int country_3 = country3vec[0];
+				if (country_1 == 200 && country_2 == 220 && country_3 == 315)
+				{
+					bool break_ = true;
+				}
+			}
+		}
+	}
 
 	
 	int most_recent_current_offset = -1;
@@ -8354,6 +8395,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		} BOOST_SCOPE_EXIT_END
 
 		BeginNewTransaction();
+
+		// To deal with multiple rows with the same ID that are being merged in, but some with proper date range and some without,
+		// add a little cache loop here...
 
 		while (StepData())
 		{
