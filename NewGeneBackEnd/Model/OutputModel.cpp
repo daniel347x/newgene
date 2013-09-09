@@ -3346,13 +3346,12 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			previous_row_binding = previous_row_of_data.current_parameter_which_binding_to_use[current_index + previous_inner_table_index_offset];
 		}
 
-		int test = current_row_of_data.inner_table_number[current_index];
 		merged_data_row.inner_table_number.push_back(current_row_of_data.inner_table_number[current_index]);
 
 		// Special case: handle the primary key group with multiplicity greater than one
 		if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP
 			&&
-			current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index + current_inner_table_index_offset])
+			current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
 		{
 
 			merged_data_row.is_index_a_primary_key.push_back(true);
@@ -3415,7 +3414,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 				merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
 				merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
 
-				if (current_row_of_data.is_index_a_primary_key[current_index + current_inner_table_index_offset])
+				if (current_row_of_data.is_index_a_primary_key[current_index])
 				{
 					merged_data_row.is_index_a_primary_key.push_back(true);
 					merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
@@ -3425,7 +3424,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 					merged_data_row.is_index_a_primary_key.push_back(false);
 				}
 
-				if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index + current_inner_table_index_offset])
+				if (current_row_of_data.is_index_a_primary_key_with_multiplicity_greater_than_1[current_index])
 				{
 					merged_data_row.is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(true);
 					merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
@@ -3435,7 +3434,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 					merged_data_row.is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(false);
 				}
 
-				if (current_row_of_data.is_index_a_primary_key_with_multiplicity_equal_to_1[current_index + current_inner_table_index_offset])
+				if (current_row_of_data.is_index_a_primary_key_with_multiplicity_equal_to_1[current_index])
 				{
 					merged_data_row.is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(true);
 					merged_data_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
@@ -3456,7 +3455,16 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 							{
 
 								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
-								merged_data_row.current_parameter_ints.push_back(current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[current_index + current_inner_table_index_offset].second]);
+
+								if (current_index + current_inner_table_index_offset < (int)current_row_of_data.indices_of_all_columns.size())
+								{
+									merged_data_row.current_parameter_ints.push_back(current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[current_index + current_inner_table_index_offset].second]);
+								}
+								else
+								{
+									// otherwise, the not-yet-appended datetime columns, which will be added and written to later - this data does not need to be correct
+									merged_data_row.current_parameter_ints.push_back(current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[current_index].second]);
+								}
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)merged_data_row.current_parameter_ints.size()-1));
 
 								if (current_row_of_data.is_index_a_primary_key[current_index + current_inner_table_index_offset])
@@ -3495,7 +3503,15 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 							{
 
 								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
-								merged_data_row.current_parameter_strings.push_back(current_row_of_data.current_parameter_strings[current_row_of_data.indices_of_all_columns[current_index + current_inner_table_index_offset].second]);
+								if (current_index + current_inner_table_index_offset < (int)current_row_of_data.indices_of_all_columns.size())
+								{
+									merged_data_row.current_parameter_strings.push_back(current_row_of_data.current_parameter_strings[current_row_of_data.indices_of_all_columns[current_index + current_inner_table_index_offset].second]);
+								}
+								else
+								{
+									// otherwise, the not-yet-appended datetime columns, which will be added and written to later - this data does not need to be correct
+									merged_data_row.current_parameter_strings.push_back(current_row_of_data.current_parameter_strings[current_row_of_data.indices_of_all_columns[current_index].second]);
+								}
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)merged_data_row.current_parameter_strings.size()-1));
 
 								if (current_row_of_data.is_index_a_primary_key[current_index + current_inner_table_index_offset])
@@ -3540,7 +3556,15 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 							{
 
 								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
-								merged_data_row.current_parameter_ints.push_back(previous_row_of_data.current_parameter_ints[previous_row_of_data.indices_of_all_columns[current_index + previous_inner_table_index_offset].second]);
+								if (current_index + previous_inner_table_index_offset < (int)previous_row_of_data.indices_of_all_columns.size())
+								{
+									merged_data_row.current_parameter_ints.push_back(previous_row_of_data.current_parameter_ints[previous_row_of_data.indices_of_all_columns[current_index + previous_inner_table_index_offset].second]);
+								}
+								else
+								{
+									// otherwise, the not-yet-appended datetime columns, which will be added and written to later - this data does not need to be correct
+									merged_data_row.current_parameter_ints.push_back(previous_row_of_data.current_parameter_ints[previous_row_of_data.indices_of_all_columns[current_index].second]);
+								}
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)merged_data_row.current_parameter_ints.size()-1));
 
 								if (previous_row_of_data.is_index_a_primary_key[current_index + previous_inner_table_index_offset])
@@ -3579,7 +3603,15 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 							{
 
 								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
-								merged_data_row.current_parameter_strings.push_back(previous_row_of_data.current_parameter_strings[previous_row_of_data.indices_of_all_columns[current_index + previous_inner_table_index_offset].second]);
+								if (current_index + previous_inner_table_index_offset < (int)previous_row_of_data.indices_of_all_columns.size())
+								{
+									merged_data_row.current_parameter_strings.push_back(previous_row_of_data.current_parameter_strings[previous_row_of_data.indices_of_all_columns[current_index + previous_inner_table_index_offset].second]);
+								}
+								else
+								{
+									// otherwise, the not-yet-appended datetime columns, which will be added and written to later - this data does not need to be correct
+									merged_data_row.current_parameter_strings.push_back(previous_row_of_data.current_parameter_strings[previous_row_of_data.indices_of_all_columns[current_index].second]);
+								}
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)merged_data_row.current_parameter_strings.size()-1));
 
 								if (previous_row_of_data.is_index_a_primary_key[current_index + previous_inner_table_index_offset])
