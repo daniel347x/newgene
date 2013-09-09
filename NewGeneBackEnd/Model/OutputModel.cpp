@@ -113,7 +113,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, remove_self_kads(true)
 {
 	debug_ordering = true;
-	//delete_tables = false;
+	delete_tables = false;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -2863,6 +2863,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			//    "matching" row (which had matched on some NULL columns)
 			//    which themselves do not match on all primary key columns.
 			// ******************************************************************************************************** //
+			use_newest_row_index = false;
 			bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(sorting_row_of_data, rows_to_sort[which_previous_row_index_to_test_against], use_newest_row_index);
 			if (primary_keys_match)
 			{
@@ -4463,7 +4464,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateSortedTable(ColumnsInTempView const & final_xr_or_xrmfxr_columns, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateSortedTable(ColumnsInTempView const & final_xr_or_xrmfxr_columns, int const primary_group_number, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category)
 {
 
 	char c[256];
@@ -4494,6 +4495,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			break;
 	}
 	view_name += itoa(primary_group_number, c, 10);
+	view_name += "_";
+	view_name += itoa(current_multiplicity, c, 10);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
@@ -8414,15 +8417,35 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		// add a little cache loop here...
 		std::deque<SavedRowData> rows_to_check_for_duplicates_in_newly_joined_primary_key_columns;
 		SavedRowData current_row_of_data;
+		bool use_newest_row_index = false;
 
 		while (StepData())
 		{
 
 			current_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result);
 
-			if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
+			if (false && xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 			{
+				if (rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.empty())
+				{
+					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(current_row_of_data);
+					continue;
+				}
+				use_newest_row_index = false;
 
+				// Note that the following function only checks the keys on up to the first K inner tables.
+				// But since this is a PRIMARY_VARIABLE_GROUP, the current (newest) inner table
+				// being appended is guaranteed to be included in the match test.
+				bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[0], use_newest_row_index);
+				if (primary_keys_match)
+				{
+					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(current_row_of_data);
+				}
+				else
+				{
+					// The previous rows (not the current) match on all primary keys.
+					// Therefore, the only possible difference is the date range.
+				}
 			}
 
 			//int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
@@ -10814,7 +10837,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	// COLUMN_TYPE__DATETIMESTART_CHILD_MERGE / COLUMN_TYPE__DATETIMEEND_CHILD_MERGE
 	// or
 	// DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-	SqlAndColumnSet intermediate_sorted_top_level_variable_group_result = CreateSortedTable(column_set, primary_group_number, xr_table_category);
+	SqlAndColumnSet intermediate_sorted_top_level_variable_group_result = CreateSortedTable(column_set, primary_group_number, current_multiplicity, xr_table_category);
 	intermediate_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(intermediate_sorted_top_level_variable_group_result);
 	if (do_clear_table)
