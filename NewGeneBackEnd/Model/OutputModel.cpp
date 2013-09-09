@@ -289,6 +289,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	msg_1 % boost::filesystem::path(setting_path_to_kad_output).filename();
 	messager.UpdateStatusBarText(msg_1.str().c_str(), this);
 	messager.AppendKadStatusText("", nullptr); // This will clear the pane
+
+	boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
+	std::string time_start_formatted = boost::posix_time::to_simple_string(now);
+
+	boost::format msg_start("NewGene K-ad generation run starting %1%.");
+	msg_start % time_start_formatted;
+	messager.AppendKadStatusText(msg_start.str(), nullptr);
+
 	messager.AppendKadStatusText("Beginning generation of K-ad output.", this);
 	messager.AppendKadStatusText("Initializing...", this);
 
