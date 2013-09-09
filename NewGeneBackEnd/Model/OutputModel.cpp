@@ -4495,8 +4495,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			break;
 	}
 	view_name += itoa(primary_group_number, c, 10);
-	view_name += "_";
-	view_name += itoa(current_multiplicity, c, 10);
+	if (current_multiplicity >= 0)
+	{
+		view_name += "_";
+		view_name += itoa(current_multiplicity, c, 10);
+	}
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
