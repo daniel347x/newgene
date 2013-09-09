@@ -2101,7 +2101,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	std::int64_t raw_rows_count = total_number_incoming_rows[primary_variable_group_raw_data_columns.variable_groups[0]];
 	std::int64_t rows_estimate = raw_rows_count;
 
-	boost::format msg_("Constructing output for top-level primary group (%1%), multiplicity 1");
+	boost::format msg_("Constructing output for top-level primary group \"%1%\", multiplicity 1");
 	msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 		: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string());
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
@@ -2196,7 +2196,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 		current_number_rows_to_sort = number_of_rows;
 
-		boost::format msg_("Constructing output for top-level primary group (%1%), multiplicity %2%");
+		boost::format msg_("Constructing output for top-level primary group \"%1%\", multiplicity %2%");
 		msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 			% current_multiplicity;
@@ -2745,7 +2745,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	}
 
 
-	int const minimum_desired_rows_per_transaction = 1024 * 1024;
+	int const minimum_desired_rows_per_transaction = 1024 * 16;
 	current_rows_added = 0;
 	std::int64_t current_rows_stepped = 0;
 	std::int64_t current_rows_added_since_execution = 0;
@@ -8021,7 +8021,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 
 
-		int const minimum_desired_rows_per_transaction = 1024 * 1024;
+		int const minimum_desired_rows_per_transaction = 1024 * 16;
 
 		std::int64_t current_rows_added = 0;
 		std::int64_t current_rows_stepped = 0;
@@ -10376,13 +10376,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("%4% for \"%1%\", multiplicity %2% - %3% rows.");
+				boost::format msg("%4% for \"%1%\", multiplicity %2%: %3% rows.");
 				msg % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("%3% for \"%1%\" - %2% rows.");
+				boost::format msg("%3% for \"%1%\": %2% rows.");
 				msg % *variable_group.longhand % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -10391,13 +10391,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("%4% for %1%, multiplicity %2% - %3% rows.");
+				boost::format msg("%4% for %1%, multiplicity %2%: %3% rows.");
 				msg % *variable_group.code % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("%3% for %1% - %2% rows.");
+				boost::format msg("%3% for %1%: %2% rows.");
 				msg % *variable_group.code % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -10405,7 +10405,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	}
 	else
 	{
-		boost::format msg("%2% - %1% rows.");
+		boost::format msg("%2%: %1% rows.");
 		msg % number_of_rows_to_sort % msg_sort_preface;
 		UpdateProgressBarToNextStage(msg.str(), std::string());
 	}
@@ -10437,13 +10437,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("%4% for \"%1%\", multiplicity %2% - %3% rows");
+				boost::format msg("%4% for \"%1%\", multiplicity %2%: %3% rows");
 				msg % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("%3% for \"%1%\" - %2% rows");
+				boost::format msg("%3% for \"%1%\": %2% rows");
 				msg % *variable_group.longhand % number_of_rows_to_sort % msg_remove_duplicates_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -10452,13 +10452,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("%4% for %1%, multiplicity %2% - %3% rows");
+				boost::format msg("%4% for %1%, multiplicity %2%: %3% rows");
 				msg % *variable_group.code % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("%3% for %1% - %2% rows");
+				boost::format msg("%3% for %1%: %2% rows");
 				msg % *variable_group.code % number_of_rows_to_sort % msg_remove_duplicates_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -10466,7 +10466,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	}
 	else
 	{
-		boost::format msg_2("%2% - %1% rows");
+		boost::format msg_2("%2%: %1% rows");
 		msg_2 % number_of_rows_to_sort % msg_remove_duplicates_preface;
 		UpdateProgressBarToNextStage(msg_2.str(), std::string());
 	}
