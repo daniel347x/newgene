@@ -2876,6 +2876,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			// ******************************************************************************************************** //
 			use_newest_row_index = false;
 			bool primary_keys_match = PopulateSplitRowInfo_FromCurrentMergingColumns(sorting_row_of_data, rows_to_sort[which_previous_row_index_to_test_against], use_newest_row_index);
+
+			if (failed)
+			{
+				break;
+			}
+
 			if (primary_keys_match)
 			{
 				rows_to_sort.push_back(sorting_row_of_data);
@@ -8493,7 +8499,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		std::deque<SavedRowData> rows_to_check_for_duplicates_in_newly_joined_primary_key_columns;
 		SavedRowData current_row_of_data;
 		bool use_newest_row_index = false;
-		std::vector<std::tuple<bool, bool, std::int64_t, std::int64_t>>	row_inserts_info;
+		std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>>	row_inserts_info;
 		std::int64_t datetime_range_start = 0;
 		std::int64_t datetime_range_end;
 		bool include_current_data = false;
@@ -8524,6 +8530,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				// But since this is a PRIMARY_VARIABLE_GROUP, the current (newest) inner table
 				// being appended is guaranteed to be included in the match test.
 				bool primary_keys_match = PopulateSplitRowInfo_FromCurrentMergingColumns(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[0], use_newest_row_index, true);
+
+				if (failed)
+				{
+					break;
+				}
+
 				if (primary_keys_match)
 				{
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(current_row_of_data);
@@ -8532,7 +8544,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					// The previous rows (not the current) match on all primary keys.
 					// Therefore, the only possible difference is the date range.
+
+
+					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(current_row_of_data);
 				}
+
 			}
 
 			std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &current_row_of_data, &first_row_added, &include_current_data, &include_previous_data, &datetime_start_col_name, &datetime_end_col_name, &datetime_range_start, &datetime_range_end, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](std::tuple<bool, bool, std::int64_t, std::int64_t> const & row_insert_info)
@@ -10670,7 +10686,7 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityGreaterThanOnes(Column
 	}
 }
 
-void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<std::tuple<bool, bool, std::int64_t, std::int64_t>> & rows_to_insert_info, int & previous_datetime_start_column_index, int & current_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_end_column_index, SavedRowData & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
+void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> & rows_to_insert_info, int & previous_datetime_start_column_index, int & current_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_end_column_index, SavedRowData & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
 {
 
 	//int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
@@ -10738,7 +10754,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 		include_previous_data = false;
 		start_datetime_to_use = current_datetime_start;
 		end_datetime_to_use = current_datetime_end;
-		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 	}
 
@@ -10750,7 +10766,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 		include_previous_data = true;
 		start_datetime_to_use = previous_datetime_start;
 		end_datetime_to_use = previous_datetime_end;
-		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 	}
 
@@ -10762,7 +10778,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 		include_previous_data = true;
 		start_datetime_to_use = 0;
 		end_datetime_to_use = 0;
-		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 	}
 
@@ -10774,7 +10790,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 		include_previous_data = true;
 		start_datetime_to_use = current_datetime_start;
 		end_datetime_to_use = current_datetime_end;
-		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 	}
 
@@ -10786,7 +10802,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 		include_previous_data = true;
 		start_datetime_to_use = previous_datetime_start;
 		end_datetime_to_use = previous_datetime_end;
-		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 	}
 	else
@@ -10902,7 +10918,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 				include_previous_data = previous__DO_include_lower_range_data__DO_include_upper_range_data;
 				start_datetime_to_use = current_datetime_start;
 				end_datetime_to_use = current_datetime_end;
-				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 			}
 			else if (lower_range_end < upper_range_end)
@@ -10917,7 +10933,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 				include_previous_data = previous__DO_include_lower_range_data__DO_include_upper_range_data;
 				start_datetime_to_use = lower_range_start;
 				end_datetime_to_use = lower_range_end;
-				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 
 				// Second, add a row that includes only the upper range's data,
@@ -10930,7 +10946,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 					include_previous_data = previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data;
 					start_datetime_to_use = lower_range_end;
 					end_datetime_to_use = upper_range_end;
-					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 				}
 
@@ -10947,7 +10963,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 				include_previous_data = previous__DO_include_lower_range_data__DO_include_upper_range_data;
 				start_datetime_to_use = upper_range_start;
 				end_datetime_to_use = upper_range_end;
-				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 
 				// Second, add a row that includes only the lower range's data,
@@ -10960,7 +10976,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 					include_previous_data = previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
 					start_datetime_to_use = upper_range_end;
 					end_datetime_to_use = lower_range_end;
-					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 				}
 
@@ -10990,7 +11006,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 					include_previous_data = previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
 					start_datetime_to_use = lower_range_start;
 					end_datetime_to_use = lower_range_end;
-					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 				}
 
@@ -11004,7 +11020,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 					include_previous_data = previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data;
 					start_datetime_to_use = upper_range_start;
 					end_datetime_to_use = upper_range_end;
-					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 				}
 
@@ -11027,7 +11043,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 					include_previous_data = previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
 					start_datetime_to_use = lower_range_start;
 					end_datetime_to_use = upper_range_start;
-					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 				}
 
@@ -11046,7 +11062,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 					include_previous_data = previous__DO_include_lower_range_data__DO_include_upper_range_data;
 					start_datetime_to_use = upper_range_start;
 					end_datetime_to_use = upper_range_end;
-					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 				}
 				else if (lower_range_end < upper_range_end)
@@ -11072,7 +11088,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 					include_previous_data = previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data;
 					start_datetime_to_use = lower_range_end;
 					end_datetime_to_use = upper_range_end;
-					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 				}
 				else
@@ -11101,7 +11117,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 						include_previous_data = previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
 						start_datetime_to_use = upper_range_end;
 						end_datetime_to_use = lower_range_end;
-						rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
+						rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
 					}
 
