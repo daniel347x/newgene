@@ -8493,11 +8493,28 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		std::deque<SavedRowData> rows_to_check_for_duplicates_in_newly_joined_primary_key_columns;
 		SavedRowData current_row_of_data;
 		bool use_newest_row_index = false;
+		std::vector<std::tuple<bool, bool, std::int64_t, std::int64_t>>	row_insert_info;
 
 		while (StepData())
 		{
 
 			current_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result);
+			row_insert_info.clear();
+			TestIfNewXRrowShouldBeInserted(row_insert_info, previous_datetime_start_column_index, current_datetime_start_column_index, current_row_of_data, xr_table_category);
+
+			//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use,
+			//upper_range_start, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
+			//if (failed)
+			//{
+			//	break;
+			//}
+			//if (added)
+			//{
+			//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+			//	the_prepared_stmt = sql_strings.back().stmt;
+			//	++current_rows_added;
+			//	++current_rows_added_since_execution;
+			//}
 
 			bool debug = false;
 			if (debug)
@@ -10655,11 +10672,8 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityGreaterThanOnes(Column
 	}
 }
 
-bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include_previous_data, bool & include_current_data, SavedRowData & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
+void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<std::tuple<bool, bool, std::int64_t, std::int64_t>> & rows_to_insert_info, int & previous_datetime_start_column_index, int & current_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_end_column_index, SavedRowData & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
 {
-
-	include_previous_data = false;
-	include_current_data = false;
 
 	//int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
 	SQLExecutor::WHICH_BINDING previous_data_type = current_row_of_data.indices_of_all_columns[previous_datetime_start_column_index].first;
@@ -10707,6 +10721,11 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 
 	bool added = false;
 
+	bool include_current_data = false;
+	bool include_previous_data = false;
+	std::int64_t start_datetime_to_use = 0;
+	std::int64_t end_datetime_to_use = 0;
+
 	if (previous_datetime_is_null && current_datetime_is_null)
 	{
 		// no data
@@ -10719,19 +10738,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 		// Add only current data, setting time range to that of the previous data
 		include_current_data = true;
 		include_previous_data = false;
-
-		//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, false, true, xr_table_category);
-		//if (failed)
-		//{
-		//	break;
-		//}
-		//if (added)
-		//{
-		//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-		//	the_prepared_stmt = sql_strings.back().stmt;
-		//	++current_rows_added;
-		//	++current_rows_added_since_execution;
-		//}
+		start_datetime_to_use = current_datetime_start;
+		end_datetime_to_use = current_datetime_end;
+		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 	}
 
@@ -10741,19 +10750,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 		// Add only previous data, setting time range to that of the previous data
 		include_current_data = false;
 		include_previous_data = true;
-
-		//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, false, xr_table_category);
-		//if (failed)
-		//{
-		//	break;
-		//}
-		//if (added)
-		//{
-		//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-		//	the_prepared_stmt = sql_strings.back().stmt;
-		//	++current_rows_added;
-		//	++current_rows_added_since_execution;
-		//}
+		start_datetime_to_use = previous_datetime_start;
+		end_datetime_to_use = previous_datetime_end;
+		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 	}
 
@@ -10763,19 +10762,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 		// Add row as-is, setting new time range columns to 0
 		include_current_data = true;
 		include_previous_data = true;
-
-		//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, 0, 0, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category);
-		//if (failed)
-		//{
-		//	break;
-		//}
-		//if (added)
-		//{
-		//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-		//	the_prepared_stmt = sql_strings.back().stmt;
-		//	++current_rows_added;
-		//	++current_rows_added_since_execution;
-		//}
+		start_datetime_to_use = 0;
+		end_datetime_to_use = 0;
+		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 	}
 
@@ -10785,19 +10774,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 		// Add row as-is, setting new time range columns to current time range values
 		include_current_data = true;
 		include_previous_data = true;
-
-		//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category);
-		//if (failed)
-		//{
-		//	break;
-		//}
-		//if (added)
-		//{
-		//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-		//	the_prepared_stmt = sql_strings.back().stmt;
-		//	++current_rows_added;
-		//	++current_rows_added_since_execution;
-		//}
+		start_datetime_to_use = current_datetime_start;
+		end_datetime_to_use = current_datetime_end;
+		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 	}
 
@@ -10807,22 +10786,11 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 		// Add row as-is, setting new time range columns to previous time range values
 		include_current_data = true;
 		include_previous_data = true;
-
-		//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, previous_datetime_start, previous_datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category);
-		//if (failed)
-		//{
-		//	break;
-		//}
-		//if (added)
-		//{
-		//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-		//	the_prepared_stmt = sql_strings.back().stmt;
-		//	++current_rows_added;
-		//	++current_rows_added_since_execution;
-		//}
+		start_datetime_to_use = previous_datetime_start;
+		end_datetime_to_use = previous_datetime_end;
+		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 	}
-
 	else
 	{
 
@@ -10934,19 +10902,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 				// because they are the same
 				include_current_data = current__DO_include_lower_range_data__DO_include_upper_range_data;
 				include_previous_data = previous__DO_include_lower_range_data__DO_include_upper_range_data;
-
-				//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, current_datetime_start, current_datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-				//if (failed)
-				//{
-				//	break;
-				//}
-				//if (added)
-				//{
-				//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-				//	the_prepared_stmt = sql_strings.back().stmt;
-				//	++current_rows_added;
-				//	++current_rows_added_since_execution;
-				//}
+				start_datetime_to_use = current_datetime_start;
+				end_datetime_to_use = current_datetime_end;
+				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 			}
 			else if (lower_range_end < upper_range_end)
@@ -10959,19 +10917,10 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 				// lower_range_start - lower_range_end
 				include_current_data = current__DO_include_lower_range_data__DO_include_upper_range_data;
 				include_previous_data = previous__DO_include_lower_range_data__DO_include_upper_range_data;
+				start_datetime_to_use = lower_range_start;
+				end_datetime_to_use = lower_range_end;
+				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
-				//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-				//if (failed)
-				//{
-				//	break;
-				//}
-				//if (added)
-				//{
-				//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row,bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-				//	the_prepared_stmt = sql_strings.back().stmt;
-				//	++current_rows_added;
-				//	++current_rows_added_since_execution;
-				//}
 
 				// Second, add a row that includes only the upper range's data,
 				// setting new time range columns to:
@@ -10981,19 +10930,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 
 					include_current_data = current__DO_NOT_include_lower_range_data__DO_include_upper_range_data;
 					include_previous_data = previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data;
-
-					//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_end, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-					//if (failed)
-					//{
-					//	break;
-					//}
-					//if (added)
-					//{
-					//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-					//	the_prepared_stmt = sql_strings.back().stmt;
-					//	++current_rows_added;
-					//	++current_rows_added_since_execution;
-					//}
+					start_datetime_to_use = lower_range_end;
+					end_datetime_to_use = upper_range_end;
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 				}
 
@@ -11008,19 +10947,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 				// upper_range_start - upper_range_end
 				include_current_data = current__DO_include_lower_range_data__DO_include_upper_range_data;
 				include_previous_data = previous__DO_include_lower_range_data__DO_include_upper_range_data;
-
-				//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-				//if (failed)
-				//{
-				//	break;
-				//}
-				//if (added)
-				//{
-				//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-				//	the_prepared_stmt = sql_strings.back().stmt;
-				//	++current_rows_added;
-				//	++current_rows_added_since_execution;
-				//}
+				start_datetime_to_use = upper_range_start;
+				end_datetime_to_use = upper_range_end;
+				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 
 				// Second, add a row that includes only the lower range's data,
@@ -11031,19 +10960,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 
 					include_current_data = current__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
 					include_previous_data = previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
-
-					//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
-					//if (failed)
-					//{
-					//	break;
-					//}
-					//if (added)
-					//{
-					//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-					//	the_prepared_stmt = sql_strings.back().stmt;
-					//	++current_rows_added;
-					//	++current_rows_added_since_execution;
-					//}
+					start_datetime_to_use = upper_range_end;
+					end_datetime_to_use = lower_range_end;
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 				}
 
@@ -11071,19 +10990,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 
 					include_current_data = current__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
 					include_previous_data = previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
-
-					//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
-					//if (failed)
-					//{
-					//	break;
-					//}
-					//if (added)
-					//{
-					//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-					//	the_prepared_stmt = sql_strings.back().stmt;
-					//	++current_rows_added;
-					//	++current_rows_added_since_execution;
-					//}
+					start_datetime_to_use = lower_range_start;
+					end_datetime_to_use = lower_range_end;
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 				}
 
@@ -11095,19 +11004,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 
 					include_current_data = current__DO_NOT_include_lower_range_data__DO_include_upper_range_data;
 					include_previous_data = previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data;
-
-					//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-					//if (failed)
-					//{
-					//	break;
-					//}
-					//if (added)
-					//{
-					//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-					//	the_prepared_stmt = sql_strings.back().stmt;
-					//	++current_rows_added;
-					//	++current_rows_added_since_execution;
-					//}
+					start_datetime_to_use = upper_range_start;
+					end_datetime_to_use = upper_range_end;
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 				}
 
@@ -11128,19 +11027,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 	
 					include_current_data = current__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
 					include_previous_data = previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
-
-					//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_start, upper_range_start, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
-					//if (failed)
-					//{
-					//	break;
-					//}
-					//if (added)
-					//{
-					//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-					//	the_prepared_stmt = sql_strings.back().stmt;
-					//	++current_rows_added;
-					//	++current_rows_added_since_execution;
-					//}
+					start_datetime_to_use = lower_range_start;
+					end_datetime_to_use = upper_range_start;
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 				}
 
@@ -11157,19 +11046,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 
 					include_current_data = current__DO_include_lower_range_data__DO_include_upper_range_data;
 					include_previous_data = previous__DO_include_lower_range_data__DO_include_upper_range_data;
-
-					//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-					//if (failed)
-					//{
-					//	break;
-					//}
-					//if (added)
-					//{
-					//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-					//	the_prepared_stmt = sql_strings.back().stmt;
-					//	++current_rows_added;
-					//	++current_rows_added_since_execution;
-					//}
+					start_datetime_to_use = upper_range_start;
+					end_datetime_to_use = upper_range_end;
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 				}
 				else if (lower_range_end < upper_range_end)
@@ -11183,20 +11062,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 
 					include_current_data = current__DO_include_lower_range_data__DO_include_upper_range_data;
 					include_previous_data = previous__DO_include_lower_range_data__DO_include_upper_range_data;
-
-					//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-					//if (failed)
-					//{
-					//	break;
-					//}
-					//if (added)
-					//{
-					//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-					//	the_prepared_stmt = sql_strings.back().stmt;
-					//	++current_rows_added;
-					//	++current_rows_added_since_execution;
-					//}
-
+					start_datetime_to_use = upper_range_start;
+					end_datetime_to_use = lower_range_end;
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 					// And third, add a row that includes only the upper range's data,
 					// setting new time range columns to:
@@ -11204,23 +11072,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 
 					include_current_data = current__DO_NOT_include_lower_range_data__DO_include_upper_range_data;
 					include_previous_data = previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data;
-
-					//if (xr_table_category != OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP || !previous_is_lower)
-					//{
-					//	added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, lower_range_end, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_NOT_include_lower_range_data__DO_include_upper_range_data, current__DO_NOT_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-					//	if (failed)
-					//	{
-					//		break;
-					//	}
-					//	if (added)
-					//	{
-					//		sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-					//		the_prepared_stmt = sql_strings.back().stmt;
-					//		++current_rows_added;
-					//		++current_rows_added_since_execution;
-					//	}
-					//}
-
+					start_datetime_to_use = lower_range_end;
+					end_datetime_to_use = upper_range_end;
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 				}
 				else
@@ -11235,20 +11089,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 
 					include_current_data = current__DO_include_lower_range_data__DO_include_upper_range_data;
 					include_previous_data = previous__DO_include_lower_range_data__DO_include_upper_range_data;
-
-					//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_start, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
-					//if (failed)
-					//{
-					//	break;
-					//}
-					//if (added)
-					//{
-					//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-					//	the_prepared_stmt = sql_strings.back().stmt;
-					//	++current_rows_added;
-					//	++current_rows_added_since_execution;
-					//}
-
+					start_datetime_to_use = upper_range_start;
+					end_datetime_to_use = upper_range_end;
+					rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 					// And third, add a row that includes only the lower range's data,
 					// setting new time range columns to:
@@ -11258,19 +11101,9 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 
 						include_current_data = current__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
 						include_previous_data = previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
-
-						//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
-						//if (failed)
-						//{
-						//	break;
-						//}
-						//if (added)
-						//{
-						//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-						//	the_prepared_stmt = sql_strings.back().stmt;
-						//	++current_rows_added;
-						//	++current_rows_added_since_execution;
-						//}
+						start_datetime_to_use = upper_range_end;
+						end_datetime_to_use = lower_range_end;
+						rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, start_datetime_to_use, end_datetime_to_use));
 
 					}
 
