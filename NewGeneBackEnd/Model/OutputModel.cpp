@@ -2444,6 +2444,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 			case SQLITE_INTEGER:
 				{
+
 					data_int64 = sqlite3_column_int64(stmt_result, current_column);
 					current_parameter_ints.push_back(data_int64);
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
@@ -2503,6 +2504,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 						is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(false);
 						is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(false);
 					}
+
 				}
 				break;
 
@@ -2520,6 +2522,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 			case SQLITE_TEXT:
 				{
+
 					data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, current_column));
 					current_parameter_strings.push_back(data_string);
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
@@ -2579,6 +2582,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 						is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(false);
 						is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(false);
 					}
+
 				}
 				break;
 
@@ -2594,6 +2598,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 			case SQLITE_NULL:
 				{
+
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
 					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
 
@@ -2651,6 +2656,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 						is_index_a_primary_key_with_multiplicity_greater_than_1.push_back(false);
 						is_index_a_primary_key_with_multiplicity_equal_to_1.push_back(false);
 					}
+
 				}
 				break;
 
