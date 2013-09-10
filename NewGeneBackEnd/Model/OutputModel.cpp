@@ -3867,6 +3867,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									// otherwise, the not-yet-appended datetime columns, which will be added and written to later - this data does not need to be correct
 									merged_data_row.current_parameter_ints.push_back(current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[current_index].second]);
 								}
+
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)merged_data_row.current_parameter_ints.size()-1));
 
 								if (current_row_of_data.is_index_a_primary_key[current_index])
@@ -3920,6 +3921,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									// otherwise, the not-yet-appended datetime columns, which will be added and written to later - this data does not need to be correct
 									merged_data_row.current_parameter_strings.push_back(current_row_of_data.current_parameter_strings[current_row_of_data.indices_of_all_columns[current_index].second]);
 								}
+
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)merged_data_row.current_parameter_strings.size()-1));
 
 								if (current_row_of_data.is_index_a_primary_key[current_index])
@@ -3979,6 +3981,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									// otherwise, the not-yet-appended datetime columns, which will be added and written to later - this data does not need to be correct
 									merged_data_row.current_parameter_ints.push_back(previous_row_of_data.current_parameter_ints[previous_row_of_data.indices_of_all_columns[current_index].second]);
 								}
+
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)merged_data_row.current_parameter_ints.size()-1));
 
 								if (previous_row_of_data.is_index_a_primary_key[current_index])
@@ -4032,6 +4035,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									// otherwise, the not-yet-appended datetime columns, which will be added and written to later - this data does not need to be correct
 									merged_data_row.current_parameter_strings.push_back(previous_row_of_data.current_parameter_strings[previous_row_of_data.indices_of_all_columns[current_index].second]);
 								}
+
 								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)merged_data_row.current_parameter_strings.size()-1));
 
 								if (previous_row_of_data.is_index_a_primary_key[current_index])
