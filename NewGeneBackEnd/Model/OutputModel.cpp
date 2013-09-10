@@ -3204,6 +3204,24 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	int current_index = 0;
 	int previous_index = 0;
 
+	
+	
+	
+	// ********************************************************************************** //
+	// Compare the following method to that used in CreateNewXRRow().
+	//
+	// In this method, we save the indices of the original location of the data
+	// in the incoming SavedRowData objects (current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number),
+	// and simply use those indices when we need to retrieve the data
+	// for a certain inner table (current_inner_table_index_offset).
+	// 
+	// In CreateNewXRRow(), we copy the inner table data into a new, local cache
+	// (actually, a vector of them),
+	// and then when we need the data we reference the local cache vector by index.
+	// ********************************************************************************** //
+
+
+
 
 	// Populate a set of primary key groups - one group from each inner table, corresponding only to the DMU with multiplicity greater than 1.
 	// We do this because NULL's in each group could offset the group as a whole, making it more difficult to test for a match.
@@ -3468,7 +3486,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 		}
 	}
 
-	
+
 	int most_recent_current_offset = -1;
 	int most_recent_previous_offset = -1;
 
@@ -6674,6 +6692,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData & current_row_of_data, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView const & previous_x_or_mergedfinalplusnewfinal_columns, ColumnsInTempView & current_xr_or_completemerge_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category)
 {
+
+	// ********************************************************************************** //
+	//
+	// Compare the following method to that used in MergeRows().
+	//
+	// In this method, we copy the inner table data into a new, local cache
+	// (actually, a vector of them),
+	// and then when we need the data we reference the local cache vector by index.
+	//
+	// In MergeRows(), we save the indices of the original location of the data
+	// in the incoming SavedRowData objects (current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number),
+	// and simply use those indices when we need to retrieve the data
+	// for a certain inner table (current_inner_table_index_offset).
+	// 
+	// ********************************************************************************** //
 
 	if (include_previous_data == false && include_current_data == false)
 	{
@@ -10492,7 +10525,7 @@ bool OutputModel::OutputGenerator::SavedRowData::operator<(SavedRowData const & 
 bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter const & rhs) const
 {
 
-	// The value of the primary keys in the final inner table dominates the decision on sort order.
+	// The value of the primary key group in the final inner table dominates the decision on sort order.
 
 	bool is_determined = false;
 	bool is_less_than = false;
