@@ -10586,8 +10586,13 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	// we match on the primary key groups from all but the last inner table
 
 	// (1) Test equality of the primary keys from all inner tables but the last
-	//     (allow some inner tables to have NULL key fields: note that the function assumes
-	//      that whatever key fields ARE present already have been tested to match in "TestPrimaryKeyMatch()")
+	//     (assume that if the COUNT of inner tables, not counting the last,
+	//      that have non-NULL primary key fields, is sufficient to detect a match:
+	//      the code assumes that a previous test using "TestPrimaryKeyMatch()")
+	//      has been performed).
+	//      Unlike TestPrimaryKeyMatch(), this function returns FALSE (no match)
+	//      if the number of non-NULL primary keys present all but the last inner table
+	//      is different (even if those that are present completely overlap).
 	// (2) Test equality of the final inner table's primary keys
 	// (3) Test equality of the time range
 
