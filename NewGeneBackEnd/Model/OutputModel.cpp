@@ -2371,13 +2371,6 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					add_as_primary_key_column_in_all_but_final_inner_table = true;
 				}
 			}
-			else
-			{
-				if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-				{
-					add_as_primary_key_column_in_final_inner_table = true;
-				}
-			}
 
 			if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
 				== possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group)
@@ -2387,10 +2380,6 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				{
 					add_as_primary_key_column_in_final_inner_table = true;
 				}
-			}
-			else
-			{
-				is_index_in_final_inner_table.push_back(false);
 			}
 
 			if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
