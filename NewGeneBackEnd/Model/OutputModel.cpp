@@ -11259,18 +11259,19 @@ bool OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(bool & include
 						include_current_data = current__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
 						include_previous_data = previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data;
 
-						added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
-						if (failed)
-						{
-							break;
-						}
-						if (added)
-						{
-							sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-							the_prepared_stmt = sql_strings.back().stmt;
-							++current_rows_added;
-							++current_rows_added_since_execution;
-						}
+						//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, upper_range_end, lower_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_NOT_include_upper_range_data, current__DO_include_lower_range_data__DO_NOT_include_upper_range_data, xr_table_category);
+						//if (failed)
+						//{
+						//	break;
+						//}
+						//if (added)
+						//{
+						//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+						//	the_prepared_stmt = sql_strings.back().stmt;
+						//	++current_rows_added;
+						//	++current_rows_added_since_execution;
+						//}
+
 					}
 
 				}
