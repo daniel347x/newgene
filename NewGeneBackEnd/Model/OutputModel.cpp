@@ -1148,9 +1148,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	std::map<WidgetInstanceIdentifier, std::pair<int, std::vector<int>>> lhs_primary_keys;
 	std::map<WidgetInstanceIdentifier, std::pair<int, std::vector<int>>> rhs_primary_keys;
 
-	// These columns are from the previous MFXR temporary table, which contains 2 pairs of datetime columns
-	// in every inner table except for those inner tables that mark the end of the entire top-level variable set final results,
-	// which have 4 pairs of datetime columns
+	// These columns are from the previous temporary table
 	bool first_datetime_already_reached = false;
 	bool stop_incrementing_first_inner_table = false;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&first_datetime_already_reached, &stop_incrementing_first_inner_table, &lhs_primary_keys, &first_full_table_column_count, &number_columns__in__very_first_primary_variable_group__and__only_its_first_inner_table, &previous_column_names, &number_columns_very_first_primary_variable_group_including_multiplicities, &very_first_primary_variable_group](ColumnsInTempView::ColumnInTempView & previous_column)
@@ -2305,7 +2303,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	int current_column = 0;
 	bool reached_first_dates = false;
 	bool on_other_side_of_first_dates = false;
-	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
+	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &sorted_result_columns, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 
 		inner_table_number.push_back(possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
@@ -2363,23 +2361,9 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			bool add_as_primary_key_column_in_all_but_final_inner_table = false;
 
 			if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
-				< possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group)
-			{
-				add_as_column_in_all_but_final_inner_table = true;
-				if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-				{
-					add_as_primary_key_column_in_all_but_final_inner_table = true;
-				}
-			}
-
-			if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
 				== possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group)
 			{
-				add_as_column_in_final_inner_table = true;
-				if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-				{
-					add_as_primary_key_column_in_final_inner_table = true;
-				}
+				//add_as_column_in_final_inner_table = true;
 			}
 
 			if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
@@ -2416,6 +2400,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 						add_as_primary_key_with_multiplicity_equal_to_1 = true;
 					}
 				}
+			}
+
+			if (add_as_primary_key_column)
+			{
+				//if (possible_duplicate_view_column.)
 			}
 
 
@@ -9826,25 +9815,25 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 					}
 				});
 
-				int outer_multiplicity_current_primary_or_child_uoa = 0;
+				int outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa = 0;
 				if (total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group > 0)
 				{
-					outer_multiplicity_current_primary_or_child_uoa = 1;
+					outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa = 1;
 					int test_kad_count = total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
 					while (test_kad_count <= total_spin_control_k_count_for_given_dmu_category)
 					{
 						test_kad_count += total_inner_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
 						if (test_kad_count <= total_spin_control_k_count_for_given_dmu_category)
 						{
-							++outer_multiplicity_current_primary_or_child_uoa;
+							++outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa;
 						}
 					}
 				}
 
 				// The current iteration is through primary variable groups
-				current_primary_key_sequence.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group = outer_multiplicity_current_primary_or_child_uoa;
+				current_primary_key_sequence.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group = outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa;
 
-				map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group[the_dmu_category] = outer_multiplicity_current_primary_or_child_uoa;
+				map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group[the_dmu_category] = outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa;
 
 				variable_group_info_for_primary_keys.push_back(PrimaryKeySequence::VariableGroup_PrimaryKey_Info());
 				PrimaryKeySequence::VariableGroup_PrimaryKey_Info & current_variable_group_current_primary_key_info = variable_group_info_for_primary_keys.back();
@@ -9853,10 +9842,14 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				current_variable_group_current_primary_key_info.associated_uoa_identifier = current_uoa_identifier;
 
 				int current_variable_group_current_primary_key_dmu_category__total_sequence_number = 0;
-				for (int m=0; m<outer_multiplicity_current_primary_or_child_uoa; ++m)
+				for (int m=0; m<outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa; ++m)
 				{
+
+					// Loop through the exact number of occurrences of the DMU category in the unit of analysis.
+					// These correspond to the INNER multiplicity within a SINGLE inner table.
+					// Only append info for the single instance that matches the sequence number of interest.
 					int current_variable_group_current_primary_key_dmu_category__internal_sequence_number = 0;
-					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &outer_multiplicity_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category__total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category__internal_sequence_number, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group__current_dmu_primary_key_instance)
+					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category__total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category__internal_sequence_number, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group__current_dmu_primary_key_instance)
 					{
 						if (failed)
 						{
@@ -9872,7 +9865,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group__current_dmu_primary_key_instance.longhand;
 								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_for_this_variable_groups_uoa = current_variable_group_current_primary_key_dmu_category__internal_sequence_number;
 								current_variable_group_current_primary_key_info.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group = m+1;
-								current_variable_group_current_primary_key_info.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = outer_multiplicity_current_primary_or_child_uoa;
+								current_variable_group_current_primary_key_info.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa;
 								current_variable_group_current_primary_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group = current_primary_key_sequence.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group;
 								current_variable_group_current_primary_key_info.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category = k_count_for_primary_uoa_for_given_dmu_category;
 
@@ -9884,7 +9877,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								std::string this_variable_group__this_primary_key__unique_name;
 								this_variable_group__this_primary_key__unique_name += *current_variable_group__current_dmu_primary_key_instance.longhand;
 								current_variable_group_current_primary_key_info.column_name_no_uuid = this_variable_group__this_primary_key__unique_name;
-								if (outer_multiplicity_current_primary_or_child_uoa > 1)
+								if (outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa > 1)
 								{
 									this_variable_group__this_primary_key__unique_name += "_";
 									this_variable_group__this_primary_key__unique_name += itoa(m+1, ns__, 10);
@@ -10005,17 +9998,17 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 					}
 				});
 
-				int multiplicity_current_primary_or_child_uoa = 0;
+				int outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa = 0;
 				if (total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group > 0)
 				{
-					multiplicity_current_primary_or_child_uoa = 1;
+					outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa = 1;
 					int test_kad_count = total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
 					while (test_kad_count <= total_spin_control_k_count_for_given_dmu_category)
 					{
 						test_kad_count += total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
 						if (test_kad_count <= total_spin_control_k_count_for_given_dmu_category)
 						{
-							++multiplicity_current_primary_or_child_uoa;
+							++outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa;
 						}
 					}
 				}
@@ -10051,7 +10044,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				// *************************************************************************************************************** //
 
 				int current_variable_group_current_primary_key_dmu_category__total_sequence_number = 0;
-				for (int m=0; m<multiplicity_current_primary_or_child_uoa; ++m)
+				for (int m=0; m<outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa; ++m)
 				{
 
 					// *************************************************************************************************************** //
@@ -10062,7 +10055,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 					// *************************************************************************************************************** //
 
 					int current_variable_group_current_primary_key_dmu_category__internal_sequence_number = 0;
-					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &multiplicity_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category__total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category__internal_sequence_number, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
+					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &current_variable_group_current_primary_key_dmu_category__total_sequence_number, &the_dmu_category, &current_variable_group_current_primary_key_dmu_category__internal_sequence_number, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
 					{
 
 						if (failed)
@@ -10086,7 +10079,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group_current_dmu_primary_key.longhand;
 								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_for_this_variable_groups_uoa = current_variable_group_current_primary_key_dmu_category__internal_sequence_number;
 								current_variable_group_current_primary_key_info.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group = m+1;
-								current_variable_group_current_primary_key_info.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = multiplicity_current_primary_or_child_uoa;
+								current_variable_group_current_primary_key_info.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa;
 								current_variable_group_current_primary_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group = current_primary_key_sequence.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group;
 								current_variable_group_current_primary_key_info.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category = k_count_for_primary_uoa_for_given_dmu_category;
 								current_variable_group_current_primary_key_info.total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group = total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
@@ -10096,7 +10089,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								std::string this_variable_group__this_primary_key__unique_name;
 								this_variable_group__this_primary_key__unique_name += *current_variable_group_current_dmu_primary_key.longhand;
 								current_variable_group_current_primary_key_info.column_name_no_uuid = this_variable_group__this_primary_key__unique_name;
-								if (multiplicity_current_primary_or_child_uoa > 1)
+								if (outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa > 1)
 								{
 									this_variable_group__this_primary_key__unique_name += "_";
 									this_variable_group__this_primary_key__unique_name += itoa(m+1, ns__, 10);
