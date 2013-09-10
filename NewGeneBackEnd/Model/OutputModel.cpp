@@ -2296,14 +2296,50 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 	WidgetInstanceIdentifier first_variable_group;
 
+	int current_column = 0;
+	bool reached_first_dates = false;
+	bool reached_second_dates = false;
+	bool on_other_side_of_first_dates = false;
+	bool on_other_side_of_second_dates = false;
+	int reverse_index_to_final_relevant_date_column = 0;
+	std::for_each(sorted_result_columns.columns_in_view.crbegin(), sorted_result_columns.columns_in_view.crend(), [this, &reverse_index_to_final_relevant_date_column, &sorted_result_columns, &reached_first_dates, &reached_second_dates, &on_other_side_of_first_dates, &on_other_side_of_second_dates, &first_variable_group, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
+	{
+		if (possible_duplicate_view_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
+			&& possible_duplicate_view_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			reached_first_dates = true;
+			if (on_other_side_of_first_dates)
+			{
+				reached_second_dates = true;
+			}
+		}
+		else
+		{
+			if (reached_first_dates)
+			{
+				on_other_side_of_first_dates = true;
+			}
+			if (reached_second_dates)
+			{
+				if (!on_other_side_of_second_dates)
+				{
+					reverse_index_to_final_relevant_date_column = current_column;
+				}
+				on_other_side_of_second_dates = true;
+			}
+		}
+	});
+
+	int column_index_of_start_of_final_inner_table = (int)sorted_result_columns.columns_in_view.size() - reverse_index_to_final_relevant_date_column;
+
 	int column_data_type = 0;
 	std::int64_t data_int64 = 0;
 	std::string data_string;
 	long double data_long = 0.0;
-	int current_column = 0;
-	bool reached_first_dates = false;
-	bool on_other_side_of_first_dates = false;
-	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &sorted_result_columns, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
+	current_column = 0;
+	reached_first_dates = false;
+	on_other_side_of_first_dates = false;
+	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &column_index_of_start_of_final_inner_table, &sorted_result_columns, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 
 		inner_table_number.push_back(possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
@@ -2360,14 +2396,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			bool add_as_primary_key_column_in_final_inner_table = false;
 			bool add_as_primary_key_column_in_all_but_final_inner_table = false;
 
-			if (   possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
-				== possible_duplicate_view_column.number_inner_tables_in_set)
+			if (  current_column >= column_index_of_start_of_final_inner_table)
 			{
 				add_as_column_in_final_inner_table = true;
 			}
-
-			if (   possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
-				!= possible_duplicate_view_column.number_inner_tables_in_set)
+			else
 			{
 				add_as_column_in_all_but_final_inner_table = true;
 			}
@@ -10525,6 +10558,13 @@ bool OutputModel::OutputGenerator::SavedRowData::operator<(SavedRowData const & 
 bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter const & rhs) const
 {
 
+	// the whole point of this time range sorter is to skip the final inner table
+	// (so that the algorithm that splits XR rows can compare all rows that match
+	// on every primary key group BUT the last one in order to determine
+	// whether to include a row that has NULL for the final primary key group...
+	// the algorithm should NOT include such a row if there is at least ONE
+	// other row that gets included, which matches on all but the final primary key group.
+
 	// The number of non-NULL primary key groups dominates the decision on sort order.
 
 	int the_index = 0;
@@ -10533,6 +10573,12 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	bool current_row_current_inner_table_primary_key_group_is_null = false;
 	std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &current_row_current_inner_table_primary_key_group_is_null, &number_non_null_primary_key_groups_in_current_row, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
+
+		if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[the_index])
+		{
+			// See note above: The whole point of this time range sorter
+			// is to skip the primary key group in the last inner table.
+		}
 
 		SQLExecutor::WHICH_BINDING binding = current_info.first;
 
