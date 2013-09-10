@@ -2448,6 +2448,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					data_int64 = sqlite3_column_int64(stmt_result, current_column);
 					current_parameter_ints.push_back(data_int64);
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+
 					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)current_parameter_ints.size()-1));
 
 					if (add_as_column_in_all_but_final_inner_table)
@@ -2526,6 +2527,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, current_column));
 					current_parameter_strings.push_back(data_string);
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+
 					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)current_parameter_strings.size()-1));
 
 					if (add_as_column_in_all_but_final_inner_table)
@@ -2600,6 +2602,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				{
 
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+
 					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
 
 					if (add_as_column_in_all_but_final_inner_table)
