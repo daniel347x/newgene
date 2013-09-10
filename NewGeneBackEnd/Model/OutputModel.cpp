@@ -3456,13 +3456,13 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 			if (country1vec.size() == 1 && country2vec.size() == 1 && country3vec.size() == 1)
 			{
-				//int country_1 = country1vec[0];
-				//int country_2 = country2vec[0];
-				//int country_3 = country3vec[0];
-				//if (country_1 == 200 && country_2 == 220 && country_3 == 315)
-				//{
-				//	bool break_ = true;
-				//}
+				int country_1 = country1vec[0];
+				int country_2 = country2vec[0];
+				int country_3 = country3vec[0];
+				if (country_1 == 200 && country_2 == 220 && country_3 == 315)
+				{
+					bool break_ = true;
+				}
 			}
 		}
 	}
@@ -8752,7 +8752,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				break;
 			}
 
-			if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
+			bool debug = true;
+			if (debug)
+			{
+				if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP && primary_group_number == 1 && current_multiplicity == 4)
+					if (
+						current_row_of_data.current_parameter_ints[1]  == 200 
+						&& current_row_of_data.current_parameter_ints[10] == 220
+						&& current_row_of_data.current_parameter_ints[19] == 315
+						//&& current_row_of_data.current_parameter_ints[28] == 255
+										)
+					{
+						int m = 0;
+					}
+			}
+
+			if (false && xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 			{
 				if (rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.empty())
 				{
@@ -10459,7 +10474,179 @@ bool OutputModel::OutputGenerator::SavedRowData::operator<(SavedRowData const & 
 bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter const & rhs) const
 {
 
-	//if (this->the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.)
+	// The value of the primary keys in the final inner table dominates the decision on sort order.
+
+	bool is_determined = false;
+	bool is_less_than = false;
+	int index = 0;
+	std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table.cbegin(),
+				  the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table.cend(),
+				  [this, &rhs, &is_determined, &is_less_than, &index](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding_info)
+	{
+
+		if (is_determined)
+		{
+			return;
+		}
+		
+		std::pair<SQLExecutor::WHICH_BINDING, int> const & binding_info_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table[index];
+
+		if (binding_info.first == SQLExecutor::NULL_BINDING && binding_info_rhs.first == SQLExecutor::NULL_BINDING)
+		{
+			return;
+		}
+
+		if (binding_info.first == SQLExecutor::NULL_BINDING && !binding_info_rhs.first == SQLExecutor::NULL_BINDING)
+		{
+			is_less_than = true;
+			is_determined = true;
+			return;
+		}
+
+		if (!binding_info.first == SQLExecutor::NULL_BINDING && binding_info_rhs.first == SQLExecutor::NULL_BINDING)
+		{
+			is_less_than = false;
+			is_determined = true;
+			return;
+		}
+
+		switch (binding_info.first)
+		{
+
+			case SQLExecutor::INT64:
+				{
+
+					std::int64_t data_int64 = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second];
+
+					switch (binding_info_rhs.first)
+					{
+
+						case SQLExecutor::INT64:
+							{
+
+								std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second];
+
+								if (data_int64 < data_int64_rhs)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_int64 > data_int64_rhs)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
+						case SQLExecutor::STRING:
+							{
+
+								std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second];
+								std::int64_t data_rhs_converted = boost::lexical_cast<std::int64_t>(data_string_rhs);
+
+								if (data_int64 < data_rhs_converted)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_int64 > data_rhs_converted)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
+					}
+
+				}
+				break;
+
+			case SQLExecutor::STRING:
+				{
+				
+					std::string data_string = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second];
+
+					switch (binding_info_rhs.first)
+					{
+
+						case SQLExecutor::INT64:
+							{
+
+								std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second];
+								std::int64_t data_converted = boost::lexical_cast<std::int64_t>(data_string);
+
+								if (data_converted < data_int64_rhs)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_converted > data_int64_rhs)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
+						case SQLExecutor::STRING:
+							{
+
+								std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second];
+
+								if (data_string < data_string_rhs)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_string > data_string_rhs)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
+						}
+
+				}
+				break;
+
+		}
+
+		++index;
+	
+	});
+
+	if (is_determined)
+	{
+		return is_less_than;
+	}
+
+	// If the final inner column primary keys match, then proceed with evaluating the time range to determine the sort.
+
+	if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start < rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start)
+	{
+		return true;
+	}
+	if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start > rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start)
+	{
+		return false;
+	}
+
+	if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end < rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end)
+	{
+		return true;
+	}
+	if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end > rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end)
+	{
+		return false;
+	}
 
 	return false;
 
