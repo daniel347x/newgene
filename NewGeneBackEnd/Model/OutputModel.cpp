@@ -8752,21 +8752,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				break;
 			}
 
-			bool debug = true;
-			if (debug)
-			{
-				if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP && primary_group_number == 1 && current_multiplicity == 4)
-					if (
-						current_row_of_data.current_parameter_ints[1]  == 200 
-						&& current_row_of_data.current_parameter_ints[10] == 220
-						&& current_row_of_data.current_parameter_ints[19] == 315
-						//&& current_row_of_data.current_parameter_ints[28] == 255
-										)
-					{
-						int m = 0;
-					}
-			}
-
 			if (false && xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 			{
 				if (rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.empty())
