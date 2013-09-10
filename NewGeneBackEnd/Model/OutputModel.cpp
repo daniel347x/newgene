@@ -10569,9 +10569,9 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 	int the_index = 0;
 	int current_inner_multiplicity = 0;
-	int number_non_null_primary_key_groups_in_current_row = 0;
+	int number_non_primary_key_groups_in_current_row = 0;
 	bool current_row_current_inner_table_primary_key_group_is_null = false;
-	std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &current_row_current_inner_table_primary_key_group_is_null, &number_non_null_primary_key_groups_in_current_row, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
+	std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &current_row_current_inner_table_primary_key_group_is_null, &number_non_primary_key_groups_in_current_row, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
 
 		if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[the_index])
@@ -10586,7 +10586,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 		{
 			if (!current_row_current_inner_table_primary_key_group_is_null)
 			{
-				++number_non_null_primary_key_groups_in_current_row;
+				++number_non_primary_key_groups_in_current_row;
 				current_row_current_inner_table_primary_key_group_is_null = true;
 			}
 		}
@@ -10605,9 +10605,9 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 	the_index = 0;
 	current_inner_multiplicity = 0;
-	int number_non_null_primary_key_groups_in_current_row_rhs = 0;
+	int number_null_primary_key_groups_in_current_row_rhs = 0;
 	current_row_current_inner_table_primary_key_group_is_null = false;
-	std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &current_row_current_inner_table_primary_key_group_is_null, &number_non_null_primary_key_groups_in_current_row_rhs, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
+	std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row_rhs, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = current_info.first;
@@ -10616,7 +10616,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 		{
 			if (!current_row_current_inner_table_primary_key_group_is_null)
 			{
-				++number_non_null_primary_key_groups_in_current_row_rhs;
+				++number_null_primary_key_groups_in_current_row_rhs;
 				current_row_current_inner_table_primary_key_group_is_null = true;
 			}
 		}
@@ -10633,13 +10633,13 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	});
 
 
-	if (number_non_null_primary_key_groups_in_current_row > number_non_null_primary_key_groups_in_current_row_rhs)
+	if (number_non_primary_key_groups_in_current_row > number_null_primary_key_groups_in_current_row_rhs)
 	{
 		// We have more NULLs than the RHS row, so we should appear first
 		return true;
 	}
 
-	if (number_non_null_primary_key_groups_in_current_row < number_non_null_primary_key_groups_in_current_row_rhs)
+	if (number_non_primary_key_groups_in_current_row < number_null_primary_key_groups_in_current_row_rhs)
 	{
 		// We have more NULLs than the RHS row, so we should appear first
 		return false;
