@@ -8500,7 +8500,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			current_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result);
 			row_insert_info.clear();
-			TestIfNewXRrowShouldBeInserted(row_insert_info, previous_datetime_start_column_index, current_datetime_start_column_index, current_row_of_data, xr_table_category);
+			TestIfNewXRrowShouldBeInserted(row_insert_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, current_row_of_data, xr_table_category);
 
 			//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use,
 			//upper_range_start, upper_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, previous__DO_include_lower_range_data__DO_include_upper_range_data, current__DO_include_lower_range_data__DO_include_upper_range_data, xr_table_category);
