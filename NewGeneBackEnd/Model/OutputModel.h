@@ -388,19 +388,21 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::int64_t> current_parameter_ints;
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
 
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns;
+
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns_in_final_inner_table;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns_in_all_but_final_inner_table;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns_with_multiplicity_greater_than_1;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns_with_multiplicity_equal_to_1;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns_in_all_but_final_inner_table;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns_in_final_inner_table;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_primary_key_columns_in_all_but_final_inner_table;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_primary_key_columns_in_final_inner_table;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_primary_key_columns_in_all_but_final_inner_table;
+
+						std::vector<bool> is_index_in_final_inner_table;
+						std::vector<bool> is_index_in_all_but_final_inner_table;
 						std::vector<bool> is_index_a_primary_key;
 						std::vector<bool> is_index_a_primary_key_with_multiplicity_greater_than_1;
 						std::vector<bool> is_index_a_primary_key_with_multiplicity_equal_to_1;
-						std::vector<bool> is_index_in_final_inner_table;
-						std::vector<bool> is_index_in_all_but_final_inner_table;
 						std::vector<bool> is_index_a_primary_key_in_the_final_inner_table;
 						std::vector<bool> is_index_a_primary_key_in_not_the_final_inner_table;
 
