@@ -482,6 +482,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 					public:
 
+						TimeRangeSorter() {}
+						TimeRangeSorter(SavedRowData const & rhs) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs; }
 						SavedRowData the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table;
 						bool operator<(TimeRangeSorter const & rhs) const;
 
