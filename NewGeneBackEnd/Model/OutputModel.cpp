@@ -2271,6 +2271,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	number_of_columns_in_inner_table = 0;
 	inner_table_number.clear();
 	indices_of_all_columns.clear();
+	number_of_multiplicities = 0;
 }
 
 void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & sorted_result_columns, sqlite3_stmt * stmt_result)
@@ -2295,13 +2296,18 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	int current_column = 0;
 	bool reached_first_dates = false;
 	bool on_other_side_of_first_dates = false;
-	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
+	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &highest_inner_table_number, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 
 		inner_table_number.push_back(possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
 		if (possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category > number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
 		{
 			number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+		}
+
+		if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > number_of_multiplicities)
+		{
+			number_of_multiplicities = possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
 		}
 
 		if (failed)
@@ -3048,6 +3054,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 	merged_data_row.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one;
 	merged_data_row.number_of_columns_in_inner_table = current_row_of_data.number_of_columns_in_inner_table;
+	merged_data_row.number_of_multiplicities = current_row_of_data.number_of_multiplicities;
 
 	std::set<std::vector<std::string>> saved_strings_vector;
 	std::set<std::vector<std::int64_t>> saved_ints_vector;
@@ -3902,7 +3909,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	return merged_data_row;
 }
 
-bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index)
+bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index, bool const ignore_final_inner_table)
 {
 
 	bool match_failed = false;
@@ -4064,7 +4071,7 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 	int the_index = 0;
 	std::vector<std::string> inner_multiplicity_string_vector;
 	std::vector<std::int64_t> inner_multiplicity_int_vector;
-	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &current_inner_multiplicity, &number_nulls_previous, &number_nulls_current, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
+	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &current_inner_multiplicity, &number_nulls_previous, &number_nulls_current, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = current_info.first;
@@ -4105,12 +4112,42 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 		{
 			if (!inner_multiplicity_int_vector.empty())
 			{
-				saved_ints_current_vector.insert(inner_multiplicity_int_vector);
+				bool do_insert = false;
+				if (ignore_final_inner_table)
+				{
+					if (current_inner_multiplicity < current_row_of_data.number_of_multiplicities)
+					{
+						do_insert = true;
+					}
+				}
+				else
+				{
+					do_insert = true;
+				}
+				if (do_insert)
+				{
+					saved_ints_current_vector.insert(inner_multiplicity_int_vector);
+				}
 				inner_multiplicity_int_vector.clear();
 			}
 			if (!inner_multiplicity_string_vector.empty())
 			{
-				saved_strings_current_vector.insert(inner_multiplicity_string_vector);
+				bool do_insert = false;
+				if (ignore_final_inner_table)
+				{
+					if (current_inner_multiplicity < current_row_of_data.number_of_multiplicities)
+					{
+						do_insert = true;
+					}
+				}
+				else
+				{
+					do_insert = true;
+				}
+				if (do_insert)
+				{
+					saved_strings_current_vector.insert(inner_multiplicity_string_vector);
+				}
 				inner_multiplicity_string_vector.clear();
 			}
 			current_inner_multiplicity = 0;
@@ -4122,7 +4159,7 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 	inner_multiplicity_int_vector.clear();
 	current_inner_multiplicity = 0;
 	the_index = 0;
-	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &current_inner_multiplicity, &number_nulls_previous, &number_nulls_current, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & previous_info)
+	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &current_inner_multiplicity, &number_nulls_previous, &number_nulls_current, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & previous_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = previous_info.first;
@@ -4163,12 +4200,42 @@ bool OutputModel::OutputGenerator::TestIfCurrentRowMatchesPrimaryKeys(SavedRowDa
 		{
 			if (!inner_multiplicity_int_vector.empty())
 			{
-				saved_ints_previous_vector.insert(inner_multiplicity_int_vector);
+				bool do_insert = false;
+				if (ignore_final_inner_table)
+				{
+					if (current_inner_multiplicity < current_row_of_data.number_of_multiplicities)
+					{
+						do_insert = true;
+					}
+				}
+				else
+				{
+					do_insert = true;
+				}
+				if (do_insert)
+				{
+					saved_ints_previous_vector.insert(inner_multiplicity_int_vector);
+				}
 				inner_multiplicity_int_vector.clear();
 			}
 			if (!inner_multiplicity_string_vector.empty())
 			{
-				saved_strings_previous_vector.insert(inner_multiplicity_string_vector);
+				bool do_insert = false;
+				if (ignore_final_inner_table)
+				{
+					if (current_inner_multiplicity < current_row_of_data.number_of_multiplicities)
+					{
+						do_insert = true;
+					}
+				}
+				else
+				{
+					do_insert = true;
+				}
+				if (do_insert)
+				{
+					saved_strings_previous_vector.insert(inner_multiplicity_string_vector);
+				}
 				inner_multiplicity_string_vector.clear();
 			}
 			current_inner_multiplicity = 0;
@@ -8432,7 +8499,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			current_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result);
 
-			if (false && xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
+			bool debug = false;
+			if (debug)
+			{
+				if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP && primary_group_number == 1 && current_multiplicity == 4)
+				if (
+					//   current_row_of_data.current_parameter_ints[1]  == 200 
+					//&& current_row_of_data.current_parameter_ints[10] == 220
+					//&& current_row_of_data.current_parameter_ints[19] == 315
+					//&& current_row_of_data.current_parameter_ints[28] == 255
+					)
+				{
+					int m = 0;
+				}
+			}
+
+			if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 			{
 				if (rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.empty())
 				{
@@ -8444,7 +8526,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				// Note that the following function only checks the keys on up to the first K inner tables.
 				// But since this is a PRIMARY_VARIABLE_GROUP, the current (newest) inner table
 				// being appended is guaranteed to be included in the match test.
-				bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[0], use_newest_row_index);
+				bool primary_keys_match = TestIfCurrentRowMatchesPrimaryKeys(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[0], use_newest_row_index, true);
 				if (primary_keys_match)
 				{
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(current_row_of_data);
