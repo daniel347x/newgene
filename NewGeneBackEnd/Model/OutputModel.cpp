@@ -3910,6 +3910,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 							{
 
 								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+
 								if (current_index + current_inner_table_index_offset < (int)current_row_of_data.indices_of_all_columns.size())
 								{
 									merged_data_row.current_parameter_strings.push_back(current_row_of_data.current_parameter_strings[current_row_of_data.indices_of_all_columns[current_index + current_inner_table_index_offset].second]);
@@ -3968,6 +3969,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 							{
 
 								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+
 								if (current_index + previous_inner_table_index_offset < (int)previous_row_of_data.indices_of_all_columns.size())
 								{
 									merged_data_row.current_parameter_ints.push_back(previous_row_of_data.current_parameter_ints[previous_row_of_data.indices_of_all_columns[current_index + previous_inner_table_index_offset].second]);
@@ -4020,6 +4022,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 							{
 
 								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+
 								if (current_index + previous_inner_table_index_offset < (int)previous_row_of_data.indices_of_all_columns.size())
 								{
 									merged_data_row.current_parameter_strings.push_back(previous_row_of_data.current_parameter_strings[previous_row_of_data.indices_of_all_columns[current_index + previous_inner_table_index_offset].second]);
