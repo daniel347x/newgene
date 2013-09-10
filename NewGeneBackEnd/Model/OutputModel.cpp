@@ -7006,17 +7006,14 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData & current_row_of_
 		if (!do_not_include_this_data)
 		{
 
-			//column_data_type = sqlite3_column_type(stmt_result, index);
 			column_data_type = current_row_of_data.indices_of_all_columns[index].first;
 
 			switch (column_data_type)
 			{
 
-				//case SQLITE_INTEGER:
 				case SQLExecutor::INT64:
 					{
 
-						//data_int64 = sqlite3_column_int64(stmt_result, index);
 						data_int64 = current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[index].second];
 
 						// ... just populate the single data structures that hold all data across all inner tables
@@ -7074,8 +7071,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData & current_row_of_
 				case SQLExecutor::DOUBLE:
 					{
 						// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
-						//data_double = sqlite3_column_double(stmt_result, index);
-						//data_double = current_row_of_data.current_parameter_doubles[current_row_of_data.indices_of_all_columns[index].second];
 						// Todo: Error message
 						boost::format msg("Floating point values are not yet supported.  (Error while creating new timerange-managed row.)");
 						SetFailureMessage(msg.str());
@@ -7089,7 +7084,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData & current_row_of_
 				case SQLExecutor::STRING:
 					{
 
-						//data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, index));
 						data_string = current_row_of_data.current_parameter_strings[current_row_of_data.indices_of_all_columns[index].second];
 
 						// ... just populate the single data structures that hold all data across all inner tables
@@ -7155,7 +7149,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData & current_row_of_
 					break;
 #				endif
 
-				//case SQLITE_NULL:
 				case SQLExecutor::NULL_BINDING:
 					{
 
@@ -8768,9 +8761,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				use_newest_row_index = false;
 
-				// Note that the following function only checks the keys on up to the first K inner tables.
-				// But since this is a PRIMARY_VARIABLE_GROUP, the current (newest) inner table
-				// being appended is guaranteed to be included in the match test.
+				// Final argument to the following function ensures that the new data being appended will be skipped in the primary key check
+				// ... this way, we can gather up all rows that match only on the previous data, and do some pre-processing
+				// to eliminate some edge-case redundant rows,
+				// and to help optimize the algorithm by clearing out some known duplicates here rather than waiting for a later stage
+				// to clear them out.
 				bool primary_keys_match = TestPrimaryKeyMatch(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[0], use_newest_row_index, true);
 
 				if (failed)
@@ -10465,6 +10460,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 {
 
 	//if (this->the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.)
+
 	return false;
 
 }
