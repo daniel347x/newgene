@@ -3808,7 +3808,18 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			{
 
 				merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+
 				merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
+
+				if (merged_data_row.is_index_in_final_inner_table[current_index])
+				{
+					merged_data_row.indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
+				}
+
+				if (merged_data_row.is_index_in_all_but_final_inner_table[current_index])
+				{
+					merged_data_row.indices_of_all_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
+				}
 
 				if (current_row_of_data.is_index_a_primary_key[current_index])
 				{
@@ -3825,24 +3836,14 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 					merged_data_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 				}
 
-				if (merged_data_row.is_index_in_final_inner_table[current_index])
+				if (merged_data_row.is_index_a_primary_key_in_the_final_inner_table[current_index])
 				{
-					merged_data_row.indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
-				}
-
-				if (merged_data_row.is_index_in_all_but_final_inner_table[current_index])
-				{
-					merged_data_row.indices_of_all_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
+					merged_data_row.indices_of_all_primary_key_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
 				}
 
 				if (merged_data_row.is_index_a_primary_key_in_not_the_final_inner_table[current_index])
 				{
 					merged_data_row.indices_of_all_primary_key_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
-				}
-
-				if (merged_data_row.is_index_a_primary_key_in_the_final_inner_table[current_index])
-				{
-					merged_data_row.indices_of_all_primary_key_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
 				}
 
 			}
