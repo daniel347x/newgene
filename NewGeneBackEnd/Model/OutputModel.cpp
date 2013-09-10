@@ -2274,6 +2274,8 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	indices_of_all_columns_in_final_inner_table.clear();
 	is_index_in_all_but_final_inner_table.clear();
 	is_index_in_final_inner_table.clear();
+	is_index_a_primary_key_in_not_the_final_inner_table.clear();
+	is_index_a_primary_key_in_the_final_inner_table.clear();
 	indices_of_all_columns.clear();
 	number_of_multiplicities = 0;
 }
@@ -2357,6 +2359,14 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 		{
 			add_as_column_in_all_but_final_inner_table = true;
 			is_index_in_all_but_final_inner_table.push_back(true);
+			if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			{
+				is_index_a_primary_key_in_not_the_final_inner_table.push_back(true);
+			}
+			else
+			{
+				is_index_a_primary_key_in_not_the_final_inner_table.push_back(false);
+			}
 		}
 		else
 		{
@@ -2367,6 +2377,14 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 		{
 			add_as_column_in_final_inner_table = true;
 			is_index_in_final_inner_table.push_back(true);
+			if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			{
+				is_index_a_primary_key_in_the_final_inner_table.push_back(true);
+			}
+			else
+			{
+				is_index_a_primary_key_in_the_final_inner_table.push_back(false);
+			}
 		}
 		else
 		{
@@ -3122,6 +3140,8 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	merged_data_row.number_of_multiplicities = current_row_of_data.number_of_multiplicities;
 	merged_data_row.is_index_in_final_inner_table = current_row_of_data.is_index_in_final_inner_table;
 	merged_data_row.is_index_in_all_but_final_inner_table = current_row_of_data.is_index_in_all_but_final_inner_table;
+	merged_data_row.is_index_a_primary_key_in_the_final_inner_table = current_row_of_data.is_index_a_primary_key_in_the_final_inner_table;
+	merged_data_row.is_index_a_primary_key_in_not_the_final_inner_table = current_row_of_data.is_index_a_primary_key_in_not_the_final_inner_table;
 
 	std::set<std::vector<std::string>> saved_strings_vector;
 	std::set<std::vector<std::int64_t>> saved_ints_vector;
@@ -10347,7 +10367,7 @@ bool OutputModel::OutputGenerator::SavedRowData::operator<(SavedRowData const & 
 bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter const & rhs) const
 {
 
-	if (this->)
+	//if (this->the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.)
 
 }
 
