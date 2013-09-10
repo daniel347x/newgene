@@ -8857,8 +8857,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				// to eliminate some edge-case redundant rows,
 				// and to help optimize the algorithm by clearing out some known duplicates here rather than waiting for a later stage
 				// to clear them out.
+				// See comments inside the function.
 				use_newest_row_index = false;
-				bool primary_keys_match = TestPrimaryKeyMatch(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[which_previous_row_index_to_test_against], use_newest_row_index, true);
+				bool primary_keys_match = TestPrimaryKeyMatch(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[which_previous_row_index_to_test_against], use_newest_row_index,
+															  // Note: important 4th parameter: See note above
+															  true);
 
 				if (failed)
 				{
