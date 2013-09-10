@@ -2799,6 +2799,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
 	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
 	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = sorted_result_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_start_column.number_inner_tables_in_set = sorted_result_columns.columns_in_view.back().number_inner_tables_in_set;
 	switch (xr_table_category)
 	{
 		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
@@ -2881,6 +2882,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
 	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
 	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = sorted_result_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_end_column.number_inner_tables_in_set = sorted_result_columns.columns_in_view.back().number_inner_tables_in_set;
 	switch (xr_table_category)
 	{
 		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
@@ -5772,6 +5774,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
+			datetime_start_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 
 			std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
 			std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -5797,6 +5800,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
+			datetime_end_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 		}
 	}
 
@@ -5916,6 +5920,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
+	datetime_start_column.number_inner_tables_in_set = primary_variable_group_x1_columns.columns_in_view.back().number_inner_tables_in_set;
 
 	std::string datetime_end_col_name_no_uuid = "DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED";
 	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -5941,6 +5946,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
+	datetime_end_column.number_inner_tables_in_set = primary_variable_group_x1_columns.columns_in_view.back().number_inner_tables_in_set;
 
 
 	// Set the "merged" time range columns to be equal to the original time range columns
@@ -6059,6 +6065,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = first_final_primary_variable_group_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_start_column.number_inner_tables_in_set = first_final_primary_variable_group_columns.columns_in_view.back().number_inner_tables_in_set;
 
 
 	std::string datetime_end_col_name_no_uuid = "DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS";
@@ -6085,6 +6092,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = first_final_primary_variable_group_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_end_column.number_inner_tables_in_set = first_final_primary_variable_group_columns.columns_in_view.back().number_inner_tables_in_set;
 
 
 	// Set the "merged" time range columns to be equal to the original time range columns
@@ -6181,7 +6189,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Further, the "current_multiplicity" of these columns is 1, and must be updated.
 	//
 	// Start with the primary key columns.
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_raw_data_table)
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&primary_variable_group_raw_data_columns, &result_columns, &variables_selected, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_raw_data_table)
 	{
 		if (new_column_raw_data_table.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 		 || new_column_raw_data_table.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
@@ -6221,7 +6229,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 	// Proceed to the secondary key columns.
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &primary_variable_group_raw_data_columns, &variables_selected, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
 	{
 		if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
@@ -6270,7 +6278,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	int most_recent_current_inner_table_count = -1;
 	// Proceed, finally, to the datetime columns, if they exist.  (If they don't, they will be added via ALTER TABLE to the temporary table under construction.)
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&most_recent_current_inner_table_count, &result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_datetime)
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&most_recent_current_inner_table_count, &primary_variable_group_raw_data_columns, &result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_datetime)
 	{
 		if (new_column_datetime.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 0)
 		{
@@ -6616,6 +6624,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = primary_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+		datetime_start_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -6641,6 +6650,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = primary_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+		datetime_end_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 	}
 
 	return result;
@@ -8225,6 +8235,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = child_set_number;
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = child_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+		datetime_start_column.number_inner_tables_in_set = child_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 
 		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
@@ -8250,6 +8261,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = child_set_number;
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = child_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+		datetime_end_column.number_inner_tables_in_set = child_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 	}
 
 	return result;
@@ -8395,6 +8407,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
 	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
 	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_start_column.number_inner_tables_in_set = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.back().number_inner_tables_in_set;
 
 	switch (xr_table_category)
 	{
@@ -8473,6 +8486,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
 	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
 	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_end_column.number_inner_tables_in_set = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.back().number_inner_tables_in_set;
+
 	switch (xr_table_category)
 	{
 		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
@@ -8908,7 +8923,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 	// via the VG identifier.
 	// ************************************************************************************************ //
 
-	// Convert data into a far more useful form for construction of K-adic output
+	// Convert column metadata into a far more useful form for construction of K-adic output
 
 	if (failed)
 	{
@@ -8979,6 +8994,8 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 		columns_in_variable_group_view.has_no_datetime_columns_originally = true;
 	}
 
+
+
 	std::for_each(variables_in_group_sorted.cbegin(), variables_in_group_sorted.cend(), [this, &vg_data_table_name, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &is_primary, &columns_in_variable_group_view, &datetime_columns, &the_variable_group, &variables_in_group_primary_keys_metadata](WidgetInstanceIdentifier const & variable_group_set_member)
 	{
 		columns_in_variable_group_view.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
@@ -9041,6 +9058,10 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 			}
 		}
 
+
+		// Populate primary key column data, for those columns that are primary keys
+
+		int number_inner_tables = 0;
 		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table, &variables_in_group_primary_keys_metadata](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key_entry__output__including_multiplicities)
 		{
 
@@ -9053,7 +9074,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 				}
 			});
 
-			std::for_each(primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys.cbegin(), primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys.cend(), [this, &k_count__corresponding_to_top_level_uoa__and_current_dmu_category, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities, &variables_in_group_primary_keys_metadata](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
+			std::for_each(primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys.cbegin(), primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys.cend(), [this, &number_inner_tables, &k_count__corresponding_to_top_level_uoa__and_current_dmu_category, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities, &variables_in_group_primary_keys_metadata](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
 			{
 				if (current_variable_group_primary_key_entry.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))
 				{
@@ -9100,13 +9121,19 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 								column_in_variable_group_data_table.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group = current_variable_group_primary_key_entry.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
 								column_in_variable_group_data_table.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category = k_count__corresponding_to_top_level_uoa__and_current_dmu_category;
 
-								std::for_each(dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cbegin(), dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cend(), [this, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities](Table_UOA_Identifier::DMU_Plus_Count const & dmu_count)
+								std::for_each(dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cbegin(), dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group.cend(), [this, &number_inner_tables, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities](Table_UOA_Identifier::DMU_Plus_Count const & dmu_count)
 								{
 									if (dmu_count.first.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key_entry__output__including_multiplicities.dmu_category))
 									{
 										column_in_variable_group_data_table.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category = dmu_count.second;
 										WidgetInstanceIdentifier_Int_Pair Kad_Data = model->t_kad_count.getIdentifier(*primary_key_entry__output__including_multiplicities.dmu_category.uuid);
 										column_in_variable_group_data_table.total_k_spin_count_across_multiplicities_for_dmu_category = Kad_Data.second;
+
+										int test_total_number_inner_tables = Kad_Data.second / dmu_count.second;
+										if (test_total_number_inner_tables > number_inner_tables)
+										{
+											number_inner_tables = test_total_number_inner_tables;
+										}
 									}
 								});
 
@@ -9128,6 +9155,8 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 				}
 			});
 		});
+
+		column_in_variable_group_data_table.number_inner_tables_in_set = number_inner_tables;
 
 	});
 

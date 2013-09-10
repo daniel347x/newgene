@@ -126,6 +126,7 @@ class ColumnsInTempView
 					, total_k_spin_count_across_multiplicities_for_dmu_category(-1)
 					, is_within_inner_table_corresponding_to_top_level_uoa(false)
 					, inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables(-1)
+					, number_inner_tables_in_set(-1)
 				{
 
 				}
@@ -158,6 +159,7 @@ class ColumnsInTempView
 				int primary_key_index_within_primary_uoa_for_dmu_category;
 				int current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg;
 				int current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+				int number_inner_tables_in_set;
 				int total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
 				int total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 				int total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category;
