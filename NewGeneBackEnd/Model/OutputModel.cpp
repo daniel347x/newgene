@@ -2360,10 +2360,16 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			bool add_as_primary_key_column_in_final_inner_table = false;
 			bool add_as_primary_key_column_in_all_but_final_inner_table = false;
 
-			if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
-				== possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group)
+			if (   possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
+				== possible_duplicate_view_column.number_inner_tables_in_set)
 			{
-				//add_as_column_in_final_inner_table = true;
+				add_as_column_in_final_inner_table = true;
+			}
+
+			if (   possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
+				!= possible_duplicate_view_column.number_inner_tables_in_set)
+			{
+				add_as_column_in_all_but_final_inner_table = true;
 			}
 
 			if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
@@ -2402,9 +2408,14 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				}
 			}
 
-			if (add_as_primary_key_column)
+			if (add_as_primary_key_column && add_as_column_in_final_inner_table)
 			{
-				//if (possible_duplicate_view_column.)
+				add_as_primary_key_column_in_final_inner_table = true;
+			}
+
+			if (add_as_primary_key_column && add_as_column_in_all_but_final_inner_table)
+			{
+				add_as_primary_key_column_in_all_but_final_inner_table = true;
 			}
 
 
@@ -2623,37 +2634,17 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_index_a_primary_key[current_column])
 					{
-
 						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
-						is_index_a_primary_key.push_back(true);
-
-						if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_column])
-						{
-							indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-							is_index_a_primary_key_with_outer_multiplicity_greater_than_1.push_back(true);
-							is_index_a_primary_key_with_outer_multiplicity_equal_to_1.push_back(false);
-						}
-						else
-						{
-							if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
-							{
-								indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-								is_index_a_primary_key_with_outer_multiplicity_greater_than_1.push_back(false);
-								is_index_a_primary_key_with_outer_multiplicity_equal_to_1.push_back(true);
-							}
-							else
-							{
-								is_index_a_primary_key_with_outer_multiplicity_greater_than_1.push_back(false);
-								is_index_a_primary_key_with_outer_multiplicity_equal_to_1.push_back(false);
-							}
-						}
-
 					}
-					else
+
+					if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_column])
 					{
-						is_index_a_primary_key.push_back(false);
-						is_index_a_primary_key_with_outer_multiplicity_greater_than_1.push_back(false);
-						is_index_a_primary_key_with_outer_multiplicity_equal_to_1.push_back(false);
+						indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
+					}
+
+					if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_column])
+					{
+						indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 					}
 
 				}
