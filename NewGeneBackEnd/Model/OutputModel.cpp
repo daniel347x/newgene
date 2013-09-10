@@ -2352,33 +2352,13 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			not_first_variable_group = true;
 		}
 
-		bool add_as_primary_key_column = false;
-		bool add_as_primary_key_with_multiplicity_greater_than_1_in_first_inner_table = false;
-		bool add_as_primary_key_with_multiplicity_greater_than_1 = false;
-		bool add_as_primary_key_column_in_all_but_final_inner_table = false;
-		bool add_as_primary_key_column_in_final_inner_table = false;
 		bool add_as_column_in_final_inner_table = false;
 		bool add_as_column_in_all_but_final_inner_table = false;
-
-		if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-		{
-			is_index_a_primary_key.push_back(true);
-		}
-		else
-		{
-			is_index_a_primary_key.push_back(false);
-		}
-
-		if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
-			&&
-				possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
-				<
-				possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group)
-		{
-		}
-		else
-		{
-		}
+		bool add_as_primary_key_column = false;
+		bool add_as_primary_key_with_multiplicity_greater_than_1 = false;
+		bool add_as_primary_key_with_multiplicity_equal_to_1 = false;
+		bool add_as_primary_key_column_in_final_inner_table = false;
+		bool add_as_primary_key_column_in_all_but_final_inner_table = false;
 
 		if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set < possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group)
 		{
@@ -2435,7 +2415,6 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					add_as_primary_key_column = true;
 					if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 					{
-						add_as_primary_key_with_multiplicity_greater_than_1_in_first_inner_table = true;
 						add_as_primary_key_with_multiplicity_greater_than_1 = true;
 					}
 				}
@@ -2457,6 +2436,72 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 		{
 			add_as_primary_key_column = false;
 		}
+
+
+
+		if (add_as_column_in_final_inner_table)
+		{
+			is_index_in_final_inner_table.push_back(true);
+		}
+		else
+		{
+			is_index_in_final_inner_table.push_back(false);
+		}
+
+		if (add_as_column_in_all_but_final_inner_table)
+		{
+			is_index_in_all_but_final_inner_table.push_back(true);
+		}
+		else
+		{
+			is_index_in_all_but_final_inner_table.push_back(false);
+		}
+
+		if (add_as_primary_key_column)
+		{
+			is_index_a_primary_key.push_back(true);
+		}
+		else
+		{
+			is_index_a_primary_key.push_back(false);
+		}
+
+		if (add_as_primary_key_with_multiplicity_greater_than_1)
+		{
+			is_index_a_primary_key_with_outer_multiplicity_greater_than_1.push_back(true);
+		}
+		else
+		{
+			is_index_a_primary_key_with_outer_multiplicity_greater_than_1.push_back(true);
+		}
+
+		if (add_as_primary_key_with_multiplicity_equal_to_1)
+		{
+			is_index_a_primary_key_with_outer_multiplicity_equal_to_1.push_back(true);
+		}
+		else
+		{
+			is_index_a_primary_key_with_outer_multiplicity_equal_to_1.push_back(false);
+		}
+
+		if (add_as_primary_key_column_in_final_inner_table)
+		{
+			is_index_a_primary_key_in_the_final_inner_table.push_back(true);
+		}
+		else
+		{
+			is_index_a_primary_key_in_the_final_inner_table.push_back(false);
+		}
+
+		if (add_as_primary_key_column_in_all_but_final_inner_table)
+		{
+			is_index_a_primary_key_in_not_the_final_inner_table.push_back(true);
+		}
+		else
+		{
+			is_index_a_primary_key_in_not_the_final_inner_table.push_back(false);
+		}
+
 
 		column_data_type = sqlite3_column_type(stmt_result, current_column);
 		switch (column_data_type)

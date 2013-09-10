@@ -400,7 +400,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						std::vector<bool> is_index_in_final_inner_table;
 						std::vector<bool> is_index_in_all_but_final_inner_table;
-						std::vector<bool> is_index_a_primary_key; // done
+						std::vector<bool> is_index_a_primary_key;
 						std::vector<bool> is_index_a_primary_key_with_outer_multiplicity_greater_than_1;
 						std::vector<bool> is_index_a_primary_key_with_outer_multiplicity_equal_to_1;
 						std::vector<bool> is_index_a_primary_key_in_the_final_inner_table;
