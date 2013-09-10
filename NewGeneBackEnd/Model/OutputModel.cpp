@@ -8821,7 +8821,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		// To deal with multiple rows with the same ID that are being merged in, but some with proper date range and some without,
 		// add a little cache loop here...
-		std::deque<SavedRowData> rows_to_check_for_duplicates_in_newly_joined_primary_key_columns;
+		std::vector<TimeRangeSorter> rows_to_check_for_duplicates_in_newly_joined_primary_key_columns;
 		SavedRowData current_row_of_data;
 		bool use_newest_row_index = false;
 		int which_previous_row_index_to_test_against = 0;
@@ -8848,7 +8848,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 				if (rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.empty())
 				{
-					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(current_row_of_data);
+					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
 					continue;
 				}
 
@@ -8859,7 +8859,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				// to clear them out.
 				// See comments inside the function.
 				use_newest_row_index = false;
-				bool primary_keys_match = TestPrimaryKeyMatch(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[which_previous_row_index_to_test_against], use_newest_row_index,
+				bool primary_keys_match = TestPrimaryKeyMatch(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[which_previous_row_index_to_test_against].the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table, use_newest_row_index,
 															  // Note: important 4th parameter: See note above
 															  true);
 
@@ -8870,7 +8870,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 				if (primary_keys_match)
 				{
-					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(current_row_of_data);
+					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
 					if (use_newest_row_index)
 					{
 						which_previous_row_index_to_test_against = (int)rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.size() - 1;
@@ -8879,13 +8879,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				else
 				{
+
+					// The previous rows (not the current) match on all primary keys except those in the final inner table.
+					// Note that the matching function (TestPrimaryKeyMatch(), above) does not care if there are some
+					// extra NULL primary keys (and fewer non-NULL primary keys) in all but the final inner table
+					// when performing the comparison; unlike the operator<() in the TimeRangeSorter
+					// used in the sort operation, below.
+					//
+					// Therefore, the only possible difference in the rows in this vector
+					// are the date range, and the primary key of the final inner table.
+					
 					use_newest_row_index = false;
 					which_previous_row_index_to_test_against = 0;
-					// The previous rows (not the current) match on all primary keys.
-					// Therefore, the only possible difference is the date range.
+
+					// This function takes advantage of the operator<() (comparison operator) of the TimeRangeSorter class
+					// to sort the elements in the array first by primary keys in all but the final inner table
+					//     (in this case, rows are considered NOT to match if 
+					std::sort(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end());
 
 
-					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(current_row_of_data);
+					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
+
 				}
 
 			}
@@ -10570,6 +10584,12 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 	// If we're here, we already know that, aside from the sequence and NULLs,
 	// we match on the primary key groups from all but the last inner table
+
+	// (1) Test equality of the primary keys from all inner tables but the last
+	//     (allow some inner tables to have NULL key fields: note that the function assumes
+	//      that whatever key fields ARE present already have been tested to match in "TestPrimaryKeyMatch()")
+	// (2) Test equality of the final inner table's primary keys
+	// (3) Test equality of the time range
 
 	// The number of non-NULL primary key groups dominates the decision on sort order.
 
