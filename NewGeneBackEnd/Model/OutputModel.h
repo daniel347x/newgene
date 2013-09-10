@@ -393,6 +393,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns_with_multiplicity_equal_to_1;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns_in_all_but_final_inner_table;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns_in_final_inner_table;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_primary_key_columns_in_all_but_final_inner_table;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_primary_key_columns_in_final_inner_table;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns;
 						std::vector<bool> is_index_a_primary_key;
 						std::vector<bool> is_index_a_primary_key_with_multiplicity_greater_than_1;
@@ -401,6 +403,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<bool> is_index_in_all_but_final_inner_table;
 						std::vector<bool> is_index_a_primary_key_in_the_final_inner_table;
 						std::vector<bool> is_index_a_primary_key_in_not_the_final_inner_table;
+
 						int number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one;
 						int number_of_columns_in_inner_table;
 
