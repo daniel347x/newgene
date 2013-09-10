@@ -3614,9 +3614,9 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 					merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 					merged_data_row.current_parameter_ints.push_back(the_ints[inner_multiplicity_current_index]);
 
+					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)merged_data_row.current_parameter_ints.size()-1));
 					merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, merged_data_row.current_parameter_ints.size()-1));
 					merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, merged_data_row.current_parameter_ints.size()-1));
-					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, (int)merged_data_row.current_parameter_ints.size()-1));
 					if (merged_data_row.is_index_in_final_inner_table[current_index])
 					{
 						merged_data_row.indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::INT64, (int)merged_data_row.current_parameter_ints.size()-1));
@@ -3640,9 +3640,10 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 					// No more.  Add a NULL group
 					merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+
+					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
 					merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 					merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
 					if (merged_data_row.is_index_in_final_inner_table[current_index])
 					{
 						merged_data_row.indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
@@ -3672,9 +3673,10 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 					std::vector<std::string> & the_strings = saved_strings_deque.front();
 					merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
 					merged_data_row.current_parameter_strings.push_back(the_strings[inner_multiplicity_current_index]);
+
+					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)merged_data_row.current_parameter_strings.size()-1));
 					merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, merged_data_row.current_parameter_strings.size()-1));
 					merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::STRING, merged_data_row.current_parameter_strings.size()-1));
-					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, (int)merged_data_row.current_parameter_strings.size()-1));
 					if (merged_data_row.is_index_in_final_inner_table[current_index])
 					{
 						merged_data_row.indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::STRING, (int)merged_data_row.current_parameter_strings.size()-1));
@@ -3698,9 +3700,10 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 					// No more.  Add a NULL group
 					merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+
+					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
 					merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
 					merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, 0));
-					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
 					if (merged_data_row.is_index_in_final_inner_table[current_index])
 					{
 						merged_data_row.indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
