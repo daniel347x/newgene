@@ -125,13 +125,13 @@ class ColumnsInTempView
 					, total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category(-1)
 					, total_k_spin_count_across_multiplicities_for_dmu_category(-1)
 					, is_within_inner_table_corresponding_to_top_level_uoa(false)
-					, inner_table_set_number(-1)
+					, inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables(-1)
 				{
 
 				}
 
 				bool is_within_inner_table_corresponding_to_top_level_uoa;
-				int inner_table_set_number; // 0 for primary, 1 for first child variable group, etc.  Note that each set includes potentially multiple inner tables, depending on the multiplicity of the given primary or child variable group.
+				int inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables; // 0 for primary, 1 for first child variable group, etc.  Note that each set includes potentially multiple inner tables, depending on the multiplicity of the given primary or child variable group.
 				std::string column_name_in_temporary_table; // The name of the column in the temporary view (includes UUID)
 				std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without UUID)
 				std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)
