@@ -4147,6 +4147,17 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index, bool const ignore_final_inner_table)
 {
 
+	// This is a special matching function that tests all the primary keys
+	// (but if the last argument is true, it skips the primary keys in the last inner table)
+	// ... and returns true (a match) if the primary keys from different inner tables
+	// match, regardless of the order they appear in the inner tables.
+	// Furthermore, inner tables with NULL primary keys are skipped during this check.
+	// Alongside this skipping of NULL primary keys in the test,
+	// a true value will be returned (successful match) if one of the rows being
+	// tested has a SMALL number of non-NULL primary keys than the other row,
+	// just so long as all of its non-NULL keys match at least one of the
+	// keys in the other row.
+
 	bool match_failed = false;
 	int entry_number = 0;
 	use_newest_row_index = false;
@@ -4406,25 +4417,25 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 		switch (binding)
 		{
 
-		case SQLExecutor::INT64:
-			{
-				data_int = previous_row_of_data.current_parameter_ints[index];
-				inner_multiplicity_int_vector.push_back(data_int);
-			}
-			break;
+			case SQLExecutor::INT64:
+				{
+					data_int = previous_row_of_data.current_parameter_ints[index];
+					inner_multiplicity_int_vector.push_back(data_int);
+				}
+				break;
 
-		case SQLExecutor::STRING:
-			{
-				data_string = previous_row_of_data.current_parameter_strings[index];
-					inner_multiplicity_string_vector.push_back(data_string);
-			}
-			break;
+			case SQLExecutor::STRING:
+				{
+					data_string = previous_row_of_data.current_parameter_strings[index];
+						inner_multiplicity_string_vector.push_back(data_string);
+				}
+				break;
 
-		case SQLExecutor::NULL_BINDING:
-			{
-				++number_nulls_previous;
-			}
-			break;
+			case SQLExecutor::NULL_BINDING:
+				{
+					++number_nulls_previous;
+				}
+				break;
 
 		}
 
