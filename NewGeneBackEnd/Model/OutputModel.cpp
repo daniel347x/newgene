@@ -2362,45 +2362,30 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			bool add_as_primary_key_column_in_final_inner_table = false;
 			bool add_as_primary_key_column_in_all_but_final_inner_table = false;
 
-			if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set < possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group)
+			if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
+				< possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group)
 			{
 				add_as_column_in_all_but_final_inner_table = true;
-				is_index_in_all_but_final_inner_table.push_back(true);
 				if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
 					add_as_primary_key_column_in_all_but_final_inner_table = true;
-					is_index_a_primary_key_in_not_the_final_inner_table.push_back(true);
-				}
-				else
-				{
-					is_index_a_primary_key_in_not_the_final_inner_table.push_back(false);
 				}
 			}
 			else
 			{
-				is_index_in_all_but_final_inner_table.push_back(false);
 				if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
 					add_as_primary_key_column_in_final_inner_table = true;
-					is_index_a_primary_key_in_the_final_inner_table.push_back(true);
-				}
-				else
-				{
-					is_index_a_primary_key_in_the_final_inner_table.push_back(false);
 				}
 			}
 
-			if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group)
+			if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set
+				== possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group)
 			{
 				add_as_column_in_final_inner_table = true;
-				is_index_in_final_inner_table.push_back(true);
 				if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					is_index_a_primary_key_in_the_final_inner_table.push_back(true);
-				}
-				else
-				{
-					is_index_a_primary_key_in_the_final_inner_table.push_back(false);
+					add_as_primary_key_column_in_final_inner_table = true;
 				}
 			}
 			else
@@ -2408,40 +2393,31 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_in_final_inner_table.push_back(false);
 			}
 
-			if (possible_duplicate_view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+			if (possible_duplicate_view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == 1)
 			{
-				if (possible_duplicate_view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == 1)
+				if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 				{
-					if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-					{
-						add_as_primary_key_column = true;
-						if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
-						{
-							add_as_primary_key_with_multiplicity_greater_than_1 = true;
-						}
-					}
-				}
-				else
-				{
-					// Only primary keys have the following value set to anything but -1,
-					// and only those primary keys we wish to capture in inner tables beyond the first
-					// have the value greater than 1.
+					add_as_primary_key_column = true;
 					if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 					{
-						add_as_primary_key_column = true;
 						add_as_primary_key_with_multiplicity_greater_than_1 = true;
 					}
 				}
 			}
-
-			if (not_first_variable_group)
+			else
 			{
-				add_as_primary_key_column = false;
+				// Only primary keys have the following value set to anything but -1,
+				// and only those primary keys we wish to capture in inner tables beyond the first
+				// have the value greater than 1.
+				if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+				{
+					add_as_primary_key_column = true;
+					add_as_primary_key_with_multiplicity_greater_than_1 = true;
+				}
 			}
 
 
-
-			if (add_as_column_in_final_inner_table)
+			if (add_as_column_in_final_inner_table && !not_first_variable_group)
 			{
 				is_index_in_final_inner_table.push_back(true);
 			}
@@ -2450,7 +2426,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_in_final_inner_table.push_back(false);
 			}
 
-			if (add_as_column_in_all_but_final_inner_table)
+			if (add_as_column_in_all_but_final_inner_table && !not_first_variable_group)
 			{
 				is_index_in_all_but_final_inner_table.push_back(true);
 			}
@@ -2459,7 +2435,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_in_all_but_final_inner_table.push_back(false);
 			}
 
-			if (add_as_primary_key_column)
+			if (add_as_primary_key_column && !not_first_variable_group)
 			{
 				is_index_a_primary_key.push_back(true);
 			}
@@ -2468,7 +2444,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_a_primary_key.push_back(false);
 			}
 
-			if (add_as_primary_key_with_multiplicity_greater_than_1)
+			if (add_as_primary_key_with_multiplicity_greater_than_1 && !not_first_variable_group)
 			{
 				is_index_a_primary_key_with_outer_multiplicity_greater_than_1.push_back(true);
 			}
@@ -2477,7 +2453,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_a_primary_key_with_outer_multiplicity_greater_than_1.push_back(false);
 			}
 
-			if (add_as_primary_key_with_multiplicity_equal_to_1)
+			if (add_as_primary_key_with_multiplicity_equal_to_1 && !not_first_variable_group)
 			{
 				is_index_a_primary_key_with_outer_multiplicity_equal_to_1.push_back(true);
 			}
@@ -2486,7 +2462,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_a_primary_key_with_outer_multiplicity_equal_to_1.push_back(false);
 			}
 
-			if (add_as_primary_key_column_in_final_inner_table)
+			if (add_as_primary_key_column_in_final_inner_table && !not_first_variable_group)
 			{
 				is_index_a_primary_key_in_the_final_inner_table.push_back(true);
 			}
@@ -2495,7 +2471,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_a_primary_key_in_the_final_inner_table.push_back(false);
 			}
 
-			if (add_as_primary_key_column_in_all_but_final_inner_table)
+			if (add_as_primary_key_column_in_all_but_final_inner_table && !not_first_variable_group)
 			{
 				is_index_a_primary_key_in_not_the_final_inner_table.push_back(true);
 			}
@@ -4179,16 +4155,6 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 
 
-
-	// sanity checks
-	if (current_row_of_data.indices_of_primary_key_columns.size() != previous_row_of_data.indices_of_primary_key_columns.size())
-	{
-		boost::format msg("The number of primary key columns in the current row (%1%) is not equal to the number of primary keys of the previous row (%2%).");
-		msg % current_row_of_data.indices_of_primary_key_columns.size() % previous_row_of_data.indices_of_primary_key_columns.size();
-		SetFailureMessage(msg.str());
-		failed = true;
-		return merged_data_row;
-	}
 
 	return merged_data_row;
 
