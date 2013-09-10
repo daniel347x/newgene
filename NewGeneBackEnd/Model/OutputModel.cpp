@@ -3174,11 +3174,13 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow
 
 OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRows(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
 {
+
+	SavedRowData merged_data_row;
+
 	int int_index_current = 0;
 	int string_index_current = 0;
 	int int_index_previous = 0;
 	int string_index_previous = 0;
-	SavedRowData merged_data_row;
 
 	merged_data_row.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one;
 	merged_data_row.number_of_columns_in_inner_table = current_row_of_data.number_of_columns_in_inner_table;
@@ -4143,6 +4145,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	}
 
 	return merged_data_row;
+
 }
 
 bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index, bool const ignore_final_inner_table)
