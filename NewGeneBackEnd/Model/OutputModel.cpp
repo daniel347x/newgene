@@ -2296,7 +2296,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	int current_column = 0;
 	bool reached_first_dates = false;
 	bool on_other_side_of_first_dates = false;
-	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &highest_inner_table_number, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
+	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 
 		inner_table_number.push_back(possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
@@ -8535,7 +8535,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 			}
 
-			std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &current_row_of_data, &first_row_added, &include_current_data, &include_previous_data, &datetime_start_col_name, &datetime_end_col_name, &datetime_range_start, &datetime_range_end, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](std::vector<std::tuple<bool, bool, std::int64_t, std::int64_t>> & row_insert_info)
+			std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &current_row_of_data, &first_row_added, &include_current_data, &include_previous_data, &datetime_start_col_name, &datetime_end_col_name, &datetime_range_start, &datetime_range_end, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](std::tuple<bool, bool, std::int64_t, std::int64_t> const & row_insert_info)
 			{
 
 				bool added = false;
@@ -10670,7 +10670,7 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityGreaterThanOnes(Column
 	}
 }
 
-void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<std::tuple<bool, bool, std::int64_t, std::int64_t>> & rows_to_insert_info, int & previous_datetime_start_column_index, int & current_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_end_column_index, SavedRowData & current_rows_of_data, XR_TABLE_CATEGORY const xr_table_category)
+void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<std::tuple<bool, bool, std::int64_t, std::int64_t>> & rows_to_insert_info, int & previous_datetime_start_column_index, int & current_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_end_column_index, SavedRowData & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
 {
 
 	//int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
@@ -10727,7 +10727,7 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 	if (previous_datetime_is_null && current_datetime_is_null)
 	{
 		// no data
-		return false;
+		return;
 	}
 
 	else if (previous_datetime_is_null)
@@ -10800,12 +10800,12 @@ void OutputModel::OutputGenerator::TestIfNewXRrowShouldBeInserted(std::vector<st
 		if (previous_datetime_start >= previous_datetime_end)
 		{
 			// invalid previous time range values
-			return false;
+			return;
 		}
 		else if (current_datetime_start >= current_datetime_end)
 		{
 			// invalid current time range values
-			return false;
+			return;
 		}
 
 		// Both current and previous time range windows
