@@ -2418,6 +2418,17 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				}
 			}
 
+			if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			{
+				if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+				{
+					if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
+					{
+						add_as_primary_key_with_multiplicity_equal_to_1 = true;
+					}
+				}
+			}
+
 
 			if (add_as_column_in_final_inner_table && !not_first_variable_group)
 			{
