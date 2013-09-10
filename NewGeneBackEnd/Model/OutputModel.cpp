@@ -10565,6 +10565,9 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	// the algorithm should NOT include such a row if there is at least ONE
 	// other row that gets included, which matches on all but the final primary key group.
 
+	// If we're here, we already know that, aside from the sequence and NULLs,
+	// we match on the primary key groups from all but the last inner table
+
 	// The number of non-NULL primary key groups dominates the decision on sort order.
 
 	int the_index = 0;
@@ -10578,6 +10581,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 		{
 			// See note above: The whole point of this time range sorter
 			// is to skip the primary key group in the last inner table.
+			return;
 		}
 
 		SQLExecutor::WHICH_BINDING binding = current_info.first;
@@ -10607,8 +10611,15 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	current_inner_multiplicity = 0;
 	int number_null_primary_key_groups_in_current_row_rhs = 0;
 	current_row_current_inner_table_primary_key_group_is_null = false;
-	std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row_rhs, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
+	std::for_each(rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &rhs, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row_rhs, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
+
+		if (rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[the_index])
+		{
+			// See note above: The whole point of this time range sorter
+			// is to skip the primary key group in the last inner table.
+			return;
+		}
 
 		SQLExecutor::WHICH_BINDING binding = current_info.first;
 
@@ -10624,7 +10635,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 		++the_index;
 		++current_inner_multiplicity;
 
-		if (current_inner_multiplicity == the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (current_inner_multiplicity == rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
 		{
 			current_inner_multiplicity = 0;
 			current_row_current_inner_table_primary_key_group_is_null = false;
@@ -10641,7 +10652,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 	if (number_null_primary_key_groups_in_current_row < number_null_primary_key_groups_in_current_row_rhs)
 	{
-		// We have more NULLs than the RHS row, so we should appear first
+		// We have less NULLs than the RHS row, so we should appear after it
 		return false;
 	}
 
@@ -10800,7 +10811,8 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 		return is_less_than;
 	}
 
-	// If the final inner column primary keys match, then proceed with evaluating the time range to determine the sort.
+
+	// If the final inner column primary keys also match, then proceed with evaluating the time range to determine the sort.
 
 	if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start < rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start)
 	{
