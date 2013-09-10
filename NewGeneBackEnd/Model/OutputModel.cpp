@@ -8894,7 +8894,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 					// This function takes advantage of the operator<() (comparison operator) of the TimeRangeSorter class
 					// to sort the elements in the array first by primary keys in all but the final inner table
-					//     (in this case, rows are considered NOT to match if 
+					//     (in this case, rows are considered NOT to match if there are a different number of
+					//      non-NULL primary keys in all inner tables but the last)
 					std::sort(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end());
 
 
