@@ -8823,18 +8823,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		bool use_newest_row_index = false;
 		int which_previous_row_index_to_test_against = 0;
 		
-		std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>>	row_inserts_info;
-		std::int64_t datetime_range_start = 0;
-		std::int64_t datetime_range_end;
-		bool include_current_data = false;
-		bool include_previous_data = false;
-
 		while (StepData())
 		{
 
 			current_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result);
-			row_inserts_info.clear();
-			PopulateSplitRowInfo_FromCurrentMergingColumns(row_inserts_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, current_row_of_data, xr_table_category);
 
 			if (failed)
 			{
@@ -8885,7 +8877,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					//
 					// Therefore, the only possible difference in the rows in this vector
 					// are the date range, and the primary key of the final inner table.
-					
+
 					use_newest_row_index = false;
 					which_previous_row_index_to_test_against = 0;
 
@@ -8894,37 +8886,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					//     (in this case, rows are considered NOT to match if there are a different number of
 					//      non-NULL primary keys in all inner tables but the last)
 					std::sort(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end());
-					
-					Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, xr_table_category);
+
+					Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category);
 
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
 
 				}
 
 			}
-
-			std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &current_row_of_data, &first_row_added, &include_current_data, &include_previous_data, &datetime_start_col_name, &datetime_end_col_name, &datetime_range_start, &datetime_range_end, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
-			{
-
-				bool added = false;
-				datetime_range_start = std::get<2>(row_insert_info).first;
-				datetime_range_end = std::get<2>(row_insert_info).second;
-				include_current_data = std::get<0>(row_insert_info);;
-				include_previous_data = std::get<1>(row_insert_info);;
-				added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, include_previous_data, include_current_data, xr_table_category);
-				if (failed)
-				{
-					return;
-				}
-				if (added)
-				{
-					sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-					the_prepared_stmt = sql_strings.back().stmt;
-					++current_rows_added;
-					++current_rows_added_since_execution;
-				}
-
-			});
 
 			ExecuteSQL(result);
 
@@ -11303,7 +11272,7 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityGreaterThanOnes(Column
 	}
 }
 
-void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumns(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> & rows_to_insert_info, int & previous_datetime_start_column_index, int & current_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_end_column_index, SavedRowData & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
+void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumns(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> & rows_to_insert_info, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, SavedRowData & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
 {
 
 	//int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
@@ -11748,18 +11717,137 @@ void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumn
 
 }
 
-void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, XR_TABLE_CATEGORY const xr_table_category)
+void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category)
 {
 	
 	// All incoming rows match on all primary keys except those from the final inner table.
 	// However, some of these matching rows might have NULLs for some of the "matching" primary keys.
+
+	// Also, the timerange of the data associated with the final inner table for each row
+	// has not yet been compared against the time range associated with the block of
+	// inner tables that does not include the last.
+
+
+	// First, run through all rows and split / toss out each one individually according to the time range
+	// associated with the first block of inner tables, vs. the timerange associated with
+	// the final inner table.
+	std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> row_inserts_info;
+	std::int64_t datetime_range_start = 0;
+	std::int64_t datetime_range_end;
+	bool include_current_data = false;
+	bool include_previous_data = false;
+	std::vector<SavedRowData> rows_to_check;
+	std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end(), [this, &rows_to_check, &previous_datetime_start_column_index, &current_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_end_column_index, &row_inserts_info, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &xr_table_category](TimeRangeSorter & row)
+	{
+
+		if (failed)
+		{
+			return;
+		}
+
+		PopulateSplitRowInfo_FromCurrentMergingColumns(row_inserts_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, row.GetSavedRowData(), xr_table_category);
+		std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &row, &rows_to_check](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
+		{
+
+			if (failed)
+			{
+				return;
+			}
+
+			bool added = false;
+			datetime_range_start = std::get<2>(row_insert_info).first;
+			datetime_range_end = std::get<2>(row_insert_info).second;
+			include_current_data = std::get<0>(row_insert_info);
+			include_previous_data = std::get<1>(row_insert_info);
+
+			if (!include_previous_data)
+			{
+				// Skip rows that only include data from the final inner table.
+				// The reason is that the INITIAL inner table, which is pulled
+				// straight from the raw data, is guaranteed to also include
+				// this data by itself, so it doesn't need to be re-added here.
+				return;
+			}
+
+			rows_to_check.push_back(row.GetSavedRowData());
+			SavedRowData & current_row = rows_to_check.back();
+
+			current_row.datetime_start = datetime_range_start;
+			current_row.datetime_end = datetime_range_end;
+
+			if (include_current_data)
+			{
+				// data has already been copied into the row, and no data needs to be removed.
+				return;
+			}
+
+
+			// If we're here, we need to remove the data from the final inner table from the row,
+			// because its datetime range is out of range.
+
+			std::int64_t data_int64 = 0;
+			std::string data_string;
+			std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> new_indices;
+			std::vector<std::string> new_strings;
+			std::vector<std::int64_t> new_ints;
+			std::for_each(current_row.indices_of_all_columns.cbegin(), current_row.indices_of_all_columns.cend(), [this, &new_indices, &new_strings, &new_ints, &current_row, &data_int64, &data_string](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding)
+			{
+				
+				switch (binding.first)
+				{
+
+					case SQLExecutor::INT64:
+						{
+							data_int64 = current_row.current_parameter_ints[binding.second];
+							new_ints.push_back(data_int64);
+							new_indices.push_back(std::make_pair(SQLExecutor::INT64, (int)new_ints.size() - 1));
+						}
+						break;
+
+					case SQLExecutor::STRING:
+						{
+							data_string = current_row.current_parameter_strings[binding.second];
+							new_strings.push_back(data_string);
+							new_indices.push_back(std::make_pair(SQLExecutor::STRING, (int)new_strings.size() - 1));
+						}
+						break;
+
+					case SQLExecutor::NULL_BINDING:
+						{
+							new_indices.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
+						}
+						break;
+
+				}
+
+			});
+
+
+			//added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, include_previous_data, include_current_data, xr_table_category);
+
+			//if (failed)
+			//{
+			//	return;
+			//}
+
+			//if (added)
+			//{
+			//	sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+			//	the_prepared_stmt = sql_strings.back().stmt;
+			//	++current_rows_added;
+			//	++current_rows_added_since_execution;
+			//}
+
+		});
 	
-	// First, separate the incoming rows into groups:
+	});
+
+	// Separate the incoming rows into groups:
 	// Each group has the same number of non-NULL primary key groups from all inner tables except the last,
 	// and the same (NULL or non-NULL) value 
 	std::map<TimeRangeSorter, std::deque<TimeRangeSorter>> rowgroups_separated_into_primarykey_sets;
 
-	// First, set a flag to modify the way equality is tested for...
+	// Set a flag to modify the way equality is tested for...
 	// when retrieving deque's from the map, there should be one deque for every
 	// set of rows that match on all primary key fields as discussed in the comment above -
 	// regardless of time range
