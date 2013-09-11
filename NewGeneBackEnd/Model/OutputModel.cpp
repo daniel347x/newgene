@@ -8725,6 +8725,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
 					{
 						if (previous_datetime_end_column_index == -1)
+							std::for_each(new_rows_to_write_to_database.cbegin(), new_rows_to_write_to_database.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](SavedRowData const & new_row_to_write_to_database)
 						{
 							previous_datetime_end_column_index = column_index;
 						}
@@ -8824,7 +8825,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		int which_previous_row_index_to_test_against = 0;
 		std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> row_inserts_info;
 		std::int64_t datetime_range_start = 0;
-		std::int64_t datetime_range_end;
+		std::int64_t datetime_range_end = 0;
 		bool include_current_data = false;
 		bool include_previous_data = false;
 		
@@ -8842,9 +8843,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 			{
+			
 				if (rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.empty())
 				{
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
+					++current_rows_stepped;
 					continue;
 				}
 
@@ -8872,6 +8875,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						which_previous_row_index_to_test_against = (int)rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.size() - 1;
 						use_newest_row_index = false;
 					}
+					++current_rows_stepped;
+					if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
+					{
+						CheckProgressUpdateMethod2(messager, current_rows_stepped);
+					}
+					continue;
 				}
 				else
 				{
@@ -8894,36 +8903,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					//      non-NULL primary keys in all inner tables but the last)
 					std::sort(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end());
 
-					outgoing_rows_of_data.clear();
-					Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(outgoing_rows_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category);
+					HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(outgoing_rows_of_data, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 
-					std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](std::deque<SavedRowData> const & new_rows_to_write_to_database)
+					if (failed)
 					{
-						std::for_each(new_rows_to_write_to_database.cbegin(), new_rows_to_write_to_database.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](SavedRowData const & new_row_to_write_to_database)
-						{
-
-							// The previous function already set both the datetime columns and the data in the previous/current inner tables (including NULLs where necessary),
-							// so just tell the following function to use all data, and to use the existing date and time
-							bool added = CreateNewXRRow(new_row_to_write_to_database, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, new_row_to_write_to_database.datetime_start, new_row_to_write_to_database.datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category);
-
-							if (failed)
-							{
-								return;
-							}
-
-							if (added)
-							{
-								sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
-								the_prepared_stmt = sql_strings.back().stmt;
-								++current_rows_added;
-								++current_rows_added_since_execution;
-							}
-
-						});
-
-					});
+						return;
+					}
 
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
+
+					++current_rows_stepped;
+					if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
+					{
+						CheckProgressUpdateMethod2(messager, current_rows_stepped);
+					}
+
+					continue;
 
 				}
 
@@ -8958,7 +8953,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			}
 
+			if (failed)
+			{
+				return;
+			}
+
 			ExecuteSQL(result);
+
+			if (failed)
+			{
+				return;
+			}
 
 			if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
 			{
@@ -8976,6 +8981,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				CheckProgressUpdateMethod2(messager, current_rows_stepped);
 			}
 
+		}
+
+		if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
+		{
 		}
 
 		ExecuteSQL(result);
@@ -12020,6 +12029,44 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// is some other row in the same time range that is not empty in the final inner table
 		outgoing_rows_of_data.push_back(std::deque<SavedRowData>());
 		HandleSetOfRowsThatMatchOnPrimaryKeys(row_group.second, outgoing_rows_of_data.back(), xr_table_category);
+
+	});
+
+}
+
+void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(std::vector<std::deque<SavedRowData>> & outgoing_rows_of_data, std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another)
+{
+
+	outgoing_rows_of_data.clear();
+	Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(outgoing_rows_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category);
+
+	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](std::deque<SavedRowData> const & new_rows_to_write_to_database)
+	{
+		if (failed)
+		{
+			return;
+		}
+		std::for_each(new_rows_to_write_to_database.cbegin(), new_rows_to_write_to_database.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](SavedRowData const & new_row_to_write_to_database)
+		{
+
+			// The previous function already set both the datetime columns and the data in the previous/current inner tables (including NULLs where necessary),
+			// so just tell the following function to use all data, and to use the existing date and time
+			bool added = CreateNewXRRow(new_row_to_write_to_database, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, new_row_to_write_to_database.datetime_start, new_row_to_write_to_database.datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category);
+
+			if (failed)
+			{
+				return;
+			}
+
+			if (added)
+			{
+				sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+				the_prepared_stmt = sql_strings.back().stmt;
+				++current_rows_added;
+				++current_rows_added_since_execution;
+			}
+
+		});
 
 	});
 
