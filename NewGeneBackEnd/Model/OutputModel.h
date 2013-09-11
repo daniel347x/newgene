@@ -422,6 +422,96 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						bool failed;
 
+						void SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<SQLExecutor::WHICH_BINDING> const & new_bindings)
+						{
+
+							std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> new_indices;
+							int string_index = 0;
+							int int_index = 0;
+							std::for_each(new_bindings.cbegin(), new_bindings.cend(), [this, &string_index, &int_index, &new_indices](SQLExecutor::WHICH_BINDING const binding)
+							{
+								switch (binding)
+								{
+									case SQLExecutor::INT64:
+										{
+											new_indices.push_back(std::make_pair(binding, int_index));
+											++int_index;
+										}
+										break;
+									case SQLExecutor::STRING:
+										{
+											new_indices.push_back(std::make_pair(binding, string_index));
+											++string_index;
+										}
+										break;
+									case SQLExecutor::NULL_BINDING:
+										{
+											new_indices.push_back(std::make_pair(binding, 0));
+										}
+										break;
+								}
+							});
+
+							SwapBindings(new_strings, new_ints, new_indices);
+
+						}
+
+						void SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> new_indices)
+						{
+							current_parameter_ints = new_ints;
+							current_parameter_strings = new_strings;
+							indices_of_all_columns = new_indices;
+
+							current_parameter_which_binding_to_use.clear();
+							indices_of_all_columns_in_final_inner_table.clear();
+							indices_of_all_columns_in_all_but_final_inner_table.clear();
+							indices_of_primary_key_columns.clear();
+							indices_of_primary_key_columns_with_multiplicity_greater_than_1.clear();
+							indices_of_primary_key_columns_with_multiplicity_equal_to_1.clear();
+							indices_of_all_primary_key_columns_in_final_inner_table.clear();
+							indices_of_all_primary_key_columns_in_all_but_final_inner_table.clear();
+							int column_index = 0;
+							int current_int_index = 0;
+							int current_string_index = 0;
+							std::for_each(indices_of_all_columns.cbegin(), indices_of_all_columns.cend(), [this, &column_index, &current_int_index, &current_string_index](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding)
+							{
+								current_parameter_which_binding_to_use.push_back(binding.first);
+
+								std::pair<SQLExecutor::WHICH_BINDING, int> current_int_binding_to_add = std::make_pair(binding.first, current_int_index);
+								std::pair<SQLExecutor::WHICH_BINDING, int> current_string_binding_to_add = std::make_pair(binding.first, current_string_index);
+								std::pair<SQLExecutor::WHICH_BINDING, int> current_null_binding_to_add = std::make_pair(binding.first, 0);
+
+								AddBinding(is_index_in_final_inner_table, indices_of_all_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+								AddBinding(is_index_in_all_but_final_inner_table, indices_of_all_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+								AddBinding(is_index_a_primary_key, indices_of_primary_key_columns, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+								AddBinding(is_index_a_primary_key_with_outer_multiplicity_greater_than_1, indices_of_primary_key_columns_with_multiplicity_greater_than_1, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+								AddBinding(is_index_a_primary_key_with_outer_multiplicity_equal_to_1, indices_of_primary_key_columns_with_multiplicity_equal_to_1, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+								AddBinding(is_index_a_primary_key_in_the_final_inner_table, indices_of_all_primary_key_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+								AddBinding(is_index_a_primary_key_in_not_the_final_inner_table, indices_of_all_primary_key_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+
+								switch (binding.first)
+								{
+									case SQLExecutor::INT64:
+										{
+											++current_int_index;
+										}
+										break;
+									case SQLExecutor::STRING:
+										{
+											++current_string_index;
+										}
+										break;
+									case SQLExecutor::NULL_BINDING:
+										{
+
+										}
+										break;
+								}
+
+								++column_index;
+							});
+						}
+
 						void AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, int> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, int> const & potential_current_string_binding_to_add)
 						{
 							if (binding_test[binding_index])
@@ -515,6 +605,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						SavedRowData the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table;
 						bool operator<(TimeRangeSorter const & rhs) const;
 						SavedRowData const & GetSavedRowData() const { return the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; }
+						SavedRowData & GetSavedRowData() { return the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; }
 
 						bool ShouldReturnEqual_EvenIf_TimeRangesAreDifferent;
 						bool DoCompareFinalInnerTable;
@@ -562,7 +653,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void CloseObtainData();
 				std::int64_t ObtainCount(ColumnsInTempView const & column_set);
 				bool StepData();
-				bool CreateNewXRRow(SavedRowData const & current_row_of_data, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView const & previous_x_columns, ColumnsInTempView & current_xr_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category);
+				bool CreateNewXRRow(SavedRowData const & current_row_of_data, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView const & previous_x_columns, ColumnsInTempView & current_xr_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category, bool const sort_only);
 				bool TestPrimaryKeyMatch(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index, bool const ignore_final_inner_table = false);
 				bool ProcessCurrentDataRowOverlapWithPreviousSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data, XR_TABLE_CATEGORY const xr_table_category);
 				SavedRowData MergeRows(SavedRowData const & current_row_of_data, SavedRowData const & first_incoming_row, XR_TABLE_CATEGORY const xr_table_category);
@@ -575,7 +666,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void SortOrderByMultiplicityOnes(ColumnsInTempView & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first);
 				void SortOrderByMultiplicityGreaterThanOnes(ColumnsInTempView & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first);
 				void PopulateSplitRowInfo_FromCurrentMergingColumns(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> & rows_to_insert_info, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, SavedRowData const & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category);
-				void Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(std::deque<SavedRowData> & outgoing_rows_of_data, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category);
+				void Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, std::deque<SavedRowData> & outgoing_rows_of_data, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category);
 				void HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 
 				template <typename ROW_DEQUE>
