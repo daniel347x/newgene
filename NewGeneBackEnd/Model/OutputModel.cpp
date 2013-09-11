@@ -3505,13 +3505,13 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 			if (country1vec.size() == 1 && country2vec.size() == 1 && country3vec.size() == 1)
 			{
-				int country_1 = country1vec[0];
-				int country_2 = country2vec[0];
-				int country_3 = country3vec[0];
-				if (country_1 == 200 && country_2 == 220 && country_3 == 315)
-				{
-					bool break_ = true;
-				}
+				//int country_1 = country1vec[0];
+				//int country_2 = country2vec[0];
+				//int country_3 = country3vec[0];
+				//if (country_1 == 200 && country_2 == 220 && country_3 == 315)
+				//{
+				//	bool break_ = true;
+				//}
 			}
 		}
 	}
@@ -11793,7 +11793,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// the final inner table.
 
 
-	std::vector<SavedRowData> rows_to_check;
+	std::vector<TimeRangeSorter> rows_to_check;
 
 
 	std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> row_inserts_info;
@@ -11834,8 +11834,8 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 				return;
 			}
 
-			rows_to_check.push_back(row.GetSavedRowData());
-			SavedRowData & current_row = rows_to_check.back();
+			rows_to_check.push_back(row);
+			SavedRowData & current_row = rows_to_check.back().the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table;
 			current_row.datetime_start = datetime_range_start;
 			current_row.datetime_end = datetime_range_end;
 			current_row.error_message.clear();
@@ -11913,7 +11913,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			current_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.clear();
 			current_row.indices_of_all_primary_key_columns_in_final_inner_table.clear();
 			current_row.indices_of_all_primary_key_columns_in_all_but_final_inner_table.clear();
-			int column_index = 0;
+			column_index = 0;
 			int current_int_index = 0;
 			int current_string_index = 0;
 			std::for_each(current_row.indices_of_all_columns.cbegin(), current_row.indices_of_all_columns.cend(), [this, &current_row, &column_index, &current_int_index, &current_string_index](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding)
@@ -11980,9 +11980,9 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	});
 
 	// Revert the flags
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::deque<TimeRangeSorter> & row_group)
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
 	{
-		std::for_each(row_group.begin(), row_group.end(), [](TimeRangeSorter & row)
+		std::for_each(row_group.second.begin(), row_group.second.end(), [](TimeRangeSorter & row)
 		{
 			row.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = false;
 		});
@@ -11992,13 +11992,13 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// The result will be that each deque will have all rows matching on primary key groups (including the number of NULL's,
 	// and including the final inner table's primary key group),
 	// and these rows inside each deque will be sorted according to time range.
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::deque<TimeRangeSorter> & row_group)
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
 	{
-		std::sort(row_group.begin(), row_group.end());
+		std::sort(row_group.second.begin(), row_group.second.end());
 	});
 
 	// Process the rows inside each row group
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &current_row_of_data, &incoming_rows_of_data, &intermediate_rows_of_data, &outgoing_rows_of_data, &xr_table_category](std::deque<TimeRangeSorter> & row_group)
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &outgoing_rows_of_data, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
 	{
 
 		// Process rows according to time range.
@@ -12013,12 +12013,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// for all OVERLAPPING time ranges, and in this way eliminates
 		// rows that are empty in the final inner table when there
 		// is some other row in the same time range that is not empty in the final inner table
-		HandleSetOfRowsThatMatchOnPrimaryKeys(row_group, outgoing_rows_of_data, xr_table_category);
-
-		if (failed)
-		{
-			return;
-		}
+		HandleSetOfRowsThatMatchOnPrimaryKeys(row_group.second, outgoing_rows_of_data, xr_table_category);
 
 	});
 
