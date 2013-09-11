@@ -3054,7 +3054,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				bound_parameter_ints.clear();
 				bound_parameter_strings.clear();
 				bound_parameter_which_binding_to_use.clear();
-				CreateNewXRRow(sorting_row_of_data.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, previous_result_columns, dummycols, true, true, xr_table_category, false);
+				CreateNewXRRow(sorting_row_of_data.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, previous_result_columns, dummycols, true, true, xr_table_category, false, order_within_rows);
 
 				// Remove the last two bindings, which are the new timerange columns - we don't have them yet, and we don't need them
 
@@ -6837,7 +6837,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_row_of_data, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView const & previous_x_or_mergedfinalplusnewfinal_columns, ColumnsInTempView & current_xr_or_completemerge_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category, bool const sort_only)
+bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_row_of_data, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView const & previous_x_or_mergedfinalplusnewfinal_columns, ColumnsInTempView & current_xr_or_completemerge_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category, bool const sort_only, bool const no_new_column_names)
 {
 
 	// ********************************************************************************** //
@@ -6905,15 +6905,18 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 		});
 
-		// The two new "merged" time range columns
-		if (!first_column_name)
+		if (!no_new_column_names)
 		{
+			// The two new "merged" time range columns
+			if (!first_column_name)
+			{
+				sql_add_xr_row += ", ";
+			}
+			first_column_name = false;
+			sql_add_xr_row += datetime_start_col_name;
 			sql_add_xr_row += ", ";
+			sql_add_xr_row += datetime_end_col_name;
 		}
-		first_column_name = false;
-		sql_add_xr_row += datetime_start_col_name;
-		sql_add_xr_row += ", ";
-		sql_add_xr_row += datetime_end_col_name;
 
 		sql_add_xr_row += ") VALUES (";
 
@@ -6936,19 +6939,22 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 		});
 
-		// The two new "merged" time range columns
-		if (!first_column_value)
+		if (!no_new_column_names)
 		{
+			// The two new "merged" time range columns
+			if (!first_column_value)
+			{
+				sql_add_xr_row += ", ";
+			}
+			first_column_value = false;
+			sql_add_xr_row += "?";
+			sql_add_xr_row += itoa(index, cindex, 10);
+			++index;
 			sql_add_xr_row += ", ";
+			sql_add_xr_row += "?";
+			sql_add_xr_row += itoa(index, cindex, 10);
+			++index;
 		}
-		first_column_value = false;
-		sql_add_xr_row += "?";
-		sql_add_xr_row += itoa(index, cindex, 10);
-		++index;
-		sql_add_xr_row += ", ";
-		sql_add_xr_row += "?";
-		sql_add_xr_row += itoa(index, cindex, 10);
-		++index;
 
 		sql_add_xr_row += ")";
 
@@ -9068,7 +9074,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					{
 						datetime_range_end = timerange_end;
 					}
-					added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, include_previous_data, include_current_data, xr_table_category, false);
+					added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, include_previous_data, include_current_data, xr_table_category, false, false);
 					if (failed)
 					{
 						return;
@@ -12150,7 +12156,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		bound_parameter_ints.clear();
 		bound_parameter_strings.clear();
 		bound_parameter_which_binding_to_use.clear();
-		CreateNewXRRow(row.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, dummycols, true, true, xr_table_category, false);
+		CreateNewXRRow(row.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, dummycols, true, true, xr_table_category, false, false);
 
 		// Remove the last two bindings, which are the new timerange columns - we don't have them yet, and we don't need them
 
@@ -12392,7 +12398,7 @@ void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroup
 		{
 			datetime_end = timerange_end;
 		}
-		bool added = CreateNewXRRow(new_row_to_write_to_database, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category, false);
+		bool added = CreateNewXRRow(new_row_to_write_to_database, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category, false, false);
 
 		if (failed)
 		{
