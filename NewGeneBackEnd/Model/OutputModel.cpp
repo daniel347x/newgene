@@ -8822,6 +8822,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		SavedRowData current_row_of_data;
 		bool use_newest_row_index = false;
 		int which_previous_row_index_to_test_against = 0;
+		std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> row_inserts_info;
+		std::int64_t datetime_range_start = 0;
+		std::int64_t datetime_range_end;
+		bool include_current_data = false;
+		bool include_previous_data = false;
 		
 		std::deque<SavedRowData> outgoing_rows_of_data;
 
@@ -8916,6 +8921,35 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
 
 				}
+
+			}
+			else
+			{
+
+				row_inserts_info.clear();
+				PopulateSplitRowInfo_FromCurrentMergingColumns(row_inserts_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, current_row_of_data, xr_table_category);
+				std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &current_row_of_data, &first_row_added, &include_current_data, &include_previous_data, &datetime_start_col_name, &datetime_end_col_name, &datetime_range_start, &datetime_range_end, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
+				{
+
+					bool added = false;
+					datetime_range_start = std::get<2>(row_insert_info).first;
+					datetime_range_end = std::get<2>(row_insert_info).second;
+					include_current_data = std::get<0>(row_insert_info);;
+					include_previous_data = std::get<1>(row_insert_info);;
+					added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, include_previous_data, include_current_data, xr_table_category);
+					if (failed)
+					{
+						return;
+					}
+					if (added)
+					{
+						sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+						the_prepared_stmt = sql_strings.back().stmt;
+						++current_rows_added;
+						++current_rows_added_since_execution;
+					}
+
+				});
 
 			}
 
