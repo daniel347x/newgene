@@ -11818,7 +11818,7 @@ void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumn
 
 }
 
-void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(std::vector<std::deque<SavedRowData>> & outgoing_rows_of_data, std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category)
+void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(std::deque<SavedRowData> & outgoing_rows_of_data, std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category)
 {
 	
 	// All incoming rows match on all primary keys except those from the final inner table.
@@ -11838,6 +11838,8 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 	std::vector<TimeRangeSorter> rows_to_check;
 
+	std::vector<SavedRowData> saved_rows_with_multiple_nulls;
+
 
 	// The incoming rows may not match on the data in the final inner table.
 	// These rows come straight from the input -
@@ -11847,7 +11849,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	std::int64_t datetime_range_end;
 	bool include_current_data = false;
 	bool include_previous_data = false;
-	std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cbegin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cend(), [this, &rows_to_check, &previous_datetime_start_column_index, &current_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_end_column_index, &row_inserts_info, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &xr_table_category](TimeRangeSorter const & row)
+	std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cbegin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cend(), [this, &saved_rows_with_multiple_nulls, &rows_to_check, &previous_datetime_start_column_index, &current_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_end_column_index, &row_inserts_info, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &xr_table_category](TimeRangeSorter const & row)
 	{
 
 		if (failed)
@@ -11882,6 +11884,8 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			// A previous iteration of the multiplicity algorithm
 			// was unable to find a matching value here -
 			// and so we won't be able to, either.
+			// Just save the row as-is without further processing.
+			saved_rows_with_multiple_nulls.push_back(row);
 			return;
 		}
 
@@ -11896,6 +11900,8 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		row_inserts_info.clear();
 		PopulateSplitRowInfo_FromCurrentMergingColumns(row_inserts_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, row.GetSavedRowData(), xr_table_category);
 		
+		// Throw out redundant rows.
+		//
 		// The following block will NOT include rows that only include the data from the final inner table,
 		// but not the previous data,
 		// because this data is guaranteed to be in place from the initial primary table.
@@ -12069,7 +12075,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// Now perform the actual binning of the rows into separate deques,
 	// with each deque matchin on all but the final inner table (including NULL count),
 	// in arbitrary time range order.
-	std::for_each(rows_to_check.begin(), rows_to_check.end(), [&rowgroups_separated_into_primarykey_sets](TimeRangeSorter & row)
+	std::for_each(rows_to_check.cbegin(), rows_to_check.cend(), [&rowgroups_separated_into_primarykey_sets](TimeRangeSorter const & row)
 	{
 		rowgroups_separated_into_primarykey_sets[row].push_back(row);
 	});
@@ -12111,6 +12117,9 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			return;
 		}
 
+		// TEST the rows only!!!!!!
+		// Do not actually use this data!!!
+		//
 		// The following function internally calls MergeRows()
 		// for all OVERLAPPING time ranges, and in this way eliminates
 		// rows that are empty in the final inner table when there
@@ -12144,7 +12153,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 	// ******************************************************************************* //
 	// Part two: Rerun the entire algorithm,
-	// this time grouping rows into deques INCLUDING
+	// this time grouping rows into deque's INCLUDING
 	// the final inner table primary key group.
 	// ******************************************************************************* //
 
@@ -12152,21 +12161,18 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// Separate the incoming rows into groups:
 	// Each group has a non-NULL value in EVERY inner table,
 	// including the last
-	rowgroups_separated_into_primarykey_sets;
+	rowgroups_separated_into_primarykey_sets.clear();
 
-	// Set a flag to modify the way equality is tested for when element is inserted into the map
-	// in the next loop (using operator[], which internally calls TimeRangeSorter::operator<() for equality comparison)
-	// when retrieving deque's from the map, there should be one deque for every
-	// set of rows that match on all primary key fields EXCEPT the last.
-	// They will include all time ranges within this group.
+	// This time, bucket the rows into groups INCLUDING the final inner table's primary key group.
 	std::for_each(rows_to_check.begin(), rows_to_check.end(), [](TimeRangeSorter & row)
 	{
 		row.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = true;
+		row.DoCompareFinalInnerTable = true;
 	});
 
 	// Now perform the actual binning of the rows into separate deques,
-	// with each deque matchin on all but the final inner table (including NULL count),
-	// in arbitrary time range order.
+	// this time with each group guaranteed to have ALL inner tables 
+	// with non-NULL data, and matching on all inner table primary key groups.
 	std::for_each(rows_to_check.begin(), rows_to_check.end(), [&rowgroups_separated_into_primarykey_sets](TimeRangeSorter & row)
 	{
 		rowgroups_separated_into_primarykey_sets[row].push_back(row);
@@ -12189,6 +12195,67 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	{
 		std::sort(row_group.second.begin(), row_group.second.end());
 	});
+
+
+	// Same as before, except this time it's not a test...
+	// Unlike the above equivalent-looking loop,
+	// each group handled in the following loop has the SAME primary key group
+	// in the final inner table.
+	// So there won't be garbage produced during the merge.
+
+	std::vector<SavedRowData> saved_complete_rows;
+
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &outgoing_rows_of_data, &saved_complete_rows, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	{
+
+		// Process rows according to time range.
+		// The incoming rows are sorted according to time range (first on start datetime, then on end datetime)
+
+		if (failed)
+		{
+			return;
+		}
+
+		// This time it's real data that comes out!
+		// (Unlike the above equivalent-looking loop.)
+		//
+		// The following function internally calls MergeRows()
+		// but this time all primary keys match, so the results
+		// will be a legitimate merging/splitting of rows into proper time ranges.
+		std::deque<SavedRowData> outgoing_real_rows;
+		HandleSetOfRowsThatMatchOnPrimaryKeys(row_group.second, outgoing_real_rows, xr_table_category);
+
+		// real_rows returns with two categories of rows, just as test_rows
+		// in the above equivalent-looking loop did:
+		// those for which
+		// the merging algorithm was unable to find data for the final inner table.
+		// in that time range, and those that do have data in the final inner table.
+		//
+		// However, unlike in the above loop, this time we want to keep only
+		// the rows that have data in the final inner table,
+		// because we've already saved the rows that don't (from the above loop).
+
+		std::for_each(outgoing_real_rows.cbegin(), outgoing_real_rows.cend(), [&saved_complete_rows](const SavedRowData & test_row)
+		{
+			if (test_row.indices_of_all_primary_key_columns_in_final_inner_table[0].first != SQLExecutor::NULL_BINDING)
+			{
+				// The time range in this row represents a time range for which no data could be found
+				// for the final inner table.  It must be saved.
+				saved_complete_rows.push_back(test_row);
+			}
+		});
+
+	});
+
+	// We have the final results.
+	// Rows that arrived from the previous multiplicity stage with NULL's for some primary key inner tables, even before being merged with the current multiplicity, are saved in "saved_rows_with_multiple_nulls".
+	// Rows with legitimate NULLs in the final inner table are saved in "saved_rows_with_null_in_final_inner_table".
+	// Rows with all inner tables populated with data are saved in "saved_complete_rows".
+
+	outgoing_rows_of_data.insert(outgoing_rows_of_data.begin(), saved_rows_with_multiple_nulls.cbegin(), saved_rows_with_multiple_nulls.cend());
+	outgoing_rows_of_data.insert(outgoing_rows_of_data.begin(), saved_complete_rows.cbegin(), saved_complete_rows.cend());
+	outgoing_rows_of_data.insert(outgoing_rows_of_data.begin(), saved_rows_with_null_in_final_inner_table.cbegin(), saved_rows_with_null_in_final_inner_table.cend());
+
 }
 
 void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(std::vector<std::deque<SavedRowData>> & outgoing_rows_of_data, std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another)
