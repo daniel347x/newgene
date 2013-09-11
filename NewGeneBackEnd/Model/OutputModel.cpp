@@ -12052,6 +12052,13 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		bound_parameter_which_binding_to_use.clear();
 		CreateNewXRRow(row.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, dummycols, true, true, xr_table_category, false);
 
+		// Remove the last two bindings, which are the new timerange columns - we don't have them yet, and we don't need them
+
+		bound_parameter_ints.pop_back();
+		bound_parameter_ints.pop_back();
+		bound_parameter_which_binding_to_use.pop_back();
+		bound_parameter_which_binding_to_use.pop_back();
+
 		// Set the new inner table order
 		row.GetSavedRowData().SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 
