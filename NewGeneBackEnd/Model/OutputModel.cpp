@@ -7719,6 +7719,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 						int number_to_add = number_columns_first_sets - columns_in_single_inner_table.bindings.size();
 						for (int n=0; n<number_to_add; ++n)
 						{
+							bound_parameter_ints.push_back(0);
 							bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
 						}
 						// Now populate with the previous values
