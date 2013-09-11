@@ -3073,7 +3073,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				
 				if (failed)
 				{
-					return;
+					break;
 				}
 
 				ExecuteSQL(result);
