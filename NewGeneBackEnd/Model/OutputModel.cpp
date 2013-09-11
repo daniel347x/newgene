@@ -3094,7 +3094,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 }
 
-bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithFrontSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data, XR_TABLE_CATEGORY const xr_table_category)
+bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data, XR_TABLE_CATEGORY const xr_table_category)
 {
 
 	if (current_row_of_data.datetime_start >= first_incoming_row.datetime_end)
@@ -10335,7 +10335,7 @@ void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches(std::in
 				break;
 			}
 			SavedRowData & first_incoming_row = incoming_rows_of_data.front();
-			current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, xr_table_category);
+			current_row_complete = ProcessCurrentDataRowOverlapWithPreviousSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, xr_table_category);
 			if (failed)
 			{
 				return;
@@ -11916,7 +11916,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 					break;
 				}
 				TimeRangeSorter & first_incoming_row = incoming_rows_of_data.front();
-				current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, xr_table_category);
+				//current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, xr_table_category);
 				if (failed)
 				{
 					return;
@@ -11935,7 +11935,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		}
 
 		outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-		WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category);
+		//WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category);
 		if (failed)
 		{
 			return;
