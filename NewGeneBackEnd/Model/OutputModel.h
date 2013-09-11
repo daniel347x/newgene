@@ -422,6 +422,31 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						bool failed;
 
+						void AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, int> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, int> const & potential_current_string_binding_to_add)
+						{
+							if (binding_test[binding_index])
+							{
+								switch (binding_type)
+								{
+								case SQLExecutor::INT64:
+									{
+										bindings.push_back(potential_current_int_binding_to_add);
+									}
+									break;
+								case SQLExecutor::STRING:
+									{
+										bindings.push_back(potential_current_string_binding_to_add);
+									}
+									break;
+								case SQLExecutor::NULL_BINDING:
+									{
+										bindings.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
+									}
+									break;
+								}
+							}
+						}
+
 				};
 
 				enum XR_TABLE_CATEGORY

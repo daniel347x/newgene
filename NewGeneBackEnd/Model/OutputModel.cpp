@@ -11728,15 +11728,21 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// inner tables that does not include the last.
 
 
+
+
 	// First, run through all rows and split / toss out each one individually according to the time range
 	// associated with the first block of inner tables, vs. the timerange associated with
 	// the final inner table.
+
+
+	std::vector<SavedRowData> rows_to_check;
+
+
 	std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> row_inserts_info;
 	std::int64_t datetime_range_start = 0;
 	std::int64_t datetime_range_end;
 	bool include_current_data = false;
 	bool include_previous_data = false;
-	std::vector<SavedRowData> rows_to_check;
 	std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end(), [this, &rows_to_check, &previous_datetime_start_column_index, &current_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_end_column_index, &row_inserts_info, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &xr_table_category](TimeRangeSorter & row)
 	{
 
@@ -11746,6 +11752,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		}
 
 		PopulateSplitRowInfo_FromCurrentMergingColumns(row_inserts_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, row.GetSavedRowData(), xr_table_category);
+		
 		std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &row, &rows_to_check](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
 		{
 
@@ -11771,29 +11778,40 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 			rows_to_check.push_back(row.GetSavedRowData());
 			SavedRowData & current_row = rows_to_check.back();
-
 			current_row.datetime_start = datetime_range_start;
 			current_row.datetime_end = datetime_range_end;
+			current_row.error_message.clear();
 
 			if (include_current_data)
 			{
+
 				// data has already been copied into the row, and no data needs to be removed.
 				return;
+
 			}
 
 
 			// If we're here, we need to remove the data from the final inner table from the row,
 			// because its datetime range is out of range.
 
+
 			std::int64_t data_int64 = 0;
 			std::string data_string;
 			std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> new_indices;
 			std::vector<std::string> new_strings;
 			std::vector<std::int64_t> new_ints;
-			std::for_each(current_row.indices_of_all_columns.cbegin(), current_row.indices_of_all_columns.cend(), [this, &new_indices, &new_strings, &new_ints, &current_row, &data_int64, &data_string](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding)
+			int column_index = 0;
+			std::for_each(row.GetSavedRowData().indices_of_all_columns.cbegin(), row.GetSavedRowData().indices_of_all_columns.cend(), [this, &current_row, &column_index, &new_indices, &new_strings, &new_ints, &data_int64, &data_string](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding)
 			{
+
+				SQLExecutor::WHICH_BINDING binding_to_use = binding.first;
+
+				if (current_row.is_index_in_final_inner_table[column_index])
+				{
+					binding_to_use = SQLExecutor::NULL_BINDING;
+				}
 				
-				switch (binding.first)
+				switch (binding_to_use)
 				{
 
 					case SQLExecutor::INT64:
@@ -11820,6 +11838,62 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 				}
 
+				++column_index;
+
+			});
+
+
+			current_row.current_parameter_ints = new_ints;
+			current_row.current_parameter_strings = new_strings;
+			current_row.indices_of_all_columns = new_indices;
+
+			current_row.current_parameter_which_binding_to_use.clear();
+			current_row.indices_of_all_columns_in_final_inner_table.clear();
+			current_row.indices_of_all_columns_in_all_but_final_inner_table.clear();
+			current_row.indices_of_primary_key_columns.clear();
+			current_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.clear();
+			current_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.clear();
+			current_row.indices_of_all_primary_key_columns_in_final_inner_table.clear();
+			current_row.indices_of_all_primary_key_columns_in_all_but_final_inner_table.clear();
+			int column_index = 0;
+			int current_int_index = 0;
+			int current_string_index = 0;
+			std::for_each(current_row.indices_of_all_columns.cbegin(), current_row.indices_of_all_columns.cend(), [this, &current_row, &column_index, &current_int_index, &current_string_index](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding)
+			{
+				current_row.current_parameter_which_binding_to_use.push_back(binding.first);
+
+				std::pair<SQLExecutor::WHICH_BINDING, int> current_int_binding_to_add = std::make_pair(binding.first, current_int_index);
+				std::pair<SQLExecutor::WHICH_BINDING, int> current_string_binding_to_add = std::make_pair(binding.first, current_string_index);
+				std::pair<SQLExecutor::WHICH_BINDING, int> current_null_binding_to_add = std::make_pair(binding.first, 0);
+
+				current_row.AddBinding(current_row.is_index_in_final_inner_table, current_row.indices_of_all_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+				current_row.AddBinding(current_row.is_index_in_all_but_final_inner_table, current_row.indices_of_all_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+				current_row.AddBinding(current_row.is_index_a_primary_key, current_row.indices_of_primary_key_columns, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+				current_row.AddBinding(current_row.is_index_a_primary_key_with_outer_multiplicity_greater_than_1, current_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+				current_row.AddBinding(current_row.is_index_a_primary_key_with_outer_multiplicity_equal_to_1, current_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+				current_row.AddBinding(current_row.is_index_a_primary_key_in_the_final_inner_table, current_row.indices_of_all_primary_key_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+				current_row.AddBinding(current_row.is_index_a_primary_key_in_not_the_final_inner_table, current_row.indices_of_all_primary_key_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+
+				switch (binding.first)
+				{
+					case SQLExecutor::INT64:
+						{
+							++current_int_index;
+						}
+						break;
+					case SQLExecutor::STRING:
+						{
+							++current_string_index;
+						}
+						break;
+					case SQLExecutor::NULL_BINDING:
+						{
+
+						}
+						break;
+				}
+
+				++column_index;
 			});
 
 
@@ -11851,13 +11925,13 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// when retrieving deque's from the map, there should be one deque for every
 	// set of rows that match on all primary key fields as discussed in the comment above -
 	// regardless of time range
-	std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end(), [](TimeRangeSorter & row)
+	std::for_each(rows_to_check.begin(), rows_to_check.end(), [](TimeRangeSorter & row)
 	{
 		row.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = true;
 	});
 
 	// Now bin the rows into separate deques
-	std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end(), [&rowgroups_separated_into_primarykey_sets](TimeRangeSorter & row)
+	std::for_each(rows_to_check.begin(), rows_to_check.end(), [&rowgroups_separated_into_primarykey_sets](TimeRangeSorter & row)
 	{
 		rowgroups_separated_into_primarykey_sets[row].push_back(row);
 	});
