@@ -8912,6 +8912,23 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
 
+					ExecuteSQL(result);
+
+					if (failed)
+					{
+						return;
+					}
+
+					if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
+					{
+						boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+						msg % current_rows_stepped % current_number_rows_to_sort;
+						messager.SetPerformanceLabel(msg.str());
+						EndTransaction();
+						BeginNewTransaction();
+						current_rows_added_since_execution = 0;
+					}
+
 					++current_rows_stepped;
 					if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
 					{
@@ -8985,6 +9002,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 		{
+			HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(outgoing_rows_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
+			if (failed)
+			{
+				return;
+			}
 		}
 
 		ExecuteSQL(result);
