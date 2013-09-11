@@ -483,6 +483,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 					public:
 
 						TimeRangeSorter() : ShouldReturnEqual_EvenIf_TimeRangesAreDifferent(false) {}
+						TimeRangeSorter(TimeRangeSorter const & rhs) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = rhs.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent; }
 						TimeRangeSorter(SavedRowData const & rhs) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs; }
 						SavedRowData the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table;
 						bool operator<(TimeRangeSorter const & rhs) const;
@@ -545,7 +546,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void SortOrderByMultiplicityOnes(ColumnsInTempView & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first);
 				void SortOrderByMultiplicityGreaterThanOnes(ColumnsInTempView & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first);
 				void PopulateSplitRowInfo_FromCurrentMergingColumns(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> & rows_to_insert_info, int & previous_datetime_start_column_index, int & current_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_end_column_index, SavedRowData & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category);
-				void Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns);
+				void Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, XR_TABLE_CATEGORY const xr_table_category);
 
 				// Progress bar variables
 				void DetermineTotalNumberRows();

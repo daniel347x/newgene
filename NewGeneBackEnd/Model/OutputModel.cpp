@@ -8897,10 +8897,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					//     (in this case, rows are considered NOT to match if there are a different number of
 					//      non-NULL primary keys in all inner tables but the last)
 					std::sort(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end());
-
 					
-					Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns);
-
+					Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, xr_table_category);
 
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
 
@@ -11811,7 +11809,7 @@ void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumn
 
 }
 
-void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns)
+void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, XR_TABLE_CATEGORY const xr_table_category)
 {
 	
 	// All incoming rows match on all primary keys except those from the final inner table.
@@ -11856,8 +11854,97 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	});
 
 	// Process the rows inside each row group
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::deque<TimeRangeSorter> & row_group)
+	TimeRangeSorter current_row_of_data;
+	std::deque<TimeRangeSorter> incoming_rows_of_data;
+	std::deque<TimeRangeSorter> intermediate_rows_of_data;
+	std::deque<TimeRangeSorter> outgoing_rows_of_data;
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &current_row_of_data, &incoming_rows_of_data, &intermediate_rows_of_data, &outgoing_rows_of_data, &xr_table_category](std::deque<TimeRangeSorter> & row_group)
 	{
+
+		// Process rows according to time range.
+		// The incoming rows are sorted according to time range (first on start datetime, then on end datetime)
+
+		if (failed)
+		{
+			return;
+		}
+
+		while (!row_group.empty())
+		{
+
+			current_row_of_data = row_group.front();
+			row_group.pop_front();
+
+			// If we're starting fresh, just add the current row of input to incoming_rows_of_data
+			// and proceed to the next row of input.
+			if (incoming_rows_of_data.empty())
+			{
+				incoming_rows_of_data.push_back(current_row_of_data);
+				continue;
+			}
+
+			// If the current row of input starts past
+			// the end of any of the saved rows, then
+			// there can be no overlap with these rows, and they are done.
+			// Move them to outgoing_rows_of_data.
+			while(!incoming_rows_of_data.empty())
+			{
+				TimeRangeSorter & first_incoming_row = incoming_rows_of_data.front();
+				if (first_incoming_row.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end
+					<= current_row_of_data.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start)
+				{
+					outgoing_rows_of_data.push_back(first_incoming_row);
+					incoming_rows_of_data.pop_front();
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			// There is guaranteed to either:
+			// (1) be overlap of the current row of input with the first saved row,
+			// (2) have the current row be completely beyond the end of all saved rows
+			// (or, falling into the same category,
+			// the current row's starting datetime is exactly equal to the ending datetime
+			// of the last of the saved rows)
+			bool current_row_complete = false;
+			while (!current_row_complete)
+			{
+				if (incoming_rows_of_data.empty())
+				{
+					break;
+				}
+				TimeRangeSorter & first_incoming_row = incoming_rows_of_data.front();
+				current_row_complete = ProcessCurrentDataRowOverlapWithFrontSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, xr_table_category);
+				if (failed)
+				{
+					return;
+				}
+				incoming_rows_of_data.pop_front();
+			}
+
+			if (!current_row_complete)
+			{
+				intermediate_rows_of_data.push_back(current_row_of_data);
+			}
+
+			incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), intermediate_rows_of_data.cbegin(), intermediate_rows_of_data.cend());
+			intermediate_rows_of_data.clear();
+
+		}
+
+		outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
+		WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category);
+		if (failed)
+		{
+			return;
+		}
+		incoming_rows_of_data.clear();
+		outgoing_rows_of_data.clear();
+
+
+
 
 		bool at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table = false;
 		std::for_each(row_group.begin(), row_group.end(), [&at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table](TimeRangeSorter & row)
