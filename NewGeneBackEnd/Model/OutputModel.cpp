@@ -2328,6 +2328,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				on_other_side_of_second_dates = true;
 			}
 		}
+		++current_column;
 	});
 
 	int column_index_of_start_of_final_inner_table = (int)sorted_result_columns.columns_in_view.size() - reverse_index_to_final_relevant_date_column;
