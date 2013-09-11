@@ -4366,9 +4366,9 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 	int the_index = 0;
 	std::vector<std::string> inner_multiplicity_string_vector;
 	std::vector<std::int64_t> inner_multiplicity_int_vector;
-	int number_non_null_primary_key_groups_in_current_row = 0;
+	int number_null_primary_key_groups_in_current_row = 0;
 	bool current_row_current_inner_table_primary_key_group_is_null = false;
-	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &current_row_current_inner_table_primary_key_group_is_null, &number_non_null_primary_key_groups_in_current_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
+	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = current_info.first;
@@ -4398,7 +4398,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				{
 					if (!current_row_current_inner_table_primary_key_group_is_null)
 					{
-						++number_non_null_primary_key_groups_in_current_row;
+						++number_null_primary_key_groups_in_current_row;
 						current_row_current_inner_table_primary_key_group_is_null = true;
 					}
 				}
@@ -4462,10 +4462,10 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 	inner_multiplicity_int_vector.clear();
 	inner_multiplicity_index = 0;
 	outer_multiplicity_number = 1;
-	int number_non_null_primary_key_groups_in_previous_row = 0;
+	int number_null_primary_key_groups_in_previous_row = 0;
 	bool previous_row_current_inner_table_primary_key_group_is_null = false;
 	the_index = 0;
-	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &previous_row_current_inner_table_primary_key_group_is_null, &number_non_null_primary_key_groups_in_previous_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & previous_info)
+	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &previous_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_previous_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & previous_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = previous_info.first;
@@ -4495,7 +4495,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				{
 					if (!previous_row_current_inner_table_primary_key_group_is_null)
 					{
-						++number_non_null_primary_key_groups_in_previous_row;
+						++number_null_primary_key_groups_in_previous_row;
 						previous_row_current_inner_table_primary_key_group_is_null = true;
 					}
 				}
@@ -4555,7 +4555,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 
 	});
 
-	if (number_non_null_primary_key_groups_in_current_row > number_non_null_primary_key_groups_in_previous_row)
+	if (number_null_primary_key_groups_in_current_row < number_null_primary_key_groups_in_previous_row)
 	{
 		use_newest_row_index = true;
 	}
@@ -4807,13 +4807,25 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 		// The two new "merged" time range columns
 
+		std::int64_t datetime_start = row_of_data.datetime_start;
+		std::int64_t datetime_end = row_of_data.datetime_end;
+
+		if (row_of_data.datetime_end > timerange_end)
+		{
+			datetime_end = timerange_end;
+		}
+		if (row_of_data.datetime_start < timerange_start)
+		{
+			datetime_start = timerange_start;
+		}
+
 		switch (xr_table_category)
 		{
 			case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
 				{
-					bound_parameter_ints.push_back(row_of_data.datetime_start);
+					bound_parameter_ints.push_back(datetime_start);
 					bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
-					bound_parameter_ints.push_back(row_of_data.datetime_end);
+					bound_parameter_ints.push_back(datetime_end);
 					bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 				}
 				break;
@@ -4821,8 +4833,8 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 				{
 					boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
 
-					boost::posix_time::ptime time_start_database = time_t_epoch__1970 + boost::posix_time::milliseconds(row_of_data.datetime_start);
-					boost::posix_time::ptime time_end_database = time_t_epoch__1970 + boost::posix_time::milliseconds(row_of_data.datetime_end);
+					boost::posix_time::ptime time_start_database = time_t_epoch__1970 + boost::posix_time::milliseconds(datetime_start);
+					boost::posix_time::ptime time_end_database = time_t_epoch__1970 + boost::posix_time::milliseconds(datetime_end);
 
 					std::string time_start_formatted = boost::posix_time::to_simple_string(time_start_database);
 					std::string time_end_formatted = boost::posix_time::to_simple_string(time_end_database);
@@ -8950,6 +8962,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					datetime_range_end = std::get<2>(row_insert_info).second;
 					include_current_data = std::get<0>(row_insert_info);;
 					include_previous_data = std::get<1>(row_insert_info);;
+					if (datetime_range_start < timerange_start)
+					{
+						datetime_range_start = timerange_start;
+					}
+					if (datetime_range_end > timerange_end)
+					{
+						datetime_range_end = timerange_end;
+					}
 					added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, include_previous_data, include_current_data, xr_table_category);
 					if (failed)
 					{
@@ -12274,7 +12294,17 @@ void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroup
 	{
 		// The previous function already set both the datetime columns and the data in the previous/current inner tables (including NULLs where necessary),
 		// so just tell the following function to use all data, and to use the existing date and time
-		bool added = CreateNewXRRow(new_row_to_write_to_database, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, new_row_to_write_to_database.datetime_start, new_row_to_write_to_database.datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category);
+		std::int64_t datetime_start = new_row_to_write_to_database.datetime_start;
+		std::int64_t datetime_end = new_row_to_write_to_database.datetime_end;
+		if (datetime_start < timerange_start)
+		{
+			datetime_start = timerange_start;
+		}
+		if (datetime_end > timerange_end)
+		{
+			datetime_end = timerange_end;
+		}
+		bool added = CreateNewXRRow(new_row_to_write_to_database, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category);
 
 		if (failed)
 		{
