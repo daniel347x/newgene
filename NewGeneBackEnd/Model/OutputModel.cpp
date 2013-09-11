@@ -4360,13 +4360,14 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 	std::set<std::vector<std::string>> saved_strings_current_vector;
 	std::set<std::vector<std::int64_t>> saved_ints_current_vector;
 
-	int current_inner_multiplicity = 0;
+	int inner_multiplicity = 0;
+	int outer_multiplicity = 0;
 	int the_index = 0;
 	std::vector<std::string> inner_multiplicity_string_vector;
 	std::vector<std::int64_t> inner_multiplicity_int_vector;
 	int number_non_null_primary_key_groups_in_current_row = 0;
 	bool current_row_current_inner_table_primary_key_group_is_null = false;
-	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &current_row_current_inner_table_primary_key_group_is_null, &number_non_null_primary_key_groups_in_current_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &current_inner_multiplicity, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
+	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity, &current_row_current_inner_table_primary_key_group_is_null, &number_non_null_primary_key_groups_in_current_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = current_info.first;
@@ -4405,16 +4406,16 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 		}
 
 		++the_index;
-		++current_inner_multiplicity;
+		++inner_multiplicity;
 
-		if (current_inner_multiplicity == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (inner_multiplicity == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
 		{
 			if (!inner_multiplicity_int_vector.empty())
 			{
 				bool do_insert = false;
 				if (ignore_final_inner_table)
 				{
-					if (current_inner_multiplicity < current_row_of_data.number_of_multiplicities)
+					if (outer_multiplicity < current_row_of_data.number_of_multiplicities)
 					{
 						do_insert = true;
 					}
@@ -4434,7 +4435,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				bool do_insert = false;
 				if (ignore_final_inner_table)
 				{
-					if (current_inner_multiplicity < current_row_of_data.number_of_multiplicities)
+					if (outer_multiplicity < current_row_of_data.number_of_multiplicities)
 					{
 						do_insert = true;
 					}
@@ -4449,7 +4450,8 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				}
 				inner_multiplicity_string_vector.clear();
 			}
-			current_inner_multiplicity = 0;
+			inner_multiplicity = 0;
+			++outer_multiplicity;
 			current_row_current_inner_table_primary_key_group_is_null = false;
 		}
 
@@ -4457,11 +4459,12 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 
 	inner_multiplicity_string_vector.clear();
 	inner_multiplicity_int_vector.clear();
-	current_inner_multiplicity = 0;
+	inner_multiplicity = 0;
+	outer_multiplicity = 0;
 	int number_non_null_primary_key_groups_in_previous_row = 0;
 	bool previous_row_current_inner_table_primary_key_group_is_null = false;
 	the_index = 0;
-	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &previous_row_current_inner_table_primary_key_group_is_null, &number_non_null_primary_key_groups_in_previous_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &current_inner_multiplicity, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & previous_info)
+	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity, &previous_row_current_inner_table_primary_key_group_is_null, &number_non_null_primary_key_groups_in_previous_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, int> const & previous_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = previous_info.first;
@@ -4500,16 +4503,16 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 		}
 
 		++the_index;
-		++current_inner_multiplicity;
+		++inner_multiplicity;
 
-		if (current_inner_multiplicity == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (inner_multiplicity == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
 		{
 			if (!inner_multiplicity_int_vector.empty())
 			{
 				bool do_insert = false;
 				if (ignore_final_inner_table)
 				{
-					if (current_inner_multiplicity < current_row_of_data.number_of_multiplicities)
+					if (outer_multiplicity < current_row_of_data.number_of_multiplicities)
 					{
 						do_insert = true;
 					}
@@ -4529,7 +4532,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				bool do_insert = false;
 				if (ignore_final_inner_table)
 				{
-					if (current_inner_multiplicity < current_row_of_data.number_of_multiplicities)
+					if (outer_multiplicity < current_row_of_data.number_of_multiplicities)
 					{
 						do_insert = true;
 					}
@@ -4544,7 +4547,8 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				}
 				inner_multiplicity_string_vector.clear();
 			}
-			current_inner_multiplicity = 0;
+			inner_multiplicity = 0;
+			++outer_multiplicity;
 			previous_row_current_inner_table_primary_key_group_is_null = false;
 		}
 
