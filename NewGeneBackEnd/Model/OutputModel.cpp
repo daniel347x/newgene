@@ -3069,7 +3069,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				ordering_within_rows_data.clear();
 				ordering_within_rows_data.push_back(sorting_row_of_data);
 
-				WriteRowsToFinalTable(ordering_within_rows_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category);
+				WriteRowsToFinalTable(ordering_within_rows_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category, order_within_rows);
 				
 				if (failed)
 				{
@@ -4734,10 +4734,10 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 
 }
 
-void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, XR_TABLE_CATEGORY const xr_table_category)
+void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, XR_TABLE_CATEGORY const xr_table_category, bool const no_new_column_names)
 {
 
-	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &xr_table_category, &statement_is_prepared, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
+	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &no_new_column_names, &xr_table_category, &statement_is_prepared, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
 	{
 
 		bool do_not_check_time_range = false;
@@ -4782,15 +4782,19 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 			});
 
-			// The two new "merged" time range columns
-			if (!first_column_name)
+
+			if (!no_new_column_names)
 			{
+				// The two new "merged" time range columns
+				if (!first_column_name)
+				{
+					sql_add_xr_row += ", ";
+				}
+				first_column_name = false;
+				sql_add_xr_row += datetime_start_col_name;
 				sql_add_xr_row += ", ";
+				sql_add_xr_row += datetime_end_col_name;
 			}
-			first_column_name = false;
-			sql_add_xr_row += datetime_start_col_name;
-			sql_add_xr_row += ", ";
-			sql_add_xr_row += datetime_end_col_name;
 
 			sql_add_xr_row += ") VALUES (";
 
@@ -4813,19 +4817,22 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 			});
 
-			// The two new "merged" time range columns
-			if (!first_column_value)
+			if (!no_new_column_names)
 			{
+				// The two new "merged" time range columns
+				if (!first_column_value)
+				{
+					sql_add_xr_row += ", ";
+				}
+				first_column_value = false;
+				sql_add_xr_row += "?";
+				sql_add_xr_row += itoa(index, cindex, 10);
+				++index;
 				sql_add_xr_row += ", ";
+				sql_add_xr_row += "?";
+				sql_add_xr_row += itoa(index, cindex, 10);
+				++index;
 			}
-			first_column_value = false;
-			sql_add_xr_row += "?";
-			sql_add_xr_row += itoa(index, cindex, 10);
-			++index;
-			sql_add_xr_row += ", ";
-			sql_add_xr_row += "?";
-			sql_add_xr_row += itoa(index, cindex, 10);
-			++index;
 
 			sql_add_xr_row += ")";
 
@@ -10483,7 +10490,7 @@ void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches(std::in
 		return;
 	}
 
-	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category);
+	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category, false);
 	if (failed)
 	{
 		return;
