@@ -10588,6 +10588,11 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	// the algorithm should NOT include a row if there is at least ONE
 	// other row that gets included, which matches on all but the final primary key group.
 
+	// This behavior can be overridden by setting the "DoCompareFinalInnerTable" flag.
+
+	// Also, this function can either ignore the time range, or include it,
+	// depending on the "ShouldReturnEqual_EvenIf_TimeRangesAreDifferent" flag.
+
 	// If we're here, we already know that, aside from the sequence and NULLs,
 	// we match on the primary key groups from all but the last inner table
 
@@ -10611,7 +10616,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
 
-		if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[the_index])
+		if (!DoCompareFinalInnerTable && the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[the_index])
 		{
 			// See note above: The whole point of this time range sorter
 			// is to skip the primary key group in the last inner table.
@@ -10648,7 +10653,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	std::for_each(rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &rhs, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row_rhs, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, int> const & current_info)
 	{
 
-		if (rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[the_index])
+		if (!DoCompareFinalInnerTable && rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[the_index])
 		{
 			// See note above: The whole point of this time range sorter
 			// is to skip the primary key group in the last inner table.
@@ -11847,6 +11852,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			return;
 		}
 
+		row_inserts_info.clear();
 		PopulateSplitRowInfo_FromCurrentMergingColumns(row_inserts_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, row.GetSavedRowData(), xr_table_category);
 		
 		std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &row, &rows_to_check](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
@@ -12005,7 +12011,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// Set a flag to modify the way equality is tested for...
 	// when retrieving deque's from the map, there should be one deque for every
 	// set of rows that match on all primary key fields as discussed in the comment above -
-	// regardless of time range
+	// regardless of time range.
 	std::for_each(rows_to_check.begin(), rows_to_check.end(), [](TimeRangeSorter & row)
 	{
 		row.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = true;

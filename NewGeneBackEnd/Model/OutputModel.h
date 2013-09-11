@@ -509,14 +509,15 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 					public:
 
-						TimeRangeSorter() : ShouldReturnEqual_EvenIf_TimeRangesAreDifferent(false) {}
-						TimeRangeSorter(TimeRangeSorter const & rhs) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = rhs.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent; }
-						TimeRangeSorter(SavedRowData const & rhs) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs; }
+						TimeRangeSorter() : ShouldReturnEqual_EvenIf_TimeRangesAreDifferent(false), DoCompareFinalInnerTable(false) {}
+						TimeRangeSorter(TimeRangeSorter const & rhs) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = rhs.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent; DoCompareFinalInnerTable = rhs.DoCompareFinalInnerTable; }
+						TimeRangeSorter(SavedRowData const & rhs) : ShouldReturnEqual_EvenIf_TimeRangesAreDifferent(false), DoCompareFinalInnerTable(false) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs; }
 						SavedRowData the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table;
 						bool operator<(TimeRangeSorter const & rhs) const;
 						SavedRowData & GetSavedRowData() { return the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; }
 
 						bool ShouldReturnEqual_EvenIf_TimeRangesAreDifferent;
+						bool DoCompareFinalInnerTable;
 
 				};
 
