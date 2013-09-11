@@ -384,6 +384,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						void Clear();
 						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result);
 
+						SavedRowData & GetSavedRowData() { return *this; }
+
 						std::int64_t datetime_start;
 						std::int64_t datetime_end;
 						std::vector<std::string> current_parameter_strings;
@@ -487,6 +489,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						TimeRangeSorter(SavedRowData const & rhs) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs; }
 						SavedRowData the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table;
 						bool operator<(TimeRangeSorter const & rhs) const;
+						SavedRowData & GetSavedRowData() { return the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; }
 
 						bool ShouldReturnEqual_EvenIf_TimeRangesAreDifferent;
 
@@ -523,7 +526,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreateXRTable(ColumnsInTempView const & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index);
 				SqlAndColumnSet CreateSortedTable(ColumnsInTempView const & final_xr_columns, int const primary_group_number, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category);
 				SqlAndColumnSet RemoveDuplicates(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, int const primary_group_number, std::int64_t & current_rows_added, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category);
-				void RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::deque<SavedRowData> &incoming_rows_of_data, std::deque<SavedRowData> &outgoing_rows_of_data, std::deque<SavedRowData> &intermediate_rows_of_data, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t &current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction, XR_TABLE_CATEGORY const xr_table_category);
+				void RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t &current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction, XR_TABLE_CATEGORY const xr_table_category);
 
 				// Helper functions used by the functions above
 				void BeginNewTransaction();
@@ -548,9 +551,85 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void SortOrderByMultiplicityGreaterThanOnes(ColumnsInTempView & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first);
 				void PopulateSplitRowInfo_FromCurrentMergingColumns(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> & rows_to_insert_info, int & previous_datetime_start_column_index, int & current_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_end_column_index, SavedRowData & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category);
 				void Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, XR_TABLE_CATEGORY const xr_table_category);
-				void HandleSetOfRowsThatMatchOnPrimaryKeys(std::deque<SavedRowData> & rows_to_sort, std::deque<SavedRowData> & incoming_rows_of_data, std::deque<SavedRowData> & intermediate_rows_of_data, std::deque<SavedRowData> & outgoing_rows_of_data);
 
-				// Progress bar variables
+				template <typename ROW_DEQUE>
+				void HandleSetOfRowsThatMatchOnPrimaryKeys(ROW_DEQUE & rows_to_sort, std::deque<SavedRowData> & outgoing_rows_of_data, XR_TABLE_CATEGORY const xr_table_category)
+				{
+
+					SavedRowData current_row_of_data;
+					std::deque<SavedRowData> incoming_rows_of_data;
+					std::deque<SavedRowData> intermediate_rows_of_data;
+
+					while (!rows_to_sort.empty())
+					{
+
+						current_row_of_data = rows_to_sort.front().GetSavedRowData();
+						rows_to_sort.pop_front();
+
+						// If we're starting fresh, just add the current row of input to incoming_rows_of_data
+						// and proceed to the next row of input.
+						if (incoming_rows_of_data.empty())
+						{
+							incoming_rows_of_data.push_back(current_row_of_data);
+							continue;
+						}
+
+						// If the current row of input starts past
+						// the end of any of the saved rows, then
+						// there can be no overlap with these rows, and they are done.
+						// Move them to outgoing_rows_of_data.
+						while(!incoming_rows_of_data.empty())
+						{
+							SavedRowData & first_incoming_row = incoming_rows_of_data.front();
+							if (first_incoming_row.datetime_end <= current_row_of_data.datetime_start)
+							{
+								outgoing_rows_of_data.push_back(first_incoming_row);
+								incoming_rows_of_data.pop_front();
+							}
+							else
+							{
+								break;
+							}
+						}
+
+						// There is guaranteed to either:
+						// (1) be overlap of the current row of input with the first saved row,
+						// (2) have the current row be completely beyond the end of all saved rows
+						// (or, falling into the same category,
+						// the current row's starting datetime is exactly equal to the ending datetime
+						// of the last of the saved rows)
+						bool current_row_complete = false;
+						while (!current_row_complete)
+						{
+							if (incoming_rows_of_data.empty())
+							{
+								break;
+							}
+							SavedRowData & first_incoming_row = incoming_rows_of_data.front();
+							current_row_complete = ProcessCurrentDataRowOverlapWithPreviousSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, xr_table_category);
+							if (failed)
+							{
+								return;
+							}
+							incoming_rows_of_data.pop_front();
+						}
+
+						if (!current_row_complete)
+						{
+							intermediate_rows_of_data.push_back(current_row_of_data);
+						}
+
+						incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), intermediate_rows_of_data.cbegin(), intermediate_rows_of_data.cend());
+						intermediate_rows_of_data.clear();
+
+					}
+
+					outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
+					incoming_rows_of_data.clear();
+
+				}
+
+				// Progress bar variables and functions
 				void DetermineTotalNumberRows();
 				void UpdateProgressBarToNextStage(std::string const helper_text_first_choice, std::string helper_text_second_choice);
 				void CheckProgressUpdate(std::int64_t const current_rows_added_, std::int64_t const rows_estimate_, std::int64_t const starting_value_this_stage);
