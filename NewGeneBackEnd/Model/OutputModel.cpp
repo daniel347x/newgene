@@ -11981,12 +11981,8 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			return;
 		}
 
-
-
-
-
 		bool at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table = false;
-		std::for_each(row_group.begin(), row_group.end(), [&at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table](TimeRangeSorter & row)
+		std::for_each(outgoing_rows_of_data.begin(), outgoing_rows_of_data.end(), [&at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table](SavedRowData & row)
 		{
 			
 			// To determine if a row has a non-NULL primary key group in its final inner table,
@@ -12008,7 +12004,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 			// There is guaranteed to be at least one entry, because currently all data must have at least one primary key column,
 			// Even if the final inner table is also the first inner table.
-			SQLExecutor::WHICH_BINDING binding = row.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table[0].first;
+			SQLExecutor::WHICH_BINDING binding = row.indices_of_all_primary_key_columns_in_final_inner_table[0].first;
 
 			if (binding != SQLExecutor::NULL_BINDING)
 			{
@@ -12017,20 +12013,24 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 		});
 
+
 		if (at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table)
 		{
 			// We can now remove items that have NULL in the final inner table - they are redundant
-			std::for_each(row_group.begin(), row_group.end(), [&at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table](TimeRangeSorter & row)
+			std::deque<SavedRowData> results;
+			std::for_each(outgoing_rows_of_data.begin(), outgoing_rows_of_data.end(), [&results, &at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table](SavedRowData & row)
 			{
 
-				SQLExecutor::WHICH_BINDING binding = row.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table[0].first;
+				SQLExecutor::WHICH_BINDING binding = row.indices_of_all_primary_key_columns_in_final_inner_table[0].first;
 
 				if (binding != SQLExecutor::NULL_BINDING)
 				{
-					at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table = true;
+					results.push_back(row);
 				}
 
 			});
+
+			outgoing_rows_of_data.swap(results);
 		}
 
 	});
