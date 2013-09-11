@@ -8758,14 +8758,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
 					{
-						if (previous_datetime_start_column_index == -1)
+						if (current_datetime_start_column_index == -1)
+						{
+							current_datetime_start_column_index = column_index;
+						}
+						else if (previous_datetime_start_column_index == -1)
 						{
 							previous_datetime_start_column_index = column_index;
 						}
 					}
 					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
 					{
-						if (previous_datetime_end_column_index == -1)
+						if (current_datetime_end_column_index == -1)
+						{
+							current_datetime_end_column_index = column_index;
+						}
+						else if (previous_datetime_end_column_index == -1)
 						{
 							previous_datetime_end_column_index = column_index;
 						}
