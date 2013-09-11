@@ -10512,8 +10512,8 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	// the whole point of this time range sorter is to skip the final inner table
 	// (so that the algorithm that splits XR rows can compare all rows that match
 	// on every primary key group BUT the last one in order to determine
-	// whether to include a row that has NULL for the final primary key group...
-	// the algorithm should NOT include such a row if there is at least ONE
+	// whether to include a row that has NULL for the final primary key group)...
+	// the algorithm should NOT include a row if there is at least ONE
 	// other row that gets included, which matches on all but the final primary key group.
 
 	// If we're here, we already know that, aside from the sequence and NULLs,
@@ -11926,7 +11926,8 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 	// Separate the incoming rows into groups:
 	// Each group has the same number of non-NULL primary key groups from all inner tables except the last,
-	// and the same (NULL or non-NULL) value 
+	// and the same (NULL or non-NULL) values for these primary key groups.
+	// The last inner table might or might not be empty.
 	std::map<TimeRangeSorter, std::deque<TimeRangeSorter>> rowgroups_separated_into_primarykey_sets;
 
 	// Set a flag to modify the way equality is tested for...
