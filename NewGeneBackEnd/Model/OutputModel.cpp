@@ -2908,7 +2908,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				}
 				break;
 		}
-		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
+		datetime_end_col_name = datetime_end_col_name_no_uuid;
 		datetime_end_col_name += "_";
 		datetime_end_col_name += newUUID(true);
 
