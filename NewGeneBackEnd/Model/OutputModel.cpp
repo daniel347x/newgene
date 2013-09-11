@@ -7630,6 +7630,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 							if (!inner_tables_have_different_primary_keys)
 							{
+								// Self-Kad found!  Remove it.
+
 								// set the new inner table to all NULL.  It will be sorted to the right later.
 								std::for_each(new_columns_to_test.bindings.begin(), new_columns_to_test.bindings.end(), [](std::pair<SQLExecutor::WHICH_BINDING, int> & binding)
 								{
@@ -7712,13 +7714,16 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 					}
 					else
 					{
-						// Must add them... just fill with 0; only the datetime column from the last set is used by the algorithm
+						// Must add the datetime columns...
+						// Just push the previous values from the current last two columns into the new columns.
 						int number_to_add = number_columns_first_sets - columns_in_single_inner_table.bindings.size();
 						for (int n=0; n<number_to_add; ++n)
 						{
-							bound_parameter_ints.push_back(0);
 							bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
 						}
+						// Now populate with the previous values
+						bound_parameter_ints[bound_parameter_ints.size() - 2] = bound_parameter_ints[bound_parameter_ints.size() - 2 - number_to_add];
+						bound_parameter_ints[bound_parameter_ints.size() - 1] = bound_parameter_ints[bound_parameter_ints.size() - 1 - number_to_add];
 					}
 				}
 				else
