@@ -2301,7 +2301,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	bool reached_second_dates = false;
 	bool on_other_side_of_first_dates = false;
 	bool on_other_side_of_second_dates = false;
-	int reverse_index_to_final_relevant_date_column = 0;
+	int reverse_index_to_final_relevant_date_column = (int)sorted_result_columns.columns_in_view.size(); // ensures that even if there is only one inner table, it will match as the final inner table
 	std::for_each(sorted_result_columns.columns_in_view.crbegin(), sorted_result_columns.columns_in_view.crend(), [this, &reverse_index_to_final_relevant_date_column, &sorted_result_columns, &reached_first_dates, &reached_second_dates, &on_other_side_of_first_dates, &on_other_side_of_second_dates, &first_variable_group, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 		if (possible_duplicate_view_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
@@ -2396,7 +2396,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			bool add_as_primary_key_column_in_final_inner_table = false;
 			bool add_as_primary_key_column_in_all_but_final_inner_table = false;
 
-			if (  current_column >= column_index_of_start_of_final_inner_table)
+			if (  current_column >= column_index_of_start_of_final_inner_table )
 			{
 				add_as_column_in_final_inner_table = true;
 			}
@@ -2409,7 +2409,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			{
 				if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
-					if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set)
+					if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
 					{
 						add_as_primary_key_column = true;
 					}
@@ -8898,6 +8898,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					//      non-NULL primary keys in all inner tables but the last)
 					std::sort(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end());
 
+					
+					Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns);
+
 
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
 
@@ -10705,11 +10708,15 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 		if (binding_info.first == SQLExecutor::NULL_BINDING && binding_info_rhs.first == SQLExecutor::NULL_BINDING)
 		{
+			// undetermined - move on to time range
 			return;
 		}
 
 		if (binding_info.first == SQLExecutor::NULL_BINDING && !binding_info_rhs.first == SQLExecutor::NULL_BINDING)
 		{
+			// determined - one primary key group in the final inner table is NULL, and the other not.
+			// Unlike for the primary key groups in all but the final inner table, where NULLs "match",
+			// for the FINAL inner table, NULLs do NOT match.
 			is_less_than = true;
 			is_determined = true;
 			return;
@@ -10717,10 +10724,15 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 		if (!binding_info.first == SQLExecutor::NULL_BINDING && binding_info_rhs.first == SQLExecutor::NULL_BINDING)
 		{
+			// determined - one primary key group in the final inner table is NULL, and the other not.
+			// Unlike for the primary key groups in all but the final inner table, where NULLs "match",
+			// for the FINAL inner table, NULLs do NOT match.
 			is_less_than = false;
 			is_determined = true;
 			return;
 		}
+
+		// if we're here, both incoming rows have non-NULL primary key fields in the final inner table
 
 		switch (binding_info.first)
 		{
@@ -10840,25 +10852,29 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 		return is_less_than;
 	}
 
+	if (!ShouldReturnEqual_EvenIf_TimeRangesAreDifferent)
+	{
 
-	// If the final inner column primary keys also match, then proceed with evaluating the time range to determine the sort.
+		// If the final inner column primary keys also match, then proceed with evaluating the time range to determine the sort.
 
-	if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start < rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start)
-	{
-		return true;
-	}
-	if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start > rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start)
-	{
-		return false;
-	}
+		if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start < rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start)
+		{
+			return true;
+		}
+		if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start > rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_start)
+		{
+			return false;
+		}
 
-	if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end < rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end)
-	{
-		return true;
-	}
-	if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end > rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end)
-	{
-		return false;
+		if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end < rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end)
+		{
+			return true;
+		}
+		if (the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end > rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.datetime_end)
+		{
+			return false;
+		}
+
 	}
 
 	return false;
@@ -11792,5 +11808,78 @@ void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumn
 		}
 
 	}
+
+}
+
+void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_InXRalgorithm(std::vector<TimeRangeSorter> & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns)
+{
+	
+	// All incoming rows match on all primary keys except those from the final inner table.
+	// However, some of these matching rows might have NULLs for some of the "matching" primary keys.
+	
+	// First, separate the incoming rows into groups:
+	// Each group has the same number of non-NULL primary key groups from all inner tables except the last,
+	// and the same (NULL or non-NULL) value 
+	std::map<TimeRangeSorter, std::deque<TimeRangeSorter>> rowgroups_separated_into_primarykey_sets;
+
+	// First, set a flag to modify the way equality is tested for...
+	// when retrieving deque's from the map, there should be one deque for every
+	// set of rows that match on all primary key fields as discussed in the comment above -
+	// regardless of time range
+	std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end(), [](TimeRangeSorter & row)
+	{
+		row.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = true;
+	});
+
+	// Now bin the rows into separate deques
+	std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end(), [&rowgroups_separated_into_primarykey_sets](TimeRangeSorter & row)
+	{
+		rowgroups_separated_into_primarykey_sets[row].push_back(row);
+	});
+
+	// Revert the flags
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::deque<TimeRangeSorter> & row_group)
+	{
+		std::for_each(row_group.begin(), row_group.end(), [](TimeRangeSorter & row)
+		{
+			row.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = false;
+		});
+	});
+
+	// Sort the row groups, this time including time range in the sort.
+	// The result will be that each deque will have all rows matching on primary key groups (including the number of NULL's,
+	// and including the final inner table's primary key group),
+	// and these rows inside each deque will be sorted according to time range.
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::deque<TimeRangeSorter> & row_group)
+	{
+		std::sort(row_group.begin(), row_group.end());
+	});
+
+	// Process the rows inside each row group
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::deque<TimeRangeSorter> & row_group)
+	{
+
+		bool at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table = false;
+		std::for_each(row_group.begin(), row_group.end(), [&at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table](TimeRangeSorter & row)
+		{
+			
+			// To determine if a row has a non-NULL primary key group in its final inner table,
+			// it suffices to check just a single one (note the requirement that for UOA's
+			// with more than one column, the corresponding data cannot have NULL for any
+			// of these primary key columns).
+			// 
+			// We just check a single primary key column in the final inner table
+			// (if this is not also the first inner table, it is guaranteed that
+			// all rows saved as primary keys in SavedRowData in the final inner table
+			// will have multiplicity greater than 1, but any of the primary key columns
+			// *could* be tested.
+
+			// There is guaranteed to be at least one entry, because currently all data must have at least one primary key column,
+			// Even if the final inner table is also the first inner table.
+			SQLExecutor::WHICH_BINDING binding = row.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table[0].first;
+
+		});
+
+	});
 
 }
