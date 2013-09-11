@@ -11974,63 +11974,15 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			return;
 		}
 
+		// The following function internally calls MergeRows()
+		// for all OVERLAPPING time ranges, and in this way eliminates
+		// rows that are empty in the final inner table when there
+		// is some other row in the same time range that is not empty in the final inner table
 		HandleSetOfRowsThatMatchOnPrimaryKeys(row_group, outgoing_rows_of_data, xr_table_category);
 
 		if (failed)
 		{
 			return;
-		}
-
-		bool at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table = false;
-		std::for_each(outgoing_rows_of_data.begin(), outgoing_rows_of_data.end(), [&at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table](SavedRowData & row)
-		{
-			
-			// To determine if a row has a non-NULL primary key group in its final inner table,
-			// it suffices to check just a single primary key in the final inner table's
-			// primary key group (note the requirement that for UOA's
-			// with more than one column, the corresponding data cannot have NULL for any
-			// of these primary key columns).
-			// 
-			// We just check a single primary key column in the final inner table
-			// (if this is not also the first inner table, it is guaranteed that
-			// all rows saved as primary keys in SavedRowData in the final inner table
-			// will have multiplicity greater than 1, but any of the primary key columns
-			// *could* be tested.
-
-			if (at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table)
-			{
-				return;
-			}
-
-			// There is guaranteed to be at least one entry, because currently all data must have at least one primary key column,
-			// Even if the final inner table is also the first inner table.
-			SQLExecutor::WHICH_BINDING binding = row.indices_of_all_primary_key_columns_in_final_inner_table[0].first;
-
-			if (binding != SQLExecutor::NULL_BINDING)
-			{
-				at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table = true;
-			}
-
-		});
-
-
-		if (at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table)
-		{
-			// We can now remove items that have NULL in the final inner table - they are redundant
-			std::deque<SavedRowData> results;
-			std::for_each(outgoing_rows_of_data.begin(), outgoing_rows_of_data.end(), [&results, &at_least_1_row_has_a_non_null_primary_key_group_in_final_inner_table](SavedRowData & row)
-			{
-
-				SQLExecutor::WHICH_BINDING binding = row.indices_of_all_primary_key_columns_in_final_inner_table[0].first;
-
-				if (binding != SQLExecutor::NULL_BINDING)
-				{
-					results.push_back(row);
-				}
-
-			});
-
-			outgoing_rows_of_data.swap(results);
 		}
 
 	});
