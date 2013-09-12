@@ -13064,6 +13064,64 @@ void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
 void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys & group_time_ranges__intkeys, TimeRangesForIndividualGroup_StringKeys & group_time_ranges__stringkeys)
 {
 
+	if (saved_rows_with_null_in_final_inner_table.empty())
+	{
+		return;
+	}
+	std::vector<SavedRowData> outgoing_rows;
+	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [&outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
+	{
+
+		bool use_ints = false;
+		if (saved_row_data_with_null_at_end.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first == SQLExecutor::NULL_BINDING)
+		{
+			return;
+		}
+		if (saved_row_data_with_null_at_end.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first == SQLExecutor::INT64)
+		{
+			use_ints = true;
+		}
+
+		if (use_ints)
+		{
+
+			std::set<std::vector<std::int64_t>> inner_table_primary_key_groups;
+			saved_row_data_with_null_at_end.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
+			bool no_match = false;
+			std::for_each(inner_table_primary_key_groups.cbegin(), inner_table_primary_key_groups.cend(), [&no_match, &saved_row_data_with_null_at_end, &group_time_ranges__intkeys, &group_time_ranges__stringkeys](std::vector<std::int64_t> const & inner_key_group)
+			{
+				if (no_match)
+				{
+					return;
+				}
+				if (group_time_ranges__intkeys.find(inner_key_group) == group_time_ranges__intkeys.cend())
+				{
+					no_match = true;
+					return;
+				}
+			});
+
+			if (no_match)
+			{
+				// No other row exists (with all inner tables populated, including the last)
+				// with the same primary key groups as this one has.
+				// So we definitely want to keep this one, despite the fact that it has a NULL at the end.
+				outgoing_rows.push_back(saved_row_data_with_null_at_end);
+				return;
+			}
+
+			// There is overlap with some other row that is able to populate every inner table.
+			// Therefore, where we overlap time ranges with such rows, we must not appear in the output;
+			// where we don't overlap, we must appear in the output.
+
+		}
+		else
+		{
+
+		}
+
+	});
+
 }
 
 void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::int64_t>> & inner_table_primary_key_groups) const
