@@ -3085,9 +3085,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 					sorting_row_of_data.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 
 					// Set the saved datetime columns
-					size_of_int_vector = (int)sorting_row_of_data.GetSavedRowData().current_parameter_ints.size();
-					sorting_row_of_data.GetSavedRowData().current_parameter_ints[size_of_int_vector - 2] = start_datetime_to_save;
-					sorting_row_of_data.GetSavedRowData().current_parameter_ints[size_of_int_vector - 1] = end_datetime_to_save;
+					sorting_row_of_data.SetLast2DateTimeColumns(start_datetime_to_save, end_datetime_to_save);
 
 					ordering_within_rows_data.clear();
 					ordering_within_rows_data.push_back(sorting_row_of_data);
@@ -12649,9 +12647,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			// Set the new inner table order
 			row.GetSavedRowData().SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 
-			int size_of_int_vector = (int)row.GetSavedRowData().current_parameter_ints.size();
-			row.GetSavedRowData().current_parameter_ints[size_of_int_vector - 2] = datetime_start;
-			row.GetSavedRowData().current_parameter_ints[size_of_int_vector - 1] = datetime_end;
+			sorting_row_of_data.SetLast2DateTimeColumns(datetime_start, datetime_end);
 		}
 		else
 		{
@@ -13696,5 +13692,39 @@ OutputModel::OutputGenerator::TimeRangeMapper_Ints::TimeRangeMapper_Ints(TimeRan
 OutputModel::OutputGenerator::TimeRangeMapper_Strings::TimeRangeMapper_Strings(TimeRangeMapper_Strings const & rhs)
 	: sets(rhs.sets)
 {
+
+}
+
+void OutputModel::OutputGenerator::SavedRowData::SetLast2DateTimeColumns(std::int64_t const start_datetime_to_set, std::int64_t const end_datetime_to_set)
+{
+
+	int number_columns = (int)current_parameter_which_binding_to_use.size();
+	if (current_parameter_which_binding_to_use[number_columns - 2] == SQLExecutor::NULL_BINDING)
+	{
+		// The swapping of inner tables may have swapped nulls into the timerange columns
+		current_parameter_which_binding_to_use[number_columns - 2] = SQLExecutor::INT64;
+		current_parameter_ints.push_back(start_datetime_to_set);
+		indices_of_all_columns[number_columns - 2].first = SQLExecutor::INT64;
+		indices_of_all_columns[number_columns - 2].second.first = (int)current_parameter_ints.size() - 1;
+		indices_of_all_columns[number_columns - 2].second.second = number_columns - 2;
+		indices_of_all_columns_in_final_inner_table[number_columns - 2].second.first = (int)sorting_row_of_data.current_parameter_ints.size() - 1;
+		indices_of_all_columns_in_final_inner_table[number_columns - 2].second.second = number_columns - 2;
+		datetime_start = start_datetime_to_set;
+
+		current_parameter_which_binding_to_use[number_columns - 1] = SQLExecutor::INT64;
+		current_parameter_ints.push_back(end_datetime_to_set);
+		indices_of_all_columns[number_columns - 1].first = SQLExecutor::INT64;
+		indices_of_all_columns[number_columns - 1].second.first = (int)sorting_row_of_data.current_parameter_ints.size() - 1;
+		indices_of_all_columns[number_columns - 1].second.second = number_columns - 1;
+		indices_of_all_columns_in_final_inner_table[number_columns - 1].second.first = (int)sorting_row_of_data.current_parameter_ints.size() - 1;
+		indices_of_all_columns_in_final_inner_table[number_columns - 1].second.second = number_columns - 1;
+		datetime_end = end_datetime_to_set;
+	}
+	else
+	{
+		int size_of_int_vector = (int)GetSavedRowData().current_parameter_ints.size();
+		GetSavedRowData().current_parameter_ints[size_of_int_vector - 2] = start_datetime_to_set;
+		GetSavedRowData().current_parameter_ints[size_of_int_vector - 1] = end_datetime_to_set;
+	}
 
 }

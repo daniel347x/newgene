@@ -427,6 +427,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						void SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & new_indices);
 						void AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_string_binding_to_add);
 						void SetFinalInnerTableToNull();
+						void SetLast2DateTimeColumns(std::int64_t const start_datetime_to_set, std::int64_t const end_datetime_to_set);
 
 						void ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::int64_t>> & inner_table_primary_key_groups) const;
 						void ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::string>> & inner_table_primary_key_groups) const;
