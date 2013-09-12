@@ -13199,10 +13199,50 @@ void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetim
 bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator<(TimeRangeMapper_Ints const & rhs) const
 {
 
+	if (rhs.sets.size() > sets.size())
+	{
+		return true;
+	}
+	std::set<std::vector<std::int64_t>> test_set = sets;
+	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
+	if (sets.size() == test_set.size())
+	{
+		// equal!  Return false
+		// (Even if the rhs set has less elements - that is the whole point of this class)
+		return false;
+	}
+
+	if (rhs.sets.size() < sets.size())
+	{
+		return false;
+	}
+
+	return rhs.sets < sets;
+
 }
 
 bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator<(TimeRangeMapper_Strings const & rhs) const
 {
+
+	if (rhs.sets.size() > sets.size())
+	{
+		return true;
+	}
+	std::set<std::vector<std::string>> test_set = sets;
+	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
+	if (sets.size() == test_set.size())
+	{
+		// equal!  Return false
+		// (Even if the rhs set has less elements - that is the whole point of this class)
+		return false;
+	}
+
+	if (rhs.sets.size() < sets.size())
+	{
+		return false;
+	}
+
+	return rhs.sets < sets;
 
 }
 
