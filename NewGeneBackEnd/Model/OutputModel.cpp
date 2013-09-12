@@ -12647,7 +12647,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			// Set the new inner table order
 			row.GetSavedRowData().SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
 
-			sorting_row_of_data.SetLast2DateTimeColumns(datetime_start, datetime_end);
+			row.GetSavedRowData().SetLast2DateTimeColumns(datetime_start, datetime_end);
 		}
 		else
 		{
@@ -13707,16 +13707,16 @@ void OutputModel::OutputGenerator::SavedRowData::SetLast2DateTimeColumns(std::in
 		indices_of_all_columns[number_columns - 2].first = SQLExecutor::INT64;
 		indices_of_all_columns[number_columns - 2].second.first = (int)current_parameter_ints.size() - 1;
 		indices_of_all_columns[number_columns - 2].second.second = number_columns - 2;
-		indices_of_all_columns_in_final_inner_table[number_columns - 2].second.first = (int)sorting_row_of_data.current_parameter_ints.size() - 1;
+		indices_of_all_columns_in_final_inner_table[number_columns - 2].second.first = (int)current_parameter_ints.size() - 1;
 		indices_of_all_columns_in_final_inner_table[number_columns - 2].second.second = number_columns - 2;
 		datetime_start = start_datetime_to_set;
 
 		current_parameter_which_binding_to_use[number_columns - 1] = SQLExecutor::INT64;
 		current_parameter_ints.push_back(end_datetime_to_set);
 		indices_of_all_columns[number_columns - 1].first = SQLExecutor::INT64;
-		indices_of_all_columns[number_columns - 1].second.first = (int)sorting_row_of_data.current_parameter_ints.size() - 1;
+		indices_of_all_columns[number_columns - 1].second.first = (int)current_parameter_ints.size() - 1;
 		indices_of_all_columns[number_columns - 1].second.second = number_columns - 1;
-		indices_of_all_columns_in_final_inner_table[number_columns - 1].second.first = (int)sorting_row_of_data.current_parameter_ints.size() - 1;
+		indices_of_all_columns_in_final_inner_table[number_columns - 1].second.first = (int)current_parameter_ints.size() - 1;
 		indices_of_all_columns_in_final_inner_table[number_columns - 1].second.second = number_columns - 1;
 		datetime_end = end_datetime_to_set;
 	}
