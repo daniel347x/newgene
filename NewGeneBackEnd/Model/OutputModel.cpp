@@ -2210,6 +2210,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		}
 
 
+		
+		// The above function needs to get the datetime into the last columns for the next function to succeed...
+
+
 
 
 		// ******************************************************************************************************************* //
@@ -3051,11 +3055,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 				// The function returns the inner table parameters, ordered properly
 
-				// Save the last two timerange columns
-				int size_of_int_vector = (int)sorting_row_of_data.GetSavedRowData().current_parameter_ints.size();
-				std::int64_t start_datetime_to_save = sorting_row_of_data.GetSavedRowData().current_parameter_ints[size_of_int_vector - 2];
-				std::int64_t end_datetime_to_save = sorting_row_of_data.GetSavedRowData().current_parameter_ints[size_of_int_vector - 1];
-
 				bool dummy = false;
 				std::string dummystr;
 				ColumnsInTempView dummycols;
@@ -3078,54 +3077,110 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 					}
 				}
 
-				// This is not the time to remove self-K-ads because it will ruin the sort order by placing NULLs to the right.
-				// A following stage will walk through the rows and remove self-K-ads, but determining if the row with the removed self-K-ad
-				// should be included in the output or not, based on whether there are other rows that can fill the empty slot.
-				// That algorithm requires a perfect sort here with no NULLs,
-				// because it will group the data according to the sort and it requires all the data to be in one group.
-				remove_self_kads = false;
-				bool added = CreateNewXRRow(sorting_row_of_data.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, previous_result_columns, dummycols, true, true, xr_table_category, false, order_within_rows);
-				remove_self_kads = true;
-				if (added)
+
+
+				int previous_datetime_start_column_index = -1;
+				int previous_datetime_end_column_index = -1;
+				int current_datetime_start_column_index = -1;
+				int current_datetime_end_column_index = -1;
+				FindDatetimeIndices(previous_result_columns, previous_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_start_column_index, current_datetime_end_column_index, xr_table_category);
+
+				if (current_multiplicity > 1)
 				{
-
-					// Remove the last two bindings, which are the new timerange columns - we don't have them yet, and we don't need them
-
-					bound_parameter_ints.pop_back();
-					bound_parameter_ints.pop_back();
-					bound_parameter_which_binding_to_use.pop_back();
-					bound_parameter_which_binding_to_use.pop_back();
-
-					// Set the new inner table order
-					sorting_row_of_data.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
-
-					// Set the saved datetime columns
-					sorting_row_of_data.SetLast2DateTimeColumns(start_datetime_to_save, end_datetime_to_save);
-
-
-
-					ordering_within_rows_data.clear();
-					ordering_within_rows_data.push_back(sorting_row_of_data);
-
-					WriteRowsToFinalTable(ordering_within_rows_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category, order_within_rows);
-
-					if (failed)
+					std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> row_inserts_info;
+					PopulateSplitRowInfo_FromCurrentMergingColumns(row_inserts_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, sorting_row_of_data, xr_table_category);
+					std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &current_datetime_start_column_index, &current_datetime_end_column_index, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &order_within_rows, &dummy, &dummystr, &previous_result_columns, &dummycols, &ordering_within_rows_data, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &sorting_row_of_data, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &xr_table_category](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
 					{
-						break;
-					}
+						if (failed)
+						{
+							return;
+						}
+						bool added = false;
+						std::int64_t datetime_range_start = std::get<2>(row_insert_info).first;
+						std::int64_t datetime_range_end = std::get<2>(row_insert_info).second;
+						bool include_current_data = std::get<0>(row_insert_info);;
+						bool include_previous_data = std::get<1>(row_insert_info);;
+						if (datetime_range_start < timerange_start)
+						{
+							datetime_range_start = timerange_start;
+						}
+						if (datetime_range_end > timerange_end)
+						{
+							datetime_range_end = timerange_end;
+						}
 
-					ExecuteSQL(result);
+						if (!include_previous_data)
+						{
+							return;
+						}
 
-					if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
+						// This is not the time to remove self-K-ads because it will ruin the sort order by placing NULLs to the right.
+						// A following stage will walk through the rows and remove self-K-ads, but determining if the row with the removed self-K-ad
+						// should be included in the output or not, based on whether there are other rows that can fill the empty slot.
+						// That algorithm requires a perfect sort here with no NULLs,
+						// because it will group the data according to the sort and it requires all the data to be in one group.
+
+						// We only call CreateNewXRRow to order the inner tables
+						remove_self_kads = false;
+						added = CreateNewXRRow(sorting_row_of_data.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_result_columns, dummycols, include_previous_data, include_current_data, xr_table_category, false, order_within_rows);
+						remove_self_kads = true;
+
+						if (failed)
+						{
+							return;
+						}
+						if (added)
+						{
+							SavedRowData new_row = sorting_row_of_data;
+							// Remove the last two bindings, which are the new timerange columns - we don't have them yet, and we don't need them
+							bound_parameter_ints.pop_back();
+							bound_parameter_ints.pop_back();
+							bound_parameter_which_binding_to_use.pop_back();
+							bound_parameter_which_binding_to_use.pop_back();
+							new_row.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, true, datetime_range_start, datetime_range_end, datetime_range_start, datetime_range_end, current_datetime_start_column_index, current_datetime_end_column_index, previous_datetime_start_column_index, previous_datetime_end_column_index);
+							ordering_within_rows_data.push_back(new_row);
+						}
+
+					});
+				}
+				else
+				{
+					// We only call CreateNewXRRow to order the inner tables
+					remove_self_kads = false;
+					bool added = CreateNewXRRow(sorting_row_of_data.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, previous_result_columns, dummycols, true, true, xr_table_category, false, order_within_rows);
+					remove_self_kads = true;
+					if (added)
 					{
-						boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
-						msg % current_rows_stepped % current_number_rows_to_sort;
-						messager.SetPerformanceLabel(msg.str());
-						EndTransaction();
-						BeginNewTransaction();
-						current_rows_added_since_execution = 0;
+						// Remove the last two bindings, which are the new timerange columns - we don't have them yet, and we don't need them
+						bound_parameter_ints.pop_back();
+						bound_parameter_ints.pop_back();
+						bound_parameter_which_binding_to_use.pop_back();
+						bound_parameter_which_binding_to_use.pop_back();
+						sorting_row_of_data.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, true, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, current_datetime_start_column_index, current_datetime_end_column_index, previous_datetime_start_column_index, previous_datetime_end_column_index);
+						ordering_within_rows_data.clear();
+						ordering_within_rows_data.push_back(sorting_row_of_data);
 					}
+				}
 
+				WriteRowsToFinalTable(ordering_within_rows_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category, order_within_rows);
+
+				if (failed)
+				{
+					break;
+				}
+
+				ExecuteSQL(result);
+
+				ordering_within_rows_data.clear();
+
+				if (current_rows_added_since_execution >= minimum_desired_rows_per_transaction)
+				{
+					boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+					msg % current_rows_stepped % current_number_rows_to_sort;
+					messager.SetPerformanceLabel(msg.str());
+					EndTransaction();
+					BeginNewTransaction();
+					current_rows_added_since_execution = 0;
 				}
 
 				++current_rows_stepped;
@@ -9066,143 +9121,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	int previous_datetime_end_column_index = -1;
 	int current_datetime_start_column_index = -1;
 	int current_datetime_end_column_index = -1;
-	int column_index = (int)previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.size() - 1;
-	std::for_each(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.crbegin(), previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.crend(), [&xr_table_category, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index](ColumnsInTempView::ColumnInTempView const & schema_column)
-	{
-
-		// The previous values are always located after the current values, but in arbitrary order,
-		// so this check suffices to be certain that all 4 values have been obtained
-		if (previous_datetime_start_column_index != -1 && previous_datetime_end_column_index != -1)
-		{
-			--column_index;
-			return;
-		}
-
-		switch (xr_table_category)
-		{
-			case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
-				{
-					if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
-					{
-						if (current_datetime_start_column_index == -1)
-						{
-							current_datetime_start_column_index = column_index;
-						}
-						else if (previous_datetime_start_column_index == -1)
-						{
-							previous_datetime_start_column_index = column_index;
-						}
-					}
-					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
-					{
-						if (current_datetime_end_column_index == -1)
-						{
-							current_datetime_end_column_index = column_index;
-						}
-						else if (previous_datetime_end_column_index == -1)
-						{
-							previous_datetime_end_column_index = column_index;
-						}
-					}
-					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
-					{
-						if (current_datetime_start_column_index == -1)
-						{
-							current_datetime_start_column_index = column_index;
-						}
-					}
-					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
-					{
-						if (current_datetime_end_column_index == -1)
-						{
-							current_datetime_end_column_index = column_index;
-						}
-					}
-				}
-				break;
-			case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
-				{
-
-					// Current block (at end) has timerange columns:
-					// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND or COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-					//
-					// Previous block either has timerange columns:
-					// COLUMN_TYPE__DDATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / COLUMN_TYPE__DDATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-					// or
-					// COLUMN_TYPE__DATETIMESTART_CHILD_MERGE / COLUMN_TYPE__DATETIMEEND_CHILD_MERGE
-
-					if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-					 || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_CHILD_MERGE)
-					{
-						if (previous_datetime_start_column_index == -1)
-						{
-							previous_datetime_start_column_index = column_index;
-						}
-					}
-					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-						  || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE)
-					{
-						if (previous_datetime_end_column_index == -1)
-						{
-							previous_datetime_end_column_index = column_index;
-						}
-					}
-					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-						  || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
-					{
-						if (current_datetime_start_column_index == -1)
-						{
-							current_datetime_start_column_index = column_index;
-						}
-					}
-					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
-						  || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
-					{
-						if (current_datetime_end_column_index == -1)
-						{
-							current_datetime_end_column_index = column_index;
-						}
-					}
-
-				}
-				break;
-			case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
-				{
-					if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
-					{
-						if (previous_datetime_start_column_index == -1)
-						{
-							previous_datetime_start_column_index = column_index;
-						}
-					}
-					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
-					{
-						if (previous_datetime_end_column_index == -1)
-						{
-							previous_datetime_end_column_index = column_index;
-						}
-					}
-					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
-					{
-						if (current_datetime_start_column_index == -1)
-						{
-							current_datetime_start_column_index = column_index;
-						}
-					}
-					else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
-					{
-						if (current_datetime_end_column_index == -1)
-						{
-							current_datetime_end_column_index = column_index;
-						}
-					}
-				}
-				break;
-		}
-
-		--column_index;
-
-	});
+	FindDatetimeIndices(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, previous_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_start_column_index, current_datetime_end_column_index, xr_table_category);
 
 	ExecuteSQL(result); // Executes all SQL queries up to the current one
 
@@ -13043,7 +12962,18 @@ void OutputModel::OutputGenerator::AddRowsToXRTable(std::vector<SavedRowData> & 
 
 }
 
-void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<SQLExecutor::WHICH_BINDING> const & new_bindings)
+void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::string> const & new_strings,
+															  std::vector<std::int64_t> const & new_ints,
+															  std::vector<SQLExecutor::WHICH_BINDING> const & new_bindings,
+															  bool enforce_all_datetimes,
+															  std::int64_t const startdate_current,
+															  std::int64_t const enddate_current,
+															  std::int64_t const startdate_previous,
+															  std::int64_t const enddate_previous,
+															  int const current_datetime_start_column_index,
+															  int const current_datetime_end_column_index,
+															  int const previous_datetime_start_column_index,
+															  int const previous_datetime_end_column_index)
 {
 
 	std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> new_indices;
@@ -13075,14 +13005,36 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 		++column_index;
 	});
 
-	SwapBindings(new_strings, new_ints, new_indices);
+	SwapBindings(new_strings,
+				 new_ints,
+				 new_indices,
+				 enforce_all_datetimes,
+				 startdate_current,
+				 enddate_current,
+				 startdate_previous,
+				 enddate_previous,
+				 current_datetime_start_column_index,
+				 current_datetime_end_column_index,
+				 previous_datetime_start_column_index,
+				 previous_datetime_end_column_index);
 
 }
 
-void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & new_indices)
+void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::string> const & new_strings,
+															  std::vector<std::int64_t> const & new_ints,
+															  std::vector<std::pair<SQLExecutor::WHICH_BINDING,
+															  std::pair<int, int>>> & new_indices,
+															  bool enforce_all_datetimes,
+															  std::int64_t const startdate_current,
+															  std::int64_t const enddate_current,
+															  std::int64_t const startdate_previous,
+															  std::int64_t const enddate_previous,
+															  int const current_datetime_start_column_index,
+															  int const current_datetime_end_column_index,
+															  int const previous_datetime_start_column_index,
+															  int const previous_datetime_end_column_index)
 {
-	current_parameter_ints = new_ints;
-	current_parameter_strings = new_strings;
+
 	indices_of_all_columns = new_indices;
 
 	current_parameter_which_binding_to_use.clear();
@@ -13096,12 +13048,76 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 	int column_index = 0;
 	int current_int_index = 0;
 	int current_string_index = 0;
-	std::for_each(indices_of_all_columns.cbegin(), indices_of_all_columns.cend(), [this, &column_index, &current_int_index, &current_string_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding)
+	int current_int_index_new = 0;
+	int current_string_index_new = 0;
+	std::for_each(indices_of_all_columns.begin(), indices_of_all_columns.end(), [this, &current_int_index_new, &current_string_index_new, &new_ints, &new_strings, &enforce_all_datetimes, &startdate_current, &enddate_current, &startdate_previous, &enddate_previous, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index, &current_int_index, &current_string_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> & binding)
 	{
+
+		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> old_binding = binding;		
+
+		bool handled = false;
+		if (enforce_all_datetimes)
+		{
+			if (column_index == current_datetime_start_column_index)
+			{
+				binding.first = SQLExecutor::INT64;
+				current_parameter_ints.push_back(startdate_current);
+				binding.second.first = current_int_index_new;
+				binding.second.second = column_index;
+				handled = true;
+			}
+			if (column_index == current_datetime_end_column_index)
+			{
+				binding.first = SQLExecutor::INT64;
+				current_parameter_ints.push_back(enddate_current);
+				binding.second.first = current_int_index_new;
+				binding.second.second = column_index;
+				handled = true;
+			}
+			if (column_index == previous_datetime_start_column_index)
+			{
+				binding.first = SQLExecutor::INT64;
+				current_parameter_ints.push_back(startdate_previous);
+				binding.second.first = current_int_index_new;
+				binding.second.second = column_index;
+				handled = true;
+			}
+			if (column_index == previous_datetime_end_column_index)
+			{
+				binding.first = SQLExecutor::INT64;
+				current_parameter_ints.push_back(enddate_previous);
+				binding.second.first = current_int_index_new;
+				binding.second.second = column_index;
+				handled = true;
+			}
+		}
+
+		if (!handled)
+		{
+			switch (binding.first)
+			{
+				case SQLExecutor::INT64:
+					{
+						current_parameter_ints.push_back(new_ints[current_int_index]);
+					}
+					break;
+				case SQLExecutor::STRING:
+					{
+						current_parameter_strings.push_back(new_strings[current_string_index]);
+					}
+					break;
+				case SQLExecutor::NULL_BINDING:
+					{
+
+					}
+					break;
+			}
+		}
+
 		current_parameter_which_binding_to_use.push_back(binding.first);
 
-		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_int_binding_to_add = std::make_pair(binding.first, std::make_pair(current_int_index, column_index));
-		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_string_binding_to_add = std::make_pair(binding.first, std::make_pair(current_string_index, column_index));
+		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_int_binding_to_add = std::make_pair(binding.first, std::make_pair(current_int_index_new, column_index));
+		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_string_binding_to_add = std::make_pair(binding.first, std::make_pair(current_string_index_new, column_index));
 		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_null_binding_to_add = std::make_pair(binding.first, std::make_pair(0, column_index));
 
 		AddBinding(is_index_in_final_inner_table, indices_of_all_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
@@ -13112,23 +13128,42 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 		AddBinding(is_index_a_primary_key_in_the_final_inner_table, indices_of_all_primary_key_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
 		AddBinding(is_index_a_primary_key_in_not_the_final_inner_table, indices_of_all_primary_key_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
 
+		switch (old_binding.first)
+		{
+			case SQLExecutor::INT64:
+				{
+					++current_int_index;
+				}
+				break;
+			case SQLExecutor::STRING:
+				{
+					++current_string_index;
+				}
+				break;
+			case SQLExecutor::NULL_BINDING:
+				{
+
+				}
+				break;
+		}
+
 		switch (binding.first)
 		{
-		case SQLExecutor::INT64:
-			{
-				++current_int_index;
-			}
-			break;
-		case SQLExecutor::STRING:
-			{
-				++current_string_index;
-			}
-			break;
-		case SQLExecutor::NULL_BINDING:
-			{
+			case SQLExecutor::INT64:
+				{
+					++current_int_index_new;
+				}
+				break;
+			case SQLExecutor::STRING:
+				{
+					++current_string_index_new;
+				}
+				break;
+			case SQLExecutor::NULL_BINDING:
+				{
 
-			}
-			break;
+				}
+				break;
 		}
 
 		++column_index;
@@ -13141,22 +13176,22 @@ void OutputModel::OutputGenerator::SavedRowData::AddBinding(std::vector<bool> co
 	{
 		switch (binding_type)
 		{
-		case SQLExecutor::INT64:
-			{
-				bindings.push_back(potential_current_int_binding_to_add);
+			case SQLExecutor::INT64:
+				{
+					bindings.push_back(potential_current_int_binding_to_add);
+				}
+				break;
+			case SQLExecutor::STRING:
+				{
+					bindings.push_back(potential_current_string_binding_to_add);
+				}
+				break;
+			case SQLExecutor::NULL_BINDING:
+				{
+					bindings.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, binding_index)));
+				}
+				break;
 			}
-			break;
-		case SQLExecutor::STRING:
-			{
-				bindings.push_back(potential_current_string_binding_to_add);
-			}
-			break;
-		case SQLExecutor::NULL_BINDING:
-			{
-				bindings.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, binding_index)));
-			}
-			break;
-		}
 	}
 }
 
@@ -13821,5 +13856,152 @@ void OutputModel::OutputGenerator::SavedRowData::SetLast2DateTimeColumns(std::in
 		GetSavedRowData().current_parameter_ints[size_of_int_vector - 2] = start_datetime_to_set;
 		GetSavedRowData().current_parameter_ints[size_of_int_vector - 1] = end_datetime_to_set;
 	}
+
+}
+
+void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const & columns, int & previous_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_start_column_index, int & current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category)
+{
+
+	previous_datetime_start_column_index = -1;
+	previous_datetime_end_column_index = -1;
+	current_datetime_start_column_index = -1;
+	current_datetime_end_column_index = -1;
+	int column_index = (int)columns.columns_in_view.size() - 1;
+	std::for_each(columns.columns_in_view.crbegin(), columns.columns_in_view.crend(), [&xr_table_category, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index](ColumnsInTempView::ColumnInTempView const & schema_column)
+	{
+
+		// The previous values are always located after the current values, but in arbitrary order,
+		// so this check suffices to be certain that all 4 values have been obtained
+		if (previous_datetime_start_column_index != -1 && previous_datetime_end_column_index != -1)
+		{
+			--column_index;
+			return;
+		}
+
+		switch (xr_table_category)
+		{
+		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
+			{
+				if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
+				{
+					if (current_datetime_start_column_index == -1)
+					{
+						current_datetime_start_column_index = column_index;
+					}
+					else if (previous_datetime_start_column_index == -1)
+					{
+						previous_datetime_start_column_index = column_index;
+					}
+				}
+				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
+				{
+					if (current_datetime_end_column_index == -1)
+					{
+						current_datetime_end_column_index = column_index;
+					}
+					else if (previous_datetime_end_column_index == -1)
+					{
+						previous_datetime_end_column_index = column_index;
+					}
+				}
+				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+				{
+					if (current_datetime_start_column_index == -1)
+					{
+						current_datetime_start_column_index = column_index;
+					}
+				}
+				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+				{
+					if (current_datetime_end_column_index == -1)
+					{
+						current_datetime_end_column_index = column_index;
+					}
+				}
+			}
+			break;
+		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
+			{
+
+				// Current block (at end) has timerange columns:
+				// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND or COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
+				//
+				// Previous block either has timerange columns:
+				// COLUMN_TYPE__DDATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / COLUMN_TYPE__DDATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+				// or
+				// COLUMN_TYPE__DATETIMESTART_CHILD_MERGE / COLUMN_TYPE__DATETIMEEND_CHILD_MERGE
+
+				if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+					|| schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_CHILD_MERGE)
+				{
+					if (previous_datetime_start_column_index == -1)
+					{
+						previous_datetime_start_column_index = column_index;
+					}
+				}
+				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+					|| schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE)
+				{
+					if (previous_datetime_end_column_index == -1)
+					{
+						previous_datetime_end_column_index = column_index;
+					}
+				}
+				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
+					|| schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+				{
+					if (current_datetime_start_column_index == -1)
+					{
+						current_datetime_start_column_index = column_index;
+					}
+				}
+				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
+					|| schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+				{
+					if (current_datetime_end_column_index == -1)
+					{
+						current_datetime_end_column_index = column_index;
+					}
+				}
+
+			}
+			break;
+		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
+			{
+				if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
+				{
+					if (previous_datetime_start_column_index == -1)
+					{
+						previous_datetime_start_column_index = column_index;
+					}
+				}
+				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
+				{
+					if (previous_datetime_end_column_index == -1)
+					{
+						previous_datetime_end_column_index = column_index;
+					}
+				}
+				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
+				{
+					if (current_datetime_start_column_index == -1)
+					{
+						current_datetime_start_column_index = column_index;
+					}
+				}
+				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
+				{
+					if (current_datetime_end_column_index == -1)
+					{
+						current_datetime_end_column_index = column_index;
+					}
+				}
+			}
+			break;
+		}
+
+		--column_index;
+
+	});
 
 }

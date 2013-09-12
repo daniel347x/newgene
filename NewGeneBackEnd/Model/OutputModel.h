@@ -423,8 +423,31 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						bool failed;
 
-						void SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<SQLExecutor::WHICH_BINDING> const & new_bindings);
-						void SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & new_indices);
+						void SwapBindings(  std::vector<std::string> const & new_strings,
+											std::vector<std::int64_t> const & new_ints,
+											std::vector<SQLExecutor::WHICH_BINDING> const & new_bindings,
+											bool enforce_all_datetimes = false,
+											std::int64_t const startdate_current = 0,
+											std::int64_t const enddate_current = 0,
+											std::int64_t const startdate_previous = 0,
+											std::int64_t const enddate_previous = 0,
+											int const current_datetime_start_column_index = 0,
+											int const current_datetime_end_column_index = 0,
+											int const previous_datetime_start_column_index = 0,
+											int const previous_datetime_end_column_index = 0);
+						void SwapBindings(  std::vector<std::string> const & new_strings,
+							std::vector<std::int64_t> const & new_ints,
+											std::vector<std::pair<SQLExecutor::WHICH_BINDING,
+											std::pair<int, int>>> & new_indices,
+											bool enforce_all_datetimes = false,
+											std::int64_t const startdate_current = 0,
+											std::int64_t const enddate_current = 0,
+											std::int64_t const startdate_previous = 0,
+											std::int64_t const enddate_previous = 0,
+											int const current_datetime_start_column_index = 0,
+											int const current_datetime_end_column_index = 0,
+											int const previous_datetime_start_column_index = 0,
+											int const previous_datetime_end_column_index = 0);
 						void AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_string_binding_to_add);
 						void SetFinalInnerTableToNull();
 						void SetLast2DateTimeColumns(std::int64_t const start_datetime_to_set, std::int64_t const end_datetime_to_set);
@@ -621,6 +644,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys & group_time_ranges__intkeys, TimeRangesForIndividualGroup_StringKeys & group_time_ranges__stringkeys, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 				void AddRowsToXRTable(std::vector<SavedRowData> & outgoing_rows_of_data, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 				void EliminateRedundantNullsInFinalInnerTable(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys const & group_time_ranges__intkeys, TimeRangesForIndividualGroup_StringKeys const & group_time_ranges__stringkeys);
+				void FindDatetimeIndices(ColumnsInTempView const & columns, int & previous_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_start_column_index, int & current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category);
 
 				template <typename ROW_DEQUE>
 				void HandleSetOfRowsThatMatchOnPrimaryKeys(ROW_DEQUE & rows_to_sort, std::deque<SavedRowData> & outgoing_rows_of_data, XR_TABLE_CATEGORY const xr_table_category)
