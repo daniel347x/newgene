@@ -13721,8 +13721,8 @@ void OutputModel::OutputGenerator::SavedRowData::SetLast2DateTimeColumns(std::in
 		indices_of_all_columns[number_columns - 1].second.first = (int)current_parameter_ints.size() - 1;
 		indices_of_all_columns[number_columns - 1].second.second = number_columns - 1;
 		indices_of_all_columns_in_final_inner_table[number_columns_final_inner_table - 1].first = SQLExecutor::INT64;
-		indices_of_all_columns_in_final_inner_table[number_columns - 1].second.first = (int)current_parameter_ints.size() - 1;
-		indices_of_all_columns_in_final_inner_table[number_columns - 1].second.second = number_columns - 1;
+		indices_of_all_columns_in_final_inner_table[number_columns_final_inner_table - 1].second.first = (int)current_parameter_ints.size() - 1;
+		indices_of_all_columns_in_final_inner_table[number_columns_final_inner_table - 1].second.second = number_columns - 1;
 		datetime_end = end_datetime_to_set;
 	}
 	else
