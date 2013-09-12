@@ -519,8 +519,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				};
 
-				typedef std::map<std::vector<std::int64_t>, TimeRanges> TimeRangesForIndividualGroup_IntKeys;
-				typedef std::map<std::vector<std::string>, TimeRanges> TimeRangesForIndividualGroup_StringKeys;
+				typedef std::map<std::set<std::vector<std::int64_t>>, TimeRanges> TimeRangesForIndividualGroup_IntKeys;
+				typedef std::map<std::set<std::vector<std::string>>, TimeRanges> TimeRangesForIndividualGroup_StringKeys;
 
 				typedef std::pair<std::vector<SQLExecutor>, ColumnsInTempView> SqlAndColumnSet;
 				typedef std::vector<SqlAndColumnSet> SqlAndColumnSets;

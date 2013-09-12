@@ -12792,21 +12792,15 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 				{
 					std::set<std::vector<std::int64_t>> inner_table_primary_key_groups;
 					test_row.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
-					std::for_each(inner_table_primary_key_groups.cbegin(), inner_table_primary_key_groups.cend(), [&test_row, &group_time_ranges__intkeys, &group_time_ranges__stringkeys](std::vector<std::int64_t> const & inner_key_group)
-					{
-						TimeRanges & time_ranges = group_time_ranges__intkeys[inner_key_group];
-						time_ranges.append(test_row.datetime_start, test_row.datetime_end);
-					});
+					TimeRanges & time_ranges = group_time_ranges__intkeys[inner_table_primary_key_groups];
+					time_ranges.append(test_row.datetime_start, test_row.datetime_end);
 				}
 				else
 				{
 					std::set<std::vector<std::string>> inner_table_primary_key_groups;
 					test_row.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
-					std::for_each(inner_table_primary_key_groups.cbegin(), inner_table_primary_key_groups.cend(), [&test_row, &group_time_ranges__intkeys, &group_time_ranges__stringkeys](std::vector<std::int64_t> const & inner_key_group)
-					{
-						TimeRanges & time_ranges = group_time_ranges__stringkeys[inner_key_group];
-						time_ranges.append(test_row.datetime_start, test_row.datetime_end);
-					});
+					TimeRanges & time_ranges = group_time_ranges__stringkeys[inner_table_primary_key_groups];
+					time_ranges.append(test_row.datetime_start, test_row.datetime_end);
 				}
 			}
 		});
@@ -12837,7 +12831,7 @@ void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroup
 	}
 
 	std::vector<SavedRowData> outgoing_rows_of_data;
-	Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(saved_rows_with_null_in_final_inner_table, group_time_ranges__intkeys, gr, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, outgoing_rows_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category);
+	Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(saved_rows_with_null_in_final_inner_table, group_time_ranges__intkeys, group_time_ranges__stringkeys, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, outgoing_rows_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category);
 	AddRowsToXRTable(outgoing_rows_of_data, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 
 }
@@ -12845,7 +12839,7 @@ void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroup
 void OutputModel::OutputGenerator::AddRowsToXRTable(std::vector<SavedRowData> & outgoing_rows_of_data, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another)
 {
 
-	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](SavedRowData const & new_row_to_write_to_database)
+	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another](SavedRowData const & new_row_to_write_to_database)
 	{
 		// The previous function already set both the datetime columns and the data in the previous/current inner tables (including NULLs where necessary),
 		// so just tell the following function to use all data, and to use the existing date and time
@@ -12859,7 +12853,7 @@ void OutputModel::OutputGenerator::AddRowsToXRTable(std::vector<SavedRowData> & 
 		{
 			datetime_end = timerange_end;
 		}
-		bool added = CreateNewXRRow(new_row_to_write_to_database, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category, false, false);
+		bool added = CreateNewXRRow(new_row_to_write_to_database, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP, false, false);
 
 		if (failed)
 		{
@@ -13085,34 +13079,27 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 		if (use_ints)
 		{
 
-			std::set<std::vector<std::int64_t>> inner_table_primary_key_groups;
-			saved_row_data_with_null_at_end.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
-			bool no_match = false;
-			std::for_each(inner_table_primary_key_groups.cbegin(), inner_table_primary_key_groups.cend(), [&no_match, &saved_row_data_with_null_at_end, &group_time_ranges__intkeys, &group_time_ranges__stringkeys](std::vector<std::int64_t> const & inner_key_group)
-			{
-				if (no_match)
-				{
-					return;
-				}
-				if (group_time_ranges__intkeys.find(inner_key_group) == group_time_ranges__intkeys.cend())
-				{
-					no_match = true;
-					return;
-				}
-			});
+			//std::set<std::vector<std::int64_t>> inner_table_primary_key_groups;
+			//saved_row_data_with_null_at_end.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
+			//if (group_time_ranges__intkeys.find(inner_table_primary_key_groups) == group_time_ranges__intkeys.cend())
+			//{
+			//	return;
+			//}
 
-			if (no_match)
-			{
-				// No other row exists (with all inner tables populated, including the last)
-				// with the same primary key groups as this one has.
-				// So we definitely want to keep this one, despite the fact that it has a NULL at the end.
-				outgoing_rows.push_back(saved_row_data_with_null_at_end);
-				return;
-			}
+			//if (no_match)
+			//{
+			//	// No other row exists (with all inner tables populated, including the last)
+			//	// with the same primary key groups as this one has.
+			//	// So we definitely want to keep this one, despite the fact that it has a NULL at the end.
+			//	outgoing_rows.push_back(saved_row_data_with_null_at_end);
+			//	return;
+			//}
 
-			// There is overlap with some other row that is able to populate every inner table.
-			// Therefore, where we overlap time ranges with such rows, we must not appear in the output;
-			// where we don't overlap, we must appear in the output.
+			//// There is overlap with some other row that is able to populate every inner table.
+			//// Therefore, where we overlap time ranges with such rows, we must not appear in the output;
+			//// where we don't overlap, we must appear in the output.
+
+			//// Populate a new TimeRanges object to track all time ranges for which all three 
 
 		}
 		else
