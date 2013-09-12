@@ -11158,7 +11158,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & current_info)
 	{
 
-		if (!DoCompareFinalInnerTable && the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[current_info.second.first])
+		if (!DoCompareFinalInnerTable && the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[current_info.second.second])
 		{
 			// See note above: The whole point of this time range sorter
 			// is to skip the primary key group in the last inner table.
@@ -11195,7 +11195,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 	std::for_each(rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &rhs, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row_rhs, &the_index, &current_inner_multiplicity](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & current_info)
 	{
 
-		if (!DoCompareFinalInnerTable && rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[current_info.second.first])
+		if (!DoCompareFinalInnerTable && rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.is_index_a_primary_key_in_the_final_inner_table[current_info.second.second])
 		{
 			// See note above: The whole point of this time range sorter
 			// is to skip the primary key group in the last inner table.
