@@ -11240,7 +11240,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 	// The value of the primary key group in the final inner table then attempts to determine the decision on sort order.
 
-	if (!DoCompareFinalInnerTable)
+	if (DoCompareFinalInnerTable)
 	{
 
 		is_determined = false;
