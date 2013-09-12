@@ -4497,29 +4497,29 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			switch (binding)
 			{
 
-			case SQLExecutor::INT64:
-				{
-					data_int = current_row_of_data.current_parameter_ints[index_in_data_vectors];
-					inner_multiplicity_int_vector.push_back(data_int);
-				}
-				break;
-
-			case SQLExecutor::STRING:
-				{
-					data_string = current_row_of_data.current_parameter_strings[index_in_data_vectors];
-					inner_multiplicity_string_vector.push_back(data_string);
-				}
-				break;
-
-			case SQLExecutor::NULL_BINDING:
-				{
-					if (!current_row_current_inner_table_primary_key_group_is_null)
+				case SQLExecutor::INT64:
 					{
-						++number_null_primary_key_groups_in_current_row;
-						current_row_current_inner_table_primary_key_group_is_null = true;
+						data_int = current_row_of_data.current_parameter_ints[index_in_data_vectors];
+						inner_multiplicity_int_vector.push_back(data_int);
 					}
-				}
-				break;
+					break;
+
+				case SQLExecutor::STRING:
+					{
+						data_string = current_row_of_data.current_parameter_strings[index_in_data_vectors];
+						inner_multiplicity_string_vector.push_back(data_string);
+					}
+					break;
+
+				case SQLExecutor::NULL_BINDING:
+					{
+						if (!current_row_current_inner_table_primary_key_group_is_null)
+						{
+							++number_null_primary_key_groups_in_current_row;
+							current_row_current_inner_table_primary_key_group_is_null = true;
+						}
+					}
+					break;
 
 			}
 
@@ -4612,29 +4612,29 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			switch (binding)
 			{
 
-			case SQLExecutor::INT64:
-				{
-					data_int = previous_row_of_data.current_parameter_ints[index_in_data_vectors];
-					inner_multiplicity_int_vector.push_back(data_int);
-				}
-				break;
-
-			case SQLExecutor::STRING:
-				{
-					data_string = previous_row_of_data.current_parameter_strings[index_in_data_vectors];
-					inner_multiplicity_string_vector.push_back(data_string);
-				}
-				break;
-
-			case SQLExecutor::NULL_BINDING:
-				{
-					if (!previous_row_current_inner_table_primary_key_group_is_null)
+				case SQLExecutor::INT64:
 					{
-						++number_null_primary_key_groups_in_previous_row;
-						previous_row_current_inner_table_primary_key_group_is_null = true;
+						data_int = previous_row_of_data.current_parameter_ints[index_in_data_vectors];
+						inner_multiplicity_int_vector.push_back(data_int);
 					}
-				}
-				break;
+					break;
+
+				case SQLExecutor::STRING:
+					{
+						data_string = previous_row_of_data.current_parameter_strings[index_in_data_vectors];
+						inner_multiplicity_string_vector.push_back(data_string);
+					}
+					break;
+
+				case SQLExecutor::NULL_BINDING:
+					{
+						if (!previous_row_current_inner_table_primary_key_group_is_null)
+						{
+							++number_null_primary_key_groups_in_previous_row;
+							previous_row_current_inner_table_primary_key_group_is_null = true;
+						}
+					}
+					break;
 
 			}
 
@@ -12786,7 +12786,14 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 				// in the final inner table.  It must be saved.
 				saved_complete_rows.push_back(test_row);
 
-				std::vector<>;
+				if (test_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first == SQLExecutor::INT64)
+				{
+					std::set<std::vector<std::int64_t>> inner_table_primary_key_groups;
+				}
+				else
+				{
+					std::set<std::vector<std::string>> inner_table_primary_key_groups;
+				}
 			}
 		});
 
@@ -13043,4 +13050,78 @@ void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
 void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys & group_time_ranges__intkeys, TimeRangesForIndividualGroup_StringKeys & group_time_ranges__stringkeys)
 {
 
+}
+
+void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::int64_t>> & inner_table_primary_key_groups)
+{
+	if (indices_of_primary_key_columns_with_multiplicity_greater_than_1.empty())
+	{
+		return;
+	}
+	if (indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first != SQLExecutor::INT64)
+	{
+		return;
+	}
+
+	int column_index = 0;
+	int inner_multiplicity_index = 0;
+	std::vector<std::int64_t> inner_table_primary_key_group;
+	std::for_each(indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &inner_table_primary_key_group, &inner_table_primary_key_groups, &column_index, &inner_multiplicity_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding)
+	{
+
+		int index_in_data_vector = binding.second.first;
+
+		if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[column_index])
+		{
+			inner_table_primary_key_group.push_back(current_parameter_ints[index_in_data_vector]);
+		}
+	
+		++column_index;
+		++inner_multiplicity_index;
+
+		if (inner_multiplicity_index == number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		{
+			inner_table_primary_key_groups.insert(inner_table_primary_key_group);
+			inner_table_primary_key_group.clear();
+			inner_multiplicity_index = 0;
+		}
+
+	});
+}
+
+void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::string>> & inner_table_primary_key_groups)
+{
+	if (indices_of_primary_key_columns_with_multiplicity_greater_than_1.empty())
+	{
+		return;
+	}
+	if (indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first != SQLExecutor::STRING)
+	{
+		return;
+	}
+
+	int column_index = 0;
+	int inner_multiplicity_index = 0;
+	std::vector<std::string> inner_table_primary_key_group;
+	std::for_each(indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &inner_table_primary_key_group, &inner_table_primary_key_groups, &column_index, &inner_multiplicity_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding)
+	{
+
+		int index_in_data_vector = binding.second.first;
+
+		if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[column_index])
+		{
+			inner_table_primary_key_group.push_back(current_parameter_strings[index_in_data_vector]);
+		}
+
+		++column_index;
+		++inner_multiplicity_index;
+
+		if (inner_multiplicity_index == number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		{
+			inner_table_primary_key_groups.insert(inner_table_primary_key_group);
+			inner_table_primary_key_group.clear();
+			inner_multiplicity_index = 0;
+		}
+
+	});
 }
