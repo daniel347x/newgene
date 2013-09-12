@@ -4773,6 +4773,11 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 		{
 			return false;
 		}
+
+		if (something_in_current_has_a_bigger_count_than_something_in_previous && something_in_previous_has_a_bigger_count_than_something_in_current)
+		{
+			return false;
+		}
 	
 	}
 
@@ -4823,6 +4828,16 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				}
 			}
 		});
+
+		if (something_in_current_is_not_in_previous && something_in_previous_is_not_in_current)
+		{
+			return false;
+		}
+
+		if (something_in_current_has_a_bigger_count_than_something_in_previous && something_in_previous_has_a_bigger_count_than_something_in_current)
+		{
+			return false;
+		}
 
 	}
 
