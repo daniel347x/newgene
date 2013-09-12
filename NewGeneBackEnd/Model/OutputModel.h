@@ -392,15 +392,15 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::int64_t> current_parameter_ints;
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
 
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_columns;
 
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns_in_final_inner_table;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_columns_in_all_but_final_inner_table;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns_with_multiplicity_greater_than_1;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_primary_key_columns_with_multiplicity_equal_to_1;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_primary_key_columns_in_final_inner_table;
-						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> indices_of_all_primary_key_columns_in_all_but_final_inner_table;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_columns_in_final_inner_table;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_columns_in_all_but_final_inner_table;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_multiplicity_greater_than_1;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_multiplicity_equal_to_1;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_primary_key_columns_in_final_inner_table;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_primary_key_columns_in_all_but_final_inner_table;
 
 						std::vector<bool> is_index_in_final_inner_table;
 						std::vector<bool> is_index_in_all_but_final_inner_table;
@@ -456,7 +456,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						}
 
-						void SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> new_indices)
+						void SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> new_indices)
 						{
 							current_parameter_ints = new_ints;
 							current_parameter_strings = new_strings;
@@ -473,13 +473,13 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							int column_index = 0;
 							int current_int_index = 0;
 							int current_string_index = 0;
-							std::for_each(indices_of_all_columns.cbegin(), indices_of_all_columns.cend(), [this, &column_index, &current_int_index, &current_string_index](std::pair<SQLExecutor::WHICH_BINDING, int> const & binding)
+							std::for_each(indices_of_all_columns.cbegin(), indices_of_all_columns.cend(), [this, &column_index, &current_int_index, &current_string_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding)
 							{
 								current_parameter_which_binding_to_use.push_back(binding.first);
 
-								std::pair<SQLExecutor::WHICH_BINDING, int> current_int_binding_to_add = std::make_pair(binding.first, current_int_index);
-								std::pair<SQLExecutor::WHICH_BINDING, int> current_string_binding_to_add = std::make_pair(binding.first, current_string_index);
-								std::pair<SQLExecutor::WHICH_BINDING, int> current_null_binding_to_add = std::make_pair(binding.first, 0);
+								std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_int_binding_to_add = std::make_pair(binding.first, std::make_pair(current_int_index, column_index));
+								std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_string_binding_to_add = std::make_pair(binding.first, std::make_pair(current_string_index, column_index));
+								std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_null_binding_to_add = std::make_pair(binding.first, std::make_pair(0, column_index));
 
 								AddBinding(is_index_in_final_inner_table, indices_of_all_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
 								AddBinding(is_index_in_all_but_final_inner_table, indices_of_all_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
@@ -512,7 +512,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							});
 						}
 
-						void AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, int> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, int> const & potential_current_string_binding_to_add)
+						void AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_string_binding_to_add)
 						{
 							if (binding_test[binding_index])
 							{
@@ -530,7 +530,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 									break;
 								case SQLExecutor::NULL_BINDING:
 									{
-										bindings.push_back(std::make_pair(SQLExecutor::NULL_BINDING, 0));
+										bindings.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, binding_index)));
 									}
 									break;
 								}
@@ -599,9 +599,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 					public:
 
-						TimeRangeSorter() : ShouldReturnEqual_EvenIf_TimeRangesAreDifferent(false), DoCompareFinalInnerTable(false) {}
-						TimeRangeSorter(TimeRangeSorter const & rhs) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = rhs.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent; DoCompareFinalInnerTable = rhs.DoCompareFinalInnerTable; }
-						TimeRangeSorter(SavedRowData const & rhs) : ShouldReturnEqual_EvenIf_TimeRangesAreDifferent(false), DoCompareFinalInnerTable(false) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs; }
+						TimeRangeSorter() : ShouldReturnEqual_EvenIf_TimeRangesAreDifferent(false), DoCompareFinalInnerTable(false), bad_row(false) {}
+						TimeRangeSorter(TimeRangeSorter const & rhs) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = rhs.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent; DoCompareFinalInnerTable = rhs.DoCompareFinalInnerTable; bad_row = rhs.bad_row; }
+						TimeRangeSorter(SavedRowData const & rhs) : ShouldReturnEqual_EvenIf_TimeRangesAreDifferent(false), DoCompareFinalInnerTable(false), bad_row(false) { the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table = rhs; }
 						SavedRowData the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table;
 						bool operator<(TimeRangeSorter const & rhs) const;
 						SavedRowData const & GetSavedRowData() const { return the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table; }
@@ -609,6 +609,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						bool ShouldReturnEqual_EvenIf_TimeRangesAreDifferent;
 						bool DoCompareFinalInnerTable;
+
+						bool bad_row;
 
 				};
 
