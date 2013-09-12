@@ -9307,7 +9307,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							return result;
 						}
 						AddRowsToXRTable(saved_rows_with_null_in_final_inner_table, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
-						multiplicity_one_time_ranges.clear();
+						multiplicity_one_time_ranges__intkeys.clear();
+						multiplicity_one_time_ranges__stringkeys.clear();
 						saved_rows_with_null_in_final_inner_table.clear();
 						if (failed)
 						{
@@ -9434,7 +9435,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				return result;
 			}
 			AddRowsToXRTable(saved_rows_with_null_in_final_inner_table, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
-			multiplicity_one_time_ranges.clear();
+			multiplicity_one_time_ranges__intkeys.clear();
+			multiplicity_one_time_ranges__stringkeys.clear();
 			saved_rows_with_null_in_final_inner_table.clear();
 			rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.clear();
 			if (failed)
@@ -12748,7 +12750,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 	std::vector<SavedRowData> saved_complete_rows;
 
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &outgoing_rows_of_data, &saved_complete_rows, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &group_time_ranges__intkeys, &group_time_ranges__stringkeys, &outgoing_rows_of_data, &saved_complete_rows, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
 	{
 
 		// Process rows according to time range.
@@ -12778,7 +12780,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// the rows that have data in the final inner table,
 		// because we've already saved the rows that don't (from the above loop).
 
-		std::for_each(outgoing_real_rows.cbegin(), outgoing_real_rows.cend(), [&saved_complete_rows](const SavedRowData & test_row)
+		std::for_each(outgoing_real_rows.cbegin(), outgoing_real_rows.cend(), [&saved_complete_rows, &group_time_ranges__intkeys, &group_time_ranges__stringkeys](const SavedRowData & test_row)
 		{
 			if (test_row.indices_of_all_primary_key_columns_in_final_inner_table[0].first != SQLExecutor::NULL_BINDING)
 			{
@@ -12789,10 +12791,22 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 				if (test_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first == SQLExecutor::INT64)
 				{
 					std::set<std::vector<std::int64_t>> inner_table_primary_key_groups;
+					test_row.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
+					std::for_each(inner_table_primary_key_groups.cbegin(), inner_table_primary_key_groups.cend(), [&test_row, &group_time_ranges__intkeys, &group_time_ranges__stringkeys](std::vector<std::int64_t> const & inner_key_group)
+					{
+						TimeRanges & time_ranges = group_time_ranges__intkeys[inner_key_group];
+						time_ranges.append(test_row.datetime_start, test_row.datetime_end);
+					});
 				}
 				else
 				{
 					std::set<std::vector<std::string>> inner_table_primary_key_groups;
+					test_row.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
+					std::for_each(inner_table_primary_key_groups.cbegin(), inner_table_primary_key_groups.cend(), [&test_row, &group_time_ranges__intkeys, &group_time_ranges__stringkeys](std::vector<std::int64_t> const & inner_key_group)
+					{
+						TimeRanges & time_ranges = group_time_ranges__stringkeys[inner_key_group];
+						time_ranges.append(test_row.datetime_start, test_row.datetime_end);
+					});
 				}
 			}
 		});
@@ -13052,7 +13066,7 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 
 }
 
-void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::int64_t>> & inner_table_primary_key_groups)
+void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::int64_t>> & inner_table_primary_key_groups) const
 {
 	if (indices_of_primary_key_columns_with_multiplicity_greater_than_1.empty())
 	{
@@ -13071,25 +13085,28 @@ void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroup
 
 		int index_in_data_vector = binding.second.first;
 
-		if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[column_index])
+		if (binding.first != SQLExecutor::NULL_BINDING)
 		{
 			inner_table_primary_key_group.push_back(current_parameter_ints[index_in_data_vector]);
 		}
-	
+
 		++column_index;
 		++inner_multiplicity_index;
 
 		if (inner_multiplicity_index == number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
 		{
-			inner_table_primary_key_groups.insert(inner_table_primary_key_group);
-			inner_table_primary_key_group.clear();
+			if (!inner_table_primary_key_group.empty())
+			{
+				inner_table_primary_key_groups.insert(inner_table_primary_key_group);
+				inner_table_primary_key_group.clear();
+			}
 			inner_multiplicity_index = 0;
 		}
 
 	});
 }
 
-void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::string>> & inner_table_primary_key_groups)
+void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::string>> & inner_table_primary_key_groups) const
 {
 	if (indices_of_primary_key_columns_with_multiplicity_greater_than_1.empty())
 	{
@@ -13108,7 +13125,7 @@ void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroup
 
 		int index_in_data_vector = binding.second.first;
 
-		if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[column_index])
+		if (binding.first != SQLExecutor::NULL_BINDING)
 		{
 			inner_table_primary_key_group.push_back(current_parameter_strings[index_in_data_vector]);
 		}
@@ -13118,10 +13135,18 @@ void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroup
 
 		if (inner_multiplicity_index == number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
 		{
-			inner_table_primary_key_groups.insert(inner_table_primary_key_group);
-			inner_table_primary_key_group.clear();
+			if (!inner_table_primary_key_group.empty())
+			{
+				inner_table_primary_key_groups.insert(inner_table_primary_key_group);
+				inner_table_primary_key_group.clear();
+			}
 			inner_multiplicity_index = 0;
 		}
 
 	});
+}
+
+void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetime_start, std::int64_t const datetime_end)
+{
+
 }
