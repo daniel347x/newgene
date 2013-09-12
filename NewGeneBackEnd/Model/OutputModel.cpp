@@ -514,7 +514,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	// Outgoing:
 	// Last two columns are:
 	// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT / COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT
-	all_merged_results_unformatted = SortAndRemoveDuplicates(merging_of_children_column_sets.back().second, WidgetInstanceIdentifier(), std::string("Sorting final K-ad results"), std::string("Removing duplicates from final K-ad results"), -1, 0, merging_of_children_column_sets, secondary_variable_groups_column_info.size() != 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, false);
+	all_merged_results_unformatted = SortAndOrRemoveDuplicates(merging_of_children_column_sets.back().second, WidgetInstanceIdentifier(), std::string("Sorting final K-ad results"), std::string("Removing duplicates from final K-ad results"), -1, 0, merging_of_children_column_sets, secondary_variable_groups_column_info.size() != 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, false);
 
 }
 
@@ -2150,7 +2150,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
 	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = xr_table_result.second.columns_in_view.size(); // This class-global variable must be set
-	SqlAndColumnSet duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false);
+	SqlAndColumnSet duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false);
 
 	if (failed)
 	{
@@ -2213,9 +2213,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 		// ******************************************************************************************************************* //
-		// Sort all rows, and split/merge them as necessary to handle time range overlap.
+		// Sort all rows, but note that the following step (CreateXRTable()) will igonore the sorting of the newly-joined data.
+		// Do not remove duplicates, as we are not prepared to do so yet.
 		// ******************************************************************************************************************* //
-		SqlAndColumnSet intermediate_duplicates_removed = SortAndRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting intermediate results"), std::string("Removing intermediate duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
+		SqlAndColumnSet intermediate_duplicates_removed = SortAndOrRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting intermediate results"), std::string("Removing intermediate duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
 		if (failed)
 		{
 			return SqlAndColumnSet();
@@ -2237,8 +2238,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 		// ******************************************************************************************************************* //
-		// Special processing: reorder inner tables in sorted primary key order,
-		// and split rows to handle the time range overlap of the new data being joined.
+		// Split rows to handle the time range overlap of the new data being joined,
+		// taking care to not include rows with NULL for the final inner table
+		// unless no other rows match over the given time range.
 		// ******************************************************************************************************************* //
 		xr_table_result = CreateXRTable(intermediate_duplicates_removed.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
 		ClearTables(sql_and_column_sets);
@@ -2256,7 +2258,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// ******************************************************************************************************************* //
 		// Sort all rows, and split/merge them as necessary to handle time range overlap.
 		// ******************************************************************************************************************* //
-		duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false);
+		duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false);
 
 		if (failed)
 		{
@@ -11587,7 +11589,7 @@ void OutputModel::OutputGenerator::CheckProgressUpdateMethod2(Messager & message
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::SortAndRemoveDuplicates(ColumnsInTempView const & column_set, WidgetInstanceIdentifier const & variable_group, std::string & msg_sort_preface, std::string & msg_remove_duplicates_preface, int const current_multiplicity, int const primary_group_number, SqlAndColumnSets & sql_and_column_sets, bool const do_clear_table, XR_TABLE_CATEGORY const xr_table_category, bool const is_intermediate)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::SortAndOrRemoveDuplicates(ColumnsInTempView const & column_set, WidgetInstanceIdentifier const & variable_group, std::string & msg_sort_preface, std::string & msg_remove_duplicates_preface, int const current_multiplicity, int const primary_group_number, SqlAndColumnSets & sql_and_column_sets, bool const do_clear_table, XR_TABLE_CATEGORY const xr_table_category, bool const is_intermediate)
 {
 
 	std::int64_t number_of_rows_to_sort = ObtainCount(column_set);
@@ -11654,63 +11656,74 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	}
 
 
-	if (variable_group.code)
+	if (!is_intermediate)
 	{
-		if (variable_group.longhand)
+
+		if (variable_group.code)
 		{
-			if (current_multiplicity >= 0)
+			if (variable_group.longhand)
 			{
-				boost::format msg("%4% for \"%1%\", multiplicity %2%: %3% rows");
-				msg % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
-				UpdateProgressBarToNextStage(msg.str(), std::string());
+				if (current_multiplicity >= 0)
+				{
+					boost::format msg("%4% for \"%1%\", multiplicity %2%: %3% rows");
+					msg % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
+					UpdateProgressBarToNextStage(msg.str(), std::string());
+				}
+				else
+				{
+					boost::format msg("%3% for \"%1%\": %2% rows");
+					msg % *variable_group.longhand % number_of_rows_to_sort % msg_remove_duplicates_preface;
+					UpdateProgressBarToNextStage(msg.str(), std::string());
+				}
 			}
 			else
 			{
-				boost::format msg("%3% for \"%1%\": %2% rows");
-				msg % *variable_group.longhand % number_of_rows_to_sort % msg_remove_duplicates_preface;
-				UpdateProgressBarToNextStage(msg.str(), std::string());
+				if (current_multiplicity >= 0)
+				{
+					boost::format msg("%4% for %1%, multiplicity %2%: %3% rows");
+					msg % *variable_group.code % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
+					UpdateProgressBarToNextStage(msg.str(), std::string());
+				}
+				else
+				{
+					boost::format msg("%3% for %1%: %2% rows");
+					msg % *variable_group.code % number_of_rows_to_sort % msg_remove_duplicates_preface;
+					UpdateProgressBarToNextStage(msg.str(), std::string());
+				}
 			}
 		}
 		else
 		{
-			if (current_multiplicity >= 0)
-			{
-				boost::format msg("%4% for %1%, multiplicity %2%: %3% rows");
-				msg % *variable_group.code % current_multiplicity % number_of_rows_to_sort % msg_remove_duplicates_preface;
-				UpdateProgressBarToNextStage(msg.str(), std::string());
-			}
-			else
-			{
-				boost::format msg("%3% for %1%: %2% rows");
-				msg % *variable_group.code % number_of_rows_to_sort % msg_remove_duplicates_preface;
-				UpdateProgressBarToNextStage(msg.str(), std::string());
-			}
+			boost::format msg_2("%2%: %1% rows");
+			msg_2 % number_of_rows_to_sort % msg_remove_duplicates_preface;
+			UpdateProgressBarToNextStage(msg_2.str(), std::string());
 		}
-	}
-	else
-	{
-		boost::format msg_2("%2%: %1% rows");
-		msg_2 % number_of_rows_to_sort % msg_remove_duplicates_preface;
-		UpdateProgressBarToNextStage(msg_2.str(), std::string());
+
+		// Entering the following function, the final two timerange columns are either:
+		// COLUMN_TYPE__DATETIMESTART_CHILD_MERGE / COLUMN_TYPE__DATETIMEEND_CHILD_MERGE
+		// or
+		// DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+		// 
+		// The function will add the following two timerange columns:
+		// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT / COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT
+		std::int64_t rows_added = 0;
+		SqlAndColumnSet duplicates_removed_top_level_variable_group_result = RemoveDuplicates_Or_OrderWithinRows(intermediate_sorted_top_level_variable_group_result.second, primary_group_number, rows_added, current_multiplicity, xr_table_category, false, is_intermediate);
+		ClearTables(sql_and_column_sets);
+		sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
+		if (failed)
+		{
+			return SqlAndColumnSet();
+		}
+
+
+		return duplicates_removed_top_level_variable_group_result;
+
+
 	}
 
-	// Entering the following function, the final two timerange columns are either:
-	// COLUMN_TYPE__DATETIMESTART_CHILD_MERGE / COLUMN_TYPE__DATETIMEEND_CHILD_MERGE
-	// or
-	// DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-	// 
-	// The function will add the following two timerange columns:
-	// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT / COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT
-	std::int64_t rows_added = 0;
-	SqlAndColumnSet duplicates_removed_top_level_variable_group_result = RemoveDuplicates_Or_OrderWithinRows(intermediate_sorted_top_level_variable_group_result.second, primary_group_number, rows_added, current_multiplicity, xr_table_category, false, is_intermediate);
-	ClearTables(sql_and_column_sets);
-	sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
-	if (failed)
-	{
-		return SqlAndColumnSet();
-	}
 
-	return duplicates_removed_top_level_variable_group_result;
+	return intermediate_sorted_top_level_variable_group_result;
+
 
 }
 
