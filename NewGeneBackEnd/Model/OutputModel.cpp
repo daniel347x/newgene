@@ -12382,26 +12382,18 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// All incoming rows match on all primary keys except those from the final inner table.
 	// However, some of these matching rows might have NULLs for some of the "matching" primary keys.
 
+	// Actually, an earlier stage prohibits the latter condition, but this function is nonetheless
+	// redundantly designed to support it in case that changes in the future.
+
 	// Also, the timerange of the data associated with the final inner table for each row
 	// has not yet been compared against the time range associated with the block of
 	// inner tables that does not include the last.
-
-
-
-
-	// First, run through all rows and split / toss out each one individually according to the time range
-	// associated with the first block of inner tables, vs. the timerange associated with
-	// the final inner table.
 
 
 	std::vector<TimeRangeSorter> rows_to_check;
 
 	std::vector<SavedRowData> saved_rows_with_multiple_nulls;
 
-
-	// The incoming rows may not match on the data in the final inner table.
-	// These rows come straight from the input -
-	// they have not yet been processed in this stage of the algorithm.
 	std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> row_inserts_info;
 	std::int64_t datetime_range_start = 0;
 	std::int64_t datetime_range_end;
@@ -12415,14 +12407,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			return;
 		}
 
-
-
-		std::int64_t country = row.GetSavedRowData().current_parameter_ints[1];
-
-
-
-		// Tricky detail: Require that ALL inner tables (not including the last)
-		// have data.
+		// Require that ALL inner tables (not including the last) have data.
 		// The reason is that if not all of them have data,
 		// it implies that an earlier multiplicity was unable to find any
 		// data over the given time range to merge in, and if so,
@@ -12498,71 +12483,19 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 			if (include_current_data)
 			{
-
 				// data has already been copied into the row, and no data needs to be removed.
 				return;
-
 			}
-
 
 			// If we're here, we need to remove the data from the final inner table from the row,
 			// because its datetime range is out of range.
-
-
-			std::int64_t data_int64 = 0;
-			std::string data_string;
-			std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> new_indices;
-			std::vector<std::string> new_strings;
-			std::vector<std::int64_t> new_ints;
-			int column_index = 0;
-			std::for_each(row.GetSavedRowData().indices_of_all_columns.cbegin(), row.GetSavedRowData().indices_of_all_columns.cend(), [this, &current_row, &column_index, &new_indices, &new_strings, &new_ints, &data_int64, &data_string](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding)
-			{
-
-				SQLExecutor::WHICH_BINDING binding_to_use = binding.first;
-
-				if (current_row.is_index_in_final_inner_table[column_index])
-				{
-					binding_to_use = SQLExecutor::NULL_BINDING;
-				}
-				
-				switch (binding_to_use)
-				{
-
-					case SQLExecutor::INT64:
-						{
-							data_int64 = current_row.current_parameter_ints[binding.second.first];
-							new_ints.push_back(data_int64);
-							new_indices.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)new_ints.size() - 1, column_index)));
-						}
-						break;
-
-					case SQLExecutor::STRING:
-						{
-							data_string = current_row.current_parameter_strings[binding.second.first];
-							new_strings.push_back(data_string);
-							new_indices.push_back(std::make_pair(SQLExecutor::STRING, std::make_pair((int)new_strings.size() - 1, column_index)));
-						}
-						break;
-
-					case SQLExecutor::NULL_BINDING:
-						{
-							new_indices.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, column_index)));
-						}
-						break;
-
-				}
-
-				++column_index;
-
-			});
-
-			current_row.SwapBindings(new_strings, new_ints, new_indices);
+			current_row.SetFinalInnerTableToNull();
 
 		});
 	
 	});
 
-	// The rows are now properly split by time range.
+	// The rows are now properly *individually* split by time range.
 
 	// Order the inner sets of each row
 	std::vector<std::string> bound_parameter_strings;
@@ -12571,6 +12504,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	bool at_least_one_row_is_bad = false;
 	std::for_each(rows_to_check.begin(), rows_to_check.end(), [this, &at_least_one_row_is_bad, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](TimeRangeSorter & row)
 	{
+
 		std::int64_t datetime_start = row.GetSavedRowData().datetime_start;
 		std::int64_t datetime_end = row.GetSavedRowData().datetime_end;
 		if (datetime_start < timerange_start)
