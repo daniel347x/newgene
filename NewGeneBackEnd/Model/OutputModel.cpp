@@ -13195,3 +13195,9 @@ void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetim
 {
 
 }
+
+bool OutputModel::OutputGenerator::TimeRangeMapper::operator<(TimeRangeMapper const & rhs) const
+{
+
+}
+
