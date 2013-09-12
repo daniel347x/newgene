@@ -3131,7 +3131,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			//    which themselves do not match on all primary key columns.
 			// ******************************************************************************************************** //
 			use_newest_row_index = false;
-			bool primary_keys_match = TestPrimaryKeyMatch(sorting_row_of_data, rows_to_sort[which_previous_row_index_to_test_against], use_newest_row_index);
+			bool primary_keys_match = TestPrimaryKeyMatch(sorting_row_of_data, rows_to_sort[which_previous_row_index_to_test_against], use_newest_row_index, PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_KEYS);
 
 			if (failed)
 			{
@@ -4308,7 +4308,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 }
 
-bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index, bool const ignore_final_inner_table)
+bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index, PRIMARY_KEY_MATCH_CONDITION const match_condition)
 {
 
 	// This is a special matching function that tests all the primary keys
@@ -4349,102 +4349,102 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 		switch (binding_current)
 		{
 
-		case SQLExecutor::INT64:
-			{
-
-				data_int_current = current_row_of_data.current_parameter_ints[index_current__data_vectors];
-
-				switch (binding_previous)
+			case SQLExecutor::INT64:
 				{
-				case SQLExecutor::INT64:
+
+					data_int_current = current_row_of_data.current_parameter_ints[index_current__data_vectors];
+
+					switch (binding_previous)
 					{
-						data_int_previous = previous_row_of_data.current_parameter_ints[index_previous__data_vectors];
-						if (data_int_current != data_int_previous)
-						{
-							match_failed = true;
-						}
+						case SQLExecutor::INT64:
+							{
+								data_int_previous = previous_row_of_data.current_parameter_ints[index_previous__data_vectors];
+								if (data_int_current != data_int_previous)
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::STRING:
+							{
+								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors];
+								if (boost::lexical_cast<std::int64_t>(data_string_previous) != data_int_current)
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::NULL_BINDING:
+							{
+								// NULLs match against non-NULLs
+							}
+							break;
 					}
-					break;
-				case SQLExecutor::STRING:
-					{
-						data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors];
-						if (boost::lexical_cast<std::int64_t>(data_string_previous) != data_int_current)
-						{
-							match_failed = true;
-						}
-					}
-					break;
-				case SQLExecutor::NULL_BINDING:
-					{
-						// NULLs match against non-NULLs
-					}
-					break;
+
 				}
+				break;
 
-			}
-			break;
-
-		case SQLExecutor::STRING:
-			{
-
-				data_string_current = current_row_of_data.current_parameter_strings[index_current__data_vectors];
-
-				switch (binding_previous)
+			case SQLExecutor::STRING:
 				{
-				case SQLExecutor::INT64:
+
+					data_string_current = current_row_of_data.current_parameter_strings[index_current__data_vectors];
+
+					switch (binding_previous)
 					{
-						data_int_previous = previous_row_of_data.current_parameter_ints[index_previous__data_vectors];
-						if (boost::lexical_cast<std::int64_t>(data_string_current) != data_int_previous)
-						{
-							match_failed = true;
-						}
+						case SQLExecutor::INT64:
+							{
+								data_int_previous = previous_row_of_data.current_parameter_ints[index_previous__data_vectors];
+								if (boost::lexical_cast<std::int64_t>(data_string_current) != data_int_previous)
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::STRING:
+							{
+								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors];
+								if (!boost::iequals(data_string_current, data_string_previous))
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::NULL_BINDING:
+							{
+								// NULLs match against non-NULLs
+							}
+							break;
 					}
-					break;
-				case SQLExecutor::STRING:
-					{
-						data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors];
-						if (!boost::iequals(data_string_current, data_string_previous))
-						{
-							match_failed = true;
-						}
-					}
-					break;
-				case SQLExecutor::NULL_BINDING:
-					{
-						// NULLs match against non-NULLs
-					}
-					break;
+
 				}
+				break;
 
-			}
-			break;
-
-		case SQLExecutor::NULL_BINDING:
-			{
-
-				data_null_current = true;
-
-				switch (binding_previous)
+			case SQLExecutor::NULL_BINDING:
 				{
-				case SQLExecutor::INT64:
-					{
-						// NULLs match against non-NULLs
-					}
-					break;
-				case SQLExecutor::STRING:
-					{
-						// NULLs match against non-NULLs
-					}
-					break;
-				case SQLExecutor::NULL_BINDING:
-					{
-						// NULLs match against NULLs
-					}
-					break;
-				}
 
-			}
-			break;
+					data_null_current = true;
+
+					switch (binding_previous)
+					{
+						case SQLExecutor::INT64:
+							{
+								// NULLs match against non-NULLs
+							}
+							break;
+						case SQLExecutor::STRING:
+							{
+								// NULLs match against non-NULLs
+							}
+							break;
+						case SQLExecutor::NULL_BINDING:
+							{
+								// NULLs match against NULLs
+							}
+							break;
+					}
+
+				}
+				break;
 
 		}
 
@@ -4482,7 +4482,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 	std::vector<std::int64_t> inner_multiplicity_int_vector;
 	int number_null_primary_key_groups_in_current_row = 0;
 	bool current_row_current_inner_table_primary_key_group_is_null = false;
-	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous__map_from_inner_primary_key_group__to__count, &saved_ints_previous__map_from_inner_primary_key_group__to__count, &saved_strings_current__map_from_inner_primary_key_group__to__count, &saved_ints_current__map_from_inner_primary_key_group__to__count, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & current_info)
+	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row, &match_condition, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous__map_from_inner_primary_key_group__to__count, &saved_ints_previous__map_from_inner_primary_key_group__to__count, &saved_strings_current__map_from_inner_primary_key_group__to__count, &saved_ints_current__map_from_inner_primary_key_group__to__count, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & current_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = current_info.first;
@@ -4528,7 +4528,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			if (!inner_multiplicity_int_vector.empty())
 			{
 				bool do_insert = false;
-				if (ignore_final_inner_table)
+				if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_INNER_TABLE)
 				{
 					if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities)
 					{
@@ -4557,7 +4557,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			if (!inner_multiplicity_string_vector.empty())
 			{
 				bool do_insert = false;
-				if (ignore_final_inner_table)
+				if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_INNER_TABLE)
 				{
 					if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities)
 					{
@@ -4597,7 +4597,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 	int number_null_primary_key_groups_in_previous_row = 0;
 	bool previous_row_current_inner_table_primary_key_group_is_null = false;
 	the_index = 0;
-	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &previous_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_previous_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous__map_from_inner_primary_key_group__to__count, &saved_ints_previous__map_from_inner_primary_key_group__to__count, &saved_strings_current__map_from_inner_primary_key_group__to__count, &saved_ints_current__map_from_inner_primary_key_group__to__count, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & previous_info)
+	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &previous_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_previous_row, &match_condition, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous__map_from_inner_primary_key_group__to__count, &saved_ints_previous__map_from_inner_primary_key_group__to__count, &saved_strings_current__map_from_inner_primary_key_group__to__count, &saved_ints_current__map_from_inner_primary_key_group__to__count, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & previous_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = previous_info.first;
@@ -4643,7 +4643,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			if (!inner_multiplicity_int_vector.empty())
 			{
 				bool do_insert = false;
-				if (ignore_final_inner_table)
+				if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_INNER_TABLE)
 				{
 					if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities)
 					{
@@ -4672,7 +4672,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			if (!inner_multiplicity_string_vector.empty())
 			{
 				bool do_insert = false;
-				if (ignore_final_inner_table)
+				if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_INNER_TABLE)
 				{
 					if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities)
 					{
@@ -9153,6 +9153,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		std::int64_t datetime_range_end = 0;
 		bool include_current_data = false;
 		bool include_previous_data = false;
+
+		TimeRangesForIndividualGroup multiplicity_one_time_ranges;
 		
 		while (StepData())
 		{
@@ -9227,7 +9229,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				use_newest_row_index = false;
 				bool primary_keys_match = TestPrimaryKeyMatch(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[which_previous_row_index_to_test_against].the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table, use_newest_row_index,
 															  // Note: important 4th parameter: See note above
-															  true);
+															  PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_INNER_TABLE);
 
 				if (failed)
 				{
@@ -9275,13 +9277,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					//      non-NULL primary keys in all inner tables but the last)
 					std::sort(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end());
 
-					HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
+					HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(multiplicity_one_time_ranges, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.clear();
 
 					if (failed)
 					{
 						break;
 					}
+
+					// Also check if the multiplicity 1 keys have changed
 
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
 
@@ -9393,7 +9397,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 		{
-			HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
+			HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(multiplicity_one_time_ranges, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 			rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.clear();
 			if (failed)
 			{
@@ -12376,7 +12380,7 @@ void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumn
 
 }
 
-void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, std::deque<SavedRowData> & outgoing_rows_of_data, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category)
+void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(TimeRangesForIndividualGroup & group_time_ranges, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, std::deque<SavedRowData> & outgoing_rows_of_data, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category)
 {
 	
 	// All incoming rows match on all primary keys except those from the final inner table.
@@ -12449,7 +12453,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		
 		// Throw out redundant rows.
 		//
-		// The following block will NOT include rows that only include the data from the final inner table,
+		// The following block will EXCLUDE rows that only include the data from the final inner table,
 		// but not the previous data,
 		// because this data is guaranteed to be in place from the initial primary table.
 		std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &row, &rows_to_check](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
@@ -12761,7 +12765,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 }
 
-void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another)
+void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(TimeRangesForIndividualGroup & group_time_ranges, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another)
 {
 
 	if (rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.empty())
@@ -12770,7 +12774,7 @@ void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroup
 	}
 
 	std::deque<SavedRowData> outgoing_rows_of_data;
-	Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, outgoing_rows_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category);
+	Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(group_time_ranges, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, outgoing_rows_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category);
 
 	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](SavedRowData const & new_row_to_write_to_database)
 	{
