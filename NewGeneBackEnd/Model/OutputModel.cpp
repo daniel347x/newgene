@@ -12790,6 +12790,20 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 				if (test_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first == SQLExecutor::INT64)
 				{
+					// Tricky use of map!  We only insert into map when no inner tables are NULL.
+					//
+					// Our map comparison will behave oddly if this is violated
+					// because the comparison will return equality for inner sets that have a smaller number of elements
+					// when compared against a full set.  This is how, later, we test to see
+					// if a row with a NULL should be included.
+					// But never insert an element with a smaller number of inner tables!
+					// This could overwrite the map entry!!!
+					//
+					// Guaranteed to have no NULL primary key groups, so the following map insertion
+					// (at this phase) will never return a match with a group that has a smaller
+					// number of inner tables.  Later, when the "saved_rows_with_null_in_final_inner_table"
+					// data structure is processed, there *will* be checks into the map against
+					// a smaller number of (non-NULL) inner tables - but not yet.
 					std::set<std::vector<std::int64_t>> inner_table_primary_key_groups;
 					test_row.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
 					TimeRanges & time_ranges = group_time_ranges__intkeys[TimeRangeMapper_Ints(inner_table_primary_key_groups)];
@@ -13079,27 +13093,22 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 		if (use_ints)
 		{
 
-			//std::set<std::vector<std::int64_t>> inner_table_primary_key_groups;
-			//saved_row_data_with_null_at_end.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
-			//if (group_time_ranges__intkeys.find(inner_table_primary_key_groups) == group_time_ranges__intkeys.cend())
-			//{
-			//	return;
-			//}
+			std::set<std::vector<std::int64_t>> inner_table_primary_key_groups;
+			saved_row_data_with_null_at_end.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
+			if (group_time_ranges__intkeys.find(inner_table_primary_key_groups) == group_time_ranges__intkeys.cend())
+			{
+				// No other row exists (with all inner tables populated, including the last)
+				// with an overlapping primary key group set as the current one has.
+				// So we definitely want to keep this one, despite the fact that it has a NULL at the end.
+				outgoing_rows.push_back(saved_row_data_with_null_at_end);
+				return;
+			}
 
-			//if (no_match)
-			//{
-			//	// No other row exists (with all inner tables populated, including the last)
-			//	// with the same primary key groups as this one has.
-			//	// So we definitely want to keep this one, despite the fact that it has a NULL at the end.
-			//	outgoing_rows.push_back(saved_row_data_with_null_at_end);
-			//	return;
-			//}
+			// There is overlap with some other row that is able to populate every inner table.
+			// Therefore, where we overlap time ranges with such rows, we must not appear in the output;
+			// where we don't overlap, we must appear in the output.
 
-			//// There is overlap with some other row that is able to populate every inner table.
-			//// Therefore, where we overlap time ranges with such rows, we must not appear in the output;
-			//// where we don't overlap, we must appear in the output.
-
-			//// Populate a new TimeRanges object to track all time ranges for which all three 
+			// Populate a new TimeRanges object to track all time ranges for which all three 
 
 		}
 		else
@@ -13199,10 +13208,6 @@ void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetim
 bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator<(TimeRangeMapper_Ints const & rhs) const
 {
 
-	if (rhs.sets.size() > sets.size())
-	{
-		return true;
-	}
 	std::set<std::vector<std::int64_t>> test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
 	if (sets.size() == test_set.size())
@@ -13212,22 +13217,13 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator<(TimeRangeMapp
 		return false;
 	}
 
-	if (rhs.sets.size() < sets.size())
-	{
-		return false;
-	}
-
-	return rhs.sets < sets;
+	return sets < rhs.sets;
 
 }
 
 bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator<(TimeRangeMapper_Strings const & rhs) const
 {
 
-	if (rhs.sets.size() > sets.size())
-	{
-		return true;
-	}
 	std::set<std::vector<std::string>> test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
 	if (sets.size() == test_set.size())
@@ -13237,12 +13233,7 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator<(TimeRangeM
 		return false;
 	}
 
-	if (rhs.sets.size() < sets.size())
-	{
-		return false;
-	}
-
-	return rhs.sets < sets;
+	return sets < rhs.sets;
 
 }
 
