@@ -13276,6 +13276,61 @@ void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroup
 void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetime_start, std::int64_t const datetime_end)
 {
 
+	if (ranges.empty())
+	{
+		ranges.push_back(std::make_pair(datetime_start, datetime_end));
+		return;
+	}
+
+	std::list<std::pair<std::int64_t, std::int64_t>>::iterator me = ranges.begin();	
+
+	while (me != ranges.end())
+	{
+
+		std::pair<std::int64_t, std::int64_t> & range_ = *me;
+		std::int64_t & _start = range_.first;
+		std::int64_t & _end = range_.second;
+
+		if (datetime_start < _start)
+		{
+
+			if (datetime_end < _start)
+			{
+				ranges.insert(ranges.begin(), std::make_pair(datetime_start, datetime_end));
+				break;
+			}
+
+			if (datetime_end <= _end)
+			{
+				_start = datetime_start;
+				break;
+			}
+
+			std::list<std::pair<std::int64_t, std::int64_t>>::iterator peek_ = me;
+			++peek_;
+			if (peek_ != ranges.end())
+			{
+				if (datetime_end >= peek_->first)
+				{
+					std::list<std::pair<std::int64_t, std::int64_t>>::iterator old_me = me;
+					me = peek_;
+					ranges.erase(old_me);
+					me->first = datetime_start;
+				}
+				else
+				{
+					me->second = datetime_end;
+				}
+				break;
+			}
+
+			me->second = datetime_end;
+			break;
+
+		}
+
+	}
+
 }
 
 void OutputModel::OutputGenerator::TimeRanges::subtract(TimeRanges const & rhs)
