@@ -113,7 +113,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, remove_self_kads(true)
 {
 	debug_ordering = true;
-	delete_tables = false;
+	//delete_tables = false;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -13037,7 +13037,10 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 
 	indices_of_all_columns = new_indices;
 
+	current_parameter_ints.clear();
+	current_parameter_strings.clear();
 	current_parameter_which_binding_to_use.clear();
+
 	indices_of_all_columns_in_final_inner_table.clear();
 	indices_of_all_columns_in_all_but_final_inner_table.clear();
 	indices_of_primary_key_columns.clear();
@@ -13045,6 +13048,7 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 	indices_of_primary_key_columns_with_multiplicity_equal_to_1.clear();
 	indices_of_all_primary_key_columns_in_final_inner_table.clear();
 	indices_of_all_primary_key_columns_in_all_but_final_inner_table.clear();
+
 	int column_index = 0;
 	int current_int_index = 0;
 	int current_string_index = 0;
