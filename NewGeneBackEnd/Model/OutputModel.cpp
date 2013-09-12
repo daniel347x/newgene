@@ -13702,13 +13702,17 @@ void OutputModel::OutputGenerator::SavedRowData::SetLast2DateTimeColumns(std::in
 	if (current_parameter_which_binding_to_use[number_columns - 2] == SQLExecutor::NULL_BINDING)
 	{
 		// The swapping of inner tables may have swapped nulls into the timerange columns
+
+		int number_columns_final_inner_table = (int)indices_of_all_columns_in_final_inner_table.size();
+
 		current_parameter_which_binding_to_use[number_columns - 2] = SQLExecutor::INT64;
 		current_parameter_ints.push_back(start_datetime_to_set);
 		indices_of_all_columns[number_columns - 2].first = SQLExecutor::INT64;
 		indices_of_all_columns[number_columns - 2].second.first = (int)current_parameter_ints.size() - 1;
 		indices_of_all_columns[number_columns - 2].second.second = number_columns - 2;
-		indices_of_all_columns_in_final_inner_table[number_columns - 2].second.first = (int)current_parameter_ints.size() - 1;
-		indices_of_all_columns_in_final_inner_table[number_columns - 2].second.second = number_columns - 2;
+		indices_of_all_columns_in_final_inner_table[number_columns_final_inner_table - 2].first = SQLExecutor::INT64;
+		indices_of_all_columns_in_final_inner_table[number_columns_final_inner_table - 2].second.first = (int)current_parameter_ints.size() - 1;
+		indices_of_all_columns_in_final_inner_table[number_columns_final_inner_table - 2].second.second = number_columns - 2;
 		datetime_start = start_datetime_to_set;
 
 		current_parameter_which_binding_to_use[number_columns - 1] = SQLExecutor::INT64;
@@ -13716,6 +13720,7 @@ void OutputModel::OutputGenerator::SavedRowData::SetLast2DateTimeColumns(std::in
 		indices_of_all_columns[number_columns - 1].first = SQLExecutor::INT64;
 		indices_of_all_columns[number_columns - 1].second.first = (int)current_parameter_ints.size() - 1;
 		indices_of_all_columns[number_columns - 1].second.second = number_columns - 1;
+		indices_of_all_columns_in_final_inner_table[number_columns_final_inner_table - 1].first = SQLExecutor::INT64;
 		indices_of_all_columns_in_final_inner_table[number_columns - 1].second.first = (int)current_parameter_ints.size() - 1;
 		indices_of_all_columns_in_final_inner_table[number_columns - 1].second.second = number_columns - 1;
 		datetime_end = end_datetime_to_set;
