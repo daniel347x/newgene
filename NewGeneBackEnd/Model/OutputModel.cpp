@@ -3051,6 +3051,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 				// The function returns the inner table parameters, ordered properly
 
+				// Save the last two timerange columns
+				int size_of_int_vector = (int)sorting_row_of_data.GetSavedRowData().current_parameter_ints.size();
+				std::int64_t start_datetime_to_save = sorting_row_of_data.GetSavedRowData().current_parameter_ints[size_of_int_vector - 2];
+				std::int64_t end_datetime_to_save = sorting_row_of_data.GetSavedRowData().current_parameter_ints[size_of_int_vector - 1];
+
 				bool dummy = false;
 				std::string dummystr;
 				ColumnsInTempView dummycols;
@@ -3078,6 +3083,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 					// Set the new inner table order
 					sorting_row_of_data.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+
+					// Set the saved datetime columns
+					size_of_int_vector = (int)sorting_row_of_data.GetSavedRowData().current_parameter_ints.size();
+					sorting_row_of_data.GetSavedRowData().current_parameter_ints[size_of_int_vector - 2] = start_datetime_to_save;
+					sorting_row_of_data.GetSavedRowData().current_parameter_ints[size_of_int_vector - 1] = end_datetime_to_save;
 
 					ordering_within_rows_data.clear();
 					ordering_within_rows_data.push_back(sorting_row_of_data);
@@ -7048,6 +7058,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_row_of_data, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView const & previous_x_or_mergedfinalplusnewfinal_columns, ColumnsInTempView & current_xr_or_completemerge_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category, bool const sort_only, bool const no_new_column_names)
 {
 
+	if (false) // debugging
+	{
+		if (current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.size() == 4)
+		{
+			if (current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].second.first] == 200
+				&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[1].second.first] == 211
+				&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[2].second.first] == 255
+				&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[3].second.first] == 315
+				)
+			{
+				int m = 0;
+			}
+		}
+	}
+
 	// ********************************************************************************** //
 	//
 	// Compare the following method to that used in MergeRows().
@@ -9174,6 +9199,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 
 			current_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result);
+
+			if (false) // debugging
+			{
+				if (current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.size() == 4)
+				{
+					if (current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].second.first] == 200
+						&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[1].second.first] == 211
+						&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[2].second.first] == 255
+						&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[3].second.first] == 315
+						)
+					{
+						int m = 0;
+					}
+				}
+			}
 
 			if (failed)
 			{
@@ -12486,6 +12526,24 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			saved_rows_with_multiple_nulls.push_back(row.GetSavedRowData());
 			return;
 		}
+
+
+
+		if (false) // debugging
+		{
+			if (row.GetSavedRowData().indices_of_primary_key_columns_with_multiplicity_greater_than_1.size() == 4)
+			{
+				if (row.GetSavedRowData().current_parameter_ints[row.GetSavedRowData().indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].second.first] == 200
+					&& row.GetSavedRowData().current_parameter_ints[row.GetSavedRowData().indices_of_primary_key_columns_with_multiplicity_greater_than_1[1].second.first] == 211
+					&& row.GetSavedRowData().current_parameter_ints[row.GetSavedRowData().indices_of_primary_key_columns_with_multiplicity_greater_than_1[2].second.first] == 255
+					&& row.GetSavedRowData().current_parameter_ints[row.GetSavedRowData().indices_of_primary_key_columns_with_multiplicity_greater_than_1[3].second.first] == 315
+					)
+				{
+					int m = 0;
+				}
+			}
+		}
+
 
 
 		// Split an individual incoming row into 0, 1, 2, or 3 new rows,
