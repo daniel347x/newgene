@@ -2152,6 +2152,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = xr_table_result.second.columns_in_view.size(); // This class-global variable must be set
 	SqlAndColumnSet duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false);
 
+	if (failed)
+	{
+		return SqlAndColumnSet();
+	}
+
 	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
 	{
 
@@ -2169,18 +2174,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			messager.SetPerformanceLabel(msg.str().c_str());
 		}
 
-		// Incoming:
-		// The LAST inner table (there may be only one) has as its LAST two columns:
-		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-		//
-		// Outgoing:
-		// ***
-		// The PREVIOUS set of inner tables (all but the last inner table) has as its LAST two columns:
-		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-		// ***
-		// The LAST inner table has only a single pair at its end:
-		// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-		// ***
 		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, duplicates_removed.second, current_multiplicity, primary_group_number);
 		x_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(x_table_result);
@@ -2193,6 +2186,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 
+		// ******************************************************************************************************************* //
+		// Reorder the inner tables within each row so that the smallest ones appear on the left.
+		// Do no other processing.
+		// In particular, do not remove self-K-ads, do not sort the rows within the table,
+		// and do not perform any time range handling.
+		// The number of input rows is identical to the number of output rows, and the order of the rows remains unchanged.
+		// ******************************************************************************************************************* //
 		std::int64_t rows_added = 0;
 		SqlAndColumnSet sorted_within_rows_prior_to_xr_processing = RemoveDuplicates_Or_OrderWithinRows(x_table_result.second, primary_group_number, rows_added, current_multiplicity, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true, false);
 		ClearTables(sql_and_column_sets);
@@ -2205,9 +2205,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 
+		// ******************************************************************************************************************* //
+		// Sort all rows that match on primary keys by time range,
+		// and split them as necessary to handle time range overlap.
+		// ******************************************************************************************************************* //
 		SqlAndColumnSet intermediate_duplicates_removed = SortAndRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting intermediate results"), std::string("Removing intermediate duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
 
 
+		if (failed)
+		{
+			return SqlAndColumnSet();
+		}
 
 
 		std::int64_t number_of_rows = ObtainCount(x_table_result.second);
@@ -2220,19 +2228,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		UpdateProgressBarToNextStage(msg_.str(), std::string());
 		rows_estimate *= raw_rows_count;
 
-		// Incoming:
-		// ***
-		// The PREVIOUS set of inner tables (all but the last inner table) has as its LAST two columns:
-		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-		// ***
-		// The LAST inner table has only a single pair at its end:
-		// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-		// ***
-		//
-		// Outgoing:
-		// The LAST inner table has two pairs at its end:
-		// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
+		// ******************************************************************************************************************* //
+		// Special processing: reorder inner tables in sorted primary key order,
+		// and split rows to handle the time range overlap of the new data being joined.
+		// ******************************************************************************************************************* //
 		xr_table_result = CreateXRTable(intermediate_duplicates_removed.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(xr_table_result);
@@ -2243,17 +2242,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 		previous_count = ObtainCount(xr_table_result.second);
 
-		// Incoming:
-		// The LAST inner table has two pairs at its end:
-		// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-		//
-		// Outgoing:
-		// The LAST inner table has three pairs at its end:
-		// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
+		// ******************************************************************************************************************* //
+		// Sort all rows that match on primary keys by time range,
+		// and split them as necessary to handle time range overlap.
+		// ******************************************************************************************************************* //
 		duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false);
+
+		if (failed)
+		{
+			return SqlAndColumnSet();
+		}
 
 	}
 
@@ -2262,11 +2260,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
-	// Outgoing:
-	// The LAST inner table has three pairs at its end:
-	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 	return sql_and_column_sets.back();
 
 }
@@ -3061,7 +3054,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				remove_self_kads = false;
 				bool added = CreateNewXRRow(sorting_row_of_data.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, previous_result_columns, dummycols, true, true, xr_table_category, false, order_within_rows);
 				remove_self_kads = true;
-
 				if (added)
 				{
 
@@ -3145,6 +3137,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			}
 			else
 			{
+
+				// ******************************************************************************************************************* //
+				// Sort all rows that match on primary keys by time range,
+				// and split them as necessary to handle time range overlap.
+				// ******************************************************************************************************************* //
+
 				use_newest_row_index = false;
 				RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction, xr_table_category);
 				which_previous_row_index_to_test_against = 0;
@@ -4731,54 +4729,89 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			return true;
 		}
 
-		bool something_in_current_is_not_in_previous = false;
-		bool something_in_current_has_a_bigger_count_than_something_in_previous = false;
-		std::for_each(saved_strings_current__map_from_inner_primary_key_group__to__count.cbegin(), saved_strings_current__map_from_inner_primary_key_group__to__count.cend(), [&something_in_current_has_a_bigger_count_than_something_in_previous, &something_in_current_is_not_in_previous, &saved_strings_previous__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::string>, int> const & inner_table_primary_key_group_info)
+		bool primary_key_group_in_current__does_not_exist_in_previous = false;
+		bool an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous = false;
+		int current_excess_count = 0;
+		std::for_each(saved_strings_current__map_from_inner_primary_key_group__to__count.cbegin(), saved_strings_current__map_from_inner_primary_key_group__to__count.cend(), [&current_excess_count, &an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous, &primary_key_group_in_current__does_not_exist_in_previous, &saved_strings_previous__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::string>, int> const & inner_table_primary_key_group_info)
 		{
 			if (saved_strings_previous__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) == saved_strings_previous__map_from_inner_primary_key_group__to__count.cend())
 			{
 				// Not found!
-				something_in_current_is_not_in_previous = true;
+				primary_key_group_in_current__does_not_exist_in_previous = true;
+				current_excess_count += inner_table_primary_key_group_info.second;
 			}
 			else
 			{
 				// Found!
 				if (inner_table_primary_key_group_info.second > saved_strings_previous__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first])
 				{
-					something_in_current_has_a_bigger_count_than_something_in_previous = true;
+					an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous = true;
+					current_excess_count += (inner_table_primary_key_group_info.second - saved_strings_previous__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first]);
 				}
 			}
 		});
 
-		bool something_in_previous_is_not_in_current = false;
-		bool something_in_previous_has_a_bigger_count_than_something_in_current = false;
-		std::for_each(saved_strings_previous__map_from_inner_primary_key_group__to__count.cbegin(), saved_strings_previous__map_from_inner_primary_key_group__to__count.cend(), [&something_in_previous_has_a_bigger_count_than_something_in_current, &something_in_previous_is_not_in_current, &saved_strings_current__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::string>, int> const & inner_table_primary_key_group_info)
+		bool primary_key_group_in_previous__does_not_exist_in_current = false;
+		bool an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current = false;
+		int previous_excess_count = 0;
+		std::for_each(saved_strings_previous__map_from_inner_primary_key_group__to__count.cbegin(), saved_strings_previous__map_from_inner_primary_key_group__to__count.cend(), [&previous_excess_count, &an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current, &primary_key_group_in_previous__does_not_exist_in_current, &saved_strings_current__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::string>, int> const & inner_table_primary_key_group_info)
 		{
 			if (saved_strings_current__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) == saved_strings_current__map_from_inner_primary_key_group__to__count.cend())
 			{
 				// Not found!
-				something_in_previous_is_not_in_current = true;
+				primary_key_group_in_previous__does_not_exist_in_current = true;
+				previous_excess_count += inner_table_primary_key_group_info.second;
 			}
 			else
 			{
 				// Found!
 				if (inner_table_primary_key_group_info.second > saved_strings_current__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first])
 				{
-					something_in_previous_has_a_bigger_count_than_something_in_current = true;
+					an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current = true;
+					previous_excess_count += (inner_table_primary_key_group_info.second - saved_strings_current__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first]);
 				}
 			}
 		});
 
-		if (something_in_current_is_not_in_previous && something_in_previous_is_not_in_current)
+		if (primary_key_group_in_current__does_not_exist_in_previous && primary_key_group_in_previous__does_not_exist_in_current)
 		{
 			return false;
 		}
 
-		if (something_in_current_has_a_bigger_count_than_something_in_previous && something_in_previous_has_a_bigger_count_than_something_in_current)
+		if (an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous && an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current)
 		{
 			return false;
 		}
-	
+
+		if (current_excess_count > number_null_primary_key_groups_in_previous_row)
+		{
+			return false;
+		}
+
+		if (previous_excess_count > number_null_primary_key_groups_in_current_row)
+		{
+			return false;
+		}
+
+		// redundant
+#		if 0
+		if (primary_key_group_in_current__does_not_exist_in_previous)
+		{
+			if (number_null_primary_key_groups_in_current_row < previous_excess_count)
+			{
+				return false;
+			}
+		}
+
+		if (primary_key_group_in_previous__does_not_exist_in_current)
+		{
+			if (number_null_primary_key_groups_in_previous_row < current_excess_count)
+			{
+				return false;
+			}
+		}
+#		endif
+
 	}
 
 	else if (saved_ints_current__map_from_inner_primary_key_group__to__count.size() > 0)
@@ -4791,53 +4824,88 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			return true;
 		}
 
-		bool something_in_current_is_not_in_previous = false;
-		bool something_in_current_has_a_bigger_count_than_something_in_previous = false;
-		std::for_each(saved_ints_current__map_from_inner_primary_key_group__to__count.cbegin(), saved_ints_current__map_from_inner_primary_key_group__to__count.cend(), [&something_in_current_has_a_bigger_count_than_something_in_previous, &something_in_current_is_not_in_previous, &saved_ints_previous__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::int64_t>, int> const & inner_table_primary_key_group_info)
+		bool primary_key_group_in_current__does_not_exist_in_previous = false;
+		bool an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous = false;
+		int current_excess_count = 0;
+		std::for_each(saved_ints_current__map_from_inner_primary_key_group__to__count.cbegin(), saved_ints_current__map_from_inner_primary_key_group__to__count.cend(), [&current_excess_count, &an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous, &primary_key_group_in_current__does_not_exist_in_previous, &saved_ints_previous__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::int64_t>, int> const & inner_table_primary_key_group_info)
 		{
 			if (saved_ints_previous__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) == saved_ints_previous__map_from_inner_primary_key_group__to__count.cend())
 			{
 				// Not found!
-				something_in_current_is_not_in_previous = true;
+				primary_key_group_in_current__does_not_exist_in_previous = true;
+				current_excess_count += inner_table_primary_key_group_info.second;
 			}
 			else
 			{
 				// Found!
 				if (inner_table_primary_key_group_info.second > saved_ints_previous__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first])
 				{
-					something_in_current_has_a_bigger_count_than_something_in_previous = true;
+					an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous = true;
+					current_excess_count += (inner_table_primary_key_group_info.second - saved_ints_previous__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first]);
 				}
 			}
 		});
 
-		bool something_in_previous_is_not_in_current = false;
-		bool something_in_previous_has_a_bigger_count_than_something_in_current = false;
-		std::for_each(saved_ints_previous__map_from_inner_primary_key_group__to__count.cbegin(), saved_ints_previous__map_from_inner_primary_key_group__to__count.cend(), [&something_in_previous_has_a_bigger_count_than_something_in_current, &something_in_previous_is_not_in_current, &saved_ints_current__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::int64_t>, int> const & inner_table_primary_key_group_info)
+		bool primary_key_group_in_previous__does_not_exist_in_current = false;
+		bool an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current = false;
+		int previous_excess_count = 0;
+		std::for_each(saved_ints_previous__map_from_inner_primary_key_group__to__count.cbegin(), saved_ints_previous__map_from_inner_primary_key_group__to__count.cend(), [&previous_excess_count, &an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current, &primary_key_group_in_previous__does_not_exist_in_current, &saved_ints_current__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::int64_t>, int> const & inner_table_primary_key_group_info)
 		{
 			if (saved_ints_current__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) == saved_ints_current__map_from_inner_primary_key_group__to__count.cend())
 			{
 				// Not found!
-				something_in_previous_is_not_in_current = true;
+				primary_key_group_in_previous__does_not_exist_in_current = true;
+				previous_excess_count += inner_table_primary_key_group_info.second;
 			}
 			else
 			{
 				// Found!
 				if (inner_table_primary_key_group_info.second > saved_ints_current__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first])
 				{
-					something_in_previous_has_a_bigger_count_than_something_in_current = true;
+					an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current = true;
+					previous_excess_count += (inner_table_primary_key_group_info.second - saved_ints_current__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first]);
 				}
 			}
 		});
 
-		if (something_in_current_is_not_in_previous && something_in_previous_is_not_in_current)
+		if (primary_key_group_in_current__does_not_exist_in_previous && primary_key_group_in_previous__does_not_exist_in_current)
 		{
 			return false;
 		}
 
-		if (something_in_current_has_a_bigger_count_than_something_in_previous && something_in_previous_has_a_bigger_count_than_something_in_current)
+		if (an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous && an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current)
 		{
 			return false;
 		}
+
+		if (current_excess_count > number_null_primary_key_groups_in_previous_row)
+		{
+			return false;
+		}
+
+		if (previous_excess_count > number_null_primary_key_groups_in_current_row)
+		{
+			return false;
+		}
+
+		// redundant
+#		if 0
+		if (primary_key_group_in_current__does_not_exist_in_previous)
+		{
+			if (number_null_primary_key_groups_in_current_row < previous_excess_count)
+			{
+				return false;
+			}
+		}
+
+		if (primary_key_group_in_previous__does_not_exist_in_current)
+		{
+			if (number_null_primary_key_groups_in_previous_row < current_excess_count)
+			{
+				return false;
+			}
+		}
+#		endif
 
 	}
 
@@ -5010,7 +5078,6 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 				default:
 					{
-						// Todo: Error message
 						boost::format msg("Unknown data type binding in column when writing row to database.");
 						SetFailureMessage(msg.str());
 						failed = true;
@@ -9087,7 +9154,51 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 			{
-			
+
+				bool any_primary_key_groups_are_null = false;
+				std::for_each(current_row_of_data.indices_of_all_primary_key_columns_in_all_but_final_inner_table.cbegin(), current_row_of_data.indices_of_all_primary_key_columns_in_all_but_final_inner_table.cend(), [&any_primary_key_groups_are_null](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+				{
+					if (binding_info.first == SQLExecutor::NULL_BINDING)
+					{
+						any_primary_key_groups_are_null = true;
+					}
+				});
+				if (any_primary_key_groups_are_null)
+				{
+
+					// ******************************************************************************************************************* //
+					// a previous iteration of the multiplicity merge was unable to find a match, so we won't be able to, either
+					// ******************************************************************************************************************* //
+
+					current_row_of_data.SetFinalInnerTableToNull();
+					std::int64_t datetime_start = current_row_of_data.datetime_start;
+					std::int64_t datetime_end = current_row_of_data.datetime_end;
+					if (datetime_start < timerange_start)
+					{
+						datetime_start = timerange_start;
+					}
+					if (datetime_end > timerange_end)
+					{
+						datetime_end = timerange_end;
+					}
+					bool added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category, false, false);
+					if (failed)
+					{
+						break;
+					}
+					if (added)
+					{
+						sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+						the_prepared_stmt = sql_strings.back().stmt;
+						++current_rows_added;
+						++current_rows_added_since_execution;
+					}
+
+					++current_rows_stepped;
+					continue;
+
+				}
+
 				if (rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.empty())
 				{
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
@@ -9128,6 +9239,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				else
 				{
+
+					// ******************************************************************************************************************* //
+					// Special processing: reorder inner tables in sorted primary key order,
+					// and split rows to handle the time range overlap of the new data being joined.
+					// ******************************************************************************************************************* //
 
 					// The previous rows (not the current) match on all primary keys except those in the final inner table.
 					// Note that the matching function (TestPrimaryKeyMatch(), above) does not care if there are some
@@ -12724,4 +12840,181 @@ void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroup
 		}
 	});
 
+}
+
+void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<SQLExecutor::WHICH_BINDING> const & new_bindings)
+{
+
+	std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> new_indices;
+	int string_index = 0;
+	int int_index = 0;
+	int column_index = 0;
+	std::for_each(new_bindings.cbegin(), new_bindings.cend(), [this, &column_index, &string_index, &int_index, &new_indices](SQLExecutor::WHICH_BINDING const binding)
+	{
+		switch (binding)
+		{
+		case SQLExecutor::INT64:
+			{
+				new_indices.push_back(std::make_pair(binding, std::make_pair(int_index, column_index)));
+				++int_index;
+			}
+			break;
+		case SQLExecutor::STRING:
+			{
+				new_indices.push_back(std::make_pair(binding, std::make_pair(string_index, column_index)));
+				++string_index;
+			}
+			break;
+		case SQLExecutor::NULL_BINDING:
+			{
+				new_indices.push_back(std::make_pair(binding, std::make_pair(0, column_index)));
+			}
+			break;
+		}
+		++column_index;
+	});
+
+	SwapBindings(new_strings, new_ints, new_indices);
+
+}
+
+void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & new_indices)
+{
+	current_parameter_ints = new_ints;
+	current_parameter_strings = new_strings;
+	indices_of_all_columns = new_indices;
+
+	current_parameter_which_binding_to_use.clear();
+	indices_of_all_columns_in_final_inner_table.clear();
+	indices_of_all_columns_in_all_but_final_inner_table.clear();
+	indices_of_primary_key_columns.clear();
+	indices_of_primary_key_columns_with_multiplicity_greater_than_1.clear();
+	indices_of_primary_key_columns_with_multiplicity_equal_to_1.clear();
+	indices_of_all_primary_key_columns_in_final_inner_table.clear();
+	indices_of_all_primary_key_columns_in_all_but_final_inner_table.clear();
+	int column_index = 0;
+	int current_int_index = 0;
+	int current_string_index = 0;
+	std::for_each(indices_of_all_columns.cbegin(), indices_of_all_columns.cend(), [this, &column_index, &current_int_index, &current_string_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding)
+	{
+		current_parameter_which_binding_to_use.push_back(binding.first);
+
+		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_int_binding_to_add = std::make_pair(binding.first, std::make_pair(current_int_index, column_index));
+		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_string_binding_to_add = std::make_pair(binding.first, std::make_pair(current_string_index, column_index));
+		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_null_binding_to_add = std::make_pair(binding.first, std::make_pair(0, column_index));
+
+		AddBinding(is_index_in_final_inner_table, indices_of_all_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_in_all_but_final_inner_table, indices_of_all_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_a_primary_key, indices_of_primary_key_columns, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_a_primary_key_with_outer_multiplicity_greater_than_1, indices_of_primary_key_columns_with_multiplicity_greater_than_1, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_a_primary_key_with_outer_multiplicity_equal_to_1, indices_of_primary_key_columns_with_multiplicity_equal_to_1, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_a_primary_key_in_the_final_inner_table, indices_of_all_primary_key_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_a_primary_key_in_not_the_final_inner_table, indices_of_all_primary_key_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+
+		switch (binding.first)
+		{
+		case SQLExecutor::INT64:
+			{
+				++current_int_index;
+			}
+			break;
+		case SQLExecutor::STRING:
+			{
+				++current_string_index;
+			}
+			break;
+		case SQLExecutor::NULL_BINDING:
+			{
+
+			}
+			break;
+		}
+
+		++column_index;
+	});
+}
+
+void OutputModel::OutputGenerator::SavedRowData::AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_string_binding_to_add)
+{
+	if (binding_test[binding_index])
+	{
+		switch (binding_type)
+		{
+		case SQLExecutor::INT64:
+			{
+				bindings.push_back(potential_current_int_binding_to_add);
+			}
+			break;
+		case SQLExecutor::STRING:
+			{
+				bindings.push_back(potential_current_string_binding_to_add);
+			}
+			break;
+		case SQLExecutor::NULL_BINDING:
+			{
+				bindings.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, binding_index)));
+			}
+			break;
+		}
+	}
+}
+
+void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
+{
+	int column_index = 0;
+	int final_inner_table_column_index = 0;
+	int final_inner_table_primary_key_column_index = 0;
+	int primary_key_column_index = 0;
+	int primary_key_with_multiplicity_1_index = 0;
+	int primary_key_with_multiplicity_greater_than_1_index = 0;
+	std::for_each(indices_of_all_columns.begin(), indices_of_all_columns.end(), [this, &primary_key_with_multiplicity_greater_than_1_index, &primary_key_with_multiplicity_1_index, &primary_key_column_index, &final_inner_table_primary_key_column_index, &current_row_of_data, &final_inner_table_column_index, &column_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> & binding_info)
+	{
+		if (is_index_in_final_inner_table[column_index])
+		{
+			binding_info.first = SQLExecutor::NULL_BINDING;
+			binding_info.second.first = 0;
+			switch(binding_info.first)
+			{
+			case SQLExecutor::INT64:
+				{
+					current_parameter_ints.pop_back();
+				}
+				break;
+			case SQLExecutor::STRING:
+				{
+					current_parameter_strings.pop_back();
+				}
+			}
+			current_parameter_which_binding_to_use[column_index] = SQLExecutor::NULL_BINDING;
+			indices_of_all_columns_in_final_inner_table[final_inner_table_column_index].first = SQLExecutor::NULL_BINDING;
+			indices_of_all_columns_in_final_inner_table[final_inner_table_column_index].second.first = 0;
+			indices_of_all_primary_key_columns_in_final_inner_table[final_inner_table_primary_key_column_index].first = SQLExecutor::NULL_BINDING;
+			indices_of_all_primary_key_columns_in_final_inner_table[final_inner_table_primary_key_column_index].second.first = 0;
+			indices_of_primary_key_columns[primary_key_column_index].first = SQLExecutor::NULL_BINDING;
+			indices_of_primary_key_columns[primary_key_column_index].second.first = 0;
+			indices_of_primary_key_columns_with_multiplicity_equal_to_1[primary_key_with_multiplicity_1_index].first = SQLExecutor::NULL_BINDING;
+			indices_of_primary_key_columns_with_multiplicity_equal_to_1[primary_key_with_multiplicity_1_index].second.first = 0;
+			indices_of_primary_key_columns_with_multiplicity_greater_than_1[primary_key_with_multiplicity_greater_than_1_index].first = SQLExecutor::NULL_BINDING;
+			indices_of_primary_key_columns_with_multiplicity_greater_than_1[primary_key_with_multiplicity_greater_than_1_index].second.first = 0;
+			if (is_index_a_primary_key_in_the_final_inner_table[column_index])
+			{
+				++final_inner_table_primary_key_column_index;
+			}
+			++final_inner_table_column_index;
+		}
+
+		if (is_index_a_primary_key[column_index])
+		{
+			++primary_key_column_index;
+		}
+		if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[column_index])
+		{
+			++primary_key_with_multiplicity_1_index;
+		}
+		if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[column_index])
+		{
+			++primary_key_with_multiplicity_greater_than_1_index;
+		}
+		++column_index;
+	});
 }
