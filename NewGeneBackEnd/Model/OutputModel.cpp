@@ -13410,6 +13410,63 @@ void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetim
 void OutputModel::OutputGenerator::TimeRanges::subtract(TimeRanges const & rhs)
 {
 
+	if (ranges.empty())
+	{
+		return;
+	}
+	if (rhs.ranges.empty())
+	{
+		return;
+	}
+
+	std::list<std::pair<std::int64_t, std::int64_t>>::iterator me = ranges.begin();	
+	std::list<std::pair<std::int64_t, std::int64_t>>::const_iterator them = rhs.ranges.cbegin();
+
+	while (me != ranges.end() && them != rhs.ranges.cend())
+	{
+		if (me->first < them->first)
+		{
+			if (me->second <= them->first)
+			{
+				++me;
+				continue;
+			}
+			else if (me->second <= them->second)
+			{
+				me->second = them->first;
+				++me;
+				continue;
+			}
+			else
+			{
+				me->first = them->second;
+				ranges.insert(ranges.begin(), std::make_pair(me->first, them->first));
+				++them;
+				continue;
+			}
+		}
+		else if (me->first < them->second)
+		{
+			if (me->second <= them->second)
+			{
+				++me;
+				ranges.erase(ranges.begin());
+				continue;
+			}
+			else
+			{
+				me->first = them->second;
+				++me;
+				continue;
+			}
+		}
+		else
+		{
+			++them;
+			continue;
+		}
+	}
+
 }
 
 bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator<(TimeRangeMapper_Ints const & rhs) const
