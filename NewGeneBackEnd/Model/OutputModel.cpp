@@ -13439,24 +13439,32 @@ void OutputModel::OutputGenerator::TimeRanges::subtract(TimeRanges const & rhs)
 			}
 			else
 			{
+				std::int64_t _old_first = me->first;
 				me->first = them->second;
-				ranges.insert(ranges.begin(), std::make_pair(me->first, them->first));
+				ranges.insert(ranges.begin(), std::make_pair(_old_first, them->first));
 				++them;
 				continue;
 			}
 		}
 		else if (me->first < them->second)
 		{
-			if (me->second <= them->second)
+			if (me->second < them->second)
 			{
 				++me;
+				ranges.erase(ranges.begin());
+				continue;
+			}
+			else if (me->second == them->second)
+			{
+				++me;
+				++them;
 				ranges.erase(ranges.begin());
 				continue;
 			}
 			else
 			{
 				me->first = them->second;
-				++me;
+				++them;
 				continue;
 			}
 		}
