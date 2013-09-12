@@ -11394,7 +11394,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							case SQLExecutor::INT64:
 								{
 
-									std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second.first];
+									std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info_rhs.second.first];
 
 									if (data_int64 < data_int64_rhs)
 									{
@@ -11413,7 +11413,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							case SQLExecutor::STRING:
 								{
 
-									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second.first];
+									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first];
 									std::int64_t data_rhs_converted = boost::lexical_cast<std::int64_t>(data_string_rhs);
 
 									if (data_int64 < data_rhs_converted)
@@ -11446,7 +11446,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							case SQLExecutor::INT64:
 								{
 
-									std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second.first];
+									std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info_rhs.second.first];
 									std::int64_t data_converted = boost::lexical_cast<std::int64_t>(data_string);
 
 									if (data_converted < data_int64_rhs)
@@ -11466,7 +11466,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							case SQLExecutor::STRING:
 								{
 
-									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second.first];
+									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first];
 
 									if (data_string < data_string_rhs)
 									{
