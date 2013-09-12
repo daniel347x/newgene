@@ -425,38 +425,40 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						void SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<SQLExecutor::WHICH_BINDING> const & new_bindings)
 						{
 
-							std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> new_indices;
+							std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> new_indices;
 							int string_index = 0;
 							int int_index = 0;
-							std::for_each(new_bindings.cbegin(), new_bindings.cend(), [this, &string_index, &int_index, &new_indices](SQLExecutor::WHICH_BINDING const binding)
+							int column_index = 0;
+							std::for_each(new_bindings.cbegin(), new_bindings.cend(), [this, &column_index, &string_index, &int_index, &new_indices](SQLExecutor::WHICH_BINDING const binding)
 							{
 								switch (binding)
 								{
 									case SQLExecutor::INT64:
 										{
-											new_indices.push_back(std::make_pair(binding, int_index));
+											new_indices.push_back(std::make_pair(binding, std::make_pair(int_index, column_index)));
 											++int_index;
 										}
 										break;
 									case SQLExecutor::STRING:
 										{
-											new_indices.push_back(std::make_pair(binding, string_index));
+											new_indices.push_back(std::make_pair(binding, std::make_pair(string_index, column_index)));
 											++string_index;
 										}
 										break;
 									case SQLExecutor::NULL_BINDING:
 										{
-											new_indices.push_back(std::make_pair(binding, 0));
+											new_indices.push_back(std::make_pair(binding, std::make_pair(0, column_index)));
 										}
 										break;
 								}
+								++column_index;
 							});
 
 							SwapBindings(new_strings, new_ints, new_indices);
 
 						}
 
-						void SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> new_indices)
+						void SwapBindings(std::vector<std::string> const & new_strings, std::vector<std::int64_t> const & new_ints, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & new_indices)
 						{
 							current_parameter_ints = new_ints;
 							current_parameter_strings = new_strings;

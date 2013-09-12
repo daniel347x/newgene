@@ -2546,11 +2546,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					current_parameter_ints.push_back(data_int64);
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 
-					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1), current_column));
+					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column)));
 
 					if (is_index_in_all_but_final_inner_table[current_column])
 					{
-						indices_of_all_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, curr)));
+						indices_of_all_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column)));
 					}
 
 					if (is_index_in_final_inner_table[current_column])
@@ -2605,7 +2605,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					current_parameter_strings.push_back(data_string);
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
 
-					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, std::make_pair((int)current_parameter_strings.size()-1), current_column));
+					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, std::make_pair((int)current_parameter_strings.size()-1, current_column)));
 
 					if (is_index_in_all_but_final_inner_table[current_column])
 					{
@@ -2694,7 +2694,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, std::make_pair(0, current_index)));
+						indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, std::make_pair(0, current_column)));
 					}
 
 				}
@@ -3985,7 +3985,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 				if (current_row_of_data.is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_index])
 				{
-					merged_data_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, std::make_pair(0, current_column)));
+					merged_data_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING, std::make_pair(0, current_index)));
 				}
 
 				if (merged_data_row.is_index_a_primary_key_in_the_final_inner_table[current_index])
@@ -4020,7 +4020,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 									merged_data_row.current_parameter_ints.push_back(current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[current_index].second.first]);
 								}
 
-								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)merged_data_row.current_parameter_ints.size()-1, std::make_pair(0, current_index))));
+								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)merged_data_row.current_parameter_ints.size()-1, current_index)));
 
 								if (current_row_of_data.is_index_a_primary_key[current_index])
 								{
@@ -12261,7 +12261,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 			std::int64_t data_int64 = 0;
 			std::string data_string;
-			std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> new_indices;
+			std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> new_indices;
 			std::vector<std::string> new_strings;
 			std::vector<std::int64_t> new_ints;
 			int column_index = 0;
