@@ -11240,165 +11240,170 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 	// The value of the primary key group in the final inner table then attempts to determine the decision on sort order.
 
-	is_determined = false;
-	is_less_than = false;
-	int index = 0;
-	std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table.cbegin(),
-				  the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table.cend(),
-				  [this, &rhs, &is_determined, &is_less_than, &index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+	if (!DoCompareFinalInnerTable)
 	{
 
-		if (is_determined)
-		{
-			return;
-		}
-		
-		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table[index];
-
-		if (binding_info.first == SQLExecutor::NULL_BINDING && binding_info_rhs.first == SQLExecutor::NULL_BINDING)
-		{
-			// undetermined - move on to time range
-			return;
-		}
-
-		if (binding_info.first == SQLExecutor::NULL_BINDING && !binding_info_rhs.first == SQLExecutor::NULL_BINDING)
-		{
-			// determined - one primary key group in the final inner table is NULL, and the other not.
-			// Unlike for the primary key groups in all but the final inner table, where NULLs "match",
-			// for the FINAL inner table, NULLs do NOT match.
-			is_less_than = true;
-			is_determined = true;
-			return;
-		}
-
-		if (!binding_info.first == SQLExecutor::NULL_BINDING && binding_info_rhs.first == SQLExecutor::NULL_BINDING)
-		{
-			// determined - one primary key group in the final inner table is NULL, and the other not.
-			// Unlike for the primary key groups in all but the final inner table, where NULLs "match",
-			// for the FINAL inner table, NULLs do NOT match.
-			is_less_than = false;
-			is_determined = true;
-			return;
-		}
-
-		// if we're here, both incoming rows have non-NULL primary key fields in the final inner table
-
-		switch (binding_info.first)
+		is_determined = false;
+		is_less_than = false;
+		int index = 0;
+		std::for_each(the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table.cbegin(),
+			the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table.cend(),
+			[this, &rhs, &is_determined, &is_less_than, &index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 		{
 
-			case SQLExecutor::INT64:
-				{
+			if (is_determined)
+			{
+				return;
+			}
 
-					std::int64_t data_int64 = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second.first];
+			std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_primary_key_columns_in_final_inner_table[index];
 
-					switch (binding_info_rhs.first)
+			if (binding_info.first == SQLExecutor::NULL_BINDING && binding_info_rhs.first == SQLExecutor::NULL_BINDING)
+			{
+				// undetermined - move on to time range
+				return;
+			}
+
+			if (binding_info.first == SQLExecutor::NULL_BINDING && !binding_info_rhs.first == SQLExecutor::NULL_BINDING)
+			{
+				// determined - one primary key group in the final inner table is NULL, and the other not.
+				// Unlike for the primary key groups in all but the final inner table, where NULLs "match",
+				// for the FINAL inner table, NULLs do NOT match.
+				is_less_than = true;
+				is_determined = true;
+				return;
+			}
+
+			if (!binding_info.first == SQLExecutor::NULL_BINDING && binding_info_rhs.first == SQLExecutor::NULL_BINDING)
+			{
+				// determined - one primary key group in the final inner table is NULL, and the other not.
+				// Unlike for the primary key groups in all but the final inner table, where NULLs "match",
+				// for the FINAL inner table, NULLs do NOT match.
+				is_less_than = false;
+				is_determined = true;
+				return;
+			}
+
+			// if we're here, both incoming rows have non-NULL primary key fields in the final inner table
+
+			switch (binding_info.first)
+			{
+
+				case SQLExecutor::INT64:
 					{
 
-						case SQLExecutor::INT64:
-							{
+						std::int64_t data_int64 = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second.first];
 
-								std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second.first];
+						switch (binding_info_rhs.first)
+						{
 
-								if (data_int64 < data_int64_rhs)
+							case SQLExecutor::INT64:
 								{
-									is_less_than = true;
-									is_determined = true;;
+
+									std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second.first];
+
+									if (data_int64 < data_int64_rhs)
+									{
+										is_less_than = true;
+										is_determined = true;;
+									}
+									else if (data_int64 > data_int64_rhs)
+									{
+										is_less_than = false;
+										is_determined = true;
+									}
+
 								}
-								else if (data_int64 > data_int64_rhs)
+								break;
+
+							case SQLExecutor::STRING:
 								{
-									is_less_than = false;
-									is_determined = true;
+
+									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second.first];
+									std::int64_t data_rhs_converted = boost::lexical_cast<std::int64_t>(data_string_rhs);
+
+									if (data_int64 < data_rhs_converted)
+									{
+										is_less_than = true;
+										is_determined = true;;
+									}
+									else if (data_int64 > data_rhs_converted)
+									{
+										is_less_than = false;
+										is_determined = true;
+									}
+
 								}
-
-							}
-							break;
-
-						case SQLExecutor::STRING:
-							{
-
-								std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second.first];
-								std::int64_t data_rhs_converted = boost::lexical_cast<std::int64_t>(data_string_rhs);
-
-								if (data_int64 < data_rhs_converted)
-								{
-									is_less_than = true;
-									is_determined = true;;
-								}
-								else if (data_int64 > data_rhs_converted)
-								{
-									is_less_than = false;
-									is_determined = true;
-								}
-
-							}
-							break;
-
-					}
-
-				}
-				break;
-
-			case SQLExecutor::STRING:
-				{
-				
-					std::string data_string = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second.first];
-
-					switch (binding_info_rhs.first)
-					{
-
-						case SQLExecutor::INT64:
-							{
-
-								std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second.first];
-								std::int64_t data_converted = boost::lexical_cast<std::int64_t>(data_string);
-
-								if (data_converted < data_int64_rhs)
-								{
-									is_less_than = true;
-									is_determined = true;;
-								}
-								else if (data_converted > data_int64_rhs)
-								{
-									is_less_than = false;
-									is_determined = true;
-								}
-
-							}
-							break;
-
-						case SQLExecutor::STRING:
-							{
-
-								std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second.first];
-
-								if (data_string < data_string_rhs)
-								{
-									is_less_than = true;
-									is_determined = true;;
-								}
-								else if (data_string > data_string_rhs)
-								{
-									is_less_than = false;
-									is_determined = true;
-								}
-
-							}
-							break;
+								break;
 
 						}
 
-				}
-				break;
+					}
+					break;
 
+				case SQLExecutor::STRING:
+					{
+
+						std::string data_string = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second.first];
+
+						switch (binding_info_rhs.first)
+						{
+
+							case SQLExecutor::INT64:
+								{
+
+									std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info.second.first];
+									std::int64_t data_converted = boost::lexical_cast<std::int64_t>(data_string);
+
+									if (data_converted < data_int64_rhs)
+									{
+										is_less_than = true;
+										is_determined = true;;
+									}
+									else if (data_converted > data_int64_rhs)
+									{
+										is_less_than = false;
+										is_determined = true;
+									}
+
+								}
+								break;
+
+							case SQLExecutor::STRING:
+								{
+
+									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second.first];
+
+									if (data_string < data_string_rhs)
+									{
+										is_less_than = true;
+										is_determined = true;;
+									}
+									else if (data_string > data_string_rhs)
+									{
+										is_less_than = false;
+										is_determined = true;
+									}
+
+								}
+								break;
+
+						}
+
+					}
+					break;
+
+			}
+
+			++index;
+
+		});
+
+		if (is_determined)
+		{
+			return is_less_than;
 		}
 
-		++index;
-	
-	});
-
-	if (is_determined)
-	{
-		return is_less_than;
 	}
 
 	if (!ShouldReturnEqual_EvenIf_TimeRangesAreDifferent)
