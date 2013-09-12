@@ -7068,6 +7068,13 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 		return false;
 	}
 
+#	if 1
+	if (include_previous_data == false && include_current_data == true)
+	{
+		return false;
+	}
+#	endif
+
 	bool do_not_check_time_range = false;
 	if (datetime_start == 0 && datetime_end == 0)
 	{
@@ -9285,7 +9292,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					std::sort(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end());
 
 					HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__stringkeys, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
-					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.clear();
 
 					if (failed)
 					{
@@ -9297,6 +9303,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						// Note: important 4th parameter: See note above
 						PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_MULTIPLICITY_1_KEYS);
 
+					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.clear();
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
 
 					if (!primary_keys_match_on_multiplicity_1)
@@ -13191,6 +13198,8 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 
 	});
 
+	saved_rows_with_null_in_final_inner_table.swap(outgoing_rows);
+
 }
 
 void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::int64_t>> & inner_table_primary_key_groups) const
@@ -13484,9 +13493,13 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator<(TimeRangeMapp
 	// Called by the standard library map functions
 	// ************************************************************ //
 
+	int size_me = (int)sets.size();
+	int size_you = (int)rhs.sets.size();
+	int max_size = std::max(size_me, size_you);
+
 	std::set<std::vector<std::int64_t>> test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
-	if (sets.size() == test_set.size())
+	if (test_set.size() == max_size)
 	{
 		// equal!  Return false
 		// (Even if the rhs set has less elements - that is the whole point of this class)
@@ -13504,9 +13517,13 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator<(TimeRangeM
 	// Called by the standard library map functions
 	// ************************************************************ //
 
+	int size_me = (int)sets.size();
+	int size_you = (int)rhs.sets.size();
+	int max_size = std::max(size_me, size_you);
+
 	std::set<std::vector<std::string>> test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
-	if (sets.size() == test_set.size())
+	if (test_set.size() == max_size)
 	{
 		// equal!  Return false
 		// (Even if the rhs set has less elements - that is the whole point of this class)
