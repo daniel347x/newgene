@@ -12990,7 +12990,7 @@ void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
 	int primary_key_column_index = 0;
 	int primary_key_with_multiplicity_1_index = 0;
 	int primary_key_with_multiplicity_greater_than_1_index = 0;
-	std::for_each(indices_of_all_columns.begin(), indices_of_all_columns.end(), [this, &primary_key_with_multiplicity_greater_than_1_index, &primary_key_with_multiplicity_1_index, &primary_key_column_index, &final_inner_table_primary_key_column_index, &current_row_of_data, &final_inner_table_column_index, &column_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> & binding_info)
+	std::for_each(indices_of_all_columns.begin(), indices_of_all_columns.end(), [this, &primary_key_with_multiplicity_greater_than_1_index, &primary_key_with_multiplicity_1_index, &primary_key_column_index, &final_inner_table_primary_key_column_index, &final_inner_table_column_index, &column_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> & binding_info)
 	{
 		if (is_index_in_final_inner_table[column_index])
 		{
