@@ -13069,7 +13069,7 @@ void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
 
 }
 
-void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys & group_time_ranges__intkeys, TimeRangesForIndividualGroup_StringKeys & group_time_ranges__stringkeys)
+void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys const & group_time_ranges__intkeys, TimeRangesForIndividualGroup_StringKeys const & group_time_ranges__stringkeys)
 {
 
 	if (saved_rows_with_null_in_final_inner_table.empty())
@@ -13108,11 +13108,84 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// Therefore, where we overlap time ranges with such rows, we must not appear in the output;
 			// where we don't overlap, we must appear in the output.
 
-			// Populate a new TimeRanges object to track all time ranges for which all three 
+			// Populate a new TimeRanges object to track all time ranges for which we overlap with other sets.
+
+			TimeRanges my_time_ranges;
+			my_time_ranges.append(saved_row_data_with_null_at_end.datetime_start, saved_row_data_with_null_at_end.datetime_end);
+
+			// This part is nasty and dangerously time-consuming.
+			// However, the algorithm demands it.
+			// We have no choice but to iterate through the map to pull out matches.
+			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [&my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
+			{
+				if (map_info.first == inner_table_primary_key_groups )
+				{
+					TimeRanges const & time_range_ = map_info.second;
+					my_time_ranges.subtract(time_range_);
+				}
+			});
+
+
+			// ******************************************************************************************************* //
+			// Whatever time ranges are left require rows over that time range, even though we have a NULL at the end.
+			// ******************************************************************************************************* //
+
+			std::for_each(my_time_ranges.ranges.cbegin(), my_time_ranges.ranges.cend(), [&saved_row_data_with_null_at_end, &outgoing_rows](std::pair<std::int64_t, std::int64_t> const & range)
+			{
+				outgoing_rows.push_back(saved_row_data_with_null_at_end);
+				SavedRowData & new_null_row = outgoing_rows.back();
+				new_null_row.datetime_start = range.first;
+				new_null_row.datetime_end = range.second;
+			});
 
 		}
 		else
 		{
+
+			std::set<std::vector<std::string>> inner_table_primary_key_groups;
+			saved_row_data_with_null_at_end.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
+			if (group_time_ranges__stringkeys.find(inner_table_primary_key_groups) == group_time_ranges__stringkeys.cend())
+			{
+				// No other row exists (with all inner tables populated, including the last)
+				// with an overlapping primary key group set as the current one has.
+				// So we definitely want to keep this one, despite the fact that it has a NULL at the end.
+				outgoing_rows.push_back(saved_row_data_with_null_at_end);
+				return;
+			}
+
+			// There is overlap with some other row that is able to populate every inner table.
+			// Therefore, where we overlap time ranges with such rows, we must not appear in the output;
+			// where we don't overlap, we must appear in the output.
+
+			// Populate a new TimeRanges object to track all time ranges for which we overlap with other sets.
+
+			TimeRanges my_time_ranges;
+			my_time_ranges.append(saved_row_data_with_null_at_end.datetime_start, saved_row_data_with_null_at_end.datetime_end);
+
+			// This part is nasty and dangerously time-consuming.
+			// However, the algorithm demands it.
+			// We have no choice but to iterate through the map to pull out matches.
+			std::for_each(group_time_ranges__stringkeys.cbegin(), group_time_ranges__stringkeys.cend(), [&my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Strings, TimeRanges> const & map_info)
+			{
+				if (map_info.first == inner_table_primary_key_groups )
+				{
+					TimeRanges const & time_range_ = map_info.second;
+					my_time_ranges.subtract(time_range_);
+				}
+			});
+
+
+			// ******************************************************************************************************* //
+			// Whatever time ranges are left require rows over that time range, even though we have a NULL at the end.
+			// ******************************************************************************************************* //
+
+			std::for_each(my_time_ranges.ranges.cbegin(), my_time_ranges.ranges.cend(), [&saved_row_data_with_null_at_end, &outgoing_rows](std::pair<std::int64_t, std::int64_t> const & range)
+			{
+				outgoing_rows.push_back(saved_row_data_with_null_at_end);
+				SavedRowData & new_null_row = outgoing_rows.back();
+				new_null_row.datetime_start = range.first;
+				new_null_row.datetime_end = range.second;
+			});
 
 		}
 
@@ -13205,8 +13278,17 @@ void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetim
 
 }
 
+void OutputModel::OutputGenerator::TimeRanges::subtract(TimeRanges const & rhs)
+{
+
+}
+
 bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator<(TimeRangeMapper_Ints const & rhs) const
 {
+
+	// ************************************************************ //
+	// Called by the standard library map functions
+	// ************************************************************ //
 
 	std::set<std::vector<std::int64_t>> test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
@@ -13224,6 +13306,10 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator<(TimeRangeMapp
 bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator<(TimeRangeMapper_Strings const & rhs) const
 {
 
+	// ************************************************************ //
+	// Called by the standard library map functions
+	// ************************************************************ //
+
 	std::set<std::vector<std::string>> test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
 	if (sets.size() == test_set.size())
@@ -13234,6 +13320,82 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator<(TimeRangeM
 	}
 
 	return sets < rhs.sets;
+
+}
+
+bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator==(TimeRangeMapper_Ints const & rhs) const
+{
+
+	// ************************************************************ //
+	// For internal calls only - not called by the standard library
+	// ************************************************************ //
+
+	std::set<std::vector<std::int64_t>> test_set = sets;
+	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
+	if (sets.size() == test_set.size())
+	{
+		// equal!
+		return true;
+	}
+
+	return sets == rhs.sets;
+
+}
+
+bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator==(TimeRangeMapper_Strings const & rhs) const
+{
+
+	// ************************************************************ //
+	// For internal calls only - not called by the standard library
+	// ************************************************************ //
+
+	std::set<std::vector<std::string>> test_set = sets;
+	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
+	if (sets.size() == test_set.size())
+	{
+		// equal!
+		return true;
+	}
+
+	return sets == rhs.sets;
+
+}
+
+bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator==(std::set<std::vector<std::int64_t>> const & rhs) const
+{
+
+	// ************************************************************ //
+	// For internal calls only - not called by the standard library
+	// ************************************************************ //
+
+	std::set<std::vector<std::int64_t>> test_set = sets;
+	test_set.insert(rhs.cbegin(), rhs.cend());
+	if (sets.size() == test_set.size())
+	{
+		// equal!
+		return true;
+	}
+
+	return sets == rhs;
+
+}
+
+bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator==(std::set<std::vector<std::string>> const & rhs) const
+{
+
+	// ************************************************************ //
+	// For internal calls only - not called by the standard library
+	// ************************************************************ //
+
+	std::set<std::vector<std::string>> test_set = sets;
+	test_set.insert(rhs.cbegin(), rhs.cend());
+	if (sets.size() == test_set.size())
+	{
+		// equal!
+		return true;
+	}
+
+	return sets == rhs;
 
 }
 
