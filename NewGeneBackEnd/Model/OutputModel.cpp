@@ -3063,6 +3063,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				bound_parameter_strings.clear();
 				bound_parameter_which_binding_to_use.clear();
 
+				if (false) // debugging
+				{
+					if (sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.size() == 4)
+					{
+						if (   sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].second.first] == 200
+							&& sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[1].second.first] == 211
+							&& sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[2].second.first] == 255
+							&& sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[3].second.first] == 315
+							)
+						{
+							int m = 0;
+						}
+					}
+				}
+
 				// This is not the time to remove self-K-ads because it will ruin the sort order by placing NULLs to the right.
 				// A following stage will walk through the rows and remove self-K-ads, but determining if the row with the removed self-K-ad
 				// should be included in the output or not, based on whether there are other rows that can fill the empty slot.
@@ -3086,6 +3101,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 					// Set the saved datetime columns
 					sorting_row_of_data.SetLast2DateTimeColumns(start_datetime_to_save, end_datetime_to_save);
+
+
 
 					ordering_within_rows_data.clear();
 					ordering_within_rows_data.push_back(sorting_row_of_data);
@@ -7245,13 +7262,40 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 	});
 
 
+	int index_of_previous_datetime_start_column = highest_index_previous_table - 1;
+	int index_of_previous_datetime_end_column = highest_index_previous_table;
+	int index_of_current_datetime_start_column = (int)previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.size() - 2;
+	int index_of_current_datetime_end_column = (int)previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.size() - 1;;
+
+	std::int64_t saved_previous_datetime_start = 0;
+	std::int64_t saved_previous_datetime_end = 0;
+	std::int64_t saved_current_datetime_start = 0;
+	std::int64_t saved_current_datetime_end = 0;
+
+	if (current_row_of_data.indices_of_all_columns[index_of_previous_datetime_start_column].first != SQLExecutor::NULL_BINDING)
+	{
+		saved_previous_datetime_start = current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[index_of_previous_datetime_start_column].second.first];
+	}
+	if (current_row_of_data.indices_of_all_columns[index_of_previous_datetime_end_column].first != SQLExecutor::NULL_BINDING)
+	{
+		saved_previous_datetime_end = current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[index_of_previous_datetime_end_column].second.first];
+	}
+	if (current_row_of_data.indices_of_all_columns[index_of_current_datetime_start_column].first != SQLExecutor::NULL_BINDING)
+	{
+		saved_current_datetime_start = current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[index_of_current_datetime_start_column].second.first];
+	}
+	if (current_row_of_data.indices_of_all_columns[index_of_current_datetime_end_column].first != SQLExecutor::NULL_BINDING)
+	{
+		saved_current_datetime_end = current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[index_of_current_datetime_end_column].second.first];
+	}
+
 	// The following block only applies to PRIMARY_VARIABLE_GROUP merges
 	int number_columns_each_single_inner_table = 0;
 	WidgetInstanceIdentifier first_variable_group;
 	int the_column_index = 0;
 	bool first_datetime_column_already_reached = false;
 	bool stop_incrementing_single_inner_table_column_count = false;
-	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [&first_datetime_column_already_reached, &stop_incrementing_single_inner_table_column_count, &the_column_index, &number_columns_each_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [&index_of_last_datetime_start_column, &index_of_last_datetime_end_column, &index_of_second_to_last_datetime_start_column, &index_of_second_to_last_datetime_end_column, &first_datetime_column_already_reached, &stop_incrementing_single_inner_table_column_count, &the_column_index, &number_columns_each_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
 		if (the_column_index == 0)
@@ -7908,32 +7952,62 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 			bound_parameter_strings.clear();
 			bound_parameter_which_binding_to_use.clear();
 			int current_inner_column_set = 0;
-			std::for_each(inner_table_columns.cbegin(), inner_table_columns.cend(), [&current_inner_column_set, &number_inner_column_sets, &number_columns_first_sets, &number_columns_last_set, &bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](ColumnSorter const & columns_in_single_inner_table)
+			int total_index = 0;
+			std::for_each(inner_table_columns.cbegin(), inner_table_columns.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &saved_previous_datetime_start, &saved_previous_datetime_end, &saved_current_datetime_start, &saved_current_datetime_end, &total_index, &current_inner_column_set, &number_inner_column_sets, &number_columns_first_sets, &number_columns_last_set, &bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](ColumnSorter const & columns_in_single_inner_table)
 			{
 				int the_index = 0;
-				std::for_each(columns_in_single_inner_table.bindings.cbegin(), columns_in_single_inner_table.bindings.cend(), [&columns_in_single_inner_table, &the_index, &bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int> const & binding_info)
+				std::for_each(columns_in_single_inner_table.bindings.cbegin(), columns_in_single_inner_table.bindings.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &saved_previous_datetime_start, &saved_previous_datetime_end, &saved_current_datetime_start, &saved_current_datetime_end, &total_index, &columns_in_single_inner_table, &the_index, &bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int> const & binding_info)
 				{
-					switch (binding_info.first)
+					bool handled = false;
+					if (total_index == index_of_current_datetime_start_column)
 					{
-						case OutputModel::OutputGenerator::SQLExecutor::INT64:
-							{
-								bound_parameter_ints.push_back(columns_in_single_inner_table.ints[binding_info.second]);
-								bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
-							}
-							break;
-						case OutputModel::OutputGenerator::SQLExecutor::STRING:
-							{
-								bound_parameter_strings.push_back(columns_in_single_inner_table.strings[binding_info.second]);
-								bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::STRING);
-							}
-							break;
-						case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
-							{
-								bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING);
-							}
-							break;
+						bound_parameter_ints.push_back(saved_current_datetime_start);
+						bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
+						handled = true;
+					}
+					if (total_index == index_of_current_datetime_end_column)
+					{
+						bound_parameter_ints.push_back(saved_current_datetime_end);
+						bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
+						handled = true;
+					}
+					if (total_index == index_of_previous_datetime_start_column)
+					{
+						bound_parameter_ints.push_back(saved_previous_datetime_start);
+						bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
+						handled = true;
+					}
+					if (total_index == index_of_previous_datetime_end_column)
+					{
+						bound_parameter_ints.push_back(saved_previous_datetime_end);
+						bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
+						handled = true;
+					}
+					if (!handled)
+					{
+						switch (binding_info.first)
+						{
+							case OutputModel::OutputGenerator::SQLExecutor::INT64:
+								{
+									bound_parameter_ints.push_back(columns_in_single_inner_table.ints[binding_info.second]);
+									bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
+								}
+								break;
+							case OutputModel::OutputGenerator::SQLExecutor::STRING:
+								{
+									bound_parameter_strings.push_back(columns_in_single_inner_table.strings[binding_info.second]);
+									bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::STRING);
+								}
+								break;
+							case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+								{
+									bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING);
+								}
+								break;
+						}
 					}
 					++the_index;
+					++total_index;
 				});
 				if (current_inner_column_set < number_inner_column_sets - 1)
 				{
@@ -7951,10 +8025,21 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 						{
 							bound_parameter_ints.push_back(0);
 							bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
+							++total_index;
 						}
 						// Now populate with the previous values
-						bound_parameter_ints[bound_parameter_ints.size() - 2] = bound_parameter_ints[bound_parameter_ints.size() - 2 - number_to_add];
-						bound_parameter_ints[bound_parameter_ints.size() - 1] = bound_parameter_ints[bound_parameter_ints.size() - 1 - number_to_add];
+						if (current_inner_column_set == number_inner_column_sets - 2)
+						{
+							// This is the exact second to last inner table.
+							// Add the saved datetime columns.
+							bound_parameter_ints[bound_parameter_ints.size() - 2] = saved_previous_datetime_start;
+							bound_parameter_ints[bound_parameter_ints.size() - 1] = saved_previous_datetime_end;
+						}
+						else
+						{
+							bound_parameter_ints[bound_parameter_ints.size() - 2] = bound_parameter_ints[bound_parameter_ints.size() - 2 - number_to_add];
+							bound_parameter_ints[bound_parameter_ints.size() - 1] = bound_parameter_ints[bound_parameter_ints.size() - 1 - number_to_add];
+						}
 					}
 				}
 				else
@@ -7962,7 +8047,11 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 					// The current (new) inner column set being constructed here is the last one
 					if (columns_in_single_inner_table.bindings.size() == number_columns_first_sets)
 					{
-						// The "merged" datetime columns have been added, but they should not have been in this special case
+
+						// The "merged" datetime columns have been added, but they should not have been in this special case.
+
+						// Note that the saved current columns are already in place.
+
 						int number_to_remove = columns_in_single_inner_table.bindings.size() - number_columns_last_set;
 						for (int n=0; n<number_to_remove; ++n)
 						{
@@ -7986,13 +8075,14 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 									break;
 							}
 						}
+
 					}
 					else
 					{
 						// OK - the "merged" datetime columns have not been added
 					}
 				}
-				++current_inner_column_set;
+				++current_inner_column_set;		
 			});
 		}
 	}
