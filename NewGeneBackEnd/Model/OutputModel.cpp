@@ -2222,6 +2222,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		}
 
 
+
 		std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 		current_number_rows_to_sort = number_of_rows;
 
@@ -2247,6 +2248,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			return SqlAndColumnSet();
 		}
 		previous_count = ObtainCount(xr_table_result.second);
+
 
 
 
