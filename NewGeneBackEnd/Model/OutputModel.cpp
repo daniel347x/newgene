@@ -9238,6 +9238,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// a previous iteration of the multiplicity merge was unable to find a match, so we won't be able to, either
 					// ******************************************************************************************************************* //
 
+
+					// ... use the datetime read from the database as the new datetime
+
 					current_row_of_data.SetFinalInnerTableToNull();
 					std::int64_t datetime_start = current_row_of_data.datetime_start;
 					std::int64_t datetime_end = current_row_of_data.datetime_end;
@@ -12645,6 +12648,10 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 			// Set the new inner table order
 			row.GetSavedRowData().SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+
+			int size_of_int_vector = (int)row.GetSavedRowData().current_parameter_ints.size();
+			row.GetSavedRowData().current_parameter_ints[size_of_int_vector - 2] = datetime_start;
+			row.GetSavedRowData().current_parameter_ints[size_of_int_vector - 1] = datetime_end;
 		}
 		else
 		{
