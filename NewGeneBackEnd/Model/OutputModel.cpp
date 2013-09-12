@@ -4460,10 +4460,10 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 	// ... should match, because the NULL can be overwritten by the 2 if the 200 were in the second column
 	// ************************************************************************************************** //
 
-	std::set<std::vector<std::string>> saved_strings_previous_vector;
-	std::set<std::vector<std::int64_t>> saved_ints_previous_vector;
-	std::set<std::vector<std::string>> saved_strings_current_vector;
-	std::set<std::vector<std::int64_t>> saved_ints_current_vector;
+	std::map<std::vector<std::string>, int> saved_strings_previous__map_from_inner_primary_key_group__to__count;
+	std::map<std::vector<std::int64_t>, int> saved_ints_previous__map_from_inner_primary_key_group__to__count;
+	std::map<std::vector<std::string>, int> saved_strings_current__map_from_inner_primary_key_group__to__count;
+	std::map<std::vector<std::int64_t>, int> saved_ints_current__map_from_inner_primary_key_group__to__count;
 
 	int inner_multiplicity_index = 0;
 	int outer_multiplicity_number = 1;
@@ -4472,7 +4472,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 	std::vector<std::int64_t> inner_multiplicity_int_vector;
 	int number_null_primary_key_groups_in_current_row = 0;
 	bool current_row_current_inner_table_primary_key_group_is_null = false;
-	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & current_info)
+	std::for_each(current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &current_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_current_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous__map_from_inner_primary_key_group__to__count, &saved_ints_previous__map_from_inner_primary_key_group__to__count, &saved_strings_current__map_from_inner_primary_key_group__to__count, &saved_ints_current__map_from_inner_primary_key_group__to__count, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & current_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = current_info.first;
@@ -4531,7 +4531,16 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				}
 				if (do_insert)
 				{
-					saved_ints_current_vector.insert(inner_multiplicity_int_vector);
+					if (saved_ints_current__map_from_inner_primary_key_group__to__count.find(inner_multiplicity_int_vector) != saved_ints_current__map_from_inner_primary_key_group__to__count.cend())
+					{
+						int current_count = saved_ints_current__map_from_inner_primary_key_group__to__count[inner_multiplicity_int_vector];
+						++current_count;
+						saved_ints_current__map_from_inner_primary_key_group__to__count[inner_multiplicity_int_vector] = current_count;
+					}
+					else
+					{
+						saved_ints_current__map_from_inner_primary_key_group__to__count[inner_multiplicity_int_vector] = 1;
+					}
 				}
 				inner_multiplicity_int_vector.clear();
 			}
@@ -4551,7 +4560,16 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				}
 				if (do_insert)
 				{
-					saved_strings_current_vector.insert(inner_multiplicity_string_vector);
+					if (saved_strings_current__map_from_inner_primary_key_group__to__count.find(inner_multiplicity_string_vector) != saved_strings_current__map_from_inner_primary_key_group__to__count.cend())
+					{
+						int current_count = saved_strings_current__map_from_inner_primary_key_group__to__count[inner_multiplicity_string_vector];
+						++current_count;
+						saved_strings_current__map_from_inner_primary_key_group__to__count[inner_multiplicity_string_vector] = current_count;
+					}
+					else
+					{
+						saved_ints_current__map_from_inner_primary_key_group__to__count[inner_multiplicity_int_vector] = 1;
+					}
 				}
 				inner_multiplicity_string_vector.clear();
 			}
@@ -4569,7 +4587,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 	int number_null_primary_key_groups_in_previous_row = 0;
 	bool previous_row_current_inner_table_primary_key_group_is_null = false;
 	the_index = 0;
-	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &previous_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_previous_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous_vector, &saved_ints_previous_vector, &saved_strings_current_vector, &saved_ints_current_vector, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & previous_info)
+	std::for_each(previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &outer_multiplicity_number, &previous_row_current_inner_table_primary_key_group_is_null, &number_null_primary_key_groups_in_previous_row, &ignore_final_inner_table, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &the_index, &inner_multiplicity_index, &saved_strings_previous__map_from_inner_primary_key_group__to__count, &saved_ints_previous__map_from_inner_primary_key_group__to__count, &saved_strings_current__map_from_inner_primary_key_group__to__count, &saved_ints_current__map_from_inner_primary_key_group__to__count, &current_row_of_data, &previous_row_of_data](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & previous_info)
 	{
 
 		SQLExecutor::WHICH_BINDING binding = previous_info.first;
@@ -4628,7 +4646,16 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				}
 				if (do_insert)
 				{
-					saved_ints_previous_vector.insert(inner_multiplicity_int_vector);
+					if (saved_ints_previous__map_from_inner_primary_key_group__to__count.find(inner_multiplicity_int_vector) != saved_ints_previous__map_from_inner_primary_key_group__to__count.cend())
+					{
+						int current_count = saved_ints_previous__map_from_inner_primary_key_group__to__count[inner_multiplicity_int_vector];
+						++current_count;
+						saved_ints_previous__map_from_inner_primary_key_group__to__count[inner_multiplicity_int_vector] = current_count;
+					}
+					else
+					{
+						saved_ints_previous__map_from_inner_primary_key_group__to__count[inner_multiplicity_int_vector] = 1;
+					}
 				}
 				inner_multiplicity_int_vector.clear();
 			}
@@ -4648,7 +4675,16 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 				}
 				if (do_insert)
 				{
-					saved_strings_previous_vector.insert(inner_multiplicity_string_vector);
+					if (saved_strings_previous__map_from_inner_primary_key_group__to__count.find(inner_multiplicity_string_vector) != saved_strings_previous__map_from_inner_primary_key_group__to__count.cend())
+					{
+						int current_count = saved_strings_previous__map_from_inner_primary_key_group__to__count[inner_multiplicity_string_vector];
+						++current_count;
+						saved_strings_previous__map_from_inner_primary_key_group__to__count[inner_multiplicity_string_vector] = current_count;
+					}
+					else
+					{
+						saved_strings_previous__map_from_inner_primary_key_group__to__count[inner_multiplicity_string_vector] = 1;
+					}
 				}
 				inner_multiplicity_string_vector.clear();
 			}
@@ -4664,75 +4700,130 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 		use_newest_row_index = true;
 	}
 
-	if (saved_strings_current_vector.size() > 0 && saved_ints_current_vector.size() > 0)
+	if (saved_strings_current__map_from_inner_primary_key_group__to__count.size() > 0 && saved_ints_current__map_from_inner_primary_key_group__to__count.size() > 0)
 	{
 		return false;
 	}
 
-	if (saved_strings_previous_vector.size() > 0 && saved_ints_previous_vector.size() > 0)
+	if (saved_strings_previous__map_from_inner_primary_key_group__to__count.size() > 0 && saved_ints_previous__map_from_inner_primary_key_group__to__count.size() > 0)
 	{
 		return false;
 	}
 
-	if (saved_strings_current_vector.size() > 0 && saved_ints_previous_vector.size() > 0)
+	if (saved_strings_current__map_from_inner_primary_key_group__to__count.size() > 0 && saved_ints_previous__map_from_inner_primary_key_group__to__count.size() > 0)
 	{
 		return false;
 	}
 
-	if (saved_ints_current_vector.size() > 0 && saved_strings_previous_vector.size() > 0)
+	if (saved_ints_current__map_from_inner_primary_key_group__to__count.size() > 0 && saved_strings_previous__map_from_inner_primary_key_group__to__count.size() > 0)
 	{
 		return false;
 	}
 
 	// sets are automatically sorted
-	if (saved_strings_current_vector.size() > 0)
+	if (saved_strings_current__map_from_inner_primary_key_group__to__count.size() > 0)
 	{
-		if (saved_strings_previous_vector.size() == 0)
+
+		if (saved_strings_previous__map_from_inner_primary_key_group__to__count.size() == 0)
 		{
 			// One of the rows is all NULL in the primary keys with multiplicity greater than 1
 			// This counts as a match, as the NULLs will be overwritten when the rows are merged
 			return true;
 		}
 
-		int biggest_size = (int)saved_strings_current_vector.size();
-		if (saved_strings_previous_vector.size() > saved_strings_current_vector.size())
+		bool something_in_current_is_not_in_previous = false;
+		bool something_in_current_has_a_bigger_count_than_something_in_previous = false;
+		std::for_each(saved_strings_current__map_from_inner_primary_key_group__to__count.cbegin(), saved_strings_current__map_from_inner_primary_key_group__to__count.cend(), [&something_in_current_has_a_bigger_count_than_something_in_previous, &something_in_current_is_not_in_previous, &saved_strings_previous__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::string>, int> const & inner_table_primary_key_group_info)
 		{
-			biggest_size = (int)saved_strings_previous_vector.size();
-		}
+			if (saved_strings_previous__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) == saved_strings_previous__map_from_inner_primary_key_group__to__count.cend())
+			{
+				// Not found!
+				something_in_current_is_not_in_previous = true;
+			}
+			else
+			{
+				// Found!
+				if (inner_table_primary_key_group_info.second > saved_strings_previous__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first])
+				{
+					something_in_current_has_a_bigger_count_than_something_in_previous = true;
+				}
+			}
+		});
 
-		std::set<std::vector<std::string>> test_strings = saved_strings_current_vector;
-		test_strings.insert(saved_strings_previous_vector.cbegin(), saved_strings_previous_vector.cend());
-
-		if ((int)test_strings.size() > biggest_size)
+		bool something_in_previous_is_not_in_current = false;
+		bool something_in_previous_has_a_bigger_count_than_something_in_current = false;
+		std::for_each(saved_strings_previous__map_from_inner_primary_key_group__to__count.cbegin(), saved_strings_previous__map_from_inner_primary_key_group__to__count.cend(), [&something_in_previous_has_a_bigger_count_than_something_in_current, &something_in_previous_is_not_in_current, &saved_strings_current__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::string>, int> const & inner_table_primary_key_group_info)
 		{
-			// The sets only partially overlapped
+			if (saved_strings_current__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) == saved_strings_current__map_from_inner_primary_key_group__to__count.cend())
+			{
+				// Not found!
+				something_in_previous_is_not_in_current = true;
+			}
+			else
+			{
+				// Found!
+				if (inner_table_primary_key_group_info.second > saved_strings_current__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first])
+				{
+					something_in_previous_has_a_bigger_count_than_something_in_current = true;
+				}
+			}
+		});
+
+		if (something_in_current_is_not_in_previous && something_in_previous_is_not_in_current)
+		{
 			return false;
 		}
+	
 	}
 
-	else if (saved_ints_current_vector.size() > 0)
+	else if (saved_ints_current__map_from_inner_primary_key_group__to__count.size() > 0)
 	{
-		if (saved_ints_previous_vector.size() == 0)
+
+		if (saved_ints_previous__map_from_inner_primary_key_group__to__count.size() == 0)
 		{
 			// One of the rows is all NULL in the primary keys with multiplicity greater than 1
 			// This counts as a match, as the NULLs will be overwritten when the rows are merged
 			return true;
 		}
 
-		int biggest_size = (int)saved_ints_current_vector.size();
-		if (saved_ints_previous_vector.size() > saved_ints_current_vector.size())
+		bool something_in_current_is_not_in_previous = false;
+		bool something_in_current_has_a_bigger_count_than_something_in_previous = false;
+		std::for_each(saved_ints_current__map_from_inner_primary_key_group__to__count.cbegin(), saved_ints_current__map_from_inner_primary_key_group__to__count.cend(), [&something_in_current_has_a_bigger_count_than_something_in_previous, &something_in_current_is_not_in_previous, &saved_ints_previous__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::int64_t>, int> const & inner_table_primary_key_group_info)
 		{
-			biggest_size = (int)saved_ints_previous_vector.size();
-		}
+			if (saved_ints_previous__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) == saved_ints_previous__map_from_inner_primary_key_group__to__count.cend())
+			{
+				// Not found!
+				something_in_current_is_not_in_previous = true;
+			}
+			else
+			{
+				// Found!
+				if (inner_table_primary_key_group_info.second > saved_ints_previous__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first])
+				{
+					something_in_current_has_a_bigger_count_than_something_in_previous = true;
+				}
+			}
+		});
 
-		std::set<std::vector<std::int64_t>> test_ints = saved_ints_current_vector;
-		test_ints.insert(saved_ints_previous_vector.cbegin(), saved_ints_previous_vector.cend());
-
-		if ((int)test_ints.size() > biggest_size)
+		bool something_in_previous_is_not_in_current = false;
+		bool something_in_previous_has_a_bigger_count_than_something_in_current = false;
+		std::for_each(saved_ints_previous__map_from_inner_primary_key_group__to__count.cbegin(), saved_ints_previous__map_from_inner_primary_key_group__to__count.cend(), [&something_in_previous_has_a_bigger_count_than_something_in_current, &something_in_previous_is_not_in_current, &saved_ints_current__map_from_inner_primary_key_group__to__count](std::pair<std::vector<std::int64_t>, int> const & inner_table_primary_key_group_info)
 		{
-			// The sets only partially overlapped
-			return false;
-		}
+			if (saved_ints_current__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) == saved_ints_current__map_from_inner_primary_key_group__to__count.cend())
+			{
+				// Not found!
+				something_in_previous_is_not_in_current = true;
+			}
+			else
+			{
+				// Found!
+				if (inner_table_primary_key_group_info.second > saved_ints_current__map_from_inner_primary_key_group__to__count[inner_table_primary_key_group_info.first])
+				{
+					something_in_previous_has_a_bigger_count_than_something_in_current = true;
+				}
+			}
+		});
+
 	}
 
 	else
