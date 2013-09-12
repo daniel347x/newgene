@@ -7295,7 +7295,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 	int the_column_index = 0;
 	bool first_datetime_column_already_reached = false;
 	bool stop_incrementing_single_inner_table_column_count = false;
-	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [&index_of_last_datetime_start_column, &index_of_last_datetime_end_column, &index_of_second_to_last_datetime_start_column, &index_of_second_to_last_datetime_end_column, &first_datetime_column_already_reached, &stop_incrementing_single_inner_table_column_count, &the_column_index, &number_columns_each_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &first_datetime_column_already_reached, &stop_incrementing_single_inner_table_column_count, &the_column_index, &number_columns_each_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
 		if (the_column_index == 0)
