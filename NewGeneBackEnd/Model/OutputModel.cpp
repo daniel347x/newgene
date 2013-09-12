@@ -13310,21 +13310,95 @@ void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetim
 			++peek_;
 			if (peek_ != ranges.end())
 			{
+
 				if (datetime_end >= peek_->first)
 				{
 					std::list<std::pair<std::int64_t, std::int64_t>>::iterator old_me = me;
 					me = peek_;
 					ranges.erase(old_me);
 					me->first = datetime_start;
+					continue;
 				}
-				else
-				{
-					me->second = datetime_end;
-				}
+
+			}
+
+			me->first = datetime_start;
+			me->second = datetime_end;
+			break;
+
+		}
+
+		else if (datetime_start < _end)
+		{
+
+			if (datetime_end <= _end)
+			{
+				// nothing to do
 				break;
 			}
 
+			std::list<std::pair<std::int64_t, std::int64_t>>::iterator peek_ = me;
+			++peek_;
+			if (peek_ != ranges.end())
+			{
+
+				if (datetime_end >= peek_->first)
+				{
+					std::list<std::pair<std::int64_t, std::int64_t>>::iterator old_me = me;
+					std::int64_t _old_start = _start;
+					me = peek_;
+					ranges.erase(old_me);
+					me->first = _old_start;
+					continue;
+				}
+
+			}
+
 			me->second = datetime_end;
+			break;
+
+		}
+
+		else if (datetime_start == _end)
+		{
+
+			std::list<std::pair<std::int64_t, std::int64_t>>::iterator peek_ = me;
+			++peek_;
+			if (peek_ != ranges.end())
+			{
+
+				if (datetime_end >= peek_->first)
+				{
+					std::list<std::pair<std::int64_t, std::int64_t>>::iterator old_me = me;
+					std::int64_t _old_start = _start;
+					me = peek_;
+					ranges.erase(old_me);
+					me->first = _old_start;
+					continue;
+				}
+
+			}
+
+			me->second = datetime_end;
+			break;
+
+		}
+
+		else
+		{
+
+			// We start past the previous one
+
+			std::list<std::pair<std::int64_t, std::int64_t>>::iterator peek_ = me;
+			++peek_;
+			if (peek_ != ranges.end())
+			{
+				me = peek_;
+				continue;
+			}
+
+			// ... and there's none higher than us, so we're a brand-new one at the end
+			ranges.insert(ranges.begin(), std::make_pair(datetime_start, datetime_end));
 			break;
 
 		}
