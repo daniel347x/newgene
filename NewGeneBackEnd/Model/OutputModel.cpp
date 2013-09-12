@@ -2174,6 +2174,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			messager.SetPerformanceLabel(msg.str().c_str());
 		}
 
+
+
+
+
+		// ******************************************************************************************************************* //
+		// Join with a new multiplicity of data.
+		// ******************************************************************************************************************* //
 		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, duplicates_removed.second, current_multiplicity, primary_group_number);
 		x_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(x_table_result);
@@ -2206,12 +2213,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 		// ******************************************************************************************************************* //
-		// Sort all rows that match on primary keys by time range,
-		// and split them as necessary to handle time range overlap.
+		// Sort all rows, and split/merge them as necessary to handle time range overlap.
 		// ******************************************************************************************************************* //
 		SqlAndColumnSet intermediate_duplicates_removed = SortAndRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting intermediate results"), std::string("Removing intermediate duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
-
-
 		if (failed)
 		{
 			return SqlAndColumnSet();
@@ -2228,6 +2232,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		UpdateProgressBarToNextStage(msg_.str(), std::string());
 		rows_estimate *= raw_rows_count;
 
+
+
+
 		// ******************************************************************************************************************* //
 		// Special processing: reorder inner tables in sorted primary key order,
 		// and split rows to handle the time range overlap of the new data being joined.
@@ -2239,12 +2246,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		{
 			return SqlAndColumnSet();
 		}
-
 		previous_count = ObtainCount(xr_table_result.second);
 
+
+
+
 		// ******************************************************************************************************************* //
-		// Sort all rows that match on primary keys by time range,
-		// and split them as necessary to handle time range overlap.
+		// Sort all rows, and split/merge them as necessary to handle time range overlap.
 		// ******************************************************************************************************************* //
 		duplicates_removed = SortAndRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false);
 
