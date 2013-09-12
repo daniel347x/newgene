@@ -12931,8 +12931,10 @@ void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
 	int primary_key_with_multiplicity_greater_than_1_index = 0;
 	std::for_each(indices_of_all_columns.begin(), indices_of_all_columns.end(), [this, &primary_key_with_multiplicity_greater_than_1_index, &primary_key_with_multiplicity_1_index, &primary_key_column_index, &final_inner_table_primary_key_column_index, &final_inner_table_column_index, &column_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> & binding_info)
 	{
+
 		if (is_index_in_final_inner_table[column_index])
 		{
+
 			binding_info.first = SQLExecutor::NULL_BINDING;
 			binding_info.second.first = 0;
 			switch(binding_info.first)
@@ -12950,33 +12952,38 @@ void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
 			current_parameter_which_binding_to_use[column_index] = SQLExecutor::NULL_BINDING;
 			indices_of_all_columns_in_final_inner_table[final_inner_table_column_index].first = SQLExecutor::NULL_BINDING;
 			indices_of_all_columns_in_final_inner_table[final_inner_table_column_index].second.first = 0;
-			indices_of_all_primary_key_columns_in_final_inner_table[final_inner_table_primary_key_column_index].first = SQLExecutor::NULL_BINDING;
-			indices_of_all_primary_key_columns_in_final_inner_table[final_inner_table_primary_key_column_index].second.first = 0;
-			indices_of_primary_key_columns[primary_key_column_index].first = SQLExecutor::NULL_BINDING;
-			indices_of_primary_key_columns[primary_key_column_index].second.first = 0;
-			indices_of_primary_key_columns_with_multiplicity_equal_to_1[primary_key_with_multiplicity_1_index].first = SQLExecutor::NULL_BINDING;
-			indices_of_primary_key_columns_with_multiplicity_equal_to_1[primary_key_with_multiplicity_1_index].second.first = 0;
-			indices_of_primary_key_columns_with_multiplicity_greater_than_1[primary_key_with_multiplicity_greater_than_1_index].first = SQLExecutor::NULL_BINDING;
-			indices_of_primary_key_columns_with_multiplicity_greater_than_1[primary_key_with_multiplicity_greater_than_1_index].second.first = 0;
+
 			if (is_index_a_primary_key_in_the_final_inner_table[column_index])
 			{
+				indices_of_all_primary_key_columns_in_final_inner_table[final_inner_table_primary_key_column_index].first = SQLExecutor::NULL_BINDING;
+				indices_of_all_primary_key_columns_in_final_inner_table[final_inner_table_primary_key_column_index].second.first = 0;
 				++final_inner_table_primary_key_column_index;
 			}
+			if (is_index_a_primary_key[column_index])
+			{
+				indices_of_primary_key_columns[primary_key_column_index].first = SQLExecutor::NULL_BINDING;
+				indices_of_primary_key_columns[primary_key_column_index].second.first = 0;
+				++primary_key_column_index;
+			}
+			if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[column_index])
+			{
+				indices_of_primary_key_columns_with_multiplicity_equal_to_1[primary_key_with_multiplicity_1_index].first = SQLExecutor::NULL_BINDING;
+				indices_of_primary_key_columns_with_multiplicity_equal_to_1[primary_key_with_multiplicity_1_index].second.first = 0;
+				++primary_key_with_multiplicity_1_index;
+			}
+			if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[column_index])
+			{
+				indices_of_primary_key_columns_with_multiplicity_greater_than_1[primary_key_with_multiplicity_greater_than_1_index].first = SQLExecutor::NULL_BINDING;
+				indices_of_primary_key_columns_with_multiplicity_greater_than_1[primary_key_with_multiplicity_greater_than_1_index].second.first = 0;
+				++primary_key_with_multiplicity_greater_than_1_index;
+			}
+
 			++final_inner_table_column_index;
+
 		}
 
-		if (is_index_a_primary_key[column_index])
-		{
-			++primary_key_column_index;
-		}
-		if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[column_index])
-		{
-			++primary_key_with_multiplicity_1_index;
-		}
-		if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[column_index])
-		{
-			++primary_key_with_multiplicity_greater_than_1_index;
-		}
 		++column_index;
+
 	});
+
 }
