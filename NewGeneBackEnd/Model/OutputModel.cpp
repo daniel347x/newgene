@@ -12792,14 +12792,14 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 				{
 					std::set<std::vector<std::int64_t>> inner_table_primary_key_groups;
 					test_row.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
-					TimeRanges & time_ranges = group_time_ranges__intkeys[inner_table_primary_key_groups];
+					TimeRanges & time_ranges = group_time_ranges__intkeys[TimeRangeMapper_Ints(inner_table_primary_key_groups)];
 					time_ranges.append(test_row.datetime_start, test_row.datetime_end);
 				}
 				else
 				{
 					std::set<std::vector<std::string>> inner_table_primary_key_groups;
 					test_row.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
-					TimeRanges & time_ranges = group_time_ranges__stringkeys[inner_table_primary_key_groups];
+					TimeRanges & time_ranges = group_time_ranges__stringkeys[TimeRangeMapper_Strings(inner_table_primary_key_groups)];
 					time_ranges.append(test_row.datetime_start, test_row.datetime_end);
 				}
 			}
@@ -13196,8 +13196,36 @@ void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetim
 
 }
 
-bool OutputModel::OutputGenerator::TimeRangeMapper::operator<(TimeRangeMapper const & rhs) const
+bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator<(TimeRangeMapper_Ints const & rhs) const
 {
 
 }
 
+bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator<(TimeRangeMapper_Strings const & rhs) const
+{
+
+}
+
+OutputModel::OutputGenerator::TimeRangeMapper_Ints::TimeRangeMapper_Ints(std::set<std::vector<std::int64_t>> const & rhs)
+	: sets(rhs)
+{
+
+}
+
+OutputModel::OutputGenerator::TimeRangeMapper_Strings::TimeRangeMapper_Strings(std::set<std::vector<std::string>> const & rhs)
+	: sets(rhs)
+{
+
+}
+
+OutputModel::OutputGenerator::TimeRangeMapper_Ints::TimeRangeMapper_Ints(TimeRangeMapper_Ints const & rhs)
+	: sets(rhs.sets)
+{
+
+}
+
+OutputModel::OutputGenerator::TimeRangeMapper_Strings::TimeRangeMapper_Strings(TimeRangeMapper_Strings const & rhs)
+	: sets(rhs.sets)
+{
+
+}

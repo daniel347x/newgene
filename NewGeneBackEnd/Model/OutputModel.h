@@ -524,6 +524,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 					public:
 
+						TimeRangeMapper_Ints(TimeRangeMapper_Ints const & rhs);
+						TimeRangeMapper_Ints(std::set<std::vector<std::int64_t>> const & rhs);
+
 						bool operator<(TimeRangeMapper_Ints const & rhs) const;
 
 						std::set<std::vector<std::int64_t>> sets; 
@@ -535,9 +538,12 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 					public:
 
+						TimeRangeMapper_Strings(TimeRangeMapper_Strings const & rhs);
+						TimeRangeMapper_Strings(std::set<std::vector<std::string>> const & rhs);
+
 						bool operator<(TimeRangeMapper_Strings const & rhs) const;
 
-						std::set<std::vector<std::int64_t>> sets; 
+						std::set<std::vector<std::string>> sets; 
 
 				};
 
