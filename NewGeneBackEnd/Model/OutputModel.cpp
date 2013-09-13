@@ -304,7 +304,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (failed)
 	{
-		// failed
 		return;
 	}
 
@@ -313,7 +312,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (failed)
 	{
-		// failed
 		return;
 	}
 
@@ -321,7 +319,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (failed)
 	{
-		// failed
 		return;
 	}
 
@@ -330,33 +327,24 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (failed)
 	{
-		// failed
 		return;
 	}
-
-	//messager.UpdateProgressBarValue(500);
 
 	messager.AppendKadStatusText("Merging top-level variable groups...", this);
 	MergeHighLevelGroupResults();
 
 	if (failed)
 	{
-		// failed
 		return;
 	}
-
-	//messager.UpdateProgressBarValue(750);
 
 	messager.AppendKadStatusText("Merging child variable groups...", this);
 	MergeChildGroups();
 
 	if (failed)
 	{
-		// failed
 		return;
 	}
-
-	//messager.UpdateProgressBarValue(900);
 
 	messager.AppendKadStatusText("Formatting results...", this);
 	messager.SetPerformanceLabel("Formatting results...");
@@ -364,11 +352,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (failed)
 	{
-		// failed
 		return;
 	}
-
-	//messager.UpdateProgressBarValue(950);
 
 	messager.AppendKadStatusText("Writing results to disk...", this);
 	messager.SetPerformanceLabel("Writing results to disk...");
@@ -3232,7 +3217,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 			if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
 			{
-				CheckProgressUpdateMethod2(messager, current_rows_stepped);
+				UpdateProgressBarValue(messager, current_rows_stepped);
 			}
 
 		}
@@ -9295,7 +9280,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					++current_rows_stepped;
 					if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
 					{
-						CheckProgressUpdateMethod2(messager, current_rows_stepped);
+						UpdateProgressBarValue(messager, current_rows_stepped);
 					}
 					continue;
 				}
@@ -9377,7 +9362,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					++current_rows_stepped;
 					if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
 					{
-						CheckProgressUpdateMethod2(messager, current_rows_stepped);
+						UpdateProgressBarValue(messager, current_rows_stepped);
 					}
 
 					continue;
@@ -9453,7 +9438,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			++current_rows_stepped;
 			if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
 			{
-				CheckProgressUpdateMethod2(messager, current_rows_stepped);
+				UpdateProgressBarValue(messager, current_rows_stepped);
 			}
 
 		}
@@ -11611,13 +11596,13 @@ void OutputModel::OutputGenerator::UpdateProgressBarToNextStage(std::string cons
 
 	if (helper_text_first_choice.size() > 0)
 	{
-		boost::format msg_2("Stage %1% of %2% (%3%)");
+		boost::format msg_2("Stage %1% of %2% - %3%");
 		msg_2 % current_progress_stage % total_progress_stages % helper_text_first_choice;
 		messager.AppendKadStatusText(msg_2.str().c_str(), this);
 	}
 	else if (helper_text_second_choice.size())
 	{
-		boost::format msg_2("Stage %1% of %2% (%3%)");
+		boost::format msg_2("Stage %1% of %2% - %3%");
 		msg_2 % current_progress_stage % total_progress_stages % helper_text_second_choice;
 		messager.AppendKadStatusText(msg_2.str().c_str(), this);
 	}
@@ -11634,36 +11619,7 @@ void OutputModel::OutputGenerator::UpdateProgressBarToNextStage(std::string cons
 
 }
 
-void OutputModel::OutputGenerator::CheckProgressUpdate(std::int64_t const current_rows_added_, std::int64_t const rows_estimate_, std::int64_t const starting_value_this_stage)
-{
-
-	bool disable_this_progress_bar_approach = true;
-
-	if (disable_this_progress_bar_approach)
-	{
-		return;
-	}
-
-	std::int64_t fraction = current_rows_added_ / rows_estimate_;
-	std::int64_t increment_value = fraction * progress_increment_per_stage;
-	std::int64_t max_value_this_stage = starting_value_this_stage + progress_increment_per_stage;
-	std::int64_t desired_current_value = starting_value_this_stage + increment_value;
-	if (desired_current_value > current_progress_value)
-	{
-		if (desired_current_value <= max_value_this_stage)
-		{
-			// no-op - each stage resets to 0
-		}
-	}
-	desired_current_value = fraction * 1000;
-	if (desired_current_value > current_progress_value)
-	{
-		messager.UpdateProgressBarValue(desired_current_value);
-	}
-
-}
-
-void OutputModel::OutputGenerator::CheckProgressUpdateMethod2(Messager & messager, std::int64_t const current_rows_stepped)
+void OutputModel::OutputGenerator::UpdateProgressBarValue(Messager & messager, std::int64_t const current_rows_stepped)
 {
 
 	boost::format msg("Processed %1% of %2% temporary rows this stage.");
