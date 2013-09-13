@@ -47,7 +47,7 @@ class UIManager
 
 		virtual ~UIManager()
 		{
-			MANAGER_CLASS_BACKEND::_manager.reset();
+			//MANAGER_CLASS_BACKEND::_manager.reset();
 		}
 
 		NewGeneMainWindow & getMainWindow()
