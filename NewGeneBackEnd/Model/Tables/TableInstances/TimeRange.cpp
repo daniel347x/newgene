@@ -49,6 +49,7 @@ void Table_TIME_RANGE::Load(sqlite3 * db, OutputModel * output_model_, InputMode
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
 }
 
 bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
@@ -73,9 +74,6 @@ bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputMo
 					break;
 				case DATA_CHANGE_INTENTION__UPDATE:
 					{
-						// This is the OUTPUT model changing.
-						// "Add" means to simply add an item that is CHECKED (previously unchecked) -
-						// NOT to add a new variable.  That would be input model change type.
 
 						if (change.child_identifiers.size() == 0)
 						{
@@ -96,11 +94,22 @@ bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputMo
 										{
 											if (boost::iequals(*child_identifier.code, *cache_identifier.first.code))
 											{
+												// flags distinguish start datetime from end datetime - they're set both in the DB and in the data structure,
+												// and they're set by the UI when it prepares the packet for us
 												if (child_identifier.flags == cache_identifier.first.flags)
 												{
 													if (packet->getValue() != cache_identifier.second)
 													{
-														cache_identifier.second = packet->getValue();
+														// Round to nearest 1000 ms
+														std::int64_t extras = packet->getValue() % 1000;
+														if (extras < 500)
+														{
+															cache_identifier.second = packet->getValue() - extras;
+														}
+														else
+														{
+															cache_identifier.second = packet->getValue() + (1000 - extras);
+														}
 														changes_made = true;
 													}
 												}
@@ -169,4 +178,5 @@ void Table_TIME_RANGE::Modify(sqlite3 * db)
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
 }
