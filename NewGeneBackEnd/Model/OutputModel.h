@@ -725,13 +725,39 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						// Do a pass to merge adjacent rows timerange-wise that have identical secondary key data
 						while (incoming_rows_of_data.size() > 1)
 						{
-							SavedRowData const & previous_row = incoming_rows_of_data.front();
-							SavedRowData const & current_row = *(++incoming_rows_of_data.cbegin());
+							SavedRowData const previous_row = incoming_rows_of_data.front();
+							SavedRowData const current_row = *(++incoming_rows_of_data.cbegin());
 							if (previous_row.datetime_end == current_row.datetime_start)
 							{
 								bool is_data_identical = CheckForIdenticalData(previous_row, current_row);
+								if (is_data_identical)
+								{
+									// Merge the rows into one
+									current_row.datetime_start = previous_row.datetime_start;
+									intermediate_rows_of_data.push_back(current_row);
+								}
+								else
+								{
+									// Leave the rows as-is
+									intermediate_rows_of_data.push_back(previous_row);
+									intermediate_rows_of_data.push_back(current_row);
+								}
 							}
+							else
+							{
+								// Leave the rows as-is
+								intermediate_rows_of_data.push_back(previous_row);
+								intermediate_rows_of_data.push_back(current_row);
+							}
+							incoming_rows_of_data.pop_front();
+							incoming_rows_of_data.pop_front();
 						}
+						if (incoming_rows_of_data.size() == 1)
+						{
+							intermediate_rows_of_data.push_back(incoming_rows_of_data.front());
+							incoming_rows_of_data.pop_front();
+						}
+						incoming_rows_of_data.swap(intermediate_rows_of_data);
 					}
 
 					outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
