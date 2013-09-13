@@ -730,6 +730,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						{
 							SavedRowData const previous_row = outgoing_rows_of_data.front();
 							SavedRowData current_row = *(++outgoing_rows_of_data.cbegin());
+							outgoing_rows_of_data.pop_front();
+							outgoing_rows_of_data.pop_front();
 							if (previous_row.datetime_end == current_row.datetime_start)
 							{
 								bool is_data_identical = CheckForIdenticalData(columns, previous_row, current_row);
@@ -737,23 +739,21 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 								{
 									// Merge the rows into one
 									current_row.datetime_start = previous_row.datetime_start;
-									intermediate_rows_of_data.push_back(current_row);
+									outgoing_rows_of_data.push_front(current_row);
 								}
 								else
 								{
 									// Leave the rows as-is
 									intermediate_rows_of_data.push_back(previous_row);
-									intermediate_rows_of_data.push_back(current_row);
+									outgoing_rows_of_data.push_front(current_row);
 								}
 							}
 							else
 							{
 								// Leave the rows as-is
 								intermediate_rows_of_data.push_back(previous_row);
-								intermediate_rows_of_data.push_back(current_row);
+								outgoing_rows_of_data.push_front(current_row);
 							}
-							outgoing_rows_of_data.pop_front();
-							outgoing_rows_of_data.pop_front();
 						}
 						if (outgoing_rows_of_data.size() == 1)
 						{
