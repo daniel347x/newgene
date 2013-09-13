@@ -648,7 +648,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool CheckForIdenticalData(ColumnsInTempView const & columns, SavedRowData const & previous_row, SavedRowData const & current_row);
 
 				template <typename ROW_DEQUE>
-				void HandleSetOfRowsThatMatchOnPrimaryKeys(ROW_DEQUE & rows_to_sort, std::deque<SavedRowData> & outgoing_rows_of_data, XR_TABLE_CATEGORY const xr_table_category)
+				void HandleSetOfRowsThatMatchOnPrimaryKeys(ColumnsInTempView const & columns, ROW_DEQUE & rows_to_sort, std::deque<SavedRowData> & outgoing_rows_of_data, XR_TABLE_CATEGORY const xr_table_category)
 				{
 
 					SavedRowData current_row_of_data;
@@ -726,10 +726,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						while (incoming_rows_of_data.size() > 1)
 						{
 							SavedRowData const previous_row = incoming_rows_of_data.front();
-							SavedRowData const current_row = *(++incoming_rows_of_data.cbegin());
+							SavedRowData current_row = *(++incoming_rows_of_data.cbegin());
 							if (previous_row.datetime_end == current_row.datetime_start)
 							{
-								bool is_data_identical = CheckForIdenticalData(previous_row, current_row);
+								bool is_data_identical = CheckForIdenticalData(columns, previous_row, current_row);
 								if (is_data_identical)
 								{
 									// Merge the rows into one

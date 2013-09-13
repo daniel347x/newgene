@@ -10835,7 +10835,7 @@ void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches(std::in
 	std::sort(rows_to_sort.begin(), rows_to_sort.end());
 
 	std::deque<SavedRowData> outgoing_rows_of_data;
-	HandleSetOfRowsThatMatchOnPrimaryKeys(rows_to_sort, outgoing_rows_of_data, xr_table_category);
+	HandleSetOfRowsThatMatchOnPrimaryKeys(result_columns, rows_to_sort, outgoing_rows_of_data, xr_table_category);
 
 	if (failed)
 	{
@@ -12721,7 +12721,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// If not, we must include all entries (even though they have NULLs in the final inner table).
 	// However, the time range must be taken into consideration.
 
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &outgoing_rows_of_data, &saved_rows_with_null_in_final_inner_table, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &outgoing_rows_of_data, &saved_rows_with_null_in_final_inner_table, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
 	{
 
 		// Process rows according to time range.
@@ -12741,7 +12741,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// is some other row in the same time range that is not empty in the final inner table
 		//outgoing_rows_of_data.push_back(std::deque<SavedRowData>());
 		std::deque<SavedRowData> outgoing_test_rows;
-		HandleSetOfRowsThatMatchOnPrimaryKeys(row_group.second, outgoing_test_rows, xr_table_category);
+		HandleSetOfRowsThatMatchOnPrimaryKeys(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, row_group.second, outgoing_test_rows, xr_table_category);
 
 		// test_rows returns with two categories of rows: those for which
 		// the merging algorithm was unable to find data for the final inner table.
@@ -12820,7 +12820,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 	std::vector<SavedRowData> saved_complete_rows;
 
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &group_time_ranges__intkeys, &group_time_ranges__stringkeys, &outgoing_rows_of_data, &saved_complete_rows, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &group_time_ranges__intkeys, &group_time_ranges__stringkeys, &outgoing_rows_of_data, &saved_complete_rows, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
 	{
 
 		// Process rows according to time range.
@@ -12838,7 +12838,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// but this time all primary keys match, so the results
 		// will be a legitimate merging/splitting of rows into proper time ranges.
 		std::deque<SavedRowData> outgoing_real_rows;
-		HandleSetOfRowsThatMatchOnPrimaryKeys(row_group.second, outgoing_real_rows, xr_table_category);
+		HandleSetOfRowsThatMatchOnPrimaryKeys(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, row_group.second, outgoing_real_rows, xr_table_category);
 
 		// real_rows returns with two categories of rows, just as test_rows
 		// in the above equivalent-looking loop did:
