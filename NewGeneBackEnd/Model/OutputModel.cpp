@@ -449,7 +449,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 
 			std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 
-			boost::format msg_2("Multiplicity %2% - Splitting of rows on time boundaries, and removal of redundant NULL rows, for child group \"%1%\": %3% rows");
+			boost::format msg_2("Multiplicity %2% - Splitting rows on time boundaries, and removing redundant NULL rows, for child group \"%1%\": %3% rows");
 			msg_2 % (child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand
 				: child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 				% current_multiplicity % number_of_rows;
@@ -1027,7 +1027,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 			std::int64_t number_of_rows = ObtainCount(intermediate_merge_of_top_level_primary_group_results.second);
 
-			boost::format msg_("Splitting of rows on time boundaries, and removal of redundant NULL rows, for merged variable group \"%1%\": %2% rows");
+			boost::format msg_("Splitting rows on time boundaries, and removing redundant NULL rows, for merged variable group \"%1%\": %2% rows");
 			msg_ % (primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand
 				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string()) % number_of_rows;
 			UpdateProgressBarToNextStage(msg_.str(), std::string());
@@ -2203,7 +2203,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 		number_of_rows_to_sort = ObtainCount(intermediate_duplicates_removed.second);
 
-		boost::format msg_3("Multiplicity %2% - Splitting of rows on time boundaries, and removal of redundant NULL rows, for variable group \"%1%\": %3% rows");
+		boost::format msg_3("Multiplicity %2% - Splitting rows on time boundaries, and removing redundant NULL rows, for variable group \"%1%\": %3% rows");
 		msg_3 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 			% current_multiplicity % number_of_rows_to_sort;
