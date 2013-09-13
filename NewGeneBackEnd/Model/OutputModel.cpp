@@ -13964,7 +13964,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 					case SQLExecutor::INT64:
 						{
 							std::int64_t const & previous_int = previous_row.current_parameter_ints[previous_binding.second.first];
-							std::int64_t const & current_int = current_row.current_parameter_ints[previous_binding.second.first];
+							std::int64_t const & current_int = current_row.current_parameter_ints[current_binding.second.first];
 							if (previous_int != current_int)
 							{
 								anything_is_different = true;
@@ -13974,7 +13974,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 					case SQLExecutor::STRING:
 						{
 							std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first];
-							std::string const & current_string = current_row.current_parameter_strings[previous_binding.second.first];
+							std::string const & current_string = current_row.current_parameter_strings[current_binding.second.first];
 							if (previous_string != current_string)
 							{
 								anything_is_different = true;
