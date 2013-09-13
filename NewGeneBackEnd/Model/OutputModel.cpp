@@ -115,7 +115,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 {
 	debug_ordering = true;
 	//delete_tables = false;
-	merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
+	merge_adjacent_rows_with_identical_data_on_secondary_keys = true;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -13965,52 +13965,166 @@ void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const &
 
 bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const & columns, SavedRowData const & previous_row, SavedRowData const & current_row)
 {
+
 	bool anything_is_different = false;
 	int column_index = 0;
+
 	std::for_each(columns.columns_in_view.cbegin(), columns.columns_in_view.cend(), [&column_index, &anything_is_different, &previous_row, &current_row](ColumnsInTempView::ColumnInTempView const & column)
 	{
+
 		if (anything_is_different)
 		{
 			return;
 		}
+
 		if (   column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
 			|| column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
+
 			std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & previous_binding = previous_row.indices_of_all_columns[column_index];
 			std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & current_binding = current_row.indices_of_all_columns[column_index];
-			if (previous_binding.first == current_binding.first)
+
+			switch (current_binding.first)
 			{
-				switch (current_binding.first)
-				{
-					case SQLExecutor::INT64:
-						{
-							std::int64_t const & previous_int = previous_row.current_parameter_ints[previous_binding.second.first];
-							std::int64_t const & current_int = current_row.current_parameter_ints[current_binding.second.first];
-							if (previous_int != current_int)
-							{
-								anything_is_different = true;
-							}
-						}
-						break;
-					case SQLExecutor::STRING:
-						{
-							std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first];
-							std::string const & current_string = current_row.current_parameter_strings[current_binding.second.first];
-							if (previous_string != current_string)
-							{
-								anything_is_different = true;
-							}
-						}
-						break;
-					case SQLExecutor::NULL_BINDING:
+
+				case SQLExecutor::INT64:
+					{
+
+						std::int64_t const & current_int = current_row.current_parameter_ints[current_binding.second.first];
+
+						switch (previous_binding.first)
 						{
 
+							case SQLExecutor::INT64:
+								{
+
+									std::int64_t const & previous_int = previous_row.current_parameter_ints[previous_binding.second.first];
+									if (previous_int != current_int)
+									{
+										anything_is_different = true;
+									}
+
+								}
+								break;
+
+							case SQLExecutor::STRING:
+								{
+
+									std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first];
+									if (boost::lexical_cast<std::int64_t>(previous_string) != current_int)
+									{
+										anything_is_different = true;
+									}
+
+								}
+								break;
+
+							case SQLExecutor::NULL_BINDING:
+								{
+
+									// one row has data and the other doesn't
+									anything_is_different = true;
+
+								}
+								break;
+
 						}
-						break;
-				}
+
+
+					}
+					break;
+
+				case SQLExecutor::STRING:
+					{
+
+						std::string const & current_string = current_row.current_parameter_strings[current_binding.second.first];
+
+						switch (previous_binding.first)
+						{
+
+							case SQLExecutor::INT64:
+								{
+
+									std::int64_t const & previous_int = previous_row.current_parameter_ints[previous_binding.second.first];
+									if (previous_int != boost::lexical_cast<std::int64_t>(current_string))
+									{
+										anything_is_different = true;
+									}
+
+								}
+								break;
+
+							case SQLExecutor::STRING:
+								{
+
+									std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first];
+									if (previous_string != current_string)
+									{
+										anything_is_different = true;
+									}
+
+								}
+								break;
+
+							case SQLExecutor::NULL_BINDING:
+								{
+
+									// one row has data and the other doesn't
+									anything_is_different = true;
+
+								}
+								break;
+
+						}
+
+					}
+					break;
+
+				case SQLExecutor::NULL_BINDING:
+					{
+
+						switch (previous_binding.first)
+						{
+
+							case SQLExecutor::INT64:
+								{
+
+									// one row has data and the other doesn't
+									anything_is_different = true;
+
+								}
+								break;
+
+							case SQLExecutor::STRING:
+								{
+
+									// one row has data and the other doesn't
+									anything_is_different = true;
+
+								}
+								break;
+
+							case SQLExecutor::NULL_BINDING:
+								{
+
+									// neither row has data here - they are the same on this column
+
+								}
+								break;
+
+						}
+
+					}
+					break;
+
 			}
+
 		}
+	
 		++column_index;
+
 	});
+
 	return !anything_is_different;
+
 }
