@@ -282,7 +282,7 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 
 	ImportDefinition::ImportMappings mappings;
 
-	if (true)
+	if (false)
 	{
 		// Time-range mapping
 		std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
