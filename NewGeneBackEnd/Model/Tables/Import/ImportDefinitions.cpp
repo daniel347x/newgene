@@ -282,19 +282,48 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 
 	ImportDefinition::ImportMappings mappings;
 
-	// Time-range mapping
-	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
-	FieldTypeEntries input_file_fields;
-	FieldTypeEntries output_table_fields;
-	FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32);
-	input_file_fields.push_back(input_time_field__Year);
-	FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-	FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
-	output_table_fields.push_back(output_time_field__YearStart);
-	output_table_fields.push_back(output_time_field__YearEnd);
-	time_range_mapping->input_file_fields = input_file_fields;
-	time_range_mapping->output_table_fields = output_table_fields;
-	mappings.push_back(time_range_mapping);
+	if (true)
+	{
+		// Time-range mapping
+		std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
+		FieldTypeEntries input_file_fields;
+		FieldTypeEntries output_table_fields;
+		FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTDAY"), FIELD_TYPE_INT32);
+		FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTMNTH"), FIELD_TYPE_INT32);
+		FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTYR"), FIELD_TYPE_INT32);
+		FieldTypeEntry input_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "ENDDAY"), FIELD_TYPE_INT32);
+		FieldTypeEntry input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "ENDMNTH"), FIELD_TYPE_INT32);
+		FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "ENDYEAR"), FIELD_TYPE_INT32);
+		input_file_fields.push_back(input_time_field__DayStart);
+		input_file_fields.push_back(input_time_field__MonthStart);
+		input_file_fields.push_back(input_time_field__YearStart);
+		input_file_fields.push_back(input_time_field__DayEnd);
+		input_file_fields.push_back(input_time_field__MonthEnd);
+		input_file_fields.push_back(input_time_field__YearEnd);
+		FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
+		FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+		output_table_fields.push_back(output_time_field__DayStart);
+		output_table_fields.push_back(output_time_field__DayEnd);
+		time_range_mapping->input_file_fields = input_file_fields;
+		time_range_mapping->output_table_fields = output_table_fields;
+		mappings.push_back(time_range_mapping);
+	}
+	else
+	{
+		// Time-range mapping
+		std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
+		FieldTypeEntries input_file_fields;
+		FieldTypeEntries output_table_fields;
+		FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32);
+		input_file_fields.push_back(input_time_field__Year);
+		FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
+		FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+		output_table_fields.push_back(output_time_field__YearStart);
+		output_table_fields.push_back(output_time_field__YearEnd);
+		time_range_mapping->input_file_fields = input_file_fields;
+		time_range_mapping->output_table_fields = output_table_fields;
+		mappings.push_back(time_range_mapping);
+	}
 
 	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32)));
 	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "DISNO"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "DISNO"), FIELD_TYPE_STRING_FIXED)));
