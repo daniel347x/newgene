@@ -1045,20 +1045,6 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
 
-			// Incoming:
-			// The LAST inner table has, for its last two columns:
-			// DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-			//
-			// Outgoing:
-			//
-			// Adds new block of top-level primary variable group columns,
-			// and simply does a JOIN, without adding any new timerange columns.
-			//
-			// Last two columns of the PREVIOUS merged block:
-			// COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-			//
-			// Last two columns of the newly-added top-level block:
-			// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 			intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, intermediate_merging_of_primary_groups_column_sets.back(), count);
 			if (failed)
 			{
@@ -1083,17 +1069,6 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			UpdateProgressBarToNextStage(msg_.str(), std::string());
 			rows_estimate += raw_rows_count;
 
-			// Incoming:
-			// Last two columns of the PREVIOUS merged block:
-			// COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-			//
-			// Last two columns of the newly-added top-level block (it has three pairs of timerange columns; see entry to this function):
-			// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-			//
-			// Outgoing:
-			// The last inner table of the most recently merged group now has 4 pairs of timerange columns. 
-			// Last two columns:
-			// DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
 			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count);
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
@@ -1751,65 +1726,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 		bool first = true;
 
-		if (highest_multiplicity_primary_uoa > 1)
-		{
-
-			// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
-			for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
-			{
-				for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa; ++inner_dmu_multiplicity)
-				{
-					int current_column_count = 0;
-					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_order_by, &current_column_count, &number_columns_very_first_primary_variable_group_including_multiplicities, &number_columns_very_last_primary_variable_group_including_multiplicities, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &first](ColumnsInTempView::ColumnInTempView & view_column)
-					{
-						if (current_column_count < number_columns_very_first_primary_variable_group_including_multiplicities)
-						{
-							if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-							{
-								if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
-								{
-									if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
-									{
-										if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == outer_dmu_multiplicity)
-										{
-											if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
-											{
-												if (!first)
-												{
-													sql_order_by += ", ";
-												}
-												else
-												{
-													sql_order_by += " ORDER BY ";
-												}
-												first = false;
-
-												// Not legal for outer joins - but child table should already have proper column type
-												if (false && view_column.primary_key_should_be_treated_as_numeric)
-												{
-													sql_order_by += "CAST (";
-												}
-												sql_order_by += view_column.column_name_in_temporary_table;
-
-												// Not legal for outer joins - but child table should already have proper column type
-												if (false && view_column.primary_key_should_be_treated_as_numeric)
-												{
-													sql_order_by += " AS INTEGER)";
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-						++current_column_count;
-					});
-				}
-			}
-
-		}
-
-		// Now order by remaining primary key columns (with multiplicity 1)
+		// Order by remaining primary key columns (with multiplicity 1)
 		// ... If there are no primary key DMU categories for this top-level UOA with multiplicity greater than 1,
 		// then this section will order by all of this top-level's UOA primary key DMU categories.
 		int current_column = 0;
@@ -1886,6 +1803,64 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			}
 			++current_column;
 		});
+
+		if (highest_multiplicity_primary_uoa > 1)
+		{
+
+			// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
+			for (int outer_dmu_multiplicity = 1; outer_dmu_multiplicity <= highest_multiplicity_primary_uoa; ++outer_dmu_multiplicity)
+			{
+				for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1__for_top_level_uoa; ++inner_dmu_multiplicity)
+				{
+					int current_column_count = 0;
+					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_order_by, &current_column_count, &number_columns_very_first_primary_variable_group_including_multiplicities, &number_columns_very_last_primary_variable_group_including_multiplicities, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &first](ColumnsInTempView::ColumnInTempView & view_column)
+					{
+						if (current_column_count < number_columns_very_first_primary_variable_group_including_multiplicities)
+						{
+							if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+							{
+								if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
+								{
+									if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
+									{
+										if (view_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == outer_dmu_multiplicity)
+										{
+											if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+											{
+												if (!first)
+												{
+													sql_order_by += ", ";
+												}
+												else
+												{
+													sql_order_by += " ORDER BY ";
+												}
+												first = false;
+
+												// Not legal for outer joins - but child table should already have proper column type
+												if (false && view_column.primary_key_should_be_treated_as_numeric)
+												{
+													sql_order_by += "CAST (";
+												}
+												sql_order_by += view_column.column_name_in_temporary_table;
+
+												// Not legal for outer joins - but child table should already have proper column type
+												if (false && view_column.primary_key_should_be_treated_as_numeric)
+												{
+													sql_order_by += " AS INTEGER)";
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+						++current_column_count;
+					});
+				}
+			}
+
+		}
 
 	}
 
@@ -7179,12 +7154,13 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 		return false;
 	}
 
-#	if 1
-	if (include_previous_data == false && include_current_data == true)
+	if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 	{
-		return false;
+		if (include_previous_data == false && include_current_data == true)
+		{
+			return false;
+		}
 	}
-#	endif
 
 	bool do_not_check_time_range = false;
 	if (datetime_start == 0 && datetime_end == 0)
