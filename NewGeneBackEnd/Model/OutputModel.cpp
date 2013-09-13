@@ -2113,6 +2113,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
+	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(x_table_result.second, primary_group_number);
 	xr_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(xr_table_result);
 	ClearTables(sql_and_column_sets);
