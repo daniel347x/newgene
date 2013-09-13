@@ -433,12 +433,11 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			}
 
 			std::int64_t number_of_rows = ObtainCount(x_table_result.second);
-			current_number_rows_to_sort = number_of_rows;
 
-			boost::format msg_("Merging child variable group %1%, multiplicity %2%");
+			boost::format msg_("Merging child variable group %1%, multiplicity %2%: %3% rows");
 			msg_ % (child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand
 				: child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : std::string())
-				% current_multiplicity;
+				% current_multiplicity % number_of_rows;
 			UpdateProgressBarToNextStage(msg_.str(), "");
 
 			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
@@ -1009,11 +1008,10 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			}
 
 			std::int64_t number_of_rows = ObtainCount(intermediate_merge_of_top_level_primary_group_results.second);
-			current_number_rows_to_sort = number_of_rows;
 
-			boost::format msg_("Merging top-level variable groups: %1%");
+			boost::format msg_("Merging top-level variable group %1%: %2% rows");
 			msg_ % (primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand
-				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string());
+				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string()) % number_of_rows;
 			UpdateProgressBarToNextStage(msg_.str(), std::string());
 			rows_estimate += raw_rows_count;
 
@@ -2129,12 +2127,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 
+		std::int64_t number_of_rows_to_sort = ObtainCount(x_table_result.second);
+		current_number_rows_to_sort = number_of_rows_to_sort;
 
-		boost::format msg_("Ordering primary key data inside individual rows in preparation for sort, for variable group \"%1%\", multiplicity %2%");
-		msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
+		boost::format msg_2("Ordering data within rows for variable group \"%1%\", multiplicity %2%: %3% rows");
+		msg_2 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
-			% current_multiplicity;
-		UpdateProgressBarToNextStage(msg_.str(), std::string());
+			% current_multiplicity % number_of_rows_to_sort;
+		UpdateProgressBarToNextStage(msg_2.str(), std::string());
 
 		// ******************************************************************************************************************* //
 		// Reorder the inner tables within each row so that the smallest ones appear on the left.
@@ -2170,12 +2170,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 
+		std::int64_t number_of_rows_to_sort = ObtainCount(intermediate_duplicates_removed.second);
 
-		boost::format msg_("Detailed splitting of merged rows on time boundaries and removal of redundant NULL rows, for variable group \"%1%\", multiplicity %2%");
-		msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
+		boost::format msg_3("Detailed splitting of rows on time boundaries, and removal of redundant NULL rows, for variable group \"%1%\", multiplicity %2%: %3% rows");
+		msg_3 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
-			% current_multiplicity;
-		UpdateProgressBarToNextStage(msg_.str(), std::string());
+			% current_multiplicity % number_of_rows_to_sort;
+		UpdateProgressBarToNextStage(msg_3.str(), std::string());
 
 
 		// ******************************************************************************************************************* //
@@ -8820,7 +8821,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index)
 {
 
-	std::int64_t saved_initial_progress_bar_value = current_progress_value;
+	std::int64_t number_of_rows_to_sort = ObtainCount(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
+	current_number_rows_to_sort = number_of_rows_to_sort;
 
 	char c[256];
 
@@ -11739,13 +11741,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 			UpdateProgressBarToNextStage(msg_2.str(), std::string());
 		}
 
-		// Entering the following function, the final two timerange columns are either:
-		// COLUMN_TYPE__DATETIMESTART_CHILD_MERGE / COLUMN_TYPE__DATETIMEEND_CHILD_MERGE
-		// or
-		// DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-		// 
-		// The function will add the following two timerange columns:
-		// COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT / COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT
 		std::int64_t rows_added = 0;
 		SqlAndColumnSet duplicates_removed_top_level_variable_group_result = RemoveDuplicates_Or_OrderWithinRows(intermediate_sorted_top_level_variable_group_result.second, primary_group_number, rows_added, current_multiplicity, xr_table_category, false, is_intermediate, consider_merging_timerange_adjacent_identical_rows);
 		ClearTables(sql_and_column_sets);
@@ -11763,7 +11758,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 
 
 	return intermediate_sorted_top_level_variable_group_result;
-
 
 }
 
