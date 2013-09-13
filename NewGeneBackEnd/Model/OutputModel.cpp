@@ -14002,3 +14002,55 @@ void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const &
 	});
 
 }
+
+bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const & columns, SavedRowData const & previous_row, SavedRowData const & current_row)
+{
+	bool anything_is_different = false;
+	int column_index = 0;
+	std::for_each(columns.columns_in_view.cbegin(), columns.columns_in_view.cend(), [&column_index, &anything_is_different, &previous_row, &current_row](ColumnsInTempView::ColumnInTempView const & column)
+	{
+		if (anything_is_different)
+		{
+			return;
+		}
+		if (   column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
+			|| column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & previous_binding = previous_row.indices_of_all_columns[column_index];
+			std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & current_binding = current_row.indices_of_all_columns[column_index];
+			if (previous_binding.first == current_binding.first)
+			{
+				switch (current_binding.first)
+				{
+					case SQLExecutor::INT64:
+						{
+							std::int64_t const & previous_int = previous_row.current_parameter_ints[previous_binding.second.first];
+							std::int64_t const & current_int = current_row.current_parameter_ints[previous_binding.second.first];
+							if (previous_int != current_int)
+							{
+								anything_is_different = true;
+							}
+						}
+						break;
+					case SQLExecutor::STRING:
+						{
+							std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first];
+							std::string const & current_string = current_row.current_parameter_strings[previous_binding.second.first];
+							if (previous_string != current_string)
+							{
+								anything_is_different = true;
+							}
+						}
+						break;
+					case SQLExecutor::NULL_BINDING:
+						{
+
+						}
+						break;
+				}
+			}
+		}
+		++column_index;
+	});
+	return !anything_is_different;
+}

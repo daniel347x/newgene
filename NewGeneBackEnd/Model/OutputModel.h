@@ -436,7 +436,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 											int const previous_datetime_start_column_index = 0,
 											int const previous_datetime_end_column_index = 0);
 						void SwapBindings(  std::vector<std::string> const & new_strings,
-							std::vector<std::int64_t> const & new_ints,
+											std::vector<std::int64_t> const & new_ints,
 											std::vector<std::pair<SQLExecutor::WHICH_BINDING,
 											std::pair<int, int>>> & new_indices,
 											bool enforce_all_datetimes = false,
@@ -645,6 +645,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void AddRowsToXRTable(std::vector<SavedRowData> & outgoing_rows_of_data, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 				void EliminateRedundantNullsInFinalInnerTable(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys const & group_time_ranges__intkeys, TimeRangesForIndividualGroup_StringKeys const & group_time_ranges__stringkeys);
 				void FindDatetimeIndices(ColumnsInTempView const & columns, int & previous_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_start_column_index, int & current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category);
+				bool CheckForIdenticalData(ColumnsInTempView const & columns, SavedRowData const & previous_row, SavedRowData const & current_row);
 
 				template <typename ROW_DEQUE>
 				void HandleSetOfRowsThatMatchOnPrimaryKeys(ROW_DEQUE & rows_to_sort, std::deque<SavedRowData> & outgoing_rows_of_data, XR_TABLE_CATEGORY const xr_table_category)
@@ -668,6 +669,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							continue;
 						}
 
+						// Quick check here before moving on to main part of loop:
 						// If the current row of input starts past
 						// the end of any of the saved rows, then
 						// there can be no overlap with these rows, and they are done.
@@ -716,6 +718,20 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), intermediate_rows_of_data.cbegin(), intermediate_rows_of_data.cend());
 						intermediate_rows_of_data.clear();
 
+					}
+
+					if (merge_adjacent_rows_with_identical_data_on_secondary_keys)
+					{
+						// Do a pass to merge adjacent rows timerange-wise that have identical secondary key data
+						while (incoming_rows_of_data.size() > 1)
+						{
+							SavedRowData const & previous_row = incoming_rows_of_data.front();
+							SavedRowData const & current_row = *(++incoming_rows_of_data.cbegin());
+							if (previous_row.datetime_end == current_row.datetime_start)
+							{
+								bool is_data_identical = CheckForIdenticalData(previous_row, current_row);
+							}
+						}
 					}
 
 					outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
