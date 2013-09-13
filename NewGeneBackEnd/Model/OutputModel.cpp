@@ -1010,6 +1010,11 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
 
+			boost::format msg_("Retrieving final data and merging with previous data for variable group \"%1%\": merging %2% previous with %3% new rows");
+			msg_ % (primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand
+				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string()) % number_of_rows_previous % number_of_rows_new;
+			UpdateProgressBarToNextStage(msg_.str(), std::string());
+
 			intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, intermediate_merging_of_primary_groups_column_sets.back(), count);
 			if (failed)
 			{
@@ -1027,11 +1032,10 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 			std::int64_t number_of_rows = ObtainCount(intermediate_merge_of_top_level_primary_group_results.second);
 
-			boost::format msg_("Splitting rows on time boundaries, and removing redundant NULL rows, for merged variable group \"%1%\": %2% rows");
-			msg_ % (primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand
+			boost::format msg_2("Splitting rows on time boundaries, and removing redundant NULL rows, for merged variable group \"%1%\": %2% rows");
+			msg_2 % (primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand
 				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string()) % number_of_rows;
-			UpdateProgressBarToNextStage(msg_.str(), std::string());
-			rows_estimate += raw_rows_count;
+			UpdateProgressBarToNextStage(msg_2.str(), std::string());
 
 			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count);
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
@@ -1963,6 +1967,8 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 
 		// Merging of primary groups: One each
 		++total_progress_stages; // a final one for each primary group - corresponding to the merging of primary groups
+		// plus an extra one for every group after the first
+		total_progress_stages += highest_multiplicity_primary_uoa - 1;
 
 		++primary_group_number;
 
