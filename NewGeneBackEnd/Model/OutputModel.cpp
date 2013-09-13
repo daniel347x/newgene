@@ -938,6 +938,10 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 {
 
+	SqlAndColumnSet intermediate_merge_of_top_level_primary_group_results = primary_group_final_results[0];
+	intermediate_merge_of_top_level_primary_group_results.second.view_number = 1;
+	intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
+
 	std::int64_t number_of_rows_to_sort = ObtainCount(intermediate_merging_of_primary_groups_column_sets.back().second);
 	current_number_rows_to_sort = number_of_rows_to_sort;
 
@@ -945,10 +949,6 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	msg_ % (primary_group_final_results[0].second.variable_groups[0].longhand ? *primary_group_final_results[0].second.variable_groups[0].longhand
 		: primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : std::string()) % number_of_rows_to_sort;
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
-
-	SqlAndColumnSet intermediate_merge_of_top_level_primary_group_results = primary_group_final_results[0];
-	intermediate_merge_of_top_level_primary_group_results.second.view_number = 1;
-	intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
 
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryMergeXRTable(intermediate_merging_of_primary_groups_column_sets.back().second);
 	if (failed)
