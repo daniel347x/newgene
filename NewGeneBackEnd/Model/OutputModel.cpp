@@ -1971,7 +1971,7 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 		if (primary_group_number > 1)
 		{
 			// plus an extra one for every group after the first
-			total_progress_stages += highest_multiplicity_primary_uoa - 1;
+			++total_progress_stages;
 		}
 
 		++primary_group_number;
