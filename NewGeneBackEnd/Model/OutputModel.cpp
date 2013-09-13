@@ -111,6 +111,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, ms_elapsed(0)
 	, current_number_rows_to_sort(0)
 	, remove_self_kads(true)
+	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 {
 	debug_ordering = true;
 	//delete_tables = false;
