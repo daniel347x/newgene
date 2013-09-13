@@ -1967,8 +1967,12 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 
 		// Merging of primary groups: One each
 		++total_progress_stages; // a final one for each primary group - corresponding to the merging of primary groups
-		// plus an extra one for every group after the first
-		total_progress_stages += highest_multiplicity_primary_uoa - 1;
+
+		if (primary_group_number > 1)
+		{
+			// plus an extra one for every group after the first
+			total_progress_stages += highest_multiplicity_primary_uoa - 1;
+		}
 
 		++primary_group_number;
 
