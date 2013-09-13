@@ -422,6 +422,15 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
 
+			std::int64_t number_of_rows_previous = ObtainCount(xr_table_result.second);
+			std::int64_t number_of_rows_new = ObtainCount(child_variable_group_raw_data_columns);
+
+			boost::format msg_("Retrieving data and merging with previous data for child group \"%1%\", multiplicity %2%: merging %3% previous with %4% new rows");
+			msg_ % (child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand
+				: child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : std::string())
+				% current_multiplicity % number_of_rows_previous % number_of_rows_new;
+			UpdateProgressBarToNextStage(msg_.str(), "");
+
 			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, xr_table_result.second, current_multiplicity, 0, child_set_number, current_child_view_name_index);
 			x_table_result.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(x_table_result);
@@ -434,11 +443,11 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 
 			std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 
-			boost::format msg_("Merging child variable group %1%, multiplicity %2%: %3% rows");
-			msg_ % (child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand
+			boost::format msg_2("Detailed splitting of rows on time boundaries, and removal of redundant NULL rows, for child group \"%1%\", multiplicity %2%: %3% rows");
+			msg_2 % (child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand
 				: child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 				% current_multiplicity % number_of_rows;
-			UpdateProgressBarToNextStage(msg_.str(), "");
+			UpdateProgressBarToNextStage(msg_2.str(), "");
 
 			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
 			ClearTable(x_table_result);
@@ -929,31 +938,18 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 {
 
-	boost::format msg_("Merging top-level variable groups: %1%");
+	std::int64_t number_of_rows_to_sort = ObtainCount(intermediate_merging_of_primary_groups_column_sets.back().second);
+	current_number_rows_to_sort = number_of_rows_to_sort;
+
+	boost::format msg_("Merging top-level variable groups.  Retrieving data for variable group %1%: %2% rows");
 	msg_ % (primary_group_final_results[0].second.variable_groups[0].longhand ? *primary_group_final_results[0].second.variable_groups[0].longhand
-		: primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : std::string());
+		: primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : std::string()) % number_of_rows_to_sort;
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
 
-	// The LAST inner table of any top-level primary group set of inner tables has three pairs at its end:
-	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 	SqlAndColumnSet intermediate_merge_of_top_level_primary_group_results = primary_group_final_results[0];
 	intermediate_merge_of_top_level_primary_group_results.second.view_number = 1;
 	intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
 
-	// Incoming:
-	// The LAST inner table has three pairs at its end:
-	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-	//
-	// Outgoing:
-	// The LAST inner table of the first top-level primary group set has four pairs at its end:
-	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-	// DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS / DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryMergeXRTable(intermediate_merging_of_primary_groups_column_sets.back().second);
 	if (failed)
 	{
@@ -974,21 +970,25 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 	// The primary variable group data is stored in primary_group_final_results
 	int count = 1;
-	std::for_each(primary_group_final_results.cbegin(), primary_group_final_results.cend(), [this, &rows_estimate, &raw_rows_count, &xr_table_result, &intermediate_merge_of_top_level_primary_group_results, &count](SqlAndColumnSet const & primary_variable_group_final_result)
+	std::for_each(primary_group_final_results.cbegin(), primary_group_final_results.cend(), [this, &number_of_rows_to_sort, &rows_estimate, &raw_rows_count, &xr_table_result, &intermediate_merge_of_top_level_primary_group_results, &count](SqlAndColumnSet const & primary_variable_group_final_result)
 	{
 
 		if (count != 1)
 		{
+
+			std::int64_t number_of_rows_previous = ObtainCount(intermediate_merging_of_primary_groups_column_sets.back().second);
+			std::int64_t number_of_rows_new = ObtainCount(primary_variable_group_final_result.second);
+
 			if (primary_variable_group_final_result.second.variable_groups[0].longhand)
 			{
-				boost::format msg("Merging data \"%1%\" with previous data...");
-				msg % *primary_variable_group_final_result.second.variable_groups[0].longhand;
+				boost::format msg("Retrieving final data and merging with previous data for variable group \"%1%\": merging %2% previous with %3% new rows");
+				msg % *primary_variable_group_final_result.second.variable_groups[0].longhand % number_of_rows_previous % number_of_rows_new;
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
 			else
 			{
-				boost::format msg("Merging data %1% with previous data...");
-				msg % *primary_variable_group_final_result.second.variable_groups[0].code;
+				boost::format msg("Retrieving final data and merging with previous data for variable group \"%1%\": merging %2% previous with %3% new rows");
+				msg % *primary_variable_group_final_result.second.variable_groups[0].code % number_of_rows_previous % number_of_rows_new;
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
 
@@ -1009,7 +1009,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 			std::int64_t number_of_rows = ObtainCount(intermediate_merge_of_top_level_primary_group_results.second);
 
-			boost::format msg_("Merging top-level variable group %1%: %2% rows");
+			boost::format msg_("Detailed splitting of rows on time boundaries, and removal of redundant NULL rows, for merged variable group \"%1%\": %2% rows");
 			msg_ % (primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand
 				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string()) % number_of_rows;
 			UpdateProgressBarToNextStage(msg_.str(), std::string());
@@ -2095,10 +2095,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
 			messager.SetPerformanceLabel(msg.str().c_str());
 		}
-		boost::format msg_("Retrieving data and merging with previous data for variable group \"%1%\", multiplicity %2%");
+
+		std::int64_t number_of_rows_previous = ObtainCount(duplicates_removed.second);
+		std::int64_t number_of_rows_new = ObtainCount(primary_variable_group_raw_data_columns);
+
+		boost::format msg_("Retrieving data and merging with previous data for variable group \"%1%\", multiplicity %2%: merging %3% previous with %4% new rows");
 		msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
-			% current_multiplicity;
+			% current_multiplicity % number_of_rows_previous % number_of_rows_new;
 		UpdateProgressBarToNextStage(msg_.str(), std::string());
 		rows_estimate *= raw_rows_count;
 
@@ -2170,7 +2174,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 
-		std::int64_t number_of_rows_to_sort = ObtainCount(intermediate_duplicates_removed.second);
+		number_of_rows_to_sort = ObtainCount(intermediate_duplicates_removed.second);
 
 		boost::format msg_3("Detailed splitting of rows on time boundaries, and removal of redundant NULL rows, for variable group \"%1%\", multiplicity %2%: %3% rows");
 		msg_3 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
