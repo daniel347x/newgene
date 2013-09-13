@@ -720,13 +720,16 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 					}
 
+					outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
+					incoming_rows_of_data.clear();
+
 					if (merge_adjacent_rows_with_identical_data_on_secondary_keys)
 					{
 						// Do a pass to merge adjacent rows timerange-wise that have identical secondary key data
-						while (incoming_rows_of_data.size() > 1)
+						while (outgoing_rows_of_data.size() > 1)
 						{
-							SavedRowData const previous_row = incoming_rows_of_data.front();
-							SavedRowData current_row = *(++incoming_rows_of_data.cbegin());
+							SavedRowData const previous_row = outgoing_rows_of_data.front();
+							SavedRowData current_row = *(++outgoing_rows_of_data.cbegin());
 							if (previous_row.datetime_end == current_row.datetime_start)
 							{
 								bool is_data_identical = CheckForIdenticalData(columns, previous_row, current_row);
@@ -749,19 +752,16 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 								intermediate_rows_of_data.push_back(previous_row);
 								intermediate_rows_of_data.push_back(current_row);
 							}
-							incoming_rows_of_data.pop_front();
-							incoming_rows_of_data.pop_front();
+							outgoing_rows_of_data.pop_front();
+							outgoing_rows_of_data.pop_front();
 						}
-						if (incoming_rows_of_data.size() == 1)
+						if (outgoing_rows_of_data.size() == 1)
 						{
-							intermediate_rows_of_data.push_back(incoming_rows_of_data.front());
-							incoming_rows_of_data.pop_front();
+							intermediate_rows_of_data.push_back(outgoing_rows_of_data.front());
+							outgoing_rows_of_data.pop_front();
 						}
-						incoming_rows_of_data.swap(intermediate_rows_of_data);
+						outgoing_rows_of_data.swap(intermediate_rows_of_data);
 					}
-
-					outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
-					incoming_rows_of_data.clear();
 
 				}
 
