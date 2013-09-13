@@ -609,8 +609,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number, int const child_set_number, int const current_child_view_name_index);
 				SqlAndColumnSet CreateXRTable(ColumnsInTempView const & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index);
 				SqlAndColumnSet CreateSortedTable(ColumnsInTempView const & final_xr_columns, int const primary_group_number, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category, bool const is_intermediate);
-				SqlAndColumnSet RemoveDuplicates_Or_OrderWithinRows(ColumnsInTempView const & previous_result_columns, int const primary_group_number, std::int64_t & current_rows_added, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category, bool const order_within_rows, bool const is_intermediate);
-				void RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t &current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction, XR_TABLE_CATEGORY const xr_table_category);
+				SqlAndColumnSet RemoveDuplicates_Or_OrderWithinRows(ColumnsInTempView const & previous_result_columns, int const primary_group_number, std::int64_t & current_rows_added, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category, bool const order_within_rows, bool const is_intermediate, bool const consider_merging_timerange_adjacent_identical_rows = false);
+				void RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t &current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows = false);
 
 				enum PRIMARY_KEY_MATCH_CONDITION
 				{
@@ -636,7 +636,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void ClearTables(SqlAndColumnSets const & tables_to_clear);
 				void ClearTable(SqlAndColumnSet const & table_to_clear);
 				std::string CheckOutputFileExists();
-				SqlAndColumnSet SortAndOrRemoveDuplicates(ColumnsInTempView const & column_set, WidgetInstanceIdentifier const & variable_group, std::string & msg_sort_preface, std::string & msg_remove_duplicates_preface, int const current_multiplicity, int const primary_group_number, SqlAndColumnSets & sql_and_column_sets, bool const do_clear_table, XR_TABLE_CATEGORY const xr_table_category, bool const is_intermediate);
+				SqlAndColumnSet SortAndOrRemoveDuplicates(ColumnsInTempView const & column_set, WidgetInstanceIdentifier const & variable_group, std::string & msg_sort_preface, std::string & msg_remove_duplicates_preface, int const current_multiplicity, int const primary_group_number, SqlAndColumnSets & sql_and_column_sets, bool const do_clear_table, XR_TABLE_CATEGORY const xr_table_category, bool const is_intermediate, bool const consider_merging_timerange_adjacent_identical_rows = false);
 				void SortOrderByMultiplicityOnes(ColumnsInTempView & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first);
 				void SortOrderByMultiplicityGreaterThanOnes(ColumnsInTempView & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first);
 				void PopulateSplitRowInfo_FromCurrentMergingColumns(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> & rows_to_insert_info, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, SavedRowData const & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category);
@@ -648,7 +648,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool CheckForIdenticalData(ColumnsInTempView const & columns, SavedRowData const & previous_row, SavedRowData const & current_row);
 
 				template <typename ROW_DEQUE>
-				void HandleSetOfRowsThatMatchOnPrimaryKeys(ColumnsInTempView const & columns, ROW_DEQUE & rows_to_sort, std::deque<SavedRowData> & outgoing_rows_of_data, XR_TABLE_CATEGORY const xr_table_category)
+				void HandleSetOfRowsThatMatchOnPrimaryKeys(ColumnsInTempView const & columns, ROW_DEQUE & rows_to_sort, std::deque<SavedRowData> & outgoing_rows_of_data, XR_TABLE_CATEGORY const xr_table_category, consider_merging_timerange_adjacent_identical_rows = false)
 				{
 
 					SavedRowData current_row_of_data;
@@ -723,7 +723,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 					outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
 					incoming_rows_of_data.clear();
 
-					if (merge_adjacent_rows_with_identical_data_on_secondary_keys)
+					if (consider_merging_timerange_adjacent_identical_rows && merge_adjacent_rows_with_identical_data_on_secondary_keys)
 					{
 						// Do a pass to merge adjacent rows timerange-wise that have identical secondary key data
 						while (outgoing_rows_of_data.size() > 1)
