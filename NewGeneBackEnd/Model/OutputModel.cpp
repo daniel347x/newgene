@@ -2104,12 +2104,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string());
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
 
-	// Incoming: might have COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND, or might have nothing
-	//
-	// Outgoing: has, at end, either:
-	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND
-	// ***OR***
-	// COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL columns
 	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, primary_group_number, false);
 	x_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(x_table_result);
@@ -2119,15 +2113,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
-	// Incoming:
-	// The LAST (and only) inner table has two pairs at its end:
-	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-	//
-	// Outgoing:
-	// The LAST (and only) inner table has two pairs at its end:
-	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(x_table_result.second, primary_group_number);
 	xr_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(xr_table_result);
 	ClearTables(sql_and_column_sets);
@@ -2139,16 +2124,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 	std::int64_t previous_count = ObtainCount(xr_table_result.second);
 
-	// Incoming:
-	// The LAST (and only) inner table has two pairs at its end:
-	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	//
-	// Outgoing:
-	// The LAST (and only) inner table has three pairs at its end:
-	// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-	// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = xr_table_result.second.columns_in_view.size(); // This class-global variable must be set
 	SqlAndColumnSet duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false);
 
@@ -2191,14 +2166,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			return SqlAndColumnSet();
 		}
 
+		
+		
+		
+		std::int64_t number_of_rows = ObtainCount(x_table_result.second);
+		current_number_rows_to_sort = number_of_rows;
+
+
+
 
 
 		// ******************************************************************************************************************* //
 		// Reorder the inner tables within each row so that the smallest ones appear on the left.
 		// Do no other processing.
-		// In particular, do not remove self-K-ads, do not sort the rows within the table,
-		// and do not perform any time range handling.
-		// The number of input rows is identical to the number of output rows, and the order of the rows remains unchanged.
+		// In particular, do not remove self-K-ads, and do not sort the rows within the table.
+		// Split any rows with reordered inner tables to handle time ranges before the inner tables are reordered.
 		// ******************************************************************************************************************* //
 		std::int64_t rows_added = 0;
 		SqlAndColumnSet sorted_within_rows_prior_to_xr_processing = RemoveDuplicates_Or_OrderWithinRows(x_table_result.second, primary_group_number, rows_added, current_multiplicity, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true, false);
@@ -2217,8 +2199,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 		// ******************************************************************************************************************* //
-		// Sort all rows, but note that the following step (CreateXRTable()) will igonore the sorting of the newly-joined data.
-		// Do not remove duplicates, as we are not prepared to do so yet.
+		// Sort all row, with all rows now guaranteed to have inner tables within each row ordered,
+		// so the sort is guaranteed to include ALL identical rows.
+		// There is a subtlety: Rows could have NULLs, but due to the fact that SQLite places NULLs prior to non-NULLs,
+		// it is guaranteed that rows that are equivalent except for some missing (NULL) inner tables
+		// will nonetheless appear as adjacent rows (with those rows with more NULLs appearing first).
+		// Do not remove duplicates.
 		// ******************************************************************************************************************* //
 		SqlAndColumnSet intermediate_duplicates_removed = SortAndOrRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting intermediate results"), std::string("Removing intermediate duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
 		if (failed)
@@ -2228,8 +2214,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 
-		std::int64_t number_of_rows = ObtainCount(x_table_result.second);
-		current_number_rows_to_sort = number_of_rows;
 
 		boost::format msg_("Constructing output for top-level primary group \"%1%\", multiplicity %2%");
 		msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
@@ -2242,9 +2226,33 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 		// ******************************************************************************************************************* //
-		// Split rows to handle the time range overlap of the new data being joined,
-		// taking care to not include rows with NULL for the final inner table
-		// unless no other rows match over the given time range.
+		// Merge identical rows, while keeping track of time ranges to handle them properly during the merge.
+		// This stage is the most complex.
+		// It takes advantage of the fact that the rows are both ordered within themselves
+		//    (inner tables from left to right within each row are sorted)
+		// and sorted within the table (rows are sorted in ascending order).
+		//
+		// The merging of rows also splits rows to handle the time range overlap of the new data being joined.
+		//
+		// Finally, this stage also tracks all rows with the new data being NULL due to either:
+		// ... The reordering inside of individual rows of inner tables (from the last step)
+		//    that may have caused (potentailly double) rows to appear, one of which has NULL in the final inner table,
+		// ... Or the merging/splitting of MULTIPLE rows together in this stage due to time range handling.
+		//
+		// (Note that there are, therefore, TWO stages of the splitting and creation of multiple rows
+		// due to time range handling: One resulting from the joining of new data and the splitting of individual rows
+		// to handle time range overlap of each individual joined row (the prior stage),
+		// and the other to handle time range overlap of adjacent joined rows (in this stage).
+		//
+		// Finally, this stage carefully tracks all rows with NULL and not NULL in the final inner table along with their time ranges,
+		// and when all rows with non-NULL in the final inner table that match on all other primary keys have completed processing,
+		// the algorithm does a special step of processing where it checks each tracked NULL row (including time range)
+		// against the non-NULL entries over the same time range that match on the keys, and if there is a match
+		// found it EXCLUDES the NULL row from the result set; otherwise it INCLUDES it.
+		// This is how NewGene handles displaying K-ads that have a smaller maximum count than the K-value selected by the user
+		// (i.e., K=6 but there are only 4 countries in the dispute).  (In the latter case, a row with all 4 countries
+		// and 2 NULLs should appear; whereas if 5 or more countries are available over the same time range, a row
+		// with 4 countries should NOT appear).
 		// ******************************************************************************************************************* //
 		xr_table_result = CreateXRTable(intermediate_duplicates_removed.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
 		ClearTables(sql_and_column_sets);
@@ -2260,7 +2268,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 		// ******************************************************************************************************************* //
-		// Sort all rows, and split/merge them as necessary to handle time range overlap.
+		// The previous stage handled merging and splitting of rows to handle time range overlap and NULLs.
+		// However, it leaves some duplicate rows in its wake and it does not place rows into its result set in sorted order.
+		// Perform a final pass, this time once again sorting the rows in the table in ascending order,
+		// and then proceeding to step over all rows without doing any merging or splitting, but simply removing duplicate rows
+		// that it encounters.
+		//
+		// The final result of this stage is the final result for this multiplicity, in unformatted form
+		// (i.e., with UUID's added to column names, and with extraneous columns present).
 		// ******************************************************************************************************************* //
 		duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false);
 
