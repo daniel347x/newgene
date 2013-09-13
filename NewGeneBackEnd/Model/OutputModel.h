@@ -766,7 +766,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				}
 
 				// Progress bar variables and functions
-				void DetermineTotalNumberRows();
+				void DetermineNumberStages();
 				void UpdateProgressBarToNextStage(std::string const helper_text_first_choice, std::string helper_text_second_choice);
 				void UpdateProgressBarValue(Messager & messager, std::int64_t const current_rows_stepped);
 				std::map<WidgetInstanceIdentifier, std::int64_t> total_number_incoming_rows;

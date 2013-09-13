@@ -115,7 +115,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 {
 	debug_ordering = true;
 	//delete_tables = false;
-	merge_adjacent_rows_with_identical_data_on_secondary_keys = true;
+	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -316,7 +316,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	DetermineTotalNumberRows();
+	DetermineNumberStages();
 
 	if (failed)
 	{
@@ -475,6 +475,8 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	{
 		merging_of_children_column_sets.push_back(xr_table_result);
 	}
+
+	messager.AppendKadStatusText("Construction of final K-ad results...", this);
 
 	all_merged_results_unformatted = SortAndOrRemoveDuplicates(merging_of_children_column_sets.back().second, WidgetInstanceIdentifier(), std::string("Sorting final K-ad results"), std::string("Removing duplicates from final K-ad results"), -1, 0, merging_of_children_column_sets, secondary_variable_groups_column_info.size() != 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, false, true);
 
@@ -1886,7 +1888,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 }
 
-void OutputModel::OutputGenerator::DetermineTotalNumberRows()
+void OutputModel::OutputGenerator::DetermineNumberStages()
 {
 
 	total_number_primary_rows = 0;
@@ -2001,8 +2003,8 @@ void OutputModel::OutputGenerator::DetermineTotalNumberRows()
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
 		multiplicities[child_variable_group_raw_data_columns.variable_groups[0]] = the_child_multiplicity;
 
-		// One stage per child group multiplicity
-		total_progress_stages += the_child_multiplicity;
+		// Two stages per child group multiplicity
+		total_progress_stages += (2 * the_child_multiplicity);
 
 		++child_set_number;
 
