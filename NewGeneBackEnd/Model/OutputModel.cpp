@@ -115,6 +115,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 {
 	debug_ordering = true;
 	//delete_tables = false;
+	merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -401,6 +402,11 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	int child_set_number = 1;
 	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &current_child_view_name_index, &child_set_number, &x_table_result, &xr_table_result](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
+
+		boost::format msg_start("Child variable group \"%1%\"");
+		msg_start % (child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand
+			: child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : std::string());
+		messager.AppendKadStatusText(msg_start.str(), this);
 
 		WidgetInstanceIdentifier const & dmu_category_multiplicity_greater_than_1_for_child = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].first;
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
@@ -945,7 +951,12 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	std::int64_t number_of_rows_to_sort = ObtainCount(intermediate_merging_of_primary_groups_column_sets.back().second);
 	current_number_rows_to_sort = number_of_rows_to_sort;
 
-	boost::format msg_("Merging top-level variable groups.  Retrieving data for variable group %1%: %2% rows");
+	boost::format msg_start("Variable group \"%1%\"");
+	msg_start % (primary_group_final_results[0].second.variable_groups[0].longhand ? *primary_group_final_results[0].second.variable_groups[0].longhand
+		: primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : std::string());
+	messager.AppendKadStatusText(msg_start.str(), this);
+
+	boost::format msg_("Retrieving data for variable group %1%: %2% rows");
 	msg_ % (primary_group_final_results[0].second.variable_groups[0].longhand ? *primary_group_final_results[0].second.variable_groups[0].longhand
 		: primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : std::string()) % number_of_rows_to_sort;
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
@@ -975,6 +986,11 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 		if (count != 1)
 		{
+
+			boost::format msg_start("Variable group \"%1%\"");
+			msg_start % (primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand
+				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string());
+			messager.AppendKadStatusText(msg_start.str(), this);
 
 			std::int64_t number_of_rows_previous = ObtainCount(intermediate_merging_of_primary_groups_column_sets.back().second);
 			std::int64_t number_of_rows_new = ObtainCount(primary_variable_group_final_result.second);
@@ -2045,7 +2061,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	std::int64_t raw_rows_count = total_number_incoming_rows[primary_variable_group_raw_data_columns.variable_groups[0]];
 	std::int64_t rows_estimate = raw_rows_count;
 
-	boost::format msg_("Retrieving data for variable group \"%1%\", multiplicity 1");
+	boost::format msg_start("Variable group \"%1%\"");
+	msg_start % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
+		: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string());
+	messager.AppendKadStatusText(msg_start.str(), this);
+
+	boost::format msg_("Multiplicity 1 - Retrieving data for variable group \"%1%\"");
 	msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 		: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string());
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
