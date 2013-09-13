@@ -1957,6 +1957,10 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 		// 2 stages hidden inside *final* call to SortAndRemoveDuplicates() inside loop
 		total_progress_stages += highest_multiplicity_primary_uoa - 1;
 
+		// Inside loop, which starts at 2, not 1
+		// 1 stage I missed somehow when coding this calculation
+		total_progress_stages += highest_multiplicity_primary_uoa - 1;
+
 		// Merging of primary groups: One each
 		++total_progress_stages; // a final one for each primary group - corresponding to the merging of primary groups
 
@@ -2189,7 +2193,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// will nonetheless appear as adjacent rows (with those rows with more NULLs appearing first).
 		// Do not remove duplicates.
 		// ******************************************************************************************************************* //
-		SqlAndColumnSet intermediate_duplicates_removed = SortAndOrRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows in ascending order (preparing for initial pass)"), std::string(""), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
+		SqlAndColumnSet intermediate_duplicates_removed = SortAndOrRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows in ascending order (preparing for full table scan)"), std::string(""), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
 		if (failed)
 		{
 			return SqlAndColumnSet();
