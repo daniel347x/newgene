@@ -13782,6 +13782,13 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 					TimeRanges & time_ranges = group_time_ranges__intkeys[TimeRangeMapper_Ints(inner_table_primary_key_groups)];
 					time_ranges.append(test_row.datetime_start, test_row.datetime_end);
 				}
+				else if (test_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first == SQLExecutor::FLOAT)
+				{
+					std::set<std::vector<long double>> inner_table_primary_key_groups;
+					test_row.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
+					TimeRanges & time_ranges = group_time_ranges__floatkeys[TimeRangeMapper_Floats(inner_table_primary_key_groups)];
+					time_ranges.append(test_row.datetime_start, test_row.datetime_end);
+				}
 				else
 				{
 					std::set<std::vector<std::string>> inner_table_primary_key_groups;
@@ -13860,6 +13867,7 @@ void OutputModel::OutputGenerator::AddRowsToXRTable(std::vector<SavedRowData> & 
 
 void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::string> const & new_strings,
 															  std::vector<std::int64_t> const & new_ints,
+															  std::vector<long double> const & new_floats,
 															  std::vector<SQLExecutor::WHICH_BINDING> const & new_bindings,
 															  bool enforce_all_datetimes,
 															  std::int64_t const startdate_current,
@@ -13875,8 +13883,9 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 	std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> new_indices;
 	int string_index = 0;
 	int int_index = 0;
+	int float_index = 0;
 	int column_index = 0;
-	std::for_each(new_bindings.cbegin(), new_bindings.cend(), [this, &column_index, &string_index, &int_index, &new_indices](SQLExecutor::WHICH_BINDING const binding)
+	std::for_each(new_bindings.cbegin(), new_bindings.cend(), [this, &column_index, &string_index, &int_index, &float_index, &new_indices](SQLExecutor::WHICH_BINDING const binding)
 	{
 		switch (binding)
 		{
@@ -13884,6 +13893,12 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 			{
 				new_indices.push_back(std::make_pair(binding, std::make_pair(int_index, column_index)));
 				++int_index;
+			}
+			break;
+		case SQLExecutor::FLOAT:
+			{
+				new_indices.push_back(std::make_pair(binding, std::make_pair(float_index, column_index)));
+				++float_index;
 			}
 			break;
 		case SQLExecutor::STRING:
@@ -13903,6 +13918,7 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 
 	SwapBindings(new_strings,
 				 new_ints,
+				 new_floats,
 				 new_indices,
 				 enforce_all_datetimes,
 				 startdate_current,
@@ -14192,7 +14208,7 @@ void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
 
 }
 
-void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys const & group_time_ranges__intkeys, TimeRangesForIndividualGroup_StringKeys const & group_time_ranges__stringkeys)
+void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys const & group_time_ranges__intkeys, TimeRangesForIndividualGroup_FloatKeys const & group_time_ranges__floatkeys, TimeRangesForIndividualGroup_StringKeys const & group_time_ranges__stringkeys)
 {
 
 	if (saved_rows_with_null_in_final_inner_table.empty())
@@ -14200,10 +14216,11 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 		return;
 	}
 	std::vector<SavedRowData> outgoing_rows;
-	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [&outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
+	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [&outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
 	{
 
 		bool use_ints = false;
+		bool use_floats = false;
 		if (saved_row_data_with_null_at_end.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first == SQLExecutor::NULL_BINDING)
 		{
 			return;
@@ -14211,6 +14228,10 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 		if (saved_row_data_with_null_at_end.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first == SQLExecutor::INT64)
 		{
 			use_ints = true;
+		}
+		if (saved_row_data_with_null_at_end.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first == SQLExecutor::FLOAT)
+		{
+			use_floats = true;
 		}
 
 		if (use_ints)
@@ -14240,6 +14261,55 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
 			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [&my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
+			{
+				if (map_info.first == inner_table_primary_key_groups )
+				{
+					TimeRanges const & time_range_ = map_info.second;
+					my_time_ranges.subtract(time_range_);
+				}
+			});
+
+
+			// ******************************************************************************************************* //
+			// Whatever time ranges are left require rows over that time range, even though we have a NULL at the end.
+			// ******************************************************************************************************* //
+
+			std::for_each(my_time_ranges.ranges.cbegin(), my_time_ranges.ranges.cend(), [&saved_row_data_with_null_at_end, &outgoing_rows](std::pair<std::int64_t, std::int64_t> const & range)
+			{
+				outgoing_rows.push_back(saved_row_data_with_null_at_end);
+				SavedRowData & new_null_row = outgoing_rows.back();
+				new_null_row.datetime_start = range.first;
+				new_null_row.datetime_end = range.second;
+			});
+
+		}
+		else if (use_floats)
+		{
+
+			std::set<std::vector<long double>> inner_table_primary_key_groups;
+			saved_row_data_with_null_at_end.ReturnAllNonNullPrimaryKeyGroups(inner_table_primary_key_groups);
+			if (group_time_ranges__floatkeys.find(inner_table_primary_key_groups) == group_time_ranges__floatkeys.cend())
+			{
+				// No other row exists (with all inner tables populated, including the last)
+				// with an overlapping primary key group set as the current one has.
+				// So we definitely want to keep this one, despite the fact that it has a NULL at the end.
+				outgoing_rows.push_back(saved_row_data_with_null_at_end);
+				return;
+			}
+
+			// There is overlap with some other row that is able to populate every inner table.
+			// Therefore, where we overlap time ranges with such rows, we must not appear in the output;
+			// where we don't overlap, we must appear in the output.
+
+			// Populate a new TimeRanges object to track all time ranges for which we overlap with other sets.
+
+			TimeRanges my_time_ranges;
+			my_time_ranges.append(saved_row_data_with_null_at_end.datetime_start, saved_row_data_with_null_at_end.datetime_end);
+
+			// This part is nasty and dangerously time-consuming.
+			// However, the algorithm demands it.
+			// We have no choice but to iterate through the map to pull out matches.
+			std::for_each(group_time_ranges__floatkeys.cbegin(), group_time_ranges__floatkeys.cend(), [&my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Floats, TimeRanges> const & map_info)
 			{
 				if (map_info.first == inner_table_primary_key_groups )
 				{
