@@ -14644,11 +14644,82 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 								}
 								break;
 
+							case SQLExecutor::FLOAT:
+								{
+
+									long double const & previous_float = previous_row.current_parameter_floats[previous_binding.second.first];
+									if (previous_float != boost::lexical_cast<long double>(current_int))
+									{
+										anything_is_different = true;
+									}
+
+								}
+								break;
+
 							case SQLExecutor::STRING:
 								{
 
 									std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first];
 									if (boost::lexical_cast<std::int64_t>(previous_string) != current_int)
+									{
+										anything_is_different = true;
+									}
+
+								}
+								break;
+
+							case SQLExecutor::NULL_BINDING:
+								{
+
+									// one row has data and the other doesn't
+									anything_is_different = true;
+
+								}
+								break;
+
+						}
+
+
+					}
+					break;
+
+				case SQLExecutor::FLOAT:
+					{
+
+						long double const & current_float = current_row.current_parameter_floats[current_binding.second.first];
+
+						switch (previous_binding.first)
+						{
+
+							case SQLExecutor::INT64:
+								{
+
+									std::int64_t const & previous_int = previous_row.current_parameter_ints[previous_binding.second.first];
+									if (boost::lexical_cast<long double>(previous_int) != current_float)
+									{
+										anything_is_different = true;
+									}
+
+								}
+								break;
+
+							case SQLExecutor::FLOAT:
+								{
+
+									long double const & previous_float = previous_row.current_parameter_floats[previous_binding.second.first];
+									if (previous_float != current_float)
+									{
+										anything_is_different = true;
+									}
+
+								}
+								break;
+
+							case SQLExecutor::STRING:
+								{
+
+									std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first];
+									if (boost::lexical_cast<long double>(previous_string) != current_float)
 									{
 										anything_is_different = true;
 									}
@@ -14691,6 +14762,18 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 								}
 								break;
 
+							case SQLExecutor::FLOAT:
+								{
+
+									long double const & previous_float = previous_row.current_parameter_floats[previous_binding.second.first];
+									if (previous_float != boost::lexical_cast<long double>(current_string))
+									{
+										anything_is_different = true;
+									}
+
+								}
+								break;
+
 							case SQLExecutor::STRING:
 								{
 
@@ -14724,6 +14807,15 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 						{
 
 							case SQLExecutor::INT64:
+								{
+
+									// one row has data and the other doesn't
+									anything_is_different = true;
+
+								}
+								break;
+
+							case SQLExecutor::FLOAT:
 								{
 
 									// one row has data and the other doesn't

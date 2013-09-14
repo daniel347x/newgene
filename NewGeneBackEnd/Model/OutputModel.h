@@ -392,6 +392,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::int64_t datetime_end;
 						std::vector<std::string> current_parameter_strings;
 						std::vector<std::int64_t> current_parameter_ints;
+						std::vector<long double> current_parameter_floats;
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
 
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_columns;
@@ -426,6 +427,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						void SwapBindings(  std::vector<std::string> const & new_strings,
 											std::vector<std::int64_t> const & new_ints,
+											std::vector<long double> const & new_floats,
 											std::vector<SQLExecutor::WHICH_BINDING> const & new_bindings,
 											bool enforce_all_datetimes = false,
 											std::int64_t const startdate_current = 0,
@@ -438,6 +440,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 											int const previous_datetime_end_column_index = 0);
 						void SwapBindings(  std::vector<std::string> const & new_strings,
 											std::vector<std::int64_t> const & new_ints,
+											std::vector<long double> const & new_floats,
 											std::vector<std::pair<SQLExecutor::WHICH_BINDING,
 											std::pair<int, int>>> & new_indices,
 											bool enforce_all_datetimes = false,
@@ -449,7 +452,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 											int const current_datetime_end_column_index = 0,
 											int const previous_datetime_start_column_index = 0,
 											int const previous_datetime_end_column_index = 0);
-						void AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_string_binding_to_add);
+						void AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_float_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_string_binding_to_add);
 						void SetFinalInnerTableToNull();
 						void SetLast2DateTimeColumns(std::int64_t const start_datetime_to_set, std::int64_t const end_datetime_to_set);
 
