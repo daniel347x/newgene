@@ -2611,7 +2611,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				{
 
 					data_float = sqlite3_column_double(stmt_result, current_column);
-					current_parameter_floats.push_back(data_int64);
+					current_parameter_floats.push_back(data_float);
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::FLOAT);
 
 					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)current_parameter_floats.size()-1, current_column)));
@@ -5513,7 +5513,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 				case SQLExecutor::FLOAT:
 					{
-						data_float = row_of_data.current_parameter_floats[int_index];
+						data_float = row_of_data.current_parameter_floats[float_index];
 						++float_index;
 						bound_parameter_floats.push_back(data_float);
 						bound_parameter_which_binding_to_use.push_back(SQLExecutor::FLOAT);
@@ -7755,7 +7755,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 	bool first_column_value = true;
 	std::int64_t data_int64 = 0;
 	std::string data_string;
-	long double data_long = 0.0;
+	long double data_float = 0.0;
 	bool do_not_include_this_data = false;
 	//int column_data_type = 0;
 	SQLExecutor::WHICH_BINDING column_data_type = SQLExecutor::UNKNOWN_BINDING;
@@ -7768,7 +7768,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 	int which_inner_table = 0;
 
-	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [this, &current_row_of_data, &which_inner_table, &inner_table_columns, &swap_current_and_previous_and_set_previous_to_null, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_each_single_inner_table, &highest_index_previous_table, &data_int64, &data_string, &data_long, &do_not_include_this_data, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [this, &current_row_of_data, &which_inner_table, &inner_table_columns, &swap_current_and_previous_and_set_previous_to_null, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_each_single_inner_table, &highest_index_previous_table, &data_int64, &data_string, &data_float, &do_not_include_this_data, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
 		if (failed)
@@ -7790,6 +7790,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 		// The following variables only apply to PRIMARY_VARIABLE_GROUP merges
 		std::vector<std::string> & inner_table_string_set = inner_table_columns.back().strings;
 		std::vector<std::int64_t> & inner_table_int_set = inner_table_columns.back().ints;
+		std::vector<long double> & inner_table_float_set = inner_table_columns.back().floats;
 		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table_bindings = inner_table_columns.back().bindings;
 		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set = inner_table_columns.back().bindings__primary_keys_with_multiplicity_greater_than_1;
 		std::vector<std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int>> & inner_table__all_primary_keys__which_binding_to_use__set = inner_table_columns.back().bindings__all_primary_keys;
@@ -7960,18 +7961,61 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 					}
 					break;
 
-#				if 0
-				case SQLExecutor::DOUBLE:
+				case SQLExecutor::FLOAT:
 					{
-						// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
-						// Todo: Error message
-						boost::format msg("Floating point values are not yet supported.  (Error while creating new timerange-managed row.)");
-						SetFailureMessage(msg.str());
-						failed = true;
-						return; // from lambda
+
+						data_float = current_row_of_data.current_parameter_floats[current_row_of_data.indices_of_all_columns[index].second.first];
+
+						// ... just populate the single data structures that hold all data across all inner tables
+						// ... (including possible null data for the newly added columns)
+						if (!swap_current_and_previous_and_set_previous_to_null)
+						{
+							bound_parameter_floats.push_back(data_float);
+							bound_parameter_which_binding_to_use.push_back(SQLExecutor::FLOAT);
+						}
+						else
+						{
+							if (index > highest_index_previous_table)
+							{
+								bound_parameter_floats.push_back(data_float);
+								bound_parameter_which_binding_to_use.push_back(SQLExecutor::FLOAT);
+							}
+						}
+
+						// The following if/else block only applies to PRIMARY_VARIABLE_GROUP merges
+						// Now, also save the data into sets broken down by inner table
+						if (!swap_current_and_previous_and_set_previous_to_null)
+						{
+							inner_table_float_set.push_back(data_float);
+							inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT, (int)inner_table_float_set.size() - 1));
+							if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+							{
+								inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT, (int)inner_table_float_set.size() - 1));
+							}
+							if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+							{
+								inner_table__all_primary_keys__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT, (int)inner_table_float_set.size() - 1));
+							}
+						}
+						else
+						{
+							if (index > highest_index_previous_table)
+							{
+								inner_table_float_set.push_back(data_float);
+								inner_table_bindings.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT, (int)inner_table_float_set.size() - 1));
+								if (column_in_view.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+								{
+									inner_table__primary_keys_with_multiplicity_greater_than_one__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT, (int)inner_table_float_set.size() - 1));
+								}
+								if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+								{
+									inner_table__all_primary_keys__which_binding_to_use__set.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT, (int)inner_table_float_set.size() - 1));
+								}
+							}
+						}
+
 					}
 					break;
-#				endif
 
 				case SQLExecutor::STRING:
 					{
@@ -8028,18 +8072,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 					}
 					break;
-
-#				if 0
-				case SQLITE_BLOB:
-					{
-						// Todo: Error message
-						boost::format msg("BLOBs are not supported.  (Error while creating new timerange-managed row.)");
-						SetFailureMessage(msg.str());
-						failed = true;
-						return; // from lambda
-					}
-					break;
-#				endif
 
 				case SQLExecutor::NULL_BINDING:
 					{
@@ -9555,21 +9587,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 
 			current_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result);
-
-			if (false) // debugging
-			{
-				if (current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.size() == 4)
-				{
-					if (current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].second.first] == 200
-						&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[1].second.first] == 211
-						&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[2].second.first] == 255
-						&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[3].second.first] == 315
-						)
-					{
-						int m = 0;
-					}
-				}
-			}
 
 			if (failed)
 			{
@@ -11514,6 +11531,26 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							}
 							break;
 
+						case SQLExecutor::FLOAT:
+							{
+
+								long double data_float_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_floats[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first];
+								long double data_converted = boost::lexical_cast<long double>(data_int64);
+
+								if (data_converted < data_float_rhs)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_converted > data_float_rhs)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
 						case SQLExecutor::STRING:
 							{
 
@@ -11526,6 +11563,78 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 									is_determined = true;;
 								}
 								else if (data_int64 > data_rhs_converted)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
+					}
+
+				}
+				break;
+
+			case SQLExecutor::FLOAT:
+				{
+
+					long double data_float = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_floats[current_info.second.first];
+
+					switch (rhs_binding)
+					{
+
+						case SQLExecutor::INT64:
+							{
+
+								std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first];
+								long double data_rhs_converted = boost::lexical_cast<long double>(data_int64_rhs);
+
+								if (data_float < data_rhs_converted)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_float > data_rhs_converted)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
+						case SQLExecutor::FLOAT:
+							{
+
+								long double data_float_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_floats[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first];
+
+								if (data_float < data_float_rhs)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_float > data_float_rhs)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
+						case SQLExecutor::STRING:
+							{
+
+								std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first];
+								long double data_rhs_converted = boost::lexical_cast<long double>(data_string_rhs);
+
+								if (data_float < data_rhs_converted)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_float > data_rhs_converted)
 								{
 									is_less_than = false;
 									is_determined = true;
@@ -11559,6 +11668,26 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 									is_determined = true;;
 								}
 								else if (data_converted > data_int64_rhs)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
+						case SQLExecutor::FLOAT:
+							{
+
+								long double data_float_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_floats[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first];
+								long double data_converted = boost::lexical_cast<long double>(data_string);
+
+								if (data_converted < data_float_rhs)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_converted > data_float_rhs)
 								{
 									is_less_than = false;
 									is_determined = true;
@@ -11766,6 +11895,26 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 								}
 								break;
 
+							case SQLExecutor::FLOAT:
+								{
+
+									long double data_float_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_floats[binding_info_rhs.second.first];
+									long double data_converted = boost::lexical_cast<std::int64_t>(data_int64);
+
+									if (data_converted < data_float_rhs)
+									{
+										is_less_than = true;
+										is_determined = true;;
+									}
+									else if (data_converted > data_float_rhs)
+									{
+										is_less_than = false;
+										is_determined = true;
+									}
+
+								}
+								break;
+
 							case SQLExecutor::STRING:
 								{
 
@@ -11785,6 +11934,78 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 								}
 								break;
+
+						}
+
+					}
+					break;
+
+				case SQLExecutor::FLOAT:
+					{
+
+						long double data_float = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_floats[binding_info.second.first];
+
+						switch (binding_info_rhs.first)
+						{
+
+						case SQLExecutor::INT64:
+							{
+
+								std::int64_t data_int64_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_ints[binding_info_rhs.second.first];
+								long double data_rhs_converted = boost::lexical_cast<long double>(data_int64_rhs);
+
+								if (data_float < data_rhs_converted)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_float > data_rhs_converted)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
+						case SQLExecutor::FLOAT:
+							{
+
+								long double data_float_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_floats[binding_info_rhs.second.first];
+
+								if (data_float < data_float_rhs)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_float > data_float_rhs)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
+
+						case SQLExecutor::STRING:
+							{
+
+								std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first];
+								long double data_rhs_converted = boost::lexical_cast<long double>(data_string_rhs);
+
+								if (data_float < data_rhs_converted)
+								{
+									is_less_than = true;
+									is_determined = true;;
+								}
+								else if (data_float > data_rhs_converted)
+								{
+									is_less_than = false;
+									is_determined = true;
+								}
+
+							}
+							break;
 
 						}
 
@@ -11811,6 +12032,26 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 										is_determined = true;;
 									}
 									else if (data_converted > data_int64_rhs)
+									{
+										is_less_than = false;
+										is_determined = true;
+									}
+
+								}
+								break;
+
+							case SQLExecutor::FLOAT:
+								{
+
+									long double data_float_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_floats[binding_info_rhs.second.first];
+									long double data_converted = boost::lexical_cast<long double>(data_string);
+
+									if (data_converted < data_float_rhs)
+									{
+										is_less_than = true;
+										is_determined = true;;
+									}
+									else if (data_converted > data_float_rhs)
 									{
 										is_less_than = false;
 										is_determined = true;
@@ -12341,14 +12582,10 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityGreaterThanOnes(Column
 void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumns(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> & rows_to_insert_info, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, SavedRowData const & current_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
 {
 
-	//int previous_data_type = sqlite3_column_type(stmt_result, previous_datetime_start_column_index);
 	SQLExecutor::WHICH_BINDING previous_data_type = current_row_of_data.indices_of_all_columns[previous_datetime_start_column_index].first;
 
-	//int current_data_type = sqlite3_column_type(stmt_result, current_datetime_start_column_index);
 	SQLExecutor::WHICH_BINDING current_data_type = current_row_of_data.indices_of_all_columns[current_datetime_start_column_index].first;
 
-	//bool previous_datetime_is_null = (previous_data_type == SQLITE_NULL);
-	//bool current_datetime_is_null = (current_data_type == SQLITE_NULL);
 	bool previous_datetime_is_null = (previous_data_type == SQLExecutor::NULL_BINDING);
 	bool current_datetime_is_null = (current_data_type == SQLExecutor::NULL_BINDING);
 
@@ -12359,16 +12596,12 @@ void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumn
 
 	if (!previous_datetime_is_null)
 	{
-		//previous_datetime_start = sqlite3_column_int64(stmt_result, previous_datetime_start_column_index);
-		//previous_datetime_end = sqlite3_column_int64(stmt_result, previous_datetime_end_column_index);
 		previous_datetime_start = current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[previous_datetime_start_column_index].second.first];
 		previous_datetime_end = current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[previous_datetime_end_column_index].second.first];
 	}
 
 	if (!current_datetime_is_null)
 	{
-		//current_datetime_start = sqlite3_column_int64(stmt_result, current_datetime_start_column_index);
-		//current_datetime_end = sqlite3_column_int64(stmt_result, current_datetime_end_column_index);
 		current_datetime_start = current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[current_datetime_start_column_index].second.first];
 		current_datetime_end = current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_all_columns[current_datetime_end_column_index].second.first];
 	}
@@ -12843,25 +13076,6 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			return;
 		}
 
-
-
-		if (false) // debugging
-		{
-			if (row.GetSavedRowData().indices_of_primary_key_columns_with_multiplicity_greater_than_1.size() == 4)
-			{
-				if (row.GetSavedRowData().current_parameter_ints[row.GetSavedRowData().indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].second.first] == 200
-					&& row.GetSavedRowData().current_parameter_ints[row.GetSavedRowData().indices_of_primary_key_columns_with_multiplicity_greater_than_1[1].second.first] == 211
-					&& row.GetSavedRowData().current_parameter_ints[row.GetSavedRowData().indices_of_primary_key_columns_with_multiplicity_greater_than_1[2].second.first] == 255
-					&& row.GetSavedRowData().current_parameter_ints[row.GetSavedRowData().indices_of_primary_key_columns_with_multiplicity_greater_than_1[3].second.first] == 315
-					)
-				{
-					int m = 0;
-				}
-			}
-		}
-
-
-
 		// Split an individual incoming row into 0, 1, 2, or 3 new rows,
 		// based on the overlap of the time range of the previous data (contained in all inner tables except the last - i.e., the columns to the left)
 		// with the new data (in the rightmost columns, the final inner table)
@@ -13328,6 +13542,7 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 
 void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::string> const & new_strings,
 															  std::vector<std::int64_t> const & new_ints,
+															  std::vector<long double> const & new_floats,
 															  std::vector<std::pair<SQLExecutor::WHICH_BINDING,
 															  std::pair<int, int>>> & new_indices,
 															  bool enforce_all_datetimes,
@@ -13344,6 +13559,7 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 	indices_of_all_columns = new_indices;
 
 	current_parameter_ints.clear();
+	current_parameter_floats.clear();
 	current_parameter_strings.clear();
 	current_parameter_which_binding_to_use.clear();
 
@@ -13357,10 +13573,12 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 
 	int column_index = 0;
 	int current_int_index = 0;
+	int current_float_index = 0;
 	int current_string_index = 0;
 	int current_int_index_new = 0;
+	int current_float_index_new = 0;
 	int current_string_index_new = 0;
-	std::for_each(indices_of_all_columns.begin(), indices_of_all_columns.end(), [this, &current_int_index_new, &current_string_index_new, &new_ints, &new_strings, &enforce_all_datetimes, &startdate_current, &enddate_current, &startdate_previous, &enddate_previous, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index, &current_int_index, &current_string_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> & binding)
+	std::for_each(indices_of_all_columns.begin(), indices_of_all_columns.end(), [this, &current_int_index_new, &current_float_index_new, &current_string_index_new, &new_ints, &new_floats, &new_strings, &enforce_all_datetimes, &startdate_current, &enddate_current, &startdate_previous, &enddate_previous, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index, &current_int_index, &current_float_index, &current_string_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> & binding)
 	{
 
 		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> old_binding = binding;		
@@ -13411,6 +13629,11 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 						current_parameter_ints.push_back(new_ints[current_int_index]);
 					}
 					break;
+				case SQLExecutor::FLOAT:
+					{
+						current_parameter_floats.push_back(new_floats[current_float_index]);
+					}
+					break;
 				case SQLExecutor::STRING:
 					{
 						current_parameter_strings.push_back(new_strings[current_string_index]);
@@ -13427,22 +13650,28 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 		current_parameter_which_binding_to_use.push_back(binding.first);
 
 		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_int_binding_to_add = std::make_pair(binding.first, std::make_pair(current_int_index_new, column_index));
+		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_float_binding_to_add = std::make_pair(binding.first, std::make_pair(current_float_index_new, column_index));
 		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_string_binding_to_add = std::make_pair(binding.first, std::make_pair(current_string_index_new, column_index));
 		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_null_binding_to_add = std::make_pair(binding.first, std::make_pair(0, column_index));
 
-		AddBinding(is_index_in_final_inner_table, indices_of_all_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
-		AddBinding(is_index_in_all_but_final_inner_table, indices_of_all_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
-		AddBinding(is_index_a_primary_key, indices_of_primary_key_columns, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
-		AddBinding(is_index_a_primary_key_with_outer_multiplicity_greater_than_1, indices_of_primary_key_columns_with_multiplicity_greater_than_1, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
-		AddBinding(is_index_a_primary_key_with_outer_multiplicity_equal_to_1, indices_of_primary_key_columns_with_multiplicity_equal_to_1, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
-		AddBinding(is_index_a_primary_key_in_the_final_inner_table, indices_of_all_primary_key_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
-		AddBinding(is_index_a_primary_key_in_not_the_final_inner_table, indices_of_all_primary_key_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_in_final_inner_table, indices_of_all_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_float_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_in_all_but_final_inner_table, indices_of_all_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_float_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_a_primary_key, indices_of_primary_key_columns, binding.first, column_index, current_int_binding_to_add, current_float_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_a_primary_key_with_outer_multiplicity_greater_than_1, indices_of_primary_key_columns_with_multiplicity_greater_than_1, binding.first, column_index, current_int_binding_to_add, current_float_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_a_primary_key_with_outer_multiplicity_equal_to_1, indices_of_primary_key_columns_with_multiplicity_equal_to_1, binding.first, column_index, current_int_binding_to_add, current_float_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_a_primary_key_in_the_final_inner_table, indices_of_all_primary_key_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_float_binding_to_add, current_string_binding_to_add);
+		AddBinding(is_index_a_primary_key_in_not_the_final_inner_table, indices_of_all_primary_key_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_float_binding_to_add, current_string_binding_to_add);
 
 		switch (old_binding.first)
 		{
 			case SQLExecutor::INT64:
 				{
 					++current_int_index;
+				}
+				break;
+			case SQLExecutor::FLOAT:
+				{
+					++current_float_index;
 				}
 				break;
 			case SQLExecutor::STRING:
@@ -13464,6 +13693,11 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 					++current_int_index_new;
 				}
 				break;
+			case SQLExecutor::FLOAT:
+				{
+					++current_float_index_new;
+				}
+				break;
 			case SQLExecutor::STRING:
 				{
 					++current_string_index_new;
@@ -13480,7 +13714,7 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 	});
 }
 
-void OutputModel::OutputGenerator::SavedRowData::AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_string_binding_to_add)
+void OutputModel::OutputGenerator::SavedRowData::AddBinding(std::vector<bool> const & binding_test, std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> & bindings, SQLExecutor::WHICH_BINDING binding_type, int const binding_index, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_int_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_float_binding_to_add, std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & potential_current_string_binding_to_add)
 {
 	if (binding_test[binding_index])
 	{
@@ -13489,6 +13723,11 @@ void OutputModel::OutputGenerator::SavedRowData::AddBinding(std::vector<bool> co
 			case SQLExecutor::INT64:
 				{
 					bindings.push_back(potential_current_int_binding_to_add);
+				}
+				break;
+			case SQLExecutor::FLOAT:
+				{
+					bindings.push_back(potential_current_float_binding_to_add);
 				}
 				break;
 			case SQLExecutor::STRING:
@@ -13526,6 +13765,11 @@ void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
 			case SQLExecutor::INT64:
 				{
 					current_parameter_ints.pop_back();
+				}
+				break;
+			case SQLExecutor::FLOAT:
+				{
+					current_parameter_floats.pop_back();
 				}
 				break;
 			case SQLExecutor::STRING:
@@ -13720,6 +13964,46 @@ void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroup
 		if (binding.first != SQLExecutor::NULL_BINDING)
 		{
 			inner_table_primary_key_group.push_back(current_parameter_ints[index_in_data_vector]);
+		}
+
+		++column_index;
+		++inner_multiplicity_index;
+
+		if (inner_multiplicity_index == number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		{
+			if (!inner_table_primary_key_group.empty())
+			{
+				inner_table_primary_key_groups.insert(inner_table_primary_key_group);
+				inner_table_primary_key_group.clear();
+			}
+			inner_multiplicity_index = 0;
+		}
+
+	});
+}
+
+void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<long double>> & inner_table_primary_key_groups) const
+{
+	if (indices_of_primary_key_columns_with_multiplicity_greater_than_1.empty())
+	{
+		return;
+	}
+	if (indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first != SQLExecutor::FLOAT)
+	{
+		return;
+	}
+
+	int column_index = 0;
+	int inner_multiplicity_index = 0;
+	std::vector<long double> inner_table_primary_key_group;
+	std::for_each(indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [this, &inner_table_primary_key_group, &inner_table_primary_key_groups, &column_index, &inner_multiplicity_index](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding)
+	{
+
+		int index_in_data_vector = binding.second.first;
+
+		if (binding.first != SQLExecutor::NULL_BINDING)
+		{
+			inner_table_primary_key_group.push_back(current_parameter_floats[index_in_data_vector]);
 		}
 
 		++column_index;
