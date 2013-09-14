@@ -327,7 +327,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_);
 						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_);
-						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & stmt_is_prepared, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
+						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<long double> const & bound_parameter_floats_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & stmt_is_prepared, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
 						SQLExecutor(SQLExecutor const & rhs);
 						SQLExecutor(SQLExecutor && rhs);
 						SQLExecutor & operator=(SQLExecutor const & rhs);
@@ -352,7 +352,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						std::vector<std::string> bound_parameter_strings;
 						std::vector<std::int64_t> bound_parameter_ints;
-						std::vector<std::int64_t> bound_parameter_floats;
+						std::vector<long double> bound_parameter_floats;
 						std::vector<WHICH_BINDING> bound_parameter_which_binding_to_use;
 
 						bool statement_is_shared;
@@ -637,7 +637,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet CreateXRTable(ColumnsInTempView const & previous_x_or_final_columns_being_cleaned_over_timerange, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index);
 				SqlAndColumnSet CreateSortedTable(ColumnsInTempView const & final_xr_columns, int const primary_group_number, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category, bool const is_intermediate);
 				SqlAndColumnSet RemoveDuplicates_Or_OrderWithinRows(ColumnsInTempView const & previous_result_columns, int const primary_group_number, std::int64_t & current_rows_added, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category, bool const order_within_rows, bool const is_intermediate, bool const consider_merging_timerange_adjacent_identical_rows = false);
-				void RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t &current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<long double> bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows = false);
+				void RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView & result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows = false);
 
 				enum PRIMARY_KEY_MATCH_CONDITION
 				{

@@ -3490,8 +3490,8 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 	std::map<std::vector<std::int64_t>, int> current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number;
 	std::map<std::vector<std::int64_t>, int> previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number;
-	std::map<std::vector<std::int64_t>, int> current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number;
-	std::map<std::vector<std::int64_t>, int> previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number;
+	std::map<std::vector<long double>, int> current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number;
+	std::map<std::vector<long double>, int> previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number;
 	std::map<std::vector<std::string>, int> current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number;
 	std::map<std::vector<std::string>, int> previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number;
 	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_current_index, &saved_strings_vector, &saved_ints_vector, &saved_floats_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector, &current_row_of_data, &int_index_current, &float_index_current, &string_index_current, &current_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
@@ -3519,7 +3519,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 				}
 				break;
-			case SQLExecutor::FLOAT
+			case SQLExecutor::FLOAT:
 				{
 
 					if (current_row_of_data.is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_index])
@@ -3614,7 +3614,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	current_index = 0;
 	previous_index = 0;
 
-	std::for_each(previous_row_of_data.current_parameter_which_binding_to_use.cbegin(), previous_row_of_data.current_parameter_which_binding_to_use.cend(), [&previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_previous_index, &saved_strings_vector, &saved_ints_vector, &saved_floats_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector, &previous_row_of_data, &int_index_previous, &float_index_previous, &string_index_previous, &previous_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & previous_binding)
+	std::for_each(previous_row_of_data.current_parameter_which_binding_to_use.cbegin(), previous_row_of_data.current_parameter_which_binding_to_use.cend(), [&previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_previous_index, &saved_strings_vector, &saved_ints_vector, &saved_floats_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector, &previous_row_of_data, &int_index_previous, &float_index_previous, &string_index_previous, &previous_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & previous_binding)
 	{
 
 		if (previous_binding == SQLExecutor::NULL_BINDING)
@@ -3785,7 +3785,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	int current_row_inner_table_data_to_use = -1;
 	int previous_row_inner_table_data_to_use = -1;
 
-	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [this, &current_row_inner_table_data_to_use, &previous_row_inner_table_data_to_use, &current__current_inner_table, &previous__current_inner_table, &most_recent_current_offset, &most_recent_previous_offset, &xr_table_category, &current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector,  &inner_multiplicity_string_vector, &use_strings, &use_ints, &use_floats, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &saved_floats_deque, &current_row_of_data, &int_index_current, &float_index_current, &string_index_current, &int_index_previous, &float_index_previous, &string_index_previous, &current_index, &previous_row_of_data, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [this, &current_row_inner_table_data_to_use, &previous_row_inner_table_data_to_use, &current__current_inner_table, &previous__current_inner_table, &most_recent_current_offset, &most_recent_previous_offset, &xr_table_category, &current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector,  &inner_multiplicity_string_vector, &use_strings, &use_ints, &use_floats, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &saved_floats_deque, &current_row_of_data, &int_index_current, &float_index_current, &string_index_current, &int_index_previous, &float_index_previous, &string_index_previous, &current_index, &previous_row_of_data, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
 	{
 
 		if (failed)
@@ -5516,7 +5516,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, XR_TABLE_CATEGORY const xr_table_category, bool const no_new_column_names)
 {
 
-	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &no_new_column_names, &xr_table_category, &statement_is_prepared, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
+	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &no_new_column_names, &xr_table_category, &statement_is_prepared, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
 	{
 
 		bool do_not_check_time_range = false;
@@ -5741,7 +5741,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 				break;
 		}
 		
-		sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+		sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 		the_prepared_stmt = sql_strings.back().stmt;
 		++current_rows_added;
 		++current_rows_added_since_execution;
@@ -7928,7 +7928,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 	int which_inner_table = 0;
 
-	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [this, &current_row_of_data, &which_inner_table, &inner_table_columns, &swap_current_and_previous_and_set_previous_to_null, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_each_single_inner_table, &highest_index_previous_table, &data_int64, &data_float, &data_string, &data_float, &do_not_include_this_data, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [this, &current_row_of_data, &which_inner_table, &inner_table_columns, &swap_current_and_previous_and_set_previous_to_null, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_each_single_inner_table, &highest_index_previous_table, &data_int64, &data_float, &data_string, &do_not_include_this_data, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
 		if (failed)
@@ -8642,10 +8642,10 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 			bound_parameter_which_binding_to_use.clear();
 			int current_inner_column_set = 0;
 			int total_index = 0;
-			std::for_each(inner_table_columns.cbegin(), inner_table_columns.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &saved_previous_datetime_start, &saved_previous_datetime_end, &saved_current_datetime_start, &saved_current_datetime_end, &total_index, &current_inner_column_set, &number_inner_column_sets, &number_columns_first_sets, &number_columns_last_set, &bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](ColumnSorter const & columns_in_single_inner_table)
+			std::for_each(inner_table_columns.cbegin(), inner_table_columns.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &saved_previous_datetime_start, &saved_previous_datetime_end, &saved_current_datetime_start, &saved_current_datetime_end, &total_index, &current_inner_column_set, &number_inner_column_sets, &number_columns_first_sets, &number_columns_last_set, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_strings, &bound_parameter_which_binding_to_use](ColumnSorter const & columns_in_single_inner_table)
 			{
 				int the_index = 0;
-				std::for_each(columns_in_single_inner_table.bindings.cbegin(), columns_in_single_inner_table.bindings.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &saved_previous_datetime_start, &saved_previous_datetime_end, &saved_current_datetime_start, &saved_current_datetime_end, &total_index, &columns_in_single_inner_table, &the_index, &bound_parameter_ints, &bound_parameter_strings, &bound_parameter_which_binding_to_use](std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int> const & binding_info)
+				std::for_each(columns_in_single_inner_table.bindings.cbegin(), columns_in_single_inner_table.bindings.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &saved_previous_datetime_start, &saved_previous_datetime_end, &saved_current_datetime_start, &saved_current_datetime_end, &total_index, &columns_in_single_inner_table, &the_index, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_strings, &bound_parameter_which_binding_to_use](std::pair<OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING, int> const & binding_info)
 				{
 					bool handled = false;
 					if (total_index == index_of_current_datetime_start_column)
@@ -9815,6 +9815,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		bool first_row_added = true;
 		std::vector<std::string> bound_parameter_strings;
 		std::vector<std::int64_t> bound_parameter_ints;
+		std::vector<long double> bound_parameter_floats;
 		std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
 
 		sqlite3_stmt * the_prepared_stmt = nullptr;
@@ -9898,7 +9899,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					}
 					if (added)
 					{
-						sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+						sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 						the_prepared_stmt = sql_strings.back().stmt;
 						++current_rows_added;
 						++current_rows_added_since_execution;
@@ -10039,7 +10040,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 				row_inserts_info.clear();
 				PopulateSplitRowInfo_FromCurrentMergingColumns(row_inserts_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, current_row_of_data, xr_table_category);
-				std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &current_row_of_data, &first_row_added, &include_current_data, &include_previous_data, &datetime_start_col_name, &datetime_end_col_name, &datetime_range_start, &datetime_range_end, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
+				std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &current_row_of_data, &first_row_added, &include_current_data, &include_previous_data, &datetime_start_col_name, &datetime_end_col_name, &datetime_range_start, &datetime_range_end, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
 				{
 
 					if (failed)
@@ -10067,7 +10068,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					}
 					if (added)
 					{
-						sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+						sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 						the_prepared_stmt = sql_strings.back().stmt;
 						++current_rows_added;
 						++current_rows_added_since_execution;
@@ -11469,7 +11470,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 	});
 }
 
-void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> &rows_to_sort, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView &result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string sql_add_xr_row, bool first_row_added, std::vector<std::string> bound_parameter_strings, std::vector<std::int64_t> bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows)
+void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result, std::deque<SavedRowData> & rows_to_sort, std::string datetime_start_col_name, std::string datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, ColumnsInTempView & result_columns, ColumnsInTempView const & sorted_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const minimum_desired_rows_per_transaction, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows)
 {
 
 	// perform sort here of rows in rows_to_sort ONLY on time columns
@@ -11517,7 +11518,7 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 		}
 		std::pair<SQLExecutor::WHICH_BINDING, int> rhs_binding = rhs.bindings__primary_keys_with_multiplicity_greater_than_1[index];
 		std::int64_t rhs_value_int = 0;
-		std::int64_t rhs_value_float = 0.0;
+		long double rhs_value_float = 0.0;
 		std::string rhs_value_string;
 		switch (rhs_binding.first)
 		{
@@ -12285,7 +12286,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 								{
 
 									long double data_float_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_floats[binding_info_rhs.second.first];
-									long double data_converted = boost::lexical_cast<std::int64_t>(data_int64);
+									long double data_converted = boost::lexical_cast<long double>(data_int64);
 
 									if (data_converted < data_float_rhs)
 									{
@@ -13525,9 +13526,10 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// Order the inner sets of each row
 	std::vector<std::string> bound_parameter_strings;
 	std::vector<std::int64_t> bound_parameter_ints;
+	std::vector<long double> bound_parameter_floats;
 	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use; 
 	bool at_least_one_row_is_bad = false;
-	std::for_each(rows_to_check.begin(), rows_to_check.end(), [this, &at_least_one_row_is_bad, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](TimeRangeSorter & row)
+	std::for_each(rows_to_check.begin(), rows_to_check.end(), [this, &at_least_one_row_is_bad, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](TimeRangeSorter & row)
 	{
 
 		std::int64_t datetime_start = row.GetSavedRowData().datetime_start;
@@ -13560,7 +13562,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			bound_parameter_which_binding_to_use.pop_back();
 
 			// Set the new inner table order
-			row.GetSavedRowData().SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use);
+			row.GetSavedRowData().SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use);
 
 			row.GetSavedRowData().SetLast2DateTimeColumns(datetime_start, datetime_end);
 		}
@@ -13843,7 +13845,7 @@ void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroup
 void OutputModel::OutputGenerator::AddRowsToXRTable(std::vector<SavedRowData> & outgoing_rows_of_data, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another)
 {
 
-	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another](SavedRowData const & new_row_to_write_to_database)
+	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another](SavedRowData const & new_row_to_write_to_database)
 	{
 		// The previous function already set both the datetime columns and the data in the previous/current inner tables (including NULLs where necessary),
 		// so just tell the following function to use all data, and to use the existing date and time
@@ -13866,7 +13868,7 @@ void OutputModel::OutputGenerator::AddRowsToXRTable(std::vector<SavedRowData> & 
 
 		if (added)
 		{
-			sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+			sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 			the_prepared_stmt = sql_strings.back().stmt;
 			++current_rows_added;
 			++current_rows_added_since_execution;
