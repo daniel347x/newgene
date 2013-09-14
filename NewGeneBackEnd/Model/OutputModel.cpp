@@ -3044,6 +3044,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	bool first_row_added = true;
 	std::vector<std::string> bound_parameter_strings;
 	std::vector<std::int64_t> bound_parameter_ints;
+	std::vector<long double> bound_parameter_floats;
 	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
 
 
@@ -3106,6 +3107,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				std::string dummystr;
 				ColumnsInTempView dummycols;
 				bound_parameter_ints.clear();
+				bound_parameter_floats.clear();
 				bound_parameter_strings.clear();
 				bound_parameter_which_binding_to_use.clear();
 
@@ -3119,7 +3121,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				{
 					std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>> row_inserts_info;
 					PopulateSplitRowInfo_FromCurrentMergingColumns(row_inserts_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, sorting_row_of_data, xr_table_category);
-					std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &current_datetime_start_column_index, &current_datetime_end_column_index, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &order_within_rows, &dummy, &dummystr, &previous_result_columns, &dummycols, &ordering_within_rows_data, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &sorting_row_of_data, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use, &xr_table_category](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
+					std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &current_datetime_start_column_index, &current_datetime_end_column_index, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &order_within_rows, &dummy, &dummystr, &previous_result_columns, &dummycols, &ordering_within_rows_data, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &sorting_row_of_data, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &xr_table_category](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
 					{
 						if (failed)
 						{
@@ -3167,7 +3169,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 							bound_parameter_ints.pop_back();
 							bound_parameter_which_binding_to_use.pop_back();
 							bound_parameter_which_binding_to_use.pop_back();
-							new_row.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, true, datetime_range_start, datetime_range_end, datetime_range_start, datetime_range_end, current_datetime_start_column_index, current_datetime_end_column_index, previous_datetime_start_column_index, previous_datetime_end_column_index);
+							new_row.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, true, datetime_range_start, datetime_range_end, datetime_range_start, datetime_range_end, current_datetime_start_column_index, current_datetime_end_column_index, previous_datetime_start_column_index, previous_datetime_end_column_index);
 							ordering_within_rows_data.push_back(new_row);
 						}
 
@@ -3186,13 +3188,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 						bound_parameter_ints.pop_back();
 						bound_parameter_which_binding_to_use.pop_back();
 						bound_parameter_which_binding_to_use.pop_back();
-						sorting_row_of_data.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, true, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, current_datetime_start_column_index, current_datetime_end_column_index, previous_datetime_start_column_index, previous_datetime_end_column_index);
+						sorting_row_of_data.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, true, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, current_datetime_start_column_index, current_datetime_end_column_index, previous_datetime_start_column_index, previous_datetime_end_column_index);
 						ordering_within_rows_data.clear();
 						ordering_within_rows_data.push_back(sorting_row_of_data);
 					}
 				}
 
-				WriteRowsToFinalTable(ordering_within_rows_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category, order_within_rows);
+				WriteRowsToFinalTable(ordering_within_rows_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, xr_table_category, order_within_rows);
 
 				if (failed)
 				{
@@ -11481,7 +11483,7 @@ void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches(std::in
 		return;
 	}
 
-	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_which_binding_to_use, xr_table_category, false);
+	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, xr_table_category, false);
 	if (failed)
 	{
 		return;
