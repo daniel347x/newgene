@@ -8609,6 +8609,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 									binding.second = 0;
 								});
 								new_columns_to_test.ints.clear();
+								new_columns_to_test.floats.clear();
 								new_columns_to_test.strings.clear();
 								do_any_adjacent_pairs_of_inner_tables_have_the_same_primary_keys = true;
 							}

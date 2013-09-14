@@ -477,6 +477,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 	
 						std::vector<std::string> strings;
 						std::vector<std::int64_t> ints;
+						std::vector<std::int64_t> floats;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings__primary_keys_with_multiplicity_greater_than_1;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings__all_primary_keys;
@@ -489,6 +490,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						ColumnSorter(
 							  std::vector<std::string> const & strings_
 							, std::vector<std::int64_t> const & ints_
+							, std::vector<long double> const & floats_
 							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> bindings_
 							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> const & bindings__primary_keys_with_multiplicity_greater_than_1_
 							, std::vector<std::pair<SQLExecutor::WHICH_BINDING, int>> const & bindings__all_primary_keys_
@@ -496,6 +498,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							:
 							  strings(strings_)
 							, ints(ints_)
+							, floats(floats_)
 							, bindings(bindings_)
 							, bindings__primary_keys_with_multiplicity_greater_than_1(bindings__primary_keys_with_multiplicity_greater_than_1_)
 							, bindings__all_primary_keys(bindings__all_primary_keys_)
@@ -507,6 +510,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							:
 							  strings(rhs.strings)
 							, ints(rhs.ints)
+							, floats(rhs.floats)
 							, bindings(rhs.bindings)
 							, bindings__primary_keys_with_multiplicity_greater_than_1(rhs.bindings__primary_keys_with_multiplicity_greater_than_1)
 							, bindings__all_primary_keys(rhs.bindings__all_primary_keys)
