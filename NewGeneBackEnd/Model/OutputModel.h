@@ -352,6 +352,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						std::vector<std::string> bound_parameter_strings;
 						std::vector<std::int64_t> bound_parameter_ints;
+						std::vector<std::int64_t> bound_parameter_floats;
 						std::vector<WHICH_BINDING> bound_parameter_which_binding_to_use;
 
 						bool statement_is_shared;
@@ -565,6 +566,22 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				};
 
+				class TimeRangeMapper_Floats
+				{
+
+				public:
+
+					TimeRangeMapper_Floats(TimeRangeMapper_Floats const & rhs);
+					TimeRangeMapper_Floats(std::set<std::vector<long double>> const & rhs);
+
+					bool operator<(TimeRangeMapper_Floats const & rhs) const;
+					bool operator==(TimeRangeMapper_Floats const & rhs) const;
+					bool operator==(std::set<std::vector<long double>> const & rhs) const;
+
+					std::set<std::vector<long double>> sets; 
+
+				};
+
 				class TimeRangeMapper_Strings
 				{
 
@@ -582,6 +599,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				};
 
 				typedef std::map<TimeRangeMapper_Ints, TimeRanges> TimeRangesForIndividualGroup_IntKeys;
+				typedef std::map<TimeRangeMapper_Floats, TimeRanges> TimeRangesForIndividualGroup_FloatKeys;
 				typedef std::map<TimeRangeMapper_Strings, TimeRanges> TimeRangesForIndividualGroup_StringKeys;
 
 				typedef std::pair<std::vector<SQLExecutor>, ColumnsInTempView> SqlAndColumnSet;

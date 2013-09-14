@@ -6049,7 +6049,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(OutputModel::OutputGenera
 
 }
 
-OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & statement_is_prepared_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
+OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<long double> const & bound_parameter_floats_, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & statement_is_prepared_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
 	: sql(sql_)
 	, generator(generator_)
 	, statement_type(DOES_NOT_RETURN_ROWS)
@@ -6060,6 +6060,7 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(OutputModel::OutputGenera
 	, statement_is_prepared(statement_is_prepared_)
 	, bound_parameter_strings(bound_parameter_strings_)
 	, bound_parameter_ints(bound_parameter_ints_)
+	, bound_parameter_floats(bound_parameter_floats_)
 	, bound_parameter_which_binding_to_use(bound_parameter_which_binding_to_use_)
 	, statement_is_shared(true)
 {
@@ -6125,6 +6126,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Copy(SQLExecutor const & rhs)
 	this->statement_is_owned = false;
 
 	this->bound_parameter_ints = rhs.bound_parameter_ints;
+	this->bound_parameter_floats = rhs.bound_parameter_floats;
 	this->bound_parameter_strings = rhs.bound_parameter_strings;
 	this->bound_parameter_which_binding_to_use = rhs.bound_parameter_which_binding_to_use;
 	this->db = rhs.db;
@@ -6145,6 +6147,7 @@ void OutputModel::OutputGenerator::SQLExecutor::CopyOwned(SQLExecutor & rhs)
 	rhs.statement_is_owned = false;
 
 	this->bound_parameter_ints = rhs.bound_parameter_ints;
+	this->bound_parameter_floats = rhs.bound_parameter_floats;
 	this->bound_parameter_strings = rhs.bound_parameter_strings;
 	this->bound_parameter_which_binding_to_use = rhs.bound_parameter_which_binding_to_use;
 	this->db = rhs.db;
@@ -6174,6 +6177,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 		sql.clear();
 		bound_parameter_strings.clear();
 		bound_parameter_ints.clear();
+		bound_parameter_floats.clear();
 		bound_parameter_which_binding_to_use.clear();
 	}
 
@@ -14736,6 +14740,30 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator<(TimeRangeMapp
 
 }
 
+bool OutputModel::OutputGenerator::TimeRangeMapper_Floats::operator<(TimeRangeMapper_Floats const & rhs) const
+{
+
+	// ************************************************************ //
+	// Called by the standard library map functions
+	// ************************************************************ //
+
+	int size_me = (int)sets.size();
+	int size_you = (int)rhs.sets.size();
+	int max_size = std::max(size_me, size_you);
+
+	std::set<std::vector<long double>> test_set = sets;
+	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
+	if (test_set.size() == max_size)
+	{
+		// equal!  Return false
+		// (Even if the rhs set has less elements - that is the whole point of this class)
+		return false;
+	}
+
+	return sets < rhs.sets;
+
+}
+
 bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator<(TimeRangeMapper_Strings const & rhs) const
 {
 
@@ -14768,6 +14796,25 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator==(TimeRangeMap
 	// ************************************************************ //
 
 	std::set<std::vector<std::int64_t>> test_set = sets;
+	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
+	if (sets.size() == test_set.size())
+	{
+		// equal!
+		return true;
+	}
+
+	return sets == rhs.sets;
+
+}
+
+bool OutputModel::OutputGenerator::TimeRangeMapper_Floats::operator==(TimeRangeMapper_Floats const & rhs) const
+{
+
+	// ************************************************************ //
+	// For internal calls only - not called by the standard library
+	// ************************************************************ //
+
+	std::set<std::vector<long double>> test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
 	if (sets.size() == test_set.size())
 	{
@@ -14817,6 +14864,25 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator==(std::set<std
 
 }
 
+bool OutputModel::OutputGenerator::TimeRangeMapper_Floats::operator==(std::set<std::vector<long double>> const & rhs) const
+{
+
+	// ************************************************************ //
+	// For internal calls only - not called by the standard library
+	// ************************************************************ //
+
+	std::set<std::vector<long double>> test_set = sets;
+	test_set.insert(rhs.cbegin(), rhs.cend());
+	if (sets.size() == test_set.size())
+	{
+		// equal!
+		return true;
+	}
+
+	return sets == rhs;
+
+}
+
 bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator==(std::set<std::vector<std::string>> const & rhs) const
 {
 
@@ -14842,6 +14908,12 @@ OutputModel::OutputGenerator::TimeRangeMapper_Ints::TimeRangeMapper_Ints(std::se
 
 }
 
+OutputModel::OutputGenerator::TimeRangeMapper_Floats::TimeRangeMapper_Floats(std::set<std::vector<long double>> const & rhs)
+	: sets(rhs)
+{
+
+}
+
 OutputModel::OutputGenerator::TimeRangeMapper_Strings::TimeRangeMapper_Strings(std::set<std::vector<std::string>> const & rhs)
 	: sets(rhs)
 {
@@ -14849,6 +14921,12 @@ OutputModel::OutputGenerator::TimeRangeMapper_Strings::TimeRangeMapper_Strings(s
 }
 
 OutputModel::OutputGenerator::TimeRangeMapper_Ints::TimeRangeMapper_Ints(TimeRangeMapper_Ints const & rhs)
+	: sets(rhs.sets)
+{
+
+}
+
+OutputModel::OutputGenerator::TimeRangeMapper_Floats::TimeRangeMapper_Floats(TimeRangeMapper_Floats const & rhs)
 	: sets(rhs.sets)
 {
 
