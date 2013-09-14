@@ -9842,6 +9842,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		bool include_previous_data = false;
 
 		TimeRangesForIndividualGroup_IntKeys multiplicity_one_time_ranges__intkeys;
+		TimeRangesForIndividualGroup_FloatKeys multiplicity_one_time_ranges__floatkeys;
 		TimeRangesForIndividualGroup_StringKeys multiplicity_one_time_ranges__stringkeys;
 		std::vector<SavedRowData> saved_rows_with_null_in_final_inner_table;
 		
@@ -9969,7 +9970,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					//      non-NULL primary keys in all inner tables but the last)
 					std::sort(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.begin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.end());
 
-					HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__stringkeys, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
+					HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__floatkeys, multiplicity_one_time_ranges__stringkeys, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 
 					if (failed)
 					{
@@ -9986,13 +9987,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 					if (!primary_keys_match_on_multiplicity_1)
 					{
-						EliminateRedundantNullsInFinalInnerTable(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__stringkeys);
+						EliminateRedundantNullsInFinalInnerTable(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__floatkeys, multiplicity_one_time_ranges__stringkeys);
 						if (failed)
 						{
 							return result;
 						}
 						AddRowsToXRTable(saved_rows_with_null_in_final_inner_table, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 						multiplicity_one_time_ranges__intkeys.clear();
+						multiplicity_one_time_ranges__floatkeys.clear();
 						multiplicity_one_time_ranges__stringkeys.clear();
 						saved_rows_with_null_in_final_inner_table.clear();
 						if (failed)
@@ -10109,18 +10111,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 		{
-			HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__stringkeys, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
+			HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__floatkeys, multiplicity_one_time_ranges__stringkeys, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 			if (failed)
 			{
 				return result;
 			}
-			EliminateRedundantNullsInFinalInnerTable(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__stringkeys);
+			EliminateRedundantNullsInFinalInnerTable(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__floatkeys, multiplicity_one_time_ranges__stringkeys);
 			if (failed)
 			{
 				return result;
 			}
 			AddRowsToXRTable(saved_rows_with_null_in_final_inner_table, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 			multiplicity_one_time_ranges__intkeys.clear();
+			multiplicity_one_time_ranges__floatkeys.clear();
 			multiplicity_one_time_ranges__stringkeys.clear();
 			saved_rows_with_null_in_final_inner_table.clear();
 			rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.clear();
@@ -13396,7 +13399,7 @@ void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumn
 
 }
 
-void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys & group_time_ranges__intkeys, TimeRangesForIndividualGroup_StringKeys & group_time_ranges__stringkeys, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, std::vector<SavedRowData> & outgoing_rows_of_data, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category)
+void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys & group_time_ranges__intkeys, TimeRangesForIndividualGroup_FloatKeys & group_time_ranges__floatkeys, TimeRangesForIndividualGroup_StringKeys & group_time_ranges__stringkeys, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, std::vector<SavedRowData> & outgoing_rows_of_data, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category)
 {
 	
 	// All incoming rows match on all primary keys except those from the final inner table.
@@ -13727,7 +13730,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 	std::vector<SavedRowData> saved_complete_rows;
 
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &group_time_ranges__intkeys, &group_time_ranges__stringkeys, &outgoing_rows_of_data, &saved_complete_rows, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys, &outgoing_rows_of_data, &saved_complete_rows, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
 	{
 
 		// Process rows according to time range.
@@ -13757,7 +13760,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// the rows that have data in the final inner table,
 		// because we've already saved the rows that don't (from the above loop).
 
-		std::for_each(outgoing_real_rows.cbegin(), outgoing_real_rows.cend(), [&saved_complete_rows, &group_time_ranges__intkeys, &group_time_ranges__stringkeys](const SavedRowData & test_row)
+		std::for_each(outgoing_real_rows.cbegin(), outgoing_real_rows.cend(), [&saved_complete_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](const SavedRowData & test_row)
 		{
 			if (test_row.indices_of_all_primary_key_columns_in_final_inner_table[0].first != SQLExecutor::NULL_BINDING)
 			{
@@ -13820,7 +13823,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 }
 
-void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys & group_time_ranges__intkeys, TimeRangesForIndividualGroup_StringKeys & group_time_ranges__stringkeys, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another)
+void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(std::vector<SavedRowData> & saved_rows_with_null_in_final_inner_table, TimeRangesForIndividualGroup_IntKeys & group_time_ranges__intkeys, TimeRangesForIndividualGroup_FloatKeys & group_time_ranges__floatkeys, TimeRangesForIndividualGroup_StringKeys & group_time_ranges__stringkeys, std::vector<TimeRangeSorter> const & rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, int const previous_datetime_start_column_index, int const current_datetime_start_column_index, int const previous_datetime_end_column_index, int const current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category, std::vector<SQLExecutor> & sql_strings, sqlite3_stmt *& the_prepared_stmt, std::shared_ptr<bool> & statement_is_prepared, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, ColumnsInTempView & result_columns, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t & datetime_range_start, std::int64_t & datetime_range_end, ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another)
 {
 
 	if (rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.empty())
@@ -13829,7 +13832,7 @@ void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroup
 	}
 
 	std::vector<SavedRowData> outgoing_rows_of_data;
-	Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(saved_rows_with_null_in_final_inner_table, group_time_ranges__intkeys, group_time_ranges__stringkeys, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, outgoing_rows_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category);
+	Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(saved_rows_with_null_in_final_inner_table, group_time_ranges__intkeys, group_time_ranges__floatkeys, group_time_ranges__stringkeys, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, outgoing_rows_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category);
 	AddRowsToXRTable(outgoing_rows_of_data, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 
 }
