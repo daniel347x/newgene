@@ -4,6 +4,8 @@ FieldTypeTraits<FIELD_TYPE_STRING_FIXED>::type const FieldTypeTraits<FIELD_TYPE_
 
 FieldTypeTraits<FIELD_TYPE_STRING_VAR>::type const FieldTypeTraits<FIELD_TYPE_STRING_VAR>::default;
 
+FieldTypeTraits<FIELD_TYPE_FLOAT>::type const FieldTypeTraits<FIELD_TYPE_FLOAT>::default = 0.0;
+
 FieldTypeTraits<FIELD_TYPE_UUID>::type const FieldTypeTraits<FIELD_TYPE_UUID>::default;
 
 FieldTypeTraits<FIELD_TYPE_UUID_FOREIGN>::type const FieldTypeTraits<FIELD_TYPE_UUID_FOREIGN>::default;

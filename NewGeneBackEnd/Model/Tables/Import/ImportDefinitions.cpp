@@ -39,8 +39,93 @@ ImportDefinition ImportDefinitions::CreateImportDefinition(std::string const & v
 		new_definition = Development__CreateImportDefinition_MidNames();
 		definitions.push_back(new_definition);
 	}
+	else if (boost::iequals(vg_code, "VG_CTY_CINC"))
+	{
+		new_definition = Development__CreateImportDefinition_CINC();
+		definitions.push_back(new_definition);
+	}
 
 	return new_definition;
+
+}
+
+ImportDefinition Development__CreateImportDefinition_CINC()
+{
+
+	ImportDefinition import_definition__cinc;
+
+	import_definition__cinc.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
+	import_definition__cinc.input_file = "L:\\daniel347x\\__DanExtras\\NewGene\\NEWGENEDATA\\NMC_v4_0.csv";
+	import_definition__cinc.first_row_is_header_row = true;
+	import_definition__cinc.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
+
+	Schema schema_input;
+	Schema schema_output;
+
+	SchemaVector input_schema_vector;
+	SchemaVector output_schema_vector;
+
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "stateabb"));
+	input_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "ccode"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "year"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "irst"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "milex"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "milper"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "pec"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "tpop"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "upop"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_FLOAT, "cinc"));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "version"));
+
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "stateabb", true));
+	output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "ccode", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "year", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "irst", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "milex", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "milper", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "pec", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "tpop", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "upop", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_FLOAT, "cinc", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_START", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_END", true));
+
+	ImportDefinition::ImportMappings mappings;
+
+	// Time-range mapping
+	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
+	FieldTypeEntries input_file_fields;
+	FieldTypeEntries output_table_fields;
+	FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "year"), FIELD_TYPE_INT32);
+	input_file_fields.push_back(input_time_field__Year);
+	FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
+	FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+	output_table_fields.push_back(output_time_field__YearStart);
+	output_table_fields.push_back(output_time_field__YearEnd);
+	time_range_mapping->input_file_fields = input_file_fields;
+	time_range_mapping->output_table_fields = output_table_fields;
+	mappings.push_back(time_range_mapping);
+
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "stateabb"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "stateabb"), FIELD_TYPE_STRING_FIXED)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "ccode"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "ccode"), FIELD_TYPE_STRING_FIXED)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "year"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "year"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "irst"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "irst"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "milex"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "milex"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "milper"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "milper"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "pec"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "pec"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "tpop"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "tpop"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "upop"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "upop"), FIELD_TYPE_INT32)));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "cinc"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "cinc"), FIELD_TYPE_INT32)));
+
+	schema_input.schema = input_schema_vector;
+	schema_output.schema = output_schema_vector;
+
+	import_definition__cinc.input_schema = schema_input;
+	import_definition__cinc.output_schema = schema_output;
+
+	import_definition__cinc.mappings = mappings;
+
+	return import_definition__cinc;
 
 }
 
@@ -282,6 +367,7 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 
 	ImportDefinition::ImportMappings mappings;
 
+	// Not the first block, because the day/month/year fields for Maoz data are the same for every row regardless of year
 	if (false)
 	{
 		// Time-range mapping

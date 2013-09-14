@@ -318,6 +318,12 @@ void Importer::InitializeFields()
 					fields.push_back(field);
 				}
 				break;
+			case FIELD_TYPE_FLOAT:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_FLOAT>> field = std::make_shared<Field<FIELD_TYPE_FLOAT>>(field_name);
+					fields.push_back(field);
+				}
+				break;
 			case FIELD_TYPE_TIMESTAMP:
 				{
 					std::shared_ptr<Field<FIELD_TYPE_TIMESTAMP>> field = std::make_shared<Field<FIELD_TYPE_TIMESTAMP>>(field_name);
@@ -423,6 +429,12 @@ void Importer::InitializeFields()
 			case FIELD_TYPE_STRING_VAR:
 				{
 					std::shared_ptr<Field<FIELD_TYPE_STRING_VAR>> field = std::make_shared<Field<FIELD_TYPE_STRING_VAR>>(field_name);
+					fields.push_back(field);
+				}
+				break;
+			case FIELD_TYPE_FLOAT:
+				{
+					std::shared_ptr<Field<FIELD_TYPE_FLOAT>> field = std::make_shared<Field<FIELD_TYPE_FLOAT>>(field_name);
 					fields.push_back(field);
 				}
 				break;
@@ -977,6 +989,15 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 						data_entry.SetValue(parsed_line_ptr);
 					}
 					break;
+				case FIELD_TYPE_FLOAT:
+					{
+						Field<FIELD_TYPE_FLOAT> & data_entry = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(theField);
+						float temp;
+						sscanf(current_line_ptr, "%f%n", &temp, &number_chars_read);
+						data_entry.GetValueReference() = temp;
+						current_line_ptr += number_chars_read;
+					}
+					break;
 				case FIELD_TYPE_TIMESTAMP:
 					{
 						Field<FIELD_TYPE_TIMESTAMP> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(theField);
@@ -1193,6 +1214,13 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 									{
 										Field<FIELD_TYPE_STRING_VAR> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_input_field);
 										Field<FIELD_TYPE_STRING_VAR> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_output_field);
+										data_entry_output.SetValue(data_entry_input.GetValueReference());
+									}
+									break;
+								case FIELD_TYPE_FLOAT:
+									{
+										Field<FIELD_TYPE_FLOAT> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(*the_input_field);
+										Field<FIELD_TYPE_FLOAT> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(*the_output_field);
 										data_entry_output.SetValue(data_entry_input.GetValueReference());
 									}
 									break;

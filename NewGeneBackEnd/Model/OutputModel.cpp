@@ -449,7 +449,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 
 			std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 
-			boost::format msg_2("Multiplicity %2% - Splitting rows on time boundaries, and removing redundant NULL rows, for child group \"%1%\": %3% rows");
+			boost::format msg_2("Multiplicity %2% - Splitting rows on time boundaries for child group \"%1%\": %3% rows");
 			msg_2 % (child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand
 				: child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 				% current_multiplicity % number_of_rows;

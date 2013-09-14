@@ -90,6 +90,11 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string code, Import
 						sql_create += "INTEGER";
 					}
 					break;
+				case FIELD_TYPE_FLOAT:
+					{
+						sql_create += "REAL";
+					}
+					break;
 				}
 			});
 
@@ -204,6 +209,12 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 			case FIELD_TYPE_UINT64:
 				{
 					Field<FIELD_TYPE_UINT64> const & field = static_cast<Field<FIELD_TYPE_UINT64> const & >(*field_data);
+					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+				}
+				break;
+			case FIELD_TYPE_FLOAT:
+				{
+					Field<FIELD_TYPE_FLOAT> const & field = static_cast<Field<FIELD_TYPE_FLOAT> const & >(*field_data);
 					sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
 				}
 				break;

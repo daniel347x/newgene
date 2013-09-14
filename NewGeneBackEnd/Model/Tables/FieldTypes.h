@@ -17,6 +17,8 @@ enum FIELD_TYPE
 	, FIELD_TYPE_STRING_FIXED
 	, FIELD_TYPE_STRING_VAR
 
+	, FIELD_TYPE_FLOAT
+
 	// Special - typically for internal NewGene use, and not available in the user interface directly,
 	// but only as translated from user interface options such as "primary key" being selected for a column
 	, FIELD_TYPE_TIMESTAMP
@@ -81,6 +83,13 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_STRING_VAR>
 {
 	typedef std::string type;
+	static type const default;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_FLOAT>
+{
+	typedef long double type;
 	static type const default;
 };
 
