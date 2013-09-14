@@ -2294,6 +2294,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 {
 	current_parameter_strings.clear();
 	current_parameter_ints.clear();
+	current_parameter_floats.clear();
 	current_parameter_which_binding_to_use.clear();
 	datetime_start = 0;
 	datetime_end = 0;
@@ -2370,12 +2371,13 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 	int column_data_type = 0;
 	std::int64_t data_int64 = 0;
+	long double data_float = 0.0;
 	std::string data_string;
 	long double data_long = 0.0;
 	current_column = 0;
 	reached_first_dates = false;
 	on_other_side_of_first_dates = false;
-	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &column_index_of_start_of_final_inner_table, &sorted_result_columns, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
+	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &column_index_of_start_of_final_inner_table, &sorted_result_columns, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_float, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 
 		inner_table_number.push_back(possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
@@ -2607,13 +2609,48 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 			case SQLITE_FLOAT:
 				{
-					// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
-					data_long = sqlite3_column_double(stmt_result, current_column);
-					// Todo: Error message
-					boost::format msg("Floating point values are not yet supported.");
-					error_message = msg.str();
-					failed = true;
-					return; // from lambda
+
+					data_float = sqlite3_column_double(stmt_result, current_column);
+					current_parameter_floats.push_back(data_int64);
+					current_parameter_which_binding_to_use.push_back(SQLExecutor::FLOAT);
+
+					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)current_parameter_floats.size()-1, current_column)));
+
+					if (is_index_in_all_but_final_inner_table[current_column])
+					{
+						indices_of_all_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)current_parameter_floats.size()-1, current_column)));
+					}
+
+					if (is_index_in_final_inner_table[current_column])
+					{
+						indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)current_parameter_floats.size()-1, current_column)));
+					}
+
+					if (is_index_a_primary_key_in_not_the_final_inner_table[current_column])
+					{
+						indices_of_all_primary_key_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)current_parameter_floats.size()-1, current_column)));
+					}
+
+					if (is_index_a_primary_key_in_the_final_inner_table[current_column])
+					{
+						indices_of_all_primary_key_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)current_parameter_floats.size()-1, current_column)));
+					}
+
+					if (is_index_a_primary_key[current_column])
+					{
+						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)current_parameter_floats.size()-1, current_column)));
+					}
+
+					if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_column])
+					{
+						indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT, std::make_pair((int)current_parameter_floats.size()-1, current_column)));
+					}
+
+					if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_column])
+					{
+						indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::FLOAT, std::make_pair((int)current_parameter_floats.size()-1, current_column)));
+					}
+
 				}
 				break;
 
@@ -3072,23 +3109,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				bound_parameter_strings.clear();
 				bound_parameter_which_binding_to_use.clear();
 
-				if (false) // debugging
-				{
-					if (sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.size() == 4)
-					{
-						if (   sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].second.first] == 200
-							&& sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[1].second.first] == 211
-							&& sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[2].second.first] == 255
-							&& sorting_row_of_data.current_parameter_ints[sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[3].second.first] == 315
-							)
-						{
-							int m = 0;
-						}
-					}
-				}
-
-
-
 				int previous_datetime_start_column_index = -1;
 				int previous_datetime_end_column_index = -1;
 				int current_datetime_start_column_index = -1;
@@ -3412,8 +3432,10 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	SavedRowData merged_data_row;
 
 	int int_index_current = 0;
+	int float_index_current = 0;
 	int string_index_current = 0;
 	int int_index_previous = 0;
+	int float_index_previous = 0;
 	int string_index_previous = 0;
 
 	merged_data_row.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one;
@@ -3429,9 +3451,11 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 	std::set<std::vector<std::string>> saved_strings_vector;
 	std::set<std::vector<std::int64_t>> saved_ints_vector;
+	std::set<std::vector<long double>> saved_floats_vector;
 
 	std::vector<std::string> inner_multiplicity_string_vector;
 	std::vector<std::int64_t> inner_multiplicity_int_vector;
+	std::vector<long double> inner_multiplicity_float_vector;
 
 	int inner_multiplicity_current_index = 0;
 	int inner_multiplicity_previous_index = 0;
@@ -3464,9 +3488,11 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 	std::map<std::vector<std::int64_t>, int> current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number;
 	std::map<std::vector<std::int64_t>, int> previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number;
+	std::map<std::vector<std::int64_t>, int> current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number;
+	std::map<std::vector<std::int64_t>, int> previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number;
 	std::map<std::vector<std::string>, int> current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number;
 	std::map<std::vector<std::string>, int> previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number;
-	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &inner_multiplicity_current_index, &saved_strings_vector, &saved_ints_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &current_row_of_data, &int_index_current, &string_index_current, &current_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_current_index, &saved_strings_vector, &saved_ints_vector, &saved_floats_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector, &current_row_of_data, &int_index_current, &float_index_current, &string_index_current, &current_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
 	{
 
 		if (current_binding == SQLExecutor::NULL_BINDING)
@@ -3491,6 +3517,16 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 				}
 				break;
+			case SQLExecutor::FLOAT
+				{
+
+					if (current_row_of_data.is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_index])
+					{
+						inner_multiplicity_float_vector.push_back(current_row_of_data.current_parameter_floats[float_index_current]);
+					}
+
+			}
+				break;
 			case SQLExecutor::STRING:
 				{
 
@@ -3509,6 +3545,11 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			case SQLExecutor::INT64:
 				{
 					++int_index_current;
+				}
+				break;
+			case SQLExecutor::FLOAT:
+				{
+					++float_index_current;
 				}
 				break;
 			case SQLExecutor::STRING:
@@ -3541,19 +3582,29 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 				current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number[inner_multiplicity_int_vector] = current_row_of_data.inner_table_number[current_index-1];
 			}
 
+			if (!inner_multiplicity_float_vector.empty())
+			{
+				saved_floats_vector.insert(inner_multiplicity_float_vector);
+				current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number[inner_multiplicity_float_vector] = current_row_of_data.inner_table_number[current_index-1];
+			}
+
 			inner_multiplicity_string_vector.clear();
 			inner_multiplicity_int_vector.clear();
+			inner_multiplicity_float_vector.clear();
 		}
 
 	});
 
 	int_index_current = 0;
+	float_index_current = 0;
 	string_index_current = 0;
 	int_index_previous = 0;
+	float_index_previous = 0;
 	string_index_previous = 0;
 
 	inner_multiplicity_string_vector.clear();
 	inner_multiplicity_int_vector.clear();
+	inner_multiplicity_float_vector.clear();
 
 	inner_multiplicity_current_index = 0;
 	inner_multiplicity_previous_index = 0;
@@ -3561,7 +3612,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	current_index = 0;
 	previous_index = 0;
 
-	std::for_each(previous_row_of_data.current_parameter_which_binding_to_use.cbegin(), previous_row_of_data.current_parameter_which_binding_to_use.cend(), [&previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &inner_multiplicity_previous_index, &saved_strings_vector, &saved_ints_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &previous_row_of_data, &int_index_previous, &string_index_previous, &previous_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & previous_binding)
+	std::for_each(previous_row_of_data.current_parameter_which_binding_to_use.cbegin(), previous_row_of_data.current_parameter_which_binding_to_use.cend(), [&previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &inner_multiplicity_previous_index, &saved_strings_vector, &saved_ints_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector, &previous_row_of_data, &int_index_previous, &float_index_previous, &string_index_previous, &previous_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & previous_binding)
 	{
 
 		if (previous_binding == SQLExecutor::NULL_BINDING)
@@ -3586,6 +3637,16 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 					}
 					break;
+				case SQLExecutor::FLOAT:
+					{
+
+						if (previous_row_of_data.is_index_a_primary_key_with_outer_multiplicity_greater_than_1[previous_index])
+						{
+							inner_multiplicity_float_vector.push_back(previous_row_of_data.current_parameter_floats[float_index_previous]);
+						}
+
+					}
+					break;
 				case SQLExecutor::STRING:
 					{
 
@@ -3604,6 +3665,11 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			case SQLExecutor::INT64:
 				{
 					++int_index_previous;
+				}
+				break;
+			case SQLExecutor::FLOAT:
+				{
+					++float_index_previous;
 				}
 				break;
 			case SQLExecutor::STRING:
@@ -3636,15 +3702,24 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 				previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number[inner_multiplicity_int_vector] = previous_row_of_data.inner_table_number[previous_index-1];
 			}
 
+			if (!inner_multiplicity_float_vector.empty())
+			{
+				saved_floats_vector.insert(inner_multiplicity_float_vector);
+				previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number[inner_multiplicity_float_vector] = previous_row_of_data.inner_table_number[previous_index-1];
+			}
+
 			inner_multiplicity_string_vector.clear();
 			inner_multiplicity_int_vector.clear();
+			inner_multiplicity_float_vector.clear();
 		}
 
 	});
 
 	int_index_current = 0;
+	float_index_current = 0;
 	string_index_current = 0;
 	int_index_previous = 0;
+	float_index_previous = 0;
 	string_index_previous = 0;
 
 
@@ -3660,67 +3735,44 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 		use_ints = true;
 	}
 
-	if (use_strings && use_ints)
+	bool use_floats = false;
+	if (!saved_floats_vector.empty())
 	{
-		boost::format msg("Primary keys within the same DMU category are of different types - integer and string.");
+		use_floats = true;
+	}
+
+	int count_of_types = 0;
+	if (use_strings)
+	{
+		++count_of_types;
+	}
+	if (use_ints)
+	{
+		++count_of_types;
+	}
+	if (use_floats)
+	{
+		++count_of_types;
+	}
+
+	if (count_of_types != 1)
+	{
+		boost::format msg("Primary keys within the same DMU category are of different, or of NULL, types.");
 		SetFailureMessage(msg.str());
 		failed = true;
 		return merged_data_row;
 	}
 
-
 	inner_multiplicity_current_index = 0;
 	current_index = 0;
-
 	
 	std::deque<std::vector<std::string>> saved_strings_deque;
 	std::deque<std::vector<std::int64_t>> saved_ints_deque;
-
+	std::deque<std::vector<long double>> saved_floats_deque;
 
 	saved_strings_deque.insert(saved_strings_deque.begin(), saved_strings_vector.begin(), saved_strings_vector.end());
 	saved_ints_deque.insert(saved_ints_deque.begin(), saved_ints_vector.begin(), saved_ints_vector.end());
-
-
-	// debugging individual cases
-	bool debugging = false;
-	if (debugging)
-	{
-		if (saved_ints_deque.size() == 3)
-		{
-			std::vector<std::int64_t> country1vec;
-			std::vector<std::int64_t> country2vec;
-			std::vector<std::int64_t> country3vec;
-			int index = 0;
-			std::for_each(saved_ints_deque.cbegin(), saved_ints_deque.cend(), [&index, &country1vec, &country2vec, &country3vec](std::vector<std::int64_t> const & vec)
-			{
-				switch(index)
-				{
-				case 0:
-					country1vec = vec;
-					break;
-				case 1:
-					country2vec = vec;
-					break;
-				case 2:
-					country3vec = vec;
-					break;
-				}
-				++index;
-			});
-
-			if (country1vec.size() == 1 && country2vec.size() == 1 && country3vec.size() == 1)
-			{
-				//int country_1 = country1vec[0];
-				//int country_2 = country2vec[0];
-				//int country_3 = country3vec[0];
-				//if (country_1 == 200 && country_2 == 220 && country_3 == 315)
-				//{
-				//	bool break_ = true;
-				//}
-			}
-		}
-	}
-
+	saved_floats_deque.insert(saved_floats_deque.begin(), saved_floats_vector.begin(), saved_floats_vector.end());
 
 	int most_recent_current_offset = -1;
 	int most_recent_previous_offset = -1;
@@ -3731,7 +3783,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	int current_row_inner_table_data_to_use = -1;
 	int previous_row_inner_table_data_to_use = -1;
 
-	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [this, &current_row_inner_table_data_to_use, &previous_row_inner_table_data_to_use, &current__current_inner_table, &previous__current_inner_table, &most_recent_current_offset, &most_recent_previous_offset, &xr_table_category, &current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &inner_multiplicity_int_vector, &inner_multiplicity_string_vector, &use_strings, &use_ints, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &current_row_of_data, &int_index_current, &string_index_current, &int_index_previous, &string_index_previous, &current_index, &previous_row_of_data, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [this, &current_row_inner_table_data_to_use, &previous_row_inner_table_data_to_use, &current__current_inner_table, &previous__current_inner_table, &most_recent_current_offset, &most_recent_previous_offset, &xr_table_category, &current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector,  &inner_multiplicity_string_vector, &use_strings, &use_ints, &use_floats, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &saved_floats_deque, &current_row_of_data, &int_index_current, &float_index_current, &string_index_current, &int_index_previous, &float_index_previous, &string_index_previous, &current_index, &previous_row_of_data, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
 	{
 
 		if (failed)
@@ -3750,6 +3802,17 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 					if (current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.find(inner_multiplicity_int_vector) != current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.cend())
 					{
 						current_row_inner_table_data_to_use = current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number[inner_multiplicity_int_vector];
+					}
+				}
+			}
+			if (use_floats)
+			{
+				if (!saved_floats_deque.empty())
+				{
+					inner_multiplicity_float_vector = saved_floats_deque.front();
+					if (current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number.find(inner_multiplicity_float_vector) != current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number.cend())
+					{
+						current_row_inner_table_data_to_use = current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number[inner_multiplicity_float_vector];
 					}
 				}
 			}
@@ -3777,6 +3840,17 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 					if (previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.find(inner_multiplicity_int_vector) != previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number.cend())
 					{
 						previous_row_inner_table_data_to_use = previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number[inner_multiplicity_int_vector];
+					}
+				}
+			}
+			if (use_floats)
+			{
+				if (!saved_floats_deque.empty())
+				{
+					inner_multiplicity_float_vector = saved_floats_deque.front();
+					if (previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number.find(inner_multiplicity_float_vector) != previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number.cend())
+					{
+						previous_row_inner_table_data_to_use = previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number[inner_multiplicity_float_vector];
 					}
 				}
 			}
@@ -3886,6 +3960,66 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 					if (merged_data_row.is_index_a_primary_key_in_not_the_final_inner_table[current_index])
 					{
 						merged_data_row.indices_of_all_primary_key_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)merged_data_row.current_parameter_ints.size()-1, current_index)));
+					}
+
+				}
+				else
+				{
+
+					// No more.  Add a NULL group
+					merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::NULL_BINDING);
+
+					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, current_index)));
+					merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, current_index)));
+					merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, current_index)));
+					if (merged_data_row.is_index_in_final_inner_table[current_index])
+					{
+						merged_data_row.indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, current_index)));
+					}
+					if (merged_data_row.is_index_in_all_but_final_inner_table[current_index])
+					{
+						merged_data_row.indices_of_all_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, current_index)));
+					}
+					if (merged_data_row.is_index_a_primary_key_in_the_final_inner_table[current_index])
+					{
+						merged_data_row.indices_of_all_primary_key_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, current_index)));
+					}
+					if (merged_data_row.is_index_a_primary_key_in_not_the_final_inner_table[current_index])
+					{
+						merged_data_row.indices_of_all_primary_key_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, current_index)));
+					}
+
+				}
+
+			}
+			else if (use_floats)
+			{
+
+				if (!saved_floats_deque.empty())
+				{
+
+					std::vector<long double> & the_floats = saved_floats_deque.front();
+					merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::FLOAT);
+					merged_data_row.current_parameter_floats.push_back(the_floats[inner_multiplicity_current_index]);
+
+					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+					merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+					merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+					if (merged_data_row.is_index_in_final_inner_table[current_index])
+					{
+						merged_data_row.indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+					}
+					if (merged_data_row.is_index_in_all_but_final_inner_table[current_index])
+					{
+						merged_data_row.indices_of_all_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+					}
+					if (merged_data_row.is_index_a_primary_key_in_the_final_inner_table[current_index])
+					{
+						merged_data_row.indices_of_all_primary_key_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+					}
+					if (merged_data_row.is_index_a_primary_key_in_not_the_final_inner_table[current_index])
+					{
+						merged_data_row.indices_of_all_primary_key_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
 					}
 
 				}
@@ -4159,6 +4293,60 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 							}
 							break;
+						case SQLExecutor::FLOAT:
+							{
+
+								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::FLOAT);
+
+								if (current_index + current_inner_table_index_offset < (int)current_row_of_data.indices_of_all_columns.size())
+								{
+									merged_data_row.current_parameter_floats.push_back(current_row_of_data.current_parameter_floats[current_row_of_data.indices_of_all_columns[current_index + current_inner_table_index_offset].second.first]);
+								}
+								else
+								{
+									// otherwise, the not-yet-appended datetime columns, which will be added and written to later - this data does not need to be correct
+									merged_data_row.current_parameter_floats.push_back(current_row_of_data.current_parameter_floats[current_row_of_data.indices_of_all_columns[current_index].second.first]);
+								}
+
+								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+
+								if (current_row_of_data.is_index_a_primary_key[current_index])
+								{
+									merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (current_row_of_data.is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_index])
+								{
+									merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (current_row_of_data.is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_index])
+								{
+									merged_data_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (merged_data_row.is_index_in_final_inner_table[current_index])
+								{
+									merged_data_row.indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (merged_data_row.is_index_in_all_but_final_inner_table[current_index])
+								{
+									merged_data_row.indices_of_all_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (merged_data_row.is_index_a_primary_key_in_not_the_final_inner_table[current_index])
+								{
+									merged_data_row.indices_of_all_primary_key_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (merged_data_row.is_index_a_primary_key_in_the_final_inner_table[current_index])
+								{
+									merged_data_row.indices_of_all_primary_key_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+							}
+							break;
 						case SQLExecutor::STRING:
 							{
 
@@ -4273,6 +4461,60 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 							}
 							break;
+						case SQLExecutor::FLOAT:
+							{
+
+								merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::FLOAT);
+
+								if (current_index + previous_inner_table_index_offset < (int)previous_row_of_data.indices_of_all_columns.size())
+								{
+									merged_data_row.current_parameter_floats.push_back(previous_row_of_data.current_parameter_floats[previous_row_of_data.indices_of_all_columns[current_index + previous_inner_table_index_offset].second.first]);
+								}
+								else
+								{
+									// otherwise, the not-yet-appended datetime columns, which will be added and written to later - this data does not need to be correct
+									merged_data_row.current_parameter_floats.push_back(previous_row_of_data.current_parameter_floats[previous_row_of_data.indices_of_all_columns[current_index].second.first]);
+								}
+
+								merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+
+								if (previous_row_of_data.is_index_a_primary_key[current_index])
+								{
+									merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (previous_row_of_data.is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_index])
+								{
+									merged_data_row.indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (previous_row_of_data.is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_index])
+								{
+									merged_data_row.indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (merged_data_row.is_index_in_final_inner_table[current_index])
+								{
+									merged_data_row.indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (merged_data_row.is_index_in_all_but_final_inner_table[current_index])
+								{
+									merged_data_row.indices_of_all_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (merged_data_row.is_index_a_primary_key_in_not_the_final_inner_table[current_index])
+								{
+									merged_data_row.indices_of_all_primary_key_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+								if (merged_data_row.is_index_a_primary_key_in_the_final_inner_table[current_index])
+								{
+									merged_data_row.indices_of_all_primary_key_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size()-1, current_index)));
+								}
+
+							}
+							break;
 						case SQLExecutor::STRING:
 							{
 
@@ -4341,6 +4583,11 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 					++int_index_current;
 				}
 				break;
+			case SQLExecutor::FLOAT:
+				{
+					++float_index_current;
+				}
+				break;
 			case SQLExecutor::STRING:
 				{
 					++string_index_current;
@@ -4353,6 +4600,11 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			case SQLExecutor::INT64:
 				{
 					++int_index_previous;
+				}
+				break;
+			case SQLExecutor::FLOAT:
+				{
+					++float_index_previous;
 				}
 				break;
 			case SQLExecutor::STRING:
@@ -4374,6 +4626,13 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 				if (!saved_ints_deque.empty())
 				{
 					saved_ints_deque.pop_front();
+				}
+			}
+			if (use_floats)
+			{
+				if (!saved_floats_deque.empty())
+				{
+					saved_floats_deque.pop_front();
 				}
 			}
 			if (use_strings)
@@ -4428,12 +4687,14 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 		SQLExecutor::WHICH_BINDING binding_current = current_info.first;
 		int index_current__data_vectors = current_info.second.first;
 		std::int64_t data_int_current = 0;
+		long double data_float_current = 0.0;
 		std::string data_string_current;
 		bool data_null_current = false;
 
 		SQLExecutor::WHICH_BINDING binding_previous = previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1[entry_number].first;
 		int index_previous__data_vectors = previous_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1[entry_number].second.first;
 		std::int64_t data_int_previous = 0;
+		long double data_float_previous = 0.0;
 		std::string data_string_previous;
 
 		switch (binding_current)
@@ -4455,10 +4716,63 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 								}
 							}
 							break;
+						case SQLExecutor::FLOAT:
+							{
+								data_float_previous = previous_row_of_data.current_parameter_floats[index_previous__data_vectors];
+								if (boost::lexical_cast<long double>(data_int_current) != data_float_previous)
+								{
+									match_failed = true;
+								}
+							}
+							break;
 						case SQLExecutor::STRING:
 							{
 								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors];
-								if (boost::lexical_cast<std::int64_t>(data_string_previous) != data_int_current)
+								if (data_int_current != boost::lexical_cast<std::int64_t>(data_string_previous))
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::NULL_BINDING:
+							{
+								// NULLs match against non-NULLs
+							}
+							break;
+					}
+
+				}
+				break;
+
+			case SQLExecutor::FLOAT:
+				{
+
+					data_float_current = current_row_of_data.current_parameter_floats[index_current__data_vectors];
+
+					switch (binding_previous)
+					{
+						case SQLExecutor::INT64:
+							{
+								data_int_previous = previous_row_of_data.current_parameter_ints[index_previous__data_vectors];
+								if (data_float_current != boost::lexical_cast<long double>(data_int_previous))
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::FLOAT:
+							{
+								data_float_previous = previous_row_of_data.current_parameter_floats[index_previous__data_vectors];
+								if (data_float_current != data_float_previous)
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::STRING:
+							{
+								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors];
+								if (data_float_current != boost::lexical_cast<long double>(data_string_previous))
 								{
 									match_failed = true;
 								}
@@ -4485,6 +4799,15 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 							{
 								data_int_previous = previous_row_of_data.current_parameter_ints[index_previous__data_vectors];
 								if (boost::lexical_cast<std::int64_t>(data_string_current) != data_int_previous)
+								{
+									match_failed = true;
+								}
+							}
+							break;
+						case SQLExecutor::FLOAT:
+							{
+								data_float_previous = previous_row_of_data.current_parameter_floats[index_previous__data_vectors];
+								if (boost::lexical_cast<long double>(data_string_current) != data_float_previous)
 								{
 									match_failed = true;
 								}
@@ -4517,6 +4840,11 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 					switch (binding_previous)
 					{
 						case SQLExecutor::INT64:
+							{
+								// NULLs match against non-NULLs
+							}
+							break;
+						case SQLExecutor::FLOAT:
 							{
 								// NULLs match against non-NULLs
 							}
@@ -4581,6 +4909,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			SQLExecutor::WHICH_BINDING binding = current_info.first;
 			int index_in_data_vectors = current_info.second.first;
 			std::int64_t data_int = 0;
+			long double data_float = 0.0;
 			std::string data_string;
 			bool data_null = false;
 
@@ -4591,6 +4920,13 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 					{
 						data_int = current_row_of_data.current_parameter_ints[index_in_data_vectors];
 						inner_multiplicity_int_vector.push_back(data_int);
+					}
+					break;
+
+				case SQLExecutor::FLOAT:
+					{
+						data_float = current_row_of_data.current_parameter_floats[index_in_data_vectors];
+						inner_multiplicity_float_vector.push_back(data_float);
 					}
 					break;
 
@@ -4706,6 +5042,13 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 					{
 						data_int = previous_row_of_data.current_parameter_ints[index_in_data_vectors];
 						inner_multiplicity_int_vector.push_back(data_int);
+					}
+					break;
+
+				case SQLExecutor::FLOAT:
+					{
+						data_float = previous_row_of_data.current_parameter_floats[index_in_data_vectors];
+						inner_multiplicity_float_vector.push_back(data_float);
 					}
 					break;
 
@@ -5165,6 +5508,15 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 						++int_index;
 						bound_parameter_ints.push_back(data_int64);
 						bound_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+					}
+					break;
+
+				case SQLExecutor::FLOAT:
+					{
+						data_float = row_of_data.current_parameter_floats[int_index];
+						++float_index;
+						bound_parameter_floats.push_back(data_float);
+						bound_parameter_which_binding_to_use.push_back(SQLExecutor::FLOAT);
 					}
 					break;
 
@@ -7137,21 +7489,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_row_of_data, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView const & previous_x_or_mergedfinalplusnewfinal_columns, ColumnsInTempView & current_xr_or_completemerge_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category, bool const sort_only, bool const no_new_column_names)
 {
-
-	if (false) // debugging
-	{
-		if (current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.size() == 4)
-		{
-			if (current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].second.first] == 200
-				&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[1].second.first] == 211
-				&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[2].second.first] == 255
-				&& current_row_of_data.current_parameter_ints[current_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1[3].second.first] == 315
-				)
-			{
-				int m = 0;
-			}
-		}
-	}
 
 	// ********************************************************************************** //
 	//

@@ -322,6 +322,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							, NULL_BINDING
 							, STRING
 							, INT64
+							, FLOAT
 						};
 
 						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_);
