@@ -6266,8 +6266,9 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 
 		int current_string_index = 0;
 		int current_int64_index = 0;
+		int current_float_index = 0;
 		int current_index = 1;
-		std::for_each(bound_parameter_which_binding_to_use.cbegin(), bound_parameter_which_binding_to_use.cend(), [this, &current_string_index, &current_int64_index, &current_index](WHICH_BINDING const & which_binding)
+		std::for_each(bound_parameter_which_binding_to_use.cbegin(), bound_parameter_which_binding_to_use.cend(), [this, &current_string_index, &current_int64_index, &current_float_index, &current_index](WHICH_BINDING const & which_binding)
 		{
 			switch (which_binding)
 			{
@@ -6286,6 +6287,15 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 						std::int64_t the_int64 = this->bound_parameter_ints[current_int64_index];
 						sqlite3_bind_int64(this->stmt, current_index, the_int64);
 						++current_int64_index;
+						++current_index;
+					}
+					break;
+
+				case FLOAT:
+					{
+						long double the_float = this->bound_parameter_floats[current_float_index];
+						sqlite3_bind_double(this->stmt, current_index, the_float);
+						++current_float_index;
 						++current_index;
 					}
 					break;
@@ -8366,12 +8376,84 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 													}
 													break;
 
+												case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+													{
+
+														long double test_binding_value_float = new_columns_to_test.floats[test_binding.second];
+
+														if (boost::lexical_cast<long double>(binding_value_int) != test_binding_value_float)
+														{
+															inner_tables_have_different_primary_keys = true;
+														}
+
+													}
+													break;
+
 												case OutputModel::OutputGenerator::SQLExecutor::STRING:
 													{
 
 														std::string test_binding_value_string = new_columns_to_test.strings[test_binding.second];
 
 														if (binding_value_int != boost::lexical_cast<std::int64_t>(test_binding_value_string))
+														{
+															inner_tables_have_different_primary_keys = true;
+														}
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+													{
+
+														inner_tables_have_different_primary_keys = true;
+
+													}
+													break;
+
+											}
+										}
+										break;
+
+									case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+										{
+
+											long double binding_value_float = previous_columns.floats[binding.second];
+
+											switch (test_binding.first)
+											{
+
+												case OutputModel::OutputGenerator::SQLExecutor::INT64:
+													{
+
+														std::int64_t test_binding_value_int = new_columns_to_test.ints[test_binding.second];
+
+														if (binding_value_float != boost::lexical_cast<long double>(test_binding_value_int))
+														{
+															inner_tables_have_different_primary_keys = true;
+														}
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+													{
+
+														long double test_binding_value_float = new_columns_to_test.floats[test_binding.second];
+
+														if (binding_value_float != test_binding_value_float)
+														{
+															inner_tables_have_different_primary_keys = true;
+														}
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::STRING:
+													{
+
+														std::string test_binding_value_string = new_columns_to_test.strings[test_binding.second];
+
+														if (binding_value_float != boost::lexical_cast<long double>(test_binding_value_string))
 														{
 															inner_tables_have_different_primary_keys = true;
 														}
@@ -8405,6 +8487,19 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 														std::int64_t test_binding_value_int = new_columns_to_test.ints[test_binding.second];
 
 														if (boost::lexical_cast<std::int64_t>(binding_value_string) != test_binding_value_int)
+														{
+															inner_tables_have_different_primary_keys = true;
+														}
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+													{
+
+														long double test_binding_value_float = new_columns_to_test.floats[test_binding.second];
+
+														if (boost::lexical_cast<long double>(binding_value_string) != test_binding_value_float)
 														{
 															inner_tables_have_different_primary_keys = true;
 														}
@@ -8446,6 +8541,14 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 											{
 
 												case OutputModel::OutputGenerator::SQLExecutor::INT64:
+													{
+
+														inner_tables_have_different_primary_keys = true;
+
+													}
+													break;
+
+												case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
 													{
 
 														inner_tables_have_different_primary_keys = true;
@@ -8572,6 +8675,12 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 									bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::INT64);
 								}
 								break;
+							case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+								{
+									bound_parameter_floats.push_back(columns_in_single_inner_table.floats[binding_info.second]);
+									bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::FLOAT);
+								}
+								break;
 							case OutputModel::OutputGenerator::SQLExecutor::STRING:
 								{
 									bound_parameter_strings.push_back(columns_in_single_inner_table.strings[binding_info.second]);
@@ -8641,6 +8750,11 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 								case OutputModel::OutputGenerator::SQLExecutor::INT64:
 									{
 										bound_parameter_ints.pop_back();
+									}
+									break;
+								case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+									{
+										bound_parameter_floats.pop_back();
 									}
 									break;
 								case OutputModel::OutputGenerator::SQLExecutor::STRING:
@@ -11393,12 +11507,18 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 		}
 		std::pair<SQLExecutor::WHICH_BINDING, int> rhs_binding = rhs.bindings__primary_keys_with_multiplicity_greater_than_1[index];
 		std::int64_t rhs_value_int = 0;
+		std::int64_t rhs_value_float = 0.0;
 		std::string rhs_value_string;
 		switch (rhs_binding.first)
 		{
 			case OutputModel::OutputGenerator::SQLExecutor::INT64:
 				{
 					rhs_value_int = rhs.ints[rhs_binding.second];
+				}
+				break;
+			case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+				{
+					rhs_value_float = rhs.floats[rhs_binding.second];
 				}
 				break;
 			case OutputModel::OutputGenerator::SQLExecutor::STRING:
@@ -11437,6 +11557,24 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 								}
 							}
 							break;
+						case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+							{
+								if (boost::lexical_cast<long double>(lhs_value_int) < rhs_value_float)
+								{
+									answered = true;
+									is_less_than = true;
+								}
+								else if (boost::lexical_cast<long double>(lhs_value_int) > rhs_value_float)
+								{
+									answered = true;
+									is_less_than = false;
+								}
+								else
+								{
+									is_less_than = false;
+								}
+							}
+							break;
 						case OutputModel::OutputGenerator::SQLExecutor::STRING:
 							{
 								if (lhs_value_int < boost::lexical_cast<std::int64_t>(rhs_value_string))
@@ -11465,6 +11603,75 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 					}
 				}
 				break;
+			case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+				{
+					long double lhs_value_float = floats[lhs_binding.second];
+					switch (rhs_binding.first)
+					{
+					case OutputModel::OutputGenerator::SQLExecutor::INT64:
+						{
+							if (lhs_value_float < boost::lexical_cast<long double>(rhs_value_int))
+							{
+								answered = true;
+								is_less_than = true;
+							}
+							else if (lhs_value_float > boost::lexical_cast<long double>(rhs_value_int))
+							{
+								answered = true;
+								is_less_than = false;
+							}
+							else
+							{
+								is_less_than = false;
+							}
+						}
+						break;
+					case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+						{
+							if (lhs_value_float < rhs_value_float)
+							{
+								answered = true;
+								is_less_than = true;
+							}
+							else if (lhs_value_float > rhs_value_float)
+							{
+								answered = true;
+								is_less_than = false;
+							}
+							else
+							{
+								is_less_than = false;
+							}
+						}
+						break;
+					case OutputModel::OutputGenerator::SQLExecutor::STRING:
+						{
+							if (lhs_value_float < boost::lexical_cast<long double>(rhs_value_string))
+							{
+								answered = true;
+								is_less_than = true;
+							}
+							else if (lhs_value_float > boost::lexical_cast<long double>(rhs_value_string))
+							{
+								answered = true;
+								is_less_than = false;
+							}
+							else
+							{
+								is_less_than = false;
+							}
+						}
+						break;
+					case OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING:
+						{
+							// NULL is greater than anything
+							answered = true;
+							is_less_than = true;
+						}
+						break;
+					}
+				}
+				break;
 			case OutputModel::OutputGenerator::SQLExecutor::STRING:
 				{
 					std::string lhs_value_string = strings[lhs_binding.second];
@@ -11478,6 +11685,24 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 									is_less_than = true;
 								}
 								else if (boost::lexical_cast<std::int64_t>(lhs_value_string) > rhs_value_int)
+								{
+									answered = true;
+									is_less_than = false;
+								}
+								else
+								{
+									is_less_than = false;
+								}
+							}
+							break;
+						case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
+							{
+								if (boost::lexical_cast<long double>(lhs_value_string) < rhs_value_float)
+								{
+									answered = true;
+									is_less_than = true;
+								}
+								else if (boost::lexical_cast<long double>(lhs_value_string) > rhs_value_float)
 								{
 									answered = true;
 									is_less_than = false;
@@ -11521,6 +11746,13 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 					switch (rhs_binding.first)
 					{
 						case OutputModel::OutputGenerator::SQLExecutor::INT64:
+							{
+								// NULL is greater than anything
+								answered = true;
+								is_less_than = false;
+							}
+							break;
+						case OutputModel::OutputGenerator::SQLExecutor::FLOAT:
 							{
 								// NULL is greater than anything
 								answered = true;
