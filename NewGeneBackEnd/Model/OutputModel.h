@@ -107,10 +107,16 @@ class ColumnsInTempView
 					, COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 					, COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
 					, COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+					, COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+					, COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
 					, COLUMN_TYPE__DATETIMESTART_CHILD_MERGE
 					, COLUMN_TYPE__DATETIMEEND_CHILD_MERGE
+					, COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT
+					, COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT
 					, COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT
 					, COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT
+					, COLUMN_TYPE__DATETIMESTART_TEXT
+					, COLUMN_TYPE__DATETIMEEND_TEXT
 				};
 
 				ColumnInTempView()
@@ -466,8 +472,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				enum XR_TABLE_CATEGORY
 				{
 					  PRIMARY_VARIABLE_GROUP
-					, CHILD_VARIABLE_GROUP
 					, FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP
+					, CHILD_VARIABLE_GROUP
+					, KAD_RESULTS
 				};
 
 				class ColumnSorter
@@ -658,7 +665,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool TestPrimaryKeyMatch(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index, PRIMARY_KEY_MATCH_CONDITION const match_condition);
 				bool ProcessCurrentDataRowOverlapWithPreviousSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data, XR_TABLE_CATEGORY const xr_table_category);
 				SavedRowData MergeRows(SavedRowData const & current_row_of_data, SavedRowData const & first_incoming_row, XR_TABLE_CATEGORY const xr_table_category);
-				void WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, XR_TABLE_CATEGORY const xr_table_category, bool const no_new_column_names);
+				void WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, XR_TABLE_CATEGORY const xr_table_category, bool const no_new_column_names, std::string const datetimestart_text_colname = std::string(), std::string const datetimeend_text_colname = std::string(), std::string const datetimestart_text = std::string(), std::string const datetimeend_text = std::string());
 				SqlAndColumnSet MergeIndividualTopLevelGroupIntoPrevious(ColumnsInTempView const & primary_variable_group_final_result, OutputModel::OutputGenerator::SqlAndColumnSet & previous_merged_primary_variable_groups_table, int const count);
 				void ClearTables(SqlAndColumnSets const & tables_to_clear);
 				void ClearTable(SqlAndColumnSet const & table_to_clear);
