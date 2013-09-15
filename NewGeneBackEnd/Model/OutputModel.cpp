@@ -114,7 +114,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 {
 	debug_ordering = true;
-	delete_tables = false;
+	//delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
 }
@@ -9623,13 +9623,57 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		});
 	});
 
+	if (true)
+	{
+
+		if (true)
+		{
+			if (!child_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+			{
+				if (and_)
+				{
+					sql_string += " AND ";
+				}
+				and_ = true;
+
+				sql_string += " CASE WHEN ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+				sql_string += " = 0 AND ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+				sql_string += " = 0 ";
+				sql_string += " THEN 1 ";
+				sql_string += " WHEN ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+				sql_string += " < ";
+				sql_string += boost::lexical_cast<std::string>(timerange_end);
+				sql_string += " THEN ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+				sql_string += " > ";
+				sql_string += boost::lexical_cast<std::string>(timerange_start);
+				sql_string += " WHEN ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+				sql_string += " > ";
+				sql_string += boost::lexical_cast<std::string>(timerange_start);
+				sql_string += " THEN ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+				sql_string += " < ";
+				sql_string += boost::lexical_cast<std::string>(timerange_end);
+				sql_string += " ELSE 0";
+				sql_string += " END";
+			}
+		}
+
+	}
+
 	// No!  No WHERE clause for timerange when merging child groups!
 	// This has the effect of causing valid rows to not appear in the result set
 	// (i.e., the child data should just be NULL, rather than the entire row be missing).
 	// The later "XR" algorithm that loops through all rows evaluating the time range
 	// condition for both the previous, and the new, data, will take care of
 	// child data that does not match the user's selection of time range.
-	if (false)
+	//
+	// Instead, put this functionality into the JOIN ON clause.
+	else
 	{
 		if (!child_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 		{
