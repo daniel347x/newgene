@@ -2494,7 +2494,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			{
 				if (current_column == sorted_result_columns.not_first_variable_group_column_index)
 				{
-					not_first_variable_group == true;
+					not_first_variable_group = true;
 				}
 			}
 			else if (!possible_duplicate_view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
@@ -14752,7 +14752,7 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 	std::int64_t total_number_null_checks = number_null_rows * number_map_entries;
 	std::int64_t current_null_check_count = 0;
 	boost::format msg("Processing potential NULLs: 0 / %1%");
-	msg % number_null_rows * total_number_null_checks;
+	msg % total_number_null_checks;
 	this->messager.SetPerformanceLabel(msg.str());
 
 	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [this, &current_null_check_count, &total_number_null_checks, &outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
