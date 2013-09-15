@@ -14811,6 +14811,8 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 				++current_map_entry_number;
 			});
 
+			this->messager.SetPerformanceLabel(std::string());
+
 
 			// ******************************************************************************************************* //
 			// Whatever time ranges are left require rows over that time range, even though we have a NULL at the end.
