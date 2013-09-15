@@ -2975,7 +2975,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			datetime_start_column.column_name_in_original_data_table = "";
 
 			std::string datetime_end_col_name_no_uuid;
-			datetime_end_col_name_no_uuid = "DATETIMEEND_END_TEXT";
+			datetime_end_col_name_no_uuid = "DATETIME_END_TEXT";
 			datetime_end_col_name_text = datetime_end_col_name_no_uuid;
 			datetime_end_col_name_text += "_";
 			datetime_end_col_name_text += newUUID(true);
@@ -2984,7 +2984,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			alter_string += "ALTER TABLE ";
 			alter_string += result_columns.view_name;
 			alter_string += " ADD COLUMN ";
-			alter_string += datetime_end_col_name;
+			alter_string += datetime_end_col_name_text;
 			alter_string += " TEXT";
 
 			sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -6013,7 +6013,8 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 				break;
 		}
 		
-		sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+		//sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+		SQLExecutor::Execute(false, SQLExecutor::DOES_NOT_RETURN_ROWS, this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true);
 		if (failed)
 		{
 			SetFailureMessage(sql_error);
@@ -6330,48 +6331,59 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(OutputModel::OutputGenera
 
 }
 
-OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<long double> const & bound_parameter_floats_, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & statement_is_prepared_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
-	: sql(sql_)
-	, generator(generator_)
-	, statement_type(DOES_NOT_RETURN_ROWS)
-	, db(db_)
-	, stmt(stmt_to_use)
-	, failed(false)
-	, statement_is_owned(false)
-	, statement_is_prepared(statement_is_prepared_)
-	, bound_parameter_strings(bound_parameter_strings_)
-	, bound_parameter_ints(bound_parameter_ints_)
-	, bound_parameter_floats(bound_parameter_floats_)
-	, bound_parameter_which_binding_to_use(bound_parameter_which_binding_to_use_)
-	, statement_is_shared(true)
-{
+sqlite3_stmt * OutputModel::OutputGenerator::SQLExecutor::stmt_insert = nullptr;
 
-	if (!failed && prepare_statement_if_null && stmt == nullptr)
-	{
-		if (!(*statement_is_prepared))
-		{
-			if (generator && generator->debug_sql_file.is_open() && !boost::iequals(sql.substr(0, strlen("INSERT")), std::string("INSERT")))
-			{
-				generator->debug_sql_file << sql << std::endl << std::endl;
-			}
-			sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
-			if (stmt == NULL)
-			{
-				sql_error = sqlite3_errmsg(db);
-				boost::format msg("Unable to prepare SQL query \"%1%\": %2%");
-				msg % sql % sql_error;
-				error_message = msg.str();
-				generator->failed = true;
-				generator->sql_error = error_message;
-				failed = true;
-				return;
-			}
-			++number_statement_prepares;
-			statement_is_owned = true;
-			*statement_is_prepared = true;
-		}
-	}
-}
+//void OutputModel::OutputGenerator::SQLExecutor::Execute(OutputModel::OutputGenerator * generator, sqlite3 * db, std::string const & sql, std::vector<std::string> const & bound_parameter_strings, std::vector<std::int64_t> const & bound_parameter_ints, std::vector<long double> const & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt * stmt, bool const prepare_statement_if_null)
+//OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<long double> const & bound_parameter_floats_, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & statement_is_prepared_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
+	//: sql(sql_)
+	//, generator(generator_)
+	//, statement_type(DOES_NOT_RETURN_ROWS)
+	//, db(db_)
+	//, stmt(stmt_to_use)
+	//, failed(false)
+	//, statement_is_owned(false)
+	//, statement_is_prepared(statement_is_prepared_)
+	//, bound_parameter_strings(bound_parameter_strings_)
+	//, bound_parameter_ints(bound_parameter_ints_)
+	//, bound_parameter_floats(bound_parameter_floats_)
+	//, bound_parameter_which_binding_to_use(bound_parameter_which_binding_to_use_)
+	//, statement_is_shared(true)
+//{
+
+	//if (!failed && prepare_statement_if_null && stmt == nullptr)
+	//if (prepare_statement_if_null && stmt == nullptr)
+	//{
+	//	if (!(*statement_is_prepared))
+	//	{
+	//		if (generator && generator->debug_sql_file.is_open() && !boost::iequals(sql.substr(0, strlen("INSERT")), std::string("INSERT")))
+	//		{
+	//			generator->debug_sql_file << sql << std::endl << std::endl;
+	//		}
+	//		sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	//		if (stmt == NULL)
+	//		{
+	//			//sql_error = sqlite3_errmsg(db);
+	//			std::string sql_error = sqlite3_errmsg(db);
+	//			boost::format msg("Unable to prepare SQL query \"%1%\": %2%");
+	//			msg % sql % sql_error;
+	//			//error_message = msg.str();
+	//			std::string error_message = msg.str();
+	//			generator->failed = true;
+	//			generator->sql_error = error_message;
+	//			//failed = true;
+	//			return;
+	//		}
+	//		++number_statement_prepares;
+	//		//statement_is_owned = true;
+	//		*statement_is_prepared = true;
+	//	}
+	//}
+
+#	if 1
+
+#	endif
+
+//}
 
 OutputModel::OutputGenerator::SQLExecutor::~SQLExecutor()
 {
@@ -6543,6 +6555,46 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		return;
 	}
 
+	DoExecute(db, generator, stmt, statement_type, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_owned, statement_is_prepared, statement_is_shared);
+
+}
+
+void OutputModel::OutputGenerator::SQLExecutor::Execute(bool statement_is_owned_, OutputModel::OutputGenerator::SQLExecutor::STATEMENT_TYPE statement_type_, OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<long double> const & bound_parameter_floats_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & statement_is_prepared_, sqlite3_stmt *& stmt_to_use, bool const prepare_statement_if_null)
+{
+	if (prepare_statement_if_null && stmt_to_use == nullptr)
+	{
+		if (!(*statement_is_prepared_))
+		{
+			sqlite3_prepare_v2(db_, sql_.c_str(), sql_.size() + 1, &stmt_to_use, NULL);
+			if (stmt_to_use == NULL)
+			{
+				//sql_error = sqlite3_errmsg(db);
+				std::string sql_error = sqlite3_errmsg(db_);
+				boost::format msg("Unable to prepare SQL query \"%1%\": %2%");
+				msg % sql_ % sql_error;
+				//error_message = msg.str();
+				std::string error_message = msg.str();
+				generator_->failed = true;
+				generator_->sql_error = error_message;
+				//failed = true;
+				return;
+			}
+			++number_statement_prepares;
+			//statement_is_owned = true;
+			*statement_is_prepared_ = true;
+		}
+	}
+	DoExecute(db_, generator_, stmt_to_use, statement_type_, bound_parameter_strings_, bound_parameter_ints_, bound_parameter_floats_, bound_parameter_which_binding_to_use_, statement_is_owned_, statement_is_prepared_, true);
+}
+
+void OutputModel::OutputGenerator::SQLExecutor::DoExecute(sqlite3 * db, OutputModel::OutputGenerator * generator, sqlite3_stmt *& stmt, SQLExecutor::STATEMENT_TYPE statement_type, std::vector<std::string> const & bound_parameter_strings, std::vector<std::int64_t> const & bound_parameter_ints, std::vector<long double> const & bound_parameter_floats, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use, bool statement_is_owned, std::shared_ptr<bool> & statement_is_prepared, bool statement_is_shared)
+{
+
+	if (stmt == nullptr)
+	{
+		return;
+	}
+
 	if (bound_parameter_which_binding_to_use.size() > 0)
 	{
 
@@ -6555,44 +6607,44 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 		int current_int64_index = 0;
 		int current_float_index = 0;
 		int current_index = 1;
-		std::for_each(bound_parameter_which_binding_to_use.cbegin(), bound_parameter_which_binding_to_use.cend(), [this, &current_string_index, &current_int64_index, &current_float_index, &current_index](WHICH_BINDING const & which_binding)
+		std::for_each(bound_parameter_which_binding_to_use.cbegin(), bound_parameter_which_binding_to_use.cend(), [&stmt, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &current_string_index, &current_int64_index, &current_float_index, &current_index](WHICH_BINDING const & which_binding)
 		{
 			switch (which_binding)
 			{
 
-				case STRING:
-					{
-						std::string & the_string = this->bound_parameter_strings[current_string_index];
-						sqlite3_bind_text(this->stmt, current_index, the_string.c_str(), the_string.size(), SQLITE_STATIC);
-						++current_string_index;
-						++current_index;
-					}
-					break;
+			case STRING:
+				{
+					std::string const & the_string = bound_parameter_strings[current_string_index];
+					sqlite3_bind_text(stmt, current_index, the_string.c_str(), the_string.size(), SQLITE_STATIC);
+					++current_string_index;
+					++current_index;
+				}
+				break;
 
-				case INT64:
-					{
-						std::int64_t the_int64 = this->bound_parameter_ints[current_int64_index];
-						sqlite3_bind_int64(this->stmt, current_index, the_int64);
-						++current_int64_index;
-						++current_index;
-					}
-					break;
+			case INT64:
+				{
+					std::int64_t the_int64 = bound_parameter_ints[current_int64_index];
+					sqlite3_bind_int64(stmt, current_index, the_int64);
+					++current_int64_index;
+					++current_index;
+				}
+				break;
 
-				case FLOAT:
-					{
-						long double the_float = this->bound_parameter_floats[current_float_index];
-						sqlite3_bind_double(this->stmt, current_index, the_float);
-						++current_float_index;
-						++current_index;
-					}
-					break;
+			case FLOAT:
+				{
+					long double the_float = bound_parameter_floats[current_float_index];
+					sqlite3_bind_double(stmt, current_index, the_float);
+					++current_float_index;
+					++current_index;
+				}
+				break;
 
-				case NULL_BINDING:
-					{
-						sqlite3_bind_null(this->stmt, current_index);
-						++current_index;
-					}
-					break;
+			case NULL_BINDING:
+				{
+					sqlite3_bind_null(stmt, current_index);
+					++current_index;
+				}
+				break;
 
 			}
 		});
@@ -6602,38 +6654,39 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 	switch(statement_type)
 	{
 
-		case DOES_NOT_RETURN_ROWS:
+	case DOES_NOT_RETURN_ROWS:
+		{
+
+			int step_result = 0;
+			if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
 			{
-
-				int step_result = 0;
-				if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
-				{
-					sql_error = sqlite3_errmsg(db);
-					boost::format msg("Unexpected result when attempting to execute SQL query \"%1%\": %2%");
-					msg % sql % sql_error;
-					error_message = msg.str();
-					failed = true;
-					return;
-				}
-
-				if (stmt && statement_is_owned && !statement_is_shared)
-				{
-					sqlite3_finalize(stmt);
-					++number_statement_finalizes;
-					*statement_is_prepared = false;
-					stmt = nullptr;
-				}
-
+				std::string sql_error = sqlite3_errmsg(db);
+				boost::format msg("Unexpected result when attempting to execute SQL query \"%1%\": %2%");
+				//msg % sql % sql_error;
+				generator->failed = true;
+				generator->sql_error = msg.str();
+				//failed = true;
+				return;
 			}
-			break;
 
-		case RETURNS_ROWS:
+			if (stmt && statement_is_owned && !statement_is_shared)
 			{
-
-				// no-op
-
+				sqlite3_finalize(stmt);
+				++number_statement_finalizes;
+				*statement_is_prepared = false;
+				stmt = nullptr;
 			}
-			break;
+
+		}
+		break;
+
+	case RETURNS_ROWS:
+		{
+
+			// no-op
+
+		}
+		break;
 
 	}
 
@@ -10169,9 +10222,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		std::vector<long double> bound_parameter_floats;
 		std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
 
-		sqlite3_stmt * the_prepared_stmt = nullptr;
-		std::shared_ptr<bool> & statement_is_prepared(std::make_shared<bool>(false));
-		BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared)
+		sqlite3_stmt * the_prepared_stmt = SQLExecutor::stmt_insert;
+		std::shared_ptr<bool> statement_is_prepared(std::make_shared<bool>(false));
+		SQLExecutor::stmt_insert = nullptr;
+		sqlite3_stmt *& the_stmt__ = SQLExecutor::stmt_insert;
+		BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared, &the_stmt__)
 		{
 			if (the_prepared_stmt && *statement_is_prepared)
 			{
@@ -10180,6 +10235,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				the_prepared_stmt = nullptr;
 				*statement_is_prepared = false;
 			}
+			the_stmt__ = nullptr;
 		} BOOST_SCOPE_EXIT_END
 
 		BeginNewTransaction();
@@ -10250,13 +10306,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					}
 					if (added)
 					{
-						sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+						SQLExecutor::Execute(false, SQLExecutor::DOES_NOT_RETURN_ROWS, this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true);
+						//sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 						if (failed)
 						{
 							SetFailureMessage(sql_error);
 							return result;
 						}
-						the_prepared_stmt = sql_strings.back().stmt;
+						//the_prepared_stmt = sql_strings.back().stmt;
+						the_prepared_stmt = SQLExecutor::stmt_insert;
 						++current_rows_added;
 						++current_rows_added_since_execution;
 					}
@@ -10367,7 +10425,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						}
 					}
 
-					ExecuteSQL(result);
+					//ExecuteSQL(result);
 
 					if (failed)
 					{
@@ -10428,13 +10486,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					}
 					if (added)
 					{
-						sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+						//sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+						SQLExecutor::Execute(false, SQLExecutor::DOES_NOT_RETURN_ROWS, this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, SQLExecutor::stmt_insert, true);
 						if (failed)
 						{
 							SetFailureMessage(sql_error);
 							return;
 						}
-						the_prepared_stmt = sql_strings.back().stmt;
+						//the_prepared_stmt = sql_strings.back().stmt;
+						the_prepared_stmt = SQLExecutor::stmt_insert;
 						++current_rows_added;
 						++current_rows_added_since_execution;
 					}
@@ -10448,7 +10508,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				return result;
 			}
 
-			ExecuteSQL(result);
+			//ExecuteSQL(result);
 
 			if (failed)
 			{
@@ -10506,7 +10566,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 		}
 
-		ExecuteSQL(result);
+		//ExecuteSQL(result);
+
 		messager.UpdateProgressBarValue(1000);
 		boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
 		msg % current_rows_stepped % current_number_rows_to_sort;
@@ -14250,13 +14311,15 @@ void OutputModel::OutputGenerator::AddRowsToXRTable(std::vector<SavedRowData> & 
 
 		if (added)
 		{
-			sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+			//sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
+			SQLExecutor::Execute(false, SQLExecutor::DOES_NOT_RETURN_ROWS, this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true);
 			if (failed)
 			{
 				SetFailureMessage(sql_error);
 				return;
 			}
-			the_prepared_stmt = sql_strings.back().stmt;
+			//the_prepared_stmt = sql_strings.back().stmt;
+			the_prepared_stmt = SQLExecutor::stmt_insert;
 			++current_rows_added;
 			++current_rows_added_since_execution;
 		}

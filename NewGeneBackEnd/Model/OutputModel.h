@@ -333,7 +333,10 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_);
 						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_);
-						SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<long double> const & bound_parameter_floats_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & stmt_is_prepared, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
+
+						static void Execute(bool statement_is_owned, OutputModel::OutputGenerator::SQLExecutor::STATEMENT_TYPE statement_type_, OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<long double> const & bound_parameter_floats_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & stmt_is_prepared, sqlite3_stmt *& stmt_to_use, bool const prepare_statement_if_null = false);
+						//SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<long double> const & bound_parameter_floats_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & stmt_is_prepared, sqlite3_stmt * stmt_to_use = nullptr, bool const prepare_statement_if_null = false);
+
 						SQLExecutor(SQLExecutor const & rhs);
 						SQLExecutor(SQLExecutor && rhs);
 						SQLExecutor & operator=(SQLExecutor const & rhs);
@@ -342,6 +345,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						void CopyOwned(SQLExecutor & rhs);
 						~SQLExecutor();
 
+						//static void Execute(sqlite3 * db, bool unused_disambiguator, OutputModel::OutputGenerator * generator, sqlite3_stmt * stmt, SQLExecutor::STATEMENT_TYPE statement_type, std::vector<std::string> const & bound_parameter_strings, std::vector<std::int64_t> const & bound_parameter_ints, std::vector<long double> const & bound_parameter_floats, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use, bool statement_is_owned, std::shared_ptr<bool> & statement_is_prepared);
+						static void DoExecute(sqlite3 * db, OutputModel::OutputGenerator * generator, sqlite3_stmt *& stmt, SQLExecutor::STATEMENT_TYPE statement_type, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<long double> const & bound_parameter_floats_, std::vector<WHICH_BINDING> & bound_parameter_which_binding_to_use_, bool statement_is_owned, std::shared_ptr<bool> & stmt_is_prepared, bool statement_is_shared);
 						void Execute();
 						bool Step();
 						void Empty(bool const empty_sql = true); // closes prepared statement and optionally clears stored SQL
@@ -350,6 +355,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::string sql_error;
 
 						sqlite3 * db;
+						static sqlite3_stmt * stmt_insert;
 						sqlite3_stmt * stmt;
 						STATEMENT_TYPE statement_type;
 						bool statement_is_owned;
