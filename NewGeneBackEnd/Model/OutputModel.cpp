@@ -23,6 +23,10 @@ int OutputModel::OutputGenerator::SQLExecutor::number_statement_finalizes = 0;
 int OutputModel::OutputGenerator::number_transaction_begins = 0;
 int OutputModel::OutputGenerator::number_transaction_ends = 0;
 
+std::set<std::vector<std::int64_t>> OutputModel::OutputGenerator::TimeRangeMapper_Ints::test_set;
+std::set<std::vector<long double>> OutputModel::OutputGenerator::TimeRangeMapper_Floats::test_set;
+std::set<std::vector<std::string>> OutputModel::OutputGenerator::TimeRangeMapper_Strings::test_set;
+
 void OutputModel::LoadTables()
 {
 
@@ -14740,7 +14744,7 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 		return;
 	}
 	std::vector<SavedRowData> outgoing_rows;
-	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [&outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
+	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [this, &outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
 	{
 
 		bool use_ints = false;
@@ -14781,16 +14785,30 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			TimeRanges my_time_ranges;
 			my_time_ranges.append(saved_row_data_with_null_at_end.datetime_start, saved_row_data_with_null_at_end.datetime_end);
 
+			// Set progress feedback for the following time-consuming loop.
+			std::int64_t number_map_entries = (std::int64_t)group_time_ranges__intkeys.size();
+			boost::format msg("Processing potential NULLs: 0 / %2%");
+			msg % number_map_entries;
+			this->messager.SetPerformanceLabel(msg.str());
+
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [&my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
+			std::int64_t current_map_entry_number = 0;
+			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [this, &current_map_entry_number, &number_map_entries, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
 			{
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
 				}
+				if (current_map_entry_number % 1000 == 0)
+				{
+					boost::format msg("Processing potential NULLs: %1% / %2%");
+					msg % current_map_entry_number % number_map_entries;
+					this->messager.SetPerformanceLabel(msg.str());
+				}
+				++current_map_entry_number;
 			});
 
 
@@ -15315,7 +15333,8 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator==(TimeRangeMap
 	// For internal calls only - not called by the standard library
 	// ************************************************************ //
 
-	std::set<std::vector<std::int64_t>> test_set = sets;
+	//std::set<std::vector<std::int64_t>> test_set = sets;
+	test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
 	if (sets.size() == test_set.size())
 	{
@@ -15334,7 +15353,8 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Floats::operator==(TimeRangeM
 	// For internal calls only - not called by the standard library
 	// ************************************************************ //
 
-	std::set<std::vector<long double>> test_set = sets;
+	//std::set<std::vector<long double>> test_set = sets;
+	test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
 	if (sets.size() == test_set.size())
 	{
@@ -15353,7 +15373,8 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator==(TimeRange
 	// For internal calls only - not called by the standard library
 	// ************************************************************ //
 
-	std::set<std::vector<std::string>> test_set = sets;
+	//std::set<std::vector<std::string>> test_set = sets;
+	test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
 	if (sets.size() == test_set.size())
 	{
@@ -15372,7 +15393,8 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator==(std::set<std
 	// For internal calls only - not called by the standard library
 	// ************************************************************ //
 
-	std::set<std::vector<std::int64_t>> test_set = sets;
+	//std::set<std::vector<std::int64_t>> test_set = sets;
+	test_set = sets;
 	test_set.insert(rhs.cbegin(), rhs.cend());
 	if (sets.size() == test_set.size())
 	{
@@ -15391,7 +15413,8 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Floats::operator==(std::set<s
 	// For internal calls only - not called by the standard library
 	// ************************************************************ //
 
-	std::set<std::vector<long double>> test_set = sets;
+	//std::set<std::vector<long double>> test_set = sets;
+	test_set = sets;
 	test_set.insert(rhs.cbegin(), rhs.cend());
 	if (sets.size() == test_set.size())
 	{
@@ -15410,7 +15433,8 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator==(std::set<
 	// For internal calls only - not called by the standard library
 	// ************************************************************ //
 
-	std::set<std::vector<std::string>> test_set = sets;
+	//std::set<std::vector<std::string>> test_set = sets;
+	test_set = sets;
 	test_set.insert(rhs.cbegin(), rhs.cend());
 	if (sets.size() == test_set.size())
 	{

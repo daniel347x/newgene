@@ -603,7 +603,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						bool operator==(TimeRangeMapper_Ints const & rhs) const;
 						bool operator==(std::set<std::vector<std::int64_t>> const & rhs) const;
 
-						std::set<std::vector<std::int64_t>> sets; 
+						std::set<std::vector<std::int64_t>> sets;
+						static std::set<std::vector<std::int64_t>> test_set;
 
 				};
 
@@ -620,6 +621,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 					bool operator==(std::set<std::vector<long double>> const & rhs) const;
 
 					std::set<std::vector<long double>> sets; 
+					static std::set<std::vector<long double>> test_set;
 
 				};
 
@@ -636,6 +638,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						bool operator==(std::set<std::vector<std::string>> const & rhs) const;
 
 						std::set<std::vector<std::string>> sets; 
+						static std::set<std::vector<std::string>> test_set;
 
 				};
 
