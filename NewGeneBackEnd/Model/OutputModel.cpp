@@ -114,7 +114,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 {
 	debug_ordering = true;
-	//delete_tables = false;
+	delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
 }
@@ -438,7 +438,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			std::int64_t number_of_rows_previous = previous_count;
 			std::int64_t number_of_rows_new = current_count;
 
-			boost::format msg_("Multiplicity %2% - Retrieving data and merging with previous data for child group \"%1%\": merging %3% previous with %4% new rows");
+			boost::format msg_("Multiplicity %2% - Retrieving data for child group \"%1%\": merging %3% previous with %4% new rows");
 			msg_ % (child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand
 				: child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 				% current_multiplicity % number_of_rows_previous % number_of_rows_new;
@@ -456,7 +456,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 
 			std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 
-			boost::format msg_2("Multiplicity %2% - Splitting rows on time boundaries for child group \"%1%\": %3% rows");
+			boost::format msg_2("Multiplicity %2% - Splitting rows on time boundaries \"%1%\": %3% rows");
 			msg_2 % (child_variable_group_raw_data_columns.variable_groups[0].longhand ? *child_variable_group_raw_data_columns.variable_groups[0].longhand
 				: child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 				% current_multiplicity % number_of_rows;
@@ -470,7 +470,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 				return;
 			}
 
-			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, child_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows in ascending order (for final pass)"), std::string("Removing duplicates"), current_multiplicity, child_set_number, merging_of_children_column_sets, true, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, false, true);
+			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, child_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), current_multiplicity, child_set_number, merging_of_children_column_sets, true, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, false, true);
 			if (failed)
 			{
 				return;
@@ -1057,18 +1057,18 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
 			if (primary_variable_group_final_result.second.variable_groups[0].longhand)
 			{
-				boost::format msg("Retrieving final data and merging with previous data for variable group \"%1%\": merging %2% previous with %3% new rows");
+				boost::format msg("Retrieving final data for variable group \"%1%\": merging %2% previous with %3% new rows");
 				msg % *primary_variable_group_final_result.second.variable_groups[0].longhand % number_of_rows_previous % number_of_rows_new;
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
 			else
 			{
-				boost::format msg("Retrieving final data and merging with previous data for variable group \"%1%\": merging %2% previous with %3% new rows");
+				boost::format msg("Retrieving final data for variable group \"%1%\": merging %2% previous with %3% new rows");
 				msg % *primary_variable_group_final_result.second.variable_groups[0].code % number_of_rows_previous % number_of_rows_new;
 				messager.SetPerformanceLabel(msg.str().c_str());
 			}
 
-			boost::format msg_("Retrieving final data and merging with previous data for variable group \"%1%\": merging %2% previous with %3% new rows");
+			boost::format msg_("Retrieving final data for variable group \"%1%\": merging %2% previous with %3% new rows");
 			msg_ % (primary_variable_group_final_result.second.variable_groups[0].longhand ? *primary_variable_group_final_result.second.variable_groups[0].longhand
 				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string()) % number_of_rows_previous % number_of_rows_new;
 			UpdateProgressBarToNextStage(msg_.str(), std::string());
@@ -1103,7 +1103,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 				return;
 			}
 
-			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_final_result.second.variable_groups[0], std::string("Sorting rows in ascending order (for final pass)"), std::string("Removing duplicates"), 0, count, intermediate_merging_of_primary_groups_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false, true);
+			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_final_result.second.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), 0, count, intermediate_merging_of_primary_groups_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false, true);
 
 			if (failed)
 			{
@@ -2201,7 +2201,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		std::int64_t number_of_rows_previous = ObtainCount(duplicates_removed.second);
 		std::int64_t number_of_rows_new = ObtainCount(primary_variable_group_raw_data_columns);
 
-		boost::format msg_("Multiplicity %2% - Retrieving data and merging with previous data for variable group \"%1%\": merging %3% previous with %4% new rows");
+		boost::format msg_("Multiplicity %2% - Retrieving data for variable group \"%1%\": merging %3% previous with %4% new rows");
 		msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 			% current_multiplicity % number_of_rows_previous % number_of_rows_new;
@@ -2236,7 +2236,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		std::int64_t number_of_rows_to_sort = ObtainCount(x_table_result.second);
 		current_number_rows_to_sort = number_of_rows_to_sort;
 
-		boost::format msg_2("Multiplicity %2% - Ordering data within rows for variable group \"%1%\": %3% rows");
+		boost::format msg_2("Multiplicity %2% - Ordering data within rows for \"%1%\": %3% rows");
 		msg_2 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 			% current_multiplicity % number_of_rows_to_sort;
@@ -2268,7 +2268,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// will nonetheless appear as adjacent rows (with those rows with more NULLs appearing first).
 		// Do not remove duplicates.
 		// ******************************************************************************************************************* //
-		SqlAndColumnSet intermediate_duplicates_removed = SortAndOrRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows in ascending order (preparing for full table scan)"), std::string(""), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
+		SqlAndColumnSet intermediate_duplicates_removed = SortAndOrRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows"), std::string(""), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
 		if (failed)
 		{
 			return SqlAndColumnSet();
@@ -2278,7 +2278,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 		number_of_rows_to_sort = ObtainCount(intermediate_duplicates_removed.second);
 
-		boost::format msg_3("Multiplicity %2% - Splitting rows on time boundaries, and removing redundant NULL rows, for variable group \"%1%\": %3% rows");
+		boost::format msg_3("Multiplicity %2% - Splitting rows on time boundaries and removing redundant NULL rows \"%1%\": %3% rows");
 		msg_3 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
 			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
 			% current_multiplicity % number_of_rows_to_sort;
@@ -2337,7 +2337,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// The final result of this stage is the final result for this multiplicity, in unformatted form
 		// (i.e., with UUID's added to column names, and with extraneous columns present).
 		// ******************************************************************************************************************* //
-		duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows in ascending order (for final pass)"), std::string("Removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false, true);
+		duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false, true);
 
 		if (failed)
 		{
@@ -14216,7 +14216,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 	// Sort the row groups, this time including time range in the sort.
 	// The result will be that each deque will have all rows matching on primary key groups (including the number of NULL's)
-	// EXCEPT the final inner table's primary key group.
+	// INCLUDING the final inner table's primary key group.
 	// These rows inside each deque will be sorted according to time range.
 	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
 	{
