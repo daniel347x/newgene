@@ -181,8 +181,29 @@ class ColumnsInTempView
 			, has_no_datetime_columns(false)
 			, has_no_datetime_columns_originally(false)
 			, make_table_permanent(false)
+			, not_first_variable_group_column_index(-1)
 		{
 
+		}
+
+		ColumnsInTempView(ColumnsInTempView const & rhs)
+			: columns_in_view(rhs.columns_in_view)
+			, view_number(rhs.view_number)
+			, has_no_datetime_columns(rhs.has_no_datetime_columns)
+			, has_no_datetime_columns_originally(rhs.has_no_datetime_columns_originally)
+			, original_table_names(rhs.original_table_names)
+			, variable_group_codes(rhs.variable_group_codes)
+			, variable_group_longhand_names(variable_group_longhand_names)
+			, variable_groups(rhs.variable_groups)
+			, view_name(rhs.view_name)
+			, view_name_no_uuid(rhs.view_name_no_uuid)
+			, most_recent_sql_statement_executed__index(rhs.most_recent_sql_statement_executed__index)
+			, make_table_permanent(rhs.make_table_permanent)
+
+		{
+			// For optimization variables
+			// Force recalculation of this
+			not_first_variable_group_column_index = -1;
 		}
 
 		std::vector<ColumnInTempView> columns_in_view;
@@ -199,6 +220,9 @@ class ColumnsInTempView
 		int most_recent_sql_statement_executed__index;
 
 		bool make_table_permanent;
+
+		// optimizations
+		mutable int not_first_variable_group_column_index;
 
 };
 

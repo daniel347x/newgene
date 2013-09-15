@@ -2442,7 +2442,8 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	current_column = 0;
 	reached_first_dates = false;
 	on_other_side_of_first_dates = false;
-	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &column_index_of_start_of_final_inner_table, &sorted_result_columns, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_float, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
+	bool not_first_variable_group = false;
+	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &not_first_variable_group, &column_index_of_start_of_final_inner_table, &sorted_result_columns, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_float, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 
 		inner_table_number.push_back(possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
@@ -2483,10 +2484,20 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			}
 		}
 
-		bool not_first_variable_group = false;
-		if (!possible_duplicate_view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+		if (!not_first_variable_group)
 		{
-			not_first_variable_group = true;
+			if (sorted_result_columns.not_first_variable_group_column_index != -1)
+			{
+				if (current_column == sorted_result_columns.not_first_variable_group_column_index)
+				{
+					not_first_variable_group == true;
+				}
+			}
+			else if (!possible_duplicate_view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+			{
+				not_first_variable_group = true;
+				sorted_result_columns.not_first_variable_group_column_index = current_column;
+			}
 		}
 
 		{
@@ -8250,16 +8261,15 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 	// The following block only applies to PRIMARY_VARIABLE_GROUP merges
 	int number_columns_each_single_inner_table = 0;
-	WidgetInstanceIdentifier first_variable_group;
 	int the_column_index = 0;
 	bool first_datetime_column_already_reached = false;
 	bool stop_incrementing_single_inner_table_column_count = false;
-	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &first_datetime_column_already_reached, &stop_incrementing_single_inner_table_column_count, &the_column_index, &number_columns_each_single_inner_table, &first_variable_group, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &first_datetime_column_already_reached, &stop_incrementing_single_inner_table_column_count, &the_column_index, &number_columns_each_single_inner_table, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
-		if (the_column_index == 0)
+		if (stop_incrementing_single_inner_table_column_count)
 		{
-			first_variable_group = column_in_view.variable_group_associated_with_current_inner_table;
+			return;
 		}
 
 		if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
@@ -8278,12 +8288,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 		if (!stop_incrementing_single_inner_table_column_count)
 		{
 			++number_columns_each_single_inner_table;
-		}
-
-		if (!column_in_view.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
-		{
-			++the_column_index;
-			return;
 		}
 
 		++the_column_index;
