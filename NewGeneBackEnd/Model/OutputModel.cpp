@@ -2007,32 +2007,10 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 		total_number_primary_rows += (highest_multiplicity_primary_uoa * number_rows);
 
 		// Before loop is entered
-		// explicit stage prior to creation of initial X/XR table
-		total_progress_stages += 1;
-		
-		// Before loop is entered
-		// 2 stages hidden inside call to SortAndRemoveDuplicates() before entering loop
-		total_progress_stages += 2;
+		total_progress_stages += 3;
 
 		// Inside loop, which starts at 2, not 1
-		// 2 explicit stages: 1 prior to creation of X table, and 1 prior to creation of XR table, both inside loop
-		total_progress_stages += 2 * (highest_multiplicity_primary_uoa - 1);
-
-		// Inside loop, which starts at 2, not 1
-		// 1 stage hidden inside call to RemoveDuplicates_Or_OrderWithinRows() inside loop
-		total_progress_stages += highest_multiplicity_primary_uoa - 1;
-
-		// Inside loop, which starts at 2, not 1
-		// 1 stage hidden inside *intermediate* call to SortAndRemoveDuplicates() inside loop
-		total_progress_stages += highest_multiplicity_primary_uoa - 1;
-
-		// Inside loop, which starts at 2, not 1
-		// 2 stages hidden inside *final* call to SortAndRemoveDuplicates() inside loop
-		total_progress_stages += highest_multiplicity_primary_uoa - 1;
-
-		// Inside loop, which starts at 2, not 1
-		// 1 stage I missed somehow when coding this calculation
-		total_progress_stages += highest_multiplicity_primary_uoa - 1;
+		total_progress_stages += (6 * (highest_multiplicity_primary_uoa - 1));
 
 		// Merging of primary groups: One each
 		++total_progress_stages; // a final one for each primary group - corresponding to the merging of primary groups
@@ -2086,14 +2064,14 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
 		multiplicities[child_variable_group_raw_data_columns.variable_groups[0]] = the_child_multiplicity;
 
-		// Two stages per child group multiplicity
-		total_progress_stages += (2 * the_child_multiplicity);
+		// Four stages per child group multiplicity
+		total_progress_stages += (4 * the_child_multiplicity);
 
 		++child_set_number;
 
 	});
 
-	// One call to the SortAndRemoveDuplicates() at the end of MergeChildGroups() has 2 stages
+	// Two stages for construction of final K-ad results
 	total_progress_stages += 2;
 
 	rough_progress_range = 0;
