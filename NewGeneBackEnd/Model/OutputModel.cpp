@@ -13150,13 +13150,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("Multiplicity %2% - %4% for \"%1%\": %3% rows.");
+				boost::format msg("Multiplicity %2% - %4% for \"%1%\": %3% rows");
 				msg % *variable_group.longhand % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("%3% for \"%1%\": %2% rows.");
+				boost::format msg("%3% for \"%1%\": %2% rows");
 				msg % *variable_group.longhand % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -13165,13 +13165,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		{
 			if (current_multiplicity >= 0)
 			{
-				boost::format msg("Multiplicity %2% - %4% for %1%: %3% rows.");
+				boost::format msg("Multiplicity %2% - %4% for %1%: %3% rows");
 				msg % *variable_group.code % current_multiplicity % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
 			else
 			{
-				boost::format msg("%3% for %1%: %2% rows.");
+				boost::format msg("%3% for %1%: %2% rows");
 				msg % *variable_group.code % number_of_rows_to_sort % msg_sort_preface;
 				UpdateProgressBarToNextStage(msg.str(), std::string());
 			}
@@ -13179,7 +13179,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	}
 	else
 	{
-		boost::format msg("%2%: %1% rows.");
+		boost::format msg("%2%: %1% rows");
 		msg % number_of_rows_to_sort % msg_sort_preface;
 		UpdateProgressBarToNextStage(msg.str(), std::string());
 	}
@@ -14743,8 +14743,19 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 	{
 		return;
 	}
+
 	std::vector<SavedRowData> outgoing_rows;
-	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [this, &outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
+
+	// Set progress feedback for the following time-consuming loop.
+	std::int64_t number_null_rows = saved_rows_with_null_in_final_inner_table.size();
+	std::int64_t number_map_entries = (std::int64_t)group_time_ranges__intkeys.size();
+	std::int64_t total_number_null_checks = number_null_rows * number_map_entries;
+	std::int64_t current_null_check_count = 0;
+	boost::format msg("Processing potential NULLs: 0 / %1%");
+	msg % number_null_rows * total_number_null_checks;
+	this->messager.SetPerformanceLabel(msg.str());
+
+	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [this, &current_null_check_count, &total_number_null_checks, &outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
 	{
 
 		bool use_ints = false;
@@ -14785,34 +14796,24 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			TimeRanges my_time_ranges;
 			my_time_ranges.append(saved_row_data_with_null_at_end.datetime_start, saved_row_data_with_null_at_end.datetime_end);
 
-			// Set progress feedback for the following time-consuming loop.
-			std::int64_t number_map_entries = (std::int64_t)group_time_ranges__intkeys.size();
-			boost::format msg("Processing potential NULLs: 0 / %1%");
-			msg % number_map_entries;
-			this->messager.SetPerformanceLabel(msg.str());
-
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			std::int64_t current_map_entry_number = 0;
-			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [this, &current_map_entry_number, &number_map_entries, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
+			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
 			{
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
 				}
-				if (current_map_entry_number % 250 == 0)
+				if (current_null_check_count % 250 == 0)
 				{
 					boost::format msg("Processing potential NULLs: %1% / %2%");
-					msg % current_map_entry_number % number_map_entries;
+					msg % current_null_check_count % total_number_null_checks;
 					this->messager.SetPerformanceLabel(msg.str());
 				}
-				++current_map_entry_number;
+				++current_null_check_count;
 			});
-
-			this->messager.SetPerformanceLabel(std::string());
-
 
 			// ******************************************************************************************************* //
 			// Whatever time ranges are left require rows over that time range, even though we have a NULL at the end.
@@ -14927,6 +14928,8 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 		}
 
 	});
+
+	this->messager.SetPerformanceLabel(std::string());
 
 	saved_rows_with_null_in_final_inner_table.swap(outgoing_rows);
 
