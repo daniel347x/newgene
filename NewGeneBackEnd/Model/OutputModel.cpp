@@ -14802,7 +14802,7 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
 				}
-				if (current_map_entry_number % 1000 == 0)
+				if (current_map_entry_number % 100 == 0)
 				{
 					boost::format msg("Processing potential NULLs: %1% / %2%");
 					msg % current_map_entry_number % number_map_entries;
