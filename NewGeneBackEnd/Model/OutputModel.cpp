@@ -114,7 +114,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 {
 	debug_ordering = true;
-	//delete_tables = false;
+	delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
 }
@@ -607,13 +607,13 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 
 				case SQLITE_FLOAT:
 					{
-						// Currently not implemented!!!!!!!  Just add new bound_paramenter_longs as argument to this function, and as member of SQLExecutor just like the other bound_parameter data members, to implement.
 						data_long = sqlite3_column_double(stmt_result, column_index);
-						// Todo: Error message
-						boost::format msg("Floating point values are not yet supported.");
-						SetFailureMessage(msg.str());
-						failed = true;
-						return; // from lambda
+						if (!first)
+						{
+							output_file << ",";
+						}
+						first = false;
+						output_file << data_long;
 					}
 					break;
 
@@ -3255,9 +3255,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
 
 
-	sqlite3_stmt * the_prepared_stmt = nullptr;
-	std::shared_ptr<bool> statement_is_prepared = std::make_shared<bool>(false);
-	BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared)
+	sqlite3_stmt *& the_prepared_stmt = SQLExecutor::stmt_insert;
+	std::shared_ptr<bool> statement_is_prepared(std::make_shared<bool>(false));
+	SQLExecutor::stmt_insert = nullptr;
+	sqlite3_stmt *& the_stmt__ = SQLExecutor::stmt_insert;
+	BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared, &the_stmt__)
 	{
 		if (the_prepared_stmt && *statement_is_prepared)
 		{
@@ -3266,6 +3268,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			the_prepared_stmt = nullptr;
 			*statement_is_prepared = false;
 		}
+		the_stmt__ = nullptr;
 	} BOOST_SCOPE_EXIT_END
 
 	{
@@ -6020,7 +6023,8 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 			SetFailureMessage(sql_error);
 			return;
 		}
-		the_prepared_stmt = sql_strings.back().stmt;
+		//the_prepared_stmt = sql_strings.back().stmt;
+		the_prepared_stmt = SQLExecutor::stmt_insert;
 		++current_rows_added;
 		++current_rows_added_since_execution;
 
@@ -10222,7 +10226,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		std::vector<long double> bound_parameter_floats;
 		std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
 
-		sqlite3_stmt * the_prepared_stmt = SQLExecutor::stmt_insert;
+		sqlite3_stmt *& the_prepared_stmt = SQLExecutor::stmt_insert;
 		std::shared_ptr<bool> statement_is_prepared(std::make_shared<bool>(false));
 		SQLExecutor::stmt_insert = nullptr;
 		sqlite3_stmt *& the_stmt__ = SQLExecutor::stmt_insert;
