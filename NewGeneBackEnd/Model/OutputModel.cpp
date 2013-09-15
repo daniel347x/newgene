@@ -8316,6 +8316,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 	SQLExecutor::WHICH_BINDING column_data_type = SQLExecutor::UNKNOWN_BINDING;
 	bound_parameter_strings.clear();
 	bound_parameter_ints.clear();
+	bound_parameter_floats.clear();
 	bound_parameter_which_binding_to_use.clear();
 	int number_nulls_to_add_at_end = 0;
 
@@ -9033,6 +9034,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 			}
 
 			bound_parameter_ints.clear();
+			bound_parameter_floats.clear();
 			bound_parameter_strings.clear();
 			bound_parameter_which_binding_to_use.clear();
 			int current_inner_column_set = 0;
@@ -13994,6 +13996,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 		// The function returns the inner table parameters, ordered properly
 		bound_parameter_ints.clear();
+		bound_parameter_floats.clear();
 		bound_parameter_strings.clear();
 		bound_parameter_which_binding_to_use.clear();
 		bool added = CreateNewXRRow(row.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, dummycols, true, true, xr_table_category, false, false);
