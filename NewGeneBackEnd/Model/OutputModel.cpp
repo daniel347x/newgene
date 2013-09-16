@@ -14728,6 +14728,7 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 	std::int64_t number_map_entries = (std::int64_t)group_time_ranges__intkeys.size();
 	std::int64_t total_number_null_checks = number_null_rows * number_map_entries;
 	std::int64_t current_null_check_count = 0;
+	std::int64_t status_increment_check = 1000;
 	boost::format msg("Processing potential NULLs: 0 / %1%");
 	msg % total_number_null_checks;
 	this->messager.SetPerformanceLabel(msg.str());
@@ -14776,14 +14777,14 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
+			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
 			{
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
 				}
-				if (current_null_check_count % 10000 == 0)
+				if (current_null_check_count % 1000 == 0)
 				{
 					boost::format msg("Processing potential NULLs: %1% / %2%");
 					msg % current_null_check_count % total_number_null_checks;
@@ -14831,14 +14832,14 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			std::for_each(group_time_ranges__floatkeys.cbegin(), group_time_ranges__floatkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Floats, TimeRanges> const & map_info)
+			std::for_each(group_time_ranges__floatkeys.cbegin(), group_time_ranges__floatkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Floats, TimeRanges> const & map_info)
 			{
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
 				}
-				if (current_null_check_count % 10000 == 0)
+				if (current_null_check_count % 1000 == 0)
 				{
 					boost::format msg("Processing potential NULLs: %1% / %2%");
 					msg % current_null_check_count % total_number_null_checks;
@@ -14887,14 +14888,14 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			std::for_each(group_time_ranges__stringkeys.cbegin(), group_time_ranges__stringkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Strings, TimeRanges> const & map_info)
+			std::for_each(group_time_ranges__stringkeys.cbegin(), group_time_ranges__stringkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Strings, TimeRanges> const & map_info)
 			{
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
 				}
-				if (current_null_check_count % 10000 == 0)
+				if (current_null_check_count % status_increment_check == 0)
 				{
 					boost::format msg("Processing potential NULLs: %1% / %2%");
 					msg % current_null_check_count % total_number_null_checks;
