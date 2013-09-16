@@ -14733,7 +14733,7 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 	msg % total_number_null_checks;
 	this->messager.SetPerformanceLabel(msg.str());
 
-	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [this, &current_null_check_count, &total_number_null_checks, &outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
+	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [this, &current_null_check_count, &total_number_null_checks, &status_increment_check, &outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
 	{
 
 		bool use_ints = false;
