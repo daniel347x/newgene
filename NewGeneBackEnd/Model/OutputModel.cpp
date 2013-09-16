@@ -1013,7 +1013,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		: primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : std::string());
 	messager.AppendKadStatusText(msg_start.str(), this);
 
-	boost::format msg_("Retrieving data for variable group %1%: %2% rows");
+	boost::format msg_("Retrieving final data for variable group %1%: %2% rows");
 	msg_ % (primary_group_final_results[0].second.variable_groups[0].longhand ? *primary_group_final_results[0].second.variable_groups[0].longhand
 		: primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : std::string()) % number_of_rows_to_sort;
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
@@ -1107,7 +1107,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 				return;
 			}
 
-			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_final_result.second.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), 0, count, intermediate_merging_of_primary_groups_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false, true);
+			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_final_result.second.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), -1, count, intermediate_merging_of_primary_groups_column_sets, true, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, false, true);
 
 			if (failed)
 			{
@@ -2013,12 +2013,11 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 		total_progress_stages += (6 * (highest_multiplicity_primary_uoa - 1));
 
 		// Merging of primary groups: One each
-		++total_progress_stages; // a final one for each primary group - corresponding to the merging of primary groups
-
+		++total_progress_stages;
 		if (primary_group_number > 1)
 		{
-			// plus an extra one for every group after the first
-			++total_progress_stages;
+			// plus an extra three for every group after the first
+			total_progress_stages += 3;
 		}
 
 		++primary_group_number;
@@ -3011,7 +3010,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				break;
 			case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
 				{
-					datetime_start_col_name_no_uuid = "DATETIMESTART_MERGED_KAD_OUTPUT";
+					datetime_start_col_name_no_uuid = "DATETIMESTART_PRE_MERGED_KAD_OUTPUT";
 				}
 				break;
 			case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
@@ -3124,7 +3123,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				break;
 			case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
 				{
-					datetime_end_col_name_no_uuid = "DATETIMEEND_MERGED_KAD_OUTPUT";
+					datetime_end_col_name_no_uuid = "DATETIMEEND_PRE_MERGED_KAD_OUTPUT";
 				}
 				break;
 			case OutputModel::OutputGenerator::KAD_RESULTS:
@@ -3219,8 +3218,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 					datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS;
 					datetime_start_column.variable_group_associated_with_current_inner_table = previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 					datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-					datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
-					datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+					datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
+					datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 				}
 				break;
 		}
@@ -8194,7 +8193,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 		}
 		else if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
 		{
-			if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
+			if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
 			{
 				found_highest_index = true;
 				return;

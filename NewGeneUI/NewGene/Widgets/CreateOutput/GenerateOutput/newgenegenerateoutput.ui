@@ -68,7 +68,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Choose...</string>
+        <string>Choose location...</string>
        </property>
       </widget>
      </item>
