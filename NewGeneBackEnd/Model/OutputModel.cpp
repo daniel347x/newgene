@@ -7732,7 +7732,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += previous_xr_columns.view_name;
 	sql_string += " t1 JOIN ";
 	sql_string += primary_variable_group_raw_data_columns.original_table_names[0];
-	sql_string += " t2 ON ";
+	sql_string += " t2 ";
 	bool and_ = false;
 
 
@@ -7765,6 +7765,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 									if (and_)
 									{
 										sql_string += " AND ";
+									}
+									else
+									{
+										sql_string += " ON ";
 									}
 									and_ = true;
 									sql_string += "t1.";
