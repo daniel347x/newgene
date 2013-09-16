@@ -14783,7 +14783,7 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
 				}
-				if (current_null_check_count % 250 == 0)
+				if (current_null_check_count % 10000 == 0)
 				{
 					boost::format msg("Processing potential NULLs: %1% / %2%");
 					msg % current_null_check_count % total_number_null_checks;
@@ -14831,13 +14831,20 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			std::for_each(group_time_ranges__floatkeys.cbegin(), group_time_ranges__floatkeys.cend(), [&my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Floats, TimeRanges> const & map_info)
+			std::for_each(group_time_ranges__floatkeys.cbegin(), group_time_ranges__floatkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Floats, TimeRanges> const & map_info)
 			{
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
 				}
+				if (current_null_check_count % 10000 == 0)
+				{
+					boost::format msg("Processing potential NULLs: %1% / %2%");
+					msg % current_null_check_count % total_number_null_checks;
+					this->messager.SetPerformanceLabel(msg.str());
+				}
+				++current_null_check_count;
 			});
 
 
@@ -14880,13 +14887,20 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			std::for_each(group_time_ranges__stringkeys.cbegin(), group_time_ranges__stringkeys.cend(), [&my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Strings, TimeRanges> const & map_info)
+			std::for_each(group_time_ranges__stringkeys.cbegin(), group_time_ranges__stringkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Strings, TimeRanges> const & map_info)
 			{
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
 				}
+				if (current_null_check_count % 10000 == 0)
+				{
+					boost::format msg("Processing potential NULLs: %1% / %2%");
+					msg % current_null_check_count % total_number_null_checks;
+					this->messager.SetPerformanceLabel(msg.str());
+				}
+				++current_null_check_count;
 			});
 
 
