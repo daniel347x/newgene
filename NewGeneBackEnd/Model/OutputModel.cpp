@@ -473,6 +473,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 				% current_multiplicity % number_of_rows_previous % number_of_rows_new;
 			UpdateProgressBarToNextStage(msg_.str(), "");
 
+			messager.SetPerformanceLabel("Performing a database join; please be patient...");
 			x_table_result = CreateChildXTable(child_variable_group_raw_data_columns, duplicates_removed.second, current_multiplicity, 0, child_set_number, current_child_view_name_index);
 			x_table_result.second.most_recent_sql_statement_executed__index = -1;
 			ExecuteSQL(x_table_result);
@@ -482,6 +483,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			{
 				return;
 			}
+			messager.SetPerformanceLabel("");
 
 			std::int64_t number_of_rows = ObtainCount(x_table_result.second);
 
@@ -1265,6 +1267,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string()) % number_of_rows_previous % number_of_rows_new;
 			UpdateProgressBarToNextStage(msg_.str(), std::string());
 
+			messager.SetPerformanceLabel("Performing a database join; please be patient...");
 			intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, duplicates_removed, count);
 			if (failed || CheckCancelled())
 			{
@@ -1274,6 +1277,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			ExecuteSQL(intermediate_merge_of_top_level_primary_group_results);
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			ClearTable(primary_variable_group_final_result);
+			messager.SetPerformanceLabel("");
 			intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
 			if (failed || CheckCancelled())
 			{
@@ -2383,6 +2387,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// ******************************************************************************************************************* //
 		// Join with a new multiplicity of data.
 		// ******************************************************************************************************************* //
+		messager.SetPerformanceLabel("Performing a database join; please be patient...");
 		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, duplicates_removed.second, current_multiplicity, primary_group_number);
 		x_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(x_table_result);
@@ -2392,6 +2397,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		{
 			return SqlAndColumnSet();
 		}
+		messager.SetPerformanceLabel("");
 
 		
 		
@@ -13545,16 +13551,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	}
 
 	// Columns do not change!!!!!!!!!!!!!!  Just the order of rows
+	messager.SetPerformanceLabel("Sorting temporary table; please be patient...");
 	SqlAndColumnSet intermediate_sorted_top_level_variable_group_result = CreateSortedTable(column_set, primary_group_number, current_multiplicity, xr_table_category, is_intermediate);
 	if (failed || CheckCancelled())
 	{
 		return SqlAndColumnSet();
 	}
 	intermediate_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
-	if (failed || CheckCancelled())
-	{
-		return SqlAndColumnSet();
-	}
+	messager.SetPerformanceLabel("");
+
 	ExecuteSQL(intermediate_sorted_top_level_variable_group_result);
 	if (do_clear_table)
 	{
