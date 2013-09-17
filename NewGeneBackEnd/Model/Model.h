@@ -56,8 +56,6 @@ class Model_basemost
 
 		void UnloadDatabase()
 		{
-			ClearRemnantTemporaryTables();
-			VacuumDatabase();
 			if (db != nullptr)
 			{
 				sqlite3_close(db);

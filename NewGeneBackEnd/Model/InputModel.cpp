@@ -10,8 +10,6 @@ void InputModel::LoadTables()
 	if (db != nullptr)
 	{
 
-		ClearRemnantTemporaryTables();
-
 		t_dmu_category.Load(db, this);
 		t_dmu_category.Sort();
 
