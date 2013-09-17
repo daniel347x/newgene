@@ -840,8 +840,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
 				{
+					// only display datetime columns once
 					++column_index;
-					return; // only display datetime columns once
+					return;
 				}
 				break;
 		}
@@ -875,7 +876,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	// Then, display primary key columns with multiplicity greater than 1
 
 	column_index = 0;
-	bool reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
+	reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
 	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &datetimestart_timestamp_colname, &datetimeend_timestamp_colname, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
