@@ -822,6 +822,18 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			return; // display secondary keys only after primary keys
 		}
 
+		switch (unformatted_column.column_type)
+		{
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
+			{
+				// only display datetime columns once
+				++column_index;
+				return;
+			}
+			break;
+		}
+
 		result_columns.columns_in_view.push_back(unformatted_column);
 		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
 
@@ -834,18 +846,6 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		}
 
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
-
-		switch (unformatted_column.column_type)
-		{
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
-				{
-					// only display datetime columns once
-					++column_index;
-					return;
-				}
-				break;
-		}
 
 		if (!first)
 		{
