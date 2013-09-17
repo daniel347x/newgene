@@ -7003,13 +7003,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Proceed to the secondary key columns.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
+		bool make_secondary = false;
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 		{
-			return; // Enforce that datetime columns appear last.
+			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
+			//return; // Enforce that datetime columns appear last.
+			make_secondary = true;
 		}
 		if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
-			return; // We are populating secondary columns now, so exit if this isn't one
+			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
+			if (!make_secondary)
+			{
+				return; // We are populating secondary columns now, so exit if this isn't one
+			}
 		}
 		bool match = false;
 		std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&column_in_view, &match](WidgetInstanceIdentifier const & variable_selected)
@@ -7022,6 +7029,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (match)
 		{
 			result_columns.columns_in_view.push_back(column_in_view);
+			if (make_secondary)
+			{
+				result_columns.columns_in_view.back().column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+			}
 		}
 	});
 	// Proceed, finally, to the datetime columns, if they exist.  (If they don't, they will be added via ALTER TABLE to the temporary table under construction.)
@@ -7769,6 +7780,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	// These columns are from the previous XR temporary table, which is guaranteed to have all columns in place, including datetime columns.
 	// Further, the "current_multiplicity" of these columns is guaranteed to be correct.
+
+	// First, calculate some indices.
 	bool first = true;
 	bool in_first_inner_table = true;
 	bool reached_first_datetime_start_merged_column = false;
@@ -7854,15 +7867,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Proceed to the secondary key columns.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &primary_variable_group_raw_data_columns, &variables_selected, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
 	{
-		if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
-		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
-		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+	
+		bool skip_secondary_check = false;
+		if (   new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
+			|| new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 		{
-			return; // Add these columns last
+			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
+			//return; // Add these columns last
+			skip_secondary_check = true;
 		}
 
-		if (new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (!skip_secondary_check && new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
 			return; // We are populating secondary columns now, so exit if this isn't one
 		}
@@ -7894,6 +7909,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					new_column.primary_key_index_within_total_kad_for_dmu_category = new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
 						+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 				}
+			}
+			if (skip_secondary_check)
+			{
+				new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
 			}
 			++second_table_column_count;
 		}
@@ -9485,6 +9504,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// These columns are from the previous XR temporary table, which is guaranteed to have all columns in place, including datetime columns.
 	// Further, the "current_multiplicity" of these columns is guaranteed to be correct.
 	// Also, the first columns always correspond to the primary variable group.
+
+	// First, calculate some indices.
 	bool first = true;
 	bool not_yet_reached_any_datetime_columns = true;
 	bool reached_second_inner_table = false;
@@ -9583,15 +9604,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Proceed to the secondary key columns.
 	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&first, &child_set_number, &variable_group_child, &uoa_child, &variables_selected, &result_columns, &second_table_column_count, &current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
 	{
+		bool skip_secondary_check = false;
 		if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
-		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
-		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 		{
-			return; // Add these columns last
+			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
+			//return; // Add these columns last
+			skip_secondary_check = true;
 		}
 
-		if (new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (!skip_secondary_check && new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
 			return; // We are populating secondary columns now, so exit if this isn't one
 		}
@@ -9632,6 +9654,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							+ (current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 					}
 				}
+			}
+			if (skip_secondary_check)
+			{
+				new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
 			}
 			++second_table_column_count;
 			if (first)
@@ -9924,7 +9950,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// condition for both the previous, and the new, data, will take care of
 	// child data that does not match the user's selection of time range.
 	//
-	// Instead, put this functionality into the JOIN ON clause.
+	// Instead, put this functionality into the JOIN ON clause, in the above "if" block.
 	else
 	{
 		if (!child_variable_group_raw_data_columns.has_no_datetime_columns_originally)
