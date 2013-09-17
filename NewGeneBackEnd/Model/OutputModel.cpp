@@ -730,6 +730,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	WidgetInstanceIdentifier first_variable_group;
 
 	// Display primary key columns
+
+	// First, display primary key columns with multiplicity of 1
+
 	bool first = true;
 	int column_index = 0;
 	bool reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
@@ -762,6 +765,13 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 					return; // only display primary key columns of multiplicity 1 once - from the first inner table of the first primary variable group
 				}
 			}
+		}
+
+		if (   unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
+			&& unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+		{
+			++column_index; // We are currently displaying keys of multiplicity 1
+			return;
 		}
 
 		switch (unformatted_column.column_type)
@@ -837,6 +847,150 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 					formatted_column.column_name_in_temporary_table = "DATETIME_END";
 				}
 				break;
+		}
+
+		if (!first)
+		{
+			sql_string += ", ";
+		}
+		first = false;
+
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += "CAST (";
+		}
+
+		sql_string += unformatted_column.column_name_in_temporary_table;
+
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_numeric)
+		{
+			sql_string += " AS INTEGER)";
+		}
+
+		sql_string += " AS ";
+		sql_string += formatted_column.column_name_in_temporary_table;
+
+		++column_index;
+
+	});
+
+
+	// Then, display primary key columns with multiplicity greater than 1
+
+	bool first = true;
+	int column_index = 0;
+	bool reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
+	std::string datetimestart_timestamp_colname;
+	std::string datetimeend_timestamp_colname;
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &datetimestart_timestamp_colname, &datetimeend_timestamp_colname, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	{
+
+		if (column_index == 0)
+		{
+			first_variable_group = unformatted_column.variable_group_associated_with_current_inner_table;
+		}
+
+		if (!unformatted_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
+		{
+			if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			{
+				++column_index;
+				return; // Only display primary key columns from the first primary variable group
+			}
+		}
+
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+		{
+			if (reached_end_of_first_inner_table_not_including_terminating_datetime_columns)
+			{
+				if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+				{
+					++column_index;
+					return; // only display primary key columns of multiplicity 1 once - from the first inner table of the first primary variable group
+				}
+			}
+		}
+
+		if (   unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
+			&& unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+		{
+			++column_index; // We are currently displaying keys of multiplicity greater than 1
+			return;
+		}
+
+		switch (unformatted_column.column_type)
+		{
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_CHILD_MERGE:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT:
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT:
+			{
+				reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
+				++column_index;
+				return; // only display a single pair of time range columns
+			}
+			break;
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
+			{
+				datetimestart_timestamp_colname = unformatted_column.column_name_in_temporary_table;
+				reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
+				++column_index;
+				return; // only display a single pair of time range columns
+			}
+			break;
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT:
+			{
+				datetimeend_timestamp_colname = unformatted_column.column_name_in_temporary_table;
+				reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
+				++column_index;
+				return; // only display a single pair of time range columns
+			}
+			break;
+		}
+
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			++column_index;
+			return; // display secondary keys only after primary keys
+		}
+
+		result_columns.columns_in_view.push_back(unformatted_column);
+		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
+
+		formatted_column.column_name_in_temporary_table = formatted_column.column_name_in_original_data_table;
+
+		if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+		{
+			formatted_column.column_name_in_temporary_table += "_";
+			formatted_column.column_name_in_temporary_table += itoa(unformatted_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg, c, 10);
+		}
+
+		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
+
+		switch (unformatted_column.column_type)
+		{
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
+			{
+				formatted_column.column_name_in_temporary_table = "DATETIME_START";
+			}
+			break;
+		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
+			{
+				formatted_column.column_name_in_temporary_table = "DATETIME_END";
+			}
+			break;
 		}
 
 		if (!first)
