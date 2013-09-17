@@ -229,6 +229,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText(msg_start.str(), nullptr);
 
 	InputModel & input_model = model->getInputModel();
+
+	BOOST_SCOPE_EXIT(&model)
+	{
+		// This is also done explicity at the end,
+		// but it's better to include in both places,
+		// the first (at end) so that user can benefit from status text,
+		// and the second (here) in case of exit due to failure
+		model.ClearRemnantTemporaryTables();
+		model.VacuumDatabase();
+	} BOOST_SCOPE_EXIT_END
+
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, &input_model);
 	the_map = &the_map_;
 
@@ -376,6 +387,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
 	messager.SetPerformanceLabel("Vacuuming and defragmenting database...");
+	model->ClearRemnantTemporaryTables();
 	model->VacuumDatabase();
 
 	messager.UpdateProgressBarValue(1000);
@@ -6242,7 +6254,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				else
 				{
-					view_name += "S";
+					view_name += "NGTEMP_S";
 				}
 			}
 			break;
