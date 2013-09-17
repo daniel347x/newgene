@@ -134,6 +134,7 @@ class ColumnsInTempView
 					, is_within_inner_table_corresponding_to_top_level_uoa(false)
 					, inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables(-1)
 					, number_inner_tables_in_set(-1)
+					, originally_datetime(false)
 				{
 
 				}
@@ -172,6 +173,7 @@ class ColumnsInTempView
 				int total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category;
 				int total_k_spin_count_across_multiplicities_for_dmu_category;
 				bool primary_key_should_be_treated_as_numeric;
+				bool originally_datetime;
 
 		};
 
@@ -406,6 +408,14 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 			private:
 
+				enum XR_TABLE_CATEGORY
+				{
+					  PRIMARY_VARIABLE_GROUP
+					, FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP
+					, CHILD_VARIABLE_GROUP
+					, KAD_RESULTS
+				};
+
 				class SavedRowData
 				{
 
@@ -421,7 +431,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						}
 
 						void Clear();
-						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result);
+						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result, XR_TABLE_CATEGORY const xr_table_category);
 
 						SavedRowData & GetSavedRowData() { return *this; }
 
@@ -497,14 +507,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						void ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<long double>> & inner_table_primary_key_groups) const;
 						void ReturnAllNonNullPrimaryKeyGroups(std::set<std::vector<std::string>> & inner_table_primary_key_groups) const;
 
-				};
-
-				enum XR_TABLE_CATEGORY
-				{
-					  PRIMARY_VARIABLE_GROUP
-					, FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP
-					, CHILD_VARIABLE_GROUP
-					, KAD_RESULTS
 				};
 
 				class ColumnSorter

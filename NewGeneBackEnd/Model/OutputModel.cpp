@@ -2554,7 +2554,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	number_of_multiplicities = 0;
 }
 
-void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & sorted_result_columns, sqlite3_stmt * stmt_result)
+void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & sorted_result_columns, sqlite3_stmt * stmt_result, XR_TABLE_CATEGORY const xr_table_category)
 {
 
 	Clear();
@@ -2612,7 +2612,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	reached_first_dates = false;
 	on_other_side_of_first_dates = false;
 	bool not_first_variable_group = false;
-	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &not_first_variable_group, &column_index_of_start_of_final_inner_table, &sorted_result_columns, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_float, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
+	std::for_each(sorted_result_columns.columns_in_view.cbegin(), sorted_result_columns.columns_in_view.cend(), [this, &xr_table_category, &not_first_variable_group, &column_index_of_start_of_final_inner_table, &sorted_result_columns, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_float, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 
 		inner_table_number.push_back(possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
@@ -2803,6 +2803,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 		}
 
+		bool add_as_secondary_datetime_column = possible_duplicate_view_column.originally_datetime;
 
 		column_data_type = sqlite3_column_type(stmt_result, current_column);
 		switch (column_data_type)
@@ -2812,44 +2813,62 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				{
 
 					data_int64 = sqlite3_column_int64(stmt_result, current_column);
-					current_parameter_ints.push_back(data_int64);
-					current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
 
-					indices_of_all_columns.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column)));
+					std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> binding;
+
+					// Special case!  Construction of final K-ad output, and this is a
+					// datetime column that the user has selected as a secondary data column.
+					if (xr_table_category == XR_TABLE_CATEGORY::KAD_RESULTS && add_as_secondary_datetime_column)
+					{
+						boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+						boost::posix_time::ptime time_database = time_t_epoch__1970 + boost::posix_time::milliseconds(data_int64);
+						std::string time_formatted = boost::posix_time::to_simple_string(time_database);
+						current_parameter_strings.push_back(time_formatted);
+						current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
+						binding = std::make_pair(SQLExecutor::STRING, std::make_pair((int)current_parameter_strings.size()-1, current_column));
+					}
+					else
+					{
+						current_parameter_ints.push_back(data_int64);
+						current_parameter_which_binding_to_use.push_back(SQLExecutor::INT64);
+						binding = std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column));
+					}
+
+					indices_of_all_columns.push_back(binding);
 
 					if (is_index_in_all_but_final_inner_table[current_column])
 					{
-						indices_of_all_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column)));
+						indices_of_all_columns_in_all_but_final_inner_table.push_back(binding);
 					}
 
 					if (is_index_in_final_inner_table[current_column])
 					{
-						indices_of_all_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column)));
+						indices_of_all_columns_in_final_inner_table.push_back(binding);
 					}
 					
 					if (is_index_a_primary_key_in_not_the_final_inner_table[current_column])
 					{
-						indices_of_all_primary_key_columns_in_all_but_final_inner_table.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column)));
+						indices_of_all_primary_key_columns_in_all_but_final_inner_table.push_back(binding);
 					}
 
 					if (is_index_a_primary_key_in_the_final_inner_table[current_column])
 					{
-						indices_of_all_primary_key_columns_in_final_inner_table.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column)));
+						indices_of_all_primary_key_columns_in_final_inner_table.push_back(binding);
 					}
 
 					if (is_index_a_primary_key[current_column])
 					{
-						indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column)));
+						indices_of_primary_key_columns.push_back(binding);
 					}
 
 					if (is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column)));
+						indices_of_primary_key_columns_with_multiplicity_greater_than_1.push_back(binding);
 					}
 
 					if (is_index_a_primary_key_with_outer_multiplicity_equal_to_1[current_column])
 					{
-						indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(std::make_pair(OutputModel::OutputGenerator::SQLExecutor::INT64, std::make_pair((int)current_parameter_ints.size()-1, current_column)));
+						indices_of_primary_key_columns_with_multiplicity_equal_to_1.push_back(binding);
 					}
 
 				}
@@ -3502,7 +3521,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		while (StepData())
 		{
 
-			sorting_row_of_data.PopulateFromCurrentRowInDatabase(previous_result_columns, stmt_result);
+			sorting_row_of_data.PopulateFromCurrentRowInDatabase(previous_result_columns, stmt_result, xr_table_category);
 
 			failed = sorting_row_of_data.failed;
 			if (failed)
@@ -7020,17 +7039,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Proceed to the secondary key columns.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
-		bool make_secondary = false;
+		bool make_secondary_datetime_column = false;
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 		{
 			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
 			//return; // Enforce that datetime columns appear last.
-			make_secondary = true;
+			make_secondary_datetime_column = true;
 		}
 		if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
 			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
-			if (!make_secondary)
+			if (!make_secondary_datetime_column)
 			{
 				return; // We are populating secondary columns now, so exit if this isn't one
 			}
@@ -7046,9 +7065,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (match)
 		{
 			result_columns.columns_in_view.push_back(column_in_view);
-			if (make_secondary)
+			if (make_secondary_datetime_column)
 			{
 				result_columns.columns_in_view.back().column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+				result_columns.columns_in_view.back().originally_datetime = true;
 			}
 		}
 	});
@@ -7889,16 +7909,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &primary_variable_group_raw_data_columns, &variables_selected, &second_table_column_count, &current_multiplicity](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
 	{
 	
-		bool skip_secondary_check = false;
+		bool make_secondary_datetime_column = false;
 		if (   new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 			|| new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 		{
 			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
 			//return; // Add these columns last
-			skip_secondary_check = true;
+			make_secondary_datetime_column = true;
 		}
 
-		if (!skip_secondary_check && new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (!make_secondary_datetime_column && new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
 			return; // We are populating secondary columns now, so exit if this isn't one
 		}
@@ -7931,9 +7951,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						+ (current_multiplicity - 1) * new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 				}
 			}
-			if (skip_secondary_check)
+			if (make_secondary_datetime_column)
 			{
 				new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+				new_column.originally_datetime = true;
 			}
 			++second_table_column_count;
 		}
@@ -9625,16 +9646,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Proceed to the secondary key columns.
 	std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(), child_variable_group_raw_data_columns.columns_in_view.cend(), [&first, &child_set_number, &variable_group_child, &uoa_child, &variables_selected, &result_columns, &second_table_column_count, &current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
 	{
-		bool skip_secondary_check = false;
+		bool make_secondary_datetime_column = false;
 		if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 		 || new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 		{
 			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
 			//return; // Add these columns last
-			skip_secondary_check = true;
+			make_secondary_datetime_column = true;
 		}
 
-		if (!skip_secondary_check && new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (!make_secondary_datetime_column && new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
 			return; // We are populating secondary columns now, so exit if this isn't one
 		}
@@ -9676,9 +9697,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					}
 				}
 			}
-			if (skip_secondary_check)
+			if (make_secondary_datetime_column)
 			{
 				new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+				new_column.originally_datetime = true;
 			}
 			++second_table_column_count;
 			if (first)
@@ -10640,7 +10662,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		while (StepData())
 		{
 
-			current_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result);
+			current_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result, xr_table_category);
 
 			if (failed || CheckCancelled())
 			{
