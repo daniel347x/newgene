@@ -72,6 +72,13 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				// ***************************************** //
 				OutputModel::OutputGenerator output_generator(messager, output_model, project);
 				output_generator.GenerateOutput(change_response);
+				if (!output_generator.done)
+				{
+					if (OutputModel::OutputGenerator::cancelled)
+					{
+						messager.AppendKadStatusText("Operation cancelled.", &output_generator);
+					}
+				}
 
 #				if 0
 				boost::format msg1("Number transactions begun: %1%");
@@ -90,11 +97,6 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 #				endif
 
 			});
-
-			if (OutputModel::OutputGenerator::cancelled)
-			{
-				messager.AppendKadStatusText("Operation cancelled.");
-			}
 
 			messager.EmitChangeMessage(change_response);
 

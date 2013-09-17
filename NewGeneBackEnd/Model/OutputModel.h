@@ -1038,6 +1038,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				static std::recursive_mutex is_generating_output_mutex;
 				static std::atomic<bool> is_generating_output;
 				static bool cancelled;
+				bool done;
 
 			private:
 

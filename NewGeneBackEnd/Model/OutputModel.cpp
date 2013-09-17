@@ -200,6 +200,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 {
 
 	cancelled = false;
+	done = false;
 
 	{
 		std::lock_guard<std::recursive_mutex> guard(is_generating_output_mutex);
@@ -413,6 +414,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		debug_sql_file << msg3.str() << std::endl;
 		debug_sql_file << msg4.str() << std::endl;
 	}
+
+	done = true;
 
 }
 
