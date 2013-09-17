@@ -230,14 +230,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	InputModel & input_model = model->getInputModel();
 
-	BOOST_SCOPE_EXIT(&model)
+	BOOST_SCOPE_EXIT(&input_model)
 	{
 		// This is also done explicity at the end,
 		// but it's better to include in both places,
 		// the first (at end) so that user can benefit from status text,
 		// and the second (here) in case of exit due to failure
-		model.ClearRemnantTemporaryTables();
-		model.VacuumDatabase();
+		input_model.ClearRemnantTemporaryTables();
+		input_model.VacuumDatabase();
 	} BOOST_SCOPE_EXIT_END
 
 	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map_ = model->t_variables_selected_identifiers.GetSelectedVariablesByUOA(model->getDb(), model, &input_model);
