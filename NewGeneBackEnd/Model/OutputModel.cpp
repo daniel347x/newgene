@@ -101,6 +101,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, initialized(false)
 	, timerange_start(0)
 	, timerange_end(0)
+	, at_least_one_variable_group_has_timerange(false)
 	, project(project_)
 	, messager(messager_)
 	, failed(false)
@@ -848,14 +849,14 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		switch (unformatted_column.column_type)
 		{
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
-			{
-				// only display datetime columns once
-				++column_index;
-				return;
-			}
-			break;
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
+				{
+					// only display datetime columns once
+					++column_index;
+					return;
+				}
+				break;
 		}
 
 		result_columns.columns_in_view.push_back(unformatted_column);
@@ -901,7 +902,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	column_index = 0;
 	reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
-	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &datetimestart_timestamp_colname, &datetimeend_timestamp_colname, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [this, &c, &datetimestart_timestamp_colname, &datetimeend_timestamp_colname, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
 		if (column_index == 0)
@@ -939,48 +940,64 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		switch (unformatted_column.column_type)
 		{
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_CHILD_MERGE:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT:
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT:
-			{
-				reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
-				++column_index;
-				return; // only display a single pair of time range columns
-			}
-			break;
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
-			{
-				reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
-				++column_index;
-				return; // only display a single pair of time range columns
-			}
-			break;
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT:
-			{
-				reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
-				++column_index;
-				return; // only display a single pair of time range columns
-			}
-			break;
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_CHILD_MERGE:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT:
+				{
+					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
+					++column_index;
+					return; // only display a single pair of time range columns
+				}
+				break;
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
+				{
+					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
+					++column_index;
+					return; // only display a single pair of time range columns
+				}
+				break;
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT:
+				{
+					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
+					++column_index;
+					return; // only display a single pair of time range columns
+				}
+				break;
 		}
 
 		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
 			++column_index;
 			return; // display secondary keys only after primary keys
+		}
+
+		if (!at_least_one_variable_group_has_timerange)
+		{
+			// If no variable groups selected by user have a datetime associated with them,
+			// do not output datetime columns
+			switch (unformatted_column.column_type)
+			{
+				case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
+				case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
+					{
+						++column_index;
+						return;
+					}
+					break;
+			}
 		}
 
 		result_columns.columns_in_view.push_back(unformatted_column);
@@ -998,16 +1015,16 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 		switch (unformatted_column.column_type)
 		{
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
-			{
-				formatted_column.column_name_in_temporary_table = "DATETIME_START_OUTPUTROW";
-			}
-			break;
-		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
-			{
-				formatted_column.column_name_in_temporary_table = "DATETIME_END_OUTPUTROW";
-			}
-			break;
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
+				{
+					formatted_column.column_name_in_temporary_table = "DATETIME_START_OUTPUTROW";
+				}
+				break;
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
+				{
+					formatted_column.column_name_in_temporary_table = "DATETIME_END_OUTPUTROW";
+				}
+				break;
 		}
 
 		if (!first)
@@ -7382,6 +7399,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
 			datetime_end_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 		}
+		else
+		{
+			at_least_one_variable_group_has_timerange = true;
+		}
 	}
 
 	return result;
@@ -10224,6 +10245,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = child_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
 		datetime_end_column.number_inner_tables_in_set = child_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
+	}
+	else
+	{
+		at_least_one_variable_group_has_timerange = true;
 	}
 
 	return result;

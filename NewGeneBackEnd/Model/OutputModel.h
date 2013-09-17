@@ -1024,6 +1024,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				std::int64_t timerange_start;
 				std::int64_t timerange_end;
+				bool at_least_one_variable_group_has_timerange;
 
 				bool failed;
 
