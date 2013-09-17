@@ -96,6 +96,13 @@ class Model_basemost
 			}
 			int step_result = 0;
 
+			// must store table names in a vector,
+			// because if we try to delete them
+			// while iterating through the table names themselves,
+			// the entire database is locked because we're still executing
+			// the SQL that returns the table names and so the attempt to delete fails due to locked database
+			std::vector<std::string> tables_to_delete;
+
 			while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 			{
 				char const * table_name_ = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 0));
@@ -105,15 +112,7 @@ class Model_basemost
 				{
 					if (boost::iequals(table_name.substr(0, prefix.size()), prefix))
 					{
-						boost::format drop_stmt("DROP TABLE IF EXISTS %1%");
-						drop_stmt % table_name;
-						char * errmsg = nullptr;
-						sqlite3_exec(db, drop_stmt.str().c_str(), NULL, NULL, &errmsg);
-						if (errmsg != nullptr)
-						{
-							// todo - handle very rare and mostly harmless error at some point in the future
-							sqlite3_free(errmsg);
-						}
+						tables_to_delete.push_back(table_name);
 					}
 				}
 			}
@@ -123,6 +122,19 @@ class Model_basemost
 				sqlite3_finalize(stmt);
 				stmt = nullptr;
 			}
+
+			std::for_each(tables_to_delete.cbegin(), tables_to_delete.cend(), [this](std::string const & table_to_delete)
+			{
+				boost::format drop_stmt("DROP TABLE IF EXISTS %1%");
+				drop_stmt % table_to_delete;
+				char * errmsg = nullptr;
+				sqlite3_exec(db, drop_stmt.str().c_str(), NULL, NULL, &errmsg);
+				if (errmsg != nullptr)
+				{
+					// todo - handle very rare and mostly harmless error at some point in the future
+					sqlite3_free(errmsg);
+				}
+			});
 		}
 
 	protected:

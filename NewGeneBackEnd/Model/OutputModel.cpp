@@ -230,6 +230,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	InputModel & input_model = model->getInputModel();
 
+	input_model.ClearRemnantTemporaryTables();
+
 	BOOST_SCOPE_EXIT(&input_model)
 	{
 		// This is also done explicity at the end,
