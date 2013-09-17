@@ -838,13 +838,10 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		switch (unformatted_column.column_type)
 		{
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
-				{
-					formatted_column.column_name_in_temporary_table = "DATETIME_START";
-				}
-				break;
 			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
 				{
-					formatted_column.column_name_in_temporary_table = "DATETIME_END";
+					++column_index;
+					return; // only display datetime columns once
 				}
 				break;
 		}
@@ -877,11 +874,8 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 
 	// Then, display primary key columns with multiplicity greater than 1
 
-	bool first = true;
-	int column_index = 0;
+	column_index = 0;
 	bool reached_end_of_first_inner_table_not_including_terminating_datetime_columns = false;
-	std::string datetimestart_timestamp_colname;
-	std::string datetimeend_timestamp_colname;
 	std::for_each(all_merged_results_unformatted.second.columns_in_view.begin(), all_merged_results_unformatted.second.columns_in_view.end(), [&c, &datetimestart_timestamp_colname, &datetimeend_timestamp_colname, &reached_end_of_first_inner_table_not_including_terminating_datetime_columns, &sql_string, &first, &first_variable_group, &result_columns, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
 
@@ -944,7 +938,6 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			break;
 		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
 			{
-				datetimestart_timestamp_colname = unformatted_column.column_name_in_temporary_table;
 				reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
 				++column_index;
 				return; // only display a single pair of time range columns
@@ -952,7 +945,6 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			break;
 		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT:
 			{
-				datetimeend_timestamp_colname = unformatted_column.column_name_in_temporary_table;
 				reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
 				++column_index;
 				return; // only display a single pair of time range columns
