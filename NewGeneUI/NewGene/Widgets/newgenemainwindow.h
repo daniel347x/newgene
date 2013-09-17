@@ -39,6 +39,7 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 
 	protected:
 		void changeEvent( QEvent * e );
+		void closeEvent(QCloseEvent *event);
 
 	private slots:
 		void on_actionClose_Current_Input_Dataset_triggered();

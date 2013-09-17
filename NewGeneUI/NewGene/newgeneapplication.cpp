@@ -1,6 +1,4 @@
 #include "newgeneapplication.h"
-#include <QCloseEvent>
-#include "../../../../NewGeneBackEnd/Model/OutputModel.h"
 
 NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QApplication( argc, argv )
@@ -89,27 +87,4 @@ void NewGeneApplication::showErrorBox(std::string const theMsg)
 	QMessageBox msgBox;
 	msgBox.setText( msg.str().c_str() );
 	msgBox.exec();
-}
-
-void NewGeneApplication::closeEvent(QCloseEvent *event)
-{
-	{
-		std::lock_guard<std::recursive_mutex> guard(OutputModel::OutputGenerator::is_generating_output_mutex);
-		if (OutputModel::OutputGenerator::is_generating_output)
-		{
-			QMessageBox::StandardButton reply;
-			reply = QMessageBox::question(nullptr, QString("Cancel"), QString("Are you sure you wish to cancel?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-			if (reply == QMessageBox::Yes)
-			{
-				// No lock - not necessary for a boolean checked multiple times by back end and that will not cause an error if it is messed up in extraordinarily rare circumstances
-				OutputModel::OutputGenerator::cancelled = true;
-			}
-			else
-			{
-				event->ignore();
-				return;
-			}
-		}
-	}
-	event->accept();
 }

@@ -22,6 +22,7 @@
 #	include <boost/filesystem.hpp>
 #endif
 #include <QFileDialog>
+#include <QCloseEvent>
 
 NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	QMainWindow( parent ),
@@ -243,4 +244,27 @@ void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 void NewGeneMainWindow::on_actionClose_Current_Output_Dataset_triggered()
 {
 	emit SignalCloseCurrentOutputDataset();
+}
+
+void NewGeneMainWindow::closeEvent(QCloseEvent *event)
+{
+	{
+		std::lock_guard<std::recursive_mutex> guard(OutputModel::OutputGenerator::is_generating_output_mutex);
+		if (OutputModel::OutputGenerator::is_generating_output)
+		{
+			QMessageBox::StandardButton reply;
+			reply = QMessageBox::question(nullptr, QString("Exit?"), QString("A K-ad output set is being generated.  Are you sure you wish to exit?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::Yes)
+			{
+				// No lock - not necessary for a boolean checked multiple times by back end and that will not cause an error if it is messed up in extraordinarily rare circumstances
+				OutputModel::OutputGenerator::cancelled = true;
+			}
+			else
+			{
+				event->ignore();
+				return;
+			}
+		}
+	}
+	event->accept();
 }
