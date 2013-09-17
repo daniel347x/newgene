@@ -14,6 +14,7 @@
 #endif
 
 #include <fstream>
+#include <algorithm>
 
 std::recursive_mutex OutputModel::OutputGenerator::is_generating_output_mutex;
 std::atomic<bool> OutputModel::OutputGenerator::is_generating_output = false;
@@ -2931,6 +2932,13 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				{
 
 					data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, current_column));
+
+					// Special case!  Construction of final K-ad output, so commas need to be removed
+					if (xr_table_category == XR_TABLE_CATEGORY::KAD_RESULTS)
+					{
+						std::replace(data_string.begin(), data_string.end(), ',', ' ');
+					}
+
 					current_parameter_strings.push_back(data_string);
 					current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
 
