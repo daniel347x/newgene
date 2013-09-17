@@ -119,7 +119,12 @@ void NewGeneGenerateOutput::ReceiveSignalSetPerformanceLabel(int progress_bar_id
 	QLabel * label_ = findChild<QLabel *>( "labelOngoingPerformance" );
 	if (label_)
 	{
-		label_->setText(performance_measure_text.c_str());
+		QString html_prefix("<span style=\"font-size:14pt; font-weight:600; color:#aa0000;\">");
+		QString html_postfix("</span>");
+		QString html_text = html_prefix;
+		html_text += QString(performance_measure_text.c_str());
+		html_text += html_postfix;
+		label_->setText(html_text);
 	}
 }
 

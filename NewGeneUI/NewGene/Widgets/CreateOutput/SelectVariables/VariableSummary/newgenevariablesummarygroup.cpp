@@ -131,6 +131,7 @@ void NewGeneVariableSummaryGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIAB
 
 		   QStandardItem * item = new QStandardItem();
 		   item->setText(QString(identifier.longhand->c_str()));
+		   item->setEditable(false);
 		   QVariant v;
 		   v.setValue(identifier);
 		   item->setData(v);
