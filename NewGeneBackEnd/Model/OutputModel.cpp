@@ -17,6 +17,7 @@
 
 std::recursive_mutex OutputModel::OutputGenerator::is_generating_output_mutex;
 std::atomic<bool> OutputModel::OutputGenerator::is_generating_output = false;
+bool OutputModel::OutputGenerator::cancelled = false;
 
 int OutputModel::OutputGenerator::SQLExecutor::number_statement_prepares = 0;
 int OutputModel::OutputGenerator::SQLExecutor::number_statement_finalizes = 0;
@@ -103,7 +104,6 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, project(project_)
 	, messager(messager_)
 	, failed(false)
-	, cancelled(false)
 	, overwrite_if_output_file_already_exists(false)
 	, rough_progress_range(0)
 	, rough_progress_increment_one_percent(0)
@@ -201,6 +201,8 @@ OutputModel::OutputGenerator::~OutputGenerator()
 void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_response)
 {
 
+	cancelled = false;
+
 	{
 		std::lock_guard<std::recursive_mutex> guard(is_generating_output_mutex);
 		if (is_generating_output)
@@ -211,9 +213,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		is_generating_output = true;
 	}
 
-	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager)
+	bool & is_cancelled = cancelled;
+	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager, &is_cancelled)
 	{
 		is_generating_output = false;
+		is_cancelled = false;
 		messager.SetPerformanceLabel("");
 	} BOOST_SCOPE_EXIT_END
 
@@ -270,7 +274,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	setting_path_to_kad_output = CheckOutputFileExists();
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -291,11 +295,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		}
 	} BOOST_SCOPE_EXIT_END
 
-		debug_sql_file.open(debug_sql_path.string(), std::ios::out | std::ios::trunc);
+	debug_sql_file.open(debug_sql_path.string(), std::ios::out | std::ios::trunc);
 
 	if (!debug_sql_file.is_open())
 	{
-		int m = 0;
+		// for now - harmless
 	}
 
 	current_progress_stage = 0;
@@ -308,7 +312,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	Prepare();
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -316,14 +320,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText("Preparing input data...", this);
 	ObtainColumnInfoForRawDataTables();
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
 
 	DetermineNumberStages();
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -331,7 +335,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText("Looping through top-level variable groups...", this);
 	LoopThroughPrimaryVariableGroups();
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -339,7 +343,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText("Merging top-level variable groups...", this);
 	MergeHighLevelGroupResults();
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -347,7 +351,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText("Merging child variable groups...", this);
 	MergeChildGroups();
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -356,7 +360,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.SetPerformanceLabel("Formatting results...");
 	FormatResultsForOutput();
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -365,7 +369,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.SetPerformanceLabel("Writing results to disk...");
 	WriteResultsToFileOrScreen();
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -413,7 +417,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &duplicates_removed, &current_child_view_name_index, &child_set_number, &x_table_result, &xr_table_result](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -458,7 +462,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			ExecuteSQL(x_table_result);
 			ClearTable(xr_table_result);
 			merging_of_children_column_sets.push_back(x_table_result);
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
@@ -474,13 +478,13 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
 			ClearTable(x_table_result);
 			merging_of_children_column_sets.push_back(xr_table_result);
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
 
 			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, child_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), current_multiplicity, child_set_number, merging_of_children_column_sets, true, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, false, true);
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
@@ -493,7 +497,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 
 	});
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -518,7 +522,7 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 
 	std::string setting_path_to_kad_output = CheckOutputFileExists();
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -564,7 +568,7 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 
 		ObtainData(final_result.second);
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -579,7 +583,7 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 		while (StepData())
 		{
 
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				break;
 			}
@@ -590,7 +594,7 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 			std::for_each(final_result.second.columns_in_view.begin(), final_result.second.columns_in_view.end(), [this, &output_file, &data_int64, &data_string, &data_long, &first, &column_index, &column_data_type](ColumnsInTempView::ColumnInTempView & unformatted_column)
 			{
 
-				if (failed)
+				if (failed || CheckCancelled())
 				{
 					return;
 				}
@@ -677,7 +681,7 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 
 			});
 
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
@@ -688,7 +692,7 @@ void OutputModel::OutputGenerator::WriteResultsToFileOrScreen()
 
 		}
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -1171,7 +1175,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
 
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryMergeXRTable(intermediate_merging_of_primary_groups_column_sets.back().second);
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -1179,7 +1183,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	ExecuteSQL(xr_table_result);
 	ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 	intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -1195,7 +1199,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 	std::for_each(primary_group_final_results.cbegin(), primary_group_final_results.cend(), [this, &duplicates_removed, &number_of_rows_to_sort, &rows_estimate, &raw_rows_count, &xr_table_result, &intermediate_merge_of_top_level_primary_group_results, &count](SqlAndColumnSet const & primary_variable_group_final_result)
 	{
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -1230,7 +1234,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			UpdateProgressBarToNextStage(msg_.str(), std::string());
 
 			intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, duplicates_removed, count);
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
@@ -1239,7 +1243,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			ClearTable(primary_variable_group_final_result);
 			intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
@@ -1254,14 +1258,14 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count);
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
 
 			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_final_result.second.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), -1, count, intermediate_merging_of_primary_groups_column_sets, true, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, false, true);
 
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
@@ -1270,7 +1274,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		++count;
 	});
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -2123,12 +2127,12 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
 		SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, primary_group_number, true);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -2180,14 +2184,14 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [this, &child_set_number](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
 
 		// Call the following function, even though this is a child variable group, just to get a count
 		SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(child_variable_group_raw_data_columns, child_set_number, true);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -2247,14 +2251,14 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 	int primary_group_number = 1;
 	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
 		SqlAndColumnSet primary_group_final_result = ConstructFullOutputForSinglePrimaryGroup(primary_variable_group_raw_data_columns, primary_group_column_sets, primary_group_number);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -2289,7 +2293,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	x_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(x_table_result);
 	sql_and_column_sets.push_back(x_table_result);
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return SqlAndColumnSet();
 	}
@@ -2299,7 +2303,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	ExecuteSQL(xr_table_result);
 	ClearTables(sql_and_column_sets);
 	sql_and_column_sets.push_back(xr_table_result);
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return SqlAndColumnSet();
 	}
@@ -2309,7 +2313,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = xr_table_result.second.columns_in_view.size(); // This class-global variable must be set
 	SqlAndColumnSet duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false);
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return SqlAndColumnSet();
 	}
@@ -2352,7 +2356,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		ExecuteSQL(x_table_result);
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(x_table_result);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return SqlAndColumnSet();
 		}
@@ -2383,7 +2387,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// ******************************************************************************************************************* //
 		std::int64_t rows_added = 0;
 		SqlAndColumnSet sorted_within_rows_prior_to_xr_processing = RemoveDuplicates_Or_OrderWithinRows(x_table_result.second, primary_group_number, rows_added, current_multiplicity, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true, false);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return SqlAndColumnSet();
 		}
@@ -2402,7 +2406,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// Do not remove duplicates.
 		// ******************************************************************************************************************* //
 		SqlAndColumnSet intermediate_duplicates_removed = SortAndOrRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows"), std::string(""), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return SqlAndColumnSet();
 		}
@@ -2450,7 +2454,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		xr_table_result = CreateXRTable(intermediate_duplicates_removed.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(xr_table_result);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return SqlAndColumnSet();
 		}
@@ -2472,14 +2476,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// ******************************************************************************************************************* //
 		duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, false, true);
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return SqlAndColumnSet();
 		}
 
 	}
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return SqlAndColumnSet();
 	}
@@ -2593,7 +2597,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			number_of_multiplicities = possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
 		}
 
-		if (failed)
+		if (failed || OutputModel::OutputGenerator::CheckCancelled())
 		{
 			return;
 		}
@@ -3067,6 +3071,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		SetFailureMessage(sql_error);
 		return result;
 	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
 
 
 	// Add the "merged" time range columns
@@ -3106,6 +3114,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				SetFailureMessage(sql_error);
 				return result;
 			}
+			if (CheckCancelled())
+			{
+				return result;
+			}
 
 			result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 			ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
@@ -3138,6 +3150,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			if (failed)
 			{
 				SetFailureMessage(sql_error);
+				return result;
+			}
+			if (CheckCancelled())
+			{
 				return result;
 			}
 
@@ -3218,6 +3234,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		if (failed)
 		{
 			SetFailureMessage(sql_error);
+			return result;
+		}
+		if (CheckCancelled())
+		{
 			return result;
 		}
 
@@ -3332,6 +3352,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			SetFailureMessage(sql_error);
 			return result;
 		}
+		if (CheckCancelled())
+		{
+			return result;
+		}
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
@@ -3384,7 +3408,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 	ExecuteSQL(result); // Executes all SQL queries up to the current one
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return result;
 	}
@@ -3427,7 +3451,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 		ObtainData(previous_result_columns);
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return result;
 		}
@@ -3452,6 +3476,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			if (failed)
 			{
 				SetFailureMessage(sorting_row_of_data.error_message);
+				return result;
+			}
+			if (CheckCancelled())
+			{
 				return result;
 			}
 
@@ -3480,7 +3508,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 					PopulateSplitRowInfo_FromCurrentMergingColumns(row_inserts_info, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, sorting_row_of_data, xr_table_category);
 					std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &current_datetime_start_column_index, &current_datetime_end_column_index, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &order_within_rows, &dummy, &dummystr, &previous_result_columns, &dummycols, &ordering_within_rows_data, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &sorting_row_of_data, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &xr_table_category](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
 					{
-						if (failed)
+						if (failed || CheckCancelled())
 						{
 							return;
 						}
@@ -3514,7 +3542,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 						added = CreateNewXRRow(sorting_row_of_data.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_result_columns, dummycols, include_previous_data, include_current_data, xr_table_category, false, order_within_rows);
 						remove_self_kads = true;
 
-						if (failed)
+						if (failed || CheckCancelled())
 						{
 							return;
 						}
@@ -3553,7 +3581,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 				WriteRowsToFinalTable(ordering_within_rows_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, xr_table_category, order_within_rows);
 
-				if (failed)
+				if (failed || CheckCancelled())
 				{
 					break;
 				}
@@ -3602,7 +3630,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			use_newest_row_index = false;
 			bool primary_keys_match = TestPrimaryKeyMatch(sorting_row_of_data, rows_to_sort[which_previous_row_index_to_test_against], use_newest_row_index, PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_KEYS);
 
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				break;
 			}
@@ -3627,7 +3655,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				use_newest_row_index = false;
 				RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction, xr_table_category, consider_merging_timerange_adjacent_identical_rows, datetime_start_col_name_text, datetime_end_col_name_text);
 				which_previous_row_index_to_test_against = 0;
-				if (failed)
+				if (failed || CheckCancelled())
 				{
 					return result;
 				}
@@ -3649,7 +3677,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			{
 				RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction, xr_table_category, consider_merging_timerange_adjacent_identical_rows, datetime_start_col_name_text, datetime_end_col_name_text);
 				which_previous_row_index_to_test_against = 0;
-				if (failed)
+				if (failed || CheckCancelled())
 				{
 					return result;
 				}
@@ -3663,7 +3691,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		messager.SetPerformanceLabel(msg.str());
 		EndTransaction();
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return result;
 		}
@@ -3734,7 +3762,7 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 		// merge from:
 		// current_row_of_data.datetime_start to current_row_of_data.datetime_end
 		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row, xr_table_category);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return false;
 		}
@@ -3754,7 +3782,7 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 		// merge from:
 		// current_row_of_data.datetime_start to current_row_of_data.datetime_end
 		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row, xr_table_category);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return false;
 		}
@@ -3771,7 +3799,7 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 		// merge from:
 		// first_incoming_row.datetime_start to first_incoming_row.datetime_end
 		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row, xr_table_category);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return false;
 		}
@@ -4152,7 +4180,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [this, &one_multiplicity, &current_row_inner_table_data_to_use, &previous_row_inner_table_data_to_use, &current__current_inner_table, &previous__current_inner_table, &most_recent_current_offset, &most_recent_previous_offset, &xr_table_category, &current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector,  &inner_multiplicity_string_vector, &use_strings, &use_ints, &use_floats, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &saved_floats_deque, &current_row_of_data, &int_index_current, &float_index_current, &string_index_current, &int_index_previous, &float_index_previous, &string_index_previous, &current_index, &previous_row_of_data, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
 	{
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -5883,7 +5911,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &datetimestart_text_colname, &datetimeend_text_colname, &no_new_column_names, &xr_table_category, &statement_is_prepared, &datetime_start_col_name, &datetime_end_col_name, &the_prepared_stmt, &sql_strings, &db, &result_columns_view_name, &preliminary_sorted_top_level_variable_group_result_columns, &current_rows_added, &current_rows_added_since_execution, &sql_add_xr_row, &first_row_added, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use](SavedRowData const & row_of_data)
 	{
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -6024,7 +6052,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 		}
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -6046,7 +6074,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 		std::for_each(row_of_data.current_parameter_which_binding_to_use.cbegin(), row_of_data.current_parameter_which_binding_to_use.cend(), [this, &row_of_data, &data_int64, &data_float, &data_string, &data_long, &first_column_value, &int_index, &float_index, &string_index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use](SQLExecutor::WHICH_BINDING const & the_binding)
 		{
 
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
@@ -6177,6 +6205,11 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 			SetFailureMessage(sql_error);
 			return;
 		}
+		if (CheckCancelled())
+		{
+			return;
+		}
+
 		//the_prepared_stmt = sql_strings.back().stmt;
 		the_prepared_stmt = SQLExecutor::stmt_insert;
 		++current_rows_added;
@@ -6268,6 +6301,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		SetFailureMessage(sql_error);
 		return result;
 	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
 
 	return result;
 
@@ -6281,7 +6318,7 @@ bool OutputModel::OutputGenerator::StepData()
 		return false;
 	}
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return false;
 	}
@@ -6426,7 +6463,7 @@ void OutputModel::OutputGenerator::ExecuteSQL(SqlAndColumnSet & sql_and_column_s
 	std::for_each(sql_commands.begin() + (sql_and_column_set.second.most_recent_sql_statement_executed__index + 1), sql_commands.end(), [this, &number_executed, &sql_and_column_set](SQLExecutor & sql_executor)
 	{
 		
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -6646,7 +6683,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Empty(bool const empty_sql)
 void OutputModel::OutputGenerator::SQLExecutor::Execute()
 {
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -6863,7 +6900,7 @@ bool OutputModel::OutputGenerator::SQLExecutor::Step()
 		return false;
 	}
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return false;
 	}
@@ -7250,6 +7287,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				SetFailureMessage(sql_error);
 				return result;
 			}
+			if (CheckCancelled())
+			{
+				return result;
+			}
 
 			result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 			ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
@@ -7279,6 +7320,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			if (failed)
 			{
 				SetFailureMessage(sql_error);
+				return result;
+			}
+			if (CheckCancelled())
+			{
 				return result;
 			}
 
@@ -7406,6 +7451,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		SetFailureMessage(sql_error);
 		return result;
 	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
 
 	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
@@ -7435,6 +7484,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	if (failed)
 	{
 		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
 		return result;
 	}
 
@@ -7468,6 +7521,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	if (failed)
 	{
 		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
 		return result;
 	}
 
@@ -7566,6 +7623,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		SetFailureMessage(sql_error);
 		return result;
 	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
 
 	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
@@ -7596,6 +7657,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	if (failed)
 	{
 		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
 		return result;
 	}
 
@@ -7629,6 +7694,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	if (failed)
 	{
 		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
 		return result;
 	}
 
@@ -8144,6 +8213,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			SetFailureMessage(sql_error);
 			return result;
 		}
+		if (CheckCancelled())
+		{
+			return result;
+		}
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
@@ -8173,6 +8246,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (failed)
 		{
 			SetFailureMessage(sql_error);
+			return result;
+		}
+		if (CheckCancelled())
+		{
 			return result;
 		}
 
@@ -8327,7 +8404,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 	}
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return false;
 	}
@@ -8471,7 +8548,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [this, &current_row_of_data, &which_inner_table, &inner_table_columns, &swap_current_and_previous_and_set_previous_to_null, &number_nulls_to_add_at_end, &xr_table_category, &number_columns_each_single_inner_table, &highest_index_previous_table, &data_int64, &data_float, &data_string, &do_not_include_this_data, &column_data_type, &first_column_value, &index, &cindex, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &include_previous_data, &include_current_data](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -9328,7 +9405,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 		}
 	}
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return false;
 	}
@@ -10038,6 +10115,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			SetFailureMessage(sql_error);
 			return result;
 		}
+		if (CheckCancelled())
+		{
+			return result;
+		}
 
 		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
@@ -10067,6 +10148,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (failed)
 		{
 			SetFailureMessage(sql_error);
+			return result;
+		}
+		if (CheckCancelled())
+		{
 			return result;
 		}
 
@@ -10185,8 +10270,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		SetFailureMessage(sql_error);
 		return result;
 	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
 
-	
+
 	// Pull from the simple datetime columns at the end of the previous X table, which are guaranteed to be in place
 	WidgetInstanceIdentifier variable_group = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view[previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.size()-1].variable_group_associated_with_current_inner_table;
 	WidgetInstanceIdentifier uoa = previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view[previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.columns_in_view.size()-1].uoa_associated_with_variable_group_associated_with_current_inner_table;
@@ -10225,6 +10314,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	if (failed)
 	{
 		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
 		return result;
 	}
 
@@ -10311,6 +10404,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		SetFailureMessage(sql_error);
 		return result;
 	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
 
 	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
 	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
@@ -10376,7 +10473,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	ExecuteSQL(result); // Executes all SQL queries up to the current one
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return result;
 	}
@@ -10405,7 +10502,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		ObtainData(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return result;
 		}
@@ -10463,7 +10560,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			current_row_of_data.PopulateFromCurrentRowInDatabase(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, stmt_result);
 
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				break;
 			}
@@ -10501,20 +10598,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						datetime_end = timerange_end;
 					}
 					bool added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category, false, false);
-					if (failed)
+					if (failed || CheckCancelled())
 					{
 						break;
 					}
 					if (added)
 					{
 						SQLExecutor::Execute(false, SQLExecutor::DOES_NOT_RETURN_ROWS, this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true);
-						//sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 						if (failed)
 						{
 							SetFailureMessage(sql_error);
 							return result;
 						}
-						//the_prepared_stmt = sql_strings.back().stmt;
+						if (CheckCancelled())
+						{
+							return result;
+						}
 						the_prepared_stmt = SQLExecutor::stmt_insert;
 						++current_rows_added;
 						++current_rows_added_since_execution;
@@ -10543,7 +10642,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 															  // Note: important 4th parameter: See note above
 															  PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_INNER_TABLE);
 
-				if (failed)
+				if (failed || CheckCancelled())
 				{
 					break;
 				}
@@ -10591,7 +10690,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 					HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__floatkeys, multiplicity_one_time_ranges__stringkeys, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 
-					if (failed)
+					if (failed || CheckCancelled())
 					{
 						break;
 					}
@@ -10607,12 +10706,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					if (!primary_keys_match_on_multiplicity_1)
 					{
 						EliminateRedundantNullsInFinalInnerTable(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__floatkeys, multiplicity_one_time_ranges__stringkeys);
-						if (failed)
+						if (failed || CheckCancelled())
 						{
 							return result;
 						}
 						AddRowsToXRTable(saved_rows_with_null_in_final_inner_table, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
-						if (failed)
+						if (failed || CheckCancelled())
 						{
 							return result;
 						}
@@ -10620,7 +10719,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						multiplicity_one_time_ranges__floatkeys.clear();
 						multiplicity_one_time_ranges__stringkeys.clear();
 						saved_rows_with_null_in_final_inner_table.clear();
-						if (failed)
+						if (failed || CheckCancelled())
 						{
 							return result;
 						}
@@ -10628,7 +10727,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 					//ExecuteSQL(result);
 
-					if (failed)
+					if (failed || CheckCancelled())
 					{
 						break;
 					}
@@ -10662,7 +10761,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &sql_strings, &current_rows_added, &current_rows_added_since_execution, &statement_is_prepared, &the_prepared_stmt, &current_row_of_data, &first_row_added, &include_current_data, &include_previous_data, &datetime_start_col_name, &datetime_end_col_name, &datetime_range_start, &datetime_range_end, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
 				{
 
-					if (failed)
+					if (failed || CheckCancelled())
 					{
 						return;
 					}
@@ -10681,20 +10780,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						datetime_range_end = timerange_end;
 					}
 					added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, include_previous_data, include_current_data, xr_table_category, false, false);
-					if (failed)
+					if (failed || CheckCancelled())
 					{
 						return;
 					}
 					if (added)
 					{
-						//sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 						SQLExecutor::Execute(false, SQLExecutor::DOES_NOT_RETURN_ROWS, this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, SQLExecutor::stmt_insert, true);
 						if (failed)
 						{
 							SetFailureMessage(sql_error);
 							return;
 						}
-						//the_prepared_stmt = sql_strings.back().stmt;
+						if (CheckCancelled())
+						{
+							return;
+						}
 						the_prepared_stmt = SQLExecutor::stmt_insert;
 						++current_rows_added;
 						++current_rows_added_since_execution;
@@ -10704,14 +10805,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			}
 
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return result;
 			}
 
-			//ExecuteSQL(result);
-
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return result;
 			}
@@ -10734,7 +10833,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		}
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return result;
 		}
@@ -10742,17 +10841,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 		{
 			HandleCompletionOfProcessingOfNormalizedGroupOfMatchingRowsInXRalgorithm(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__floatkeys, multiplicity_one_time_ranges__stringkeys, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return result;
 			}
 			EliminateRedundantNullsInFinalInnerTable(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__floatkeys, multiplicity_one_time_ranges__stringkeys);
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return result;
 			}
 			AddRowsToXRTable(saved_rows_with_null_in_final_inner_table, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return result;
 			}
@@ -10761,7 +10860,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			multiplicity_one_time_ranges__stringkeys.clear();
 			saved_rows_with_null_in_final_inner_table.clear();
 			rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.clear();
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return result;
 			}
@@ -10775,7 +10874,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		messager.SetPerformanceLabel(msg.str());
 		EndTransaction();
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return result;
 		}
@@ -10848,7 +10947,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 
 	// Convert column metadata into a far more useful form for construction of K-adic output
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -11097,7 +11196,7 @@ void OutputModel::OutputGenerator::PopulateDMUCounts()
 	std::for_each(UOAs.cbegin(), UOAs.cend(), [this, &first](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
 	{
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return; // from lambda
 		}
@@ -11237,7 +11336,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	// in terms of the DMU counts
 	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this](Table_UOA_Identifier::DMU_Plus_Count const & k_count_for_primary_uoa_for_given_dmu_category__info)
 	{
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return; // from lamda
 		}
@@ -11346,7 +11445,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		}
 	});
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		// Todo: Error message
 		return;
@@ -11359,7 +11458,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	int current_index = 0;
 	std::for_each(multiplicities_primary_uoa.cbegin(), multiplicities_primary_uoa.cend(), [this, &current_index](int const & test_multiplicity)
 	{
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return; // from lambda
 		}
@@ -11381,7 +11480,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		++current_index;
 	});
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		// Todo: Error message
 		return;
@@ -11398,7 +11497,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	// for the primary UOAs
 	std::for_each(child_counts.cbegin(), child_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & uoa__to__dmu_counts__pair)
 	{
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return; // from lambda
 		}
@@ -11406,7 +11505,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 		Table_UOA_Identifier::DMU_Counts const & current_dmu_counts = uoa__to__dmu_counts__pair.second;
 		std::for_each(current_dmu_counts.cbegin(), current_dmu_counts.cend(), [this, &primary_dmu_categories_for_which_child_has_less](Table_UOA_Identifier::DMU_Plus_Count const & current_dmu_plus_count)
 		{
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return; // from lambda
 			}
@@ -11417,7 +11516,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			}
 			std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &current_dmu_plus_count, &primary_dmu_categories_for_which_child_has_less](Table_UOA_Identifier::DMU_Plus_Count const & k_count_for_primary_uoa_for_given_dmu_category__info)
 			{
-				if (failed)
+				if (failed || CheckCancelled())
 				{
 					return; // from lambda
 				}
@@ -11528,7 +11627,7 @@ void OutputModel::OutputGenerator::PopulateUOAs()
 																	   Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map>
 															 const & uoa__to__variable_groups__pair)
 	{
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return; // from lambda
 		}
@@ -11555,7 +11654,7 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 	std::for_each(child_counts.cbegin(), child_counts.cend(), [this](std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts> const & child_uoa__dmu_counts__pair)
 	{
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return; // from lambda
 		}
@@ -11565,7 +11664,7 @@ void OutputModel::OutputGenerator::DetermineChildMultiplicitiesGreaterThanOne()
 		std::for_each(child_uoa__dmu_counts__pair.second.cbegin(), child_uoa__dmu_counts__pair.second.cend(), [this, &uoa_identifier, &first](Table_UOA_Identifier::DMU_Plus_Count const & dmu_category)
 		{
 
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return; // from lamda
 			}
@@ -11672,7 +11771,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 	int overall_primary_key_sequence_number = 0;
 	std::for_each(biggest_counts[0].second.cbegin(), biggest_counts[0].second.cend(), [this, &overall_primary_key_sequence_number](Table_UOA_Identifier::DMU_Plus_Count const & k_count_for_primary_uoa_for_given_dmu_category__info)
 	{
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return; // from lamda
 		}
@@ -11712,7 +11811,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 			int view_count = 0;
 			std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 			{
-				if (failed)
+				if (failed || CheckCancelled())
 				{
 					return; // from lambda
 				}
@@ -11808,7 +11907,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 					int inner_sequence_number__current_variable_group__current_primary_key_dmu_category = 0;
 					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &outer_sequence_number__current_variable_group__current_primary_key_dmu_category, &the_dmu_category, &inner_sequence_number__current_variable_group__current_primary_key_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys](WidgetInstanceIdentifier const & current_variable_group__current_dmu_primary_key_instance)
 					{
-						if (failed)
+						if (failed || CheckCancelled())
 						{
 							return; // from lambda
 						}
@@ -11881,13 +11980,13 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 					});
 				}
 
-				if (failed)
+				if (failed || CheckCancelled())
 				{
 					return; // from lambda
 				}
 			});
 
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return; // from lambda
 			}
@@ -11895,7 +11994,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 			view_count = 0;
 			std::for_each(secondary_variable_groups_vector.cbegin(), secondary_variable_groups_vector.cend(), [this, &the_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &map__dmu_category__total_outer_multiplicity_of_dmu_category_in_primary_uoa_corresponding_to_top_level_variable_group](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group)
 			{
-				if (failed)
+				if (failed || CheckCancelled())
 				{
 					return; // from lambda
 				}
@@ -12015,7 +12114,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 					std::for_each(dmu_category_metadata__for_current_primary_or_child_uoa.cbegin(), dmu_category_metadata__for_current_primary_or_child_uoa.cend(), [this, &m, &outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa, &current_variable_group_current_primary_key_info, &the_variable_group, &outer_sequence_number__current_variable_group__current_primary_key_dmu_category, &the_dmu_category, &inner_sequence_number__current_variable_group__current_primary_key_dmu_category, &k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category, &k_count_for_primary_uoa_for_given_dmu_category, &total_spin_control_k_count_for_given_dmu_category, &current_primary_key_sequence, &variable_group_info_for_primary_keys, &total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group](WidgetInstanceIdentifier const & current_variable_group_current_dmu_primary_key)
 					{
 
-						if (failed)
+						if (failed || CheckCancelled())
 						{
 							return; // from lambda
 						}
@@ -12093,7 +12192,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 					});
 				}
 
-				if (failed)
+				if (failed || CheckCancelled())
 				{
 					return; // from lambda
 				}
@@ -12115,13 +12214,13 @@ void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches(std::in
 	std::deque<SavedRowData> outgoing_rows_of_data;
 	HandleSetOfRowsThatMatchOnPrimaryKeys(result_columns, rows_to_sort, outgoing_rows_of_data, xr_table_category, consider_merging_timerange_adjacent_identical_rows);
 
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
 
 	WriteRowsToFinalTable(outgoing_rows_of_data, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, sorted_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, xr_table_category, false, datetimestart_colname_text, datetimeend_colname_text);
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -13327,12 +13426,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 
 	// Columns do not change!!!!!!!!!!!!!!  Just the order of rows
 	SqlAndColumnSet intermediate_sorted_top_level_variable_group_result = CreateSortedTable(column_set, primary_group_number, current_multiplicity, xr_table_category, is_intermediate);
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return SqlAndColumnSet();
 	}
 	intermediate_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return SqlAndColumnSet();
 	}
@@ -13342,7 +13441,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		ClearTables(sql_and_column_sets);
 	}
 	sql_and_column_sets.push_back(intermediate_sorted_top_level_variable_group_result);
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return SqlAndColumnSet();
 	}
@@ -13393,7 +13492,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 
 		std::int64_t rows_added = 0;
 		SqlAndColumnSet duplicates_removed_top_level_variable_group_result = RemoveDuplicates_Or_OrderWithinRows(intermediate_sorted_top_level_variable_group_result.second, primary_group_number, rows_added, current_multiplicity, xr_table_category, false, is_intermediate, consider_merging_timerange_adjacent_identical_rows);
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return SqlAndColumnSet();
 		}
@@ -14070,7 +14169,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cbegin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cend(), [this, &saved_rows_with_multiple_nulls, &rows_to_check, &previous_datetime_start_column_index, &current_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_end_column_index, &row_inserts_info, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &xr_table_category](TimeRangeSorter const & row)
 	{
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -14122,7 +14221,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &row, &rows_to_check](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
 		{
 
-			if (failed)
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
@@ -14284,7 +14383,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// Process rows according to time range.
 		// The incoming rows are sorted according to time range (first on start datetime, then on end datetime)
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -14383,7 +14482,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// Process rows according to time range.
 		// The incoming rows are sorted according to time range (first on start datetime, then on end datetime)
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -14481,7 +14580,7 @@ void OutputModel::OutputGenerator::HandleCompletionOfProcessingOfNormalizedGroup
 	std::vector<SavedRowData> outgoing_rows_of_data;
 	Process_RowsToCheckForDuplicates_ThatMatchOnAllButFinalInnerTable_ExceptForNullCount_InXRalgorithm(saved_rows_with_null_in_final_inner_table, group_time_ranges__intkeys, group_time_ranges__floatkeys, group_time_ranges__stringkeys, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, outgoing_rows_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns, previous_datetime_start_column_index, current_datetime_start_column_index, previous_datetime_end_column_index, current_datetime_end_column_index, xr_table_category);
 	AddRowsToXRTable(outgoing_rows_of_data, sql_strings, the_prepared_stmt, statement_is_prepared, current_rows_added, current_rows_added_since_execution, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
-	if (failed)
+	if (failed || CheckCancelled())
 	{
 		return;
 	}
@@ -14493,7 +14592,7 @@ void OutputModel::OutputGenerator::AddRowsToXRTable(std::vector<SavedRowData> & 
 
 	std::for_each(outgoing_rows_of_data.cbegin(), outgoing_rows_of_data.cend(), [this, &sql_strings, &the_prepared_stmt, &statement_is_prepared, &current_rows_added, &current_rows_added_since_execution, &first_row_added, &datetime_start_col_name, &datetime_end_col_name, &result_columns, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &datetime_range_start, &datetime_range_end, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another](SavedRowData const & new_row_to_write_to_database)
 	{
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
@@ -14511,21 +14610,23 @@ void OutputModel::OutputGenerator::AddRowsToXRTable(std::vector<SavedRowData> & 
 		}
 		bool added = CreateNewXRRow(new_row_to_write_to_database, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP, false, false);
 
-		if (failed)
+		if (failed || CheckCancelled())
 		{
 			return;
 		}
 
 		if (added)
 		{
-			//sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 			SQLExecutor::Execute(false, SQLExecutor::DOES_NOT_RETURN_ROWS, this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true);
 			if (failed)
 			{
 				SetFailureMessage(sql_error);
 				return;
 			}
-			//the_prepared_stmt = sql_strings.back().stmt;
+			if (CheckCancelled())
+			{
+				return;
+			}
 			the_prepared_stmt = SQLExecutor::stmt_insert;
 			++current_rows_added;
 			++current_rows_added_since_execution;

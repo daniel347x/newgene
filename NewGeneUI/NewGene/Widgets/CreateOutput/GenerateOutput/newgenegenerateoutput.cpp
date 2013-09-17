@@ -170,3 +170,21 @@ void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_editingFinished()
 	}
 
 }
+
+void NewGeneGenerateOutput::on_pushButton_cancel_clicked()
+{
+	{
+		std::lock_guard<std::recursive_mutex> guard(OutputModel::OutputGenerator::is_generating_output_mutex);
+		if (OutputModel::OutputGenerator::is_generating_output)
+		{
+			UIMessager messager;
+			bool do_cancel = messager.ShowQuestionMessageBox("Cancel", "Are you sure you wish to cancel?");
+			if (do_cancel)
+			{
+				// No lock - not necessary for a boolean checked multiple times by back end and that will not cause an error if it is messed up in extraordinarily rare circumstances
+				OutputModel::OutputGenerator::cancelled = true;
+			}
+			return;
+		}
+	}
+}

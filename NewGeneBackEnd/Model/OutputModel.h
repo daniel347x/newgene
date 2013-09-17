@@ -832,6 +832,12 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				}
 
+				inline static bool CheckCancelled()
+				{
+					// No lock - not necessary for a boolean checked multiple times by back end and that will not cause an error if it is messed up in extraordinarily rare circumstances
+					return cancelled; // opportunity for further checking here
+				}
+
 				// Progress bar variables and functions
 				void DetermineNumberStages();
 				void UpdateProgressBarToNextStage(std::string const helper_text_first_choice, std::string helper_text_second_choice);
@@ -1020,7 +1026,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::int64_t timerange_end;
 
 				bool failed;
-				bool cancelled;
 
 				bool debug_ordering;
 				bool delete_tables;
@@ -1028,8 +1033,13 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool initialized;
 				bool overwrite_if_output_file_already_exists;
 
+			public:
+			
 				static std::recursive_mutex is_generating_output_mutex;
 				static std::atomic<bool> is_generating_output;
+				static bool cancelled;
+
+			private:
 
 				// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
 				std::string temp_dot;

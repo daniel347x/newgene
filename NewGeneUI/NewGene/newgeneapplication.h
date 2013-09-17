@@ -12,6 +12,8 @@ class NewGeneApplication : public QApplication
 
 		bool notify( QObject * receiver, QEvent * e );
 
+		void closeEvent(QCloseEvent *event);
+
 	signals:
 
 	public slots:
