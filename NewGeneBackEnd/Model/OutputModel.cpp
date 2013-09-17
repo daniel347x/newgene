@@ -387,8 +387,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
 	messager.SetPerformanceLabel("Vacuuming and defragmenting database...");
-	model->ClearRemnantTemporaryTables();
-	model->VacuumDatabase();
+	input_model.ClearRemnantTemporaryTables();
+	input_model.VacuumDatabase();
 
 	messager.UpdateProgressBarValue(1000);
 
