@@ -61,11 +61,22 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				change.SetPacket(std::make_shared<DataChangePacket_GenerateOutput>());
 				change_response.changes.push_back(change);
 
+				bool & is_cancelled = OutputModel::OutputGenerator::cancelled;
+				BOOST_SCOPE_EXIT(&is_cancelled)
+				{
+					is_cancelled = false;
+				} BOOST_SCOPE_EXIT_END
+
 				// ***************************************** //
 				// Generate output
 				// ***************************************** //
 				OutputModel::OutputGenerator output_generator(messager, output_model, project);
 				output_generator.GenerateOutput(change_response);
+
+				if (OutputModel::OutputGenerator::cancelled)
+				{
+					output_generator.messager.AppendKadStatusText("Operation cancelled.");
+				}
 
 #				if 0
 				boost::format msg1("Number transactions begun: %1%");

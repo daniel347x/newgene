@@ -211,11 +211,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		is_generating_output = true;
 	}
 
-	bool & is_cancelled = cancelled;
-	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager, &is_cancelled)
+	BOOST_SCOPE_EXIT(&is_generating_output, &is_generating_output_mutex, &messager)
 	{
 		is_generating_output = false;
-		is_cancelled = false;
 		messager.SetPerformanceLabel("");
 	} BOOST_SCOPE_EXIT_END
 
