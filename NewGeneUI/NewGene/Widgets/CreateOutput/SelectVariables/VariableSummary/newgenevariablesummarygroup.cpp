@@ -244,6 +244,7 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 												   {
 													   QStandardItem * item = new QStandardItem();
 													   item->setText(QString(child_identifier.longhand->c_str()));
+													   item->setEditable(false);
 													   QVariant v;
 													   v.setValue(child_identifier);
 													   item->setData(v);
@@ -259,6 +260,7 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 										   {
 											   QStandardItem * item = new QStandardItem();
 											   item->setText(QString(child_identifier.longhand->c_str()));
+											   item->setEditable(false);
 											   QVariant v;
 											   v.setValue(child_identifier);
 											   item->setData(v);
