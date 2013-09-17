@@ -2391,13 +2391,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, duplicates_removed.second, current_multiplicity, primary_group_number);
 		x_table_result.second.most_recent_sql_statement_executed__index = -1;
 		ExecuteSQL(x_table_result);
+		messager.SetPerformanceLabel("");
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(x_table_result);
 		if (failed || CheckCancelled())
 		{
 			return SqlAndColumnSet();
 		}
-		messager.SetPerformanceLabel("");
 
 		
 		
@@ -13558,13 +13558,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 		return SqlAndColumnSet();
 	}
 	intermediate_sorted_top_level_variable_group_result.second.most_recent_sql_statement_executed__index = -1;
-	messager.SetPerformanceLabel("");
 
 	ExecuteSQL(intermediate_sorted_top_level_variable_group_result);
 	if (do_clear_table)
 	{
 		ClearTables(sql_and_column_sets);
 	}
+	messager.SetPerformanceLabel("");
 	sql_and_column_sets.push_back(intermediate_sorted_top_level_variable_group_result);
 	if (failed || CheckCancelled())
 	{
