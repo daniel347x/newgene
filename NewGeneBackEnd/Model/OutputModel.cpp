@@ -11783,7 +11783,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	
 	if (biggest_counts.size() > 1)
 	{
-		boost::format msg("Because you have multiple top-level variable groups selected, it is possible that some rows over the same time range will contain data for one (or more), but not all, of these variable groups, and not the others.  However, a *subset* of data in the other variable groups might have valid data over this time range.  In this case, that valid data will appear as NULL in the output for this run.  This is probably minor, but to prevent this, perform a run with only one top-level variable group selected.");
+		boost::format msg("Because you have multiple top-level variable groups selected, it is possible that some rows over the same time range will contain data for one (or more) but not all of these variable groups, and not the others.  However, a *subset* of data in the other variable groups might have valid data over this time range.  In this case, that valid data will appear as NULL in the output for this run.  This is probably minor, but to prevent this, perform a run with only one top-level variable group selected.");
 		bool do_continue = messager.ShowQuestionMessageBox(std::string("Continue?"), msg.str());
 		if (!do_continue)
 		{
