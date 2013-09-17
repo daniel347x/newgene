@@ -120,7 +120,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 {
 	debug_ordering = true;
-	delete_tables = false;
+	//delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
 }
@@ -7048,7 +7048,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			result_columns.columns_in_view.push_back(column_in_view);
 			if (make_secondary)
 			{
-				result_columns.columns_in_view.back().column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+				result_columns.columns_in_view.back().column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
 			}
 		}
 	});
@@ -7933,7 +7933,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 			if (skip_secondary_check)
 			{
-				new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+				new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
 			}
 			++second_table_column_count;
 		}
@@ -9678,7 +9678,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 			if (skip_secondary_check)
 			{
-				new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+				new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
 			}
 			++second_table_column_count;
 			if (first)
