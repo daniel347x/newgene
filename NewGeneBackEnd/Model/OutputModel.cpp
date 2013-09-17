@@ -119,7 +119,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 {
 	debug_ordering = true;
-	//delete_tables = false;
+	delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
 }
@@ -274,7 +274,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	timerange_end = timerange_end_identifier.second;
 
 	// The time range controls are only accurate to 1 second
-	if (timerange_end <= (timerange_start + 1001))
+	if (timerange_end <= (timerange_start + 999))
 	{
 		boost::format msg("The ending value of the time range must be greater than the starting value.");
 		SetFailureMessage(msg.str());
@@ -3530,15 +3530,23 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 						bool added = false;
 						std::int64_t datetime_range_start = std::get<2>(row_insert_info).first;
 						std::int64_t datetime_range_end = std::get<2>(row_insert_info).second;
-						bool include_current_data = std::get<0>(row_insert_info);;
-						bool include_previous_data = std::get<1>(row_insert_info);;
-						if (datetime_range_start < timerange_start)
+						bool include_current_data = std::get<0>(row_insert_info);
+						bool include_previous_data = std::get<1>(row_insert_info);
+						bool skip_check = false;
+						if (datetime_range_start == 0 && datetime_range_end == 0)
 						{
-							datetime_range_start = timerange_start;
+							skip_check = true;
 						}
-						if (datetime_range_end > timerange_end)
+						if (!skip_check)
 						{
-							datetime_range_end = timerange_end;
+							if (datetime_range_start < timerange_start)
+							{
+								datetime_range_start = timerange_start;
+							}
+							if (datetime_range_end > timerange_end)
+							{
+								datetime_range_end = timerange_end;
+							}
 						}
 
 						if (!include_previous_data)
@@ -6148,13 +6156,21 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 		std::int64_t datetime_start = row_of_data.datetime_start;
 		std::int64_t datetime_end = row_of_data.datetime_end;
 
-		if (row_of_data.datetime_end > timerange_end)
+		bool skip_check = false;
+		if (row_of_data.datetime_start == 0 && row_of_data.datetime_end == 0)
 		{
-			datetime_end = timerange_end;
+			skip_check = true;
 		}
-		if (row_of_data.datetime_start < timerange_start)
+		if (!skip_check)
 		{
-			datetime_start = timerange_start;
+			if (row_of_data.datetime_end > timerange_end)
+			{
+				datetime_end = timerange_end;
+			}
+			if (row_of_data.datetime_start < timerange_start)
+			{
+				datetime_start = timerange_start;
+			}
 		}
 
 		switch (xr_table_category)
@@ -10604,13 +10620,21 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					current_row_of_data.SetFinalInnerTableToNull();
 					std::int64_t datetime_start = current_row_of_data.datetime_start;
 					std::int64_t datetime_end = current_row_of_data.datetime_end;
-					if (datetime_start < timerange_start)
+					bool skip_check = false;
+					if (datetime_start == 0 && datetime_end == 0)
 					{
-						datetime_start = timerange_start;
+						skip_check = true;
 					}
-					if (datetime_end > timerange_end)
+					if (!skip_check)
 					{
-						datetime_end = timerange_end;
+						if (datetime_start < timerange_start)
+						{
+							datetime_start = timerange_start;
+						}
+						if (datetime_end > timerange_end)
+						{
+							datetime_end = timerange_end;
+						}
 					}
 					bool added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, xr_table_category, false, false);
 					if (failed || CheckCancelled())
@@ -10784,15 +10808,23 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					bool added = false;
 					datetime_range_start = std::get<2>(row_insert_info).first;
 					datetime_range_end = std::get<2>(row_insert_info).second;
-					include_current_data = std::get<0>(row_insert_info);;
-					include_previous_data = std::get<1>(row_insert_info);;
-					if (datetime_range_start < timerange_start)
+					include_current_data = std::get<0>(row_insert_info);
+					include_previous_data = std::get<1>(row_insert_info);
+					bool skip_check = false;
+					if (datetime_range_start == 0 && datetime_range_end == 0)
 					{
-						datetime_range_start = timerange_start;
+						skip_check = true;
 					}
-					if (datetime_range_end > timerange_end)
+					if (!skip_check)
 					{
-						datetime_range_end = timerange_end;
+						if (datetime_range_start < timerange_start)
+						{
+							datetime_range_start = timerange_start;
+						}
+						if (datetime_range_end > timerange_end)
+						{
+							datetime_range_end = timerange_end;
+						}
 					}
 					added = CreateNewXRRow(current_row_of_data, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_range_start, datetime_range_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, include_previous_data, include_current_data, xr_table_category, false, false);
 					if (failed || CheckCancelled())
@@ -14289,13 +14321,21 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 		std::int64_t datetime_start = row.GetSavedRowData().datetime_start;
 		std::int64_t datetime_end = row.GetSavedRowData().datetime_end;
-		if (datetime_start < timerange_start)
+		bool skip_check = false;
+		if (datetime_start == 0 && datetime_end == 0)
 		{
-			datetime_start = timerange_start;
+			skip_check = true;
 		}
-		if (datetime_end > timerange_end)
+		if (!skip_check)
 		{
-			datetime_end = timerange_end;
+			if (datetime_start < timerange_start)
+			{
+				datetime_start = timerange_start;
+			}
+			if (datetime_end > timerange_end)
+			{
+				datetime_end = timerange_end;
+			}
 		}
 		bool dummy = false;
 		std::string dummystr;
@@ -14615,13 +14655,21 @@ void OutputModel::OutputGenerator::AddRowsToXRTable(std::vector<SavedRowData> & 
 		// so just tell the following function to use all data, and to use the existing date and time
 		std::int64_t datetime_start = new_row_to_write_to_database.datetime_start;
 		std::int64_t datetime_end = new_row_to_write_to_database.datetime_end;
-		if (datetime_start < timerange_start)
+		bool skip_check = false;
+		if (datetime_start == 0 && datetime_end == 0)
 		{
-			datetime_start = timerange_start;
+			skip_check = true;
 		}
-		if (datetime_end > timerange_end)
+		if (!skip_check)
 		{
-			datetime_end = timerange_end;
+			if (datetime_start < timerange_start)
+			{
+				datetime_start = timerange_start;
+			}
+			if (datetime_end > timerange_end)
+			{
+				datetime_end = timerange_end;
+			}
 		}
 		bool added = CreateNewXRRow(new_row_to_write_to_database, first_row_added, datetime_start_col_name, datetime_end_col_name, result_columns.view_name, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, result_columns, true, true, XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP, false, false);
 
