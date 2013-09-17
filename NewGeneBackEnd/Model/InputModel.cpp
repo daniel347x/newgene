@@ -9,6 +9,9 @@ void InputModel::LoadTables()
 
 	if (db != nullptr)
 	{
+
+		ClearRemnantTemporaryTables();
+
 		t_dmu_category.Load(db, this);
 		t_dmu_category.Sort();
 
@@ -110,5 +113,10 @@ bool InputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_
 		return false;
 	}
 	return true;
+
+}
+
+void InputModel::ClearRemnantTemporaryTables()
+{
 
 }

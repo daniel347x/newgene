@@ -415,7 +415,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							: datetime_start(0)
 							, datetime_end(0)
 							, failed(false)
-							, number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one(1)
+							, number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns(1)
 						{
 
 						}
@@ -450,7 +450,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<bool> is_index_a_primary_key_in_the_final_inner_table;
 						std::vector<bool> is_index_a_primary_key_in_not_the_final_inner_table;
 
-						int number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one;
+						int number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns;
 						int number_of_columns_in_inner_table;
 
 						std::vector<int> inner_table_number;

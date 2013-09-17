@@ -118,7 +118,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 {
 	debug_ordering = true;
-	//delete_tables = false;
+	delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
 }
@@ -2350,7 +2350,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	indices_of_primary_key_columns_with_multiplicity_greater_than_1.clear();
 	is_index_a_primary_key_with_outer_multiplicity_greater_than_1.clear();
 	indices_of_primary_key_columns_with_multiplicity_equal_to_1.clear();
-	number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = 0;
+	number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns = 0;
 	number_of_columns_in_inner_table = 0;
 	inner_table_number.clear();
 	indices_of_all_columns_in_all_but_final_inner_table.clear();
@@ -2428,9 +2428,12 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	{
 
 		inner_table_number.push_back(possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
-		if (possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category > number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 		{
-			number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+			if (possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category > number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
+			{
+				number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns = possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+			}
 		}
 
 		if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > number_of_multiplicities)
@@ -3642,7 +3645,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	int float_index_previous = 0;
 	int string_index_previous = 0;
 
-	merged_data_row.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one = current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one;
+	merged_data_row.number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns = current_row_of_data.number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns;
 	merged_data_row.number_of_columns_in_inner_table = current_row_of_data.number_of_columns_in_inner_table;
 	merged_data_row.number_of_multiplicities = current_row_of_data.number_of_multiplicities;
 	merged_data_row.is_index_a_primary_key = current_row_of_data.is_index_a_primary_key;
@@ -3770,7 +3773,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 		++current_index;
 
-		if (inner_multiplicity_current_index == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (inner_multiplicity_current_index == current_row_of_data.number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 		{
 			inner_multiplicity_current_index = 0;
 
@@ -3890,7 +3893,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 		++previous_index;
 
-		if (inner_multiplicity_previous_index == previous_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (inner_multiplicity_previous_index == previous_row_of_data.number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 		{
 			inner_multiplicity_previous_index = 0;
 
@@ -4830,7 +4833,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			++inner_multiplicity_current_index;
 		}
 
-		if (inner_multiplicity_current_index == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (inner_multiplicity_current_index == current_row_of_data.number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 		{
 			if (use_ints)
 			{
@@ -5166,7 +5169,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			++the_index;
 			++inner_multiplicity_index;
 
-			if (inner_multiplicity_index == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+			if (inner_multiplicity_index == current_row_of_data.number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 			{
 				if (!inner_multiplicity_int_vector.empty())
 				{
@@ -5319,7 +5322,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			++the_index;
 			++inner_multiplicity_index;
 
-			if (inner_multiplicity_index == current_row_of_data.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+			if (inner_multiplicity_index == current_row_of_data.number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 			{
 				if (!inner_multiplicity_int_vector.empty())
 				{
@@ -10842,6 +10845,11 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 				}
 			});
 
+			// Determine those columns in the RAW DATA TABLE
+			//    (only includes one instance of columns with multiplicity > 1)
+			// which correspond to primary keys, and if so, WHICH of the primary keys
+			// in the FULL SEQUENCE they correspond to (includes multiplicity > 1,
+			//     so single columns in the former match to multiple columns in the latter)
 			std::for_each(primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys.cbegin(), primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys.cend(), [this, &number_inner_tables, &k_count__corresponding_to_top_level_uoa__and_current_dmu_category, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities, &variables_in_group_primary_keys_metadata](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
 			{
 				if (current_variable_group_primary_key_entry.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_variable_group.first))
@@ -12621,7 +12629,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 		++the_index;
 		++current_inner_multiplicity;
 
-		if (current_inner_multiplicity == the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (current_inner_multiplicity == the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 		{
 			current_inner_multiplicity = 0;
 			current_row_current_inner_table_primary_key_group_is_null = false;
@@ -12658,7 +12666,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 		++the_index;
 		++current_inner_multiplicity;
 
-		if (current_inner_multiplicity == rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (current_inner_multiplicity == rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 		{
 			current_inner_multiplicity = 0;
 			current_row_current_inner_table_primary_key_group_is_null = false;
@@ -14958,7 +14966,7 @@ void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroup
 		++column_index;
 		++inner_multiplicity_index;
 
-		if (inner_multiplicity_index == number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (inner_multiplicity_index == number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 		{
 			if (!inner_table_primary_key_group.empty())
 			{
@@ -14998,7 +15006,7 @@ void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroup
 		++column_index;
 		++inner_multiplicity_index;
 
-		if (inner_multiplicity_index == number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (inner_multiplicity_index == number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 		{
 			if (!inner_table_primary_key_group.empty())
 			{
@@ -15038,7 +15046,7 @@ void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroup
 		++column_index;
 		++inner_multiplicity_index;
 
-		if (inner_multiplicity_index == number_of_columns_in_a_single_inner_table_in_the_dmu_category_with_multiplicity_greater_than_one)
+		if (inner_multiplicity_index == number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 		{
 			if (!inner_table_primary_key_group.empty())
 			{
