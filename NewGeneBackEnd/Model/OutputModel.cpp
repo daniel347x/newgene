@@ -13859,7 +13859,7 @@ void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumn
 	else if (previous_datetime_is_null)
 	{
 
-		// Add only current data, setting time range to that of the previous data
+		// Add only current data, setting time range to that of the current data
 		include_current_data = true;
 		include_previous_data = false;
 		start_datetime_to_use = current_datetime_start;
@@ -13895,26 +13895,102 @@ void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumn
 	else if (previous_is_0 && !current_is_0)
 	{
 
-		// Add row as-is, setting new time range columns to current time range values
-		include_current_data = true;
-		include_previous_data = true;
-		start_datetime_to_use = current_datetime_start;
-		end_datetime_to_use = current_datetime_end;
-		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
+		if (current_datetime_start < timerange_end && current_datetime_end > timerange_start)
+		{
+			// First, add row as-is, setting new time range columns to current time range values
+			include_current_data = true;
+			include_previous_data = true;
+			start_datetime_to_use = current_datetime_start;
+			end_datetime_to_use = current_datetime_end;
+			if (start_datetime_to_use < timerange_start)
+			{
+				start_datetime_to_use = timerange_start;
+			}
+			if (end_datetime_to_use > timerange_end)
+			{
+				end_datetime_to_use = timerange_end;
+			}
+			rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
+
+			// Next, add a row that fills in from the user's choice of starting timerange to the starting datetime of the current row, with data from the previous row
+			if (current_datetime_start > timerange_start && current_datetime_start < timerange_end)
+			{
+				include_current_data = false;
+				include_previous_data = true;
+				start_datetime_to_use = timerange_start;
+				end_datetime_to_use = current_datetime_start;
+				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
+			}
+
+			// Next, add a row that fills in from the ending datetime of the current row to the user's choice of ending timerange, with data from the previous row
+			if (timerange_end > current_datetime_end && current_datetime_end > timerange_start)
+			{
+				include_current_data = false;
+				include_previous_data = true;
+				start_datetime_to_use = current_datetime_end;
+				end_datetime_to_use = timerange_end;
+				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
+			}
+
+		}
+		else
+		{
+			// special-case - the new column is out of range, yet we still want the old data
+			include_current_data = false;
+			include_previous_data = true;
+			start_datetime_to_use = 0;
+			end_datetime_to_use = 0;
+			rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
+		}
 
 	}
 
 	else if (!previous_is_0 && current_is_0)
 	{
 
-		// Add row as-is, setting new time range columns to previous time range values
+		// Note: Unlike above "else if" block,
+		// in this one, it is guaranteed that the previous data
+		// will be within the user's choice of time range
+		//    (because that was handled in the previous multiplicity),
+		// so we can skip all those checks in this block.
+
+		// First, add row as-is, setting new time range columns to previous time range values
 		include_current_data = true;
 		include_previous_data = true;
 		start_datetime_to_use = previous_datetime_start;
 		end_datetime_to_use = previous_datetime_end;
 		rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
 
+		// Unlike the above "else if" block, where we always include the previous data
+		// over the full timerange selected by the user, whether or not the current data overlaps,
+		// in this block we must NOT include the CURRENT data if it does not overlap
+		// the previous data if this is a child merge.
+		// (But for primary inner tables, and top-level primary merges, we want all the data over the full time range.)
+		if (xr_table_category != XR_TABLE_CATEGORY::CHILD_VARIABLE_GROUP)
+		{
+			// Next, add a row that fills in from the user's choice of starting timerange to the starting datetime of the previous row, with data from the current row
+			if (previous_datetime_start > timerange_start && previous_datetime_start < timerange_end)
+			{
+				include_current_data = true;
+				include_previous_data = false;
+				start_datetime_to_use = timerange_start;
+				end_datetime_to_use = previous_datetime_start;
+				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
+			}
+
+			// Next, add a row that fills in from the ending datetime of the current row to the user's choice of ending timerange, with data from the previous row
+			if (timerange_end > previous_datetime_end && previous_datetime_end > timerange_start)
+			{
+				include_current_data = true;
+				include_previous_data = false;
+				start_datetime_to_use = previous_datetime_end;
+				end_datetime_to_use = timerange_end;
+				rows_to_insert_info.push_back(std::make_tuple(include_current_data, include_previous_data, std::make_pair(start_datetime_to_use, end_datetime_to_use)));
+			}
+		}
+
 	}
+
 	else
 	{
 
