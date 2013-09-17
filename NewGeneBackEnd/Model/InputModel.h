@@ -20,8 +20,9 @@ class InputModel : public Model<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETT
 
 		}
 
+		~InputModel();
+
 		void LoadTables();
-		void ClearRemnantTemporaryTables();
 
 		Table_DMU_Identifier t_dmu_category;
 		Table_DMU_Instance t_dmu_setmembers;

@@ -216,7 +216,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.SetPerformanceLabel("");
 	} BOOST_SCOPE_EXIT_END
 
-		messager.AppendKadStatusText("", nullptr); // This will clear the pane
+	messager.AppendKadStatusText("", nullptr); // This will clear the pane
 	boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
 	std::string time_start_formatted = boost::posix_time::to_simple_string(now);
 	boost::format msg_start("NewGene K-ad generation: Starting run at %1%");
@@ -368,6 +368,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	{
 		return;
 	}
+
+	messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
+	messager.SetPerformanceLabel("Vacuuming and defragmenting database...");
+	model->VacuumDatabase();
 
 	messager.UpdateProgressBarValue(1000);
 
@@ -714,7 +718,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	std::vector<SQLExecutor> & sql_strings = final_result.first;
 	ColumnsInTempView & result_columns = final_result.second;
 
-	std::string view_name = "KAD_Results";
+	std::string view_name = "NGTEMP_KAD_Results";
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
@@ -1287,7 +1291,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 	result_columns = previous_merged_primary_variable_groups_table.second;
 
-	std::string view_name = "MF";
+	std::string view_name = "NGTEMP_MF";
 	view_name += itoa(count, c, 10);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
@@ -3004,31 +3008,31 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			{
 				if (order_within_rows)
 				{
-					view_name += "O";
+					view_name += "NGTEMP_O";
 				}
 				else if (is_intermediate)
 				{
-					view_name += "I";
+					view_name += "NGTEMP_I";
 				}
 				else
 				{
-					view_name += "DR";
+					view_name += "NGTEMP_DR";
 				}
 			}
 			break;
 		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
 			{
-				view_name += "KAD";
+				view_name += "NGTEMP_KAD";
 			}
 			break;
 		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
 			{
-				view_name += "FM";
+				view_name += "NGTEMP_FM";
 			}
 			break;
 		case OutputModel::OutputGenerator::KAD_RESULTS:
 			{
-				view_name += "KKA";
+				view_name += "NGTEMP_KKA";
 			}
 			break;
 	}
@@ -6200,7 +6204,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			{
 				if (is_intermediate)
 				{
-					view_name += "SI";
+					view_name += "NGTEMP_SI";
 				}
 				else
 				{
@@ -6210,17 +6214,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			break;
 		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
 			{
-				view_name += "MFXRMF";
+				view_name += "NGTEMP_MFXRMF";
 			}
 			break;
 		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
 			{
-				view_name += "FMB";
+				view_name += "NGTEMP_FMB";
 			}
 			break;
 		case OutputModel::OutputGenerator::KAD_RESULTS:
 			{
-				view_name += "KK";
+				view_name += "NGTEMP_KK";
 			}
 			break;
 	}
@@ -6896,7 +6900,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	result_columns.view_number = 1;
 	result_columns.has_no_datetime_columns = false;
-	std::string view_name = "V";
+	std::string view_name = "NGTEMP_V";
 	view_name += itoa(primary_group_number, c, 10);
 	view_name += "_x";
 	view_name += "1";
@@ -7306,7 +7310,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	result_columns = primary_variable_group_x1_columns;
 
-	std::string view_name = "V";
+	std::string view_name = "NGTEMP_V";
 	view_name += itoa(primary_group_number, c, 10);
 	view_name += "_xr";
 	view_name += "1";
@@ -7479,7 +7483,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	result_columns = first_final_primary_variable_group_columns;
 
-	std::string view_name = "MF0";
+	std::string view_name = "NGTEMP_MF0";
 	view_name += "_xr";
 	view_name += "1";
 	result_columns.view_name_no_uuid = view_name;
@@ -7642,7 +7646,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	result_columns = previous_xr_columns;
 
-	std::string view_name = "V";
+	std::string view_name = "NGTEMP_V";
 	view_name += itoa(primary_group_number, c, 10);
 	view_name += "_x";
 	view_name += itoa(current_multiplicity, c, 10);
@@ -9349,7 +9353,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	result_columns = previous_xr_columns;
 
-	std::string view_name = "CV";
+	std::string view_name = "NGTEMP_CV";
 	view_name += itoa(primary_group_number, c, 10);
 	view_name += "_x";
 	view_name += itoa(current_child_view_name_index, c, 10);
@@ -10103,17 +10107,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
 			{
-				view_name += "V";
+				view_name += "NGTEMP_V";
 			}
 			break;
 		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
 			{
-				view_name += "CV";
+				view_name += "NGTEMP_CV";
 			}
 			break;
 		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
 			{
-				view_name += "MF";
+				view_name += "NGTEMP_MF";
 			}
 			break;
 	}

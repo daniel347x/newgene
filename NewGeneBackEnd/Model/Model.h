@@ -56,6 +56,8 @@ class Model_basemost
 
 		void UnloadDatabase()
 		{
+			ClearRemnantTemporaryTables();
+			VacuumDatabase();
 			if (db != nullptr)
 			{
 				sqlite3_close(db);
@@ -70,6 +72,57 @@ class Model_basemost
 		sqlite3 const * getDb() const
 		{
 			return db;
+		}
+
+		void VacuumDatabase()
+		{
+			char * errmsg = nullptr;
+			sqlite3_exec(db, "VACUUM", NULL, NULL, &errmsg);
+			if (errmsg != nullptr)
+			{
+				// todo - handle very rare and mostly harmless error at some point in the future
+				sqlite3_free(errmsg);
+			}
+		}
+
+		void ClearRemnantTemporaryTables()
+		{
+			sqlite3_stmt * stmt = NULL;
+			std::string sql("SELECT name FROM sqlite_master WHERE type='table'");
+			sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+			if (stmt == NULL)
+			{
+				return;
+			}
+			int step_result = 0;
+
+			while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+			{
+				char const * table_name_ = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 0));
+				std::string table_name(table_name_);
+				std::string prefix("NGTEMP_");
+				if (table_name.size() >= prefix.size())
+				{
+					if (boost::iequals(table_name.substr(0, prefix.size()), prefix))
+					{
+						boost::format drop_stmt("DROP TABLE IF EXISTS %1%");
+						drop_stmt % table_name;
+						char * errmsg = nullptr;
+						sqlite3_exec(db, drop_stmt.str().c_str(), NULL, NULL, &errmsg);
+						if (errmsg != nullptr)
+						{
+							// todo - handle very rare and mostly harmless error at some point in the future
+							sqlite3_free(errmsg);
+						}
+					}
+				}
+			}
+
+			if (stmt)
+			{
+				sqlite3_finalize(stmt);
+				stmt = nullptr;
+			}
 		}
 
 	protected:

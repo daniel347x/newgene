@@ -115,8 +115,3 @@ bool InputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_
 	return true;
 
 }
-
-void InputModel::ClearRemnantTemporaryTables()
-{
-
-}
