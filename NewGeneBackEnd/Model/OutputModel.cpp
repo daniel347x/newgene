@@ -103,6 +103,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, project(project_)
 	, messager(messager_)
 	, failed(false)
+	, cancelled(false)
 	, overwrite_if_output_file_already_exists(false)
 	, rough_progress_range(0)
 	, rough_progress_increment_one_percent(0)

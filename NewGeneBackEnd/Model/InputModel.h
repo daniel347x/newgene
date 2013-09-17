@@ -20,8 +20,6 @@ class InputModel : public Model<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETT
 
 		}
 
-		~InputModel();
-
 		void LoadTables();
 
 		Table_DMU_Identifier t_dmu_category;
