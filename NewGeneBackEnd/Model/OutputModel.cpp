@@ -13551,7 +13551,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	}
 
 	// Columns do not change!!!!!!!!!!!!!!  Just the order of rows
-	messager.SetPerformanceLabel("Sorting temporary table; please be patient...");
+	messager.SetPerformanceLabel("Sorting a temporary table; please be patient...");
 	SqlAndColumnSet intermediate_sorted_top_level_variable_group_result = CreateSortedTable(column_set, primary_group_number, current_multiplicity, xr_table_category, is_intermediate);
 	if (failed || CheckCancelled())
 	{
