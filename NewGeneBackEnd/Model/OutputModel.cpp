@@ -1000,12 +1000,12 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		{
 		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
 			{
-				formatted_column.column_name_in_temporary_table = "DATETIME_START";
+				formatted_column.column_name_in_temporary_table = "DATETIME_START_OUTPUTROW";
 			}
 			break;
 		case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
 			{
-				formatted_column.column_name_in_temporary_table = "DATETIME_END";
+				formatted_column.column_name_in_temporary_table = "DATETIME_END_OUTPUTROW";
 			}
 			break;
 		}
