@@ -1,7 +1,7 @@
 #ifndef DATAWIDGETS_H
 #define DATAWIDGETS_H
 
-#include "..\Utilities\WidgetIdentifier.h"
+#include "../Utilities/WidgetIdentifier.h"
 #include <cstdint>
 #ifndef Q_MOC_RUN
 #endif

@@ -1,7 +1,7 @@
 #ifndef GLOBALS_BACKEND_H
 #define GLOBALS_BACKEND_H
 
-#include "Utilities\NewGeneException.h"
+#include "Utilities/NewGeneException.h"
 #include <memory>
 #include <vector>
 #include <map>
@@ -34,7 +34,7 @@ UIDataManager & uidataManager();
 UIActionManager & uiactionManager();
 ModelActionManager & modelactionManager();
 
-#include "UIData\DataWidgets.h"
-#include "UIAction\ActionWidgets.h"
+#include "UIData/DataWidgets.h"
+#include "UIAction/ActionWidgets.h"
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef ACTIONWIDGETS_H
 #define ACTIONWIDGETS_H
 
-#include "..\Utilities\WidgetIdentifier.h"
+#include "../Utilities/WidgetIdentifier.h"
 
 enum WIDGET_ACTIONS
 {
