@@ -120,7 +120,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, remove_self_kads(true)
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 {
-	debug_ordering = true;
+	//debug_ordering = true;
 	//delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
@@ -7940,7 +7940,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		if (   new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 			|| new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 		{
-			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
+			// No!  If the user selects these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
 			//return; // Add these columns last
 			make_secondary_datetime_column = true;
 		}
@@ -7987,8 +7987,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 
-	int most_recent_current_inner_table_count = -1;
 	// Proceed, finally, to the datetime columns, if they exist.  (If they don't, they will be added via ALTER TABLE to the temporary table under construction.)
+	int most_recent_current_inner_table_count = -1;
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(), primary_variable_group_raw_data_columns.columns_in_view.cend(), [&most_recent_current_inner_table_count, &primary_variable_group_raw_data_columns, &result_columns, &second_table_column_count](ColumnsInTempView::ColumnInTempView const & new_column_datetime)
 	{
 		if (new_column_datetime.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 0)
@@ -8085,9 +8085,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// See corresponding block in CreateChildXTable() for helpful comments
 	// ********************************************************************************************* //
 
-	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &sql_string, &variable_group, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+	std::vector<int> column_indices_primary_keys_multiplicity_greater_than_1_to_check;
+	std::vector<int> column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1;
+	std::vector<int> column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1;
+	int biggest_multiplicity_previous_table = 0;
+	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1, &biggest_multiplicity_previous_table, &column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1, &column_indices_primary_keys_multiplicity_greater_than_1_to_check, &previous_xr_columns, &sql_string, &variable_group, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 	{
-		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &sql_string, &variable_group, &primary_key, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
+		std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(), primary_key.variable_group_info_for_primary_keys.cend(), [this, &column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1, &biggest_multiplicity_previous_table, &column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1, &column_indices_primary_keys_multiplicity_greater_than_1_to_check, &previous_xr_columns, &sql_string, &variable_group, &primary_key, &result_columns, &first_full_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info)
 		{
 			if (primary_key_info.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group))
 			{
@@ -8124,6 +8128,45 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						++column_count;
 					});
 				}
+				else
+				{
+					// save indices of multiplicity > 1 keys for the join, below
+					int column_count = 0;
+					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1, &biggest_multiplicity_previous_table, &column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1, &column_indices_primary_keys_multiplicity_greater_than_1_to_check, &previous_xr_columns, &sql_string, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
+					{
+						if (column_count < (int)previous_xr_columns.columns_in_view.size())
+						{
+							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
+							{
+								// there is only one set of primary keys for this DMU category,
+								// so the following "if" statement only matches once
+								if (new_column.primary_key_index_within_primary_uoa_for_dmu_category == primary_key.sequence_number_within_dmu_category_primary_uoa)
+								{
+									column_indices_primary_keys_multiplicity_greater_than_1_to_check.push_back(column_count);
+									if (new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg > biggest_multiplicity_previous_table)
+									{
+										biggest_multiplicity_previous_table = new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg;
+										column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1.clear();
+									}
+									column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1.push_back(column_count);
+								}
+							}
+						}
+						else
+						{
+							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
+							{
+								// there is only one set of primary keys for this DMU category,
+								// so the following "if" statement only matches once
+								if (new_column.primary_key_index_within_primary_uoa_for_dmu_category == primary_key.sequence_number_within_dmu_category_primary_uoa)
+								{
+									column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1.push_back(column_count);
+								}
+							}
+						}
+						++column_count;
+					});
+				}
 			}
 		});
 	});
@@ -8154,32 +8197,128 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	}
 
-	if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+	if (true)
 	{
-		sql_string += " WHERE CASE WHEN ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-		sql_string += " = 0 AND ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-		sql_string += " = 0 ";
-		sql_string += " THEN 1 ";
-		sql_string += " WHEN ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-		sql_string += " < ";
-		sql_string += boost::lexical_cast<std::string>(timerange_end);
-		sql_string += " THEN ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-		sql_string += " > ";
-		sql_string += boost::lexical_cast<std::string>(timerange_start);
-		sql_string += " WHEN ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-		sql_string += " > ";
-		sql_string += boost::lexical_cast<std::string>(timerange_start);
-		sql_string += " THEN ";
-		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-		sql_string += " < ";
-		sql_string += boost::lexical_cast<std::string>(timerange_end);
-		sql_string += " ELSE 0";
-		sql_string += " END";
+		if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+		{
+			if (and_)
+			{
+				sql_string += " AND ";
+			}
+			else
+			{
+				sql_string += " ON ";
+			}
+			and_ = true;
+
+			sql_string += " CASE WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " = 0 AND ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " = 0 ";
+			sql_string += " THEN 1 ";
+			sql_string += " WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " < ";
+			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " THEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " > ";
+			sql_string += boost::lexical_cast<std::string>(timerange_start);
+			sql_string += " WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " > ";
+			sql_string += boost::lexical_cast<std::string>(timerange_start);
+			sql_string += " THEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " < ";
+			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " ELSE 0";
+			sql_string += " END";
+
+			if (and_)
+			{
+				sql_string += " AND ";
+			}
+			else
+			{
+				sql_string += " ON ";
+			}
+			and_ = true;
+
+			sql_string += " CASE WHEN ";
+			bool second_and = false;
+			std::for_each(column_indices_primary_keys_multiplicity_greater_than_1_to_check.cbegin(), column_indices_primary_keys_multiplicity_greater_than_1_to_check.cend(), [&](int const & column_index_test)
+			{
+				if (second_and)
+				{
+					sql_string += " OR ";
+				}
+				second_and = true;
+				sql_string += "t1.";
+				sql_string += previous_column_names_first_table[column_index_test];
+				sql_string += " IS NULL ";
+			});
+			sql_string += " THEN 1 ELSE ";
+			second_and = false;
+			int current_inner_multiplicity_count = 0;
+			sql_string += " CASE ";
+			std::for_each(column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1.cbegin(), column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1.cend(), [&](int const & column_index_test)
+			{
+				// ************************************************************************************************** //
+				// ************************************************************************************************** //
+				// 
+				// TODO! CAST AS NUMERIC IF NEEDED
+				// 
+				// ************************************************************************************************** //
+				// ************************************************************************************************** //
+				sql_string += " WHEN t1.";
+				sql_string += previous_column_names_first_table[column_index_test];
+				sql_string += " < ";
+				sql_string += " t2.";
+				sql_string += result_columns.columns_in_view[column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1[current_inner_multiplicity_count]].column_name_in_original_data_table;
+				sql_string += " THEN 1 ";
+				++current_inner_multiplicity_count;
+				// ************************************************************************************************** //
+				// ************************************************************************************************** //
+				// 
+				// TODO! CAST AS NUMERIC IF NEEDED
+				// 
+				// ************************************************************************************************** //
+				// ************************************************************************************************** //
+			});
+			sql_string += " ELSE 0 END END";
+		}
+	}
+	else  // moved into join, so else clause never reached
+	{
+		if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+		{
+			sql_string += " WHERE CASE WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " = 0 AND ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " = 0 ";
+			sql_string += " THEN 1 ";
+			sql_string += " WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " < ";
+			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " THEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " > ";
+			sql_string += boost::lexical_cast<std::string>(timerange_start);
+			sql_string += " WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " > ";
+			sql_string += boost::lexical_cast<std::string>(timerange_start);
+			sql_string += " THEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " < ";
+			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " ELSE 0";
+			sql_string += " END";
+		}
 	}
 
 	// Add the ORDER BY column/s
