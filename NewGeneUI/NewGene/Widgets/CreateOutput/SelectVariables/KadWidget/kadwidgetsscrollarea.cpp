@@ -60,14 +60,9 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 			QSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
 			newSpinBox->setFixedHeight(50);
 			newSpinBox->setFixedWidth(400);
-			//QGraphicsColorizeEffect * backColor = new QGraphicsColorizeEffect();
-			//QColor color_("yellow");
-			//backColor->setColor(color_);
-			//newSpinBox->setGraphicsEffect(backColor); // takes ownership
 			QFont currFont = newSpinBox->font();
 			currFont.setPixelSize(24);
 			newSpinBox->setFont(currFont);
-			//std::string stylesheet(" QSpinBox { color: #d006bc; font-weight: bold; } ");
 			std::string stylesheet(" QSpinBox { color: #960488; font-weight: bold; } ");
 			newSpinBox->setStyleSheet(stylesheet.c_str());
 			if (identifier.longhand)
@@ -76,6 +71,22 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 				prefixText += *identifier.longhand;
 				prefixText += " columns:  ";
 				newSpinBox->setPrefix(prefixText.c_str());
+			}
+			bool not_me = true;
+			std::for_each(widget_data.active_dmus.cbegin(), widget_data.active_dmus.cend(), [&](WidgetInstanceIdentifier const & the_dmu)
+			{
+				if (identifier.IsEqual(the_dmu))
+				{
+					not_me = false;
+				}
+			});
+			if (not_me)
+			{
+				newSpinBox->setVisible(false);
+			}
+			else
+			{
+				newSpinBox->setVisible(true);
 			}
 			layout()->addWidget(newSpinBox);
 		}

@@ -20,7 +20,15 @@ UILoggingManager::UILoggingManager( QObject * parent )
 
 	if ( !found )
 	{
-		statusManagerUI().PostStatus( "Unable to open NewGene logfile for writing.  No logging will occur.", UIStatusManager::IMPORTANCE_STANDARD, true );
+		QString error_message = "Unable to open NewGene logfile for writing.  No logging will occur.";
+		if (current_error.length() > 0)
+		{
+			error_message += " (";
+			error_message += current_error;
+			error_message += ")";
+		}
+		statusManagerUI().PostStatus(error_message, UIStatusManager::IMPORTANCE_STANDARD, true );
+		current_error.clear();
 	}
 
 }
@@ -53,12 +61,17 @@ bool UILoggingManager::ObtainLogfilePath()
 		}
 		else
 		{
+			QString path_error = logfilePathTest.string().c_str();
+			QString path_error_description = "Cannot open logfile \"";
+			path_error_description += path_error;
+			path_error_description += "\"";
+			current_error = path_error_description;
 		}
 	}
 	catch ( std::ofstream::failure e )
 	{
+		current_error = e.what();
 	}
 
 	return found;
 }
-

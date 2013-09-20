@@ -3,6 +3,7 @@
 
 #include "../Utilities/WidgetIdentifier.h"
 #include <cstdint>
+#include <set>
 #ifndef Q_MOC_RUN
 #endif
 
@@ -344,6 +345,7 @@ public:
 	{
 	}
 	WidgetInstanceIdentifiers identifiers;
+	std::set<WidgetInstanceIdentifier> active_dmus;
 };
 typedef WidgetDataItem<KAD_SPIN_CONTROLS_AREA> WidgetDataItem_KAD_SPIN_CONTROLS_AREA;
 

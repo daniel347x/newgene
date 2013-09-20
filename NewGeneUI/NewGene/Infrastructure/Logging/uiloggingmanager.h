@@ -26,6 +26,7 @@ class UILoggingManager : public QObject, public UIManager<UILoggingManager, Logg
 	private:
 
 		boost::filesystem::path loggingPath;
+		QString current_error;
 
 };
 

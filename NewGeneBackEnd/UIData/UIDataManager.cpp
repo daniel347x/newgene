@@ -96,8 +96,10 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 {
 	InputModel & input_model = project.model().getInputModel();
 	WidgetDataItem_KAD_SPIN_CONTROLS_AREA variable_groups(widget_request);
+	variable_groups.active_dmus = project.model().t_variables_selected_identifiers.GetActiveDMUs(&project.model(), &project.model().getInputModel());
 	variable_groups.identifiers = input_model.t_dmu_category.getIdentifiers();
 	messager.EmitOutputWidgetDataRefresh(variable_groups);
+	std::set<WidgetInstanceIdentifier> active_dmus;
 }
 
 /************************************************************************/

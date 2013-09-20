@@ -40,8 +40,30 @@ void UIStatusManager::PostStatus( QString const & _status, UIStatusManager::IMPO
 		msgBox.exec();
 	}
 
-	NewGeneMainWindow & mainWindow = getMainWindow();
-	mainWindow.statusBar()->showMessage( _status );
+	bool success = false;
+	try
+	{
+		NewGeneMainWindow & mainWindow = getMainWindow();
+		mainWindow.statusBar()->showMessage( _status );
+		success = true;
+	}
+	catch (NewGeneException &)
+	{
+	}
+
+	if (!success)
+	{
+		QMessageBox msgBox;
+		msgBox.setText( _status );
+		msgBox.exec();
+
+		if (importance_level == IMPORTANCE_CRITICAL)
+		{
+			boost::format msg( "Unrecoverable error: NewGene will now exit." );
+			msg % which_descriptor.toStdString();
+			throw NewGeneException() << newgene_error_description( msg.str() );
+		}
+	}
 
 }
 

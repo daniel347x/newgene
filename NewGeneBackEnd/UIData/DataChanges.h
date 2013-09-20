@@ -2,6 +2,7 @@
 #define DATACHANGES_H
 
 #include <vector>
+#include <set>
 #include "../Utilities/WidgetIdentifier.h"
 #include <cstdint>
 
@@ -203,6 +204,7 @@ class DataChange
 		DATA_CHANGE_INTENTION change_intention;
 		WidgetInstanceIdentifier parent_identifier;
 		WidgetInstanceIdentifiers child_identifiers;
+		std::set<WidgetInstanceIdentifier> set_of_identifiers; // only when needed
 
 		std::shared_ptr<DataChangePacket> change_packet;
 

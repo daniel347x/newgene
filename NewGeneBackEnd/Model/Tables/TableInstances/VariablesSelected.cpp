@@ -295,3 +295,22 @@ Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSele
 	return the_map;
 
 }
+
+std::set<WidgetInstanceIdentifier> Table_VARIABLES_SELECTED::GetActiveDMUs(OutputModel * output_model_, InputModel * input_model_)
+{
+	if (output_model_ == nullptr || input_model_ == nullptr)
+	{
+		return std::set<WidgetInstanceIdentifier>();
+	}
+	std::set<WidgetInstanceIdentifier> active_dmus;
+	Table_VARIABLES_SELECTED::UOA_To_Variables_Map the_map = output_model_->t_variables_selected_identifiers.GetSelectedVariablesByUOA(output_model_->getDb(), output_model_, input_model_);
+	std::for_each(the_map.cbegin(), the_map.cend(), [&](std::pair<WidgetInstanceIdentifier, Table_VARIABLES_SELECTED::VariableGroup_To_VariableSelections_Map> const & map_entry)
+	{
+		Table_UOA_Identifier::DMU_Counts dmu_counts = input_model_->t_uoa_category.RetrieveDMUCounts(input_model_->getDb(), input_model_, *map_entry.first.uuid);
+		std::for_each(dmu_counts.cbegin(), dmu_counts.cend(), [&](Table_UOA_Identifier::DMU_Plus_Count const & dmu_count)
+		{
+			active_dmus.insert(dmu_count.first);
+		});
+	});
+	return active_dmus;
+}
