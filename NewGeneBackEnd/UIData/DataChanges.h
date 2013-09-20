@@ -172,6 +172,7 @@ class DataChange
 			, change_intention(intention)
 			, parent_identifier(parent_identifier_)
 			, child_identifiers(child_identifiers_)
+			// set_of_identifiers: No.  A hint that it's minor enough that it should be required to be set outside the constructor.
 		{
 
 		}
@@ -181,6 +182,7 @@ class DataChange
 			, change_intention(rhs.change_intention)
 			, parent_identifier(rhs.parent_identifier)
 			, child_identifiers(rhs.child_identifiers)
+			, set_of_identifiers(rhs.set_of_identifiers)
 			, change_packet(rhs.change_packet)
 		{
 

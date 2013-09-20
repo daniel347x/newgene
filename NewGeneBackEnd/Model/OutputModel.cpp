@@ -3052,6 +3052,12 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 	});
 
+	if (sorted_result_columns.not_first_variable_group_column_index == -1)
+	{
+		// ALL columns are in the first variable group - set this index one past the end
+		sorted_result_columns.not_first_variable_group_column_index = (int)sorted_result_columns.columns_in_view.size();
+	}
+
 	if (number_of_columns_in_inner_table == 0)
 	{
 		number_of_columns_in_inner_table = (int)sorted_result_columns.columns_in_view.size();
@@ -3793,8 +3799,8 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 		if (current_row_of_data.datetime_end <= first_incoming_row.datetime_start)
 		{
 			// Rows do not overlap
-			intermediate_rows_of_data.push_back(current_row_of_data);
-			intermediate_rows_of_data.push_back(first_incoming_row);
+			intermediate_rows_of_data.push_back(std::move(current_row_of_data));
+			intermediate_rows_of_data.push_back(std::move(first_incoming_row));
 			return true; // current_row_complete
 		}
 		else
@@ -3802,7 +3808,7 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 			// Rows overlap
 			SavedRowData new_data_row = current_row_of_data;
 			new_data_row.datetime_end = first_incoming_row.datetime_start;
-			intermediate_rows_of_data.push_back(new_data_row);
+			intermediate_rows_of_data.push_back(std::move(new_data_row));
 			current_row_of_data.datetime_start = first_incoming_row.datetime_start;
 		}
 	}
@@ -3812,7 +3818,7 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 		if (first_incoming_row.datetime_end <= current_row_of_data.datetime_start)
 		{
 			// Rows do not overlap
-			intermediate_rows_of_data.push_back(first_incoming_row);
+			intermediate_rows_of_data.push_back(std::move(first_incoming_row));
 			return false; // current_row is not complete
 		}
 		else
@@ -3820,7 +3826,7 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 			// Rows overlap
 			SavedRowData new_data_row = first_incoming_row;
 			new_data_row.datetime_end = current_row_of_data.datetime_start;
-			intermediate_rows_of_data.push_back(new_data_row);
+			intermediate_rows_of_data.push_back(std::move(new_data_row));
 			first_incoming_row.datetime_start = current_row_of_data.datetime_start;
 		}
 	}
@@ -3834,19 +3840,19 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 	{
 		// merge from:
 		// current_row_of_data.datetime_start to current_row_of_data.datetime_end
-		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row, xr_table_category);
+		MergeRows(saved_temp_merged_row, current_row_of_data, first_incoming_row, xr_table_category);
 		if (failed || CheckCancelled())
 		{
 			return false;
 		}
-		merged_data_row.datetime_start = current_row_of_data.datetime_start;
-		merged_data_row.datetime_end = current_row_of_data.datetime_end;
-		intermediate_rows_of_data.push_back(merged_data_row);
+		saved_temp_merged_row.datetime_start = current_row_of_data.datetime_start;
+		saved_temp_merged_row.datetime_end = current_row_of_data.datetime_end;
+		intermediate_rows_of_data.push_back(std::move(saved_temp_merged_row));
 
 		// then:
-		SavedRowData new_data_row = first_incoming_row;
+		SavedRowData new_data_row = std::move(first_incoming_row);
 		new_data_row.datetime_start = current_row_of_data.datetime_end;
-		intermediate_rows_of_data.push_back(new_data_row);
+		intermediate_rows_of_data.push_back(std::move(new_data_row));
 
 		return true; // current_row_complete
 	}
@@ -3854,14 +3860,14 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 	{
 		// merge from:
 		// current_row_of_data.datetime_start to current_row_of_data.datetime_end
-		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row, xr_table_category);
+		MergeRows(saved_temp_merged_row, current_row_of_data, first_incoming_row, xr_table_category);
 		if (failed || CheckCancelled())
 		{
 			return false;
 		}
-		merged_data_row.datetime_start = current_row_of_data.datetime_start;
-		merged_data_row.datetime_end = current_row_of_data.datetime_end;
-		intermediate_rows_of_data.push_back(merged_data_row);
+		saved_temp_merged_row.datetime_start = current_row_of_data.datetime_start;
+		saved_temp_merged_row.datetime_end = current_row_of_data.datetime_end;
+		intermediate_rows_of_data.push_back(saved_temp_merged_row);
 
 		return true; // current_row_complete
 	}
@@ -3871,14 +3877,14 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 
 		// merge from:
 		// first_incoming_row.datetime_start to first_incoming_row.datetime_end
-		SavedRowData merged_data_row = MergeRows(current_row_of_data, first_incoming_row, xr_table_category);
+		MergeRows(saved_temp_merged_row, current_row_of_data, first_incoming_row, xr_table_category);
 		if (failed || CheckCancelled())
 		{
 			return false;
 		}
-		merged_data_row.datetime_start = first_incoming_row.datetime_start;
-		merged_data_row.datetime_end = first_incoming_row.datetime_end;
-		intermediate_rows_of_data.push_back(merged_data_row);
+		saved_temp_merged_row.datetime_start = first_incoming_row.datetime_start;
+		saved_temp_merged_row.datetime_end = first_incoming_row.datetime_end;
+		intermediate_rows_of_data.push_back(std::move(saved_temp_merged_row));
 
 		current_row_of_data.datetime_start = first_incoming_row.datetime_end;
 
@@ -3886,10 +3892,10 @@ bool OutputModel::OutputGenerator::ProcessCurrentDataRowOverlapWithPreviousSaved
 	}
 }
 
-OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRows(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
+void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, XR_TABLE_CATEGORY const xr_table_category)
 {
 
-	SavedRowData merged_data_row;
+	merged_data_row.Clear();
 
 	int int_index_current = 0;
 	int float_index_current = 0;
@@ -3952,9 +3958,12 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	std::map<std::vector<long double>, int> previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number;
 	std::map<std::vector<std::string>, int> current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number;
 	std::map<std::vector<std::string>, int> previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number;
-	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_current_index, &saved_strings_vector, &saved_ints_vector, &saved_floats_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector, &current_row_of_data, &int_index_current, &float_index_current, &string_index_current, &current_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	//std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [&current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_current_index, &saved_strings_vector, &saved_ints_vector, &saved_floats_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector, &current_row_of_data, &int_index_current, &float_index_current, &string_index_current, &current_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	for(std::vector<SQLExecutor::WHICH_BINDING>::const_iterator it = current_row_of_data.current_parameter_which_binding_to_use.cbegin(); it != current_row_of_data.current_parameter_which_binding_to_use.cend(); ++it)
 	{
 
+		SQLExecutor::WHICH_BINDING const & current_binding = *it;
+		
 		if (current_binding == SQLExecutor::NULL_BINDING)
 		{
 
@@ -4053,7 +4062,8 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			inner_multiplicity_float_vector.clear();
 		}
 
-	});
+	//});
+	}
 
 	int_index_current = 0;
 	float_index_current = 0;
@@ -4072,8 +4082,11 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	current_index = 0;
 	previous_index = 0;
 
-	std::for_each(previous_row_of_data.current_parameter_which_binding_to_use.cbegin(), previous_row_of_data.current_parameter_which_binding_to_use.cend(), [&previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_previous_index, &saved_strings_vector, &saved_ints_vector, &saved_floats_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector, &previous_row_of_data, &int_index_previous, &float_index_previous, &string_index_previous, &previous_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & previous_binding)
+	//std::for_each(previous_row_of_data.current_parameter_which_binding_to_use.cbegin(), previous_row_of_data.current_parameter_which_binding_to_use.cend(), [&previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_previous_index, &saved_strings_vector, &saved_ints_vector, &saved_floats_vector, &inner_multiplicity_string_vector, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector, &previous_row_of_data, &int_index_previous, &float_index_previous, &string_index_previous, &previous_index, &merged_data_row](SQLExecutor::WHICH_BINDING const & previous_binding)
+	for(std::vector<SQLExecutor::WHICH_BINDING>::const_iterator it = previous_row_of_data.current_parameter_which_binding_to_use.cbegin(); it != previous_row_of_data.current_parameter_which_binding_to_use.cend(); ++it)
 	{
+
+		SQLExecutor::WHICH_BINDING const & previous_binding = *it;
 
 		if (previous_binding == SQLExecutor::NULL_BINDING)
 		{
@@ -4173,7 +4186,8 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 			inner_multiplicity_float_vector.clear();
 		}
 
-	});
+	//});
+	}
 
 	int_index_current = 0;
 	float_index_current = 0;
@@ -4220,7 +4234,7 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 		boost::format msg("Primary keys within the same DMU category are of different, or of NULL, types.");
 		SetFailureMessage(msg.str());
 		failed = true;
-		return merged_data_row;
+		return;
 	}
 
 	bool one_multiplicity = false;
@@ -4233,9 +4247,9 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	inner_multiplicity_current_index = 0;
 	current_index = 0;
 	
-	std::deque<std::vector<std::string>> saved_strings_deque;
-	std::deque<std::vector<std::int64_t>> saved_ints_deque;
-	std::deque<std::vector<long double>> saved_floats_deque;
+	saved_strings_deque.clear();
+	saved_ints_deque.clear();
+	saved_floats_deque.clear();
 
 	saved_strings_deque.insert(saved_strings_deque.begin(), saved_strings_vector.begin(), saved_strings_vector.end());
 	saved_ints_deque.insert(saved_ints_deque.begin(), saved_ints_vector.begin(), saved_ints_vector.end());
@@ -4250,12 +4264,16 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 	int current_row_inner_table_data_to_use = -1;
 	int previous_row_inner_table_data_to_use = -1;
 
-	std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [this, &one_multiplicity, &current_row_inner_table_data_to_use, &previous_row_inner_table_data_to_use, &current__current_inner_table, &previous__current_inner_table, &most_recent_current_offset, &most_recent_previous_offset, &xr_table_category, &current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector,  &inner_multiplicity_string_vector, &use_strings, &use_ints, &use_floats, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &saved_floats_deque, &current_row_of_data, &int_index_current, &float_index_current, &string_index_current, &int_index_previous, &float_index_previous, &string_index_previous, &current_index, &previous_row_of_data, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	//std::for_each(current_row_of_data.current_parameter_which_binding_to_use.cbegin(), current_row_of_data.current_parameter_which_binding_to_use.cend(), [this, &one_multiplicity, &current_row_inner_table_data_to_use, &previous_row_inner_table_data_to_use, &current__current_inner_table, &previous__current_inner_table, &most_recent_current_offset, &most_recent_previous_offset, &xr_table_category, &current_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &current_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_string_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_int_vector__to__inner_table_number, &previous_row__map_from__inner_multiplicity_float_vector__to__inner_table_number, &inner_multiplicity_int_vector, &inner_multiplicity_float_vector,  &inner_multiplicity_string_vector, &use_strings, &use_ints, &use_floats, &inner_multiplicity_current_index, &saved_strings_deque, &saved_ints_deque, &saved_floats_deque, &current_row_of_data, &int_index_current, &float_index_current, &string_index_current, &int_index_previous, &float_index_previous, &string_index_previous, &current_index, &previous_row_of_data, &merged_data_row](SQLExecutor::WHICH_BINDING const & current_binding)
+	for(std::vector<SQLExecutor::WHICH_BINDING>::const_iterator it = current_row_of_data.current_parameter_which_binding_to_use.cbegin(); it != current_row_of_data.current_parameter_which_binding_to_use.cend(); ++it)
 	{
+
+		SQLExecutor::WHICH_BINDING const & current_binding = *it;
 
 		if (failed || CheckCancelled())
 		{
-			return;
+			//return;
+			break;;
 		}
 
 		if (current_index % current_row_of_data.number_of_columns_in_inner_table == 0)
@@ -5114,13 +5132,8 @@ OutputModel::OutputGenerator::SavedRowData OutputModel::OutputGenerator::MergeRo
 
 		++current_index;
 
-	});
-
-
-
-
-
-	return merged_data_row;
+	//});
+	}
 
 }
 

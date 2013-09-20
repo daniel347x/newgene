@@ -342,6 +342,7 @@ public:
 	WidgetDataItem<KAD_SPIN_CONTROLS_AREA>(WidgetDataItem<KAD_SPIN_CONTROLS_AREA> const & rhs)
 		: WidgetDataItem_base(rhs)
 		, identifiers(rhs.identifiers)
+		, active_dmus(rhs.active_dmus)
 	{
 	}
 	WidgetInstanceIdentifiers identifiers;

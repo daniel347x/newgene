@@ -24,7 +24,7 @@ KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance
    {
 
 	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE, true, *data_instance.uuid);
-	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, true, *data_instance.uuid);
+	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, false, *data_instance.uuid);
 
 	   UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 	   WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(0, WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
@@ -169,7 +169,7 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 								bool not_me = true;
 								std::for_each(change.set_of_identifiers.cbegin(), change.set_of_identifiers.cend(), [&](WidgetInstanceIdentifier const & the_dmu)
 								{
-									if (data_instance.IsEqual(the_dmu))
+									if (data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu))
 									{
 										not_me = false;
 									}

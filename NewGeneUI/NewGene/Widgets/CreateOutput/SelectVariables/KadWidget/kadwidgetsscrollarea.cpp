@@ -75,7 +75,7 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 			bool not_me = true;
 			std::for_each(widget_data.active_dmus.cbegin(), widget_data.active_dmus.cend(), [&](WidgetInstanceIdentifier const & the_dmu)
 			{
-				if (identifier.IsEqual(the_dmu))
+				if (identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu))
 				{
 					not_me = false;
 				}

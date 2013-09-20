@@ -699,7 +699,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool CreateNewXRRow(SavedRowData const & current_row_of_data, bool & first_row_added, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::string const & xr_view_name, std::string & sql_add_xr_row, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::int64_t const datetime_start, std::int64_t const datetime_end, ColumnsInTempView const & previous_x_columns, ColumnsInTempView & current_xr_columns, bool const include_previous_data, bool const include_current_data, XR_TABLE_CATEGORY const xr_table_category, bool const sort_only, bool const no_new_column_names);
 				bool TestPrimaryKeyMatch(SavedRowData const & current_row_of_data, SavedRowData const & previous_row_of_data, bool & use_newest_row_index, PRIMARY_KEY_MATCH_CONDITION const match_condition);
 				bool ProcessCurrentDataRowOverlapWithPreviousSavedRow(SavedRowData & first_incoming_row, SavedRowData & current_row_of_data, std::deque<SavedRowData> & intermediate_rows_of_data, XR_TABLE_CATEGORY const xr_table_category);
-				SavedRowData MergeRows(SavedRowData const & current_row_of_data, SavedRowData const & first_incoming_row, XR_TABLE_CATEGORY const xr_table_category);
+				void MergeRows(SavedRowData & merged_data_row, SavedRowData const & current_row_of_data, SavedRowData const & first_incoming_row, XR_TABLE_CATEGORY const xr_table_category);
 				void WriteRowsToFinalTable(std::deque<SavedRowData> & outgoing_rows_of_data, std::string const & datetime_start_col_name, std::string const & datetime_end_col_name, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt *& the_prepared_stmt, std::vector<SQLExecutor> & sql_strings, sqlite3 * db, std::string & result_columns_view_name, ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, std::int64_t & current_rows_added, std::int64_t & current_rows_added_since_execution, std::string & sql_add_xr_row, bool & first_row_added, std::vector<std::string> & bound_parameter_strings, std::vector<std::int64_t> & bound_parameter_ints, std::vector<long double> & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, XR_TABLE_CATEGORY const xr_table_category, bool const no_new_column_names, std::string const datetimestart_text_colname = std::string(), std::string const datetimeend_text_colname = std::string());
 				SqlAndColumnSet MergeIndividualTopLevelGroupIntoPrevious(ColumnsInTempView const & primary_variable_group_final_result, OutputModel::OutputGenerator::SqlAndColumnSet & previous_merged_primary_variable_groups_table, int const count);
 				void ClearTables(SqlAndColumnSets const & tables_to_clear);
@@ -716,6 +716,11 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void FindDatetimeIndices(ColumnsInTempView const & columns, int & previous_datetime_start_column_index, int & previous_datetime_end_column_index, int & current_datetime_start_column_index, int & current_datetime_end_column_index, XR_TABLE_CATEGORY const xr_table_category);
 				bool CheckForIdenticalData(ColumnsInTempView const & columns, SavedRowData const & previous_row, SavedRowData const & current_row);
 
+				SavedRowData saved_temp_merged_row;
+				std::deque<std::vector<std::string>> saved_strings_deque;
+				std::deque<std::vector<std::int64_t>> saved_ints_deque;
+				std::deque<std::vector<long double>> saved_floats_deque;
+
 				template <typename ROW_DEQUE>
 				void HandleSetOfRowsThatMatchOnPrimaryKeys(ColumnsInTempView const & columns, ROW_DEQUE & rows_to_sort, std::deque<SavedRowData> & outgoing_rows_of_data, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows = false)
 				{
@@ -727,14 +732,14 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 					while (!rows_to_sort.empty())
 					{
 
-						current_row_of_data = rows_to_sort.front().GetSavedRowData();
+						current_row_of_data = std::move(rows_to_sort.front().GetSavedRowData());
 						rows_to_sort.pop_front();
 
 						// If we're starting fresh, just add the current row of input to incoming_rows_of_data
 						// and proceed to the next row of input.
 						if (incoming_rows_of_data.empty())
 						{
-							incoming_rows_of_data.push_back(current_row_of_data);
+							incoming_rows_of_data.push_back(std::move(current_row_of_data));
 							continue;
 						}
 
@@ -748,7 +753,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							SavedRowData & first_incoming_row = incoming_rows_of_data.front();
 							if (first_incoming_row.datetime_end <= current_row_of_data.datetime_start)
 							{
-								outgoing_rows_of_data.push_back(first_incoming_row);
+								outgoing_rows_of_data.push_back(std::move(first_incoming_row));
 								incoming_rows_of_data.pop_front();
 							}
 							else
@@ -770,7 +775,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							{
 								break;
 							}
-							SavedRowData & first_incoming_row = incoming_rows_of_data.front();
+							SavedRowData & first_incoming_row = std::move(incoming_rows_of_data.front());
 							current_row_complete = ProcessCurrentDataRowOverlapWithPreviousSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, xr_table_category);
 							if (failed)
 							{
@@ -781,15 +786,15 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						if (!current_row_complete)
 						{
-							intermediate_rows_of_data.push_back(current_row_of_data);
+							intermediate_rows_of_data.push_back(std::move(current_row_of_data));
 						}
 
-						incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), intermediate_rows_of_data.cbegin(), intermediate_rows_of_data.cend());
+						incoming_rows_of_data.insert(incoming_rows_of_data.cbegin(), std::make_move_iterator(intermediate_rows_of_data.begin()), std::make_move_iterator(intermediate_rows_of_data.end()));
 						intermediate_rows_of_data.clear();
 
 					}
 
-					outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), incoming_rows_of_data.cbegin(), incoming_rows_of_data.cend());
+					outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), std::make_move_iterator(incoming_rows_of_data.begin()), std::make_move_iterator(incoming_rows_of_data.end()));
 					incoming_rows_of_data.clear();
 
 					if (consider_merging_timerange_adjacent_identical_rows && merge_adjacent_rows_with_identical_data_on_secondary_keys)
@@ -797,8 +802,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						// Do a pass to merge adjacent rows timerange-wise that have identical secondary key data
 						while (outgoing_rows_of_data.size() > 1)
 						{
-							SavedRowData const previous_row = outgoing_rows_of_data.front();
-							SavedRowData current_row = *(++outgoing_rows_of_data.cbegin());
+							SavedRowData const previous_row = std::move(outgoing_rows_of_data.front());
+							SavedRowData current_row = std::move(*(++outgoing_rows_of_data.cbegin()));
 							outgoing_rows_of_data.pop_front();
 							outgoing_rows_of_data.pop_front();
 							if (previous_row.datetime_end == current_row.datetime_start)
@@ -808,25 +813,25 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 								{
 									// Merge the rows into one
 									current_row.datetime_start = previous_row.datetime_start;
-									outgoing_rows_of_data.push_front(current_row);
+									outgoing_rows_of_data.push_front(std::move(current_row));
 								}
 								else
 								{
 									// Leave the rows as-is
-									intermediate_rows_of_data.push_back(previous_row);
-									outgoing_rows_of_data.push_front(current_row);
+									intermediate_rows_of_data.push_back(std::move(previous_row));
+									outgoing_rows_of_data.push_front(std::move(current_row));
 								}
 							}
 							else
 							{
 								// Leave the rows as-is
-								intermediate_rows_of_data.push_back(previous_row);
-								outgoing_rows_of_data.push_front(current_row);
+								intermediate_rows_of_data.push_back(std::move(previous_row));
+								outgoing_rows_of_data.push_front(std::move(current_row));
 							}
 						}
 						if (outgoing_rows_of_data.size() == 1)
 						{
-							intermediate_rows_of_data.push_back(outgoing_rows_of_data.front());
+							intermediate_rows_of_data.push_back(std::move(outgoing_rows_of_data.front()));
 							outgoing_rows_of_data.pop_front();
 						}
 						outgoing_rows_of_data.swap(intermediate_rows_of_data);

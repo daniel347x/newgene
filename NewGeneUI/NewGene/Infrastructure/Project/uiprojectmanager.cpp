@@ -17,6 +17,7 @@
 #include "newgenemainwindow.h"
 
 #include <QFileDialog>
+#include <QCoreApplication>
 
 UIProjectManager::UIProjectManager( QObject * parent )
 	: QObject(parent)
@@ -113,6 +114,17 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 
 	bool success = false;
 
+	if (input_project_list->files.size() == 0)
+	{
+		boost::filesystem::path input_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DataLocation, NewGeneFileNames::defaultInputProjectFileName);
+		if (input_project_path != boost::filesystem::path())
+		{
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, input_project_path.string().c_str()));
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_DATASET_FOLDER_PATH, OpenInputFilePath(messager, input_project_path.parent_path()));
+			input_project_list = InputProjectFilesList::get(messager);
+		}
+	}
+
 	if (input_project_list->files.size() == 1)
 	{
 
@@ -141,6 +153,17 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 
 		}
 
+	}
+
+	if (success && output_project_list->files.size() == 0)
+	{
+		boost::filesystem::path output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DataLocation, NewGeneFileNames::defaultOutputProjectFileName);
+		if (output_project_path != boost::filesystem::path())
+		{
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, output_project_path.string().c_str()));
+			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, output_project_path.parent_path()));
+			output_project_list = OutputProjectFilesList::get(messager);
+		}
 	}
 
 	if (success && output_project_list->files.size() == 1)
@@ -307,7 +330,7 @@ void UIProjectManager::OpenOutputDataset(STD_STRING the_output_dataset, QObject 
 
 	if (success)
 	{
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, InputProjectFilesList(messager, the_output_dataset));
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, the_output_dataset));
 	}
 
 }

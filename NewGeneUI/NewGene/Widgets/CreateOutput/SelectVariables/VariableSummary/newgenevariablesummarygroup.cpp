@@ -1,5 +1,6 @@
 #include "newgenevariablesummarygroup.h"
 #include "ui_newgenevariablesummarygroup.h"
+#include "../../../NewGeneBackEnd/Utilities/WidgetIdentifier.h"
 
 #include <QStandardItem>
 

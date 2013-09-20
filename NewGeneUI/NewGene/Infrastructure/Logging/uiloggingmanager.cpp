@@ -35,43 +35,12 @@ UILoggingManager::UILoggingManager( QObject * parent )
 
 bool UILoggingManager::ObtainLogfilePath()
 {
-	// TODO: Make the location of the logfile path be a user setting
-	// TODO: Make the default locatio nof the logfile path switch the the user data directory if the application directory is not writable
+	loggingPath = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DataLocation, NewGeneFileNames::logFileName, true);
 
-	QString logfilePathString = QCoreApplication::applicationDirPath();
-	boost::filesystem::path logfilePathTest( logfilePathString.toStdString() );
-	logfilePathTest /= NewGeneFileNames::logFileName.toStdString();
-	std::ofstream logfilePathTestFile;
-	logfilePathTestFile.exceptions( std::ifstream::failbit | std::ifstream::badbit );
-	bool found = false;
-
-	try
+	if (loggingPath == boost::filesystem::path())
 	{
-		logfilePathTestFile.open( logfilePathTest.c_str() );
-
-		if ( logfilePathTestFile.is_open() )
-		{
-			logfilePathTestFile.write( "\n", 1 );  // write 1 character
-			logfilePathTestFile.close();
-
-			loggingPath = logfilePathTest;
-
-			// qDebug() << "Created: " << settingsPath.string().c_str();
-			found = true;
-		}
-		else
-		{
-			QString path_error = logfilePathTest.string().c_str();
-			QString path_error_description = "Cannot open logfile \"";
-			path_error_description += path_error;
-			path_error_description += "\"";
-			current_error = path_error_description;
-		}
-	}
-	catch ( std::ofstream::failure e )
-	{
-		current_error = e.what();
+		return false;
 	}
 
-	return found;
+	return true;
 }

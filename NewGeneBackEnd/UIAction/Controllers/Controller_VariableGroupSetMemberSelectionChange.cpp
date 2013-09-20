@@ -61,8 +61,6 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 					return;
 				}
 
-				std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
-
 				// ************************************* //
 				// Retrieve data sent by user interface
 				// ************************************* //
@@ -87,13 +85,19 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 				WidgetInstanceIdentifiers child_identifiers;
 				child_identifiers.push_back(identifier);
 				DataChange change(type, intention, WidgetInstanceIdentifier(*identifier.identifier_parent), child_identifiers);
-				change.set_of_identifiers = active_dmus;
 				change_response.changes.push_back(change);
 
 				// ***************************************** //
 				// Update database and cache
 				// ***************************************** //
 				output_model.t_variables_selected_identifiers.Update(output_model.getDb(), output_model, input_model, change_response);
+
+				// ***************************************** //
+				// Use updated cache info to set further info
+				// in change_response
+				// ***************************************** //
+				std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
+				change_response.changes.back().set_of_identifiers = active_dmus;
 
 			});
 
