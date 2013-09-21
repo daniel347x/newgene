@@ -3,14 +3,134 @@
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #	include <boost/date_time/local_time/local_time.hpp>
+#	include <boost/tokenizer.hpp>
 #endif
 #include <fstream>
 #include <cstdint>
+
+void TimeRangeFieldMapping::ConvertStringToDate(int & year, int & month, int & day, std::string const & the_string)
+{
+
+	boost::tokenizer<> tok(the_string);
+	int count = 0;
+	for(boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
+	{
+		switch (count)
+		{
+		case 0:
+			{
+				std::string test = *it;
+				year = boost::lexical_cast<int>(*it);
+			}
+			break;
+		case 1:
+			{
+				std::string test = *it;
+				std::string the_month = *it;
+				if (boost::iequals(*it, "jan"))
+				{
+					month = 1;
+				}
+				else if (boost::iequals(*it, "feb"))
+				{
+					month = 2;
+				}
+				else if (boost::iequals(*it, "mar"))
+				{
+					month = 3;
+				}
+				else if (boost::iequals(*it, "apr"))
+				{
+					month = 4;
+				}
+				else if (boost::iequals(*it, "may"))
+				{
+					month = 5;
+				}
+				else if (boost::iequals(*it, "jun"))
+				{
+					month = 6;
+				}
+				else if (boost::iequals(*it, "jul"))
+				{
+					month = 7;
+				}
+				else if (boost::iequals(*it, "aug"))
+				{
+					month = 8;
+				}
+				else if (boost::iequals(*it, "sep"))
+				{
+					month = 9;
+				}
+				else if (boost::iequals(*it, "oct"))
+				{
+					month = 10;
+				}
+				else if (boost::iequals(*it, "nov"))
+				{
+					month = 11;
+				}
+				else if (boost::iequals(*it, "dec"))
+				{
+					month = 12;
+				}
+			}
+			break;
+		case 2:
+			{
+				std::string test = *it;
+				day = boost::lexical_cast<int>(*it);
+			}
+			break;
+		}
+		++count;
+	}
+
+}
 
 void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields, DataFields const & output_data_fields)
 {
 	switch(time_range_type)
 	{
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE:
+			{
+
+				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				Field<FIELD_TYPE_STRING_FIXED> const & the_input_field_start_string = static_cast<Field<FIELD_TYPE_STRING_FIXED> const &>(*the_input_field_datetime_start);
+				Field<FIELD_TYPE_STRING_FIXED> const & the_input_field_end_string = static_cast<Field<FIELD_TYPE_STRING_FIXED> const &>(*the_input_field_datetime_start);
+				Field<FIELD_TYPE_INT64> & the_output_field_start_int = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_datetime_start);
+				Field<FIELD_TYPE_INT64> & the_output_field_end_int = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_datetime_end);
+
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+
+				int year = 0, month = 0, day = 0;
+				ConvertStringToDate(year, month, day, the_input_field_start_string.GetValueReference());
+				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year, month, day));
+
+				year = 0; month = 0; day = 0;
+				ConvertStringToDate(year, month, day, the_input_field_end_string.GetValueReference());
+				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year, month, day));
+
+				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+
+				the_output_field_start_int.SetValue(diff_start_from_1970.total_milliseconds());
+				the_output_field_end_int.SetValue(diff_end_from_1970.total_milliseconds());
+
+			}
+			break;
+
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR:
 			{
 

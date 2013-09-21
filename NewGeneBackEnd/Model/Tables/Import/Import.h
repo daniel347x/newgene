@@ -263,6 +263,7 @@ class TimeRangeFieldMapping : public RowFieldMapping
 			, TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__YR_MNTH_DAY
 			, TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY
 			, TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__RANGE__FROM__YR_MNTH_DAY
+			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE
 		};
 
 		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_, FIELD_MAPPING_TYPE const field_mapping_type_)
@@ -304,6 +305,8 @@ class TimeRangeFieldMapping : public RowFieldMapping
 		}
 
 		void PerformMapping(DataFields const & input_data_fields, DataFields const & output_data_fields);
+
+		static void ConvertStringToDate(int & year, int & month, int & day, std::string const & the_string);
 
 		TIME_RANGE_FIELD_MAPPING_TYPE time_range_type;
 

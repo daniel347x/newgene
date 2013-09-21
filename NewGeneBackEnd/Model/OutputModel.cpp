@@ -2412,26 +2412,30 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		std::int64_t number_of_rows_to_sort = ObtainCount(x_table_result.second);
 		current_number_rows_to_sort = number_of_rows_to_sort;
 
-		boost::format msg_2("Multiplicity %2% - Ordering data within rows for \"%1%\": %3% rows");
-		msg_2 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
-			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
-			% current_multiplicity % number_of_rows_to_sort;
-		UpdateProgressBarToNextStage(msg_2.str(), std::string());
-
-		// ******************************************************************************************************************* //
-		// Reorder the inner tables within each row so that the smallest ones appear on the left.
-		// Do no other processing.
-		// In particular, do not remove self-K-ads, and do not sort the rows within the table.
-		// Split any rows with reordered inner tables to handle time ranges before the inner tables are reordered.
-		// ******************************************************************************************************************* //
-		std::int64_t rows_added = 0;
-		SqlAndColumnSet sorted_within_rows_prior_to_xr_processing = RemoveDuplicates_Or_OrderWithinRows(x_table_result.second, primary_group_number, rows_added, current_multiplicity, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true, false);
-		if (failed || CheckCancelled())
+		// SQL now handles this
+		if (false)
 		{
-			return SqlAndColumnSet();
+			boost::format msg_2("Multiplicity %2% - Ordering data within rows for \"%1%\": %3% rows");
+			msg_2 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
+				: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
+				% current_multiplicity % number_of_rows_to_sort;
+			UpdateProgressBarToNextStage(msg_2.str(), std::string());
+
+			// ******************************************************************************************************************* //
+			// Reorder the inner tables within each row so that the smallest ones appear on the left.
+			// Do no other processing.
+			// In particular, do not remove self-K-ads, and do not sort the rows within the table.
+			// Split any rows with reordered inner tables to handle time ranges before the inner tables are reordered.
+			// ******************************************************************************************************************* //
+			std::int64_t rows_added = 0;
+			SqlAndColumnSet sorted_within_rows_prior_to_xr_processing = RemoveDuplicates_Or_OrderWithinRows(x_table_result.second, primary_group_number, rows_added, current_multiplicity, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true, false);
+			if (failed || CheckCancelled())
+			{
+				return SqlAndColumnSet();
+			}
+			ClearTables(sql_and_column_sets);
+			sql_and_column_sets.push_back(sorted_within_rows_prior_to_xr_processing);
 		}
-		ClearTables(sql_and_column_sets);
-		sql_and_column_sets.push_back(sorted_within_rows_prior_to_xr_processing);
 
 
 		
@@ -8132,35 +8136,38 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				{
 					// save indices of multiplicity > 1 keys for the join, below
 					int column_count = 0;
-					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1, &biggest_multiplicity_previous_table, &column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1, &column_indices_primary_keys_multiplicity_greater_than_1_to_check, &previous_xr_columns, &sql_string, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
+					std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &primary_key_info, &column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1, &biggest_multiplicity_previous_table, &column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1, &column_indices_primary_keys_multiplicity_greater_than_1_to_check, &previous_xr_columns, &sql_string, &first_full_table_column_count, &second_table_column_count, &column_count, &previous_column_names_first_table, &primary_key, &and_](ColumnsInTempView::ColumnInTempView const & new_column)
 					{
-						if (column_count < (int)previous_xr_columns.columns_in_view.size())
+						if (new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg == primary_key_info.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group)
 						{
-							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
+							if (column_count < (int)previous_xr_columns.columns_in_view.size())
 							{
-								// there is only one set of primary keys for this DMU category,
-								// so the following "if" statement only matches once
-								if (new_column.primary_key_index_within_primary_uoa_for_dmu_category == primary_key.sequence_number_within_dmu_category_primary_uoa)
+								if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
 								{
-									column_indices_primary_keys_multiplicity_greater_than_1_to_check.push_back(column_count);
-									if (new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg > biggest_multiplicity_previous_table)
+									// there is only one set of primary keys for this DMU category,
+									// so the following "if" statement only matches once
+									if (new_column.primary_key_index_within_primary_uoa_for_dmu_category == primary_key.sequence_number_within_dmu_category_primary_uoa)
 									{
-										biggest_multiplicity_previous_table = new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg;
-										column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1.clear();
+										column_indices_primary_keys_multiplicity_greater_than_1_to_check.push_back(column_count);
+										if (new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg > biggest_multiplicity_previous_table)
+										{
+											biggest_multiplicity_previous_table = new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg;
+											column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1.clear();
+										}
+										column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1.push_back(column_count);
 									}
-									column_indices_final_previous_inner_table_primary_keys_multiplicity_greater_than_1.push_back(column_count);
 								}
 							}
-						}
-						else
-						{
-							if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
+							else
 							{
-								// there is only one set of primary keys for this DMU category,
-								// so the following "if" statement only matches once
-								if (new_column.primary_key_index_within_primary_uoa_for_dmu_category == primary_key.sequence_number_within_dmu_category_primary_uoa)
+								if (new_column.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_key.dmu_category))
 								{
-									column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1.push_back(column_count);
+									// there is only one set of primary keys for this DMU category,
+									// so the following "if" statement only matches once
+									if (new_column.primary_key_index_within_primary_uoa_for_dmu_category == primary_key.sequence_number_within_dmu_category_primary_uoa)
+									{
+										column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1.push_back(column_count);
+									}
 								}
 							}
 						}
@@ -8259,7 +8266,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				sql_string += previous_column_names_first_table[column_index_test];
 				sql_string += " IS NULL ";
 			});
-			sql_string += " THEN 1 ELSE ";
+			sql_string += " THEN 0 ELSE ";
 			second_and = false;
 			int current_inner_multiplicity_count = 0;
 			sql_string += " CASE ";
