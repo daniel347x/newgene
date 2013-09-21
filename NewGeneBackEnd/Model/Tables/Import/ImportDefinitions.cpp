@@ -168,8 +168,9 @@ ImportDefinition Development__CreateImportDefinition_CINC()
 		input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "upop"));
 		input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_FLOAT, "cinc"));
 
-		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "StateAbb", true));
 		output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_INT32, "CCode", true));
+		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "StateAbb", true));
+		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "StateName"));
 		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "year", true));
 		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "irst", true));
 		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "milex", true));
@@ -199,8 +200,9 @@ ImportDefinition Development__CreateImportDefinition_CINC()
 		time_range_mapping->output_table_fields = output_table_fields;
 		mappings.push_back(time_range_mapping);
 
-		mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "StateAbb"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "StateAbb"), FIELD_TYPE_STRING_FIXED)));
 		mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "CCode"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "CCode"), FIELD_TYPE_INT32)));
+		mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "StateAbb"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "StateAbb"), FIELD_TYPE_STRING_FIXED)));
+		mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "StateName"), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, "StateName"), FIELD_TYPE_STRING_FIXED)));
 		mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "year"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "year"), FIELD_TYPE_INT32)));
 		mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "irst"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "irst"), FIELD_TYPE_INT32)));
 		mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "milex"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "milex"), FIELD_TYPE_INT32)));

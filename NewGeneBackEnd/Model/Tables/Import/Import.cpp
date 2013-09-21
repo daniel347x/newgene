@@ -108,7 +108,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				}
 
 				Field<FIELD_TYPE_STRING_FIXED> const & the_input_field_start_string = static_cast<Field<FIELD_TYPE_STRING_FIXED> const &>(*the_input_field_datetime_start);
-				Field<FIELD_TYPE_STRING_FIXED> const & the_input_field_end_string = static_cast<Field<FIELD_TYPE_STRING_FIXED> const &>(*the_input_field_datetime_start);
+				Field<FIELD_TYPE_STRING_FIXED> const & the_input_field_end_string = static_cast<Field<FIELD_TYPE_STRING_FIXED> const &>(*the_input_field_datetime_end);
 				Field<FIELD_TYPE_INT64> & the_output_field_start_int = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_datetime_start);
 				Field<FIELD_TYPE_INT64> & the_output_field_end_int = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_datetime_end);
 
