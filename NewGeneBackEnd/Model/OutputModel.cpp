@@ -115,13 +115,14 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, progress_increment_per_stage(0)
 	, current_progress_value(0)
 	, delete_tables(true)
+	, debug_ordering(false)
 	, ms_elapsed(0)
 	, current_number_rows_to_sort(0)
 	, remove_self_kads(true)
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 {
 	//debug_ordering = true;
-	//delete_tables = false;
+	delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
 }
@@ -231,13 +232,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	input_model.ClearRemnantTemporaryTables();
 
-	BOOST_SCOPE_EXIT(&input_model)
+	bool delete_tables_ = delete_tables;
+	BOOST_SCOPE_EXIT(&input_model, &delete_tables_)
 	{
 		// This is also done explicity at the end,
 		// but it's better to include in both places,
 		// the first (at end) so that user can benefit from status text,
 		// and the second (here) in case of exit due to failure
-		input_model.ClearRemnantTemporaryTables();
+		if (!delete_tables_)
+		{
+			input_model.ClearRemnantTemporaryTables();
+		}
 		input_model.VacuumDatabase();
 	} BOOST_SCOPE_EXIT_END
 
@@ -8088,7 +8093,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	});
 	sql_string += " FROM ";
 	sql_string += previous_xr_columns.view_name;
-	sql_string += " t1 JOIN ";
+	sql_string += " t1 LEFT OUTER JOIN ";
 	sql_string += primary_variable_group_raw_data_columns.original_table_names[0];
 	sql_string += " t2 ";
 	bool and_ = false;
@@ -14587,8 +14592,11 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	std::int64_t datetime_range_end;
 	bool include_current_data = false;
 	bool include_previous_data = false;
-	std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cbegin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cend(), [this, &saved_rows_with_multiple_nulls, &rows_to_check, &previous_datetime_start_column_index, &current_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_end_column_index, &row_inserts_info, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &xr_table_category](TimeRangeSorter const & row)
+	//std::for_each(rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cbegin(), rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cend(), [this, &saved_rows_with_multiple_nulls, &rows_to_check, &previous_datetime_start_column_index, &current_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_end_column_index, &row_inserts_info, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &xr_table_category](TimeRangeSorter const & row)
+	for (std::vector<TimeRangeSorter>::const_iterator it = rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cbegin(); it != rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.cend(); ++it)
 	{
+
+		TimeRangeSorter const & row = *it;
 
 		if (failed || CheckCancelled())
 		{
@@ -14680,7 +14688,8 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 		});
 	
-	});
+	//});
+	}
 
 	// The rows are now properly *individually* split by time range.
 
@@ -14690,8 +14699,10 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	std::vector<long double> bound_parameter_floats;
 	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use; 
 	bool at_least_one_row_is_bad = false;
-	std::for_each(rows_to_check.begin(), rows_to_check.end(), [this, &at_least_one_row_is_bad, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](TimeRangeSorter & row)
+	//std::for_each(rows_to_check.begin(), rows_to_check.end(), [this, &at_least_one_row_is_bad, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_floats, &bound_parameter_which_binding_to_use, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &xr_table_category](TimeRangeSorter & row)
+	for(std::vector<TimeRangeSorter>::iterator it = rows_to_check.begin(); it != rows_to_check.end(); ++it)
 	{
+		TimeRangeSorter & row = *it;
 
 		std::int64_t datetime_start = row.GetSavedRowData().datetime_start;
 		std::int64_t datetime_end = row.GetSavedRowData().datetime_end;
@@ -14742,18 +14753,22 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			at_least_one_row_is_bad = true;
 		}
 
-	});
+	//});
+	}
 
 	if (at_least_one_row_is_bad)
 	{
 		std::vector<TimeRangeSorter> new_vector;
-		std::for_each(rows_to_check.begin(), rows_to_check.end(), [this, &new_vector](TimeRangeSorter & row)
+		//std::for_each(rows_to_check.begin(), rows_to_check.end(), [this, &new_vector](TimeRangeSorter & row)
+		for(std::vector<TimeRangeSorter>::iterator it = rows_to_check.begin(); it != rows_to_check.end(); ++it)
 		{
+			TimeRangeSorter & row = *it;
 			if (!row.bad_row)
 			{
 				new_vector.push_back(row);
 			}
-		});
+		//});
+		}
 		rows_to_check.swap(new_vector);
 	}
 
@@ -14769,10 +14784,13 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// when retrieving deque's from the map, there should be one deque for every
 	// set of rows that match on all primary key fields EXCEPT the last.
 	// They will include all time ranges within this group.
-	std::for_each(rows_to_check.begin(), rows_to_check.end(), [](TimeRangeSorter & row)
+	//std::for_each(rows_to_check.begin(), rows_to_check.end(), [](TimeRangeSorter & row)
+	for(std::vector<TimeRangeSorter>::iterator it = rows_to_check.begin(); it != rows_to_check.end(); ++it)
 	{
+		TimeRangeSorter & row = *it;
 		row.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = true;
-	});
+	//});
+	}
 
 	// Now perform the actual binning of the rows into separate deques,
 	// with each deque matchin on all but the final inner table (including NULL count),
@@ -14783,22 +14801,28 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	});
 
 	// Modify the flags so that the sort in the next loop DOES include the time range in the sort.
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	//std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	for(std::map<TimeRangeSorter, std::deque<TimeRangeSorter>>::iterator it = rowgroups_separated_into_primarykey_sets.begin(); it != rowgroups_separated_into_primarykey_sets.end(); ++it)
 	{
+		std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group = *it;
 		std::for_each(row_group.second.begin(), row_group.second.end(), [](TimeRangeSorter & row)
 		{
 			row.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = false;
 		});
-	});
+	//});
+	}
 
 	// Sort the row groups, this time including time range in the sort.
 	// The result will be that each deque will have all rows matching on primary key groups (including the number of NULL's)
 	// EXCEPT the final inner table's primary key group.
 	// These rows inside each deque will be sorted according to time range.
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	//std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	for(std::map<TimeRangeSorter, std::deque<TimeRangeSorter>>::iterator it = rowgroups_separated_into_primarykey_sets.begin(); it != rowgroups_separated_into_primarykey_sets.end(); ++it)
 	{
+		std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group = *it;
 		std::sort(row_group.second.begin(), row_group.second.end());
-	});
+	//});
+	}
 
 	// The task now is to check to see if there is even a single row in each group (deque)
 	// that has non-NULL in the final inner table.
@@ -14806,8 +14830,11 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	// If not, we must include all entries (even though they have NULLs in the final inner table).
 	// However, the time range must be taken into consideration.
 
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &outgoing_rows_of_data, &saved_rows_with_null_in_final_inner_table, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	//std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &outgoing_rows_of_data, &saved_rows_with_null_in_final_inner_table, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	for(std::map<TimeRangeSorter, std::deque<TimeRangeSorter>>::iterator it = rowgroups_separated_into_primarykey_sets.begin(); it != rowgroups_separated_into_primarykey_sets.end(); ++it)
 	{
+
+		std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group = *it;
 
 		// Process rows according to time range.
 		// The incoming rows are sorted according to time range (first on start datetime, then on end datetime)
@@ -14847,7 +14874,8 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			}
 		});
 
-	});
+	//});
+	}
 
 
 
@@ -14864,37 +14892,49 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	rowgroups_separated_into_primarykey_sets.clear();
 
 	// This time, bucket the rows into groups INCLUDING the final inner table's primary key group.
-	std::for_each(rows_to_check.begin(), rows_to_check.end(), [](TimeRangeSorter & row)
+	//std::for_each(rows_to_check.begin(), rows_to_check.end(), [](TimeRangeSorter & row)
+	for(std::vector<TimeRangeSorter>::iterator it = rows_to_check.begin(); it != rows_to_check.end(); ++it)
 	{
+		TimeRangeSorter & row = *it;
 		row.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = true;
 		row.DoCompareFinalInnerTable = true;
-	});
+	//});
+	}
 
 	// Now perform the actual binning of the rows into separate deques,
 	// this time with each group guaranteed to have ALL inner tables 
 	// with non-NULL data, and matching on all inner table primary key groups.
-	std::for_each(rows_to_check.begin(), rows_to_check.end(), [&rowgroups_separated_into_primarykey_sets](TimeRangeSorter & row)
+	//std::for_each(rows_to_check.begin(), rows_to_check.end(), [&rowgroups_separated_into_primarykey_sets](TimeRangeSorter & row)
+	for(std::vector<TimeRangeSorter>::iterator it = rows_to_check.begin(); it != rows_to_check.end(); ++it)
 	{
+		TimeRangeSorter & row = *it;
 		rowgroups_separated_into_primarykey_sets[row].push_back(row);
-	});
+	//});
+	}
 
 	// Modify the flags so that the sort in the next loop DOES include the time range in the sort.
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	//std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	for(std::map<TimeRangeSorter, std::deque<TimeRangeSorter>>::iterator it = rowgroups_separated_into_primarykey_sets.begin(); it != rowgroups_separated_into_primarykey_sets.end(); ++it)
 	{
+		std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group = *it;
 		std::for_each(row_group.second.begin(), row_group.second.end(), [](TimeRangeSorter & row)
 		{
 			row.ShouldReturnEqual_EvenIf_TimeRangesAreDifferent = false;
 		});
-	});
+	//});
+	}
 
 	// Sort the row groups, this time including time range in the sort.
 	// The result will be that each deque will have all rows matching on primary key groups (including the number of NULL's)
 	// INCLUDING the final inner table's primary key group.
 	// These rows inside each deque will be sorted according to time range.
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	//std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	for(std::map<TimeRangeSorter, std::deque<TimeRangeSorter>>::iterator it = rowgroups_separated_into_primarykey_sets.begin(); it != rowgroups_separated_into_primarykey_sets.end(); ++it)
 	{
+		std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group = *it;
 		std::sort(row_group.second.begin(), row_group.second.end());
-	});
+	//});
+	}
 
 
 	// Same as before, except this time it's not a test...
@@ -14905,8 +14945,11 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 	std::vector<SavedRowData> saved_complete_rows;
 
-	std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys, &outgoing_rows_of_data, &saved_complete_rows, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	//std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [this, &previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys, &outgoing_rows_of_data, &saved_complete_rows, &xr_table_category](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
+	for(std::map<TimeRangeSorter, std::deque<TimeRangeSorter>>::iterator it = rowgroups_separated_into_primarykey_sets.begin(); it != rowgroups_separated_into_primarykey_sets.end(); ++it)
 	{
+
+		std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group = *it;
 
 		// Process rows according to time range.
 		// The incoming rows are sorted according to time range (first on start datetime, then on end datetime)
@@ -14935,8 +14978,10 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// the rows that have data in the final inner table,
 		// because we've already saved the rows that don't (from the above loop).
 
-		std::for_each(outgoing_real_rows.cbegin(), outgoing_real_rows.cend(), [&saved_complete_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](const SavedRowData & test_row)
+		//std::for_each(outgoing_real_rows.cbegin(), outgoing_real_rows.cend(), [&saved_complete_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](const SavedRowData & test_row)
+		for(std::deque<SavedRowData>::const_iterator it = outgoing_real_rows.cbegin(); it != outgoing_real_rows.cend(); ++it)
 		{
+			const SavedRowData & test_row = *it;
 			if (test_row.indices_of_all_primary_key_columns_in_final_inner_table[0].first != SQLExecutor::NULL_BINDING)
 			{
 				// The time range in this row represents a time range for which data is present
@@ -14979,9 +15024,11 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 					time_ranges.append(test_row.datetime_start, test_row.datetime_end);
 				}
 			}
-		});
+		//});
+		}
 
-	});
+	//});
+	}
 
 	// We have the final results.
 	//
