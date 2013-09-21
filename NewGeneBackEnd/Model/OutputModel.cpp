@@ -2403,60 +2403,63 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		
 		
 		
-		std::int64_t number_of_rows = ObtainCount(x_table_result.second);
-		current_number_rows_to_sort = number_of_rows;
+		//std::int64_t number_of_rows = ObtainCount(x_table_result.second);
+		//current_number_rows_to_sort = number_of_rows;
 
 
-
-
-		std::int64_t number_of_rows_to_sort = ObtainCount(x_table_result.second);
-		current_number_rows_to_sort = number_of_rows_to_sort;
 
 		// SQL now handles this
 		if (false)
 		{
-			boost::format msg_2("Multiplicity %2% - Ordering data within rows for \"%1%\": %3% rows");
-			msg_2 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
-				: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
-				% current_multiplicity % number_of_rows_to_sort;
-			UpdateProgressBarToNextStage(msg_2.str(), std::string());
+			//std::int64_t number_of_rows_to_sort = ObtainCount(x_table_result.second);
+			//current_number_rows_to_sort = number_of_rows_to_sort;
 
-			// ******************************************************************************************************************* //
-			// Reorder the inner tables within each row so that the smallest ones appear on the left.
-			// Do no other processing.
-			// In particular, do not remove self-K-ads, and do not sort the rows within the table.
-			// Split any rows with reordered inner tables to handle time ranges before the inner tables are reordered.
-			// ******************************************************************************************************************* //
-			std::int64_t rows_added = 0;
-			SqlAndColumnSet sorted_within_rows_prior_to_xr_processing = RemoveDuplicates_Or_OrderWithinRows(x_table_result.second, primary_group_number, rows_added, current_multiplicity, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true, false);
-			if (failed || CheckCancelled())
-			{
-				return SqlAndColumnSet();
-			}
-			ClearTables(sql_and_column_sets);
-			sql_and_column_sets.push_back(sorted_within_rows_prior_to_xr_processing);
+			//boost::format msg_2("Multiplicity %2% - Ordering data within rows for \"%1%\": %3% rows");
+			//msg_2 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
+			//	: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
+			//	% current_multiplicity % number_of_rows_to_sort;
+			//UpdateProgressBarToNextStage(msg_2.str(), std::string());
+
+			//// ******************************************************************************************************************* //
+			//// Reorder the inner tables within each row so that the smallest ones appear on the left.
+			//// Do no other processing.
+			//// In particular, do not remove self-K-ads, and do not sort the rows within the table.
+			//// Split any rows with reordered inner tables to handle time ranges before the inner tables are reordered.
+			//// ******************************************************************************************************************* //
+			//std::int64_t rows_added = 0;
+			//SqlAndColumnSet sorted_within_rows_prior_to_xr_processing = RemoveDuplicates_Or_OrderWithinRows(x_table_result.second, primary_group_number, rows_added, current_multiplicity, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true, false);
+			//if (failed || CheckCancelled())
+			//{
+			//	return SqlAndColumnSet();
+			//}
+			//ClearTables(sql_and_column_sets);
+			//sql_and_column_sets.push_back(sorted_within_rows_prior_to_xr_processing);
 		}
 
 
 		
-
-		// ******************************************************************************************************************* //
-		// Sort all row, with all rows now guaranteed to have inner tables within each row ordered,
-		// so the sort is guaranteed to include ALL identical rows.
-		// There is a subtlety: Rows could have NULLs, but due to the fact that SQLite places NULLs prior to non-NULLs,
-		// it is guaranteed that rows that are equivalent except for some missing (NULL) inner tables
-		// will nonetheless appear as adjacent rows (with those rows with more NULLs appearing first).
-		// Do not remove duplicates.
-		// ******************************************************************************************************************* //
-		SqlAndColumnSet intermediate_duplicates_removed = SortAndOrRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows"), std::string(""), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
-		if (failed || CheckCancelled())
+		// SQL now handles this
+		if (false)
 		{
-			return SqlAndColumnSet();
+			// ******************************************************************************************************************* //
+			// Sort all row, with all rows now guaranteed to have inner tables within each row ordered,
+			// so the sort is guaranteed to include ALL identical rows.
+			// There is a subtlety: Rows could have NULLs, but due to the fact that SQLite places NULLs prior to non-NULLs,
+			// it is guaranteed that rows that are equivalent except for some missing (NULL) inner tables
+			// will nonetheless appear as adjacent rows (with those rows with more NULLs appearing first).
+			// Do not remove duplicates.
+			// ******************************************************************************************************************* //
+			//SqlAndColumnSet intermediate_duplicates_removed = SortAndOrRemoveDuplicates(sorted_within_rows_prior_to_xr_processing.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows"), std::string(""), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
+			//if (failed || CheckCancelled())
+			//{
+			//	return SqlAndColumnSet();
+			//}
 		}
 
 
 
-		number_of_rows_to_sort = ObtainCount(intermediate_duplicates_removed.second);
+		//std::int64_t number_of_rows_to_sort = ObtainCount(intermediate_duplicates_removed.second);
+		std::int64_t number_of_rows_to_sort = ObtainCount(x_table_result.second);
 
 		boost::format msg_3("Multiplicity %2% - Splitting rows on time boundaries and removing redundant NULL rows for \"%1%\": %3% rows");
 		msg_3 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
@@ -2494,7 +2497,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// and 2 NULLs should appear; whereas if 5 or more countries are available over the same time range, a row
 		// with 4 countries should NOT appear).
 		// ******************************************************************************************************************* //
-		xr_table_result = CreateXRTable(intermediate_duplicates_removed.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
+
+		if (false)
+		{
+			//xr_table_result = CreateXRTable(intermediate_duplicates_removed.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
+		}
+		else
+		{
+			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
+		}
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed || CheckCancelled())
