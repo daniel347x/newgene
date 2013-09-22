@@ -2212,7 +2212,7 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 		total_progress_stages += 3;
 
 		// Inside loop, which starts at 2, not 1
-		total_progress_stages += (6 * (highest_multiplicity_primary_uoa - 1));
+		total_progress_stages += (4 * (highest_multiplicity_primary_uoa - 1));
 
 		// Merging of primary groups: One each
 		++total_progress_stages;
