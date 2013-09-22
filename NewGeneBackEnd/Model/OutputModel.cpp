@@ -122,7 +122,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 {
 	//debug_ordering = true;
-	delete_tables = false;
+	//delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	messager.StartProgressBar(0, 1000);
 }
