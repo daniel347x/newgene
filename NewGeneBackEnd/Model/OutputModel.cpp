@@ -8270,45 +8270,45 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 
 
-			//// ************************************************************************************************** //
-			//// Timerange check against timerange in previous column blocks
-			//// (if it fails here, it means the new data was already included
-			//// in a previous stage in a previous inner table)
-			//// ************************************************************************************************** //
-			//if (and_)
-			//{
-			//	sql_string += " AND ";
-			//}
-			//else
-			//{
-			//	sql_string += " ON ";
-			//}
-			//and_ = true;
+			// ************************************************************************************************** //
+			// Timerange check against timerange in previous column blocks
+			// (if it fails here, it means the new data was already included
+			// in a previous stage in a previous inner table)
+			// ************************************************************************************************** //
+			if (and_)
+			{
+				sql_string += " AND ";
+			}
+			else
+			{
+				sql_string += " ON ";
+			}
+			and_ = true;
 
-			//sql_string += " CASE WHEN ";
-			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			//sql_string += " = 0 AND ";
-			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			//sql_string += " = 0 ";
-			//sql_string += " THEN 1 ";
-			//sql_string += " WHEN ";
-			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			//sql_string += " < ";
-			//sql_string += boost::lexical_cast<std::string>(timerange_end);
-			//sql_string += " THEN ";
-			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			//sql_string += " > ";
-			//sql_string += boost::lexical_cast<std::string>(timerange_start);
-			//sql_string += " WHEN ";
-			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			//sql_string += " > ";
-			//sql_string += boost::lexical_cast<std::string>(timerange_start);
-			//sql_string += " THEN ";
-			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			//sql_string += " < ";
-			//sql_string += boost::lexical_cast<std::string>(timerange_end);
-			//sql_string += " ELSE 0";
-			//sql_string += " END";
+			sql_string += " CASE WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " = 0 AND ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " = 0 ";
+			sql_string += " THEN 1 ";
+			sql_string += " WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " < ";
+			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " THEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " > ";
+			sql_string += boost::lexical_cast<std::string>(timerange_start);
+			sql_string += " WHEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			sql_string += " > ";
+			sql_string += boost::lexical_cast<std::string>(timerange_start);
+			sql_string += " THEN ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			sql_string += " < ";
+			sql_string += boost::lexical_cast<std::string>(timerange_end);
+			sql_string += " ELSE 0";
+			sql_string += " END";
 
 
 
