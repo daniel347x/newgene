@@ -100,15 +100,16 @@ bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputMo
 												{
 													if (packet->getValue() != cache_identifier.second)
 													{
-														// Round to nearest 1000 ms
-														std::int64_t extras = packet->getValue() % 1000;
-														if (extras < 500)
+														// Round to nearest 10000 ms
+														std::int64_t round_to_nearest = 10000;
+														std::int64_t extras = packet->getValue() % round_to_nearest;
+														if (extras < (round_to_nearest / 2))
 														{
 															cache_identifier.second = packet->getValue() - extras;
 														}
 														else
 														{
-															cache_identifier.second = packet->getValue() + (1000 - extras);
+															cache_identifier.second = packet->getValue() + (round_to_nearest - extras);
 														}
 														changes_made = true;
 													}

@@ -20,7 +20,7 @@ bool UIActionManager::FailIfBusy(Messager & messager)
 				return false;
 			}
 		}
-		boost::this_thread::sleep_for(boost::chrono::milliseconds(25));
+		boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 	}
 
 	messager.ShowMessageBox("Another operation is in progress.  Please wait for it to complete first.");

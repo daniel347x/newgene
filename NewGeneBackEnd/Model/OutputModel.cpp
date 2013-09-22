@@ -230,8 +230,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	InputModel & input_model = model->getInputModel();
 
-	input_model.ClearRemnantTemporaryTables();
-
 	bool delete_tables_ = delete_tables;
 	BOOST_SCOPE_EXIT(&input_model, &delete_tables_)
 	{
@@ -239,7 +237,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// but it's better to include in both places,
 		// the first (at end) so that user can benefit from status text,
 		// and the second (here) in case of exit due to failure
-		if (!delete_tables_)
+		if (delete_tables_)
 		{
 			input_model.ClearRemnantTemporaryTables();
 		}
@@ -303,6 +301,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	debug_sql_path = setting_path_to_kad_output;
 	debug_sql_path.replace_extension(".debugsql.txt");
+
+	messager.AppendKadStatusText("Validating database...", nullptr);
+	input_model.ClearRemnantTemporaryTables();
 
 	BOOST_SCOPE_EXIT(this_)
 	{
@@ -395,7 +396,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
 	messager.SetPerformanceLabel("Vacuuming and defragmenting database...");
-	input_model.ClearRemnantTemporaryTables();
+	if (delete_tables)
+	{
+		input_model.ClearRemnantTemporaryTables();
+	}
 	input_model.VacuumDatabase();
 
 	messager.UpdateProgressBarValue(1000);
@@ -8224,6 +8228,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 		if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 		{
+			// ************************************************************************************************** //
+			// Basic timerange check against timerange selected by end user
+			// ************************************************************************************************** //
 			if (and_)
 			{
 				sql_string += " AND ";
@@ -8259,6 +8266,58 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += " ELSE 0";
 			sql_string += " END";
 
+
+
+
+
+			//// ************************************************************************************************** //
+			//// Timerange check against timerange in previous column blocks
+			//// (if it fails here, it means the new data was already included
+			//// in a previous stage in a previous inner table)
+			//// ************************************************************************************************** //
+			//if (and_)
+			//{
+			//	sql_string += " AND ";
+			//}
+			//else
+			//{
+			//	sql_string += " ON ";
+			//}
+			//and_ = true;
+
+			//sql_string += " CASE WHEN ";
+			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			//sql_string += " = 0 AND ";
+			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			//sql_string += " = 0 ";
+			//sql_string += " THEN 1 ";
+			//sql_string += " WHEN ";
+			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			//sql_string += " < ";
+			//sql_string += boost::lexical_cast<std::string>(timerange_end);
+			//sql_string += " THEN ";
+			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			//sql_string += " > ";
+			//sql_string += boost::lexical_cast<std::string>(timerange_start);
+			//sql_string += " WHEN ";
+			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+			//sql_string += " > ";
+			//sql_string += boost::lexical_cast<std::string>(timerange_start);
+			//sql_string += " THEN ";
+			//sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+			//sql_string += " < ";
+			//sql_string += boost::lexical_cast<std::string>(timerange_end);
+			//sql_string += " ELSE 0";
+			//sql_string += " END";
+
+
+
+			// ************************************************************************************************** //
+			// Now, the test to make sure that if one or more previous multiplicity > 1 columns is NULL,
+			// that this row gets automatically included (because it's an OUTER join) even though new data
+			// does not match; OR test that the new data is greater than the previous final piece of data
+			// (in the multiplicity > 1 columns) to maintain orderedness within rows
+			// ************************************************************************************************** //
 			if (and_)
 			{
 				sql_string += " AND ";
@@ -10155,19 +10214,50 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				sql_string += " WHEN ";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
 				sql_string += " < ";
-				sql_string += boost::lexical_cast<std::string>(timerange_end);
+				sql_string += boost::lexical_cast<std::string>(timerange_end); // the cast isn't really necessary, because std::string knows how to append a number
 				sql_string += " THEN ";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
 				sql_string += " > ";
-				sql_string += boost::lexical_cast<std::string>(timerange_start);
+				sql_string += boost::lexical_cast<std::string>(timerange_start); // the cast isn't really necessary, because std::string knows how to append a number
 				sql_string += " WHEN ";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
 				sql_string += " > ";
-				sql_string += boost::lexical_cast<std::string>(timerange_start);
+				sql_string += boost::lexical_cast<std::string>(timerange_start); // the cast isn't really necessary, because std::string knows how to append a number
 				sql_string += " THEN ";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
 				sql_string += " < ";
-				sql_string += boost::lexical_cast<std::string>(timerange_end);
+				sql_string += boost::lexical_cast<std::string>(timerange_end); // the cast isn't really necessary, because std::string knows how to append a number
+				sql_string += " ELSE 0";
+				sql_string += " END";
+
+				if (and_)
+				{
+					sql_string += " AND ";
+				}
+				and_ = true;
+
+				sql_string += " CASE WHEN ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+				sql_string += " = 0 AND ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+				sql_string += " = 0 ";
+				sql_string += " THEN 1 ";
+				sql_string += " WHEN ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+				sql_string += " < ";
+				sql_string += result_columns.columns_in_view[previous_xr_columns.columns_in_view.size() - 1].column_name_in_temporary_table; // end date of previous columns
+				sql_string += " THEN ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+				sql_string += " > ";
+				sql_string += result_columns.columns_in_view[previous_xr_columns.columns_in_view.size() - 2].column_name_in_temporary_table; // start date of previous columns
+				sql_string += " WHEN ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+				sql_string += " > ";
+				sql_string += result_columns.columns_in_view[previous_xr_columns.columns_in_view.size() - 2].column_name_in_temporary_table; // start date of previous columns
+				sql_string += " THEN ";
+				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+				sql_string += " < ";
+				sql_string += result_columns.columns_in_view[previous_xr_columns.columns_in_view.size() - 1].column_name_in_temporary_table; // end date of previous columns
 				sql_string += " ELSE 0";
 				sql_string += " END";
 			}
@@ -10879,7 +10969,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 					// ... use the datetime read from the database as the new datetime
 
-					current_row_of_data.SetFinalInnerTableToNull();
+					current_row_of_data.SetFinalInnerTableToNull(true);
 					std::int64_t datetime_start = current_row_of_data.datetime_start;
 					std::int64_t datetime_end = current_row_of_data.datetime_end;
 					bool skip_check = false;
@@ -14684,7 +14774,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 			// If we're here, we need to remove the data from the final inner table from the row,
 			// because its datetime range is out of range.
-			current_row.SetFinalInnerTableToNull();
+			current_row.SetFinalInnerTableToNull(false);
 
 		});
 	
@@ -15390,7 +15480,7 @@ void OutputModel::OutputGenerator::SavedRowData::AddBinding(std::vector<bool> co
 	}
 }
 
-void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
+void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull(bool const set_datetime_to_previous_block)
 {
 	int column_index = 0;
 	int final_inner_table_column_index = 0;
@@ -15459,6 +15549,17 @@ void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull()
 		++column_index;
 
 	});
+
+	// With final inner table set to NULL, the previous block's final datetime columns
+	// are guaranteed to be the last two ints
+	if (set_datetime_to_previous_block)
+	{
+		if (current_parameter_ints.size() > 1)
+		{
+			datetime_start = current_parameter_ints[(int)current_parameter_ints.size()-2];
+			datetime_end = current_parameter_ints[(int)current_parameter_ints.size()-1];
+		}
+	}
 
 }
 
@@ -16331,7 +16432,7 @@ void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const &
 		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
 			{
 				if (    schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-					||  schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_CHILD_MERGE)
+					||  schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT)
 				{
 					if (previous_datetime_start_column_index == -1)
 					{
@@ -16339,7 +16440,7 @@ void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const &
 					}
 				}
 				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-					||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE)
+					||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT)
 				{
 					if ( previous_datetime_end_column_index == -1)
 					{
