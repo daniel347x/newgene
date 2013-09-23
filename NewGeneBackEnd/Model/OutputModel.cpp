@@ -8501,50 +8501,58 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 		return false;
 	}
 
-	int highest_index_previous_table = (int)previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.size() - 1;
-	bool found_highest_index = false;
-	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.crbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.crend(), [&xr_table_category, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
-	{
-		if (found_highest_index)
-		{
-			return;
-		}
+	//int highest_index_previous_table = (int)previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.size() - 1;
+	//bool found_highest_index = false;
+	//std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.crbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.crend(), [&xr_table_category, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	//{
+	//	if (found_highest_index)
+	//	{
+	//		return;
+	//	}
 
-		if (xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
-		{
-			if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-			 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE)
-			{
-				found_highest_index = true;
-				return;
-			}
-		}
-		else if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
-		{
-			if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
-			{
-				found_highest_index = true;
-				return;
-			}
-		}
-		else
-		{
-			if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-			 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
-			{
-				found_highest_index = true;
-				return;
-			}
-		}
+	//	if (xr_table_category == OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP)
+	//	{
+	//		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+	//		 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE)
+	//		{
+	//			found_highest_index = true;
+	//			return;
+	//		}
+	//	}
+	//	else if (xr_table_category == OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP)
+	//	{
+	//		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
+	//		{
+	//			found_highest_index = true;
+	//			return;
+	//		}
+	//	}
+	//	else
+	//	{
+	//		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
+	//		 || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
+	//		{
+	//			found_highest_index = true;
+	//			return;
+	//		}
+	//	}
 
-		--highest_index_previous_table;
-	});
+	//	--highest_index_previous_table;
+	//});
 
 
-	int index_of_previous_datetime_start_column = highest_index_previous_table - 1;
-	int index_of_previous_datetime_end_column = highest_index_previous_table;
-	int index_of_current_datetime_start_column = (int)previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.size() - 2;
-	int index_of_current_datetime_end_column = (int)previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.size() - 1;;
+	//int index_of_previous_datetime_start_column = highest_index_previous_table - 1;
+	//int index_of_previous_datetime_end_column = highest_index_previous_table;
+	//int index_of_current_datetime_start_column = (int)previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.size() - 2;
+	//int index_of_current_datetime_end_column = (int)previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.size() - 1;;
+	int index_of_previous_datetime_start_column = -1;
+	int index_of_previous_datetime_end_column = -1;
+	int index_of_current_datetime_start_column = -1;
+	int index_of_current_datetime_end_column = -1;
+
+	FindDatetimeIndices(previous_x_or_mergedfinalplusnewfinal_columns, index_of_previous_datetime_start_column, index_of_previous_datetime_end_column, index_of_current_datetime_start_column, index_of_current_datetime_end_column, xr_table_category);
+
+	int highest_index_previous_table = index_of_previous_datetime_end_column;
 
 	std::int64_t saved_previous_datetime_start = 0;
 	std::int64_t saved_previous_datetime_end = 0;
@@ -8573,7 +8581,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 	int the_column_index = 0;
 	bool first_datetime_column_already_reached = false;
 	bool stop_incrementing_single_inner_table_column_count = false;
-	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &first_datetime_column_already_reached, &stop_incrementing_single_inner_table_column_count, &the_column_index, &number_columns_each_single_inner_table, &highest_index_previous_table, &found_highest_index](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cbegin(), previous_x_or_mergedfinalplusnewfinal_columns.columns_in_view.cend(), [&index_of_previous_datetime_start_column, &index_of_previous_datetime_end_column, &index_of_current_datetime_start_column, &index_of_current_datetime_end_column, &first_datetime_column_already_reached, &stop_incrementing_single_inner_table_column_count, &the_column_index, &number_columns_each_single_inner_table, &highest_index_previous_table](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 
 		if (stop_incrementing_single_inner_table_column_count)
