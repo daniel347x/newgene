@@ -382,7 +382,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	}
 
 	messager.AppendKadStatusText("Construction of final K-ad results...", this);
-	all_merged_results_unformatted = CreateKadResultSet(child_merge_final_result.second, WidgetInstanceIdentifier(), std::string("Sorting final K-ad results"), std::string("Removing duplicates from final K-ad results"), -1, 0, merging_of_children_column_sets, secondary_variable_groups_column_info.size() != 0, OutputModel::OutputGenerator::KAD_RESULTS, true);
+	all_merged_results_unformatted = CreateKadResultSet(child_merge_final_result.second);
 
 	messager.AppendKadStatusText("Formatting results...", this);
 	messager.SetPerformanceLabel("Formatting results...");
@@ -13711,11 +13711,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateKadResultSet(ColumnsInTempView const & column_set, WidgetInstanceIdentifier const & variable_group, std::string & msg_sort_preface, std::string & msg_remove_duplicates_preface, int const current_multiplicity, int const primary_group_number, SqlAndColumnSets & sql_and_column_sets, bool const do_clear_table, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateKadResultSet(ColumnsInTempView const & column_set)
 {
 
 	std::int64_t rows_added = 0;
-	char c[256];
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
@@ -13723,8 +13722,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	result_columns = column_set;
 	result_columns.most_recent_sql_statement_executed__index = -1;
-	std::string view_name += "NGTEMP_KKA";
-	view_name += itoa(primary_group_number, c, 10);
+	std::string view_name = "NGTEMP_KKA";
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
@@ -13762,81 +13760,83 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	std::string datetime_start_col_name_text;
 	std::string datetime_end_col_name_text;
 
-	// Final result - add two TEXT columns to store text representation of the datetime
-	std::string datetime_start_col_name_no_uuid;
-	datetime_start_col_name_no_uuid = "DATETIME_START_TEXT";
-	datetime_start_col_name_text = datetime_start_col_name_no_uuid;
-	datetime_start_col_name_text += "_";
-	datetime_start_col_name_text += newUUID(true);
-
-	std::string alter_string;
-	alter_string += "ALTER TABLE ";
-	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
-	alter_string += datetime_start_col_name_text;
-	alter_string += " TEXT";
-
-	sql_strings.push_back(SQLExecutor(this, db, alter_string));
-	if (failed)
 	{
-		SetFailureMessage(sql_error);
-		return result;
+		// Final result - add two TEXT columns to store text representation of the datetime
+		std::string datetime_start_col_name_no_uuid;
+		datetime_start_col_name_no_uuid = "DATETIME_START_TEXT";
+		datetime_start_col_name_text = datetime_start_col_name_no_uuid;
+		datetime_start_col_name_text += "_";
+		datetime_start_col_name_text += newUUID(true);
+
+		std::string alter_string;
+		alter_string += "ALTER TABLE ";
+		alter_string += result_columns.view_name;
+		alter_string += " ADD COLUMN ";
+		alter_string += datetime_start_col_name_text;
+		alter_string += " TEXT";
+
+		sql_strings.push_back(SQLExecutor(this, db, alter_string));
+		if (failed)
+		{
+			SetFailureMessage(sql_error);
+			return result;
+		}
+		if (CheckCancelled())
+		{
+			return result;
+		}
+
+		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+		datetime_start_column.column_name_in_temporary_table = datetime_start_col_name_text;
+		datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
+		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = column_set.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+		datetime_start_column.number_inner_tables_in_set = column_set.columns_in_view.back().number_inner_tables_in_set;
+
+		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT;
+		datetime_start_column.variable_group_associated_with_current_inner_table = column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
+		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
+		datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
+		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+		datetime_start_column.column_name_in_original_data_table = "";
+
+		std::string datetime_end_col_name_no_uuid;
+		datetime_end_col_name_no_uuid = "DATETIME_END_TEXT";
+		datetime_end_col_name_text = datetime_end_col_name_no_uuid;
+		datetime_end_col_name_text += "_";
+		datetime_end_col_name_text += newUUID(true);
+
+		alter_string.clear();
+		alter_string += "ALTER TABLE ";
+		alter_string += result_columns.view_name;
+		alter_string += " ADD COLUMN ";
+		alter_string += datetime_end_col_name_text;
+		alter_string += " TEXT";
+
+		sql_strings.push_back(SQLExecutor(this, db, alter_string));
+		if (failed)
+		{
+			SetFailureMessage(sql_error);
+			return result;
+		}
+		if (CheckCancelled())
+		{
+			return result;
+		}
+
+		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+		datetime_end_column.column_name_in_temporary_table = datetime_end_col_name_text;
+		datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
+		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = column_set.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+		datetime_end_column.number_inner_tables_in_set = column_set.columns_in_view.back().number_inner_tables_in_set;
+		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT;
+		datetime_end_column.variable_group_associated_with_current_inner_table = column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
+		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
+		datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
+		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+		datetime_end_column.column_name_in_original_data_table = "";
 	}
-	if (CheckCancelled())
-	{
-		return result;
-	}
-
-	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
-	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name_text;
-	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
-	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = column_set.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
-	datetime_start_column.number_inner_tables_in_set = column_set.columns_in_view.back().number_inner_tables_in_set;
-
-	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT;
-	datetime_start_column.variable_group_associated_with_current_inner_table = previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
-	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
-	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
-	datetime_start_column.column_name_in_original_data_table = "";
-
-	std::string datetime_end_col_name_no_uuid;
-	datetime_end_col_name_no_uuid = "DATETIME_END_TEXT";
-	datetime_end_col_name_text = datetime_end_col_name_no_uuid;
-	datetime_end_col_name_text += "_";
-	datetime_end_col_name_text += newUUID(true);
-
-	alter_string.clear();
-	alter_string += "ALTER TABLE ";
-	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
-	alter_string += datetime_end_col_name_text;
-	alter_string += " TEXT";
-
-	sql_strings.push_back(SQLExecutor(this, db, alter_string));
-	if (failed)
-	{
-		SetFailureMessage(sql_error);
-		return result;
-	}
-	if (CheckCancelled())
-	{
-		return result;
-	}
-
-	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
-	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name_text;
-	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
-	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_result_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
-	datetime_end_column.number_inner_tables_in_set = previous_result_columns.columns_in_view.back().number_inner_tables_in_set;
-	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT;
-	datetime_end_column.variable_group_associated_with_current_inner_table = previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
-	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
-	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
-	datetime_end_column.column_name_in_original_data_table = "";
 
 	std::string datetime_start_col_name_no_uuid;
 	datetime_start_col_name_no_uuid = "DATETIMESTART_PRE_MERGED_KAD_OUTPUT";
@@ -13866,11 +13866,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
 	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
 	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
-	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_result_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
-	datetime_start_column.number_inner_tables_in_set = previous_result_columns.columns_in_view.back().number_inner_tables_in_set;
+	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = column_set.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_start_column.number_inner_tables_in_set = column_set.columns_in_view.back().number_inner_tables_in_set;
 	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT;
-	datetime_start_column.variable_group_associated_with_current_inner_table = previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
-	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
+	datetime_start_column.variable_group_associated_with_current_inner_table = column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
+	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
 	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 	datetime_start_column.column_name_in_original_data_table = "";
@@ -13903,11 +13903,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
 	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
 	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
-	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_result_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
-	datetime_end_column.number_inner_tables_in_set = previous_result_columns.columns_in_view.back().number_inner_tables_in_set;
+	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = column_set.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_end_column.number_inner_tables_in_set = column_set.columns_in_view.back().number_inner_tables_in_set;
 	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT;
-	datetime_end_column.variable_group_associated_with_current_inner_table = previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
-	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
+	datetime_end_column.variable_group_associated_with_current_inner_table = column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
+	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
 	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 	result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT);
@@ -13957,7 +13957,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			this_->CloseObtainData();
 		} BOOST_SCOPE_EXIT_END
 
-			ObtainData(previous_result_columns);
+		ObtainData(column_set);
 
 		if (failed || CheckCancelled())
 		{
@@ -13980,7 +13980,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		{
 
 			one_row.clear();
-			sorting_row_of_data.PopulateFromCurrentRowInDatabase(column_set, stmt_result, xr_table_category);
+			sorting_row_of_data.PopulateFromCurrentRowInDatabase(column_set, stmt_result, OutputModel::OutputGenerator::KAD_RESULTS);
 			one_row.push_back(std::move(sorting_row_of_data));
 
 			failed = sorting_row_of_data.failed;
@@ -13994,16 +13994,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				return result;
 			}
 
-			WriteRowsToFinalTable(one_row, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, xr_table_category, false, datetime_start_col_name_text, datetime_end_col_name_text);
+			WriteRowsToFinalTable(one_row, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, OutputModel::OutputGenerator::KAD_RESULTS, false, datetime_start_col_name_text, datetime_end_col_name_text);
 			if (failed || CheckCancelled())
 			{
-				return;
+				return SqlAndColumnSet();
 			}
 		}
 
 		if (failed || CheckCancelled())
 		{
-			return result;
+			return SqlAndColumnSet();
 		}
 
 	}
@@ -14012,8 +14012,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 		return SqlAndColumnSet();
 	}
-	ClearTables(sql_and_column_sets);
-	sql_and_column_sets.push_back(result);
 
 	return result;
 
