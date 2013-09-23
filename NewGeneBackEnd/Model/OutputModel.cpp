@@ -2131,7 +2131,7 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 	total_progress_stages = 0;
 
 	int primary_group_number = 1;
-	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_variable_groups_column_info, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
 
 		if (failed || CheckCancelled())
