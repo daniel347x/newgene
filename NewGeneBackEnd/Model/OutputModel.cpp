@@ -14860,7 +14860,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 			if (failed || CheckCancelled())
 			{
-				return;
+				break;
 			}
 
 			bool added = false;
@@ -14875,7 +14875,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 				// The reason is that the INITIAL inner table, which is pulled
 				// straight from the raw data, is guaranteed to also include
 				// this data by itself, so it doesn't need to be re-added here.
-				return;
+				break;
 			}
 
 			rows_to_check.push_back(row);
@@ -14887,7 +14887,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			if (include_current_data)
 			{
 				// data has already been copied into the row, and no data needs to be removed.
-				return;
+				break;
 			}
 
 			// If we're here, we need to remove the data from the final inner table from the row,
