@@ -14834,7 +14834,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			// and so we won't be able to, either.
 			// Just save the row as-is without further processing.
 			saved_rows_with_multiple_nulls.push_back(row.GetSavedRowData());
-			break;
+			continue;
 		}
 
 		// Split an individual incoming row into 0, 1, 2, or 3 new rows,
@@ -14852,15 +14852,16 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// The following block will EXCLUDE rows that only include the data from the final inner table,
 		// but not the previous data,
 		// because this data is guaranteed to be in place from the initial primary table.
-		//std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &row, &rows_to_check](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
-		for(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>>::const_iterator it = row_inserts_info.cbegin(); it != row_inserts_info.cend(); ++it)
+		std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &row, &rows_to_check](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
+		//for(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>>::const_iterator it = row_inserts_info.cbegin(); it != row_inserts_info.cend(); ++it)
 		{
 
-			std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info = *it;
+			//std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info = *it;
 
 			if (failed || CheckCancelled())
 			{
-				break;
+				//break;
+				return;
 			}
 
 			bool added = false;
@@ -14875,7 +14876,8 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 				// The reason is that the INITIAL inner table, which is pulled
 				// straight from the raw data, is guaranteed to also include
 				// this data by itself, so it doesn't need to be re-added here.
-				break;
+				//continue;
+				return;
 			}
 
 			rows_to_check.push_back(row);
@@ -14887,15 +14889,16 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			if (include_current_data)
 			{
 				// data has already been copied into the row, and no data needs to be removed.
-				break;
+				//continue;
+				return;
 			}
 
 			// If we're here, we need to remove the data from the final inner table from the row,
 			// because its datetime range is out of range.
 			current_row.SetFinalInnerTableToNull(false);
 
-		//});
-		}
+		});
+		//}
 	
 		if (failed || CheckCancelled())
 		{
