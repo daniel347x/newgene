@@ -472,6 +472,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						int number_of_multiplicities;
 
 						bool operator<(SavedRowData const & rhs) const;
+						bool TestLessEqual(SavedRowData const & rhs, OutputModel::OutputGenerator & generator) const;
 
 						std::string error_message;
 
@@ -1077,6 +1078,14 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// To be options / settings integrated later
 				bool remove_self_kads;
 				bool merge_adjacent_rows_with_identical_data_on_secondary_keys;
+
+				// optimization
+				std::vector<std::string> test_strings;
+				std::vector<std::int64_t> test_ints;
+				std::vector<long double> test_floats;
+				std::vector<std::string> rhs_test_strings;
+				std::vector<std::int64_t> rhs_test_ints;
+				std::vector<long double> rhs_test_floats;
 
 		};
 

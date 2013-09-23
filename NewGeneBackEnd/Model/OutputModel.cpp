@@ -10909,7 +10909,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.clear();
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
 
+					bool perform_null_checks = false;
 					if (!primary_keys_match_on_multiplicity_1)
+					{
+						perform_null_checks = true;
+					}
+
+					SavedRowData const & test_highest_saved_row_with_a_null_primary_key = saved_rows_with_null_in_final_inner_table.back();
+
+					// See comments at bottom of following function for some hints about what is happening here
+					bool previous_row_with_nulls_cannot_be_matched_by_any_following_rows = test_highest_saved_row_with_a_null_primary_key.TestLessEqual(current_row_of_data, *this);
+					if (previous_row_with_nulls_cannot_be_matched_by_any_following_rows)
+					{
+						perform_null_checks = true;
+					}
+
+					if (perform_null_checks)
 					{
 						EliminateRedundantNullsInFinalInnerTable(saved_rows_with_null_in_final_inner_table, multiplicity_one_time_ranges__intkeys, multiplicity_one_time_ranges__floatkeys, multiplicity_one_time_ranges__stringkeys);
 						if (failed || CheckCancelled())
@@ -12785,6 +12800,265 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 		++index;
 	});
 	return is_less_than;
+}
+
+bool OutputModel::OutputGenerator::SavedRowData::TestLessEqual(SavedRowData const & rhs, OutputModel::OutputGenerator & generator) const
+{
+	generator.test_strings.clear();
+	generator.test_ints.clear();
+	generator.test_floats.clear();
+	generator.rhs_test_strings.clear();
+	generator.rhs_test_ints.clear();
+	generator.rhs_test_floats.clear();
+
+	bool i_am_less_than = false;
+
+	int column_index = 0;
+	int current_inner_table = 0;
+	bool is_any_rhs_inner_table_higher_than_my_biggest = false;
+	bool something_in_me_does_not_match_rhs = false;
+
+	for (auto it = indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(); it != indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(); ++it)
+	{
+	
+		auto binding_info = *it;
+		SQLExecutor::WHICH_BINDING const binding = binding_info.first;
+		switch (binding)
+		{
+			case SQLExecutor::INT64:
+				{
+					generator.test_ints.push_back(current_parameter_ints[binding_info.second.first]);
+				}
+				break;
+			case SQLExecutor::STRING:
+				{
+					generator.test_strings.push_back(current_parameter_strings[binding_info.second.first]);
+				}
+				break;
+			case SQLExecutor::FLOAT:
+				{
+					generator.test_floats.push_back(current_parameter_floats[binding_info.second.first]);
+				}
+				break;
+			case SQLExecutor::NULL_BINDING:
+				{
+					// If we are still not bigger than the rhs row,
+					// then we're not bigger.
+					return true;
+				}
+				break;
+		}
+
+		++column_index;
+
+		bool test_now = false;
+		auto test_it = it;
+		bool my_last_inner_table = false;
+		if (++test_it == indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend())
+		{
+			test_now = true;
+			my_last_inner_table = true;
+		}
+		else
+		{
+			auto binding_info_test = *test_it;
+			int current_index_test = binding_info_test.second.second;
+			if (inner_table_number[current_index_test] > current_inner_table)
+			{
+				test_now = true;
+			}
+		}
+
+		if (test_now)
+		{
+			// We have the next of our own inner tables... test it
+
+			bool match_any_rhs_inner_tables = false;
+
+
+			int rhs_column_index = 0;
+			int rhs_current_inner_table = 0;
+			for (auto rhs_it = rhs.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(); rhs_it != rhs.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(); ++rhs_it)
+			{
+				auto rhs_binding_info = *rhs_it;
+				SQLExecutor::WHICH_BINDING const rhs_binding = rhs_binding_info.first;
+				switch (rhs_binding)
+				{
+					case SQLExecutor::INT64:
+						{
+							generator.rhs_test_ints.push_back(rhs.current_parameter_ints[rhs_binding_info.second.first]);
+						}
+						break;
+					case SQLExecutor::STRING:
+						{
+							generator.rhs_test_strings.push_back(rhs.current_parameter_strings[rhs_binding_info.second.first]);
+						}
+						break;
+					case SQLExecutor::FLOAT:
+						{
+							generator.rhs_test_floats.push_back(rhs.current_parameter_floats[rhs_binding_info.second.first]);
+						}
+						break;
+					case SQLExecutor::NULL_BINDING:
+						{
+							// If we are still not bigger than the rhs row,
+							// then we're not bigger.
+							return true;
+						}
+						break;
+				}
+
+				++rhs_column_index;
+
+				bool rhs_test_now = false;
+				auto rhs_test_it = rhs_it;
+				if (++rhs_test_it == rhs.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend())
+				{
+					rhs_test_now = true;
+				}
+				else
+				{
+					auto rhs_binding_info_test = *rhs_test_it;
+					int rhs_current_index_test = rhs_binding_info_test.second.second;
+					if (rhs.inner_table_number[rhs_current_index_test] > rhs_current_inner_table)
+					{
+						rhs_test_now = true;
+					}
+				}
+
+				if (rhs_test_now)
+				{
+					// We have the next of the rhs's inner tables... test it against our current inner table
+
+					if (!generator.test_ints.empty())
+					{
+						bool no_match = false;
+						if (generator.test_ints.size() == generator.rhs_test_ints.size())
+						{
+							int the_size = (int)generator.test_ints.size();
+							bool ignore_higher_check = false;
+							for (int n=0; n<the_size; ++n)
+							{
+								if (!ignore_higher_check)
+								{
+									if (generator.test_ints[n] < generator.rhs_test_ints[n])
+									{
+										if (my_last_inner_table)
+										{
+											is_any_rhs_inner_table_higher_than_my_biggest = true;
+										}
+									}
+								}
+								if (generator.test_ints[n] != generator.rhs_test_ints[n])
+								{
+									no_match = true;
+									ignore_higher_check = true;
+								}
+							}
+						}
+						if (!no_match)
+						{
+							match_any_rhs_inner_tables = true;
+						}
+					}
+					else if (!generator.test_strings.empty())
+					{
+						bool no_match = false;
+						if (generator.test_strings.size() == generator.rhs_test_strings.size())
+						{
+							int the_size = (int)generator.test_strings.size();
+							bool ignore_higher_check = false;
+							for (int n=0; n<the_size; ++n)
+							{
+								if (!ignore_higher_check)
+								{
+									if (generator.test_strings[n] < generator.rhs_test_strings[n])
+									{
+										if (my_last_inner_table)
+										{
+											is_any_rhs_inner_table_higher_than_my_biggest = true;
+										}
+									}
+								}
+								if (generator.test_strings[n] != generator.rhs_test_strings[n])
+								{
+									no_match = true;
+									ignore_higher_check = true;
+								}
+							}
+						}
+						if (!no_match)
+						{
+							match_any_rhs_inner_tables = true;
+						}
+					}
+					else if (!generator.test_floats.empty())
+					{
+						bool no_match = false;
+						if (generator.test_floats.size() == generator.rhs_test_floats.size())
+						{
+							int the_size = (int)generator.test_floats.size();
+							bool ignore_higher_check = false;
+							for (int n=0; n<the_size; ++n)
+							{
+								if (!ignore_higher_check)
+								{
+									if (generator.test_floats[n] < generator.rhs_test_floats[n])
+									{
+										if (my_last_inner_table)
+										{
+											is_any_rhs_inner_table_higher_than_my_biggest = true;
+										}
+									}
+								}
+								if (generator.test_floats[n] != generator.rhs_test_floats[n])
+								{
+									no_match = true;
+									ignore_higher_check = true;
+								}
+							}
+						}
+						if (!no_match)
+						{
+							match_any_rhs_inner_tables = true;
+						}
+					}
+
+					generator.rhs_test_strings.clear();
+					generator.rhs_test_ints.clear();
+					generator.rhs_test_floats.clear();
+					++rhs_current_inner_table;
+				}
+			}
+
+			if (!match_any_rhs_inner_tables)
+			{
+				something_in_me_does_not_match_rhs = true;
+			}
+
+			generator.test_strings.clear();
+			generator.test_ints.clear();
+			generator.test_floats.clear();
+			++current_inner_table;
+		}
+	}
+
+	// The whole point of this function is the following test.
+	// For example, given lhs and rhs as follows:
+	// 3 4 5
+	// 2 3 4
+	// The test should fail because a following row could bring in a 5 on the rhs (column counts are ignored - so this function thinks it's possible even if there aren't enough columns to hold it)
+	// Whereas
+	// 3 4 5
+	// 2 3 6
+	// ... should pass because there is no way for the 5 to appear in a following row, since rows are sorted and there's already a 6 present
+
+	if (something_in_me_does_not_match_rhs && is_any_rhs_inner_table_higher_than_my_biggest)
+	{
+		i_am_less_than = true;
+	}
+
+	return i_am_less_than;
 }
 
 bool OutputModel::OutputGenerator::SavedRowData::operator<(SavedRowData const & rhs) const
