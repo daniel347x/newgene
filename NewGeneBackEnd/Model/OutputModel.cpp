@@ -11200,10 +11200,15 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 	
 	columns_in_variable_group_view.has_no_datetime_columns = false;
 	columns_in_variable_group_view.has_no_datetime_columns_originally = false;
-	if (datetime_columns.size() == 0)
+	if (datetime_columns.empty())
 	{
 		columns_in_variable_group_view.has_no_datetime_columns = true;
 		columns_in_variable_group_view.has_no_datetime_columns_originally = true;
+	}
+	else
+	{
+		columns_in_variable_group_view.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND);
+		columns_in_variable_group_view.previous_block_datetime_column_types = columns_in_variable_group_view.current_block_datetime_column_types;
 	}
 
 

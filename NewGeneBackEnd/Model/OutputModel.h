@@ -201,6 +201,8 @@ class ColumnsInTempView
 			, view_name_no_uuid(rhs.view_name_no_uuid)
 			, most_recent_sql_statement_executed__index(rhs.most_recent_sql_statement_executed__index)
 			, make_table_permanent(rhs.make_table_permanent)
+			, current_block_datetime_column_types(rhs.current_block_datetime_column_types)
+			, previous_block_datetime_column_types(rhs.previous_block_datetime_column_types)
 
 		{
 			// For optimization variables
