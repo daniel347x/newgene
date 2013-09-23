@@ -190,6 +190,13 @@ OutputModel::OutputGenerator::~OutputGenerator()
 
 	});
 
+	std::for_each(child_merge_final_result.first.begin(), child_merge_final_result.first.end(), [this](SQLExecutor & sql_executor)
+	{
+
+		sql_executor.Empty();
+
+	});
+
 	std::for_each(final_result.first.begin(), final_result.first.end(), [this](SQLExecutor & sql_executor)
 	{
 
@@ -374,6 +381,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	messager.AppendKadStatusText("Construction of final K-ad results...", this);
+	all_merged_results_unformatted = CreateKadResultSet(child_merge_final_result.second, WidgetInstanceIdentifier(), std::string("Sorting final K-ad results"), std::string("Removing duplicates from final K-ad results"), -1, 0, merging_of_children_column_sets, secondary_variable_groups_column_info.size() != 0, OutputModel::OutputGenerator::KAD_RESULTS, true);
+
 	messager.AppendKadStatusText("Formatting results...", this);
 	messager.SetPerformanceLabel("Formatting results...");
 	FormatResultsForOutput();
@@ -432,6 +442,12 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 void OutputModel::OutputGenerator::MergeChildGroups()
 {
+
+	if (secondary_variable_groups_column_info.empty())
+	{
+		child_merge_final_result = primary_group_merged_results;
+		return;
+	}
 
 	SqlAndColumnSet x_table_result = primary_group_merged_results;
 	SqlAndColumnSet xr_table_result = x_table_result;
@@ -525,19 +541,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 
 	});
 
-	if (failed || CheckCancelled())
-	{
-		return;
-	}
-
-	if (secondary_variable_groups_column_info.size() == 0)
-	{
-		merging_of_children_column_sets.push_back(duplicates_removed);
-	}
-
-	messager.AppendKadStatusText("Construction of final K-ad results...", this);
-
-	all_merged_results_unformatted = SortAndOrRemoveDuplicates(duplicates_removed.second, WidgetInstanceIdentifier(), std::string("Sorting final K-ad results"), std::string("Removing duplicates from final K-ad results"), -1, 0, merging_of_children_column_sets, secondary_variable_groups_column_info.size() != 0, OutputModel::OutputGenerator::KAD_RESULTS, true);
+	child_merge_final_result = duplicates_removed;
 
 }
 
@@ -811,46 +815,25 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			return;
 		}
 
-		switch (unformatted_column.column_type)
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT)
 		{
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_CHILD_MERGE:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT:
-				{
-					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
-					++column_index;
-					return; // only display a single pair of time range columns
-				}
-				break;
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
-				{
-					datetimestart_timestamp_colname = unformatted_column.column_name_in_temporary_table;
-					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
-					++column_index;
-					return; // only display a single pair of time range columns
-				}
-				break;
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT:
-				{
-					datetimeend_timestamp_colname = unformatted_column.column_name_in_temporary_table;
-					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
-					++column_index;
-					return; // only display a single pair of time range columns
-				}
-				break;
+			datetimestart_timestamp_colname = unformatted_column.column_name_in_temporary_table;
+		}
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT)
+		{
+			datetimeend_timestamp_colname = unformatted_column.column_name_in_temporary_table;
+		}
+
+		if (   unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
+			&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		{
+			if (   unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT
+				&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT)
+			{
+				reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
+				++column_index;
+				return; // only display a single pair of time range columns
+			}
 		}
 
 		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
@@ -950,44 +933,16 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			return;
 		}
 
-		switch (unformatted_column.column_type)
+		if (   unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
+			&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_CHILD_MERGE:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT:
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT:
-				{
-					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
-					++column_index;
-					return; // only display a single pair of time range columns
-				}
-				break;
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT:
-				{
-					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
-					++column_index;
-					return; // only display a single pair of time range columns
-				}
-				break;
-			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT:
-				{
-					reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
-					++column_index;
-					return; // only display a single pair of time range columns
-				}
-				break;
+			if (   unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT
+				&& unformatted_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT)
+			{
+				reached_end_of_first_inner_table_not_including_terminating_datetime_columns = true;
+				++column_index;
+				return; // only display a single pair of time range columns
+			}
 		}
 
 		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
@@ -2457,14 +2412,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// with 4 countries should NOT appear).
 		// ******************************************************************************************************************* //
 
-		if (false)
-		{
-			//xr_table_result = CreateXRTable(intermediate_duplicates_removed.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
-		}
-		else
-		{
-			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
-		}
+		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed || CheckCancelled())
@@ -3403,6 +3351,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 				datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+				result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED);
+				result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
 			}
 			break;
 		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
@@ -3412,6 +3362,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
 				datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+				result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT);
 			}
 			break;
 		case OutputModel::OutputGenerator::KAD_RESULTS:
@@ -3421,6 +3372,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
 				datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+				result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT);
 			}
 			break;
 		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
@@ -3430,9 +3382,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
 				datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+				result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS);
 			}
 			break;
 	}
+	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
 	datetime_end_column.column_name_in_original_data_table = "";
 
 	ExecuteSQL(result); // Executes all SQL queries up to the current one
@@ -3577,16 +3531,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 		}
 
-		if (!order_within_rows)
+		if (!rows_to_sort.empty())
 		{
-			if (!rows_to_sort.empty())
+			RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction, xr_table_category, consider_merging_timerange_adjacent_identical_rows, datetime_start_col_name_text, datetime_end_col_name_text);
+			which_previous_row_index_to_test_against = 0;
+			if (failed || CheckCancelled())
 			{
-				RemoveDuplicatesFromPrimaryKeyMatches(current_rows_stepped, result, rows_to_sort, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, result_columns, previous_result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, minimum_desired_rows_per_transaction, xr_table_category, consider_merging_timerange_adjacent_identical_rows, datetime_start_col_name_text, datetime_end_col_name_text);
-				which_previous_row_index_to_test_against = 0;
-				if (failed || CheckCancelled())
-				{
-					return result;
-				}
+				return result;
 			}
 		}
 
@@ -6119,7 +6070,6 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 				break;
 		}
 		
-		//sql_strings.push_back(SQLExecutor(this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true));
 		SQLExecutor::Execute(false, SQLExecutor::DOES_NOT_RETURN_ROWS, this, db, sql_add_xr_row, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, statement_is_prepared, the_prepared_stmt, true);
 		if (failed)
 		{
@@ -6131,7 +6081,6 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 			return;
 		}
 
-		//the_prepared_stmt = sql_strings.back().stmt;
 		the_prepared_stmt = SQLExecutor::stmt_insert;
 		++current_rows_added;
 		++current_rows_added_since_execution;
@@ -7640,6 +7589,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		return result;
 	}
 
+	result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS);
+	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
+
 	return result;
 
 }
@@ -8410,6 +8362,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = primary_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
 		datetime_end_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
+
+		result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL);
+	}
+	else
+	{
+		result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND);
 	}
 
 	return result;
@@ -10351,10 +10309,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = child_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
 		datetime_end_column.number_inner_tables_in_set = child_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
+
+		result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL);
 	}
 	else
 	{
 		at_least_one_variable_group_has_timerange = true;
+		result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND);
 	}
 
 	return result;
@@ -10609,16 +10570,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
 			{
 				datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED;
+				result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED);
+				result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
 			}
 			break;
 		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
 			{
 				datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE;
+				result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_CHILD_MERGE, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_CHILD_MERGE);
+				result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
 			}
 			break;
 		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
 			{
 				datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS;
+				result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS);
+				result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
 			}
 			break;
 	}
@@ -13744,6 +13711,314 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 
 }
 
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateKadResultSet(ColumnsInTempView const & column_set, WidgetInstanceIdentifier const & variable_group, std::string & msg_sort_preface, std::string & msg_remove_duplicates_preface, int const current_multiplicity, int const primary_group_number, SqlAndColumnSets & sql_and_column_sets, bool const do_clear_table, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows)
+{
+
+	std::int64_t rows_added = 0;
+	char c[256];
+
+	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	std::vector<SQLExecutor> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+
+	result_columns = column_set;
+	result_columns.most_recent_sql_statement_executed__index = -1;
+	std::string view_name += "NGTEMP_KKA";
+	view_name += itoa(primary_group_number, c, 10);
+	result_columns.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	result_columns.view_name = view_name;
+	result_columns.view_number = 1;
+	result_columns.has_no_datetime_columns = false;
+
+	std::string sql_create_empty_table;
+	sql_create_empty_table += "CREATE TABLE ";
+	sql_create_empty_table += result_columns.view_name;
+	sql_create_empty_table += " AS SELECT * FROM ";
+	sql_create_empty_table += column_set.view_name;
+	sql_create_empty_table += " WHERE 0";
+	sql_strings.push_back(SQLExecutor(this, db, sql_create_empty_table));
+	if (failed)
+	{
+		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
+
+
+	// Add the "merged" time range columns
+
+	// The variable group is that of the primary variable group for this final result set,
+	// which is obtained from the first column
+	WidgetInstanceIdentifier variable_group = column_set.columns_in_view[0].variable_group_associated_with_current_inner_table;
+	WidgetInstanceIdentifier uoa = column_set.columns_in_view[0].uoa_associated_with_variable_group_associated_with_current_inner_table;
+
+	std::string datetime_start_col_name;
+	std::string datetime_end_col_name;
+	std::string datetime_start_col_name_text;
+	std::string datetime_end_col_name_text;
+
+	// Final result - add two TEXT columns to store text representation of the datetime
+	std::string datetime_start_col_name_no_uuid;
+	datetime_start_col_name_no_uuid = "DATETIME_START_TEXT";
+	datetime_start_col_name_text = datetime_start_col_name_no_uuid;
+	datetime_start_col_name_text += "_";
+	datetime_start_col_name_text += newUUID(true);
+
+	std::string alter_string;
+	alter_string += "ALTER TABLE ";
+	alter_string += result_columns.view_name;
+	alter_string += " ADD COLUMN ";
+	alter_string += datetime_start_col_name_text;
+	alter_string += " TEXT";
+
+	sql_strings.push_back(SQLExecutor(this, db, alter_string));
+	if (failed)
+	{
+		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name_text;
+	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
+	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = column_set.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_start_column.number_inner_tables_in_set = column_set.columns_in_view.back().number_inner_tables_in_set;
+
+	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT;
+	datetime_start_column.variable_group_associated_with_current_inner_table = previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
+	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
+	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
+	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+	datetime_start_column.column_name_in_original_data_table = "";
+
+	std::string datetime_end_col_name_no_uuid;
+	datetime_end_col_name_no_uuid = "DATETIME_END_TEXT";
+	datetime_end_col_name_text = datetime_end_col_name_no_uuid;
+	datetime_end_col_name_text += "_";
+	datetime_end_col_name_text += newUUID(true);
+
+	alter_string.clear();
+	alter_string += "ALTER TABLE ";
+	alter_string += result_columns.view_name;
+	alter_string += " ADD COLUMN ";
+	alter_string += datetime_end_col_name_text;
+	alter_string += " TEXT";
+
+	sql_strings.push_back(SQLExecutor(this, db, alter_string));
+	if (failed)
+	{
+		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name_text;
+	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
+	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_result_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_end_column.number_inner_tables_in_set = previous_result_columns.columns_in_view.back().number_inner_tables_in_set;
+	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT;
+	datetime_end_column.variable_group_associated_with_current_inner_table = previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
+	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
+	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
+	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+	datetime_end_column.column_name_in_original_data_table = "";
+
+	std::string datetime_start_col_name_no_uuid;
+	datetime_start_col_name_no_uuid = "DATETIMESTART_PRE_MERGED_KAD_OUTPUT";
+	datetime_start_col_name = datetime_start_col_name_no_uuid;
+	datetime_start_col_name += "_";
+	datetime_start_col_name += newUUID(true);
+
+	std::string alter_string;
+	alter_string += "ALTER TABLE ";
+	alter_string += result_columns.view_name;
+	alter_string += " ADD COLUMN ";
+	alter_string += datetime_start_col_name;
+	alter_string += " INTEGER DEFAULT 0";
+
+	sql_strings.push_back(SQLExecutor(this, db, alter_string));
+	if (failed)
+	{
+		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
+	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
+	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_result_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_start_column.number_inner_tables_in_set = previous_result_columns.columns_in_view.back().number_inner_tables_in_set;
+	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT;
+	datetime_start_column.variable_group_associated_with_current_inner_table = previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
+	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
+	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
+	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+	datetime_start_column.column_name_in_original_data_table = "";
+
+	std::string datetime_end_col_name_no_uuid;
+	datetime_end_col_name_no_uuid = "DATETIMEEND_PRE_MERGED_KAD_OUTPUT";
+	datetime_end_col_name = datetime_end_col_name_no_uuid;
+	datetime_end_col_name += "_";
+	datetime_end_col_name += newUUID(true);
+
+	alter_string.clear();
+	alter_string += "ALTER TABLE ";
+	alter_string += result_columns.view_name;
+	alter_string += " ADD COLUMN ";
+	alter_string += datetime_end_col_name;
+	alter_string += " INTEGER DEFAULT 0";
+
+	sql_strings.push_back(SQLExecutor(this, db, alter_string));
+	if (failed)
+	{
+		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
+	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
+	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = previous_result_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+	datetime_end_column.number_inner_tables_in_set = previous_result_columns.columns_in_view.back().number_inner_tables_in_set;
+	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT;
+	datetime_end_column.variable_group_associated_with_current_inner_table = previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
+	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = *previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
+	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
+	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+	result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT);
+	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
+	datetime_end_column.column_name_in_original_data_table = "";
+
+	ExecuteSQL(result); // Executes all SQL queries up to the current one
+
+	if (failed || CheckCancelled())
+	{
+		return result;
+	}
+
+
+	int const minimum_desired_rows_per_transaction = 1024 * 16;
+	std::int64_t current_rows_added = 0;
+	std::int64_t current_rows_stepped = 0;
+	std::int64_t current_rows_added_since_execution = 0;
+	std::string sql_add_xr_row;
+	bool first_row_added = true;
+	std::vector<std::string> bound_parameter_strings;
+	std::vector<std::int64_t> bound_parameter_ints;
+	std::vector<long double> bound_parameter_floats;
+	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
+
+
+	sqlite3_stmt *& the_prepared_stmt = SQLExecutor::stmt_insert;
+	std::shared_ptr<bool> statement_is_prepared(std::make_shared<bool>(false));
+	SQLExecutor::stmt_insert = nullptr;
+	sqlite3_stmt *& the_stmt__ = SQLExecutor::stmt_insert;
+	BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared, &the_stmt__)
+	{
+		if (the_prepared_stmt && *statement_is_prepared)
+		{
+			sqlite3_finalize(the_prepared_stmt);
+			++SQLExecutor::number_statement_finalizes;
+			the_prepared_stmt = nullptr;
+			*statement_is_prepared = false;
+		}
+		the_stmt__ = nullptr;
+	} BOOST_SCOPE_EXIT_END
+
+	{
+
+		BOOST_SCOPE_EXIT(this_)
+		{
+			this_->CloseObtainData();
+		} BOOST_SCOPE_EXIT_END
+
+			ObtainData(previous_result_columns);
+
+		if (failed || CheckCancelled())
+		{
+			return result;
+		}
+
+		BeginNewTransaction();
+
+		std::deque<SavedRowData> rows_to_sort;
+		SavedRowData sorting_row_of_data;
+		std::deque<SavedRowData> ordering_within_rows_data;
+
+		bool start_fresh = true;
+
+		int which_previous_row_index_to_test_against = 0;
+		bool use_newest_row_index = false;
+
+		std::deque<OutputModel::OutputGenerator::SavedRowData> one_row;
+		while (StepData())
+		{
+
+			one_row.clear();
+			sorting_row_of_data.PopulateFromCurrentRowInDatabase(column_set, stmt_result, xr_table_category);
+			one_row.push_back(std::move(sorting_row_of_data));
+
+			failed = sorting_row_of_data.failed;
+			if (failed)
+			{
+				SetFailureMessage(sorting_row_of_data.error_message);
+				return result;
+			}
+			if (CheckCancelled())
+			{
+				return result;
+			}
+
+			WriteRowsToFinalTable(one_row, datetime_start_col_name, datetime_end_col_name, statement_is_prepared, the_prepared_stmt, sql_strings, db, result_columns.view_name, result_columns, current_rows_added, current_rows_added_since_execution, sql_add_xr_row, first_row_added, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, xr_table_category, false, datetime_start_col_name_text, datetime_end_col_name_text);
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
+		}
+
+		if (failed || CheckCancelled())
+		{
+			return result;
+		}
+
+	}
+
+	if (failed || CheckCancelled())
+	{
+		return SqlAndColumnSet();
+	}
+	ClearTables(sql_and_column_sets);
+	sql_and_column_sets.push_back(result);
+
+	return result;
+
+}
+
 void OutputModel::OutputGenerator::SortOrderByMultiplicityOnes(ColumnsInTempView & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first)
 {
 	int current_column = 0;
@@ -16170,7 +16445,7 @@ void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const &
 	current_datetime_start_column_index = -1;
 	current_datetime_end_column_index = -1;
 	int column_index = (int)columns.columns_in_view.size() - 1;
-	std::for_each(columns.columns_in_view.crbegin(), columns.columns_in_view.crend(), [&xr_table_category, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index](ColumnsInTempView::ColumnInTempView const & schema_column)
+	std::for_each(columns.columns_in_view.crbegin(), columns.columns_in_view.crend(), [&columns, &xr_table_category, &previous_datetime_start_column_index, &previous_datetime_end_column_index, &current_datetime_start_column_index, &current_datetime_end_column_index, &column_index](ColumnsInTempView::ColumnInTempView const & schema_column)
 	{
 
 		// The previous values are always located after the current values, but in arbitrary order,
@@ -16181,119 +16456,191 @@ void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const &
 			return;
 		}
 
-		switch (xr_table_category)
+		// The following works even if the previous and the current datetime column types are the same,
+		// because it first sets the current, and only then the previous
+		bool set_ = false;
+		if (!set_ && schema_column.column_type == columns.current_block_datetime_column_types.first)
 		{
-		case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
+			if (current_datetime_start_column_index == -1)
 			{
-				if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
-				{
-					if (current_datetime_start_column_index == -1)
-					{
-						current_datetime_start_column_index = column_index;
-					}
-					else if (previous_datetime_start_column_index == -1)
-					{
-						previous_datetime_start_column_index = column_index;
-					}
-				}
-				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
-				{
-					if (current_datetime_end_column_index == -1)
-					{
-						current_datetime_end_column_index = column_index;
-					}
-					else if (previous_datetime_end_column_index == -1)
-					{
-						previous_datetime_end_column_index = column_index;
-					}
-				}
-				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
-				{
-					if (current_datetime_start_column_index == -1)
-					{
-						current_datetime_start_column_index = column_index;
-					}
-				}
-				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
-				{
-					if (current_datetime_end_column_index == -1)
-					{
-						current_datetime_end_column_index = column_index;
-					}
-				}
+				current_datetime_start_column_index = column_index;
+				set_ = true;
 			}
-			break;
-		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
+		}
+		if (!set_ && schema_column.column_type == columns.current_block_datetime_column_types.second)
+		{
+			if (current_datetime_end_column_index == -1)
 			{
-				if (    schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-					||  schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-					||  schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT)
-				{
-					if (previous_datetime_start_column_index == -1)
-					{
-						previous_datetime_start_column_index = column_index;
-					}
-				}
-				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
-					||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-					||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT)
-				{
-					if ( previous_datetime_end_column_index == -1)
-					{
-						 previous_datetime_end_column_index = column_index;
-					}
-				}
-				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-					||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
-				{
-					if ( current_datetime_start_column_index == -1)
-					{
-						 current_datetime_start_column_index = column_index;
-					}
-				}
-				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
-					||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
-				{
-					if ( current_datetime_end_column_index == -1)
-					{
-						 current_datetime_end_column_index = column_index;
-					}
-				}
+				current_datetime_end_column_index = column_index;
+				set_ = true;
+			}
+		}
+		if (!set_ && schema_column.column_type == columns.previous_block_datetime_column_types.first)
+		{
+			if (previous_datetime_start_column_index == -1)
+			{
+				previous_datetime_start_column_index = column_index;
+				set_ = true;
+			}
+		}
+		if (!set_ && schema_column.column_type == columns.previous_block_datetime_column_types.second)
+		{
+			if (previous_datetime_end_column_index == -1)
+			{
+				previous_datetime_end_column_index = column_index;
+				set_ = true;
+			}
+		}
 
-			}
-			break;
-		case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
+		if (false)
+		{
+			switch (xr_table_category)
 			{
-				if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
-				{
-					if (previous_datetime_start_column_index == -1)
+				case OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP:
 					{
-						previous_datetime_start_column_index = column_index;
+						//if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
+						if (schema_column.column_type == columns.previous_block_datetime_column_types.first)
+						{
+							//if (current_datetime_start_column_index == -1)
+							//{
+							//	current_datetime_start_column_index = column_index;
+							//} else
+							if (previous_datetime_start_column_index == -1)
+							{
+								previous_datetime_start_column_index = column_index;
+							}
+						}
+						//else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
+						else if (schema_column.column_type == columns.previous_block_datetime_column_types.second)
+						{
+							//if (current_datetime_end_column_index == -1)
+							//{
+							//	current_datetime_end_column_index = column_index;
+							//} else
+							if (previous_datetime_end_column_index == -1)
+							{
+								previous_datetime_end_column_index = column_index;
+							}
+						}
+						//else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+						else if (schema_column.column_type == columns.current_block_datetime_column_types.first)
+						{
+							if (current_datetime_start_column_index == -1)
+							{
+								current_datetime_start_column_index = column_index;
+							}
+						}
+						//else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND || schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+						else if (schema_column.column_type == columns.current_block_datetime_column_types.second)
+						{
+							if (current_datetime_end_column_index == -1)
+							{
+								current_datetime_end_column_index = column_index;
+							}
+						}
 					}
-				}
-				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
-				{
-					if (previous_datetime_end_column_index == -1)
+					break;
+				case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
 					{
-						previous_datetime_end_column_index = column_index;
+						if (schema_column.column_type == columns.previous_block_datetime_column_types.first)
+						{
+							if (previous_datetime_start_column_index == -1)
+							{
+								previous_datetime_start_column_index = column_index;
+							}
+						}
+						else if (schema_column.column_type == columns.previous_block_datetime_column_types.second)
+						{
+							if (previous_datetime_end_column_index == -1)
+							{
+								previous_datetime_end_column_index = column_index;
+							}
+						}
+						else if (schema_column.column_type == columns.current_block_datetime_column_types.first)
+						{
+							if (current_datetime_start_column_index == -1)
+							{
+								current_datetime_start_column_index = column_index;
+							}
+						}
+						else if (schema_column.column_type == columns.current_block_datetime_column_types.second)
+						{
+							if (current_datetime_end_column_index == -1)
+							{
+								current_datetime_end_column_index = column_index;
+							}
+						}
+
+						//if (    schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+						//	||  schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
+						//	||  schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT)
+						//{
+						//	if (previous_datetime_start_column_index == -1)
+						//	{
+						//		previous_datetime_start_column_index = column_index;
+						//	}
+						//}
+						//else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+						//	||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
+						//	||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT)
+						//{
+						//	if ( previous_datetime_end_column_index == -1)
+						//	{
+						//		previous_datetime_end_column_index = column_index;
+						//	}
+						//}
+						//else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
+						//	||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL)
+						//{
+						//	if ( current_datetime_start_column_index == -1)
+						//	{
+						//		current_datetime_start_column_index = column_index;
+						//	}
+						//}
+						//else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
+						//	||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
+						//{
+						//	if ( current_datetime_end_column_index == -1)
+						//	{
+						//		current_datetime_end_column_index = column_index;
+						//	}
+						//}
+
 					}
-				}
-				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
-				{
-					if (current_datetime_start_column_index == -1)
+					break;
+				case OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP:
 					{
-						current_datetime_start_column_index = column_index;
+						if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
+						{
+							if (previous_datetime_start_column_index == -1)
+							{
+								previous_datetime_start_column_index = column_index;
+							}
+						}
+						else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS)
+						{
+							if (previous_datetime_end_column_index == -1)
+							{
+								previous_datetime_end_column_index = column_index;
+							}
+						}
+						else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
+						{
+							if (current_datetime_start_column_index == -1)
+							{
+								current_datetime_start_column_index = column_index;
+							}
+						}
+						else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
+						{
+							if (current_datetime_end_column_index == -1)
+							{
+								current_datetime_end_column_index = column_index;
+							}
+						}
 					}
-				}
-				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED)
-				{
-					if (current_datetime_end_column_index == -1)
-					{
-						current_datetime_end_column_index = column_index;
-					}
-				}
+					break;
 			}
-			break;
 		}
 
 		--column_index;
