@@ -14852,8 +14852,11 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// The following block will EXCLUDE rows that only include the data from the final inner table,
 		// but not the previous data,
 		// because this data is guaranteed to be in place from the initial primary table.
-		std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &row, &rows_to_check](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
+		//std::for_each(row_inserts_info.cbegin(), row_inserts_info.cend(), [this, &datetime_range_start, &datetime_range_end, &include_current_data, &include_previous_data, &row, &rows_to_check](std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info)
+		for(std::vector<std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>>>::const_iterator it = row_inserts_info.cbegin(); it != row_inserts_info.cend(); ++it)
 		{
+
+			std::tuple<bool, bool, std::pair<std::int64_t, std::int64_t>> const & row_insert_info = *it;
 
 			if (failed || CheckCancelled())
 			{
@@ -14891,7 +14894,8 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			// because its datetime range is out of range.
 			current_row.SetFinalInnerTableToNull(false);
 
-		});
+		//});
+		}
 	
 	//});
 	}
@@ -14998,12 +15002,15 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	}
 
 	// Now perform the actual binning of the rows into separate deques,
-	// with each deque matchin on all but the final inner table (including NULL count),
+	// with each deque matching on all but the final inner table (including NULL count),
 	// in arbitrary time range order.
-	std::for_each(rows_to_check.cbegin(), rows_to_check.cend(), [&rowgroups_separated_into_primarykey_sets](TimeRangeSorter const & row)
+	//std::for_each(rows_to_check.cbegin(), rows_to_check.cend(), [&rowgroups_separated_into_primarykey_sets](TimeRangeSorter const & row)
+	for(std::vector<TimeRangeSorter>::const_iterator it = rows_to_check.cbegin(); it != rows_to_check.cend(); ++it)
 	{
+		TimeRangeSorter const & row = *it;
 		rowgroups_separated_into_primarykey_sets[row].push_back(row);
-	});
+	//});
+	}
 
 	// Modify the flags so that the sort in the next loop DOES include the time range in the sort.
 	//std::for_each(rowgroups_separated_into_primarykey_sets.begin(), rowgroups_separated_into_primarykey_sets.end(), [](std::pair<TimeRangeSorter const, std::deque<TimeRangeSorter>> & row_group)
