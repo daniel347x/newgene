@@ -105,7 +105,6 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 		{
 
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE, true, *data_instance.uuid);
-			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE, true, *data_instance.uuid);
 
 		}
 
