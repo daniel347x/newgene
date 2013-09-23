@@ -595,6 +595,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						void append(std::int64_t const datetime_start, std::int64_t const datetime_end);
 						void subtract(TimeRanges const & rhs);
+						bool empty();
 
 				};
 
@@ -690,6 +691,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				{
 					  MATCH_ON_ALL_KEYS
 					, MATCH_ON_ALL_BUT_FINAL_INNER_TABLE
+					, MATCH_ON_ALL_BUT_FINAL_TWO_INNER_TABLES
 					, MATCH_ON_ALL_MULTIPLICITY_1_KEYS
 				};
 

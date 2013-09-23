@@ -3513,7 +3513,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 
 			++current_rows_stepped;
 
-			if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
+			if (current_rows_stepped % 100 == 0 || current_rows_stepped == current_number_rows_to_sort)
 			{
 				UpdateProgressBarValue(messager, current_rows_stepped);
 			}
@@ -5214,6 +5214,13 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 							do_insert = true;
 						}
 					}
+					else if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_TWO_INNER_TABLES)
+					{
+						if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities - 1)
+						{
+							do_insert = true;
+						}
+					}
 					else
 					{
 						do_insert = true;
@@ -5243,6 +5250,13 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 							do_insert = true;
 						}
 					}
+					else if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_TWO_INNER_TABLES)
+					{
+						if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities - 1)
+						{
+							do_insert = true;
+						}
+					}
 					else
 					{
 						do_insert = true;
@@ -5268,6 +5282,13 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 					if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_INNER_TABLE)
 					{
 						if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities)
+						{
+							do_insert = true;
+						}
+					}
+					else if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_TWO_INNER_TABLES)
+					{
+						if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities - 1)
 						{
 							do_insert = true;
 						}
@@ -5367,6 +5388,13 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 							do_insert = true;
 						}
 					}
+					else if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_TWO_INNER_TABLES)
+					{
+						if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities - 1)
+						{
+							do_insert = true;
+						}
+					}
 					else
 					{
 						do_insert = true;
@@ -5396,6 +5424,13 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 							do_insert = true;
 						}
 					}
+					else if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_TWO_INNER_TABLES)
+					{
+						if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities - 1)
+						{
+							do_insert = true;
+						}
+					}
 					else
 					{
 						do_insert = true;
@@ -5421,6 +5456,13 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 					if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_INNER_TABLE)
 					{
 						if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities)
+						{
+							do_insert = true;
+						}
+					}
+					else if (match_condition == PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_TWO_INNER_TABLES)
+					{
+						if (outer_multiplicity_number < current_row_of_data.number_of_multiplicities - 1)
 						{
 							do_insert = true;
 						}
@@ -10819,7 +10861,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 						use_newest_row_index = false;
 					}
 					++current_rows_stepped;
-					if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
+					if (current_rows_stepped % 100 == 0 || current_rows_stepped == current_number_rows_to_sort)
 					{
 						UpdateProgressBarValue(messager, current_rows_stepped);
 					}
@@ -10862,6 +10904,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					bool primary_keys_match_on_multiplicity_1 = TestPrimaryKeyMatch(current_row_of_data, rows_to_check_for_duplicates_in_newly_joined_primary_key_columns[which_previous_row_index_to_test_against].the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table, use_newest_row_index,
 						// Note: important 4th parameter: See note above
 						PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_MULTIPLICITY_1_KEYS);
+						//PRIMARY_KEY_MATCH_CONDITION::MATCH_ON_ALL_BUT_FINAL_TWO_INNER_TABLES);
 
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.clear();
 					rows_to_check_for_duplicates_in_newly_joined_primary_key_columns.push_back(TimeRangeSorter(current_row_of_data));
@@ -10906,7 +10949,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					}
 
 					++current_rows_stepped;
-					if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
+					if (current_rows_stepped % 100 == 0 || current_rows_stepped == current_number_rows_to_sort)
 					{
 						UpdateProgressBarValue(messager, current_rows_stepped);
 					}
@@ -10997,7 +11040,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 
 			++current_rows_stepped;
-			if (current_rows_stepped % 1000 == 0 || current_rows_stepped == current_number_rows_to_sort)
+			if (current_rows_stepped % 100 == 0 || current_rows_stepped == current_number_rows_to_sort)
 			{
 				UpdateProgressBarValue(messager, current_rows_stepped);
 			}
@@ -15658,6 +15701,11 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 	std::for_each(saved_rows_with_null_in_final_inner_table.begin(), saved_rows_with_null_in_final_inner_table.end(), [this, &current_null_check_count, &total_number_null_checks, &status_increment_check, &outgoing_rows, &group_time_ranges__intkeys, &group_time_ranges__floatkeys, &group_time_ranges__stringkeys](SavedRowData & saved_row_data_with_null_at_end)
 	{
 
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
 		bool use_ints = false;
 		bool use_floats = false;
 		if (saved_row_data_with_null_at_end.indices_of_primary_key_columns_with_multiplicity_greater_than_1[0].first == SQLExecutor::NULL_BINDING)
@@ -15699,14 +15747,28 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
+			bool done = false;
+			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [this, &done, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
 			{
+				if (done)
+				{
+					return;
+				}
+				if (failed || CheckCancelled())
+				{
+					done = true;
+					return;
+				}
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
+					if (my_time_ranges.empty())
+					{
+						done = true;
+					}
 				}
-				if (current_null_check_count % 1000 == 0)
+				if (current_null_check_count % status_increment_check == 0)
 				{
 					boost::format msg("Processing potential NULLs: %1% / %2%");
 					msg % current_null_check_count % total_number_null_checks;
@@ -15714,6 +15776,11 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 				}
 				++current_null_check_count;
 			});
+
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
 
 			// ******************************************************************************************************* //
 			// Whatever time ranges are left require rows over that time range, even though we have a NULL at the end.
@@ -15754,14 +15821,28 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			std::for_each(group_time_ranges__floatkeys.cbegin(), group_time_ranges__floatkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Floats, TimeRanges> const & map_info)
+			bool done = false;
+			std::for_each(group_time_ranges__floatkeys.cbegin(), group_time_ranges__floatkeys.cend(), [this, &done, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Floats, TimeRanges> const & map_info)
 			{
+				if (done)
+				{
+					return;
+				}
+				if (failed || CheckCancelled())
+				{
+					done = true;
+					return;
+				}
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
 				}
-				if (current_null_check_count % 1000 == 0)
+				if (my_time_ranges.empty())
+				{
+					done = true;
+				}
+				if (current_null_check_count % status_increment_check == 0)
 				{
 					boost::format msg("Processing potential NULLs: %1% / %2%");
 					msg % current_null_check_count % total_number_null_checks;
@@ -15770,6 +15851,11 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 				++current_null_check_count;
 			});
 
+
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
 
 			// ******************************************************************************************************* //
 			// Whatever time ranges are left require rows over that time range, even though we have a NULL at the end.
@@ -15810,12 +15896,26 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			std::for_each(group_time_ranges__stringkeys.cbegin(), group_time_ranges__stringkeys.cend(), [this, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Strings, TimeRanges> const & map_info)
+			bool done = false;
+			std::for_each(group_time_ranges__stringkeys.cbegin(), group_time_ranges__stringkeys.cend(), [this, &done, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Strings, TimeRanges> const & map_info)
 			{
+				if (done)
+				{
+					return;
+				}
+				if (failed || CheckCancelled())
+				{
+					done = true;
+					return;
+				}
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
+					if (my_time_ranges.empty())
+					{
+						done = true;
+					}
 				}
 				if (current_null_check_count % status_increment_check == 0)
 				{
@@ -15826,6 +15926,11 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 				++current_null_check_count;
 			});
 
+
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
 
 			// ******************************************************************************************************* //
 			// Whatever time ranges are left require rows over that time range, even though we have a NULL at the end.
@@ -16101,6 +16206,15 @@ void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetim
 
 	}
 
+}
+
+void OutputModel::OutputGenerator::TimeRanges::empty(TimeRanges const & rhs)
+{
+	if (ranges.empty())
+	{
+		return true;
+	}
+	return false;
 }
 
 void OutputModel::OutputGenerator::TimeRanges::subtract(TimeRanges const & rhs)
