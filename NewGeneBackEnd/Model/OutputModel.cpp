@@ -16289,7 +16289,8 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Ints::operator<(TimeRangeMapp
 	int size_you = (int)rhs.sets.size();
 	int max_size = std::max(size_me, size_you);
 
-	std::set<std::vector<std::int64_t>> test_set = sets;
+	//std::set<std::vector<std::int64_t>> test_set = sets;
+	test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
 	if (test_set.size() == max_size)
 	{
@@ -16313,7 +16314,8 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Floats::operator<(TimeRangeMa
 	int size_you = (int)rhs.sets.size();
 	int max_size = std::max(size_me, size_you);
 
-	std::set<std::vector<long double>> test_set = sets;
+	//std::set<std::vector<long double>> test_set = sets;
+	test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
 	if (test_set.size() == max_size)
 	{
@@ -16337,7 +16339,8 @@ bool OutputModel::OutputGenerator::TimeRangeMapper_Strings::operator<(TimeRangeM
 	int size_you = (int)rhs.sets.size();
 	int max_size = std::max(size_me, size_you);
 
-	std::set<std::vector<std::string>> test_set = sets;
+	//std::set<std::vector<std::string>> test_set = sets;
+	test_set = sets;
 	test_set.insert(rhs.sets.cbegin(), rhs.sets.cend());
 	if (test_set.size() == max_size)
 	{
