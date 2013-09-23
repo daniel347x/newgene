@@ -16208,7 +16208,7 @@ void OutputModel::OutputGenerator::TimeRanges::append(std::int64_t const datetim
 
 }
 
-void OutputModel::OutputGenerator::TimeRanges::empty(TimeRanges const & rhs)
+bool OutputModel::OutputGenerator::TimeRanges::empty()
 {
 	if (ranges.empty())
 	{
