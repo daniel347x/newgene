@@ -2131,7 +2131,7 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 	total_progress_stages = 0;
 
 	int primary_group_number = 1;
-	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_variable_groups_column_info, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
 
 		if (failed || CheckCancelled())
@@ -2175,12 +2175,15 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 		// Inside loop, which starts at 2, not 1
 		total_progress_stages += (4 * (highest_multiplicity_primary_uoa - 1));
 
-		// Merging of primary groups: One each
-		++total_progress_stages;
-		if (primary_group_number > 1)
+		if (primary_variable_groups_column_info.size() > 1)
 		{
-			// plus an extra three for every group after the first
-			total_progress_stages += 3;
+			// Merging of primary groups: One each
+			++total_progress_stages;
+			if (primary_group_number > 1)
+			{
+				// plus an extra three for every group after the first
+				total_progress_stages += 3;
+			}
 		}
 
 		++primary_group_number;
@@ -2234,21 +2237,7 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 	});
 
 	// Two stages for construction of final K-ad results
-	total_progress_stages += 2;
-
-	rough_progress_range = 0;
-	std::for_each(total_number_incoming_rows.cbegin(), total_number_incoming_rows.cend(), [this](std::pair<WidgetInstanceIdentifier const, std::int64_t> const & the_pair)
-	{
-		WidgetInstanceIdentifier const & variable_group = the_pair.first;
-		std::int64_t number_raw_rows = the_pair.second;
-		int the_multiplicity = multiplicities[variable_group];
-		rough_progress_range += number_raw_rows * the_multiplicity;
-	});
-
-	// unused for now
-	rough_progress_increment_one_percent = rough_progress_range / 125; // leave an extra 20% for the merging of primary groups
-
-	progress_increment_per_stage = 1000 / total_progress_stages;
+	//total_progress_stages += 2;
 
 }
 
