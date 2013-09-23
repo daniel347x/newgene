@@ -14805,7 +14805,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 		if (failed || CheckCancelled())
 		{
-			return;
+			break;
 		}
 
 		// Require that ALL inner tables (not including the last) have data.
@@ -14834,7 +14834,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 			// and so we won't be able to, either.
 			// Just save the row as-is without further processing.
 			saved_rows_with_multiple_nulls.push_back(row.GetSavedRowData());
-			return;
+			break;
 		}
 
 		// Split an individual incoming row into 0, 1, 2, or 3 new rows,
@@ -14897,7 +14897,17 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		//});
 		}
 	
+		if (failed || CheckCancelled())
+		{
+			break;
+		}
+
 	//});
+	}
+
+	if (failed || CheckCancelled())
+	{
+		return;
 	}
 
 	// The rows are now properly *individually* split by time range.
@@ -14942,6 +14952,11 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		bound_parameter_which_binding_to_use.clear();
 		bool added = CreateNewXRRow(row.GetSavedRowData(), dummy, "", "", "", dummystr, bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, datetime_start, datetime_end, previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, dummycols, true, true, xr_table_category, false, false);
 
+		if (failed || CheckCancelled())
+		{
+			break;
+		}
+
 		if (added)
 		{
 			// Remove the last two bindings, which are the new timerange columns - we don't have them yet, and we don't need them
@@ -14963,6 +14978,11 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		}
 
 	//});
+	}
+
+	if (failed || CheckCancelled())
+	{
+		return;
 	}
 
 	if (at_least_one_row_is_bad)
@@ -15053,7 +15073,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 		if (failed || CheckCancelled())
 		{
-			return;
+			break;
 		}
 
 		// TEST the rows only!!!!!!
@@ -15066,6 +15086,11 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		//outgoing_rows_of_data.push_back(std::deque<SavedRowData>());
 		std::deque<SavedRowData> outgoing_test_rows;
 		HandleSetOfRowsThatMatchOnPrimaryKeys(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, row_group.second, outgoing_test_rows, xr_table_category);
+
+		if (failed || CheckCancelled())
+		{
+			break;
+		}
 
 		// test_rows returns with two categories of rows: those for which
 		// the merging algorithm was unable to find data for the final inner table.
@@ -15090,6 +15115,10 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 	}
 
 
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
 
 	// ******************************************************************************* //
 	// Part two: Rerun the entire algorithm,
@@ -15168,7 +15197,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 
 		if (failed || CheckCancelled())
 		{
-			return;
+			break;
 		}
 
 		// This time it's real data that comes out!
@@ -15179,6 +15208,11 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		// will be a legitimate merging/splitting of rows into proper time ranges.
 		std::deque<SavedRowData> outgoing_real_rows;
 		HandleSetOfRowsThatMatchOnPrimaryKeys(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, row_group.second, outgoing_real_rows, xr_table_category);
+
+		if (failed || CheckCancelled())
+		{
+			break;
+		}
 
 		// real_rows returns with two categories of rows, just as test_rows
 		// in the above equivalent-looking loop did:
@@ -15239,7 +15273,17 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 		//});
 		}
 
+		if (failed || CheckCancelled())
+		{
+			break;
+		}
+
 	//});
+	}
+
+	if (failed || CheckCancelled())
+	{
+		return;
 	}
 
 	// We have the final results.
