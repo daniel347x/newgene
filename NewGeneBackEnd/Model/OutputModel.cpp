@@ -1201,6 +1201,12 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 {
 
+	if (primary_group_final_results.size() == 1)
+	{
+		primary_group_merged_results = primary_group_final_results[0];
+		return;
+	}
+
 	SqlAndColumnSet intermediate_merge_of_top_level_primary_group_results = primary_group_final_results[0];
 	intermediate_merge_of_top_level_primary_group_results.second.view_number = 1;
 	intermediate_merging_of_primary_groups_column_sets.push_back(intermediate_merge_of_top_level_primary_group_results);
@@ -3676,7 +3682,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 						bound_parameter_ints.pop_back();
 						bound_parameter_which_binding_to_use.pop_back();
 						bound_parameter_which_binding_to_use.pop_back();
-						sorting_row_of_data.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, true, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, current_datetime_start_column_index, current_datetime_end_column_index, previous_datetime_start_column_index, previous_datetime_end_column_index);
+						// This SwapBindings leaves all fields unchanged
+						sorting_row_of_data.SwapBindings(bound_parameter_strings, bound_parameter_ints, bound_parameter_floats, bound_parameter_which_binding_to_use, false, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end, current_datetime_start_column_index, current_datetime_end_column_index, previous_datetime_start_column_index, previous_datetime_end_column_index);
 						ordering_within_rows_data.clear();
 						ordering_within_rows_data.push_back(sorting_row_of_data);
 					}
@@ -16432,6 +16439,7 @@ void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const &
 		case OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP:
 			{
 				if (    schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+					||  schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 					||  schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT)
 				{
 					if (previous_datetime_start_column_index == -1)
@@ -16440,6 +16448,7 @@ void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const &
 					}
 				}
 				else if (schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS
+					||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
 					||   schema_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT)
 				{
 					if ( previous_datetime_end_column_index == -1)
