@@ -15747,17 +15747,13 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			bool done = false;
-			std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [this, &done, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
+			//std::for_each(group_time_ranges__intkeys.cbegin(), group_time_ranges__intkeys.cend(), [this, &done, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info)
+			for(TimeRangesForIndividualGroup_IntKeys::const_iterator it = group_time_ranges__intkeys.cbegin(); it != group_time_ranges__intkeys.cend(); ++it)
 			{
-				if (done)
-				{
-					return;
-				}
+				std::pair<TimeRangeMapper_Ints, TimeRanges> const & map_info = *it;
 				if (failed || CheckCancelled())
 				{
-					done = true;
-					return;
+					break;
 				}
 				if (map_info.first == inner_table_primary_key_groups )
 				{
@@ -15765,7 +15761,7 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 					my_time_ranges.subtract(time_range_);
 					if (my_time_ranges.empty())
 					{
-						done = true;
+						break;
 					}
 				}
 				if (current_null_check_count % status_increment_check == 0)
@@ -15775,7 +15771,8 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 					this->messager.SetPerformanceLabel(msg.str());
 				}
 				++current_null_check_count;
-			});
+			//});
+			}
 
 			if (failed || CheckCancelled())
 			{
@@ -15821,26 +15818,22 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			bool done = false;
-			std::for_each(group_time_ranges__floatkeys.cbegin(), group_time_ranges__floatkeys.cend(), [this, &done, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Floats, TimeRanges> const & map_info)
+			//std::for_each(group_time_ranges__floatkeys.cbegin(), group_time_ranges__floatkeys.cend(), [this, &done, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Floats, TimeRanges> const & map_info)
+			for(TimeRangesForIndividualGroup_FloatKeys::const_iterator it = group_time_ranges__floatkeys.cbegin(); it != group_time_ranges__floatkeys.cend(); ++it)
 			{
-				if (done)
-				{
-					return;
-				}
+				std::pair<TimeRangeMapper_Floats, TimeRanges> const & map_info = *it;
 				if (failed || CheckCancelled())
 				{
-					done = true;
-					return;
+					break;
 				}
 				if (map_info.first == inner_table_primary_key_groups )
 				{
 					TimeRanges const & time_range_ = map_info.second;
 					my_time_ranges.subtract(time_range_);
-				}
-				if (my_time_ranges.empty())
-				{
-					done = true;
+					if (my_time_ranges.empty())
+					{
+						break;
+					}
 				}
 				if (current_null_check_count % status_increment_check == 0)
 				{
@@ -15849,7 +15842,8 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 					this->messager.SetPerformanceLabel(msg.str());
 				}
 				++current_null_check_count;
-			});
+			//});
+			}
 
 
 			if (failed || CheckCancelled())
@@ -15896,17 +15890,13 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 			// This part is nasty and dangerously time-consuming.
 			// However, the algorithm demands it.
 			// We have no choice but to iterate through the map to pull out matches.
-			bool done = false;
-			std::for_each(group_time_ranges__stringkeys.cbegin(), group_time_ranges__stringkeys.cend(), [this, &done, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Strings, TimeRanges> const & map_info)
+			//std::for_each(group_time_ranges__stringkeys.cbegin(), group_time_ranges__stringkeys.cend(), [this, &done, &current_null_check_count, &total_number_null_checks, &status_increment_check, &my_time_ranges, &inner_table_primary_key_groups](std::pair<TimeRangeMapper_Strings, TimeRanges> const & map_info)
+			for(TimeRangesForIndividualGroup_StringKeys::const_iterator it = group_time_ranges__stringkeys.cbegin(); it != group_time_ranges__stringkeys.cend(); ++it)
 			{
-				if (done)
-				{
-					return;
-				}
+				std::pair<TimeRangeMapper_Strings, TimeRanges> const & map_info = *it;
 				if (failed || CheckCancelled())
 				{
-					done = true;
-					return;
+					break;
 				}
 				if (map_info.first == inner_table_primary_key_groups )
 				{
@@ -15914,7 +15904,7 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 					my_time_ranges.subtract(time_range_);
 					if (my_time_ranges.empty())
 					{
-						done = true;
+						break;
 					}
 				}
 				if (current_null_check_count % status_increment_check == 0)
@@ -15924,7 +15914,8 @@ void OutputModel::OutputGenerator::EliminateRedundantNullsInFinalInnerTable(std:
 					this->messager.SetPerformanceLabel(msg.str());
 				}
 				++current_null_check_count;
-			});
+			//});
+			}
 
 
 			if (failed || CheckCancelled())
