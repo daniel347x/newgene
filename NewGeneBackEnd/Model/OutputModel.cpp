@@ -2119,6 +2119,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		sql_string += sql_order_by;
 	}
 
+	result_columns.current_block_datetime_column_types = primary_variable_group_final_result.current_block_datetime_column_types;
+	result_columns.previous_block_datetime_column_types = previous_merged_primary_variable_groups_table.second.current_block_datetime_column_types;
 
 	return result;
 
