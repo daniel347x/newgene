@@ -120,10 +120,13 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, current_number_rows_to_sort(0)
 	, remove_self_kads(true)
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
+	, random_sampling_rows_per_stage(100)
+	, random_sampling(false)
 {
 	//debug_ordering = true;
 	//delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
+	random_sampling = true;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -7053,13 +7056,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 
 	// Add the ORDER BY column/s
-	if (!count_only && debug_ordering)
-	//if (!count_only && true)
+	//if (!count_only && debug_ordering)
+	if (!count_only && true)
 	{
 
 		bool first = true;
 
-		// Now order by remaining primary key columns (with multiplicity 1)
+		// First order by primary key columns(with multiplicity 1
 		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &first](ColumnsInTempView::ColumnInTempView & view_column)
 		{
 			// Determine how many columns there are corresponding to the DMU category
@@ -7116,6 +7119,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 		});
 
+		// Then by columns with multiplicity greater than 1
 		if (highest_multiplicity_primary_uoa > 1)
 		{
 

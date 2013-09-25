@@ -1078,6 +1078,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// To be options / settings integrated later
 				bool remove_self_kads;
 				bool merge_adjacent_rows_with_identical_data_on_secondary_keys;
+				bool random_sampling;
+				std::int64_t random_sampling_rows_per_stage;
 
 				// optimization
 				std::vector<std::string> test_strings;
