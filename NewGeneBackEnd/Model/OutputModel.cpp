@@ -120,13 +120,14 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, current_number_rows_to_sort(0)
 	, remove_self_kads(true)
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
-	, random_sampling_rows_per_stage(100)
+	, random_sampling_rows_per_stage(1)
 	, random_sampling(false)
 {
 	//debug_ordering = true;
 	//delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	random_sampling = true;
+	random_sampling_rows_per_stage = 1000000;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -2179,6 +2180,12 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 
 		// Inside loop, which starts at 2, not 1
 		total_progress_stages += (4 * (highest_multiplicity_primary_uoa - 1));
+
+		// If randomizing
+		if (random_sampling)
+		{
+			total_progress_stages += (1 * (highest_multiplicity_primary_uoa - 1));
+		}
 
 		if (primary_variable_groups_column_info.size() > 1)
 		{
@@ -14011,10 +14018,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	}
 	messager.SetPerformanceLabel("");
 	sql_and_column_sets.push_back(intermediate_sorted_top_level_variable_group_result);
-	if (failed || CheckCancelled())
-	{
-		return SqlAndColumnSet();
-	}
 
 	if (variable_group.code)
 	{
@@ -14065,8 +14068,98 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	ClearTables(sql_and_column_sets);
 	sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
 
+	if (random_sampling && xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
+	{
+		duplicates_removed_top_level_variable_group_result = Randomize(duplicates_removed_top_level_variable_group_result.second, variable_group, current_multiplicity, primary_group_number, sql_and_column_sets);
+		if (failed || CheckCancelled())
+		{
+			return SqlAndColumnSet();
+		}
+	}
+
 	return duplicates_removed_top_level_variable_group_result;
 
+}
+
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Randomize(ColumnsInTempView const & columns, WidgetInstanceIdentifier const & variable_group, int const current_multiplicity, int const primary_group_number, SqlAndColumnSets & sql_and_column_sets)
+{
+	std::int64_t number_rows = ObtainCount(columns);
+	boost::format msg("Multiplicity %1% - Randomizing to select a maximum of %2% rows from %3% to pass to the next stage...");
+	msg % current_multiplicity % random_sampling_rows_per_stage % number_rows;
+	UpdateProgressBarToNextStage(msg.str(), std::string());
+	messager.SetPerformanceLabel("Randomizing...");
+
+	char c[256];
+
+	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	std::vector<SQLExecutor> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+
+	result_columns = columns;
+	result_columns.most_recent_sql_statement_executed__index = -1;
+	std::string view_name = "NGTEMP_RAND";
+	view_name += itoa(primary_group_number, c, 10);
+	if (current_multiplicity >= 0)
+	{
+		view_name += "_";
+		view_name += itoa(current_multiplicity, c, 10);
+	}
+	result_columns.view_name_no_uuid = view_name;
+	view_name += "_";
+	view_name += newUUID(true);
+	result_columns.view_name = view_name;
+
+	std::string sql_string;
+
+	sql_string += "CREATE TABLE ";
+	sql_string += result_columns.view_name;
+	sql_string += " AS SELECT * FROM ";
+	sql_string += "(SELECT * FROM ";
+	sql_string += columns.view_name;
+	sql_string += " ORDER BY RANDOM() LIMIT ";
+	sql_string += boost::lexical_cast<std::string>(random_sampling_rows_per_stage);
+	sql_string += ") ";
+
+	bool first = true;
+	SortOrderByMultiplicityOnes(result_columns, XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP, variable_group, sql_string, first);
+	SortOrderByMultiplicityGreaterThanOnes(result_columns, XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP, variable_group, sql_string, first);
+
+	// Finally, order by the time range columns
+	if (!first)
+	{
+		sql_string += ", ";
+	}
+	else
+	{
+		sql_string += " ORDER BY ";
+	}
+	first = false;
+	sql_string += result_columns.columns_in_view[columns.columns_in_view.size()-2].column_name_in_temporary_table; // final merged datetime start column
+	sql_string += ", ";
+	sql_string += result_columns.columns_in_view[columns.columns_in_view.size()-1].column_name_in_temporary_table; // final merged datetime end column
+
+	sql_strings.push_back(SQLExecutor(this, db, sql_string));
+	if (failed)
+	{
+		SetFailureMessage(sql_error);
+		return result;
+	}
+	if (CheckCancelled())
+	{
+		return result;
+	}
+	result_columns.most_recent_sql_statement_executed__index = -1;
+
+	ExecuteSQL(result);
+	if (failed || CheckCancelled())
+	{
+		return result;
+	}
+	ClearTables(sql_and_column_sets);
+	messager.SetPerformanceLabel("");
+	sql_and_column_sets.push_back(result);
+
+	return result;
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateKadResultSet(ColumnsInTempView const & column_set)
@@ -14375,10 +14468,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-void OutputModel::OutputGenerator::SortOrderByMultiplicityOnes(ColumnsInTempView & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first)
+void OutputModel::OutputGenerator::SortOrderByMultiplicityOnes(ColumnsInTempView const & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier const & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first)
 {
 	int current_column = 0;
-	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &sql_create_final_primary_group_table, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView & view_column)
+	std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &xr_table_category, &first_variable_group, &sql_create_final_primary_group_table, &result_columns, &current_column, &first](ColumnsInTempView::ColumnInTempView const & view_column)
 	{
 		switch (xr_table_category)
 		{
@@ -14407,7 +14500,7 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityOnes(ColumnsInTempView
 		// Determine how many columns there are corresponding to the DMU category
 		int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
 		int column_count_nested = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &xr_table_category, &first_variable_group, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView & view_column_nested)
+		std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &xr_table_category, &first_variable_group, &view_column, &column_count_nested, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_create_final_primary_group_table](ColumnsInTempView::ColumnInTempView const & view_column_nested)
 		{
 			switch (xr_table_category)
 			{
@@ -14490,14 +14583,14 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityOnes(ColumnsInTempView
 	});
 }
 
-void OutputModel::OutputGenerator::SortOrderByMultiplicityGreaterThanOnes(ColumnsInTempView & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first)
+void OutputModel::OutputGenerator::SortOrderByMultiplicityGreaterThanOnes(ColumnsInTempView const & result_columns, XR_TABLE_CATEGORY const xr_table_category, WidgetInstanceIdentifier const & first_variable_group, std::string & sql_create_final_primary_group_table, bool & first)
 {
 	if (highest_multiplicity_primary_uoa > 1)
 	{
 
 		// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
 		int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &first_variable_group, &first, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1](ColumnsInTempView::ColumnInTempView & view_column)
+		std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &first_variable_group, &first, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1](ColumnsInTempView::ColumnInTempView const & view_column)
 		{
 			if (!view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
 			{
@@ -14524,7 +14617,7 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityGreaterThanOnes(Column
 		{
 			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
 			{
-				std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &first_variable_group, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_create_final_primary_group_table, &first](ColumnsInTempView::ColumnInTempView & view_column)
+				std::for_each(result_columns.columns_in_view.cbegin(), result_columns.columns_in_view.cend(), [this, &first_variable_group, &inner_dmu_multiplicity, &outer_dmu_multiplicity, &sql_create_final_primary_group_table, &first](ColumnsInTempView::ColumnInTempView const & view_column)
 				{
 					if (!view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, first_variable_group))
 					{
