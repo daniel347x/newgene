@@ -7179,6 +7179,24 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		}
 	
+		// Finally, order by the time range columns
+		if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+		{
+			if (!first)
+			{
+				sql_string += ", ";
+			}
+			else
+			{
+				sql_string += " ORDER BY ";
+			}
+			first = false;
+			sql_string += ", ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid; // final merged datetime start column
+			sql_string += ", ";
+			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid; // final merged datetime end column
+		}
+ 
 	}
 
 	if (!count_only)
