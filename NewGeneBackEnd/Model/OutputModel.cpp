@@ -7191,7 +7191,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				sql_string += " ORDER BY ";
 			}
 			first = false;
-			sql_string += ", ";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid; // final merged datetime start column
 			sql_string += ", ";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid; // final merged datetime end column
