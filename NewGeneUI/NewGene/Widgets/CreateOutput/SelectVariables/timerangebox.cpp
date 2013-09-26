@@ -12,6 +12,16 @@ TimeRangeBox::TimeRangeBox( QWidget * parent ) :
 
 	ui->setupUi( this );
 
+	QLineEdit * lineEdit = this->findChild<QLineEdit*>("randomSamplingHowManyRows");
+	if (lineEdit)
+	{
+		QIntValidator * val = new QIntValidator(0,2147483647, this);
+		if (val)
+		{
+			lineEdit->setValidator(val);
+		}
+	}
+
 	PrepareOutputWidget();
 
 }
@@ -94,7 +104,11 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 	if (lineEdit)
 	{
 		QString the_string = lineEdit->text();
-		std::int64_t the_number = boost::lexical_cast<std::int64_t>(the_string.toStdString());
+		std::int64_t the_number = 1;
+		if (the_string.size() > 0)
+		{
+			the_number = boost::lexical_cast<std::int64_t>(the_string.toStdString());
+		}
 		if (the_number != random_sampling_count_per_stage)
 		{
 			lineEdit->setText(QString((boost::lexical_cast<std::string>(random_sampling_count_per_stage).c_str())));
@@ -103,7 +117,7 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 
 }
 
-void TimeRangeBox::on_checkBox_stateChanged(int arg1)
+void TimeRangeBox::on_doRandomSampling_stateChanged(int arg1)
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
@@ -111,8 +125,6 @@ void TimeRangeBox::on_checkBox_stateChanged(int arg1)
 	{
 		return;
 	}
-
-	UIMessager messager(project);
 
 	QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
 	if (checkBox)
@@ -126,14 +138,18 @@ void TimeRangeBox::on_checkBox_stateChanged(int arg1)
 
 }
 
-void TimeRangeBox::on_lineEdit_editingFinished()
+void TimeRangeBox::on_randomSamplingHowManyRows_textChanged(const QString &arg1)
 {
 
 	QLineEdit * lineEdit = this->findChild<QLineEdit*>("randomSamplingHowManyRows");
 	if (lineEdit)
 	{
 		QString the_string = lineEdit->text();
-		std::int64_t the_number = boost::lexical_cast<std::int64_t>(the_string.toStdString());
+		std::int64_t the_number = 1;
+		if (the_string.size() > 0)
+		{
+			the_number = boost::lexical_cast<std::int64_t>(the_string.toStdString());
+		}
 		InstanceActionItems actionItems;
 		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Int64(the_number)))));
 		WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);

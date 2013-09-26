@@ -40,8 +40,8 @@ class TimeRangeBox : public QFrame, public NewGeneWidget // do not reorder base 
 		void WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET);
 
 	private slots:
-		void on_checkBox_stateChanged(int arg1);
-		void on_lineEdit_editingFinished();
+		void on_doRandomSampling_stateChanged(int arg1);
+		void on_randomSamplingHowManyRows_textChanged(const QString &arg1);
 };
 
 #endif // TIMERANGEBOX_H

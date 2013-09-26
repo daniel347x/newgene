@@ -26,7 +26,7 @@ void Table_GENERAL_OPTIONS::Load(sqlite3 * db, OutputModel * output_model_, Inpu
 		// Use codes as foreign keys, not UUID's, so that this output model can be shared with others
 		// ****************************************************************************************//
 		do_random_sampling = (sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__DO_RANDOM_SAMPLING) != 0);
-		random_sampling_count_per_stage = (sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__RANDOM_SAMPLING_COUNT_PER_STAGE) != 0);
+		random_sampling_count_per_stage = sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__RANDOM_SAMPLING_COUNT_PER_STAGE);
 
 	}
 	if (stmt)
@@ -99,7 +99,7 @@ bool Table_GENERAL_OPTIONS::UpdateRandomSamplingCountPerStage(sqlite3 * db, Outp
 	{
 		switch (change.change_type)
 		{
-		case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__DO_RANDOM_SAMPLING_CHANGE:
+		case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE:
 			{
 				switch (change.change_intention)
 				{
@@ -144,7 +144,7 @@ void Table_GENERAL_OPTIONS::ModifyDoRandomSampling(sqlite3 * db)
 	std::string sqlAdd("UPDATE GENERAL_OPTIONS SET ");
 	sqlAdd += GENERAL_OPTIONS__DO_RANDOM_SAMPLING;
 	sqlAdd += "=";
-	sqlAdd += boost::lexical_cast<std::string>(boost::lexical_cast<int>(do_random_sampling));
+	sqlAdd += boost::lexical_cast<std::string>(do_random_sampling ? 1 : 0);
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sqlAdd.c_str(), sqlAdd.size() + 1, &stmt, NULL);
 	if (stmt == NULL)
@@ -199,7 +199,7 @@ std::pair<bool, std::int64_t> Table_GENERAL_OPTIONS::getRandomSamplingInfo(sqlit
 		// Use codes as foreign keys, not UUID's, so that this output model can be shared with others
 		// ****************************************************************************************//
 		do_random_sampling = (sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__DO_RANDOM_SAMPLING) != 0);
-		random_sampling_count_per_stage = (sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__RANDOM_SAMPLING_COUNT_PER_STAGE) != 0);
+		random_sampling_count_per_stage = sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__RANDOM_SAMPLING_COUNT_PER_STAGE);
 
 	}
 	if (stmt)
