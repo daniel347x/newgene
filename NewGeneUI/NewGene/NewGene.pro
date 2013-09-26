@@ -122,7 +122,8 @@ SOURCES += main.cpp\
 	Infrastructure/UIAction/generateoutput.cpp \
 	Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.cpp \
 	Infrastructure/UIAction/timerangechange.cpp \
-	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.cpp
+	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.cpp \
+    Infrastructure/UIAction/generaloptions.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -231,7 +232,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/UIAction/generateoutput.h \
 	Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.h \
 	Infrastructure/UIAction/timerangechange.h \
-	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.h
+	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.h \
+    Infrastructure/UIAction/generaloptions.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

@@ -110,6 +110,14 @@ void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTRO
 /************************************************************************/
 //
 /************************************************************************/
+void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<TIMERANGE_REGION_WIDGET>(widget, this));
+}
+
+/************************************************************************/
+//
+/************************************************************************/
 void OutputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET widget)
 {
 	get()->getWorkService().post(DoRefreshOutputWidget<DATETIME_WIDGET>(widget, this));
@@ -140,6 +148,22 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE action_request)
 {
 	get()->getWorkService().post(KAdCountChange(action_request, this));
+}
+
+/************************************************************************/
+// ACTION_DO_RANDOM_SAMPLING_CHANGE
+/************************************************************************/
+void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE action_request)
+{
+	get()->getWorkService().post(DoRandomSamplingChange(action_request, this));
+}
+
+/************************************************************************/
+// ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE
+/************************************************************************/
+void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE action_request)
+{
+	get()->getWorkService().post(RandomSamplingCountPerStageChange(action_request, this));
 }
 
 /************************************************************************/

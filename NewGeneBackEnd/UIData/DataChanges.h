@@ -31,6 +31,8 @@ enum DATA_CHANGE_TYPE
 
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE
+	, DATA_CHANGE_TYPE__OUTPUT_MODEL__DO_RANDOM_SAMPLING_CHANGE
+	, DATA_CHANGE_TYPE__OUTPUT_MODEL__RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__DATETIME_RANGE_CHANGE
 	, DATA_CHANGE_TYPE__OUTPUT_MODEL__GENERATE_OUTPUT
 
@@ -69,6 +71,39 @@ class DataChangePacket
 		{
 
 		}
+
+};
+
+class DataChangePacket_bool : public DataChangePacket
+{
+
+public:
+
+	DataChangePacket_bool(bool const b_)
+		: DataChangePacket()
+		, b(b_)
+	{
+
+	}
+
+	DataChangePacket_bool(DataChangePacket_bool const & rhs)
+		: DataChangePacket(rhs)
+		, b(rhs.b)
+	{
+
+	}
+
+	void setValue(bool const b_)
+	{
+		b = b_;
+	}
+
+	bool getValue() const
+	{
+		return b;
+	}
+
+	bool b;
 
 };
 

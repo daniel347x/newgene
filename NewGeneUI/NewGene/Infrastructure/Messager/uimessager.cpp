@@ -293,6 +293,11 @@ void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPI
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }
 
+void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET & widgetData)
+{
+	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
+}
+
 void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET & widgetData)
 {
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);

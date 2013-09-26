@@ -26,9 +26,10 @@ NewGeneGenerateOutput::~NewGeneGenerateOutput()
 void NewGeneGenerateOutput::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 
+	NewGeneWidget::UpdateOutputConnections(connection_type, project);
+
 	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
-		NewGeneWidget::UpdateOutputConnections(connection_type, project);
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB)));
 		connect(this, SIGNAL(GenerateOutputSignal(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)));
@@ -150,10 +151,6 @@ void NewGeneGenerateOutput::on_pushButton_clicked()
 		}
 	}
 
-}
-
-void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_lostFocus()
-{
 }
 
 void NewGeneGenerateOutput::on_lineEditFilePathToKadOutput_editingFinished()

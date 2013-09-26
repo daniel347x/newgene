@@ -11,6 +11,8 @@ enum WIDGET_ACTIONS
 
 	, ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED
 	, ACTION_KAD_COUNT_CHANGE
+	, ACTION_DO_RANDOM_SAMPLING_CHANGE
+	, ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE
 	, ACTION_DATETIME_RANGE_CHANGE
 	, ACTION_GENERATE_OUTPUT
 
@@ -136,6 +138,46 @@ class WidgetActionItem__Spinbox : public WidgetActionItem
 	protected:
 
 		int value_;
+
+};
+
+class WidgetActionItem__Int64 : public WidgetActionItem
+{
+
+	public:
+
+		WidgetActionItem__Int64(std::int64_t const value__)
+			: WidgetActionItem()
+			, value_(value__)
+		{
+
+		}
+
+		WidgetActionItem__Int64(WidgetActionItem__Spinbox const & rhs)
+			: WidgetActionItem(rhs)
+			, value_(rhs.value_)
+		{
+
+		}
+
+		~WidgetActionItem__Int64()
+		{
+
+		}
+
+		void setValue(std::int64_t const value__)
+		{
+			value_ = value__;
+		}
+
+		std::int64_t getValue() const
+		{
+			return value_;
+		}
+
+	protected:
+
+		std::int64_t value_;
 
 };
 
@@ -269,6 +311,42 @@ class WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE> : public WidgetActionItem
 		}
 };
 typedef WidgetActionItemRequest<ACTION_KAD_COUNT_CHANGE> WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE;
+
+/************************************************************************/
+// ACTION_DO_RANDOM_SAMPLING_CHANGE
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_DO_RANDOM_SAMPLING_CHANGE> : public WidgetActionItemRequest_base
+{
+	public:
+		WidgetActionItemRequest<ACTION_DO_RANDOM_SAMPLING_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_DO_RANDOM_SAMPLING_CHANGE>(WidgetActionItemRequest<ACTION_DO_RANDOM_SAMPLING_CHANGE> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
+};
+typedef WidgetActionItemRequest<ACTION_DO_RANDOM_SAMPLING_CHANGE> WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE;
+
+/************************************************************************/
+// ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE> : public WidgetActionItemRequest_base
+{
+	public:
+		WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>(WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
+};
+typedef WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE> WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE;
 
 /************************************************************************/
 // ACTION_DATETIME_RANGE_CHANGE

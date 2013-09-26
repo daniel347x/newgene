@@ -56,6 +56,10 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		{
 			emit WidgetDataRefresh(widgetData);
 		}
+		void EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET & widgetData)
+		{
+			emit WidgetDataRefresh(widgetData);
+		}
 		void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET & widgetData)
 		{
 			emit WidgetDataRefresh(widgetData);
@@ -86,11 +90,14 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA widget);
 		void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET widget);
 		void RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET widget);
+		void RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET widget);
 		void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB widget);
 
 		// Actions
 		void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED);
 		void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE);
+		void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE);
+		void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE);
 		void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE);
 		void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT);
 

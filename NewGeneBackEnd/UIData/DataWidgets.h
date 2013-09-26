@@ -22,6 +22,7 @@ enum DATA_WIDGETS
 	, VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE
 	, KAD_SPIN_CONTROLS_AREA
 	, KAD_SPIN_CONTROL_WIDGET
+	, TIMERANGE_REGION_WIDGET
 	, DATETIME_WIDGET
 	, GENERATE_OUTPUT_TAB
 
@@ -402,6 +403,67 @@ public:
 	int count;
 };
 typedef WidgetDataItem<KAD_SPIN_CONTROL_WIDGET> WidgetDataItem_KAD_SPIN_CONTROL_WIDGET;
+
+
+/************************************************************************/
+// TIMERANGE_REGION_WIDGET
+/************************************************************************/
+template<>
+class WidgetDataItemRequest<TIMERANGE_REGION_WIDGET> : public WidgetDataItemRequest_base
+{
+public:
+	WidgetDataItemRequest<TIMERANGE_REGION_WIDGET>(bool const do_random_sampling_ = false, std::int64_t random_sampling_count_per_stage_ = 1, WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
+		, do_random_sampling(do_random_sampling_)
+		, random_sampling_count_per_stage(random_sampling_count_per_stage_)
+	{
+	}
+	WidgetDataItemRequest<TIMERANGE_REGION_WIDGET>(WidgetDataItemRequest<TIMERANGE_REGION_WIDGET> const & rhs)
+		: WidgetDataItemRequest_base(rhs)
+		, do_random_sampling(rhs.do_random_sampling)
+		, random_sampling_count_per_stage(rhs.random_sampling_count_per_stage)
+	{
+	}
+	bool do_random_sampling;
+	std::int64_t random_sampling_count_per_stage;
+};
+typedef WidgetDataItemRequest<TIMERANGE_REGION_WIDGET> WidgetDataItemRequest_TIMERANGE_REGION_WIDGET;
+
+template<>
+class WidgetDataItem<TIMERANGE_REGION_WIDGET> : public WidgetDataItem_base
+{
+public:
+	WidgetDataItem<TIMERANGE_REGION_WIDGET>(bool const do_random_sampling_ = false, std::int64_t random_sampling_count_per_stage_ = 1, WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
+		, do_random_sampling(do_random_sampling_)
+		, random_sampling_count_per_stage(random_sampling_count_per_stage_)
+	{
+	}
+	WidgetDataItem<TIMERANGE_REGION_WIDGET>(WidgetDataItemRequest_base const & request_obj)
+		: WidgetDataItem_base(request_obj)
+	{
+		try
+		{
+			WidgetDataItemRequest_TIMERANGE_REGION_WIDGET const & date_time_request = dynamic_cast<WidgetDataItemRequest_TIMERANGE_REGION_WIDGET const &>(request_obj);
+			do_random_sampling = date_time_request.do_random_sampling;
+			random_sampling_count_per_stage = date_time_request.random_sampling_count_per_stage;
+		}
+		catch (std::bad_cast &)
+		{
+			do_random_sampling = false;
+			random_sampling_count_per_stage = 1;
+		}
+	}
+	WidgetDataItem<TIMERANGE_REGION_WIDGET>(WidgetDataItem<TIMERANGE_REGION_WIDGET> const & rhs)
+		: WidgetDataItem_base(rhs)
+		, do_random_sampling(rhs.do_random_sampling)
+		, random_sampling_count_per_stage(rhs.random_sampling_count_per_stage)
+	{
+	}
+	bool do_random_sampling;
+	std::int64_t random_sampling_count_per_stage;
+};
+typedef WidgetDataItem<TIMERANGE_REGION_WIDGET> WidgetDataItem_TIMERANGE_REGION_WIDGET;
 
 
 /************************************************************************/

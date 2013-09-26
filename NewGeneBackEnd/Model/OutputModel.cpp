@@ -43,6 +43,7 @@ void OutputModel::LoadTables()
 		t_kad_count.Sort();
 
 		t_time_range.Load(db, this, input_model.get());
+		t_general_options.Load(db, this, input_model.get());
 	}
 
 }
@@ -126,8 +127,8 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	//debug_ordering = true;
 	//delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
-	random_sampling = true;
-	random_sampling_rows_per_stage = 1000000;
+	//random_sampling = true;
+	//random_sampling_rows_per_stage = 1000000;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -11173,6 +11174,10 @@ void OutputModel::OutputGenerator::Prepare()
 	tables_deleted.clear();
 
 	initialized = true;
+
+	std::pair<bool, std::int64_t> info_random_sampling = model->t_general_options.getRandomSamplingInfo();
+	random_sampling = info_random_sampling.first;
+	random_sampling_rows_per_stage = info_random_sampling.second;
 
 	PopulateUOAs();
 

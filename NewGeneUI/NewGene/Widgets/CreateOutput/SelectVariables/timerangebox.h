@@ -30,9 +30,18 @@ class TimeRangeBox : public QFrame, public NewGeneWidget // do not reorder base 
 	public:
 
 	signals:
+		void UpdateDoRandomSampling(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE);
+		void UpdateRandomSamplingCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE);
+		void RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET);
 
 	public slots:
+		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void RefreshAllWidgets();
+		void WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET);
 
+	private slots:
+		void on_checkBox_stateChanged(int arg1);
+		void on_lineEdit_editingFinished();
 };
 
 #endif // TIMERANGEBOX_H

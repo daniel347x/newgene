@@ -123,6 +123,30 @@
          </property>
         </spacer>
        </item>
+       <item>
+        <widget class="QCheckBox" name="doRandomSampling">
+         <property name="text">
+          <string>Random Sampling</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Limit to this many rows per multiplicity:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="randomSamplingHowManyRows">
+         <property name="inputMask">
+          <string>00000000000000000000000000000000; </string>
+         </property>
+         <property name="maxLength">
+          <number>32</number>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>

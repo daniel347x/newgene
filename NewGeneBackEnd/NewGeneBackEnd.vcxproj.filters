@@ -327,6 +327,9 @@
     <ClInclude Include="Model\Tables\TableInstances\TimeRange.h">
       <Filter>Header Files\Model\Tables\TableInstances</Filter>
     </ClInclude>
+    <ClInclude Include="Model\Tables\TableInstances\GeneralOptions.h">
+      <Filter>Header Files\Model\Tables\TableInstances</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -525,6 +528,12 @@
       <Filter>Source Files\UIAction\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="Model\Tables\TableInstances\TimeRange.cpp">
+      <Filter>Source Files\Model\Tables\TableInstances</Filter>
+    </ClCompile>
+    <ClCompile Include="UIAction\Controllers\Controller_GeneralOptions.cpp">
+      <Filter>Source Files\UIAction\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\Tables\TableInstances\GeneralOptions.cpp">
       <Filter>Source Files\Model\Tables\TableInstances</Filter>
     </ClCompile>
   </ItemGroup>
