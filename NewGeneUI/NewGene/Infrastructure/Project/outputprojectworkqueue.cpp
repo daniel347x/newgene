@@ -3,6 +3,7 @@
 #include "Widgets/newgenemainwindow.h"
 #include <QTimer>
 #include "../UIData/uiwidgetdatarefresh.h"
+#include "../UIAction/generaloptions.h"
 #include "../UIAction/variablegroupsetmemberselectionchange.h"
 #include "../UIAction/KAdCountChange.h"
 #include "../UIAction/TimeRangeChange.h"

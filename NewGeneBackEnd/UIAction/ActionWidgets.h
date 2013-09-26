@@ -346,7 +346,7 @@ class WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE> : p
 		{
 		}
 };
-typedef WidgetActionItemRequest<ACTION_DATETIME_RANGE_CHANGE> WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE;
+typedef WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE> WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE;
 
 /************************************************************************/
 // ACTION_DATETIME_RANGE_CHANGE

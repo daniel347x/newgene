@@ -1,5 +1,5 @@
-#ifndef GENERALOPTIONS_H
-#define GENERALOPTIONS_H
+#ifndef GENERALOPTIONS_2_H
+#define GENERALOPTIONS_2_H
 
 #include "../../../../NewGeneBackEnd/UIAction/ActionWidgets.h"
 #include "../Project/inputprojectworkqueue.h"
@@ -35,7 +35,7 @@ class RandomSamplingCountPerStageChange : public DoOutputAction<ACTION_RANDOM_SA
 
 	public:
 
-		RandomSamplingCountPerStageChange(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE & action_request_, OutputProjectWorkQueue * queue_)
+		RandomSamplingCountPerStageChange(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE & action_request_, OutputProjectWorkQueue * queue_)
 			: DoOutputAction<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>(static_cast<WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>>(action_request_), queue_)
 		{
 

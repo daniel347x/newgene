@@ -66,11 +66,6 @@ void TimeRangeBox::RefreshAllWidgets()
 	emit RefreshWidget(request);
 }
 
-void TimeRangeBox::RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET)
-{
-
-}
-
 void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET widget_data)
 {
 
@@ -88,7 +83,7 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 	QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
 	if (checkBox)
 	{
-		bool is_checked = checkBox->isCheckded();
+		bool is_checked = checkBox->isChecked();
 		if (is_checked != do_random_sampling)
 		{
 			checkBox->setChecked(do_random_sampling);
@@ -122,7 +117,7 @@ void TimeRangeBox::on_checkBox_stateChanged(int arg1)
 	QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
 	if (checkBox)
 	{
-		bool is_checked = checkBox->isCheckded();
+		bool is_checked = checkBox->isChecked();
 		InstanceActionItems actionItems;
 		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
 		WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
