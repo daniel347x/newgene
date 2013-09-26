@@ -141,7 +141,6 @@ bool Table_GENERAL_OPTIONS::UpdateRandomSamplingCountPerStage(sqlite3 * db, Outp
 
 void Table_GENERAL_OPTIONS::ModifyDoRandomSampling(sqlite3 * db)
 {
-	char c_[64];
 	std::string sqlAdd("UPDATE GENERAL_OPTIONS SET ");
 	sqlAdd += GENERAL_OPTIONS__DO_RANDOM_SAMPLING;
 	sqlAdd += "=";
@@ -162,7 +161,6 @@ void Table_GENERAL_OPTIONS::ModifyDoRandomSampling(sqlite3 * db)
 
 void Table_GENERAL_OPTIONS::ModifyRandomSamplingCountPerStage(sqlite3 * db)
 {
-	char c_[64];
 	std::string sqlAdd("UPDATE GENERAL_OPTIONS SET ");
 	sqlAdd += GENERAL_OPTIONS__RANDOM_SAMPLING_COUNT_PER_STAGE;
 	sqlAdd += "=";
@@ -191,7 +189,7 @@ std::pair<bool, std::int64_t> Table_GENERAL_OPTIONS::getRandomSamplingInfo(sqlit
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
-		return;
+		return std::make_pair<bool, std::int64_t>(false, 1);
 	}
 	int step_result = 0;
 	if ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)

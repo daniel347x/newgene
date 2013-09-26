@@ -68,7 +68,7 @@ void UIActionManager::DoDoRandomSamplingChange(Messager & messager, WidgetAction
 					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__DO_RANDOM_SAMPLING_CHANGE;
 					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
 					DataChange change(type, intention);
-					change.SetPacket(std::make_shared<DataChangePacket_bool>(actionItemCheckbox.getValue()));
+					change.SetPacket(std::make_shared<DataChangePacket_bool>(actionItemCheckbox.isChecked()));
 					change_response.changes.push_back(change);
 
 					// ***************************************** //
@@ -138,7 +138,7 @@ void UIActionManager::DoRandomSamplingCountPerStageChange(Messager & messager, W
 					// Retrieve data sent by user interface
 					// ************************************* //
 					WidgetActionItem const & actionItem = *instanceActionItem.second;
-					WidgetActionItem__Int64 const & actionItemSpinbox = static_cast<WidgetActionItem__Int64 const &>(actionItem);
+					WidgetActionItem__Int64 const & actionItemInt64 = static_cast<WidgetActionItem__Int64 const &>(actionItem);
 
 					// ***************************************** //
 					// Prepare data to send back to user interface
@@ -146,7 +146,7 @@ void UIActionManager::DoRandomSamplingCountPerStageChange(Messager & messager, W
 					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE;
 					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
 					DataChange change(type, intention);
-					change.SetPacket(std::make_shared<DataChangePacket_int64>(actionItemSpinbox.getValue()));
+					change.SetPacket(std::make_shared<DataChangePacket_int64>(actionItemInt64.getValue()));
 					change_response.changes.push_back(change);
 
 					// ***************************************** //

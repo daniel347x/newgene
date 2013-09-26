@@ -153,7 +153,7 @@ class WidgetActionItem__Int64 : public WidgetActionItem
 
 		}
 
-		WidgetActionItem__Int64(WidgetActionItem__Spinbox const & rhs)
+		WidgetActionItem__Int64(WidgetActionItem__Int64 const & rhs)
 			: WidgetActionItem(rhs)
 			, value_(rhs.value_)
 		{

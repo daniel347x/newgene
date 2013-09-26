@@ -11175,7 +11175,7 @@ void OutputModel::OutputGenerator::Prepare()
 
 	initialized = true;
 
-	std::pair<bool, std::int64_t> info_random_sampling = model->t_general_options.getRandomSamplingInfo();
+	std::pair<bool, std::int64_t> info_random_sampling = model->t_general_options.getRandomSamplingInfo(model->getDb());
 	random_sampling = info_random_sampling.first;
 	random_sampling_rows_per_stage = info_random_sampling.second;
 

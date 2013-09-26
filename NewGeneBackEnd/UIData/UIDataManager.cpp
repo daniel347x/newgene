@@ -125,7 +125,7 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	OutputModel & output_model = project.model();
 	WidgetDataItem_TIMERANGE_REGION_WIDGET timerange_region(widget_request);
 	WidgetInstanceIdentifier_Int64_Pair timerange_start_identifier;
-	std::pair<bool, std::int64_t> info = output_model.t_general_options.getRandomSamplingInfo();
+	std::pair<bool, std::int64_t> info = output_model.t_general_options.getRandomSamplingInfo(project.model().getDb());
 	timerange_region.do_random_sampling = info.first;
 	timerange_region.random_sampling_count_per_stage = info.second;
 	messager.EmitOutputWidgetDataRefresh(timerange_region);

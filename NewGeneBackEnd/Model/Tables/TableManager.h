@@ -8,6 +8,7 @@
 #include "TableInstances/UOA.h"
 #include "TableInstances/VariableGroup.h"
 #include "TableInstances/VariablesSelected.h"
+#include "TableInstances/GeneralOptions.h"
 #include "TableInstances/KAdCount.h"
 #include "TableInstances/TimeRange.h"
 #include "TableInstances/VariableGroupData.h"
