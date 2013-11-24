@@ -123,7 +123,7 @@ SOURCES += main.cpp\
 	Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.cpp \
 	Infrastructure/UIAction/timerangechange.cpp \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.cpp \
-    Infrastructure/UIAction/generaloptions.cpp
+	Infrastructure/UIAction/generaloptions.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -232,7 +232,7 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.h \
 	Infrastructure/UIAction/timerangechange.h \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.h \
-    Infrastructure/UIAction/generaloptions.h
+	Infrastructure/UIAction/generaloptions.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -256,8 +256,8 @@ win32:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesyst
 else:win32:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem-vc110-mt-gd-1_54
 # else:unix:
 
-INCLUDEPATH += $$PWD/../../NewGeneBackEnd/Debug
-DEPENDPATH += $$PWD/../../NewGeneBackEnd/Debug
+INCLUDEPATH += $$PWD/../../NewGeneBackEnd/Release
+DEPENDPATH += $$PWD/../../NewGeneBackEnd/Release
 INCLUDEPATH += $$PWD
 INCLUDEPATH += $$PWD/Widgets
 INCLUDEPATH += $$PWD/Widgets/CreateOutput
