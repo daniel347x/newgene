@@ -1,5 +1,5 @@
 #include "ImportDefinitions.h"
-#include "..\TableInstances\VariableGroupData.h"
+#include "../TableInstances/VariableGroupData.h"
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>

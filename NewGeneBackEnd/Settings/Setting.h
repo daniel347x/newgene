@@ -6,7 +6,7 @@
 #	include <boost/lexical_cast.hpp>
 #	include <boost/filesystem.hpp>
 #endif
-#include "..\Messager\Messager.h"
+#include "../Messager/Messager.h"
 #include "SettingsRepository.h"
 
 class Setting;
@@ -23,7 +23,7 @@ enum SETTING_CATEGORY
 	, SETTING_CATEGORY__MODEL_OUTPUT
 };
 
-template<typename SETTING_CLASS, typename SETTING_VALUE_TYPE = SETTING_CLASS::type>
+template<typename SETTING_CLASS, typename SETTING_VALUE_TYPE = typename SETTING_CLASS::type>
 class SettingFactory
 {
 

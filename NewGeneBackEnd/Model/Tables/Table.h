@@ -10,7 +10,7 @@
 #include <mutex>
 #include "../TimeGranularity.h"
 #include "Executor.h"
-#include "Import\Import.h"
+#include "Import/Import.h"
 #include "Fields.h"
 #include "Schema.h"
 

@@ -23,7 +23,7 @@ class NameOrIndex
 
 		NameOrIndex(NAME_OR_INDEX const name_or_index_, int const index_)
 			: name_or_index(name_or_index_)
-			, index(index)
+			, index(index_)
 		{
 		}
 
