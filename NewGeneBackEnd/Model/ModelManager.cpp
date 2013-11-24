@@ -41,6 +41,8 @@ bool ModelManager::ImportRawData(Messager & messager, Model_basemost * model_, T
 					}
 				}
 				break;
+            default:
+                return false;
 		}
 
 	}
@@ -96,6 +98,8 @@ bool ModelManager::ImportRawData(Messager & messager, Model_basemost * model_, T
 			{
 			}
 			break;
+        default:
+            break;
 	}
 
 	return true;

@@ -12,7 +12,7 @@ class ModelSettings : public Settings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>
 public:
 
 	ModelSettings(Messager & messager, boost::filesystem::path const model_settings_path)
-		: Settings(messager, model_settings_path)
+		: Settings<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>(messager, model_settings_path)
 	{
 
 	}

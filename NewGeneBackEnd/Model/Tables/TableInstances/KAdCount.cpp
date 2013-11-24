@@ -21,7 +21,7 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM KAD_COUNT");	
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;
@@ -35,7 +35,7 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 		// ****************************************************************************************//
 		char const * code_dmu_category = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__KAD_COUNT__DMU_CATEGORY_STRING_CODE));
 		int const kad_count = sqlite3_column_int(stmt, INDEX__KAD_COUNT__COUNT);
-		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__KAD_COUNT__FLAGS));
+		//char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__KAD_COUNT__FLAGS));
 		if (code_dmu_category && strlen(code_dmu_category))
 		{
 			WidgetInstanceIdentifier identifier;
@@ -121,9 +121,13 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 								// Ditto above.
 							}
 							break;
+                        default:
+                            break;
 					}
 				}
 				break;
+            default:
+                break;
 		}
 	});
 
@@ -145,7 +149,7 @@ void Table_KAD_COUNT::Add(sqlite3 * db, std::string const & dmu_category_code, i
 	sqlAdd += value_;
 	sqlAdd += ")";
 	sqlite3_stmt * stmt = NULL;
-	sqlite3_prepare_v2(db, sqlAdd.c_str(), sqlAdd.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sqlAdd.c_str(), static_cast<int>(sqlAdd.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;
@@ -161,7 +165,7 @@ void Table_KAD_COUNT::Remove(sqlite3 * db, std::string const & dmu_category_code
 	sqlRemove += dmu_category_code;
 	sqlRemove += "'";
 	sqlite3_stmt * stmt = NULL;
-	sqlite3_prepare_v2(db, sqlRemove.c_str(), sqlRemove.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sqlRemove.c_str(), static_cast<int>(sqlRemove.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;
@@ -176,18 +180,17 @@ void Table_KAD_COUNT::Remove(sqlite3 * db, std::string const & dmu_category_code
 
 void Table_KAD_COUNT::Modify(sqlite3 * db, std::string const & dmu_category_code, int const value_)
 {
-	char c_[64];
 	std::string sqlAdd("UPDATE KAD_COUNT SET ");
 	sqlAdd += KAD_COUNT__COUNT;
 	sqlAdd += "=";
-	sqlAdd += itoa(value_, c_, 10);
+	sqlAdd += std::to_string(value_);
 	sqlAdd += " WHERE ";
 	sqlAdd += KAD_COUNT__DMU_CATEGORY_STRING_CODE;
 	sqlAdd += "='";
 	sqlAdd += dmu_category_code;
 	sqlAdd += "'";
 	sqlite3_stmt * stmt = NULL;
-	sqlite3_prepare_v2(db, sqlAdd.c_str(), sqlAdd.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sqlAdd.c_str(), static_cast<int>(sqlAdd.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;

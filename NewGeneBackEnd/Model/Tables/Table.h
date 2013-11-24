@@ -275,7 +275,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 
 	public:
 
-		Table<TABLE_TYPE, CONTAINER_TYPE>(TABLE_MODEL_TYPE const table_model_type_)
+    Table<TABLE_TYPE, CONTAINER_TYPE>(Table_basemost::TABLE_MODEL_TYPE const table_model_type_)
 			: Table_base<CONTAINER_TYPE>(table_model_type_)
 			, table_type(TABLE_TYPE)
 		{
@@ -293,7 +293,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT> : pu
 
 	public:
 
-		Table_base(TABLE_MODEL_TYPE const table_model_type_)
+		Table_base(Table_basemost::TABLE_MODEL_TYPE const table_model_type_)
 			: Table_basemost(table_model_type_)
 		{
 

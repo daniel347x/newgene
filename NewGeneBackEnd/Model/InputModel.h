@@ -2,8 +2,8 @@
 #define INPUTMODEL_H
 
 #include "Model.h"
-#include "..\Settings\InputModelSettings.h"
-#include "..\Settings\Setting.h"
+#include "../Settings/InputModelSettings.h"
+#include "../Settings/Setting.h"
 #include "Tables/TableManager.h"
 #include <memory>
 

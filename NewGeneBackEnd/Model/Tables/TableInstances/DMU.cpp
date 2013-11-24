@@ -32,7 +32,7 @@ void Table_DMU_Identifier::Load(sqlite3 * db, InputModel * input_model_)
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM DMU_CATEGORY");
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;
@@ -69,7 +69,7 @@ void Table_DMU_Instance::Load(sqlite3 * db, InputModel * input_model_)
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM DMU_SET_MEMBER");
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;

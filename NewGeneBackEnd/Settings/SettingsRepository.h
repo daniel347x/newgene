@@ -147,7 +147,7 @@ class SettingsRepository
 		std::unique_ptr<SETTING_CLASS> GetSetting(Messager & messager, SETTINGS_ENUM const which_setting)
 		{
 			SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
-			SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
+			typename SettingsMap::const_iterator theSetting = _settings_map.find(which_setting);
 			if (theSetting == _settings_map.cend())
 			{
 				SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);

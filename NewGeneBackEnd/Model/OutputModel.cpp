@@ -1,7 +1,7 @@
 #include "OutputModel.h"
-#include "..\Utilities\UUID.h"
+#include "../Utilities/UUID.h"
 
-#include "..\Settings\OutputProjectSettings_list.h"
+#include "../Settings/OutputProjectSettings_list.h"
 #include <cstdint>
 
 #ifndef Q_MOC_RUN
@@ -17,7 +17,7 @@
 #include <algorithm>
 
 std::recursive_mutex OutputModel::OutputGenerator::is_generating_output_mutex;
-std::atomic<bool> OutputModel::OutputGenerator::is_generating_output = false;
+std::atomic<bool> OutputModel::OutputGenerator::is_generating_output(false);
 bool OutputModel::OutputGenerator::cancelled = false;
 
 int OutputModel::OutputGenerator::SQLExecutor::number_statement_prepares = 0;

@@ -71,9 +71,9 @@ template<typename DERIVED_SETTING_CLASS, typename SETTING_ENUM, SETTING_ENUM set
 class SimpleAccessSetting : public SimpleAccessSetting_base<DERIVED_SETTING_CLASS>
 {
 public:
-	static instance get(Messager & messager)
+	static typename SimpleAccessSetting_base<DERIVED_SETTING_CLASS>::instance get(Messager & messager)
 	{
-		instance derived_setting;
+		typename SimpleAccessSetting_base<DERIVED_SETTING_CLASS>::instance derived_setting;
 		std::unique_ptr<Setting> setting = static_cast<SETTINGS_MANAGER_CLASS&>(SETTINGS_MANAGER_CLASS::getManager()).getSetting(messager, setting_enum);
 		try
 		{
@@ -84,7 +84,7 @@ public:
 			boost::format msg("Cannot convert to derived setting class: %1%");
 			msg % bc.what();
 			messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
-			return instance();
+			return typename SimpleAccessSetting_base<DERIVED_SETTING_CLASS>::instance();
 		}
 		return derived_setting;
 	}
@@ -94,9 +94,9 @@ template<typename DERIVED_SETTING_CLASS, typename SETTING_ENUM, SETTING_ENUM set
 class SimpleAccessProjectModelSetting : public SimpleAccessSetting_base<DERIVED_SETTING_CLASS>
 {
 public:
-	static instance get(Messager & messager, SETTINGS_CLASS & settings)
+	static typename SimpleAccessSetting_base<DERIVED_SETTING_CLASS>::instance get(Messager & messager, SETTINGS_CLASS & settings)
 	{
-		instance derived_setting;
+		typename SimpleAccessSetting_base<DERIVED_SETTING_CLASS>::instance derived_setting;
 		std::unique_ptr<Setting> setting = static_cast<SETTINGS_MANAGER_CLASS&>(SETTINGS_MANAGER_CLASS::getManager()).getSetting(messager, settings, setting_enum);
 		try
 		{
@@ -107,7 +107,7 @@ public:
 			boost::format msg("Cannot convert to derived setting class: %1%");
 			msg % bc.what();
 			messager.AppendMessage(new MessagerErrorMessage(MESSAGER_MESSAGE__SETTING_NOT_FOUND, msg.str()));
-			return instance();
+			return typename SimpleAccessSetting_base<DERIVED_SETTING_CLASS>::instance();
 		}
 		return derived_setting;
 	}

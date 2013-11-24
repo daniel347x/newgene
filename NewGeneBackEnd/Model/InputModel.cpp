@@ -1,6 +1,6 @@
 #include "InputModel.h"
 #include "../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
-#include "Tables\Import\ImportDefinitions.h"
+#include "Tables/Import/ImportDefinitions.h"
 
 void InputModel::LoadTables()
 {

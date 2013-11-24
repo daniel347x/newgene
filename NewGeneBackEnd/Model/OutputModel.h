@@ -2,10 +2,10 @@
 #define OUTPUTMODEL_H
 
 #include "Model.h"
-#include "..\Settings\OutputModelSettings.h"
-#include "..\Settings\InputModelSettings.h"
+#include "../Settings/OutputModelSettings.h"
+#include "../Settings/InputModelSettings.h"
 #include "InputModel.h"
-#include "..\Settings\Setting.h"
+#include "../Settings/Setting.h"
 #include "Tables/TableManager.h"
 #include <memory>
 #include <tuple>
@@ -195,7 +195,7 @@ class ColumnsInTempView
 			, has_no_datetime_columns_originally(rhs.has_no_datetime_columns_originally)
 			, original_table_names(rhs.original_table_names)
 			, variable_group_codes(rhs.variable_group_codes)
-			, variable_group_longhand_names(variable_group_longhand_names)
+			, variable_group_longhand_names(rhs.variable_group_longhand_names)
 			, variable_groups(rhs.variable_groups)
 			, view_name(rhs.view_name)
 			, view_name_no_uuid(rhs.view_name_no_uuid)
@@ -786,7 +786,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 							{
 								break;
 							}
-							SavedRowData & first_incoming_row = std::move(incoming_rows_of_data.front());
+							SavedRowData & first_incoming_row = incoming_rows_of_data.front();
 							current_row_complete = ProcessCurrentDataRowOverlapWithPreviousSavedRow(first_incoming_row, current_row_of_data, intermediate_rows_of_data, xr_table_category);
 							if (failed)
 							{

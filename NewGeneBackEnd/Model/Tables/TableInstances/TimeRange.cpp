@@ -24,7 +24,7 @@ void Table_TIME_RANGE::Load(sqlite3 * db, OutputModel * output_model_, InputMode
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM TIMERANGE_SELECTED");	
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;
@@ -136,9 +136,13 @@ bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputMo
 						// Ditto above.
 					}
 					break;
+                    default:
+                        break;
 				}
 			}
 			break;
+            default:
+                break;
 		}
 	});
 
@@ -168,7 +172,7 @@ void Table_TIME_RANGE::Modify(sqlite3 * db)
 	sqlAdd += "=";
 	sqlAdd += boost::lexical_cast<std::string>(timerange_end_identifier.second);
 	sqlite3_stmt * stmt = NULL;
-	sqlite3_prepare_v2(db, sqlAdd.c_str(), sqlAdd.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sqlAdd.c_str(), static_cast<int>(sqlAdd.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;

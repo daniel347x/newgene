@@ -3,9 +3,9 @@
 
 #include <memory>
 #include "Project.h"
-#include "..\Settings\InputProjectSettings.h"
-#include "..\Settings\Setting.h"
-#include "..\Model\InputModel.h"
+#include "../Settings/InputProjectSettings.h"
+#include "../Settings/Setting.h"
+#include "../Model/InputModel.h"
 
 class InputProject : public Project<INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::INPUT_PROJECT_SETTINGS_BACKEND, BackendProjectInputSetting, INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS, InputModelSetting, InputModel>
 {

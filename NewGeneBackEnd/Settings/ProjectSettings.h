@@ -12,7 +12,7 @@ class ProjectSettings : public Settings<PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_S
 	public:
 
 		ProjectSettings(Messager & messager, boost::filesystem::path const project_settings_path)
-			: Settings(messager, project_settings_path)
+			: Settings<PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS>(messager, project_settings_path)
 		{
 
 		}

@@ -3,9 +3,9 @@
 
 #include <memory>
 #include "Project.h"
-#include "..\Settings\OutputProjectSettings.h"
-#include "..\Settings\Setting.h"
-#include "..\Model\OutputModel.h"
+#include "../Settings/OutputProjectSettings.h"
+#include "../Settings/Setting.h"
+#include "../Model/OutputModel.h"
 
 class OutputProject : public Project<OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::OUTPUT_PROJECT_SETTINGS_BACKEND, BackendProjectOutputSetting, OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS, OutputModelSetting, OutputModel>
 {
