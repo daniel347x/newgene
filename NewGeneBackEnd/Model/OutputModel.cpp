@@ -474,7 +474,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 			: child_variable_group_raw_data_columns.variable_groups[0].code ? *child_variable_group_raw_data_columns.variable_groups[0].code : std::string());
 		messager.AppendKadStatusText(msg_start.str(), this);
 
-		WidgetInstanceIdentifier const & dmu_category_multiplicity_greater_than_1_for_child = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].first;
+		//WidgetInstanceIdentifier const & dmu_category_multiplicity_greater_than_1_for_child = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].first;
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
 		for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
 		{
@@ -532,7 +532,9 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 				return;
 			}
 
-			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, child_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), current_multiplicity, child_set_number, merging_of_children_column_sets, true, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, true);
+            std::string sorting_rows_text("Sorting rows");
+            std::string removing_duplicates_text("Removing duplicates");
+			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, child_variable_group_raw_data_columns.variable_groups[0], sorting_rows_text, removing_duplicates_text, current_multiplicity, child_set_number, merging_of_children_column_sets, true, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, true);
 			if (failed || CheckCancelled())
 			{
 				return;
@@ -857,6 +859,8 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 					return;
 				}
 				break;
+            default:
+                break;
 		}
 
 		result_columns.columns_in_view.push_back(unformatted_column);
@@ -867,7 +871,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 		{
 			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(unformatted_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg, c, 10);
+			formatted_column.column_name_in_temporary_table += std::to_string(unformatted_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg);
 		}
 
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
@@ -969,6 +973,8 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 						return;
 					}
 					break;
+                default:
+                    break;
 			}
 		}
 
@@ -980,7 +986,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 		{
 			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(unformatted_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg, c, 10);
+			formatted_column.column_name_in_temporary_table += std::to_string(unformatted_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg);
 		}
 
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
@@ -997,6 +1003,8 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 					formatted_column.column_name_in_temporary_table = "DATETIME_END_OUTPUTROW";
 				}
 				break;
+            default:
+                break;
 		}
 
 		if (!first)
@@ -1073,7 +1081,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
 		{
 			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set, c, 10);
+			formatted_column.column_name_in_temporary_table += std::to_string(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
 		}
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
@@ -1115,7 +1123,7 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		if (variable_group_appears_more_than_once[unformatted_column.variable_group_associated_with_current_inner_table])
 		{
 			formatted_column.column_name_in_temporary_table += "_";
-			formatted_column.column_name_in_temporary_table += itoa(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set, c, 10);
+			formatted_column.column_name_in_temporary_table += std::to_string(formatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
 		}
 		formatted_column.column_name_in_temporary_table_no_uuid = formatted_column.column_name_in_temporary_table;
 
@@ -1275,7 +1283,9 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 				return;
 			}
 
-			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_final_result.second.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), -1, count, intermediate_merging_of_primary_groups_column_sets, true, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, true);
+            std::string sorting_rows_text("Sorting rows");
+            std::string removing_duplicates_text("Removing duplicates");
+			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_final_result.second.variable_groups[0], sorting_rows_text, removing_duplicates_text, -1, count, intermediate_merging_of_primary_groups_column_sets, true, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, true);
 
 			if (failed || CheckCancelled())
 			{
@@ -1300,8 +1310,6 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::MergeIndividualTopLevelGroupIntoPrevious(ColumnsInTempView const & primary_variable_group_final_result, OutputModel::OutputGenerator::SqlAndColumnSet & previous_merged_primary_variable_groups_table, int const count)
 {
 
-	char c[256];
-
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
@@ -1309,7 +1317,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	result_columns = previous_merged_primary_variable_groups_table.second;
 
 	std::string view_name = "NGTEMP_MF";
-	view_name += itoa(count, c, 10);
+	view_name += std::to_string(count);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
@@ -2319,8 +2327,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 	std::int64_t previous_count = ObtainCount(xr_table_result.second);
 
-	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = xr_table_result.second.columns_in_view.size(); // This class-global variable must be set
-	SqlAndColumnSet duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting results"), std::string("Removing duplicates"), 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP);
+	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = static_cast<int>(xr_table_result.second.columns_in_view.size()); // This class-global variable must be set
+    std::string sorting_results_text("Sorting results");
+    std::string removing_duplicates_text("Removing duplicates");
+	SqlAndColumnSet duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], sorting_results_text, removing_duplicates_text, 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP);
 
 	if (failed || CheckCancelled())
 	{
@@ -2437,7 +2447,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// The final result of this stage is the final result for this multiplicity, in unformatted form
 		// (i.e., with UUID's added to column names, and with extraneous columns present).
 		// ******************************************************************************************************************* //
-		duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], std::string("Sorting rows"), std::string("Removing duplicates"), current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
+        std::string sorting_rows_text("Sorting rows");
+        std::string removing_duplicates_text("Removing duplicates");
+		duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], sorting_rows_text, removing_duplicates_text, current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
 
 		if (failed || CheckCancelled())
 		{
@@ -2992,8 +3004,6 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RemoveDuplicates_Or_OrderWithinRows(ColumnsInTempView const & previous_result_columns, int const primary_group_number, std::int64_t & current_rows_added, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows)
 {
 
-	char c[256];
-
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
@@ -3025,19 +3035,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			}
 			break;
 	}
-	view_name += itoa(primary_group_number, c, 10);
+	view_name += std::to_string(primary_group_number);
 	result_columns.view_name_no_uuid = view_name;
 	if (current_multiplicity >= 0)
 	{
 		view_name += "_";
-		view_name += itoa(current_multiplicity, c, 10);
+		view_name += std::to_string(current_multiplicity);
 	}
 	view_name += "_";
 	view_name += newUUID(true);
 	if (current_multiplicity >= 0)
 	{
 		view_name += "_a";
-		view_name += itoa(primary_group_number, c, 10);
+		view_name += std::to_string(primary_group_number);
 	}
 	result_columns.view_name = view_name;
 	result_columns.view_number = 1;
@@ -3774,7 +3784,7 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 						inner_multiplicity_float_vector.push_back(current_row_of_data.current_parameter_floats[float_index_current]);
 					}
 
-			}
+                }
 				break;
 			case SQLExecutor::STRING:
 				{
@@ -3786,6 +3796,8 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 
 				}
 				break;
+            default:
+                break;
 			}
 		}
 
@@ -3806,6 +3818,8 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 					++string_index_current;
 				}
 				break;
+            default:
+                break;
 		}
 
 		if (current_row_of_data.is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_index])
@@ -3910,6 +3924,8 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 
 					}
 					break;
+                default:
+                    break;
 			}
 		}
 
@@ -3930,6 +3946,8 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 					++string_index_previous;
 				}
 				break;
+            default:
+                break;
 		}
 
 		if (previous_row_of_data.is_index_a_primary_key_with_outer_multiplicity_greater_than_1[previous_index])
@@ -4020,7 +4038,6 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 	bool one_multiplicity = false;
 	if (count_of_types == 0)
 	{
-		int m = 0;
 		one_multiplicity = true;
 	}
 
@@ -4834,6 +4851,8 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 
 							}
 							break;
+                        default:
+                            break;
 					}
 				}
 			}
@@ -5911,7 +5930,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 				first_column_value = false;
 
 				sql_add_xr_row += "?";
-				sql_add_xr_row += itoa(index, cindex, 10);
+				sql_add_xr_row += std::to_string(index);
 				++index;
 
 			});
@@ -5927,13 +5946,13 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 					}
 					first_column_value = false;
 					sql_add_xr_row += "?";
-					sql_add_xr_row += itoa(index, cindex, 10);
+					sql_add_xr_row += std::to_string(index);
 					++index;
 				}
 
 				sql_add_xr_row += ", ";
 				sql_add_xr_row += "?";
-				sql_add_xr_row += itoa(index, cindex, 10);
+				sql_add_xr_row += std::to_string(index);
 				++index;
 			}
 
@@ -5946,11 +5965,11 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 				}
 				first_column_value = false;
 				sql_add_xr_row += "?";
-				sql_add_xr_row += itoa(index, cindex, 10);
+				sql_add_xr_row += std::to_string(index);
 				++index;
 				sql_add_xr_row += ", ";
 				sql_add_xr_row += "?";
-				sql_add_xr_row += itoa(index, cindex, 10);
+				sql_add_xr_row += std::to_string(index);
 				++index;
 			}
 
@@ -6849,7 +6868,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns.view_number = 1;
 	result_columns.has_no_datetime_columns = false;
 	std::string view_name = "NGTEMP_V";
-	view_name += itoa(primary_group_number, c, 10);
+	view_name += std::to_string(primary_group_number);
 	view_name += "_x";
 	view_name += "1";
 	result_columns.view_name_no_uuid = view_name;
@@ -7308,7 +7327,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns = primary_variable_group_x1_columns;
 
 	std::string view_name = "NGTEMP_V";
-	view_name += itoa(primary_group_number, c, 10);
+	view_name += std::to_string(primary_group_number);
 	view_name += "_xr";
 	view_name += "1";
 	result_columns.view_name_no_uuid = view_name;
@@ -7676,7 +7695,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	std::string view_name = "NGTEMP_V";
 	view_name += itoa(primary_group_number, c, 10);
 	view_name += "_x";
-	view_name += itoa(current_multiplicity, c, 10);
+	view_name += std::to_string(current_multiplicity);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
@@ -8546,7 +8565,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 			first_column_value = false;
 
 			sql_add_xr_row += "?";
-			sql_add_xr_row += itoa(index, cindex, 10);
+			sql_add_xr_row += std::to_string(index);
 			++index;
 
 		});
@@ -8560,11 +8579,11 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 			}
 			first_column_value = false;
 			sql_add_xr_row += "?";
-			sql_add_xr_row += itoa(index, cindex, 10);
+			sql_add_xr_row += std::to_string(index);
 			++index;
 			sql_add_xr_row += ", ";
 			sql_add_xr_row += "?";
-			sql_add_xr_row += itoa(index, cindex, 10);
+			sql_add_xr_row += std::to_string(index);
 			++index;
 		}
 
@@ -9210,6 +9229,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 													}
 													break;
+                                                default:
+                                                    break;
 
 											}
 										}
@@ -9330,6 +9351,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 													}
 													break;
+                                                default:
+                                                    break;
 
 											}
 										}
@@ -9375,10 +9398,14 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 													}
 													break;
+                                                default:
+                                                    break;
 
 											}
 										}
 										break;
+                                    default:
+                                        break;
 								}
 
 								++testing_index;
@@ -11290,7 +11317,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 	columns_in_variable_group_view.variable_groups.push_back(the_variable_group.first);
 
 	WidgetInstanceIdentifiers & variables_in_group = input_model->t_vgp_setmembers.getIdentifiers(*the_variable_group.first.uuid);
-	WidgetInstanceIdentifiers & variables_in_group_primary_keys_metadata = input_model->t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
+	WidgetInstanceIdentifiers variables_in_group_primary_keys_metadata = input_model->t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
 
 	std::set<WidgetInstanceIdentifier> variables_in_group_sorted;
 	std::for_each(variables_in_group.cbegin(), variables_in_group.cend(), [&variables_in_group_sorted](WidgetInstanceIdentifier const & variable_group_set_member)
@@ -11298,7 +11325,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 		variables_in_group_sorted.insert(variable_group_set_member);
 	});
 
-	WidgetInstanceIdentifiers & datetime_columns = input_model->t_vgp_data_metadata__datetime_columns.getIdentifiers(vg_data_table_name);
+	WidgetInstanceIdentifiers datetime_columns = input_model->t_vgp_data_metadata__datetime_columns.getIdentifiers(vg_data_table_name);
 	if (datetime_columns.size() > 0 && datetime_columns.size() != 2)
 	{
 		boost::format msg("The number of datetime columns in the raw data tables in the database is not either 0 or 2 (table %1%)");

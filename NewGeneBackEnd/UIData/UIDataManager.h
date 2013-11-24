@@ -2,7 +2,7 @@
 #define UIDATAMANAGER_H
 
 #include "../globals.h"
-#include "..\Manager.h"
+#include "../Manager.h"
 #include "../Messager/Messager.h"
 
 class InputProject;
