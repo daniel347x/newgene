@@ -550,7 +550,7 @@ public:
 	{
 		try
 		{
-			WidgetDataItemRequest_GENERATE_OUTPUT_TAB const & date_time_request = dynamic_cast<WidgetDataItemRequest_GENERATE_OUTPUT_TAB const &>(request_obj);
+			//WidgetDataItemRequest_GENERATE_OUTPUT_TAB const & date_time_request = dynamic_cast<WidgetDataItemRequest_GENERATE_OUTPUT_TAB const &>(request_obj);
 		}
 		catch (std::bad_cast &)
 		{
