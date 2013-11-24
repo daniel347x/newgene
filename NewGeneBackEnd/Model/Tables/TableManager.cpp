@@ -13,7 +13,7 @@ bool TableManager::TableExists(sqlite3 * db, std::string table_name)
 		sql_exists += "';";
 
 		sqlite3_stmt * stmt = NULL;
-		sqlite3_prepare_v2(db, sql_exists.c_str(), sql_exists.size() + 1, &stmt, NULL);
+		sqlite3_prepare_v2(db, sql_exists.c_str(), static_cast<int>(sql_exists.size()) + 1, &stmt, NULL);
 		if (stmt == NULL)
 		{
 			return false;

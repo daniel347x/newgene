@@ -1,5 +1,5 @@
 #include "VariableGroupData.h"
-#include "..\TableManager.h"
+#include "../TableManager.h"
 #include "../../InputModel.h"
 
 #ifndef Q_MOC_RUN
@@ -95,13 +95,18 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, std::string code, Import
 						sql_create += "REAL";
 					}
 					break;
+                default:
+                    {
+                        sql_create += "TEXT";
+                    }
+                    break;
 				}
 			});
 
 			sql_create += ")";
 
 			sqlite3_stmt * stmt = NULL;
-			sqlite3_prepare_v2(db, sql_create.c_str(), sql_create.size() + 1, &stmt, NULL);
+			sqlite3_prepare_v2(db, sql_create.c_str(), static_cast<int>(sql_create.size()) + 1, &stmt, NULL);
 			if (stmt == NULL)
 			{
 				return false;
@@ -302,6 +307,8 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 					sql_insert += '\'';
 				}
 				break;
+            default:
+                break;
 			}
 		});
 
@@ -364,45 +371,40 @@ std::string Table_VariableGroupData::TableNameFromVGCode(std::string variable_gr
 
 std::string Table_VariableGroupData::ViewNameFromCountTemp(int const view_number, int const multiplicity_number)
 {
-	char vns[1024];
 	std::string view_name("vtmp");
-	view_name += itoa(view_number, vns, 10);
+	view_name += std::to_string(view_number);
 	view_name += "_";
-	view_name += itoa(multiplicity_number, vns, 10);
+	view_name += std::to_string(multiplicity_number);
 	return view_name;
 }
 
 std::string Table_VariableGroupData::ViewNameFromCountTempTimeRanged(int const view_number, int const multiplicity_number)
 {
-	char vns[1024];
 	std::string view_name("vtmp_TR");
-	view_name += itoa(view_number, vns, 10);
+	view_name += std::to_string(view_number);
 	view_name += "_";
-	view_name += itoa(multiplicity_number, vns, 10);
+	view_name += std::to_string(multiplicity_number);
 	return view_name;
 }
 
 std::string Table_VariableGroupData::ViewNameFromCount(int const view_number)
 {
-	char vns[1024];
 	std::string view_name("v");
-	view_name += itoa(view_number, vns, 10);
-	return view_name;
+	view_name += std::to_string(view_number);
+	return view_name;
 }
 
 std::string Table_VariableGroupData::JoinViewNameFromCount(int const join_number)
 {
-	char vns[1024];
 	std::string join_view_name("j");
-	join_view_name += itoa(join_number, vns, 10);
+	join_view_name += std::to_string(join_number);
 	return join_view_name;
 }
 
 std::string Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(int const join_number)
 {
-	char vns[1024];
 	std::string join_view_name("jt");
-	join_view_name += itoa(join_number, vns, 10);
+	join_view_name += std::to_string(join_number);
 	return join_view_name;
 }
 

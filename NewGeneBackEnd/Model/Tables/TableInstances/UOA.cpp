@@ -28,7 +28,7 @@ void Table_UOA_Identifier::Load(sqlite3 * db, InputModel * input_model_)
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM UOA_CATEGORY");	
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;
@@ -67,7 +67,7 @@ void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM UOA_CATEGORY_LOOKUP");
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;
@@ -77,7 +77,7 @@ void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		char const * uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_LOOKUP_FK_UOA_CATEGORY_UUID));
-		int const sequence_number = reinterpret_cast<int>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_LOOKUP_SEQUENCE_NUMBER));
+		int const sequence_number = sqlite3_column_int(stmt, INDEX__UOA_CATEGORY_LOOKUP_SEQUENCE_NUMBER);
 		char const * dmu_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_LOOKUP_FK_DMU_CATEGORY_UUID));
 		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ dmu_uuid /* && strlen(dmu_uuid) == UUID_LENGTH */ )
 		{
