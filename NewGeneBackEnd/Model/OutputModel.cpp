@@ -4052,11 +4052,11 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 	saved_ints_deque.insert(saved_ints_deque.begin(), saved_ints_vector.begin(), saved_ints_vector.end());
 	saved_floats_deque.insert(saved_floats_deque.begin(), saved_floats_vector.begin(), saved_floats_vector.end());
 
-	int most_recent_current_offset = -1;
-	int most_recent_previous_offset = -1;
+	//int most_recent_current_offset = -1;
+	//int most_recent_previous_offset = -1;
 
-	int current__current_inner_table = -1;
-	int previous__current_inner_table = -1;
+	//int current__current_inner_table = -1;
+	//int previous__current_inner_table = -1;
 
 	int current_row_inner_table_data_to_use = -1;
 	int previous_row_inner_table_data_to_use = -1;
@@ -4065,7 +4065,7 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 	for(std::vector<SQLExecutor::WHICH_BINDING>::const_iterator it = current_row_of_data.current_parameter_which_binding_to_use.cbegin(); it != current_row_of_data.current_parameter_which_binding_to_use.cend(); ++it)
 	{
 
-		SQLExecutor::WHICH_BINDING const & current_binding = *it;
+		//SQLExecutor::WHICH_BINDING const & current_binding = *it;
 
 		if (failed || CheckCancelled())
 		{
@@ -4683,6 +4683,8 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 
 							}
 							break;
+                        default:
+                            break;
 					}
 				}
 				else
@@ -4877,6 +4879,8 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 					++string_index_current;
 				}
 				break;
+            default:
+                break;
 		}
 
 		switch (previous_row_binding)
@@ -4896,6 +4900,8 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 					++string_index_previous;
 				}
 				break;
+            default:
+                break;
 		}
 
 		if (current_row_of_data.is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_index])
@@ -5018,6 +5024,8 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 								// NULLs match against non-NULLs
 							}
 							break;
+                        default:
+                            break;
 					}
 
 				}
@@ -5062,6 +5070,8 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 								// NULLs match against non-NULLs
 							}
 							break;
+                        default:
+                            break;
 					}
 
 				}
@@ -5106,6 +5116,8 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 								// NULLs match against non-NULLs
 							}
 							break;
+                        default:
+                            break;
 					}
 
 				}
@@ -5138,10 +5150,14 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 								// NULLs match against NULLs
 							}
 							break;
+                        default:
+                            break;
 					}
 
 				}
 				break;
+            default:
+                break;
 
 		}
 
@@ -5193,7 +5209,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			std::int64_t data_int = 0;
 			long double data_float = 0.0;
 			std::string data_string;
-			bool data_null = false;
+			//bool data_null = false;
 
 			switch (binding)
 			{
@@ -5228,6 +5244,8 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 						}
 					}
 					break;
+                default:
+                    break;
 
 			}
 
@@ -5367,7 +5385,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			std::int64_t data_int = 0;
 			long double data_float = 0.0;
 			std::string data_string;
-			bool data_null = false;
+			//bool data_null = false;
 
 			switch (binding)
 			{
@@ -5402,6 +5420,8 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 						}
 					}
 					break;
+                default:
+                    break;
 
 			}
 
@@ -6155,8 +6175,6 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateSortedTable(ColumnsInTempView const & final_xr_or_xrmfxr_columns, int const primary_group_number, int const current_multiplicity, XR_TABLE_CATEGORY const xr_table_category)
 {
 
-	char c[256];
-
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
@@ -6188,11 +6206,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 			break;
 	}
-	view_name += itoa(primary_group_number, c, 10);
+	view_name += std::to_string(primary_group_number);
 	if (current_multiplicity >= 0)
 	{
 		view_name += "_";
-		view_name += itoa(current_multiplicity, c, 10);
+		view_name += std::to_string(current_multiplicity);
 	}
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
@@ -6283,7 +6301,7 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_s
 	{
 		debug_sql_file << sql << std::endl << std::endl;
 	}
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt_result, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt_result, NULL);
 	if (stmt_result == NULL)
 	{
 		sql_error = sqlite3_errmsg(db);
@@ -6319,7 +6337,7 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 	sql += "SELECT COUNT (*) FROM ";
 	sql += column_set.view_name;
 
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt_result, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt_result, NULL);
 	if (stmt_result == NULL)
 	{
 		sql_error = sqlite3_errmsg(db);
@@ -6629,7 +6647,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 					{
 						generator->debug_sql_file << sql << std::endl << std::endl;
 					}
-					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+					sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 					if (stmt == NULL)
 					{
 						sql_error = sqlite3_errmsg(db);
@@ -6655,7 +6673,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 					{
 						generator->debug_sql_file << sql << std::endl << std::endl;
 					}
-					sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+					sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 					if (stmt == NULL)
 					{
 						sql_error = sqlite3_errmsg(db);
@@ -6671,6 +6689,8 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute()
 
 			}
 			break;
+        default:
+            break;
 
 	}
 
@@ -6689,7 +6709,7 @@ void OutputModel::OutputGenerator::SQLExecutor::Execute(bool statement_is_owned_
 	{
 		if (!(*statement_is_prepared_))
 		{
-			sqlite3_prepare_v2(db_, sql_.c_str(), sql_.size() + 1, &stmt_to_use, NULL);
+			sqlite3_prepare_v2(db_, sql_.c_str(), static_cast<int>(sql_.size()) + 1, &stmt_to_use, NULL);
 			if (stmt_to_use == NULL)
 			{
 				//sql_error = sqlite3_errmsg(db);
@@ -6739,7 +6759,7 @@ void OutputModel::OutputGenerator::SQLExecutor::DoExecute(sqlite3 * db, OutputMo
 			case STRING:
 				{
 					std::string const & the_string = bound_parameter_strings[current_string_index];
-					sqlite3_bind_text(stmt, current_index, the_string.c_str(), the_string.size(), SQLITE_STATIC);
+					sqlite3_bind_text(stmt, current_index, the_string.c_str(), static_cast<int>(the_string.size()), SQLITE_STATIC);
 					++current_string_index;
 					++current_index;
 				}
@@ -6769,6 +6789,8 @@ void OutputModel::OutputGenerator::SQLExecutor::DoExecute(sqlite3 * db, OutputMo
 					++current_index;
 				}
 				break;
+                default:
+                    break;
 
 			}
 		});
@@ -6811,6 +6833,9 @@ void OutputModel::OutputGenerator::SQLExecutor::DoExecute(sqlite3 * db, OutputMo
 
 		}
 		break;
+            
+        default:
+            break;
 
 	}
 
@@ -6857,7 +6882,6 @@ bool OutputModel::OutputGenerator::SQLExecutor::Step()
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXTable_OrCount(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number, bool const count_only)
 {
-	char c[256];
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
@@ -7318,8 +7342,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number)
 {
 
-	char c[256];
-
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
@@ -7684,8 +7706,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreatePrimaryXTable(ColumnsInTempView const & primary_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_multiplicity, int const primary_group_number)
 {
 
-	char c[256];
-
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
@@ -7693,7 +7713,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns = previous_xr_columns;
 
 	std::string view_name = "NGTEMP_V";
-	view_name += itoa(primary_group_number, c, 10);
+	view_name += std::to_string(primary_group_number);
 	view_name += "_x";
 	view_name += std::to_string(current_multiplicity);
 	result_columns.view_name_no_uuid = view_name;
@@ -9290,6 +9310,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 													}
 													break;
+                                                default:
+                                                    break;
 
 											}
 										}
@@ -9522,6 +9544,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 									bound_parameter_which_binding_to_use.push_back(OutputModel::OutputGenerator::SQLExecutor::NULL_BINDING);
 								}
 								break;
+                            default:
+                                break;
 						}
 					}
 					++the_index;
@@ -9538,7 +9562,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 					{
 						// Must add the datetime columns...
 						// Just push the previous values from the current last two columns into the new columns.
-						int number_to_add = number_columns_first_sets - columns_in_single_inner_table.bindings.size();
+						int number_to_add = number_columns_first_sets - static_cast<int>(columns_in_single_inner_table.bindings.size());
 						for (int n=0; n<number_to_add; ++n)
 						{
 							bound_parameter_ints.push_back(0);
@@ -9570,7 +9594,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 						// Note that the saved current columns are already in place.
 
-						int number_to_remove = columns_in_single_inner_table.bindings.size() - number_columns_last_set;
+						int number_to_remove = static_cast<int>(columns_in_single_inner_table.bindings.size()) - number_columns_last_set;
 						for (int n=0; n<number_to_remove; ++n)
 						{
 							OutputModel::OutputGenerator::SQLExecutor::WHICH_BINDING binding = bound_parameter_which_binding_to_use.back();
@@ -9596,6 +9620,8 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 									{
 									}
 									break;
+                                default:
+                                    break;
 							}
 						}
 
@@ -9628,8 +9654,6 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateChildXTable(ColumnsInTempView const & child_variable_group_raw_data_columns, ColumnsInTempView const & previous_xr_columns, int const current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group, int const primary_group_number, int const child_set_number, int const current_child_view_name_index)
 {
 
-	char c[256];
-
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
@@ -9637,9 +9661,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns = previous_xr_columns;
 
 	std::string view_name = "NGTEMP_CV";
-	view_name += itoa(primary_group_number, c, 10);
+	view_name += std::to_string(primary_group_number);
 	view_name += "_x";
-	view_name += itoa(current_child_view_name_index, c, 10);
+	view_name += std::to_string(current_child_view_name_index);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
@@ -10430,8 +10454,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	std::int64_t number_of_rows_to_sort = ObtainCount(previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another);
 	current_number_rows_to_sort = number_of_rows_to_sort;
 
-	char c[256];
-
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
@@ -10457,10 +10479,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				view_name += "NGTEMP_MF";
 			}
 			break;
+        default:
+            break;
 	}
-	view_name += itoa(primary_group_number, c, 10);
+	view_name += std::to_string(primary_group_number);
 	view_name += "_xr";
-	view_name += itoa(current_view_name_index, c, 10);
+	view_name += std::to_string(current_view_name_index);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
@@ -10550,6 +10574,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				datetime_start_col_name_no_uuid += "DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS";
 			}
 			break;
+        default:
+            break;
 	}
 	std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
 	datetime_start_col_name += "_";
@@ -10596,6 +10622,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS;
 			}
 			break;
+        default:
+            break;
 	}
 	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
@@ -10618,6 +10646,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			}
 			break;
+        default:
+            break;
 	}
 
 	std::string datetime_end_col_name_no_uuid;
@@ -10638,6 +10668,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				datetime_end_col_name_no_uuid += "DATETIMEEND__TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS";
 			}
 			break;
+        default:
+            break;
 	}
 	std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
 	datetime_end_col_name += "_";
@@ -10690,6 +10722,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
 			}
 			break;
+        default:
+            break;
 	}
 	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
@@ -10712,6 +10746,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			}
 			break;
+        default:
+            break;
 	}
 
 
@@ -11316,7 +11352,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 	columns_in_variable_group_view.variable_group_longhand_names.push_back(*the_variable_group.first.longhand);
 	columns_in_variable_group_view.variable_groups.push_back(the_variable_group.first);
 
-	WidgetInstanceIdentifiers & variables_in_group = input_model->t_vgp_setmembers.getIdentifiers(*the_variable_group.first.uuid);
+	WidgetInstanceIdentifiers variables_in_group = input_model->t_vgp_setmembers.getIdentifiers(*the_variable_group.first.uuid);
 	WidgetInstanceIdentifiers variables_in_group_primary_keys_metadata = input_model->t_vgp_data_metadata__primary_keys.getIdentifiers(vg_data_table_name);
 
 	std::set<WidgetInstanceIdentifier> variables_in_group_sorted;
@@ -12279,15 +12315,13 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								// We are currently iterating through primary variable groups, so this is easy
 								current_variable_group_current_primary_key_info.total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group = k_count_for_primary_uoa_for_given_dmu_category;
 
-								char ns__[256];
-
 								std::string this_variable_group__this_primary_key__unique_name;
 								this_variable_group__this_primary_key__unique_name += *current_variable_group__current_dmu_primary_key_instance.longhand;
 								current_variable_group_current_primary_key_info.column_name_no_uuid = this_variable_group__this_primary_key__unique_name;
 								if (outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa > 1)
 								{
 									this_variable_group__this_primary_key__unique_name += "_";
-									this_variable_group__this_primary_key__unique_name += itoa(m+1, ns__, 10);
+									this_variable_group__this_primary_key__unique_name += std::to_string(m+1);
 								}
 								this_variable_group__this_primary_key__unique_name += "_";
 								this_variable_group__this_primary_key__unique_name += newUUID(true);
@@ -12491,15 +12525,13 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								current_variable_group_current_primary_key_info.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category = k_count_for_primary_uoa_for_given_dmu_category;
 								current_variable_group_current_primary_key_info.total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group = total_number_columns_in_given_dmu_category_for_uoa_corresponding_to_current_variable_group;
 
-								char ns__[256];
-
 								std::string this_variable_group__this_primary_key__unique_name;
 								this_variable_group__this_primary_key__unique_name += *current_variable_group_current_dmu_primary_key.longhand;
 								current_variable_group_current_primary_key_info.column_name_no_uuid = this_variable_group__this_primary_key__unique_name;
 								if (outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa > 1)
 								{
 									this_variable_group__this_primary_key__unique_name += "_";
-									this_variable_group__this_primary_key__unique_name += itoa(m+1, ns__, 10);
+									this_variable_group__this_primary_key__unique_name += std::to_string(m+1);
 								}
 								this_variable_group__this_primary_key__unique_name += "_";
 								this_variable_group__this_primary_key__unique_name += newUUID(true);
@@ -12628,6 +12660,8 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 
 				}
 				break;
+            default:
+                break;
 		}
 		switch (lhs_binding.first)
 		{
@@ -12697,6 +12731,8 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 								is_less_than = true;
 							}
 							break;
+                        default:
+                            break;
 					}
 				}
 				break;
@@ -12766,6 +12802,8 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 							is_less_than = true;
 						}
 						break;
+                        default:
+                            break;
 					}
 				}
 				break;
@@ -12835,6 +12873,8 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 								is_less_than = true;
 							}
 							break;
+                        default:
+                            break;
 					}
 				}
 				break;
@@ -12868,9 +12908,13 @@ bool OutputModel::OutputGenerator::ColumnSorter::operator<(OutputModel::OutputGe
 								is_less_than = false;
 							}
 							break;
+                        default:
+                            break;
 					}
 				}
 				break;
+            default:
+                break;
 		}
 		++index;
 	});
@@ -12922,6 +12966,8 @@ bool OutputModel::OutputGenerator::SavedRowData::TestLessEqual(SavedRowData cons
 					return true;
 				}
 				break;
+            default:
+                break;
 		}
 
 		++column_index;
@@ -12981,6 +13027,8 @@ bool OutputModel::OutputGenerator::SavedRowData::TestLessEqual(SavedRowData cons
 							return true;
 						}
 						break;
+                    default:
+                        break;
 				}
 
 				++rhs_column_index;
@@ -13302,6 +13350,8 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 							}
 							break;
+                        default:
+                            break;
 
 					}
 
@@ -13374,6 +13424,8 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 							}
 							break;
+                        default:
+                            break;
 
 					}
 
@@ -13446,11 +13498,15 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 							}
 							break;
+                        default:
+                            break;
 
 					}
 
 				}
 				break;
+            default:
+                break;
 
 		}
 
@@ -13666,6 +13722,8 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 								}
 								break;
+                            default:
+                                break;
 
 						}
 
@@ -13738,6 +13796,8 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 							}
 							break;
+                            default:
+                                break;
 
 						}
 
@@ -13810,11 +13870,15 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 
 								}
 								break;
+                            default:
+                                break;
 
 						}
 
 					}
 					break;
+                default:
+                    break;
 
 			}
 
@@ -13899,7 +13963,7 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 
 	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = nullptr;
 
-	std::unique_ptr<BackendProjectOutputSetting> & path_to_kad_output = project.projectSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
+	std::unique_ptr<BackendProjectOutputSetting> path_to_kad_output = project.projectSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
 	bool bad = false;
 	try
 	{
@@ -14121,8 +14185,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	UpdateProgressBarToNextStage(msg.str(), std::string());
 	messager.SetPerformanceLabel("Randomizing...");
 
-	char c[256];
-
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
@@ -14130,11 +14192,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	result_columns = columns;
 	result_columns.most_recent_sql_statement_executed__index = -1;
 	std::string view_name = "NGTEMP_RAND";
-	view_name += itoa(primary_group_number, c, 10);
+	view_name += std::to_string(primary_group_number);
 	if (current_multiplicity >= 0)
 	{
 		view_name += "_";
-		view_name += itoa(current_multiplicity, c, 10);
+		view_name += std::to_string(current_multiplicity);
 	}
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
@@ -14197,7 +14259,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateKadResultSet(ColumnsInTempView const & column_set)
 {
 
-	std::int64_t rows_added = 0;
+	//std::int64_t rows_added = 0;
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
@@ -14405,9 +14467,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	}
 
 
-	int const minimum_desired_rows_per_transaction = 1024 * 16;
+	//int const minimum_desired_rows_per_transaction = 1024 * 16;
 	std::int64_t current_rows_added = 0;
-	std::int64_t current_rows_stepped = 0;
+	//std::int64_t current_rows_stepped = 0;
 	std::int64_t current_rows_added_since_execution = 0;
 	std::string sql_add_xr_row;
 	bool first_row_added = true;
@@ -14453,10 +14515,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		SavedRowData sorting_row_of_data;
 		std::deque<SavedRowData> ordering_within_rows_data;
 
-		bool start_fresh = true;
+		//bool start_fresh = true;
 
-		int which_previous_row_index_to_test_against = 0;
-		bool use_newest_row_index = false;
+		//int which_previous_row_index_to_test_against = 0;
+		//bool use_newest_row_index = false;
 
 		std::deque<OutputModel::OutputGenerator::SavedRowData> one_row;
 		while (StepData())
@@ -14560,6 +14622,8 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityOnes(ColumnsInTempView
 				{
 				}
 				break;
+                default:
+                    break;
 			}
 
 			if (view_column_nested.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
@@ -14734,7 +14798,7 @@ void OutputModel::OutputGenerator::PopulateSplitRowInfo_FromCurrentMergingColumn
 		current_is_0 = true;
 	}
 
-	bool added = false;
+	//bool added = false;
 
 	bool include_current_data = false;
 	bool include_previous_data = false;
@@ -15298,7 +15362,7 @@ void OutputModel::OutputGenerator::Process_RowsToCheckForDuplicates_ThatMatchOnA
 				return;
 			}
 
-			bool added = false;
+			//bool added = false;
 			datetime_range_start = std::get<2>(row_insert_info).first;
 			datetime_range_end = std::get<2>(row_insert_info).second;
 			include_current_data = std::get<0>(row_insert_info);
@@ -15859,6 +15923,8 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 				new_indices.push_back(std::make_pair(binding, std::make_pair(0, column_index)));
 			}
 			break;
+            default:
+                break;
 		}
 		++column_index;
 	});
@@ -15983,6 +16049,8 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 
 					}
 					break;
+                default:
+                    break;
 			}
 		}
 
@@ -15991,7 +16059,7 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_int_binding_to_add = std::make_pair(binding.first, std::make_pair(current_int_index_new, column_index));
 		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_float_binding_to_add = std::make_pair(binding.first, std::make_pair(current_float_index_new, column_index));
 		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_string_binding_to_add = std::make_pair(binding.first, std::make_pair(current_string_index_new, column_index));
-		std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_null_binding_to_add = std::make_pair(binding.first, std::make_pair(0, column_index));
+		//std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> current_null_binding_to_add = std::make_pair(binding.first, std::make_pair(0, column_index));
 
 		AddBinding(is_index_in_final_inner_table, indices_of_all_columns_in_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_float_binding_to_add, current_string_binding_to_add);
 		AddBinding(is_index_in_all_but_final_inner_table, indices_of_all_columns_in_all_but_final_inner_table, binding.first, column_index, current_int_binding_to_add, current_float_binding_to_add, current_string_binding_to_add);
@@ -16023,6 +16091,8 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 
 				}
 				break;
+            default:
+                break;
 		}
 
 		switch (binding.first)
@@ -16047,6 +16117,8 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 
 				}
 				break;
+            default:
+                break;
 		}
 
 		++column_index;
@@ -16079,6 +16151,8 @@ void OutputModel::OutputGenerator::SavedRowData::AddBinding(std::vector<bool> co
 					bindings.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, binding_index)));
 				}
 				break;
+            default:
+                break;
 			}
 	}
 }
@@ -16115,6 +16189,8 @@ void OutputModel::OutputGenerator::SavedRowData::SetFinalInnerTableToNull(bool c
 				{
 					current_parameter_strings.pop_back();
 				}
+            default:
+                break;
 			}
 			current_parameter_which_binding_to_use[column_index] = SQLExecutor::NULL_BINDING;
 			indices_of_all_columns_in_final_inner_table[final_inner_table_column_index].first = SQLExecutor::NULL_BINDING;
@@ -17239,6 +17315,8 @@ void OutputModel::OutputGenerator::FindDatetimeIndices(ColumnsInTempView const &
 						}
 					}
 					break;
+                default:
+                    break;
 			}
 		}
 
@@ -17324,6 +17402,8 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 
 								}
 								break;
+                            default:
+                                break;
 
 						}
 
@@ -17383,6 +17463,8 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 
 								}
 								break;
+                            default:
+                                break;
 
 						}
 
@@ -17442,6 +17524,8 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 
 								}
 								break;
+                            default:
+                                break;
 
 						}
 
@@ -17488,11 +17572,15 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 
 								}
 								break;
+                            default:
+                                break;
 
 						}
 
 					}
 					break;
+                default:
+                    break;
 
 			}
 
