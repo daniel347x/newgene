@@ -41,7 +41,7 @@ struct FieldTypeTraits
 	static type const default_;
 };
 template<FIELD_TYPE THE_FIELD_TYPE>
-typename FieldTypeTraits<THE_FIELD_TYPE>::type FieldTypeTraits<THE_FIELD_TYPE>::default_ = nullptr;
+typename FieldTypeTraits<THE_FIELD_TYPE>::type const FieldTypeTraits<THE_FIELD_TYPE>::default_ = nullptr;
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_INT32>
