@@ -224,7 +224,6 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/Messager/uimessagersingleshot.h \
 	Infrastructure/Model/Base/modelworkqueue.h \
 	Infrastructure/UIAction/uiaction.h \
-	Infrastructure/UIAction/uiuiactionmanager.h \
 	Infrastructure/UIAction/variablegroupsetmemberselectionchange.h \
 	Widgets/CreateOutput/SelectVariables/KadWidget/kadwidgetsscrollarea.h \
 	Widgets/CreateOutput/SelectVariables/KadWidget/kadspinbox.h \
