@@ -4,7 +4,7 @@
 #include "../globals.h"
 #include "../Manager.h"
 #ifndef Q_MOC_RUN
-#   include <boost\filesystem.hpp>
+#   include <boost/filesystem.hpp>
 #   include <boost/property_tree/ptree.hpp>
 #   include <boost/property_tree/xml_parser.hpp>
 #endif

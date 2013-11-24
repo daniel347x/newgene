@@ -1,8 +1,8 @@
 #ifndef MODELMANAGER_H
 #define MODELMANAGER_H
 
-#include "..\Manager.h"
-#include "Tables\TableManager.h"
+#include "../Manager.h"
+#include "Tables/TableManager.h"
 
 class ModelManager : public Manager<ModelManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_MODEL>
 {

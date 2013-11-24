@@ -1,8 +1,8 @@
 #ifndef IMPORT_H
 #define IMPORT_H
 
-#include "..\Fields.h"
-#include "..\Schema.h"
+#include "../Fields.h"
+#include "../Schema.h"
 #include <vector>
 #include <memory>
 

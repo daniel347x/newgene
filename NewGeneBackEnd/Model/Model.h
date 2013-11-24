@@ -5,7 +5,7 @@
 #	include <boost/filesystem.hpp>
 #	include <boost/format.hpp>
 #endif
-#include "..\Messager\Messager.h"
+#include "../Messager/Messager.h"
 #ifndef Q_MOC_RUN
 #	include <boost/property_tree/ptree.hpp>
 #	include <boost/property_tree/xml_parser.hpp>
