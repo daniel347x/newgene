@@ -105,6 +105,8 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 
 		}
 		break;
+        default:
+            break;
 	}
 
 }

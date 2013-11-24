@@ -89,6 +89,8 @@ void UIActionManager::DoKAdCountChange(Messager & messager, WidgetActionItemRequ
 
 		}
 		break;
+        default:
+            break;
 	}
 
 }

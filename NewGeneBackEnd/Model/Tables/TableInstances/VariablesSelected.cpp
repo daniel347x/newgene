@@ -20,7 +20,7 @@ void Table_VARIABLES_SELECTED::Load(sqlite3 * db, OutputModel * output_model_, I
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM VG_SET_MEMBERS_SELECTED");	
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;
@@ -119,7 +119,7 @@ bool Table_VARIABLES_SELECTED::Update(sqlite3 * db, OutputModel & output_model_,
 							{
 								// selections exist in this variable group category
 								WidgetInstanceIdentifiers & current_identifiers = this->identifiers_map[*change.parent_identifier.uuid];
-								int number_variables = current_identifiers.size();
+								int number_variables = static_cast<int>(current_identifiers.size());
 								bool found = false;
 								for (int n=0; n < number_variables; ++n)
 								{
@@ -171,9 +171,13 @@ bool Table_VARIABLES_SELECTED::Update(sqlite3 * db, OutputModel & output_model_,
 						// Ditto above.
 					}
 					break;
+                    default:
+                        break;
 				}
 			}
 			break;
+            default:
+                break;
 		}
 	});
 
@@ -195,7 +199,7 @@ void Table_VARIABLES_SELECTED::Add(sqlite3 * db, std::string const & vg_set_memb
 	sqlAdd += vg_category_code;
 	sqlAdd += "')";
 	sqlite3_stmt * stmt = NULL;
-	sqlite3_prepare_v2(db, sqlAdd.c_str(), sqlAdd.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sqlAdd.c_str(), static_cast<int>(sqlAdd.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;
@@ -220,7 +224,7 @@ void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_m
 	sqlRemove += vg_category_code;
 	sqlRemove += "'";
 	sqlite3_stmt * stmt = NULL;
-	sqlite3_prepare_v2(db, sqlRemove.c_str(), sqlRemove.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sqlRemove.c_str(), static_cast<int>(sqlRemove.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;

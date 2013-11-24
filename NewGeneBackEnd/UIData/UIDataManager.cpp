@@ -167,7 +167,7 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 /************************************************************************/
 void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_GENERATE_OUTPUT_TAB const & widget_request, OutputProject & project)
 {
-	OutputModel & output_model = project.model();
+	//OutputModel & output_model = project.model();
 	WidgetDataItem_GENERATE_OUTPUT_TAB generate_output_tab_data(widget_request);
 	WidgetInstanceIdentifier_Int64_Pair timerange_start_identifier;
 	messager.EmitOutputWidgetDataRefresh(generate_output_tab_data);

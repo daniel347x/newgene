@@ -93,6 +93,8 @@ void UIActionManager::DoTimeRangeChange(Messager & messager, WidgetActionItemReq
 
 		}
 		break;
+        default:
+            break;
 	}
 
 }

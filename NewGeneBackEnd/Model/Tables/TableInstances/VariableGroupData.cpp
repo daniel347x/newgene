@@ -327,7 +327,7 @@ bool Table_VariableGroupData::ImportBlock(sqlite3 * db, ImportDefinition const &
 	}
 
 	sqlite3_stmt * stmt = NULL;
-	sqlite3_prepare_v2(db, sql_insert.c_str(), sql_insert.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql_insert.c_str(), static_cast<int>(sql_insert.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		// TODO: Log error
@@ -391,7 +391,7 @@ std::string Table_VariableGroupData::ViewNameFromCount(int const view_number)
 {
 	std::string view_name("v");
 	view_name += std::to_string(view_number);
-	return view_name;
+	return view_name;
 }
 
 std::string Table_VariableGroupData::JoinViewNameFromCount(int const join_number)
@@ -417,7 +417,7 @@ void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * in
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM VG_DATA_METADATA__PRIMARY_KEYS");
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;
@@ -464,7 +464,7 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM VG_DATA_METADATA__DATETIME_COLUMNS");
-	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
 		return;

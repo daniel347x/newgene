@@ -1,5 +1,5 @@
 #include "SettingsManager.h"
-#include "..\Project\Project.h"
+#include "../Project/Project.h"
 
 std::unique_ptr<BackendGlobalSetting> SettingsManager::getSetting(Messager & messager, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting)
 {

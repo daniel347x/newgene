@@ -5,7 +5,7 @@
 #endif
 
 std::recursive_mutex UIActionManager::is_busy_mutex;
-std::atomic<bool> UIActionManager::is_busy = false;
+std::atomic<bool> UIActionManager::is_busy(false);
 
 bool UIActionManager::FailIfBusy(Messager & messager)
 {

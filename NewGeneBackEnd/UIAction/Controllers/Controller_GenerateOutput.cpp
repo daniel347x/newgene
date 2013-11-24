@@ -55,8 +55,8 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 				// ************************************* //
 				// Retrieve data sent by user interface
 				// ************************************* //
-				WidgetActionItem const & actionItem = *instanceActionItem.second;
-				WidgetActionItem__GenerateOutput const & actionItemGenerateOutput = static_cast<WidgetActionItem__GenerateOutput const &>(actionItem);
+				//WidgetActionItem const & actionItem = *instanceActionItem.second;
+				//WidgetActionItem__GenerateOutput const & actionItemGenerateOutput = static_cast<WidgetActionItem__GenerateOutput const &>(actionItem);
 
 				// ***************************************** //
 				// Prepare data to send back to user interface
@@ -104,6 +104,8 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 
 		}
 		break;
+    default:
+        break;
 	}
 
 }
