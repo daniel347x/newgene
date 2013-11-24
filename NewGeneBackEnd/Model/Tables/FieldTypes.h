@@ -38,37 +38,37 @@ template<FIELD_TYPE THE_FIELD_TYPE>
 struct FieldTypeTraits
 {
 	typedef void * type;
-	static type const default;
+	static type const default_;
 };
 template<FIELD_TYPE THE_FIELD_TYPE>
-typename FieldTypeTraits<THE_FIELD_TYPE>::type FieldTypeTraits<THE_FIELD_TYPE>::default = nullptr;
+typename FieldTypeTraits<THE_FIELD_TYPE>::type FieldTypeTraits<THE_FIELD_TYPE>::default_ = nullptr;
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_INT32>
 {
 	typedef std::int32_t type;
-	static type const default = 0;
+	static type const default_ = 0;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_INT64>
 {
 	typedef std::int64_t type;
-	static type const default = 0;
+	static type const default_ = 0;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_UINT32>
 {
 	typedef std::uint32_t type;
-	static type const default = 0;
+	static type const default_ = 0;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_UINT64>
 {
 	typedef std::uint64_t type;
-	static type const default = 0;
+	static type const default_ = 0;
 };
 
 template<>
@@ -76,91 +76,91 @@ struct FieldTypeTraits<FIELD_TYPE_STRING_FIXED>
 {
 	// TODO: make this somehow fixed size at initialization?
 	typedef std::string type;
-	static type const default;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_STRING_VAR>
 {
 	typedef std::string type;
-	static type const default;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_FLOAT>
 {
 	typedef long double type;
-	static type const default;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_TIMESTAMP>
 {
 	typedef std::int64_t type;
-	static type const default = 0;
+	static type const default_ = 0;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_UUID>
 {
 	typedef std::string type;
-	static type const default;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_UUID_FOREIGN>
 {
 	typedef std::string type;
-	static type const default;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_STRING_CODE>
 {
 	typedef std::string type;
-	static type const default;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_STRING_LONGHAND>
 {
 	typedef std::string type;
-	static type const default;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_TIME_RANGE>
 {
 	typedef std::uint64_t type;
-	static type const default = 0;
+	static type const default_ = 0;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_NOTES_1>
 {
 	typedef std::string type;
-	static type const default;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_NOTES_2>
 {
 	typedef std::string type;
-	static type const default;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_NOTES_3>
 {
 	typedef std::string type;
-	static type const default;
+	static type const default_;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_FIELD_TYPE>
 {
 	typedef FIELD_TYPE type;
-	static type const default = FIELD_TYPE_UNKNOWN;
+	static type const default_ = FIELD_TYPE_UNKNOWN;
 };
 
 #endif

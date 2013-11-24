@@ -46,7 +46,7 @@ class Field : public BaseField
 
 public:
 
-	Field<THE_FIELD_TYPE>(std::string const field_name, FieldValue<THE_FIELD_TYPE> const & field_value = FieldValue<THE_FIELD_TYPE>(FieldTypeTraits<THE_FIELD_TYPE>::default))
+	Field<THE_FIELD_TYPE>(std::string const field_name, FieldValue<THE_FIELD_TYPE> const & field_value = FieldValue<THE_FIELD_TYPE>(FieldTypeTraits<THE_FIELD_TYPE>::default_))
 		: BaseField(true)
 		, data(std::make_tuple(THE_FIELD_TYPE, field_name, field_value))
 	{
