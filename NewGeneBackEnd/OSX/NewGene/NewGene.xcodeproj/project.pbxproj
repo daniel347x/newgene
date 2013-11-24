@@ -1,0 +1,948 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C3DAD0FF17DB47AD00F1E066 /* DocumentManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD05F17DB47AD00F1E066 /* DocumentManager.cpp */; };
+		C3DAD10017DB47AD00F1E066 /* DocumentManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD06017DB47AD00F1E066 /* DocumentManager.h */; };
+		C3DAD10117DB47AD00F1E066 /* globals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD06117DB47AD00F1E066 /* globals.cpp */; };
+		C3DAD10217DB47AD00F1E066 /* globals.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD06217DB47AD00F1E066 /* globals.h */; };
+		C3DAD10317DB47AD00F1E066 /* LoggingManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD06417DB47AD00F1E066 /* LoggingManager.cpp */; };
+		C3DAD10417DB47AD00F1E066 /* LoggingManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD06517DB47AD00F1E066 /* LoggingManager.h */; };
+		C3DAD10517DB47AD00F1E066 /* Manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD06617DB47AD00F1E066 /* Manager.cpp */; };
+		C3DAD10617DB47AD00F1E066 /* Manager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD06717DB47AD00F1E066 /* Manager.h */; };
+		C3DAD10717DB47AD00F1E066 /* Messager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD06917DB47AD00F1E066 /* Messager.cpp */; };
+		C3DAD10817DB47AD00F1E066 /* Messager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD06A17DB47AD00F1E066 /* Messager.h */; };
+		C3DAD10917DB47AD00F1E066 /* InputModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD06C17DB47AD00F1E066 /* InputModel.cpp */; };
+		C3DAD10A17DB47AD00F1E066 /* InputModel.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD06D17DB47AD00F1E066 /* InputModel.h */; };
+		C3DAD10B17DB47AD00F1E066 /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD06E17DB47AD00F1E066 /* Model.cpp */; };
+		C3DAD10C17DB47AD00F1E066 /* Model.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD06F17DB47AD00F1E066 /* Model.h */; };
+		C3DAD10D17DB47AD00F1E066 /* ModelManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD07017DB47AD00F1E066 /* ModelManager.cpp */; };
+		C3DAD10E17DB47AD00F1E066 /* ModelManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD07117DB47AD00F1E066 /* ModelManager.h */; };
+		C3DAD10F17DB47AD00F1E066 /* OutputModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD07217DB47AD00F1E066 /* OutputModel.cpp */; };
+		C3DAD11017DB47AD00F1E066 /* OutputModel.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD07317DB47AD00F1E066 /* OutputModel.h */; };
+		C3DAD11117DB47AD00F1E066 /* Executor.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD07517DB47AD00F1E066 /* Executor.h */; };
+		C3DAD11217DB47AD00F1E066 /* Fields.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD07617DB47AD00F1E066 /* Fields.h */; };
+		C3DAD11317DB47AD00F1E066 /* FieldTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD07717DB47AD00F1E066 /* FieldTypes.cpp */; };
+		C3DAD11417DB47AD00F1E066 /* FieldTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD07817DB47AD00F1E066 /* FieldTypes.h */; };
+		C3DAD11517DB47AD00F1E066 /* Import.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD07A17DB47AD00F1E066 /* Import.cpp */; };
+		C3DAD11617DB47AD00F1E066 /* Import.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD07B17DB47AD00F1E066 /* Import.h */; };
+		C3DAD11717DB47AD00F1E066 /* ImportDefinitions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD07C17DB47AD00F1E066 /* ImportDefinitions.cpp */; };
+		C3DAD11817DB47AD00F1E066 /* ImportDefinitions.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD07D17DB47AD00F1E066 /* ImportDefinitions.h */; };
+		C3DAD11917DB47AD00F1E066 /* Schema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD07E17DB47AD00F1E066 /* Schema.cpp */; };
+		C3DAD11A17DB47AD00F1E066 /* Schema.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD07F17DB47AD00F1E066 /* Schema.h */; };
+		C3DAD11B17DB47AD00F1E066 /* Table.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD08017DB47AD00F1E066 /* Table.h */; };
+		C3DAD11C17DB47AD00F1E066 /* CMU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD08217DB47AD00F1E066 /* CMU.cpp */; };
+		C3DAD11D17DB47AD00F1E066 /* CMU.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD08317DB47AD00F1E066 /* CMU.h */; };
+		C3DAD11E17DB47AD00F1E066 /* DMU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD08417DB47AD00F1E066 /* DMU.cpp */; };
+		C3DAD11F17DB47AD00F1E066 /* DMU.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD08517DB47AD00F1E066 /* DMU.h */; };
+		C3DAD12017DB47AD00F1E066 /* KAdCount.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD08617DB47AD00F1E066 /* KAdCount.cpp */; };
+		C3DAD12117DB47AD00F1E066 /* KAdCount.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD08717DB47AD00F1E066 /* KAdCount.h */; };
+		C3DAD12217DB47AD00F1E066 /* TimeRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD08817DB47AD00F1E066 /* TimeRange.cpp */; };
+		C3DAD12317DB47AD00F1E066 /* TimeRange.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD08917DB47AD00F1E066 /* TimeRange.h */; };
+		C3DAD12417DB47AD00F1E066 /* UOA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD08A17DB47AD00F1E066 /* UOA.cpp */; };
+		C3DAD12517DB47AD00F1E066 /* UOA.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD08B17DB47AD00F1E066 /* UOA.h */; };
+		C3DAD12617DB47AD00F1E066 /* VariableGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD08C17DB47AD00F1E066 /* VariableGroup.cpp */; };
+		C3DAD12717DB47AD00F1E066 /* VariableGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD08D17DB47AD00F1E066 /* VariableGroup.h */; };
+		C3DAD12817DB47AD00F1E066 /* VariableGroupData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD08E17DB47AD00F1E066 /* VariableGroupData.cpp */; };
+		C3DAD12917DB47AD00F1E066 /* VariableGroupData.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD08F17DB47AD00F1E066 /* VariableGroupData.h */; };
+		C3DAD12A17DB47AD00F1E066 /* VariablesSelected.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD09017DB47AD00F1E066 /* VariablesSelected.cpp */; };
+		C3DAD12B17DB47AD00F1E066 /* VariablesSelected.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD09117DB47AD00F1E066 /* VariablesSelected.h */; };
+		C3DAD12C17DB47AD00F1E066 /* TableManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD09217DB47AD00F1E066 /* TableManager.cpp */; };
+		C3DAD12D17DB47AD00F1E066 /* TableManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD09317DB47AD00F1E066 /* TableManager.h */; };
+		C3DAD12E17DB47AD00F1E066 /* TableTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD09417DB47AD00F1E066 /* TableTypes.cpp */; };
+		C3DAD12F17DB47AD00F1E066 /* TableTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD09517DB47AD00F1E066 /* TableTypes.h */; };
+		C3DAD13017DB47AD00F1E066 /* TimeGranularity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD09617DB47AD00F1E066 /* TimeGranularity.cpp */; };
+		C3DAD13117DB47AD00F1E066 /* TimeGranularity.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD09717DB47AD00F1E066 /* TimeGranularity.h */; };
+		C3DAD13217DB47AD00F1E066 /* ModelActionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD09917DB47AD00F1E066 /* ModelActionManager.cpp */; };
+		C3DAD13317DB47AD00F1E066 /* ModelActionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD09A17DB47AD00F1E066 /* ModelActionManager.h */; };
+		C3DAD13417DB47AD00F1E066 /* InputProject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0A417DB47AD00F1E066 /* InputProject.cpp */; };
+		C3DAD13517DB47AD00F1E066 /* InputProject.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0A517DB47AD00F1E066 /* InputProject.h */; };
+		C3DAD13617DB47AD00F1E066 /* OutputProject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0A617DB47AD00F1E066 /* OutputProject.cpp */; };
+		C3DAD13717DB47AD00F1E066 /* OutputProject.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0A717DB47AD00F1E066 /* OutputProject.h */; };
+		C3DAD13817DB47AD00F1E066 /* Project.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0A817DB47AD00F1E066 /* Project.cpp */; };
+		C3DAD13917DB47AD00F1E066 /* Project.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0A917DB47AD00F1E066 /* Project.h */; };
+		C3DAD13A17DB47AD00F1E066 /* ProjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0AA17DB47AD00F1E066 /* ProjectManager.cpp */; };
+		C3DAD13B17DB47AD00F1E066 /* ProjectManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0AB17DB47AD00F1E066 /* ProjectManager.h */; };
+		C3DAD13C17DB47AD00F1E066 /* GlobalSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0AE17DB47AD00F1E066 /* GlobalSettings.cpp */; };
+		C3DAD13D17DB47AD00F1E066 /* GlobalSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0AF17DB47AD00F1E066 /* GlobalSettings.h */; };
+		C3DAD13E17DB47AD00F1E066 /* GlobalSettings_list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0B017DB47AD00F1E066 /* GlobalSettings_list.cpp */; };
+		C3DAD13F17DB47AD00F1E066 /* GlobalSettings_list.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0B117DB47AD00F1E066 /* GlobalSettings_list.h */; };
+		C3DAD14017DB47AD00F1E066 /* InputModelSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0B217DB47AD00F1E066 /* InputModelSettings.cpp */; };
+		C3DAD14117DB47AD00F1E066 /* InputModelSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0B317DB47AD00F1E066 /* InputModelSettings.h */; };
+		C3DAD14217DB47AD00F1E066 /* InputModelSettings_list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0B417DB47AD00F1E066 /* InputModelSettings_list.cpp */; };
+		C3DAD14317DB47AD00F1E066 /* InputModelSettings_list.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0B517DB47AD00F1E066 /* InputModelSettings_list.h */; };
+		C3DAD14417DB47AD00F1E066 /* InputProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0B617DB47AD00F1E066 /* InputProjectSettings.cpp */; };
+		C3DAD14517DB47AD00F1E066 /* InputProjectSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0B717DB47AD00F1E066 /* InputProjectSettings.h */; };
+		C3DAD14617DB47AD00F1E066 /* InputProjectSettings_list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0B817DB47AD00F1E066 /* InputProjectSettings_list.cpp */; };
+		C3DAD14717DB47AD00F1E066 /* InputProjectSettings_list.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0B917DB47AD00F1E066 /* InputProjectSettings_list.h */; };
+		C3DAD14817DB47AD00F1E066 /* ModelSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0BA17DB47AD00F1E066 /* ModelSettings.cpp */; };
+		C3DAD14917DB47AD00F1E066 /* ModelSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0BB17DB47AD00F1E066 /* ModelSettings.h */; };
+		C3DAD14A17DB47AD00F1E066 /* OutputModelSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0BC17DB47AD00F1E066 /* OutputModelSettings.cpp */; };
+		C3DAD14B17DB47AD00F1E066 /* OutputModelSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0BD17DB47AD00F1E066 /* OutputModelSettings.h */; };
+		C3DAD14C17DB47AD00F1E066 /* OutputModelSettings_list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0BE17DB47AD00F1E066 /* OutputModelSettings_list.cpp */; };
+		C3DAD14D17DB47AD00F1E066 /* OutputModelSettings_list.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0BF17DB47AD00F1E066 /* OutputModelSettings_list.h */; };
+		C3DAD14E17DB47AD00F1E066 /* OutputProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0C017DB47AD00F1E066 /* OutputProjectSettings.cpp */; };
+		C3DAD14F17DB47AD00F1E066 /* OutputProjectSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0C117DB47AD00F1E066 /* OutputProjectSettings.h */; };
+		C3DAD15017DB47AD00F1E066 /* OutputProjectSettings_list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0C217DB47AD00F1E066 /* OutputProjectSettings_list.cpp */; };
+		C3DAD15117DB47AD00F1E066 /* OutputProjectSettings_list.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0C317DB47AD00F1E066 /* OutputProjectSettings_list.h */; };
+		C3DAD15217DB47AD00F1E066 /* ProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0C417DB47AD00F1E066 /* ProjectSettings.cpp */; };
+		C3DAD15317DB47AD00F1E066 /* ProjectSettings.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0C517DB47AD00F1E066 /* ProjectSettings.h */; };
+		C3DAD15417DB47AD00F1E066 /* Setting.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0C617DB47AD00F1E066 /* Setting.cpp */; };
+		C3DAD15517DB47AD00F1E066 /* Setting.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0C717DB47AD00F1E066 /* Setting.h */; };
+		C3DAD15617DB47AD00F1E066 /* Settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0C817DB47AD00F1E066 /* Settings.cpp */; };
+		C3DAD15717DB47AD00F1E066 /* Settings.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0C917DB47AD00F1E066 /* Settings.h */; };
+		C3DAD15817DB47AD00F1E066 /* SettingsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0CA17DB47AD00F1E066 /* SettingsManager.cpp */; };
+		C3DAD15917DB47AD00F1E066 /* SettingsManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0CB17DB47AD00F1E066 /* SettingsManager.h */; };
+		C3DAD15A17DB47AD00F1E066 /* SettingsRepository.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0CC17DB47AD00F1E066 /* SettingsRepository.cpp */; };
+		C3DAD15B17DB47AD00F1E066 /* SettingsRepository.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0CD17DB47AD00F1E066 /* SettingsRepository.h */; };
+		C3DAD15C17DB47AD00F1E066 /* shell.c in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0D017DB47AD00F1E066 /* shell.c */; };
+		C3DAD15D17DB47AD00F1E066 /* sqlite3.c in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0D117DB47AD00F1E066 /* sqlite3.c */; };
+		C3DAD15E17DB47AD00F1E066 /* sqlite3.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0D217DB47AD00F1E066 /* sqlite3.h */; };
+		C3DAD15F17DB47AD00F1E066 /* sqlite3ext.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0D317DB47AD00F1E066 /* sqlite3ext.h */; };
+		C3DAD16017DB47AD00F1E066 /* StatusManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0D517DB47AD00F1E066 /* StatusManager.cpp */; };
+		C3DAD16117DB47AD00F1E066 /* StatusManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0D617DB47AD00F1E066 /* StatusManager.h */; };
+		C3DAD16217DB47AD00F1E066 /* test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0D717DB47AD00F1E066 /* test.cpp */; };
+		C3DAD16317DB47AD00F1E066 /* test.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0D817DB47AD00F1E066 /* test.h */; };
+		C3DAD16417DB47AD00F1E066 /* ThreadManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0DA17DB47AD00F1E066 /* ThreadManager.cpp */; };
+		C3DAD16517DB47AD00F1E066 /* ThreadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0DB17DB47AD00F1E066 /* ThreadManager.h */; };
+		C3DAD16617DB47AD00F1E066 /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0DC17DB47AD00F1E066 /* ThreadPool.cpp */; };
+		C3DAD16717DB47AD00F1E066 /* ThreadPool.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0DD17DB47AD00F1E066 /* ThreadPool.h */; };
+		C3DAD16817DB47AD00F1E066 /* WorkerThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0DE17DB47AD00F1E066 /* WorkerThread.cpp */; };
+		C3DAD16917DB47AD00F1E066 /* WorkerThread.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0DF17DB47AD00F1E066 /* WorkerThread.h */; };
+		C3DAD16A17DB47AD00F1E066 /* WorkItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0E017DB47AD00F1E066 /* WorkItem.cpp */; };
+		C3DAD16B17DB47AD00F1E066 /* WorkItem.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0E117DB47AD00F1E066 /* WorkItem.h */; };
+		C3DAD16C17DB47AD00F1E066 /* TriggerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0E317DB47AD00F1E066 /* TriggerManager.cpp */; };
+		C3DAD16D17DB47AD00F1E066 /* TriggerManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0E417DB47AD00F1E066 /* TriggerManager.h */; };
+		C3DAD16E17DB47AD00F1E066 /* ActionChanges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0E617DB47AD00F1E066 /* ActionChanges.cpp */; };
+		C3DAD16F17DB47AD00F1E066 /* ActionChanges.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0E717DB47AD00F1E066 /* ActionChanges.h */; };
+		C3DAD17017DB47AD00F1E066 /* ActionWidgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0E817DB47AD00F1E066 /* ActionWidgets.cpp */; };
+		C3DAD17117DB47AD00F1E066 /* ActionWidgets.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0E917DB47AD00F1E066 /* ActionWidgets.h */; };
+		C3DAD17217DB47AD00F1E066 /* Controller_GenerateOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0EB17DB47AD00F1E066 /* Controller_GenerateOutput.cpp */; };
+		C3DAD17317DB47AD00F1E066 /* Controller_KAdCountChange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0EC17DB47AD00F1E066 /* Controller_KAdCountChange.cpp */; };
+		C3DAD17417DB47AD00F1E066 /* Controller_TimeRangeChange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0ED17DB47AD00F1E066 /* Controller_TimeRangeChange.cpp */; };
+		C3DAD17517DB47AD00F1E066 /* Controller_VariableGroupSetMemberSelectionChange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0EE17DB47AD00F1E066 /* Controller_VariableGroupSetMemberSelectionChange.cpp */; };
+		C3DAD17617DB47AD00F1E066 /* UIActionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0EF17DB47AD00F1E066 /* UIActionManager.cpp */; };
+		C3DAD17717DB47AD00F1E066 /* UIActionManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0F017DB47AD00F1E066 /* UIActionManager.h */; };
+		C3DAD17817DB47AD00F1E066 /* DataChanges.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0F217DB47AD00F1E066 /* DataChanges.cpp */; };
+		C3DAD17917DB47AD00F1E066 /* DataChanges.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0F317DB47AD00F1E066 /* DataChanges.h */; };
+		C3DAD17A17DB47AD00F1E066 /* DataWidgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0F417DB47AD00F1E066 /* DataWidgets.cpp */; };
+		C3DAD17B17DB47AD00F1E066 /* DataWidgets.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0F517DB47AD00F1E066 /* DataWidgets.h */; };
+		C3DAD17C17DB47AD00F1E066 /* UIDataManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0F617DB47AD00F1E066 /* UIDataManager.cpp */; };
+		C3DAD17D17DB47AD00F1E066 /* UIDataManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0F717DB47AD00F1E066 /* UIDataManager.h */; };
+		C3DAD17E17DB47AD00F1E066 /* NewGeneException.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0F917DB47AD00F1E066 /* NewGeneException.cpp */; };
+		C3DAD17F17DB47AD00F1E066 /* NewGeneException.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0FA17DB47AD00F1E066 /* NewGeneException.h */; };
+		C3DAD18017DB47AD00F1E066 /* UUID.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0FB17DB47AD00F1E066 /* UUID.cpp */; };
+		C3DAD18117DB47AD00F1E066 /* UUID.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0FC17DB47AD00F1E066 /* UUID.h */; };
+		C3DAD18217DB47AD00F1E066 /* WidgetIdentifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD0FD17DB47AD00F1E066 /* WidgetIdentifier.cpp */; };
+		C3DAD18317DB47AD00F1E066 /* WidgetIdentifier.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD0FE17DB47AD00F1E066 /* WidgetIdentifier.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		C3DAD05517DB457000F1E066 /* libNewGene.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNewGene.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		C3DAD05D17DB47AD00F1E066 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		C3DAD05F17DB47AD00F1E066 /* DocumentManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DocumentManager.cpp; sourceTree = "<group>"; };
+		C3DAD06017DB47AD00F1E066 /* DocumentManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocumentManager.h; sourceTree = "<group>"; };
+		C3DAD06117DB47AD00F1E066 /* globals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = globals.cpp; sourceTree = "<group>"; };
+		C3DAD06217DB47AD00F1E066 /* globals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = globals.h; sourceTree = "<group>"; };
+		C3DAD06417DB47AD00F1E066 /* LoggingManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LoggingManager.cpp; sourceTree = "<group>"; };
+		C3DAD06517DB47AD00F1E066 /* LoggingManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoggingManager.h; sourceTree = "<group>"; };
+		C3DAD06617DB47AD00F1E066 /* Manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Manager.cpp; sourceTree = "<group>"; };
+		C3DAD06717DB47AD00F1E066 /* Manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Manager.h; sourceTree = "<group>"; };
+		C3DAD06917DB47AD00F1E066 /* Messager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Messager.cpp; sourceTree = "<group>"; };
+		C3DAD06A17DB47AD00F1E066 /* Messager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Messager.h; sourceTree = "<group>"; };
+		C3DAD06C17DB47AD00F1E066 /* InputModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputModel.cpp; sourceTree = "<group>"; };
+		C3DAD06D17DB47AD00F1E066 /* InputModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputModel.h; sourceTree = "<group>"; };
+		C3DAD06E17DB47AD00F1E066 /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Model.cpp; sourceTree = "<group>"; };
+		C3DAD06F17DB47AD00F1E066 /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
+		C3DAD07017DB47AD00F1E066 /* ModelManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ModelManager.cpp; sourceTree = "<group>"; };
+		C3DAD07117DB47AD00F1E066 /* ModelManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModelManager.h; sourceTree = "<group>"; };
+		C3DAD07217DB47AD00F1E066 /* OutputModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OutputModel.cpp; sourceTree = "<group>"; };
+		C3DAD07317DB47AD00F1E066 /* OutputModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OutputModel.h; sourceTree = "<group>"; };
+		C3DAD07517DB47AD00F1E066 /* Executor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Executor.h; sourceTree = "<group>"; };
+		C3DAD07617DB47AD00F1E066 /* Fields.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fields.h; sourceTree = "<group>"; };
+		C3DAD07717DB47AD00F1E066 /* FieldTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FieldTypes.cpp; sourceTree = "<group>"; };
+		C3DAD07817DB47AD00F1E066 /* FieldTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FieldTypes.h; sourceTree = "<group>"; };
+		C3DAD07A17DB47AD00F1E066 /* Import.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Import.cpp; sourceTree = "<group>"; };
+		C3DAD07B17DB47AD00F1E066 /* Import.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Import.h; sourceTree = "<group>"; };
+		C3DAD07C17DB47AD00F1E066 /* ImportDefinitions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImportDefinitions.cpp; sourceTree = "<group>"; };
+		C3DAD07D17DB47AD00F1E066 /* ImportDefinitions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImportDefinitions.h; sourceTree = "<group>"; };
+		C3DAD07E17DB47AD00F1E066 /* Schema.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Schema.cpp; sourceTree = "<group>"; };
+		C3DAD07F17DB47AD00F1E066 /* Schema.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Schema.h; sourceTree = "<group>"; };
+		C3DAD08017DB47AD00F1E066 /* Table.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Table.h; sourceTree = "<group>"; };
+		C3DAD08217DB47AD00F1E066 /* CMU.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CMU.cpp; sourceTree = "<group>"; };
+		C3DAD08317DB47AD00F1E066 /* CMU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMU.h; sourceTree = "<group>"; };
+		C3DAD08417DB47AD00F1E066 /* DMU.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DMU.cpp; sourceTree = "<group>"; };
+		C3DAD08517DB47AD00F1E066 /* DMU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DMU.h; sourceTree = "<group>"; };
+		C3DAD08617DB47AD00F1E066 /* KAdCount.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KAdCount.cpp; sourceTree = "<group>"; };
+		C3DAD08717DB47AD00F1E066 /* KAdCount.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KAdCount.h; sourceTree = "<group>"; };
+		C3DAD08817DB47AD00F1E066 /* TimeRange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TimeRange.cpp; sourceTree = "<group>"; };
+		C3DAD08917DB47AD00F1E066 /* TimeRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TimeRange.h; sourceTree = "<group>"; };
+		C3DAD08A17DB47AD00F1E066 /* UOA.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UOA.cpp; sourceTree = "<group>"; };
+		C3DAD08B17DB47AD00F1E066 /* UOA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UOA.h; sourceTree = "<group>"; };
+		C3DAD08C17DB47AD00F1E066 /* VariableGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VariableGroup.cpp; sourceTree = "<group>"; };
+		C3DAD08D17DB47AD00F1E066 /* VariableGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VariableGroup.h; sourceTree = "<group>"; };
+		C3DAD08E17DB47AD00F1E066 /* VariableGroupData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VariableGroupData.cpp; sourceTree = "<group>"; };
+		C3DAD08F17DB47AD00F1E066 /* VariableGroupData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VariableGroupData.h; sourceTree = "<group>"; };
+		C3DAD09017DB47AD00F1E066 /* VariablesSelected.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VariablesSelected.cpp; sourceTree = "<group>"; };
+		C3DAD09117DB47AD00F1E066 /* VariablesSelected.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VariablesSelected.h; sourceTree = "<group>"; };
+		C3DAD09217DB47AD00F1E066 /* TableManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TableManager.cpp; sourceTree = "<group>"; };
+		C3DAD09317DB47AD00F1E066 /* TableManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TableManager.h; sourceTree = "<group>"; };
+		C3DAD09417DB47AD00F1E066 /* TableTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TableTypes.cpp; sourceTree = "<group>"; };
+		C3DAD09517DB47AD00F1E066 /* TableTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TableTypes.h; sourceTree = "<group>"; };
+		C3DAD09617DB47AD00F1E066 /* TimeGranularity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TimeGranularity.cpp; sourceTree = "<group>"; };
+		C3DAD09717DB47AD00F1E066 /* TimeGranularity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TimeGranularity.h; sourceTree = "<group>"; };
+		C3DAD09917DB47AD00F1E066 /* ModelActionManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ModelActionManager.cpp; sourceTree = "<group>"; };
+		C3DAD09A17DB47AD00F1E066 /* ModelActionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModelActionManager.h; sourceTree = "<group>"; };
+		C3DAD09B17DB47AD00F1E066 /* NewGeneBackEnd.sln */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = NewGeneBackEnd.sln; sourceTree = "<group>"; };
+		C3DAD09C17DB47AD00F1E066 /* NewGeneBackEnd.vcxproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = NewGeneBackEnd.vcxproj; sourceTree = "<group>"; };
+		C3DAD09D17DB47AD00F1E066 /* NewGeneBackEnd.vcxproj.filters */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = NewGeneBackEnd.vcxproj.filters; sourceTree = "<group>"; };
+		C3DAD0A017DB47AD00F1E066 /* NewGene.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = NewGene.xcodeproj; sourceTree = "<group>"; };
+		C3DAD0A417DB47AD00F1E066 /* InputProject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputProject.cpp; sourceTree = "<group>"; };
+		C3DAD0A517DB47AD00F1E066 /* InputProject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputProject.h; sourceTree = "<group>"; };
+		C3DAD0A617DB47AD00F1E066 /* OutputProject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OutputProject.cpp; sourceTree = "<group>"; };
+		C3DAD0A717DB47AD00F1E066 /* OutputProject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OutputProject.h; sourceTree = "<group>"; };
+		C3DAD0A817DB47AD00F1E066 /* Project.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Project.cpp; sourceTree = "<group>"; };
+		C3DAD0A917DB47AD00F1E066 /* Project.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Project.h; sourceTree = "<group>"; };
+		C3DAD0AA17DB47AD00F1E066 /* ProjectManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProjectManager.cpp; sourceTree = "<group>"; };
+		C3DAD0AB17DB47AD00F1E066 /* ProjectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProjectManager.h; sourceTree = "<group>"; };
+		C3DAD0AC17DB47AD00F1E066 /* ReadMe.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
+		C3DAD0AE17DB47AD00F1E066 /* GlobalSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GlobalSettings.cpp; sourceTree = "<group>"; };
+		C3DAD0AF17DB47AD00F1E066 /* GlobalSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalSettings.h; sourceTree = "<group>"; };
+		C3DAD0B017DB47AD00F1E066 /* GlobalSettings_list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GlobalSettings_list.cpp; sourceTree = "<group>"; };
+		C3DAD0B117DB47AD00F1E066 /* GlobalSettings_list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GlobalSettings_list.h; sourceTree = "<group>"; };
+		C3DAD0B217DB47AD00F1E066 /* InputModelSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputModelSettings.cpp; sourceTree = "<group>"; };
+		C3DAD0B317DB47AD00F1E066 /* InputModelSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputModelSettings.h; sourceTree = "<group>"; };
+		C3DAD0B417DB47AD00F1E066 /* InputModelSettings_list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputModelSettings_list.cpp; sourceTree = "<group>"; };
+		C3DAD0B517DB47AD00F1E066 /* InputModelSettings_list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputModelSettings_list.h; sourceTree = "<group>"; };
+		C3DAD0B617DB47AD00F1E066 /* InputProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputProjectSettings.cpp; sourceTree = "<group>"; };
+		C3DAD0B717DB47AD00F1E066 /* InputProjectSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputProjectSettings.h; sourceTree = "<group>"; };
+		C3DAD0B817DB47AD00F1E066 /* InputProjectSettings_list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputProjectSettings_list.cpp; sourceTree = "<group>"; };
+		C3DAD0B917DB47AD00F1E066 /* InputProjectSettings_list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputProjectSettings_list.h; sourceTree = "<group>"; };
+		C3DAD0BA17DB47AD00F1E066 /* ModelSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ModelSettings.cpp; sourceTree = "<group>"; };
+		C3DAD0BB17DB47AD00F1E066 /* ModelSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModelSettings.h; sourceTree = "<group>"; };
+		C3DAD0BC17DB47AD00F1E066 /* OutputModelSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OutputModelSettings.cpp; sourceTree = "<group>"; };
+		C3DAD0BD17DB47AD00F1E066 /* OutputModelSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OutputModelSettings.h; sourceTree = "<group>"; };
+		C3DAD0BE17DB47AD00F1E066 /* OutputModelSettings_list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OutputModelSettings_list.cpp; sourceTree = "<group>"; };
+		C3DAD0BF17DB47AD00F1E066 /* OutputModelSettings_list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OutputModelSettings_list.h; sourceTree = "<group>"; };
+		C3DAD0C017DB47AD00F1E066 /* OutputProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OutputProjectSettings.cpp; sourceTree = "<group>"; };
+		C3DAD0C117DB47AD00F1E066 /* OutputProjectSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OutputProjectSettings.h; sourceTree = "<group>"; };
+		C3DAD0C217DB47AD00F1E066 /* OutputProjectSettings_list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OutputProjectSettings_list.cpp; sourceTree = "<group>"; };
+		C3DAD0C317DB47AD00F1E066 /* OutputProjectSettings_list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OutputProjectSettings_list.h; sourceTree = "<group>"; };
+		C3DAD0C417DB47AD00F1E066 /* ProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ProjectSettings.cpp; sourceTree = "<group>"; };
+		C3DAD0C517DB47AD00F1E066 /* ProjectSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProjectSettings.h; sourceTree = "<group>"; };
+		C3DAD0C617DB47AD00F1E066 /* Setting.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Setting.cpp; sourceTree = "<group>"; };
+		C3DAD0C717DB47AD00F1E066 /* Setting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Setting.h; sourceTree = "<group>"; };
+		C3DAD0C817DB47AD00F1E066 /* Settings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Settings.cpp; sourceTree = "<group>"; };
+		C3DAD0C917DB47AD00F1E066 /* Settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Settings.h; sourceTree = "<group>"; };
+		C3DAD0CA17DB47AD00F1E066 /* SettingsManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SettingsManager.cpp; sourceTree = "<group>"; };
+		C3DAD0CB17DB47AD00F1E066 /* SettingsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsManager.h; sourceTree = "<group>"; };
+		C3DAD0CC17DB47AD00F1E066 /* SettingsRepository.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SettingsRepository.cpp; sourceTree = "<group>"; };
+		C3DAD0CD17DB47AD00F1E066 /* SettingsRepository.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsRepository.h; sourceTree = "<group>"; };
+		C3DAD0D017DB47AD00F1E066 /* shell.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = shell.c; sourceTree = "<group>"; };
+		C3DAD0D117DB47AD00F1E066 /* sqlite3.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sqlite3.c; sourceTree = "<group>"; };
+		C3DAD0D217DB47AD00F1E066 /* sqlite3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sqlite3.h; sourceTree = "<group>"; };
+		C3DAD0D317DB47AD00F1E066 /* sqlite3ext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sqlite3ext.h; sourceTree = "<group>"; };
+		C3DAD0D517DB47AD00F1E066 /* StatusManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StatusManager.cpp; sourceTree = "<group>"; };
+		C3DAD0D617DB47AD00F1E066 /* StatusManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatusManager.h; sourceTree = "<group>"; };
+		C3DAD0D717DB47AD00F1E066 /* test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = test.cpp; sourceTree = "<group>"; };
+		C3DAD0D817DB47AD00F1E066 /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = test.h; sourceTree = "<group>"; };
+		C3DAD0DA17DB47AD00F1E066 /* ThreadManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadManager.cpp; sourceTree = "<group>"; };
+		C3DAD0DB17DB47AD00F1E066 /* ThreadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadManager.h; sourceTree = "<group>"; };
+		C3DAD0DC17DB47AD00F1E066 /* ThreadPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ThreadPool.cpp; sourceTree = "<group>"; };
+		C3DAD0DD17DB47AD00F1E066 /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadPool.h; sourceTree = "<group>"; };
+		C3DAD0DE17DB47AD00F1E066 /* WorkerThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WorkerThread.cpp; sourceTree = "<group>"; };
+		C3DAD0DF17DB47AD00F1E066 /* WorkerThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkerThread.h; sourceTree = "<group>"; };
+		C3DAD0E017DB47AD00F1E066 /* WorkItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WorkItem.cpp; sourceTree = "<group>"; };
+		C3DAD0E117DB47AD00F1E066 /* WorkItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkItem.h; sourceTree = "<group>"; };
+		C3DAD0E317DB47AD00F1E066 /* TriggerManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TriggerManager.cpp; sourceTree = "<group>"; };
+		C3DAD0E417DB47AD00F1E066 /* TriggerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TriggerManager.h; sourceTree = "<group>"; };
+		C3DAD0E617DB47AD00F1E066 /* ActionChanges.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ActionChanges.cpp; sourceTree = "<group>"; };
+		C3DAD0E717DB47AD00F1E066 /* ActionChanges.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionChanges.h; sourceTree = "<group>"; };
+		C3DAD0E817DB47AD00F1E066 /* ActionWidgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ActionWidgets.cpp; sourceTree = "<group>"; };
+		C3DAD0E917DB47AD00F1E066 /* ActionWidgets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActionWidgets.h; sourceTree = "<group>"; };
+		C3DAD0EB17DB47AD00F1E066 /* Controller_GenerateOutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_GenerateOutput.cpp; sourceTree = "<group>"; };
+		C3DAD0EC17DB47AD00F1E066 /* Controller_KAdCountChange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_KAdCountChange.cpp; sourceTree = "<group>"; };
+		C3DAD0ED17DB47AD00F1E066 /* Controller_TimeRangeChange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_TimeRangeChange.cpp; sourceTree = "<group>"; };
+		C3DAD0EE17DB47AD00F1E066 /* Controller_VariableGroupSetMemberSelectionChange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_VariableGroupSetMemberSelectionChange.cpp; sourceTree = "<group>"; };
+		C3DAD0EF17DB47AD00F1E066 /* UIActionManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIActionManager.cpp; sourceTree = "<group>"; };
+		C3DAD0F017DB47AD00F1E066 /* UIActionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIActionManager.h; sourceTree = "<group>"; };
+		C3DAD0F217DB47AD00F1E066 /* DataChanges.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DataChanges.cpp; sourceTree = "<group>"; };
+		C3DAD0F317DB47AD00F1E066 /* DataChanges.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataChanges.h; sourceTree = "<group>"; };
+		C3DAD0F417DB47AD00F1E066 /* DataWidgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DataWidgets.cpp; sourceTree = "<group>"; };
+		C3DAD0F517DB47AD00F1E066 /* DataWidgets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataWidgets.h; sourceTree = "<group>"; };
+		C3DAD0F617DB47AD00F1E066 /* UIDataManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIDataManager.cpp; sourceTree = "<group>"; };
+		C3DAD0F717DB47AD00F1E066 /* UIDataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIDataManager.h; sourceTree = "<group>"; };
+		C3DAD0F917DB47AD00F1E066 /* NewGeneException.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NewGeneException.cpp; sourceTree = "<group>"; };
+		C3DAD0FA17DB47AD00F1E066 /* NewGeneException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewGeneException.h; sourceTree = "<group>"; };
+		C3DAD0FB17DB47AD00F1E066 /* UUID.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UUID.cpp; sourceTree = "<group>"; };
+		C3DAD0FC17DB47AD00F1E066 /* UUID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UUID.h; sourceTree = "<group>"; };
+		C3DAD0FD17DB47AD00F1E066 /* WidgetIdentifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WidgetIdentifier.cpp; sourceTree = "<group>"; };
+		C3DAD0FE17DB47AD00F1E066 /* WidgetIdentifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WidgetIdentifier.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C3DAD05217DB457000F1E066 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C3DAD04C17DB457000F1E066 = {
+			isa = PBXGroup;
+			children = (
+				C3DAD05C17DB47AD00F1E066 /* NewGeneBackEnd */,
+				C3DAD05617DB457000F1E066 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C3DAD05617DB457000F1E066 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD05517DB457000F1E066 /* libNewGene.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C3DAD05C17DB47AD00F1E066 /* NewGeneBackEnd */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD05D17DB47AD00F1E066 /* .gitignore */,
+				C3DAD05E17DB47AD00F1E066 /* Documents */,
+				C3DAD06117DB47AD00F1E066 /* globals.cpp */,
+				C3DAD06217DB47AD00F1E066 /* globals.h */,
+				C3DAD06317DB47AD00F1E066 /* Logging */,
+				C3DAD06617DB47AD00F1E066 /* Manager.cpp */,
+				C3DAD06717DB47AD00F1E066 /* Manager.h */,
+				C3DAD06817DB47AD00F1E066 /* Messager */,
+				C3DAD06B17DB47AD00F1E066 /* Model */,
+				C3DAD09817DB47AD00F1E066 /* ModelAction */,
+				C3DAD09B17DB47AD00F1E066 /* NewGeneBackEnd.sln */,
+				C3DAD09C17DB47AD00F1E066 /* NewGeneBackEnd.vcxproj */,
+				C3DAD09D17DB47AD00F1E066 /* NewGeneBackEnd.vcxproj.filters */,
+				C3DAD09E17DB47AD00F1E066 /* OSX */,
+				C3DAD0A317DB47AD00F1E066 /* Project */,
+				C3DAD0AC17DB47AD00F1E066 /* ReadMe.txt */,
+				C3DAD0AD17DB47AD00F1E066 /* Settings */,
+				C3DAD0CE17DB47AD00F1E066 /* sqlite */,
+				C3DAD0D417DB47AD00F1E066 /* Status */,
+				C3DAD0D717DB47AD00F1E066 /* test.cpp */,
+				C3DAD0D817DB47AD00F1E066 /* test.h */,
+				C3DAD0D917DB47AD00F1E066 /* Threads */,
+				C3DAD0E217DB47AD00F1E066 /* Triggers */,
+				C3DAD0E517DB47AD00F1E066 /* UIAction */,
+				C3DAD0F117DB47AD00F1E066 /* UIData */,
+				C3DAD0F817DB47AD00F1E066 /* Utilities */,
+			);
+			name = NewGeneBackEnd;
+			path = ../..;
+			sourceTree = "<group>";
+		};
+		C3DAD05E17DB47AD00F1E066 /* Documents */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD05F17DB47AD00F1E066 /* DocumentManager.cpp */,
+				C3DAD06017DB47AD00F1E066 /* DocumentManager.h */,
+			);
+			path = Documents;
+			sourceTree = "<group>";
+		};
+		C3DAD06317DB47AD00F1E066 /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD06417DB47AD00F1E066 /* LoggingManager.cpp */,
+				C3DAD06517DB47AD00F1E066 /* LoggingManager.h */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
+		C3DAD06817DB47AD00F1E066 /* Messager */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD06917DB47AD00F1E066 /* Messager.cpp */,
+				C3DAD06A17DB47AD00F1E066 /* Messager.h */,
+			);
+			path = Messager;
+			sourceTree = "<group>";
+		};
+		C3DAD06B17DB47AD00F1E066 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD06C17DB47AD00F1E066 /* InputModel.cpp */,
+				C3DAD06D17DB47AD00F1E066 /* InputModel.h */,
+				C3DAD06E17DB47AD00F1E066 /* Model.cpp */,
+				C3DAD06F17DB47AD00F1E066 /* Model.h */,
+				C3DAD07017DB47AD00F1E066 /* ModelManager.cpp */,
+				C3DAD07117DB47AD00F1E066 /* ModelManager.h */,
+				C3DAD07217DB47AD00F1E066 /* OutputModel.cpp */,
+				C3DAD07317DB47AD00F1E066 /* OutputModel.h */,
+				C3DAD07417DB47AD00F1E066 /* Tables */,
+				C3DAD09617DB47AD00F1E066 /* TimeGranularity.cpp */,
+				C3DAD09717DB47AD00F1E066 /* TimeGranularity.h */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		C3DAD07417DB47AD00F1E066 /* Tables */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD07517DB47AD00F1E066 /* Executor.h */,
+				C3DAD07617DB47AD00F1E066 /* Fields.h */,
+				C3DAD07717DB47AD00F1E066 /* FieldTypes.cpp */,
+				C3DAD07817DB47AD00F1E066 /* FieldTypes.h */,
+				C3DAD07917DB47AD00F1E066 /* Import */,
+				C3DAD07E17DB47AD00F1E066 /* Schema.cpp */,
+				C3DAD07F17DB47AD00F1E066 /* Schema.h */,
+				C3DAD08017DB47AD00F1E066 /* Table.h */,
+				C3DAD08117DB47AD00F1E066 /* TableInstances */,
+				C3DAD09217DB47AD00F1E066 /* TableManager.cpp */,
+				C3DAD09317DB47AD00F1E066 /* TableManager.h */,
+				C3DAD09417DB47AD00F1E066 /* TableTypes.cpp */,
+				C3DAD09517DB47AD00F1E066 /* TableTypes.h */,
+			);
+			path = Tables;
+			sourceTree = "<group>";
+		};
+		C3DAD07917DB47AD00F1E066 /* Import */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD07A17DB47AD00F1E066 /* Import.cpp */,
+				C3DAD07B17DB47AD00F1E066 /* Import.h */,
+				C3DAD07C17DB47AD00F1E066 /* ImportDefinitions.cpp */,
+				C3DAD07D17DB47AD00F1E066 /* ImportDefinitions.h */,
+			);
+			path = Import;
+			sourceTree = "<group>";
+		};
+		C3DAD08117DB47AD00F1E066 /* TableInstances */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD08217DB47AD00F1E066 /* CMU.cpp */,
+				C3DAD08317DB47AD00F1E066 /* CMU.h */,
+				C3DAD08417DB47AD00F1E066 /* DMU.cpp */,
+				C3DAD08517DB47AD00F1E066 /* DMU.h */,
+				C3DAD08617DB47AD00F1E066 /* KAdCount.cpp */,
+				C3DAD08717DB47AD00F1E066 /* KAdCount.h */,
+				C3DAD08817DB47AD00F1E066 /* TimeRange.cpp */,
+				C3DAD08917DB47AD00F1E066 /* TimeRange.h */,
+				C3DAD08A17DB47AD00F1E066 /* UOA.cpp */,
+				C3DAD08B17DB47AD00F1E066 /* UOA.h */,
+				C3DAD08C17DB47AD00F1E066 /* VariableGroup.cpp */,
+				C3DAD08D17DB47AD00F1E066 /* VariableGroup.h */,
+				C3DAD08E17DB47AD00F1E066 /* VariableGroupData.cpp */,
+				C3DAD08F17DB47AD00F1E066 /* VariableGroupData.h */,
+				C3DAD09017DB47AD00F1E066 /* VariablesSelected.cpp */,
+				C3DAD09117DB47AD00F1E066 /* VariablesSelected.h */,
+			);
+			path = TableInstances;
+			sourceTree = "<group>";
+		};
+		C3DAD09817DB47AD00F1E066 /* ModelAction */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD09917DB47AD00F1E066 /* ModelActionManager.cpp */,
+				C3DAD09A17DB47AD00F1E066 /* ModelActionManager.h */,
+			);
+			path = ModelAction;
+			sourceTree = "<group>";
+		};
+		C3DAD09E17DB47AD00F1E066 /* OSX */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD09F17DB47AD00F1E066 /* NewGene */,
+			);
+			path = OSX;
+			sourceTree = "<group>";
+		};
+		C3DAD09F17DB47AD00F1E066 /* NewGene */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0A017DB47AD00F1E066 /* NewGene.xcodeproj */,
+			);
+			path = NewGene;
+			sourceTree = "<group>";
+		};
+		C3DAD0A117DB47AD00F1E066 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C3DAD0A317DB47AD00F1E066 /* Project */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0A417DB47AD00F1E066 /* InputProject.cpp */,
+				C3DAD0A517DB47AD00F1E066 /* InputProject.h */,
+				C3DAD0A617DB47AD00F1E066 /* OutputProject.cpp */,
+				C3DAD0A717DB47AD00F1E066 /* OutputProject.h */,
+				C3DAD0A817DB47AD00F1E066 /* Project.cpp */,
+				C3DAD0A917DB47AD00F1E066 /* Project.h */,
+				C3DAD0AA17DB47AD00F1E066 /* ProjectManager.cpp */,
+				C3DAD0AB17DB47AD00F1E066 /* ProjectManager.h */,
+			);
+			path = Project;
+			sourceTree = "<group>";
+		};
+		C3DAD0AD17DB47AD00F1E066 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0AE17DB47AD00F1E066 /* GlobalSettings.cpp */,
+				C3DAD0AF17DB47AD00F1E066 /* GlobalSettings.h */,
+				C3DAD0B017DB47AD00F1E066 /* GlobalSettings_list.cpp */,
+				C3DAD0B117DB47AD00F1E066 /* GlobalSettings_list.h */,
+				C3DAD0B217DB47AD00F1E066 /* InputModelSettings.cpp */,
+				C3DAD0B317DB47AD00F1E066 /* InputModelSettings.h */,
+				C3DAD0B417DB47AD00F1E066 /* InputModelSettings_list.cpp */,
+				C3DAD0B517DB47AD00F1E066 /* InputModelSettings_list.h */,
+				C3DAD0B617DB47AD00F1E066 /* InputProjectSettings.cpp */,
+				C3DAD0B717DB47AD00F1E066 /* InputProjectSettings.h */,
+				C3DAD0B817DB47AD00F1E066 /* InputProjectSettings_list.cpp */,
+				C3DAD0B917DB47AD00F1E066 /* InputProjectSettings_list.h */,
+				C3DAD0BA17DB47AD00F1E066 /* ModelSettings.cpp */,
+				C3DAD0BB17DB47AD00F1E066 /* ModelSettings.h */,
+				C3DAD0BC17DB47AD00F1E066 /* OutputModelSettings.cpp */,
+				C3DAD0BD17DB47AD00F1E066 /* OutputModelSettings.h */,
+				C3DAD0BE17DB47AD00F1E066 /* OutputModelSettings_list.cpp */,
+				C3DAD0BF17DB47AD00F1E066 /* OutputModelSettings_list.h */,
+				C3DAD0C017DB47AD00F1E066 /* OutputProjectSettings.cpp */,
+				C3DAD0C117DB47AD00F1E066 /* OutputProjectSettings.h */,
+				C3DAD0C217DB47AD00F1E066 /* OutputProjectSettings_list.cpp */,
+				C3DAD0C317DB47AD00F1E066 /* OutputProjectSettings_list.h */,
+				C3DAD0C417DB47AD00F1E066 /* ProjectSettings.cpp */,
+				C3DAD0C517DB47AD00F1E066 /* ProjectSettings.h */,
+				C3DAD0C617DB47AD00F1E066 /* Setting.cpp */,
+				C3DAD0C717DB47AD00F1E066 /* Setting.h */,
+				C3DAD0C817DB47AD00F1E066 /* Settings.cpp */,
+				C3DAD0C917DB47AD00F1E066 /* Settings.h */,
+				C3DAD0CA17DB47AD00F1E066 /* SettingsManager.cpp */,
+				C3DAD0CB17DB47AD00F1E066 /* SettingsManager.h */,
+				C3DAD0CC17DB47AD00F1E066 /* SettingsRepository.cpp */,
+				C3DAD0CD17DB47AD00F1E066 /* SettingsRepository.h */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		C3DAD0CE17DB47AD00F1E066 /* sqlite */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0CF17DB47AD00F1E066 /* sqlite-amalgamation-3071700 */,
+			);
+			path = sqlite;
+			sourceTree = "<group>";
+		};
+		C3DAD0CF17DB47AD00F1E066 /* sqlite-amalgamation-3071700 */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0D017DB47AD00F1E066 /* shell.c */,
+				C3DAD0D117DB47AD00F1E066 /* sqlite3.c */,
+				C3DAD0D217DB47AD00F1E066 /* sqlite3.h */,
+				C3DAD0D317DB47AD00F1E066 /* sqlite3ext.h */,
+			);
+			path = "sqlite-amalgamation-3071700";
+			sourceTree = "<group>";
+		};
+		C3DAD0D417DB47AD00F1E066 /* Status */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0D517DB47AD00F1E066 /* StatusManager.cpp */,
+				C3DAD0D617DB47AD00F1E066 /* StatusManager.h */,
+			);
+			path = Status;
+			sourceTree = "<group>";
+		};
+		C3DAD0D917DB47AD00F1E066 /* Threads */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0DA17DB47AD00F1E066 /* ThreadManager.cpp */,
+				C3DAD0DB17DB47AD00F1E066 /* ThreadManager.h */,
+				C3DAD0DC17DB47AD00F1E066 /* ThreadPool.cpp */,
+				C3DAD0DD17DB47AD00F1E066 /* ThreadPool.h */,
+				C3DAD0DE17DB47AD00F1E066 /* WorkerThread.cpp */,
+				C3DAD0DF17DB47AD00F1E066 /* WorkerThread.h */,
+				C3DAD0E017DB47AD00F1E066 /* WorkItem.cpp */,
+				C3DAD0E117DB47AD00F1E066 /* WorkItem.h */,
+			);
+			path = Threads;
+			sourceTree = "<group>";
+		};
+		C3DAD0E217DB47AD00F1E066 /* Triggers */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0E317DB47AD00F1E066 /* TriggerManager.cpp */,
+				C3DAD0E417DB47AD00F1E066 /* TriggerManager.h */,
+			);
+			path = Triggers;
+			sourceTree = "<group>";
+		};
+		C3DAD0E517DB47AD00F1E066 /* UIAction */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0E617DB47AD00F1E066 /* ActionChanges.cpp */,
+				C3DAD0E717DB47AD00F1E066 /* ActionChanges.h */,
+				C3DAD0E817DB47AD00F1E066 /* ActionWidgets.cpp */,
+				C3DAD0E917DB47AD00F1E066 /* ActionWidgets.h */,
+				C3DAD0EA17DB47AD00F1E066 /* Controllers */,
+				C3DAD0EF17DB47AD00F1E066 /* UIActionManager.cpp */,
+				C3DAD0F017DB47AD00F1E066 /* UIActionManager.h */,
+			);
+			path = UIAction;
+			sourceTree = "<group>";
+		};
+		C3DAD0EA17DB47AD00F1E066 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0EB17DB47AD00F1E066 /* Controller_GenerateOutput.cpp */,
+				C3DAD0EC17DB47AD00F1E066 /* Controller_KAdCountChange.cpp */,
+				C3DAD0ED17DB47AD00F1E066 /* Controller_TimeRangeChange.cpp */,
+				C3DAD0EE17DB47AD00F1E066 /* Controller_VariableGroupSetMemberSelectionChange.cpp */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		C3DAD0F117DB47AD00F1E066 /* UIData */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0F217DB47AD00F1E066 /* DataChanges.cpp */,
+				C3DAD0F317DB47AD00F1E066 /* DataChanges.h */,
+				C3DAD0F417DB47AD00F1E066 /* DataWidgets.cpp */,
+				C3DAD0F517DB47AD00F1E066 /* DataWidgets.h */,
+				C3DAD0F617DB47AD00F1E066 /* UIDataManager.cpp */,
+				C3DAD0F717DB47AD00F1E066 /* UIDataManager.h */,
+			);
+			path = UIData;
+			sourceTree = "<group>";
+		};
+		C3DAD0F817DB47AD00F1E066 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				C3DAD0F917DB47AD00F1E066 /* NewGeneException.cpp */,
+				C3DAD0FA17DB47AD00F1E066 /* NewGeneException.h */,
+				C3DAD0FB17DB47AD00F1E066 /* UUID.cpp */,
+				C3DAD0FC17DB47AD00F1E066 /* UUID.h */,
+				C3DAD0FD17DB47AD00F1E066 /* WidgetIdentifier.cpp */,
+				C3DAD0FE17DB47AD00F1E066 /* WidgetIdentifier.h */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		C3DAD05317DB457000F1E066 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C3DAD10017DB47AD00F1E066 /* DocumentManager.h in Headers */,
+				C3DAD10217DB47AD00F1E066 /* globals.h in Headers */,
+				C3DAD10417DB47AD00F1E066 /* LoggingManager.h in Headers */,
+				C3DAD10617DB47AD00F1E066 /* Manager.h in Headers */,
+				C3DAD10817DB47AD00F1E066 /* Messager.h in Headers */,
+				C3DAD10A17DB47AD00F1E066 /* InputModel.h in Headers */,
+				C3DAD10C17DB47AD00F1E066 /* Model.h in Headers */,
+				C3DAD10E17DB47AD00F1E066 /* ModelManager.h in Headers */,
+				C3DAD11017DB47AD00F1E066 /* OutputModel.h in Headers */,
+				C3DAD11117DB47AD00F1E066 /* Executor.h in Headers */,
+				C3DAD11217DB47AD00F1E066 /* Fields.h in Headers */,
+				C3DAD11417DB47AD00F1E066 /* FieldTypes.h in Headers */,
+				C3DAD11617DB47AD00F1E066 /* Import.h in Headers */,
+				C3DAD11817DB47AD00F1E066 /* ImportDefinitions.h in Headers */,
+				C3DAD11A17DB47AD00F1E066 /* Schema.h in Headers */,
+				C3DAD11B17DB47AD00F1E066 /* Table.h in Headers */,
+				C3DAD11D17DB47AD00F1E066 /* CMU.h in Headers */,
+				C3DAD11F17DB47AD00F1E066 /* DMU.h in Headers */,
+				C3DAD12117DB47AD00F1E066 /* KAdCount.h in Headers */,
+				C3DAD12317DB47AD00F1E066 /* TimeRange.h in Headers */,
+				C3DAD12517DB47AD00F1E066 /* UOA.h in Headers */,
+				C3DAD12717DB47AD00F1E066 /* VariableGroup.h in Headers */,
+				C3DAD12917DB47AD00F1E066 /* VariableGroupData.h in Headers */,
+				C3DAD12B17DB47AD00F1E066 /* VariablesSelected.h in Headers */,
+				C3DAD12D17DB47AD00F1E066 /* TableManager.h in Headers */,
+				C3DAD12F17DB47AD00F1E066 /* TableTypes.h in Headers */,
+				C3DAD13117DB47AD00F1E066 /* TimeGranularity.h in Headers */,
+				C3DAD13317DB47AD00F1E066 /* ModelActionManager.h in Headers */,
+				C3DAD13517DB47AD00F1E066 /* InputProject.h in Headers */,
+				C3DAD13717DB47AD00F1E066 /* OutputProject.h in Headers */,
+				C3DAD13917DB47AD00F1E066 /* Project.h in Headers */,
+				C3DAD13B17DB47AD00F1E066 /* ProjectManager.h in Headers */,
+				C3DAD13D17DB47AD00F1E066 /* GlobalSettings.h in Headers */,
+				C3DAD13F17DB47AD00F1E066 /* GlobalSettings_list.h in Headers */,
+				C3DAD14117DB47AD00F1E066 /* InputModelSettings.h in Headers */,
+				C3DAD14317DB47AD00F1E066 /* InputModelSettings_list.h in Headers */,
+				C3DAD14517DB47AD00F1E066 /* InputProjectSettings.h in Headers */,
+				C3DAD14717DB47AD00F1E066 /* InputProjectSettings_list.h in Headers */,
+				C3DAD14917DB47AD00F1E066 /* ModelSettings.h in Headers */,
+				C3DAD14B17DB47AD00F1E066 /* OutputModelSettings.h in Headers */,
+				C3DAD14D17DB47AD00F1E066 /* OutputModelSettings_list.h in Headers */,
+				C3DAD14F17DB47AD00F1E066 /* OutputProjectSettings.h in Headers */,
+				C3DAD15117DB47AD00F1E066 /* OutputProjectSettings_list.h in Headers */,
+				C3DAD15317DB47AD00F1E066 /* ProjectSettings.h in Headers */,
+				C3DAD15517DB47AD00F1E066 /* Setting.h in Headers */,
+				C3DAD15717DB47AD00F1E066 /* Settings.h in Headers */,
+				C3DAD15917DB47AD00F1E066 /* SettingsManager.h in Headers */,
+				C3DAD15B17DB47AD00F1E066 /* SettingsRepository.h in Headers */,
+				C3DAD15E17DB47AD00F1E066 /* sqlite3.h in Headers */,
+				C3DAD15F17DB47AD00F1E066 /* sqlite3ext.h in Headers */,
+				C3DAD16117DB47AD00F1E066 /* StatusManager.h in Headers */,
+				C3DAD16317DB47AD00F1E066 /* test.h in Headers */,
+				C3DAD16517DB47AD00F1E066 /* ThreadManager.h in Headers */,
+				C3DAD16717DB47AD00F1E066 /* ThreadPool.h in Headers */,
+				C3DAD16917DB47AD00F1E066 /* WorkerThread.h in Headers */,
+				C3DAD16B17DB47AD00F1E066 /* WorkItem.h in Headers */,
+				C3DAD16D17DB47AD00F1E066 /* TriggerManager.h in Headers */,
+				C3DAD16F17DB47AD00F1E066 /* ActionChanges.h in Headers */,
+				C3DAD17117DB47AD00F1E066 /* ActionWidgets.h in Headers */,
+				C3DAD17717DB47AD00F1E066 /* UIActionManager.h in Headers */,
+				C3DAD17917DB47AD00F1E066 /* DataChanges.h in Headers */,
+				C3DAD17B17DB47AD00F1E066 /* DataWidgets.h in Headers */,
+				C3DAD17D17DB47AD00F1E066 /* UIDataManager.h in Headers */,
+				C3DAD17F17DB47AD00F1E066 /* NewGeneException.h in Headers */,
+				C3DAD18117DB47AD00F1E066 /* UUID.h in Headers */,
+				C3DAD18317DB47AD00F1E066 /* WidgetIdentifier.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		C3DAD05417DB457000F1E066 /* NewGene */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C3DAD05917DB457000F1E066 /* Build configuration list for PBXNativeTarget "NewGene" */;
+			buildPhases = (
+				C3DAD05117DB457000F1E066 /* Sources */,
+				C3DAD05217DB457000F1E066 /* Frameworks */,
+				C3DAD05317DB457000F1E066 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NewGene;
+			productName = NewGene;
+			productReference = C3DAD05517DB457000F1E066 /* libNewGene.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C3DAD04D17DB457000F1E066 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0500;
+				ORGANIZATIONNAME = NewGene;
+			};
+			buildConfigurationList = C3DAD05017DB457000F1E066 /* Build configuration list for PBXProject "NewGene" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = C3DAD04C17DB457000F1E066;
+			productRefGroup = C3DAD05617DB457000F1E066 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = C3DAD0A117DB47AD00F1E066 /* Products */;
+					ProjectRef = C3DAD0A017DB47AD00F1E066 /* NewGene.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				C3DAD05417DB457000F1E066 /* NewGene */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C3DAD05117DB457000F1E066 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C3DAD0FF17DB47AD00F1E066 /* DocumentManager.cpp in Sources */,
+				C3DAD10117DB47AD00F1E066 /* globals.cpp in Sources */,
+				C3DAD10317DB47AD00F1E066 /* LoggingManager.cpp in Sources */,
+				C3DAD10517DB47AD00F1E066 /* Manager.cpp in Sources */,
+				C3DAD10717DB47AD00F1E066 /* Messager.cpp in Sources */,
+				C3DAD10917DB47AD00F1E066 /* InputModel.cpp in Sources */,
+				C3DAD10B17DB47AD00F1E066 /* Model.cpp in Sources */,
+				C3DAD10D17DB47AD00F1E066 /* ModelManager.cpp in Sources */,
+				C3DAD10F17DB47AD00F1E066 /* OutputModel.cpp in Sources */,
+				C3DAD11317DB47AD00F1E066 /* FieldTypes.cpp in Sources */,
+				C3DAD11517DB47AD00F1E066 /* Import.cpp in Sources */,
+				C3DAD11717DB47AD00F1E066 /* ImportDefinitions.cpp in Sources */,
+				C3DAD11917DB47AD00F1E066 /* Schema.cpp in Sources */,
+				C3DAD11C17DB47AD00F1E066 /* CMU.cpp in Sources */,
+				C3DAD11E17DB47AD00F1E066 /* DMU.cpp in Sources */,
+				C3DAD12017DB47AD00F1E066 /* KAdCount.cpp in Sources */,
+				C3DAD12217DB47AD00F1E066 /* TimeRange.cpp in Sources */,
+				C3DAD12417DB47AD00F1E066 /* UOA.cpp in Sources */,
+				C3DAD12617DB47AD00F1E066 /* VariableGroup.cpp in Sources */,
+				C3DAD12817DB47AD00F1E066 /* VariableGroupData.cpp in Sources */,
+				C3DAD12A17DB47AD00F1E066 /* VariablesSelected.cpp in Sources */,
+				C3DAD12C17DB47AD00F1E066 /* TableManager.cpp in Sources */,
+				C3DAD12E17DB47AD00F1E066 /* TableTypes.cpp in Sources */,
+				C3DAD13017DB47AD00F1E066 /* TimeGranularity.cpp in Sources */,
+				C3DAD13217DB47AD00F1E066 /* ModelActionManager.cpp in Sources */,
+				C3DAD13417DB47AD00F1E066 /* InputProject.cpp in Sources */,
+				C3DAD13617DB47AD00F1E066 /* OutputProject.cpp in Sources */,
+				C3DAD13817DB47AD00F1E066 /* Project.cpp in Sources */,
+				C3DAD13A17DB47AD00F1E066 /* ProjectManager.cpp in Sources */,
+				C3DAD13C17DB47AD00F1E066 /* GlobalSettings.cpp in Sources */,
+				C3DAD13E17DB47AD00F1E066 /* GlobalSettings_list.cpp in Sources */,
+				C3DAD14017DB47AD00F1E066 /* InputModelSettings.cpp in Sources */,
+				C3DAD14217DB47AD00F1E066 /* InputModelSettings_list.cpp in Sources */,
+				C3DAD14417DB47AD00F1E066 /* InputProjectSettings.cpp in Sources */,
+				C3DAD14617DB47AD00F1E066 /* InputProjectSettings_list.cpp in Sources */,
+				C3DAD14817DB47AD00F1E066 /* ModelSettings.cpp in Sources */,
+				C3DAD14A17DB47AD00F1E066 /* OutputModelSettings.cpp in Sources */,
+				C3DAD14C17DB47AD00F1E066 /* OutputModelSettings_list.cpp in Sources */,
+				C3DAD14E17DB47AD00F1E066 /* OutputProjectSettings.cpp in Sources */,
+				C3DAD15017DB47AD00F1E066 /* OutputProjectSettings_list.cpp in Sources */,
+				C3DAD15217DB47AD00F1E066 /* ProjectSettings.cpp in Sources */,
+				C3DAD15417DB47AD00F1E066 /* Setting.cpp in Sources */,
+				C3DAD15617DB47AD00F1E066 /* Settings.cpp in Sources */,
+				C3DAD15817DB47AD00F1E066 /* SettingsManager.cpp in Sources */,
+				C3DAD15A17DB47AD00F1E066 /* SettingsRepository.cpp in Sources */,
+				C3DAD15C17DB47AD00F1E066 /* shell.c in Sources */,
+				C3DAD15D17DB47AD00F1E066 /* sqlite3.c in Sources */,
+				C3DAD16017DB47AD00F1E066 /* StatusManager.cpp in Sources */,
+				C3DAD16217DB47AD00F1E066 /* test.cpp in Sources */,
+				C3DAD16417DB47AD00F1E066 /* ThreadManager.cpp in Sources */,
+				C3DAD16617DB47AD00F1E066 /* ThreadPool.cpp in Sources */,
+				C3DAD16817DB47AD00F1E066 /* WorkerThread.cpp in Sources */,
+				C3DAD16A17DB47AD00F1E066 /* WorkItem.cpp in Sources */,
+				C3DAD16C17DB47AD00F1E066 /* TriggerManager.cpp in Sources */,
+				C3DAD16E17DB47AD00F1E066 /* ActionChanges.cpp in Sources */,
+				C3DAD17017DB47AD00F1E066 /* ActionWidgets.cpp in Sources */,
+				C3DAD17217DB47AD00F1E066 /* Controller_GenerateOutput.cpp in Sources */,
+				C3DAD17317DB47AD00F1E066 /* Controller_KAdCountChange.cpp in Sources */,
+				C3DAD17417DB47AD00F1E066 /* Controller_TimeRangeChange.cpp in Sources */,
+				C3DAD17517DB47AD00F1E066 /* Controller_VariableGroupSetMemberSelectionChange.cpp in Sources */,
+				C3DAD17617DB47AD00F1E066 /* UIActionManager.cpp in Sources */,
+				C3DAD17817DB47AD00F1E066 /* DataChanges.cpp in Sources */,
+				C3DAD17A17DB47AD00F1E066 /* DataWidgets.cpp in Sources */,
+				C3DAD17C17DB47AD00F1E066 /* UIDataManager.cpp in Sources */,
+				C3DAD17E17DB47AD00F1E066 /* NewGeneException.cpp in Sources */,
+				C3DAD18017DB47AD00F1E066 /* UUID.cpp in Sources */,
+				C3DAD18217DB47AD00F1E066 /* WidgetIdentifier.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C3DAD05717DB457000F1E066 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		C3DAD05817DB457000F1E066 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		C3DAD05A17DB457000F1E066 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				HEADER_SEARCH_PATHS = (
+					"${SOURCE_ROOT}",
+					"${SOURCE_ROOT}",
+					"$(BOOST_ROOT)",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		C3DAD05B17DB457000F1E066 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				HEADER_SEARCH_PATHS = (
+					"${SOURCE_ROOT}",
+					"${SOURCE_ROOT}",
+					"$(BOOST_ROOT)",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C3DAD05017DB457000F1E066 /* Build configuration list for PBXProject "NewGene" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C3DAD05717DB457000F1E066 /* Debug */,
+				C3DAD05817DB457000F1E066 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C3DAD05917DB457000F1E066 /* Build configuration list for PBXNativeTarget "NewGene" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C3DAD05A17DB457000F1E066 /* Debug */,
+				C3DAD05B17DB457000F1E066 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C3DAD04D17DB457000F1E066 /* Project object */;
+}
