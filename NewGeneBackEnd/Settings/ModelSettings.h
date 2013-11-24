@@ -20,8 +20,8 @@ public:
 	void WriteSettingsToFile(Messager & messager)
 	{
 		boost::property_tree::ptree pt;
-		WriteSettingsToPtree(messager, pt);
-		WritePtreeToFile(messager, pt);
+		SettingsRepository<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>::WriteSettingsToPtree(messager, pt);
+		SettingsRepository<MODEL_SETTINGS_ENUM, MODEL_SETTING_CLASS>::WritePtreeToFile(messager, pt);
 	}
 
 	virtual ~ModelSettings() {}
