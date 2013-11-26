@@ -2,6 +2,8 @@
 #define GLOBALS_H
 
 #include <string>
+
+#if 0
 //#include <boost/predef.h> // not until Boost 1.55
 #if __APPLE__ // ... but this is defined for Clang anyways
 #   include <stdint.h>
@@ -12,9 +14,12 @@
         typedef ::int32_t int32_t;
         typedef ::int64_t int64_t;
     }
-    #else
+#else
 #   include <cstdint>
 #endif
+#endif
+
+#include <cstdint>
 
 #include <QtGlobal>
 
