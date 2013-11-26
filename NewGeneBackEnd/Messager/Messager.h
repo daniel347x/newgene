@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 #include <memory>
-#include <cstdint>
+#include "../../../globals.h"
 #include "../UIData/DataWidgets.h"
 #include "../UIAction/ActionChanges.h"
 

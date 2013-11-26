@@ -4,13 +4,16 @@
 #include <memory>
 #include <vector>
 #include <string>
+
+//#include "../../../globals.h"
+
 #include "../Model/TimeGranularity.h"
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #endif
 
-#include <cstdint>
+#include "../../../globals.h"
 
 typedef std::string UUID;
 typedef std::vector<UUID> UUIDVector;
@@ -89,9 +92,9 @@ public:
 	WidgetInstanceIdentifier(UUID const uuid_, std::string const code_, std::string const description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
 		: uuid(std::make_shared<UUID>(uuid_))
 		, code(std::make_shared<std::string>(code_))
-		, sequence_number_or_count(sequence_number_or_count_)
 		, longhand(std::make_shared<std::string>(description_))
-		, flags(flags_ ? flags_ : "")
+        , sequence_number_or_count(sequence_number_or_count_)
+        , flags(flags_ ? flags_ : "")
 		, time_granularity(time_granularity_)
 		, notes(notes_)
 	{
@@ -101,19 +104,19 @@ public:
 		: uuid(std::make_shared<UUID>(uuid_))
 		, identifier_parent(std::make_shared<WidgetInstanceIdentifier>(identifier_parent_))
 		, code(std::make_shared<std::string>(code_))
-		, sequence_number_or_count(sequence_number_or_count_)
 		, longhand(std::make_shared<std::string>(description_))
-		, flags(flags_ ? flags_ : "")
+        , sequence_number_or_count(sequence_number_or_count_)
+        , flags(flags_ ? flags_ : "")
 		, notes(notes_)
 	{
-
+        Q_UNUSED(time_granularity_);
 	}
 
 	WidgetInstanceIdentifier(std::string code_, std::string description_ = "", int const sequence_number_or_count_ = -1, char const * const flags_ = "", TIME_GRANULARITY const time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
 		: code(std::make_shared<std::string>(code_))
-		, sequence_number_or_count(sequence_number_or_count_)
 		, longhand(std::make_shared<std::string>(description_))
-		, flags(flags_ ? flags_ : "")
+        , sequence_number_or_count(sequence_number_or_count_)
+        , flags(flags_ ? flags_ : "")
 		, time_granularity(time_granularity_)
 		, notes(notes_)
 	{
@@ -125,9 +128,9 @@ public:
 		, identifier_parent(rhs.identifier_parent)
 		, foreign_key_identifiers(rhs.foreign_key_identifiers)
 		, code(rhs.code)
-		, sequence_number_or_count(rhs.sequence_number_or_count)
 		, longhand(rhs.longhand)
-		, flags(rhs.flags)
+        , sequence_number_or_count(rhs.sequence_number_or_count)
+        , flags(rhs.flags)
 		, time_granularity(rhs.time_granularity)
 		, notes(rhs.notes)
 	{

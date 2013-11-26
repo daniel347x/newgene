@@ -12,7 +12,7 @@ struct NewGeneException : virtual std::exception, virtual boost::exception
 {
 public:
 	NewGeneException(void);
-	~NewGeneException(void);
+    ~NewGeneException(void) throw();
 };
 
 #endif

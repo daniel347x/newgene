@@ -15,7 +15,7 @@ QMAKE_CXXFLAGS_RELEASE += /Zi
 QMAKE_CXXFLAGS_RELEASE += /Od
 QMAKE_LFLAGS_RELEASE += /DEBUG
 
-#macx: QMAKE_CXXFLAGS += -stdlib=libc++
+#macx: QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
 
 SOURCES += main.cpp\
 	Widgets/newgenemainwindow.cpp \
@@ -302,6 +302,8 @@ INCLUDEPATH += $(BOOST_ROOT)
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/release/NewGeneBackEnd.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/debug/NewGeneBackEnd.lib
 #else:unix: PRE_TARGETDEPS += $$PWD/../../NewGeneBackEnd/libNewGeneBackEnd.a
+
+macx: CONFIG += c++11
 
 RESOURCES += \
 	../Resources/NewGeneResources.qrc
