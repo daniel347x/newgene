@@ -250,6 +250,8 @@ FORMS    += Widgets/newgenemainwindow.ui \
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/debug/ -lNewGeneBackEnd
+else:macx:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/OSX/NewGene/DerivedData/NewGene/Build/Products/Debug -lNewGene
+else:macx:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/OSX/NewGene/DerivedData/NewGene/Build/Products/Release -lNewGene
 else:unix: LIBS += -L$$PWD/../../NewGeneBackEnd/ -lNewGeneBackEnd
 
 win32:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem-vc110-mt-1_54
