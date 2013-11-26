@@ -2,7 +2,12 @@
 #define GLOBALS_H
 
 #include <string>
-#include <cstdint>
+#include <boost/predef.h>
+#if __APPLE__
+#   include <stdint.h>
+#else
+#   include <cstdint>
+#endif
 typedef std::string STD_STRING;
 typedef std::int64_t STD_INT64;
 
