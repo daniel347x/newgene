@@ -145,11 +145,11 @@ class Messager
 		// The following functions are all overridden in [Input|Output]-specific Messager class that derives from this class
 		// ***************************************************************************************************************//
 
-		virtual void EmitChangeMessage(DataChangeMessage & changes) {}
+        virtual void EmitChangeMessage(DataChangeMessage &) {}
 
 		virtual void ShowMessageBox(std::string) {}
 		virtual bool ShowQuestionMessageBox(std::string, std::string) { return false; } // title, question text
-		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value) {}
+        virtual void StartProgressBar(std::int64_t const, std::int64_t const) {}
 		virtual void EndProgressBar() {}
 		virtual void UpdateProgressBarValue(std::int64_t const) {}
 		virtual void UpdateStatusBarText(std::string const &) {}
@@ -158,16 +158,16 @@ class Messager
 		virtual void AppendKadStatusText(std::string const &, void *);
 		virtual void SetPerformanceLabel(std::string const &) {}
 
-		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA & widgetData) {}
-		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX & widgetData) {}
-		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE & widgetData) {}
-		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA & widgetData) {}
-		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE & widgetData) {}
-		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROLS_AREA & widgetData) {}
-		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET & widgetData) {}
-		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET & widgetData) {}
-		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET & widgetData) {}
-		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB & widgetData) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA &) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX &) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE &) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA &) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE &) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROLS_AREA &) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET &) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET &) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET &) {}
+        virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB &) {}
 
 	protected:
 

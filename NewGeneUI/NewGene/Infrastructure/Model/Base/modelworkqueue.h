@@ -15,7 +15,7 @@ class ModelWorkQueue : public WorkQueueManager<UI_MODEL_THREAD_LOOP_CLASS_ENUM>
 
 		bool IsDatabasePool()
 		{
-			return IsPoolTwo();
+            return this->IsPoolTwo();
 		}
 
 };

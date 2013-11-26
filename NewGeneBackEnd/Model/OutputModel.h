@@ -120,20 +120,20 @@ class ColumnsInTempView
 				};
 
 				ColumnInTempView()
-					: column_type(COLUMN_TYPE__UNKNOWN)
-					, primary_key_index_within_total_kad_for_dmu_category(-1)
+                    : is_within_inner_table_corresponding_to_top_level_uoa(false)
+                    , inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables(-1)
+                    , column_type(COLUMN_TYPE__UNKNOWN)
+                    , primary_key_index_within_total_kad_for_dmu_category(-1)
 					, primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category(-1)
 					, primary_key_index_within_primary_uoa_for_dmu_category(-1)
 					, current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg(-1)
-					, current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set(-1)
-					, total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group(-1)
-					, primary_key_should_be_treated_as_numeric(false)
-					, total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category(-1)
-					, total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category(-1)
-					, total_k_spin_count_across_multiplicities_for_dmu_category(-1)
-					, is_within_inner_table_corresponding_to_top_level_uoa(false)
-					, inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables(-1)
-					, number_inner_tables_in_set(-1)
+                    , current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set(-1)
+                    , number_inner_tables_in_set(-1)
+                    , total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group(-1)
+                    , total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category(-1)
+                    , total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category(-1)
+                    , total_k_spin_count_across_multiplicities_for_dmu_category(-1)
+                    , primary_key_should_be_treated_as_numeric(false)
 					, originally_datetime(false)
 				{
 
@@ -179,10 +179,10 @@ class ColumnsInTempView
 
 		ColumnsInTempView()
 			: view_number(-1)
-			, most_recent_sql_statement_executed__index(-1)
 			, has_no_datetime_columns(false)
 			, has_no_datetime_columns_originally(false)
-			, make_table_permanent(false)
+            , most_recent_sql_statement_executed__index(-1)
+            , make_table_permanent(false)
 			, not_first_variable_group_column_index(-1)
 		{
 
@@ -199,10 +199,10 @@ class ColumnsInTempView
 			, variable_groups(rhs.variable_groups)
 			, view_name(rhs.view_name)
 			, view_name_no_uuid(rhs.view_name_no_uuid)
-			, most_recent_sql_statement_executed__index(rhs.most_recent_sql_statement_executed__index)
+            , previous_block_datetime_column_types(rhs.previous_block_datetime_column_types)
+            , current_block_datetime_column_types(rhs.current_block_datetime_column_types)
+            , most_recent_sql_statement_executed__index(rhs.most_recent_sql_statement_executed__index)
 			, make_table_permanent(rhs.make_table_permanent)
-			, current_block_datetime_column_types(rhs.current_block_datetime_column_types)
-			, previous_block_datetime_column_types(rhs.previous_block_datetime_column_types)
 
 		{
 			// For optimization variables
@@ -430,9 +430,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						SavedRowData()
 							: datetime_start(0)
 							, datetime_end(0)
-							, failed(false)
 							, number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns(1)
-						{
+                            , failed(false)
+                        {
 
 						}
 

@@ -18,13 +18,13 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 	public:
 
-		UIAllSettings(UIMessager & messager, int const number_worker_threads)
+        UIAllSettings(UIMessager &, int const number_worker_threads)
 			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
 		{
 
 		}
 
-		virtual void WriteSettingsToFile() {}
+        virtual void WriteSettingsToFile(Messager &) {}
 
 		virtual void UpdateConnections() {}
 
@@ -64,16 +64,16 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 				template<typename T>
 				void UpdateSetting(Messager & messager, SETTINGS_ENUM const which_setting, T const & setting_value)
 				{
-					SettingInfo setting_info = SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
-					_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info, setting_value.ToString()));
+                    SettingInfo setting_info = this->SettingInfoObject.GetSettingInfoFromEnum(messager, which_setting);
+                    this->_settings_map[which_setting] = std::unique_ptr<SETTING_CLASS>(NewSetting(messager, setting_info, setting_value.ToString()));
 					WriteSettingsToFile(messager);
 				}
 
 				void WriteSettingsToFile(Messager & messager)
 				{
 					boost::property_tree::ptree pt;
-					WriteSettingsToPtree(messager, pt);
-					WritePtreeToFile(messager, pt);
+                    this->WriteSettingsToPtree(messager, pt);
+                    this->WritePtreeToFile(messager, pt);
 				}
 
 			protected:
@@ -101,7 +101,7 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 					protected:
 
-						_RelatedImpl_base(UIMessager & messager, boost::filesystem::path const)
+                        _RelatedImpl_base(UIMessager &, boost::filesystem::path const)
 						{
 
 						}
@@ -312,18 +312,14 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		UIOnlySettings_base<SETTINGS_ENUM, SETTING_CLASS> &
 		getUISettings_base(_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS> & impl)
 		{
-			_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_UIRelatedImpl_base & impl_ui = impl.getInternalUIImplementation();
-			UI_SETTINGS_CLASS & settings_repository = impl_ui.getSettingsRepository();
-			return static_cast<UIOnlySettings_base<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
+            return static_cast<UIOnlySettings_base<SETTINGS_ENUM, SETTING_CLASS> &>(impl.getInternalUIImplementation().getSettingsRepository());
 		}
 
 		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS, typename SETTINGS_ENUM, typename SETTING_CLASS>
 		Settings<SETTINGS_ENUM, SETTING_CLASS> &
 		getBackendSettings_base(_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS> & impl)
 		{
-			_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendRelatedImpl_base & impl_backend = impl.getInternalBackendImplementation();
-			BACKEND_SETTINGS_CLASS & settings_repository = impl_backend.getSettingsRepository();
-			return static_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
+            return static_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(impl.getInternalBackendImplementation().getSettingsRepository());
 		}
 
 		template<typename BACKEND_SETTINGS_CLASS, typename UI_SETTINGS_CLASS>
@@ -332,8 +328,7 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		{
 			try
 			{
-				_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendProjectRelatedImpl_base & impl_backend = dynamic_cast<_impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendProjectRelatedImpl_base &>(impl.getInternalBackendImplementation());
-				return impl_backend.getSettingsRepositorySharedPtr();
+                return dynamic_cast<typename _impl_base<BACKEND_SETTINGS_CLASS, UI_SETTINGS_CLASS>::_BackendProjectRelatedImpl_base &>(impl.getInternalBackendImplementation()).getSettingsRepositorySharedPtr();
 			}
 			catch (std::bad_cast & bc)
 			{

@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QCoreApplication>
-#include "..\..\NewGeneBackEnd\Messager\Messager.h"
+#include "../../NewGeneBackEnd/Messager/Messager.h"
 
 class UISettingsManager;
 class UIProjectManager;
@@ -91,8 +91,8 @@ class UIMessager : public QObject, public Messager
 		virtual void UpdateStatusBarText(std::string const &, void *);
 		virtual void AppendKadStatusText(std::string const &, void *);
 
-		virtual void EmitInputProjectChangeMessage(DataChangeMessage & changes) {}
-		virtual void EmitOutputProjectChangeMessage(DataChangeMessage & changes) {}
+        virtual void EmitInputProjectChangeMessage(DataChangeMessage &) {}
+        virtual void EmitOutputProjectChangeMessage(DataChangeMessage &) {}
 
 	signals:
 
@@ -142,7 +142,7 @@ class UIMessagerInputProject : public UIMessager
 		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();
 		virtual void UpdateProgressBarValue(std::int64_t const);
-		virtual void UpdateStatusBarText(std::string const & status_bar_text);
+        virtual void UpdateStatusBarText(std::string const & status_bar_text, void *);
 
 		void EmitInputProjectChangeMessage(DataChangeMessage & changes);
 

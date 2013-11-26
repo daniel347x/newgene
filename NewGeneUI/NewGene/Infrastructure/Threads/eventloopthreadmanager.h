@@ -87,8 +87,9 @@ class EventLoopThreadManager
 
 	protected:
 
-		virtual WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
+        virtual WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * InstantiateWorkQueue(void *, bool isPool2_ = false)
 		{
+            Q_UNUSED(isPool2_);
 			return nullptr;
 		}
 

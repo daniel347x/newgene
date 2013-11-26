@@ -5,7 +5,7 @@
 #include <QString>
 #include <QApplication>
 #include <memory>
-#include "..\..\NewGeneBackEnd\Manager.h"
+#include "../../NewGeneBackEnd/Manager.h"
 
 class NewGeneMainWindow;
 class NewGeneWidget;

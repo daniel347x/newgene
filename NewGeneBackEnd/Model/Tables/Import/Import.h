@@ -29,9 +29,9 @@ class NameOrIndex
 
 		NameOrIndex(NAME_OR_INDEX const name_or_index_, std::string const name_)
 			: name_or_index(name_or_index_)
-			, name(name_)
 			, index(-1)
-		{
+            , name(name_)
+        {
 		}
 
 		NAME_OR_INDEX name_or_index;

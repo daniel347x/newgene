@@ -23,7 +23,7 @@ class Model_basemost
 
 	public:
 
-		Model_basemost(Messager & messager, boost::filesystem::path const & path_to_model_database)
+        Model_basemost(Messager &, boost::filesystem::path const & path_to_model_database)
 			: _path_to_model_database(path_to_model_database)
 			, db(NULL)
 		{

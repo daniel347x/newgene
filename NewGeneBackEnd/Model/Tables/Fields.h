@@ -32,12 +32,12 @@ class BaseField
 public:
 	virtual FIELD_TYPE GetType() const { return FIELD_TYPE_UNKNOWN; };
 	virtual std::string GetName() const { return ""; };
-	BaseField(bool dummy)
+    BaseField(bool)
 	{
 
 	}
 private:
-	BaseField(BaseField const & rhs) {}
+    BaseField(BaseField const &) {}
 };
 
 template <FIELD_TYPE THE_FIELD_TYPE>
@@ -87,7 +87,7 @@ public:
 
 private:
 	 
-	Field<THE_FIELD_TYPE>(Field<THE_FIELD_TYPE> const & rhs) {}
+    Field<THE_FIELD_TYPE>(Field<THE_FIELD_TYPE> const &) {}
 
 };
 

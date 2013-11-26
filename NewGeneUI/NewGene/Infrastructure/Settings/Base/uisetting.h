@@ -44,7 +44,7 @@ class UIProjectSetting : virtual public UISetting, virtual public ProjectSetting
 class UIProjectInputSetting : public UIProjectSetting, public UIInputSetting, public ProjectInputSetting
 {
 	public:
-		UIProjectInputSetting(Messager & messager) : Setting(messager), UISetting(messager), InputSetting(messager), ProjectSetting(messager), UIProjectSetting(messager), UIInputSetting(messager), ProjectInputSetting(messager) {}
+        UIProjectInputSetting(Messager & messager) : Setting(messager), UISetting(messager), ProjectSetting(messager), InputSetting(messager), UIProjectSetting(messager), UIInputSetting(messager), ProjectInputSetting(messager) {}
 		SettingInfo GetSettingInfoFromEnum(Messager & messager_, int const enum_val);
 		static SETTING_CATEGORY category;
 		std::string ToString() const { return ""; }
@@ -53,7 +53,7 @@ class UIProjectInputSetting : public UIProjectSetting, public UIInputSetting, pu
 class UIProjectOutputSetting : public UIProjectSetting, public UIOutputSetting, public ProjectOutputSetting
 {
 	public:
-		UIProjectOutputSetting(Messager & messager) : Setting(messager), UISetting(messager), OutputSetting(messager), ProjectSetting(messager), UIProjectSetting(messager), UIOutputSetting(messager), ProjectOutputSetting(messager) {}
+        UIProjectOutputSetting(Messager & messager) : Setting(messager), UISetting(messager), ProjectSetting(messager), OutputSetting(messager), UIProjectSetting(messager), UIOutputSetting(messager), ProjectOutputSetting(messager) {}
 		SettingInfo GetSettingInfoFromEnum(Messager & messager_, int const enum_val);
 		static SETTING_CATEGORY category;
 		std::string ToString() const { return ""; }

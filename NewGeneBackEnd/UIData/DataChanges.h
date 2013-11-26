@@ -67,7 +67,7 @@ class DataChangePacket
 
 		}
 
-		DataChangePacket(DataChangePacket const & rhs)
+        DataChangePacket(DataChangePacket const &)
 		{
 
 		}

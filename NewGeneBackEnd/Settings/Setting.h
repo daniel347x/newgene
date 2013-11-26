@@ -52,7 +52,7 @@ public:
 	virtual void DoSpecialParse(Messager &) {}
 
 	// TODO: throw
-	virtual SettingInfo GetSettingInfoFromEnum(Messager & messager, int const enum_val) { return SettingInfo(); };
+    virtual SettingInfo GetSettingInfoFromEnum(Messager &, int const) { return SettingInfo(); };
 
 protected:
 

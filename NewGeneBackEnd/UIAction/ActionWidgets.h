@@ -49,7 +49,7 @@ class WidgetActionItem
 
 		}
 
-		WidgetActionItem(WidgetActionItem const & rhs)
+        WidgetActionItem(WidgetActionItem const &)
 		{
 
 		}
