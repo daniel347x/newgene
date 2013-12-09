@@ -13,7 +13,7 @@
 #	include <boost/algorithm/string.hpp>
 #endif
 
-#include "../../../globals.h"
+//#include "../../NewGeneBackEnd/globals.h"
 
 typedef std::string UUID;
 typedef std::vector<UUID> UUIDVector;
