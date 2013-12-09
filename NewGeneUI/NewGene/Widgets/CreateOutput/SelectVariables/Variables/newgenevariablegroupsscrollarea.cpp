@@ -53,7 +53,7 @@ void NewGeneVariableGroupsScrollArea::TestSlot()
 {
 }
 
-void NewGeneVariableGroupsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA widget_data)
+void NewGeneVariableGroupsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA)
 {
 }
 

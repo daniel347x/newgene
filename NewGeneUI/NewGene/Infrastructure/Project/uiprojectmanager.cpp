@@ -73,7 +73,7 @@ void UIProjectManager::EndAllLoops()
 		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
 
-			ProjectPaths & paths = tab.first;
+            //ProjectPaths & paths = tab.first;
 			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
 			RawCloseInputProject(project_ptr);
 
@@ -88,7 +88,7 @@ void UIProjectManager::EndAllLoops()
 		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
 
-			ProjectPaths & paths = tab.first;
+            //ProjectPaths & paths = tab.first;
 			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
 			RawCloseOutputProject(project_ptr);
 
@@ -141,8 +141,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 			InputProjectTabs & tabs = input_tabs[mainWindow];
 			for_each(tabs.begin(), tabs.end(), [](InputProjectTab & tab)
 			{
-				ProjectPaths & paths = tab.first;
-				UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.get());
+                //ProjectPaths & paths = tab.first;
+                //UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.get());
 			});
 		}
 
@@ -182,8 +182,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 			OutputProjectTabs & tabs = output_tabs[mainWindow];
 			for_each(tabs.begin(), tabs.end(), [](OutputProjectTab & tab)
 			{
-				ProjectPaths & paths = tab.first;
-				UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
+                //ProjectPaths & paths = tab.first;
+                //UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
 			});
 		}
 
@@ -565,6 +565,8 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	msg % input_project_settings_path;
 	messager.UpdateStatusBarText(msg.str(), nullptr);
 
+    return true;
+
 }
 
 bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject)
@@ -681,6 +683,8 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	boost::format msg("%1% successfully loaded.");
 	msg % output_project_settings_path;
 	messager.UpdateStatusBarText(msg.str(), nullptr);
+
+    return true;
 
 }
 
