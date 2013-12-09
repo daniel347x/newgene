@@ -2,7 +2,7 @@
 #define NEWGENEVARIABLESUMMARY_H
 
 #include <QWidget>
-#include "..\..\..\newgenewidget.h"
+#include "../../../newgenewidget.h"
 #include <QStringListModel>
 
 namespace Ui

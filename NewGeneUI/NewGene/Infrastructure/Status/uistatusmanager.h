@@ -3,7 +3,7 @@
 
 #include "globals.h"
 #include "Infrastructure/uimanager.h"
-#include "..\..\..\NewGeneBackEnd\Status\StatusManager.h"
+#include "../../../NewGeneBackEnd/Status/StatusManager.h"
 
 class NewGeneMainWindow;
 

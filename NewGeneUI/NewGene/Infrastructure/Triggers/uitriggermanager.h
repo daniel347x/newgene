@@ -2,7 +2,7 @@
 #define UITRIGGERMANAGER_H
 
 #include "Infrastructure/uimanager.h"
-#include "..\..\..\NewGeneBackEnd\Triggers\TriggerManager.h"
+#include "../../../NewGeneBackEnd/Triggers/TriggerManager.h"
 #include <QWidget>
 
 class UITriggerManager : public QObject, public UIManager<UITriggerManager, TriggerManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS_UI, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_TRIGGERS>

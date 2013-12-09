@@ -88,7 +88,7 @@ class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_M
 			return static_cast<OutputModelSettings &>(getBackendSettings_base<OutputModelSettings, OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS, OutputModelSetting>(*__impl));
 		}
 
-		std::shared_ptr<OutputModelSettings> & getBackendSettingsSharedPtr()
+        std::shared_ptr<OutputModelSettings> const & getBackendSettingsSharedPtr()
 		{
 			if (!__impl)
 			{
@@ -108,7 +108,7 @@ class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_M
 
 	protected:
 
-		WorkQueueManager<UI_OUTPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
+        WorkQueueManager<UI_OUTPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			OutputModelSettingsWorkQueue * work_queue = new OutputModelSettingsWorkQueue();
 			work_queue->SetUIObject(reinterpret_cast<UIOutputModelSettings*>(ui_object));

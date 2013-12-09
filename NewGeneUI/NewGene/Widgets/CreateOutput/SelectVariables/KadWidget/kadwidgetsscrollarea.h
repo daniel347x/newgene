@@ -2,7 +2,7 @@
 #define KADWIDGETSSCROLLAREA_H
 
 #include <QWidget>
-#include "..\..\..\newgenewidget.h"
+#include "../../../newgenewidget.h"
 
 class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 {

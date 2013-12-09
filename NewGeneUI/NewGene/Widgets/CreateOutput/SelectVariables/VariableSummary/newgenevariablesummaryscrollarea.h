@@ -2,7 +2,7 @@
 #define NEWGENEVARIABLESUMMARYSCROLLAREA_H
 
 #include <QWidget>
-#include "..\..\..\newgenewidget.h"
+#include "../../../newgenewidget.h"
 #include "NewGeneVariableSummaryGroup.h"
 
 namespace Ui

@@ -2,7 +2,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QTimer>
-#include "..\..\NewGeneBackEnd\test.h"
+#include "../../NewGeneBackEnd/test.h"
 #include "Infrastructure/Model/uimodelmanager.h"
 #include "Infrastructure/Settings/uisettingsmanager.h"
 #include "Infrastructure/Documents/uidocumentmanager.h"

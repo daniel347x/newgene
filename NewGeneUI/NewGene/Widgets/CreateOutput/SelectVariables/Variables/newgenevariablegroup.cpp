@@ -256,10 +256,18 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 							{
 								// Ditto above.
 							}
+                            break;
+                        default:
+                            {
+                            }
 							break;
 					}
 				}
 				break;
-		}
+            default:
+                {
+                }
+                break;
+        }
 	});
 }

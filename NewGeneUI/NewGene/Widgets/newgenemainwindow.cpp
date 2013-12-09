@@ -1,7 +1,7 @@
 #include "newgenemainwindow.h"
 #include "ui_newgenemainwindow.h"
 #include <QMessageBox>
-#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "uistatusmanager.h"
 #include "uidocumentmanager.h"
 #include "uisettingsmanager.h"
@@ -190,7 +190,7 @@ void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(int progress_bar_id,
 	}
 }
 
-void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(int progress_bar_id, STD_STRING const status_bar_message)
+void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(int /* progress_bar_id */, STD_STRING const status_bar_message)
 {
 	if (this->statusBar())
 	{

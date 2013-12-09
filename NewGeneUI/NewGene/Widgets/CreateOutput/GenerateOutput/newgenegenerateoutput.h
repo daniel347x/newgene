@@ -1,7 +1,7 @@
 #ifndef NEWGENEGENERATEOUTPUT_H
 #define NEWGENEGENERATEOUTPUT_H
 
-#include "..\..\..\newgenewidget.h"
+#include "../../../newgenewidget.h"
 #include <QWidget>
 
 namespace Ui {

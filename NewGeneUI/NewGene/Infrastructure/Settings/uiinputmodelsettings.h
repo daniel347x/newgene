@@ -88,7 +88,7 @@ class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MOD
 			return static_cast<InputModelSettings &>(getBackendSettings_base<InputModelSettings, INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS, InputModelSetting>(*__impl));
 		}
 
-		std::shared_ptr<InputModelSettings> & getBackendSettingsSharedPtr()
+        std::shared_ptr<InputModelSettings> const & getBackendSettingsSharedPtr()
 		{
 			if (!__impl)
 			{
@@ -109,7 +109,7 @@ class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MOD
 
 	protected:
 
-		WorkQueueManager<UI_INPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
+        WorkQueueManager<UI_INPUT_MODEL_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			InputModelSettingsWorkQueue * work_queue = new InputModelSettingsWorkQueue();
 			work_queue->SetUIObject(reinterpret_cast<UIInputModelSettings*>(ui_object));

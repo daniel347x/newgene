@@ -117,7 +117,7 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 
 }
 
-void TimeRangeBox::on_doRandomSampling_stateChanged(int arg1)
+void TimeRangeBox::on_doRandomSampling_stateChanged(int)
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
@@ -138,7 +138,7 @@ void TimeRangeBox::on_doRandomSampling_stateChanged(int arg1)
 
 }
 
-void TimeRangeBox::on_randomSamplingHowManyRows_textChanged(const QString &arg1)
+void TimeRangeBox::on_randomSamplingHowManyRows_textChanged(const QString &)
 {
 
 	QLineEdit * lineEdit = this->findChild<QLineEdit*>("randomSamplingHowManyRows");

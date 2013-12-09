@@ -10,7 +10,7 @@
 #include "Base/uiproject.h"
 #include "Infrastructure/uimanager.h"
 #include "Infrastructure/Messager/uimessager.h"
-#include "..\..\..\NewGeneBackEnd\Project\ProjectManager.h"
+#include "../../../NewGeneBackEnd/Project/ProjectManager.h"
 #include "eventloopthreadmanager.h"
 #include "uiprojectmanagerworkqueue.h"
 #include <memory>
@@ -225,7 +225,7 @@ class UIProjectManager : public QObject,
 
 	protected:
 
-		WorkQueueManager<UI_PROJECT_MANAGER> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
+        WorkQueueManager<UI_PROJECT_MANAGER> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			UIProjectManagerWorkQueue * work_queue = new UIProjectManagerWorkQueue();
 			work_queue->SetUIObject(reinterpret_cast<UIProjectManager*>(ui_object));

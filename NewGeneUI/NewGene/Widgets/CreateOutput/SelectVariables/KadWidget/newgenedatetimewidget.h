@@ -2,7 +2,7 @@
 #define NEWGENEDATETIMEWIDGET_H
 
 #include <QDateTimeEdit>
-#include "..\..\..\newgenewidget.h"
+#include "../../../newgenewidget.h"
 
 class NewGeneDateTimeWidget : public QDateTimeEdit, public NewGeneWidget
 {

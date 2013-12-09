@@ -90,7 +90,7 @@ class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 			return getBackendModel();
 		}
 
-		std::shared_ptr<OutputModel> & getBackendModelSharedPtr()
+        std::shared_ptr<OutputModel> const & getBackendModelSharedPtr()
 		{
 			if (!__impl)
 			{

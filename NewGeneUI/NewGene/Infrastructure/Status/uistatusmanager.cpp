@@ -1,5 +1,5 @@
 #include "uistatusmanager.h"
-#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include <QMessageBox>
 #include <QStatusBar>
 #include "Widgets/newgenemainwindow.h"

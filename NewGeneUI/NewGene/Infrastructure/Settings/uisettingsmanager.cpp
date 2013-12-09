@@ -1,6 +1,6 @@
 
 #include "uisettingsmanager.h"
-#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "uiallprojectsettings.h"
 #include "uiallglobalsettings.h"
 #include "uimodelmanager.h"

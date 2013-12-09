@@ -2,7 +2,7 @@
 #define NEWGENEVARIABLESUMMARYGROUP_H
 
 #include <QGroupBox>
-#include "..\..\..\newgenewidget.h"
+#include "../../../newgenewidget.h"
 
 class QStandardItem;
 

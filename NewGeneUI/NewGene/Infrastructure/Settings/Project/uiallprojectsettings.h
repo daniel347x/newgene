@@ -126,7 +126,7 @@ class UIAllProjectSettings : public UIAllSettings<UI_THREAD_LOOP_CLASS_ENUM>
             return static_cast<BACKEND_PROJECT_SETTINGS_CLASS &>(this->template getBackendSettings_base<BACKEND_PROJECT_SETTINGS_CLASS, UIOnlySettings, PROJECT_SETTINGS_ENUM, BACKEND_PROJECT_SETTING_CLASS>(*__impl));
 		}
 
-		std::shared_ptr<BACKEND_PROJECT_SETTINGS_CLASS> & getBackendSettingsSharedPtr()
+        std::shared_ptr<BACKEND_PROJECT_SETTINGS_CLASS> const & getBackendSettingsSharedPtr()
 		{
 			if (!__impl)
 			{

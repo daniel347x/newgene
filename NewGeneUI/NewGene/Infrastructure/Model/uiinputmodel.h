@@ -90,7 +90,7 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 			return getBackendModel();
 		}
 
-        std::shared_ptr<InputModel> & getBackendModelSharedPtr()
+        std::shared_ptr<InputModel> const & getBackendModelSharedPtr()
 		{
 			if (!__impl)
 			{

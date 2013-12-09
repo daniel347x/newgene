@@ -56,7 +56,7 @@ class UIOutputProjectSettings : public QObject, public UIAllProjectSettings<Outp
 
 	protected:
 
-		WorkQueueManager<UI_OUTPUT_PROJECT_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool isPool2_ = false)
+        WorkQueueManager<UI_OUTPUT_PROJECT_SETTINGS> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			OutputProjectSettingsWorkQueue * work_queue = new OutputProjectSettingsWorkQueue();
 			work_queue->SetUIObject(reinterpret_cast<UIOutputProjectSettings*>(ui_object));

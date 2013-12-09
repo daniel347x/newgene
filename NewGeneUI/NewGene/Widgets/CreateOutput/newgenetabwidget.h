@@ -2,7 +2,7 @@
 #define NEWGENETABWIDGET_H
 
 #include <QTabWidget>
-#include "..\newgenewidget.h"
+#include "../newgenewidget.h"
 
 class NewGeneTabWidget : public QTabWidget, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {

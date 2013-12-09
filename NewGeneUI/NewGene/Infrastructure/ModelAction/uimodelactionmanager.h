@@ -3,7 +3,7 @@
 
 #include "globals.h"
 #include "Infrastructure/uimanager.h"
-#include "..\..\..\NewGeneBackEnd\ModelAction\ModelActionManager.h"
+#include "../../../NewGeneBackEnd/ModelAction/ModelActionManager.h"
 
 class NewGeneMainWindow;
 

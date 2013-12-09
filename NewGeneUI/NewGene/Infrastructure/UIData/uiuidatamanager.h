@@ -3,7 +3,7 @@
 
 #include "globals.h"
 #include "Infrastructure/uimanager.h"
-#include "..\..\..\NewGeneBackEnd\UIData\UIDataManager.h"
+#include "../../../NewGeneBackEnd/UIData/UIDataManager.h"
 
 class NewGeneMainWindow;
 

@@ -2,7 +2,7 @@
 #define NEWGENEVARIABLES_H
 
 #include <QWidget>
-#include "..\..\..\newgenewidget.h"
+#include "../../../newgenewidget.h"
 
 namespace Ui
 {

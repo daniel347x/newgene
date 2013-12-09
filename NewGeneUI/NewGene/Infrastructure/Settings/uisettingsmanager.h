@@ -3,10 +3,10 @@
 
 #include "globals.h"
 #include "Infrastructure/uimanager.h"
-#include "..\..\..\NewGeneBackEnd\Settings\SettingsManager.h"
+#include "../../../NewGeneBackEnd/Settings/SettingsManager.h"
 #include <QString>
 #ifndef Q_MOC_RUN
-#   include <boost\filesystem.hpp>
+#   include <boost/filesystem.hpp>
 #   include <boost/property_tree/ptree.hpp>
 #   include <boost/property_tree/xml_parser.hpp>
 #endif

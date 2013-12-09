@@ -9,14 +9,14 @@ NewGeneMainWindow * NewGeneWidget::theMainWindow = nullptr;
 
 NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
 	: self( creation_info.self )
-	, inp(nullptr)
+    , widget_nature(creation_info.widget_nature)
+    , uuid(newUUID())
+    , uuid_parent(creation_info.uuid_parent)
+    , inp(nullptr)
 	, outp(nullptr)
-	, widget_type(creation_info.widget_type)
-	, uuid(newUUID())
-	, uuid_parent(creation_info.uuid_parent)
-	, widget_nature(creation_info.widget_nature)
-	, top_level(creation_info.top_level)
-	, data_instance(creation_info.data_instance)
+    , widget_type(creation_info.widget_type)
+    , data_instance(creation_info.data_instance)
+    , top_level(creation_info.top_level)
 {
 }
 

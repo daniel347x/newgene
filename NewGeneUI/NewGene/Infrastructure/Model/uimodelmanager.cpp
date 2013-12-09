@@ -1,5 +1,5 @@
 #include "uimodelmanager.h"
-#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "uiinputmodel.h"
 #include "uioutputmodel.h"
 

@@ -1,8 +1,8 @@
 
-int const footest(int const n);
+int footest(int const n);
 
 class A
 {
 public:
-	int const foo_A(int const x);
+    int foo_A(int const x);
 };

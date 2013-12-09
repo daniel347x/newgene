@@ -13,7 +13,7 @@ class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 	public:
 
-		UIModelSettings(UIMessager & messager, int const number_worker_threads)
+        UIModelSettings(UIMessager &, int const number_worker_threads)
 			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
 		{
 
@@ -49,7 +49,7 @@ class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 					protected:
 
-						_RelatedImpl_base(UIMessager & messager, boost::filesystem::path const)
+                        _RelatedImpl_base(UIMessager &, boost::filesystem::path const)
 						{
 
 						}
@@ -115,28 +115,14 @@ class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		Settings<SETTINGS_ENUM, SETTING_CLASS> &
 		getBackendSettings_base(_impl_base<BACKEND_SETTINGS_CLASS> & impl)
 		{
-			_impl_base<BACKEND_SETTINGS_CLASS>::_ModelRelatedImpl_base & impl_backend = impl.getInternalBackendImplementation();
-			BACKEND_SETTINGS_CLASS & settings_repository = impl_backend.getSettingsRepository();
-			return static_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(settings_repository);
-		}
+            return static_cast<Settings<SETTINGS_ENUM, SETTING_CLASS> &>(impl.getInternalBackendImplementation().getSettingsRepository());
+        }
 
 		template<typename BACKEND_SETTINGS_CLASS>
 		std::shared_ptr<BACKEND_SETTINGS_CLASS>
 		getBackendSettingsSharedPtr_base(_impl_base<BACKEND_SETTINGS_CLASS> & impl)
 		{
-			_impl_base<BACKEND_SETTINGS_CLASS>::_ModelRelatedImpl_base & impl_backend = impl.getInternalBackendImplementation();
-			return impl_backend.getSettingsRepositorySharedPtr();
-//			try
-//			{
-//				_impl_base<BACKEND_SETTINGS_CLASS>::_ModelRelatedImpl_base & impl_backend = dynamic_cast<_impl_base<BACKEND_SETTINGS_CLASS>::_ModelRelatedImpl_base &>(impl.getInternalBackendImplementation());
-//				return impl_backend.getSettingsRepositorySharedPtr();
-//			}
-//			catch (std::bad_cast & bc)
-//			{
-//				boost::format msg( "Cannot convert from _BackendRelatedImpl_base to _BackendProjectRelatedImpl_base in getBackendSettingsSharedPtr_base: %1%" );
-//				msg % bc.what();
-//				throw NewGeneException() << newgene_error_description( msg.str() );
-//			}
+            return impl.getInternalBackendImplementation().getSettingsRepositorySharedPtr();
 		}
 
 };

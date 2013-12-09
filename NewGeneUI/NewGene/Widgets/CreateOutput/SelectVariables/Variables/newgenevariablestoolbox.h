@@ -2,7 +2,7 @@
 #define NEWGENEVARIABLESTOOLBOX_H
 
 #include <QToolBox>
-#include "..\..\..\newgenewidget.h"
+#include "../../../newgenewidget.h"
 #include "newgenevariablegroup.h"
 
 class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first

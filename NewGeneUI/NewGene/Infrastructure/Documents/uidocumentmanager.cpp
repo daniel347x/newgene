@@ -1,5 +1,5 @@
 #include "uidocumentmanager.h"
-#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include <QStandardPaths>
 #include <QCoreApplication>
 #include <fstream>

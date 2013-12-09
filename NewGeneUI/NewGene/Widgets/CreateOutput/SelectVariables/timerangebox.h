@@ -2,7 +2,7 @@
 #define TIMERANGEBOX_H
 
 #include <QFrame>
-#include "..\..\newgenewidget.h"
+#include "../../newgenewidget.h"
 
 namespace Ui
 {

@@ -2,7 +2,7 @@
 #define NEWGENEVARIABLESTOOLBOXWRAPPER_H
 
 #include <QWidget>
-#include "..\..\..\newgenewidget.h"
+#include "../../../newgenewidget.h"
 #include <QGridLayout>
 #include "newgenevariablestoolbox.h"
 

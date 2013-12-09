@@ -151,7 +151,7 @@ void NewGeneVariableSummaryGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIAB
 
 }
 
-void NewGeneVariableSummaryGroup::ReceiveVariableItemChanged(QStandardItem * currentItem)
+void NewGeneVariableSummaryGroup::ReceiveVariableItemChanged(QStandardItem * /* currentItem */)
 {
 
 	// Since the items are not checkboxes yet, the following signal will never currently be called
@@ -284,9 +284,17 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 							  // Ditto above.
 						  }
 						  break;
-				  }
+                      default:
+                          {
+                          }
+                          break;
+                  }
 			  }
 			  break;
-	  }
+          default:
+              {
+              }
+              break;
+      }
   });
 }
