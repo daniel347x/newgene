@@ -88,7 +88,7 @@ class UIOutputModelSettings : public QObject, public UIModelSettings<UI_OUTPUT_M
 			return static_cast<OutputModelSettings &>(getBackendSettings_base<OutputModelSettings, OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_SETTINGS, OutputModelSetting>(*__impl));
 		}
 
-        std::shared_ptr<OutputModelSettings> const & getBackendSettingsSharedPtr()
+		std::shared_ptr<OutputModelSettings> getBackendSettingsSharedPtr()
 		{
 			if (!__impl)
 			{

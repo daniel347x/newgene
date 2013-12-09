@@ -88,7 +88,7 @@ class UIInputModelSettings : public QObject, public UIModelSettings<UI_INPUT_MOD
 			return static_cast<InputModelSettings &>(getBackendSettings_base<InputModelSettings, INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETTINGS, InputModelSetting>(*__impl));
 		}
 
-        std::shared_ptr<InputModelSettings> const & getBackendSettingsSharedPtr()
+		std::shared_ptr<InputModelSettings> getBackendSettingsSharedPtr()
 		{
 			if (!__impl)
 			{
