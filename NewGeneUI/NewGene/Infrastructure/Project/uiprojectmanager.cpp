@@ -535,7 +535,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	}
 
     input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
-                                                    std::ref(std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject)))));
+                                                    std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
     UIInputProject * project = getActiveUIInputProject();
 
