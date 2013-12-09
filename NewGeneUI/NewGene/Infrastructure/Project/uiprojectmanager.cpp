@@ -73,7 +73,7 @@ void UIProjectManager::EndAllLoops()
 		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
 
-            //ProjectPaths & paths = tab.first;
+			//ProjectPaths & paths = tab.first;
 			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
 			RawCloseInputProject(project_ptr);
 
@@ -88,7 +88,7 @@ void UIProjectManager::EndAllLoops()
 		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
 
-            //ProjectPaths & paths = tab.first;
+			//ProjectPaths & paths = tab.first;
 			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
 			RawCloseOutputProject(project_ptr);
 
@@ -141,8 +141,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 			InputProjectTabs & tabs = input_tabs[mainWindow];
 			for_each(tabs.begin(), tabs.end(), [](InputProjectTab & tab)
 			{
-                //ProjectPaths & paths = tab.first;
-                //UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.get());
+				//ProjectPaths & paths = tab.first;
+				//UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.get());
 			});
 		}
 
@@ -182,8 +182,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 			OutputProjectTabs & tabs = output_tabs[mainWindow];
 			for_each(tabs.begin(), tabs.end(), [](OutputProjectTab & tab)
 			{
-                //ProjectPaths & paths = tab.first;
-                //UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
+				//ProjectPaths & paths = tab.first;
+				//UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
 			});
 		}
 
@@ -534,7 +534,8 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		return false;
 	}
 
-	input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
+	// Forced to explicity declare the type of pair to prevent Clang from const-qualifying the unique_ptr, which forces a copy, rather than move, constructor (or something like that?)
+	input_tabs[mainWindow].push_back(std::make_pair<ProjectPaths, std::unique_ptr<UIInputProject>>(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
 													std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
 	UIInputProject * project = getActiveUIInputProject();
@@ -565,7 +566,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	msg % input_project_settings_path;
 	messager.UpdateStatusBarText(msg.str(), nullptr);
 
-    return true;
+	return true;
 
 }
 
@@ -684,7 +685,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	msg % output_project_settings_path;
 	messager.UpdateStatusBarText(msg.str(), nullptr);
 
-    return true;
+	return true;
 
 }
 
