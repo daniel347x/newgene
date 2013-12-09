@@ -90,14 +90,14 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 			return getBackendModel();
 		}
 
-        std::shared_ptr<InputModel> const & getBackendModelSharedPtr()
+		std::shared_ptr<InputModel> getBackendModelSharedPtr()
 		{
 			if (!__impl)
 			{
 				boost::format msg( "Internal model implementation not yet constructed." );
 				throw NewGeneException() << newgene_error_description( msg.str() );
 			}
-            return this->getBackendModelSharedPtr_base<InputModel>(*__impl);
+			return this->getBackendModelSharedPtr_base<InputModel>(*__impl);
 		}
 
 		bool is_model_equivalent(UIMessager & messager, UIInputModel * model);

@@ -73,7 +73,7 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 					protected:
 
-                        _RelatedImpl_base(UIMessager &, std::shared_ptr<BACKEND_MODEL_CLASS> const & backend_model_instance)
+						_RelatedImpl_base(UIMessager &, std::shared_ptr<BACKEND_MODEL_CLASS> const & backend_model_instance)
 							: _model(backend_model_instance)
 						{
 						}
@@ -82,16 +82,16 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 				};
 
-                std::unique_ptr<UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base> __impl;
+				std::unique_ptr<UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base> __impl;
 
-                UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base & getInternalImplementation()
+				UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base & getInternalImplementation()
 				{
-                    if (!__impl)
+					if (!__impl)
 					{
 						boost::format msg( "Internal backend model implementation not yet constructed." );
 						throw NewGeneException() << newgene_error_description( msg.str() );
 					}
-                    return *(__impl.get());
+					return *(__impl.get());
 				}
 
 		};
@@ -101,16 +101,16 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		template<typename BACKEND_MODEL_CLASS>
 		BACKEND_MODEL_CLASS &
-        getBackendModel_base(UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS> & impl)
+		getBackendModel_base(UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS> & impl)
 		{
-            return impl.getInternalImplementation().getModel();
+			return impl.getInternalImplementation().getModel();
 		}
 
 		template<typename BACKEND_MODEL_CLASS>
 		std::shared_ptr<BACKEND_MODEL_CLASS>
 		getBackendModelSharedPtr_base(_impl_base<BACKEND_MODEL_CLASS> & impl)
 		{
-            return impl.getInternalImplementation().getModelSharedPtr();
+			return impl.getInternalImplementation().getModelSharedPtr();
 		}
 
 		boost::atomic<bool> loaded_;
