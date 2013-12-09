@@ -1,3 +1,6 @@
+class NewGeneMainWindow;
+extern NewGeneMainWindow * theMainWindow;
+
 #include "uimanager.h"
 
 namespace MANAGER_DESCRIPTION_NAMESPACE
