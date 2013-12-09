@@ -138,12 +138,12 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 		}
 		else
 		{
-			InputProjectTabs & tabs = input_tabs[mainWindow];
-			for_each(tabs.begin(), tabs.end(), [](InputProjectTab & tab)
-			{
+            //InputProjectTabs & tabs = input_tabs[mainWindow];
+            //for_each(tabs.begin(), tabs.end(), [](InputProjectTab & tab)
+            //{
 				//ProjectPaths & paths = tab.first;
 				//UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.get());
-			});
+            //});
 		}
 
 		if (create_new_instance)
@@ -179,12 +179,12 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 		}
 		else
 		{
-			OutputProjectTabs & tabs = output_tabs[mainWindow];
-			for_each(tabs.begin(), tabs.end(), [](OutputProjectTab & tab)
-			{
+            //OutputProjectTabs & tabs = output_tabs[mainWindow];
+            //for_each(tabs.begin(), tabs.end(), [](OutputProjectTab & tab)
+            //{
 				//ProjectPaths & paths = tab.first;
 				//UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
-			});
+            //});
 		}
 
 		if (create_new_instance)
@@ -534,8 +534,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		return false;
 	}
 
-	// Forced to explicity declare the type of pair to prevent Clang from const-qualifying the unique_ptr, which forces a copy, rather than move, constructor (or something like that?)
-	input_tabs[mainWindow].push_back(std::make_pair<ProjectPaths, std::unique_ptr<UIInputProject>>(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
+    input_tabs[mainWindow].push_back(std::make_pair(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
 													std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
 	UIInputProject * project = getActiveUIInputProject();
