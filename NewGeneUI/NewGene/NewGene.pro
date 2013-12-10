@@ -16,6 +16,7 @@ QMAKE_CXXFLAGS_RELEASE += /Od
 QMAKE_LFLAGS_RELEASE += /DEBUG
 
 #macx: QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
+macx: QMAKE_CXXFLAGS += -std=c++11
 
 SOURCES += main.cpp\
 	Widgets/newgenemainwindow.cpp \
