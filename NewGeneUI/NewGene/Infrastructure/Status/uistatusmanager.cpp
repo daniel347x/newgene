@@ -31,7 +31,10 @@ void UIStatusManager::PostStatus( QString const & _status, UIStatusManager::IMPO
 				LogStatus( _status, importance_level );
 			}
 			break;
-	}
+        default:
+        {
+        }
+            break;
 
 	if ( importance_level == IMPORTANCE_CRITICAL )
 	{
