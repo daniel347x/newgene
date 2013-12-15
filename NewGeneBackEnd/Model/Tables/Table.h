@@ -60,11 +60,11 @@ class Table_basemost
 
 		}
 
-        virtual void Load(sqlite3 *, InputModel * input_model_ = nullptr) { Q_UNUSED(input_model_); };
-        virtual void Load(sqlite3 *, OutputModel * output_model_ = nullptr, InputModel * input_model_ = nullptr) { Q_UNUSED(input_model_); Q_UNUSED(output_model_); };
-        virtual bool ImportStart(sqlite3 *, std::string, ImportDefinition const &, OutputModel * output_model_ = nullptr, InputModel * input_model_ = nullptr) { Q_UNUSED(output_model_); Q_UNUSED(input_model_); return true; };
+        virtual void Load(sqlite3 *, InputModel * = nullptr) { };
+        virtual void Load(sqlite3 *, OutputModel * = nullptr, InputModel * = nullptr) { };
+        virtual bool ImportStart(sqlite3 *, std::string, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
         virtual bool ImportBlock(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const) { return true; };
-        virtual bool ImportEnd(sqlite3 *, ImportDefinition const &, OutputModel * output_model_ = nullptr, InputModel * input_model_ = nullptr) { Q_UNUSED(output_model_); Q_UNUSED(input_model_); return true; };
+        virtual bool ImportEnd(sqlite3 *, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
 
 		std::recursive_mutex data_mutex;
 		TABLE_MODEL_TYPE table_model_type;

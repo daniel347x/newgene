@@ -100,7 +100,7 @@ public:
 	{
 	}
 
-	WidgetInstanceIdentifier(UUID const uuid_, WidgetInstanceIdentifier const & identifier_parent_, std::string const code_, std::string const description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
+    WidgetInstanceIdentifier(UUID const uuid_, WidgetInstanceIdentifier const & identifier_parent_, std::string const code_, std::string const description_, int const sequence_number_or_count_, char const * const flags_ = "", TIME_GRANULARITY = TIME_GRANULARITY__NONE, Notes notes_ = Notes())
 		: uuid(std::make_shared<UUID>(uuid_))
 		, identifier_parent(std::make_shared<WidgetInstanceIdentifier>(identifier_parent_))
 		, code(std::make_shared<std::string>(code_))
@@ -109,7 +109,6 @@ public:
         , flags(flags_ ? flags_ : "")
 		, notes(notes_)
 	{
-        Q_UNUSED(time_granularity_);
 	}
 
 	WidgetInstanceIdentifier(std::string code_, std::string description_ = "", int const sequence_number_or_count_ = -1, char const * const flags_ = "", TIME_GRANULARITY const time_granularity_ = TIME_GRANULARITY__NONE, Notes notes_ = Notes())

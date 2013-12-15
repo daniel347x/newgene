@@ -167,7 +167,7 @@ class SettingsRepository
 
         virtual void SetMapEntry(Messager &, SettingInfo &, boost::property_tree::ptree &) {}
         virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS *, SettingInfo &) const { return new SETTING_CLASS(messager); };
-        virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo &, std::string const & setting_value_void = NULL) { Q_UNUSED(setting_value_void); return new SETTING_CLASS(messager); };
+        virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo &, std::string const & = NULL) { return new SETTING_CLASS(messager); };
         virtual void SetPTreeEntry(Messager &, SETTINGS_ENUM, boost::property_tree::ptree &) {};
 
 		void LoadSettingsFromFile(Messager & messager)
