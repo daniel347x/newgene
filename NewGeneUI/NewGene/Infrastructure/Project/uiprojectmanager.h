@@ -164,7 +164,7 @@ class UIProjectManager : public QObject,
 		// ************************************************************************************************************************************* //
 		struct ProjectPaths
 		{
-			ProjectPaths(boost::filesystem::path && project_settings_path_, boost::filesystem::path && model_settings_path_, boost::filesystem::path && model_database_path_)
+			ProjectPaths(boost::filesystem::path const & project_settings_path_, boost::filesystem::path const & model_settings_path_, boost::filesystem::path const & model_database_path_)
 				: project_settings_path(project_settings_path_)
 				, model_settings_path(model_settings_path_)
 				, model_database_path(model_database_path_)
