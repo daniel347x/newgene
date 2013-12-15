@@ -538,10 +538,14 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
     //                                                std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
 
-    input_tabs[mainWindow].emplace_back(std::move(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database)),
-                                                        std::move(std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
+	// ************************************************************************************************************************************* //
+	// Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
+	// ... cannot pass const filesystem::path, so must create temp from the const that can act as rvalue
+	// ************************************************************************************************************************************* //
+	input_tabs[mainWindow].emplace_back(std::move(ProjectPaths(boost::filesystem::path(input_project_settings_path), boost::filesystem::path(path_to_model_settings), boost::filesystem::path(path_to_model_database))),
+														std::move(std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
-    UIInputProject * project = getActiveUIInputProject();
+	UIInputProject * project = getActiveUIInputProject();
 
 	if (!project)
 	{
