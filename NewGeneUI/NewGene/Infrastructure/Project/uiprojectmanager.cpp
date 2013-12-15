@@ -538,8 +538,8 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
     //                                                std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
 
-    input_tabs[mainWindow].emplace_back(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
-                                                        std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject)));
+    input_tabs[mainWindow].emplace_back(std::move(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database)),
+                                                        std::move(std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
     UIInputProject * project = getActiveUIInputProject();
 
@@ -660,7 +660,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
     output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
                                                     std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject)));
 
-	UIOutputProject * project = getActiveUIOutputProject();
+    UIOutputProject * project = getActiveUIOutputProject();
 
 	if (!project)
 	{

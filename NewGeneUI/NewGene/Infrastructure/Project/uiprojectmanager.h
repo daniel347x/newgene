@@ -183,11 +183,14 @@ class UIProjectManager : public QObject,
 		{
 			ProjectPaths paths;
 			std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>> project;
+
+			// Note: The following ctor does not work in conjunction with this class and its use in the application to overcome the Clang bug noted above
 			ProjectTabContents(ProjectPaths && paths_, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>> && project_)
 				: paths(std::move(paths_))
 				, project(std::move(project_))
 			{
 			}
+
 			ProjectTabContents(ProjectTabContents && rhs)
 				: paths(rhs.paths)
 				, project(rhs.project)
