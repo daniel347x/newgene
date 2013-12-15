@@ -257,8 +257,8 @@ else:unix: LIBS += -L$$PWD/../../NewGeneBackEnd/ -lNewGeneBackEnd
 
 win32:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem-vc110-mt-1_54
 else:win32:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem-vc110-mt-gd-1_54
-else:macx:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem.a
-else:macx:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem.a
+else:macx:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem
+else:macx:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem
 
 INCLUDEPATH += $$PWD/../../NewGeneBackEnd/Release
 DEPENDPATH += $$PWD/../../NewGeneBackEnd/Release
