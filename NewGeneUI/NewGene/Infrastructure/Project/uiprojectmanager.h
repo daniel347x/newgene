@@ -188,6 +188,10 @@ class UIProjectManager : public QObject,
 				, project(std::move(project_))
 			{
 			}
+			ProjectTabContents(ProjectTabContents && rhs)
+				: paths(rhs.paths)
+				, project(rhs.project)
+			{}
 		};
 
 		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
