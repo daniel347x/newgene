@@ -51,7 +51,7 @@ void NewGeneGenerateOutput::on_pushButtonGenerateOutput_clicked()
 
 }
 
-void NewGeneGenerateOutput::WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB widget_data)
+void NewGeneGenerateOutput::WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB)
 {
 
 	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
@@ -63,11 +63,10 @@ void NewGeneGenerateOutput::WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUT
 	UIMessager messager(project);
 
 	OutputProjectPathToKadOutputFile * setting_path_to_kad_output = nullptr;
-	std::unique_ptr<BackendProjectOutputSetting> & path_to_kad_output = projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE);
 	bool bad = false;
 	try
 	{
-		setting_path_to_kad_output = dynamic_cast<OutputProjectPathToKadOutputFile*>(path_to_kad_output.get());
+        setting_path_to_kad_output = dynamic_cast<OutputProjectPathToKadOutputFile*>(projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE).get());
 	}
 	catch (std::bad_cast &)
 	{
@@ -99,7 +98,7 @@ void NewGeneGenerateOutput::RefreshAllWidgets()
 	emit RefreshWidget(request);
 }
 
-void NewGeneGenerateOutput::ReceiveSignalAppendKadStatusText(int progress_bar_id, STD_STRING const kad_status_update)
+void NewGeneGenerateOutput::ReceiveSignalAppendKadStatusText(int /* progress_bar_id */, STD_STRING const kad_status_update)
 {
 	QPlainTextEdit * edit_pane = findChild<QPlainTextEdit *>( "plainTextEdit_KadStatus" );
 	if (edit_pane)
@@ -115,7 +114,7 @@ void NewGeneGenerateOutput::ReceiveSignalAppendKadStatusText(int progress_bar_id
 	}
 }
 
-void NewGeneGenerateOutput::ReceiveSignalSetPerformanceLabel(int progress_bar_id, STD_STRING const performance_measure_text)
+void NewGeneGenerateOutput::ReceiveSignalSetPerformanceLabel(int /* progress_bar_id */, STD_STRING const performance_measure_text)
 {
 	QLabel * label_ = findChild<QLabel *>( "labelOngoingPerformance" );
 	if (label_)

@@ -155,6 +155,10 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 								// Ditto above.
 							}
 							break;
+                        default:
+                            {
+                            }
+                            break;
 					}
 				}
 				break;
@@ -190,9 +194,17 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 								// Should never receive this.
 							}
 							break;
-					}
+                        default:
+                            {
+                            }
+                            break;
+                    }
 				}
 				break;
-		}
+            default:
+                {
+                }
+                break;
+        }
 	});
 }

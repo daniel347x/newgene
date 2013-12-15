@@ -2,7 +2,7 @@
 #define KADSPINBOX_H
 
 #include <QSpinBox>
-#include "..\..\..\newgenewidget.h"
+#include "../../../newgenewidget.h"
 
 class KadSpinBox : public QSpinBox, public NewGeneWidget // do not reorder base classes; QWidget instance must be instantiated first
 {

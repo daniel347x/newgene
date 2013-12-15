@@ -5,7 +5,7 @@
 #	include <boost/date_time/local_time/local_time.hpp>
 #endif
 
-NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
+NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject *) :
 
 	QDateTimeEdit( parent ),
 
@@ -240,9 +240,17 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 								// Ditto above.
 							}
 							break;
-					}
+                        default:
+                            {
+                            }
+                            break;
+                    }
 				}
 				break;
-		}
+            default:
+                {
+                }
+                break;
+        }
 	});
 }
