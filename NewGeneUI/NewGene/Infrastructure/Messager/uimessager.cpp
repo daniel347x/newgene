@@ -19,8 +19,8 @@ int UIMessager::next_messager_id = 1;
 UIMessager::UIMessager(QObject *parent) :
 	QObject(parent)
   , do_not_handle_messages_on_destruction(false)
-  , singleShotActive(false)
   , mode(NORMAL)
+  , singleShotActive(false)
 {
 	current_messager_id = next_messager_id;
 	++next_messager_id;
