@@ -159,9 +159,25 @@ class UIProjectManager : public QObject,
 		typedef std::map<NewGeneMainWindow*, UIOutputProjectsList> OutputProjectsMap;
 #		endif
 
-		typedef std::tuple<boost::filesystem::path, boost::filesystem::path, boost::filesystem::path> ProjectPaths; // project settings, model settings, model database
-
+		// ************************************************************************************************************************************* //
 		// Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
+		// ************************************************************************************************************************************* //
+		struct ProjectPaths
+		{
+			ProjectPaths(boost::filesystem::path & project_settings_path_, boost::filesystem::path & model_settings_path_, boost::filesystem::path model_database_path_)
+				: project_settings_path(project_settings_path_)
+				, model_settings_path(model_settings_path_)
+				, model_database_path(model_database_path_)
+			{}
+			boost::filesystem::path project_settings_path;
+			boost::filesystem::path model_settings_path;
+			boost::filesystem::path model_database_path;
+		};
+		//typedef std::tuple<boost::filesystem::path, boost::filesystem::path, boost::filesystem::path> ProjectPaths; // project settings, model settings, model database
+
+		// ************************************************************************************************************************************* //
+		// Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
+		// ************************************************************************************************************************************* //
 		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
 		struct ProjectTabContents
 		{
