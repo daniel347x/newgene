@@ -43,7 +43,7 @@ UIProjectManager::~UIProjectManager()
 		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
 			// Release the pointer so that when the "tabs" map is destroyed, its destructor will do the job
-            UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
+			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
 			RawCloseInputProject(project_ptr);
 		});
 
@@ -55,7 +55,7 @@ UIProjectManager::~UIProjectManager()
 		OutputProjectTabs & tabs = windows.second;
 		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
-            UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
+			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
 			RawCloseOutputProject(project_ptr);
 		});
 
@@ -74,7 +74,7 @@ void UIProjectManager::EndAllLoops()
 		{
 
 			//ProjectPaths & paths = tab.first;
-            UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
+			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
 			RawCloseInputProject(project_ptr);
 
 		});
@@ -89,7 +89,7 @@ void UIProjectManager::EndAllLoops()
 		{
 
 			//ProjectPaths & paths = tab.first;
-            UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
+			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
 			RawCloseOutputProject(project_ptr);
 
 		});
@@ -216,7 +216,7 @@ UIInputProject * UIProjectManager::getActiveUIInputProject()
 
 	InputProjectTab & tab = *tabs.begin();
 
-    UIInputProject * project = static_cast<UIInputProject *>(tab.project.get());
+	UIInputProject * project = static_cast<UIInputProject *>(tab.second.get());
 
 	return project;
 
@@ -240,7 +240,7 @@ UIOutputProject * UIProjectManager::getActiveUIOutputProject()
 
 	OutputProjectTab & tab = *tabs.begin();
 
-    UIOutputProject * project = static_cast<UIOutputProject *>(tab.project.get());
+	UIOutputProject * project = static_cast<UIOutputProject *>(tab.second.get());
 
 	return project;
 
@@ -352,13 +352,13 @@ void UIProjectManager::CloseCurrentOutputDataset()
 	}
 	OutputProjectTab & tab = *tabs.begin();
 
-    if (!tab.project)
+	if (!tab.second)
 	{
 		tabs.clear();
 		return;
 	}
 
-    UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
+	UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.release());
 	RawCloseOutputProject(project_ptr);
 
 	tabs.clear();
@@ -443,13 +443,13 @@ void UIProjectManager::CloseCurrentInputDataset()
 	}
 	InputProjectTab & tab = *tabs.begin();
 
-    if (!tab.project)
+	if (!tab.second)
 	{
 		tabs.clear();
 		return;
 	}
 
-    UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
+	UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.release());
 	RawCloseInputProject(project_ptr);
 
 	tabs.clear();
