@@ -169,6 +169,11 @@ class UIProjectManager : public QObject,
 				, model_settings_path(model_settings_path_)
 				, model_database_path(model_database_path_)
 			{}
+			ProjectPaths(ProjectPaths && rhs)
+				: project_settings_path(rhs.project_settings_path)
+				, model_settings_path(rhs.model_settings_path)
+				, model_database_path(rhs.model_database_path)
+			{}
 			boost::filesystem::path project_settings_path;
 			boost::filesystem::path model_settings_path;
 			boost::filesystem::path model_database_path;
@@ -191,8 +196,8 @@ class UIProjectManager : public QObject,
 			}
 
 			ProjectTabContents(ProjectTabContents && rhs)
-				: paths(rhs.paths)
-				, project(rhs.project)
+				: paths(std::move(rhs.paths))
+				, project(std::move(rhs.project))
 			{}
 		};
 
