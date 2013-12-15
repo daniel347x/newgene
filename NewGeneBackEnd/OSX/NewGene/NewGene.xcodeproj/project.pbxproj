@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C3933A79185E37FF00CB2D68 /* Controller_GeneralOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3933A78185E37FF00CB2D68 /* Controller_GeneralOptions.cpp */; };
 		C3DAD0FF17DB47AD00F1E066 /* DocumentManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD05F17DB47AD00F1E066 /* DocumentManager.cpp */; };
 		C3DAD10017DB47AD00F1E066 /* DocumentManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD06017DB47AD00F1E066 /* DocumentManager.h */; };
 		C3DAD10117DB47AD00F1E066 /* globals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD06117DB47AD00F1E066 /* globals.cpp */; };
@@ -143,6 +144,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C3933A78185E37FF00CB2D68 /* Controller_GeneralOptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_GeneralOptions.cpp; sourceTree = "<group>"; };
 		C3DAD05517DB457000F1E066 /* libNewGene.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNewGene.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3DAD05D17DB47AD00F1E066 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		C3DAD05F17DB47AD00F1E066 /* DocumentManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DocumentManager.cpp; sourceTree = "<group>"; };
@@ -598,6 +600,7 @@
 		C3DAD0EA17DB47AD00F1E066 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				C3933A78185E37FF00CB2D68 /* Controller_GeneralOptions.cpp */,
 				C3DAD0EB17DB47AD00F1E066 /* Controller_GenerateOutput.cpp */,
 				C3DAD0EC17DB47AD00F1E066 /* Controller_KAdCountChange.cpp */,
 				C3DAD0ED17DB47AD00F1E066 /* Controller_TimeRangeChange.cpp */,
@@ -768,6 +771,7 @@
 				C3DAD0FF17DB47AD00F1E066 /* DocumentManager.cpp in Sources */,
 				C3DAD10117DB47AD00F1E066 /* globals.cpp in Sources */,
 				C3DAD10317DB47AD00F1E066 /* LoggingManager.cpp in Sources */,
+				C3933A79185E37FF00CB2D68 /* Controller_GeneralOptions.cpp in Sources */,
 				C3DAD10517DB47AD00F1E066 /* Manager.cpp in Sources */,
 				C3DAD10717DB47AD00F1E066 /* Messager.cpp in Sources */,
 				C3DAD10917DB47AD00F1E066 /* InputModel.cpp in Sources */,
