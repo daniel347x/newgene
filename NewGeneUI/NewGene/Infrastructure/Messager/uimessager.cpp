@@ -17,7 +17,7 @@ bool UIMessager::ManagersInitialized = false;
 int UIMessager::next_messager_id = 1;
 
 UIMessager::UIMessager(QObject *parent) :
-	QObject(parent)
+    QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , mode(NORMAL)
   , singleShotActive(false)
@@ -199,10 +199,11 @@ void UIMessagerInputProject::UpdateProgressBarValue(std::int64_t const the_value
 	emit SignalUpdateProgressBarValue(current_messager_id, (STD_INT64)the_value);
 }
 
-void UIMessagerInputProject::UpdateStatusBarText(std::string const & the_text)
-{
-	emit SignalUpdateStatusBarText(current_messager_id, the_text);
-}
+// Unused?
+//void UIMessagerInputProject::UpdateStatusBarText(std::string const & the_text)
+//{
+//	emit SignalUpdateStatusBarText(current_messager_id, the_text);
+//}
 
 void UIMessagerInputProject::EmitInputProjectChangeMessage(DataChangeMessage & changes)
 {
