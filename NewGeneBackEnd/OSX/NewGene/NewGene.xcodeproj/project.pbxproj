@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C39061B1185E3920005C6306 /* GeneralOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C39061B0185E3920005C6306 /* GeneralOptions.cpp */; };
 		C3933A79185E37FF00CB2D68 /* Controller_GeneralOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3933A78185E37FF00CB2D68 /* Controller_GeneralOptions.cpp */; };
 		C3DAD0FF17DB47AD00F1E066 /* DocumentManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3DAD05F17DB47AD00F1E066 /* DocumentManager.cpp */; };
 		C3DAD10017DB47AD00F1E066 /* DocumentManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C3DAD06017DB47AD00F1E066 /* DocumentManager.h */; };
@@ -144,6 +145,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C39061B0185E3920005C6306 /* GeneralOptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GeneralOptions.cpp; sourceTree = "<group>"; };
 		C3933A78185E37FF00CB2D68 /* Controller_GeneralOptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controller_GeneralOptions.cpp; sourceTree = "<group>"; };
 		C3DAD05517DB457000F1E066 /* libNewGene.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libNewGene.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3DAD05D17DB47AD00F1E066 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
@@ -427,6 +429,7 @@
 		C3DAD08117DB47AD00F1E066 /* TableInstances */ = {
 			isa = PBXGroup;
 			children = (
+				C39061B0185E3920005C6306 /* GeneralOptions.cpp */,
 				C3DAD08217DB47AD00F1E066 /* CMU.cpp */,
 				C3DAD08317DB47AD00F1E066 /* CMU.h */,
 				C3DAD08417DB47AD00F1E066 /* DMU.cpp */,
@@ -826,6 +829,7 @@
 				C3DAD16E17DB47AD00F1E066 /* ActionChanges.cpp in Sources */,
 				C3DAD17017DB47AD00F1E066 /* ActionWidgets.cpp in Sources */,
 				C3DAD17217DB47AD00F1E066 /* Controller_GenerateOutput.cpp in Sources */,
+				C39061B1185E3920005C6306 /* GeneralOptions.cpp in Sources */,
 				C3DAD17317DB47AD00F1E066 /* Controller_KAdCountChange.cpp in Sources */,
 				C3DAD17417DB47AD00F1E066 /* Controller_TimeRangeChange.cpp in Sources */,
 				C3DAD17517DB47AD00F1E066 /* Controller_VariableGroupSetMemberSelectionChange.cpp in Sources */,
