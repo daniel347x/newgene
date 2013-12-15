@@ -10,6 +10,8 @@
 class NewGeneMainWindow;
 class NewGeneWidget;
 
+extern NewGeneMainWindow * theMainWindow;
+
 namespace MANAGER_DESCRIPTION_NAMESPACE
 {
 
