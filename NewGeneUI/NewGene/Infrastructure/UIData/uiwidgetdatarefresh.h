@@ -30,7 +30,6 @@ class DoRefreshWidget
 
 		WidgetDataItemRequest<DATA_WIDGET> const widget_refresh_request;
 
-
 };
 
 template<DATA_WIDGETS DATA_WIDGET>
@@ -87,7 +86,7 @@ class DoRefreshOutputWidget : public DoRefreshWidget<DATA_WIDGET>
 		void operator()()
 		{
 			UIMessagerSingleShot messager(queue->get()->messager);
-			uidataManagerUI().getBackendManager().DoRefreshOutputWidget(messager.get(), widget_refresh_request, queue->get()->backend());
+			uidataManagerUI().getBackendManager().DoRefreshOutputWidget(messager.get(), this->widget_refresh_request, queue->get()->backend());
 		}
 
 	protected:
