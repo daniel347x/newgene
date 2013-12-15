@@ -1,5 +1,5 @@
 #include "uithreadmanager.h"
-#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 
 UIThreadManager::UIThreadManager( QObject * parent )
 	: QObject(parent)

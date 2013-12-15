@@ -101,7 +101,7 @@ UIProjectOutputSetting * UIOutputProjectSettings::CloneSetting(Messager & messag
 
 }
 
-UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(Messager & messager_, SettingInfo & setting_info, std::string const & setting_value_string)
+UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(Messager & messager_, SettingInfo & setting_info, std::string const &)
 {
 
 	UIMessager & messager = static_cast<UIMessager &>(messager_);
@@ -131,7 +131,7 @@ UIProjectOutputSetting * UIOutputProjectSettings::NewSetting(Messager & messager
 
 }
 
-void UIOutputProjectSettings::SetPTreeEntry(Messager & messager, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI which_setting, boost::property_tree::ptree & pt)
+void UIOutputProjectSettings::SetPTreeEntry(Messager &, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI, boost::property_tree::ptree &)
 {
 
 }

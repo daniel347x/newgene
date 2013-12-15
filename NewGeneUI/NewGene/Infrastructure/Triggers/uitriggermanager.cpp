@@ -1,5 +1,5 @@
 #include "uitriggermanager.h"
-#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "globals.h"
 
 UITriggerManager::UITriggerManager( QObject * parent )

@@ -101,7 +101,7 @@ UIProjectInputSetting * UIInputProjectSettings::CloneSetting(Messager & messager
 
 }
 
-UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager_, SettingInfo & setting_info, std::string const & setting_value_string)
+UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager_, SettingInfo & setting_info, std::string const &)
 {
 
 	UIMessager & messager = static_cast<UIMessager &>(messager_);
@@ -131,7 +131,7 @@ UIProjectInputSetting * UIInputProjectSettings::NewSetting(Messager & messager_,
 
 }
 
-void UIInputProjectSettings::SetPTreeEntry(Messager & messager, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI which_setting, boost::property_tree::ptree & pt)
+void UIInputProjectSettings::SetPTreeEntry(Messager &, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI, boost::property_tree::ptree &)
 {
 
 }
