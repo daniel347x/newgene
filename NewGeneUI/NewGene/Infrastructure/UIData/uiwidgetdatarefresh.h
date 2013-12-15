@@ -7,6 +7,8 @@
 #include "../Messager/uimessager.h"
 #include "../Messager/uimessagersingleshot.h"
 #include "../UIData/uiuidatamanager.h"
+#include "../Project/uiinputproject.h"
+#include "../Project/uioutputproject.h"
 
 template<DATA_WIDGETS DATA_WIDGET>
 class DoRefreshWidget
