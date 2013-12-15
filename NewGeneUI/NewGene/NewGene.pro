@@ -13,7 +13,6 @@ TEMPLATE = app
 
 QMAKE_CXXFLAGS_RELEASE += /Zi
 QMAKE_CXXFLAGS_RELEASE += /Od
-QMAKE_LFLAGS_DEBUG += /DEBUG
 
 macx: QMAKE_CXXFLAGS += -x c++ -arch x86_64 -std=gnu++11 -stdlib=libc++
 
