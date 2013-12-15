@@ -6,6 +6,8 @@
 #	include <boost/algorithm/string.hpp>
 #	include <boost/regex.hpp>
 #	include <boost/algorithm/string/regex.hpp>
+#	include <boost/filesystem.hpp>
+#	include <boost/filesystem/operations.hpp>
 #endif
 #include <fstream>
 
