@@ -1,5 +1,5 @@
 #include "uiuidatamanager.h"
-#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 
 UIUIDataManager::UIUIDataManager( QObject * parent )
 	: QObject(parent)

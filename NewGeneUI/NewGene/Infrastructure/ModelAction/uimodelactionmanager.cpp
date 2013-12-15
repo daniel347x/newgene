@@ -1,5 +1,5 @@
 #include "uimodelactionmanager.h"
-#include "..\..\NewGeneBackEnd\Utilities\NewGeneException.h"
+#include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 
 UIModelActionManager::UIModelActionManager( QObject * parent )
 	: QObject(parent)

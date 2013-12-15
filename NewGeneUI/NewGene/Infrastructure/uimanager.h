@@ -89,7 +89,7 @@ class UIManager
 
 		static MANAGER_CLASS_BACKEND & getBackendManager()
 		{
-			MANAGER_CLASS_UI & ui_manager = static_cast<MANAGER_CLASS_UI&>(getManager());
+            //MANAGER_CLASS_UI & ui_manager = static_cast<MANAGER_CLASS_UI&>(getManager());
 			return static_cast<MANAGER_CLASS_BACKEND&>(MANAGER_CLASS_BACKEND::getManager());
 		}
 
