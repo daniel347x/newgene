@@ -43,7 +43,7 @@ UIProjectManager::~UIProjectManager()
 		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
 			// Release the pointer so that when the "tabs" map is destroyed, its destructor will do the job
-			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
+            UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
 			RawCloseInputProject(project_ptr);
 		});
 
@@ -55,7 +55,7 @@ UIProjectManager::~UIProjectManager()
 		OutputProjectTabs & tabs = windows.second;
 		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
-			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
+            UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
 			RawCloseOutputProject(project_ptr);
 		});
 
@@ -73,13 +73,13 @@ void UIProjectManager::EndAllLoops()
 		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
 
-            //ProjectPaths & paths = tab.first;
+			//ProjectPaths & paths = tab.first;
             UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
-            RawCloseInputProject(project_ptr);
+			RawCloseInputProject(project_ptr);
 
-        });
+		});
 
-    });
+	});
 
 	for_each(output_tabs.begin(), output_tabs.end(), [this](std::pair<NewGeneMainWindow * const, OutputProjectTabs> & windows)
 	{
@@ -88,15 +88,15 @@ void UIProjectManager::EndAllLoops()
 		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
 
-            //ProjectPaths & paths = tab.first;
+			//ProjectPaths & paths = tab.first;
             UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
-            RawCloseOutputProject(project_ptr);
+			RawCloseOutputProject(project_ptr);
 
-        });
+		});
 
-    });
+	});
 
-    EndLoopAndBackgroundPool();
+	EndLoopAndBackgroundPool();
 
 };
 
@@ -216,7 +216,7 @@ UIInputProject * UIProjectManager::getActiveUIInputProject()
 
 	InputProjectTab & tab = *tabs.begin();
 
-	UIInputProject * project = static_cast<UIInputProject *>(tab.project.get());
+    UIInputProject * project = static_cast<UIInputProject *>(tab.project.get());
 
 	return project;
 
@@ -240,7 +240,7 @@ UIOutputProject * UIProjectManager::getActiveUIOutputProject()
 
 	OutputProjectTab & tab = *tabs.begin();
 
-	UIOutputProject * project = static_cast<UIOutputProject *>(tab.project.get());
+    UIOutputProject * project = static_cast<UIOutputProject *>(tab.project.get());
 
 	return project;
 
@@ -352,13 +352,13 @@ void UIProjectManager::CloseCurrentOutputDataset()
 	}
 	OutputProjectTab & tab = *tabs.begin();
 
-	if (!tab.project)
+    if (!tab.project)
 	{
 		tabs.clear();
 		return;
 	}
 
-	UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
+    UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
 	RawCloseOutputProject(project_ptr);
 
 	tabs.clear();
@@ -443,13 +443,13 @@ void UIProjectManager::CloseCurrentInputDataset()
 	}
 	InputProjectTab & tab = *tabs.begin();
 
-	if (!tab.project)
+    if (!tab.project)
 	{
 		tabs.clear();
 		return;
 	}
 
-	UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
+    UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
 	RawCloseInputProject(project_ptr);
 
 	tabs.clear();
@@ -538,8 +538,8 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
     //                                                std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
 
-    input_tabs[mainWindow].emplace_back(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
-                                                        std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject)));
+    input_tabs[mainWindow].push_back(std::pair<ProjectPaths, std::unique_ptr<UIInputProject>>(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
+                                                        std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
     UIInputProject * project = getActiveUIInputProject();
 
