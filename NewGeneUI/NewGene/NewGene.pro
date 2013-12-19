@@ -15,6 +15,7 @@ QMAKE_CXXFLAGS_RELEASE += /Zi
 QMAKE_CXXFLAGS_RELEASE += /Od
 
 macx: QMAKE_CXXFLAGS += -x c++ -arch x86_64 -std=gnu++11 -stdlib=libc++
+macx: QMAKE_LFLAGS += -arch x86_64 -std=gnu++11 -stdlib=libc++
 
 SOURCES += main.cpp\
 	Widgets/newgenemainwindow.cpp \
@@ -257,8 +258,8 @@ else:unix: LIBS += -L$$PWD/../../NewGeneBackEnd/ -lNewGeneBackEnd
 
 win32:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem-vc110-mt-1_54
 else:win32:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -llibboost_filesystem-vc110-mt-gd-1_54
-else:macx:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem
-else:macx:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem
+else:macx:CONFIG(release, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lboost_date_time
+else:macx:CONFIG(debug, debug|release): LIBS += -L$(BOOST_LIB) -lboost_filesystem -lboost_regex -lboost_thread -lboost_system -lboost_date_time
 
 INCLUDEPATH += $$PWD/../../NewGeneBackEnd/Release
 DEPENDPATH += $$PWD/../../NewGeneBackEnd/Release
