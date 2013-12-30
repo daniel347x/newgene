@@ -68,7 +68,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			, _model(ui_model)
 			, _backend_project( new BACKEND_PROJECT_CLASS(_project_settings->getBackendSettingsSharedPtr(), _model_settings->getBackendSettingsSharedPtr(), _model->getBackendModelSharedPtr()) )
 		{
-            Q_UNUSED(parent);
+			Q_UNUSED(parent);
 		}
 
 		~UIProject()
@@ -186,7 +186,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			}
 		}
 
-        virtual void PassChangeMessageToWidget(NewGeneWidget *, DataChangeMessage const &) {}
+		virtual void PassChangeMessageToWidget(NewGeneWidget *, DataChangeMessage const &) {}
 
 		// ********************************************************** //
 		// This function is called in the context of the UI thread.
@@ -202,7 +202,12 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 					if (!change_message.changes.empty())
 					{
 						std::lock_guard<std::recursive_mutex> change_map_guard(data_change_interest_map_mutex);
-                        typename WidgetDataChangeInterestMap::const_iterator found_iterator = data_change_interest_map.find(widget);
+#						ifdef _WIN32
+						// Obnoxious Visual Studio bug: http://stackoverflow.com/questions/20847637/clang-os-x-requires-template-keyword-in-a-particular-nested-declaration-whi
+						WidgetDataChangeInterestMap::const_iterator found_iterator = data_change_interest_map.find(widget);
+#						else
+						typename WidgetDataChangeInterestMap::const_iterator found_iterator = data_change_interest_map.find(widget);
+#						endif
 						if (found_iterator != data_change_interest_map.cend())
 						{
 							// The widget is still alive
@@ -257,7 +262,7 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 								}
 								else
 								{
-                                    std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&interest, &matches, &change](WidgetInstanceIdentifier const &)
+									std::for_each(change.child_identifiers.cbegin(), change.child_identifiers.cend(), [&interest, &matches, &change](WidgetInstanceIdentifier const &)
 									{
 										if (change.parent_identifier.uuid && *change.parent_identifier.uuid == interest.uuid_to_match)
 										{
