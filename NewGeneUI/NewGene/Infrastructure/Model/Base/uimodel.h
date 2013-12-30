@@ -20,7 +20,7 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 	public:
 
-        UIModel(UIMessager &, int const number_worker_threads)
+		UIModel(UIMessager &, int const number_worker_threads)
 			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads, number_of_pools)
 			, loaded_(false)
 		{
@@ -82,9 +82,9 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 				};
 
-				std::unique_ptr<UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base> __impl;
+				std::unique_ptr<typename UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base> __impl;
 
-				UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base & getInternalImplementation()
+				typename UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS>::_RelatedImpl_base & getInternalImplementation()
 				{
 					if (!__impl)
 					{
@@ -101,7 +101,7 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 		template<typename BACKEND_MODEL_CLASS>
 		BACKEND_MODEL_CLASS &
-		getBackendModel_base(UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS> & impl)
+		getBackendModel_base(typename UIModel<UI_THREAD_LOOP_CLASS_ENUM>::_impl_base<BACKEND_MODEL_CLASS> & impl)
 		{
 			return impl.getInternalImplementation().getModel();
 		}
