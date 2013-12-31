@@ -48,7 +48,7 @@ class UISettingsManager : public QObject, public UIManager<UISettingsManager, Se
 		std::unique_ptr<UIProjectInputSetting> getSetting(Messager & messager_, UIInputProjectSettings * project_settings, INPUT_PROJECT_SETTINGS_UI_NAMESPACE::INPUT_PROJECT_SETTINGS_UI const which_setting);
 		std::unique_ptr<UIProjectOutputSetting> getSetting(Messager & messager_, UIOutputProjectSettings * project_settings, OUTPUT_PROJECT_SETTINGS_UI_NAMESPACE::OUTPUT_PROJECT_SETTINGS_UI const which_setting);
 
-		boost::filesystem::path ObtainGlobalPath(QStandardPaths::StandardLocation const & location, QString const & filename_no_path, bool const create_if_not_found = false);
+		boost::filesystem::path ObtainGlobalPath(QStandardPaths::StandardLocation const & location, QString const & postfix_part_of_path, QString const & filename_no_path, bool const create_if_not_found = false);
 		boost::filesystem::path getGlobalSettingsPath() { return global_settings_path; }
 
 		UIAllGlobalSettings & globalSettings() { return *_global_settings; }

@@ -21,7 +21,7 @@ UISettingsManager::UISettingsManager( QObject * parent )
 	// All Managers are instantiated AFTER the application event loop is running
 	// *************************************************************************
 
-	boost::filesystem::path the_path = ObtainGlobalPath(QStandardPaths::DataLocation, NewGeneFileNames::settingsFileName, true);
+	boost::filesystem::path the_path = ObtainGlobalPath(QStandardPaths::DataLocation, "", NewGeneFileNames::settingsFileName, true);
 
 	{
 		UIMessager messager;
@@ -39,7 +39,7 @@ UISettingsManager::UISettingsManager( QObject * parent )
 
 }
 
-boost::filesystem::path UISettingsManager::ObtainGlobalPath(QStandardPaths::StandardLocation const & location, QString const & filename_no_path, bool const create_if_not_found)
+boost::filesystem::path UISettingsManager::ObtainGlobalPath(QStandardPaths::StandardLocation const & location, QString const & postfix_part_of_path, QString const & filename_no_path, bool const create_if_not_found)
 {
 
 	boost::filesystem::path the_found_path;
@@ -51,6 +51,8 @@ boost::filesystem::path UISettingsManager::ObtainGlobalPath(QStandardPaths::Stan
 		QString settingsPathString = settingsPathStringList.at( n );
 
 		boost::filesystem::path settingsPathTest( settingsPathString.toStdString() );
+
+		settingsPathTest /= postfix_part_of_path.toStdString();
 
 		settingsPathTest /= filename_no_path.toStdString();
 
@@ -71,9 +73,11 @@ boost::filesystem::path UISettingsManager::ObtainGlobalPath(QStandardPaths::Stan
 
 				boost::filesystem::path settingsPathTest( settingsPathString.toStdString() );
 
+				settingsPathTest /= postfix_part_of_path.toStdString();
+
 				if ( !boost::filesystem::exists( settingsPathTest ) )
 				{
-					if ( !boost::filesystem::create_directory( settingsPathTest ) )
+					if ( !boost::filesystem::create_directories( settingsPathTest ) )
 					{
 						continue;
 					}
@@ -100,7 +104,7 @@ boost::filesystem::path UISettingsManager::ObtainGlobalPath(QStandardPaths::Stan
 						continue;
 					}
 				}
-				catch ( std::ofstream::failure e )
+				catch ( std::ofstream::failure )
 				{
 					continue;
 				}

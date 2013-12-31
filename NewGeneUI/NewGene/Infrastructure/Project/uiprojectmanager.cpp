@@ -73,13 +73,13 @@ void UIProjectManager::EndAllLoops()
 		for_each(tabs.begin(), tabs.end(), [this](InputProjectTab & tab)
 		{
 
-            //ProjectPaths & paths = tab.first;
-            UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
-            RawCloseInputProject(project_ptr);
+			//ProjectPaths & paths = tab.first;
+			UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.project.release());
+			RawCloseInputProject(project_ptr);
 
-        });
+		});
 
-    });
+	});
 
 	for_each(output_tabs.begin(), output_tabs.end(), [this](std::pair<NewGeneMainWindow * const, OutputProjectTabs> & windows)
 	{
@@ -88,15 +88,15 @@ void UIProjectManager::EndAllLoops()
 		for_each(tabs.begin(), tabs.end(), [this](OutputProjectTab & tab)
 		{
 
-            //ProjectPaths & paths = tab.first;
-            UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
-            RawCloseOutputProject(project_ptr);
+			//ProjectPaths & paths = tab.first;
+			UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.project.release());
+			RawCloseOutputProject(project_ptr);
 
-        });
+		});
 
-    });
+	});
 
-    EndLoopAndBackgroundPool();
+	EndLoopAndBackgroundPool();
 
 };
 
@@ -116,7 +116,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 
 	if (input_project_list->files.size() == 0)
 	{
-		boost::filesystem::path input_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DataLocation, NewGeneFileNames::defaultInputProjectFileName);
+		boost::filesystem::path input_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Input", NewGeneFileNames::defaultInputProjectFileName);
 		if (input_project_path != boost::filesystem::path())
 		{
 			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, input_project_path.string().c_str()));
@@ -157,7 +157,7 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 
 	if (success && output_project_list->files.size() == 0)
 	{
-		boost::filesystem::path output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DataLocation, NewGeneFileNames::defaultOutputProjectFileName);
+		boost::filesystem::path output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Output", NewGeneFileNames::defaultOutputProjectFileName);
 		if (output_project_path != boost::filesystem::path())
 		{
 			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, output_project_path.string().c_str()));
@@ -657,10 +657,10 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		return false;
 	}
 
-    output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
-                                                    std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject)));
+	output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
+													std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject)));
 
-    UIOutputProject * project = getActiveUIOutputProject();
+	UIOutputProject * project = getActiveUIOutputProject();
 
 	if (!project)
 	{
