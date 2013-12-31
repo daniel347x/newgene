@@ -66,6 +66,7 @@ void NewGeneGenerateOutput::WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUT
 	bool bad = false;
 	try
 	{
+		//::Sleep(30000);
         setting_path_to_kad_output = dynamic_cast<OutputProjectPathToKadOutputFile*>(projectManagerUI().getActiveUIOutputProject()->projectSettings().getBackendSettings().GetSetting(messager, OUTPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_KAD_OUTPUT_FILE).get());
 	}
 	catch (std::bad_cast &)

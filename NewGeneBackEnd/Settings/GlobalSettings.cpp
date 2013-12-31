@@ -1,7 +1,7 @@
 #include "GlobalSettings.h"
 #include "GlobalSettings_list.h"
 
-std::string newgene_global_backend_root_node("newgene.backend.ui.");
+std::string newgene_global_backend_root_node("newgene.global.backend.");
 
 SettingInfo BackendGlobalSetting::GetSettingInfoFromEnum(Messager & messager, int const value__)
 {
