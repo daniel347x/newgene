@@ -143,7 +143,7 @@ void GlobalSettings::SetPTreeEntry(Messager & messager, GLOBAL_SETTINGS_BACKEND_
 			GlobalSetting_Test const * setting = static_cast<GlobalSetting_Test const *>(_settings_map[which_setting].get());
 			if (setting)
 			{
-				pt.put(newgene_global_backend_root_node + setting_info.text, setting->getString());
+				pt.put(setting_info.text, setting->getString());
 			}
 		}
 		break;
