@@ -13974,24 +13974,27 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 		bad = true;
 	}
 
-	bool output_file_exists = boost::filesystem::exists(setting_path_to_kad_output->ToString());
-	if (output_file_exists)
+	if (!bad)
 	{
-		if (!overwrite_if_output_file_already_exists)
+		bool output_file_exists = boost::filesystem::exists(setting_path_to_kad_output->ToString());
+		if (output_file_exists)
 		{
-			boost::format overwrite_msg("The file %1% does already exists.  Overwrite this file?");
-			overwrite_msg % setting_path_to_kad_output->ToString();
-			bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
-			if (!overwrite_file)
+			if (!overwrite_if_output_file_already_exists)
 			{
-				return std::string();
+				boost::format overwrite_msg("The file %1% does already exists.  Overwrite this file?");
+				overwrite_msg % setting_path_to_kad_output->ToString();
+				bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
+				if (!overwrite_file)
+				{
+					return std::string();
+				}
+				overwrite_if_output_file_already_exists = true;
 			}
-			overwrite_if_output_file_already_exists = true;
 		}
+		return setting_path_to_kad_output->ToString();
 	}
 
-	return setting_path_to_kad_output->ToString();
-
+	return "";
 }
 
 void OutputModel::OutputGenerator::SetFailureMessage(std::string const & failure_message_)

@@ -54,6 +54,8 @@ public:
 	// TODO: throw
     virtual SettingInfo GetSettingInfoFromEnum(Messager &, int const) { return SettingInfo(); };
 
+	virtual ~Setting() {}
+
 protected:
 
 	Setting(Messager &) {} // must use factory function to create settings

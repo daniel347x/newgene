@@ -539,7 +539,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	// ... cannot pass const filesystem::path, so must create temp from the const that can act as rvalue
 	// ************************************************************************************************************************************* //
 	input_tabs[mainWindow].emplace_back(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
-														std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject)));
+		std::unique_ptr<UIInputProject>(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject)));
 
 	UIInputProject * project = getActiveUIInputProject();
 
@@ -657,8 +657,8 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		return false;
 	}
 
-	output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
-													std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject)));
+	output_tabs[mainWindow].push_back(OutputProjectTab(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
+		std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject))));
 
 	UIOutputProject * project = getActiveUIOutputProject();
 

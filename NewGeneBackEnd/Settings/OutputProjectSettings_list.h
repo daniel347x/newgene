@@ -34,7 +34,14 @@ public:
 		, OutputSetting(messager)
 		, BackendProjectOutputSetting(messager)
 		, PathSetting(messager, setting)
-	{}
+	{
+		int m = 0; // for debugging only
+	}
+
+	~OutputProjectBackendSetting__path()
+	{
+		int m = 0; // for debugging only
+	}
 
 	std::string ToString() const { return PathSetting::ToString(); }
 
