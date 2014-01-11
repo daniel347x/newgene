@@ -16,7 +16,10 @@ QMAKE_CXXFLAGS_RELEASE += /Od
 
 macx: QMAKE_CXXFLAGS += -x c++ -arch x86_64 -std=gnu++11 -stdlib=libc++
 macx: QMAKE_LFLAGS += -arch x86_64 -std=gnu++11 -stdlib=libc++
+macx: QMAKE_CFLAGS += -gdwarf-2
+macx: QMAKE_CXXFLAGS += -gdwarf-2
 macx: ICON = ../Resources/earth.icns
+macx: QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.6
 
 SOURCES += main.cpp\
 	Widgets/newgenemainwindow.cpp \
@@ -283,6 +286,7 @@ INCLUDEPATH += $$PWD/Infrastructure/Settings/Base
 INCLUDEPATH += $$PWD/Infrastructure/Settings/Indicator
 INCLUDEPATH += $$PWD/Infrastructure/Settings/Item
 INCLUDEPATH += $$PWD/Infrastructure/Settings/Global
+
 INCLUDEPATH += $$PWD/Infrastructure/Settings/Project
 INCLUDEPATH += $$PWD/Infrastructure/Messager
 INCLUDEPATH += $$PWD/Infrastructure/Documents
