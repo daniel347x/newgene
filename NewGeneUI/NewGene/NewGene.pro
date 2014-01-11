@@ -12,7 +12,12 @@ TARGET = NewGene
 TEMPLATE = app
 
 # QMAKE_CXXFLAGS_RELEASE += -Zi
-QMAKE_CXXFLAGS_RELEASE += -Od
+
+QMAKE_CFLAGS_RELEASE -= -O
+QMAKE_CFLAGS_RELEASE -= -O1
+QMAKE_CFLAGS_RELEASE -= -O2
+# add the desired -O3 if not present
+QMAKE_CFLAGS_RELEASE *= -O3
 
 macx: QMAKE_CXXFLAGS += -x c++ -arch x86_64 -std=gnu++11 -stdlib=libc++
 macx: QMAKE_LFLAGS += -arch x86_64 -std=gnu++11 -stdlib=libc++
