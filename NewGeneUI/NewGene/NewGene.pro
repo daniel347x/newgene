@@ -16,6 +16,7 @@ QMAKE_CXXFLAGS_RELEASE += /Od
 
 macx: QMAKE_CXXFLAGS += -x c++ -arch x86_64 -std=gnu++11 -stdlib=libc++
 macx: QMAKE_LFLAGS += -arch x86_64 -std=gnu++11 -stdlib=libc++
+macx: ICON = ../Resources/earth.icns
 
 SOURCES += main.cpp\
 	Widgets/newgenemainwindow.cpp \
