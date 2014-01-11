@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = NewGene
 TEMPLATE = app
 
-QMAKE_CXXFLAGS_RELEASE += -Zi
+# QMAKE_CXXFLAGS_RELEASE += -Zi
 QMAKE_CXXFLAGS_RELEASE += -Od
 
 macx: QMAKE_CXXFLAGS += -x c++ -arch x86_64 -std=gnu++11 -stdlib=libc++
