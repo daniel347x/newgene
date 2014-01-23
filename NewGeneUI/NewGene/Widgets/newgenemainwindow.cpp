@@ -144,6 +144,7 @@ void NewGeneMainWindow::SignalMessageBox(STD_STRING msg)
 
 void NewGeneMainWindow::ReceiveSignalStartProgressBar(int progress_bar_id, STD_INT64 const min_value, STD_INT64 const max_value)
 {
+
 	status_bar_progress_bars[progress_bar_id] = std::unique_ptr<QProgressBar>(new QProgressBar(this));
 	main_pane_progress_bars[progress_bar_id] = std::unique_ptr<QProgressBar>(new QProgressBar(this));
 
@@ -157,10 +158,12 @@ void NewGeneMainWindow::ReceiveSignalStartProgressBar(int progress_bar_id, STD_I
 		status_bar_progress_bars[progress_bar_id]->setValue(min_value);
 		this->statusBar()->addPermanentWidget(status_bar_progress_bars[progress_bar_id].get());
 	}
+
 }
 
 void NewGeneMainWindow::ReceiveSignalStopProgressBar(int progress_bar_id)
 {
+
 	if (this->statusBar())
 	{
 		if (status_bar_progress_bars.find(progress_bar_id) != status_bar_progress_bars.cend())
@@ -171,10 +174,12 @@ void NewGeneMainWindow::ReceiveSignalStopProgressBar(int progress_bar_id)
 	}
 
 	main_pane_progress_bars.erase(progress_bar_id);
+
 }
 
 void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(int progress_bar_id, STD_INT64 const new_value)
 {
+
 	if (this->statusBar())
 	{
 		if (status_bar_progress_bars.find(progress_bar_id) != status_bar_progress_bars.cend())
@@ -190,14 +195,17 @@ void NewGeneMainWindow::ReceiveSignalUpdateProgressBarValue(int progress_bar_id,
 			}
 		}
 	}
+
 }
 
 void NewGeneMainWindow::ReceiveSignalUpdateStatusBarText(int /* progress_bar_id */, STD_STRING const status_bar_message)
 {
+
 	if (this->statusBar())
 	{
 		this->statusBar()->showMessage(QString(status_bar_message.c_str()));
 	}
+
 }
 
 void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
@@ -221,7 +229,9 @@ void NewGeneMainWindow::on_actionOpen_Input_Dataset_triggered()
 
 void NewGeneMainWindow::on_actionClose_Current_Input_Dataset_triggered()
 {
+
 	emit SignalCloseCurrentInputDataset();
+
 }
 
 void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
@@ -245,11 +255,14 @@ void NewGeneMainWindow::on_actionOpen_Output_Dataset_triggered()
 
 void NewGeneMainWindow::on_actionClose_Current_Output_Dataset_triggered()
 {
+
 	emit SignalCloseCurrentOutputDataset();
+
 }
 
 void NewGeneMainWindow::closeEvent(QCloseEvent *event)
 {
+
 	{
 		std::lock_guard<std::recursive_mutex> guard(OutputModel::OutputGenerator::is_generating_output_mutex);
 		if (OutputModel::OutputGenerator::is_generating_output)
@@ -268,5 +281,7 @@ void NewGeneMainWindow::closeEvent(QCloseEvent *event)
 			}
 		}
 	}
+
 	event->accept();
+
 }
