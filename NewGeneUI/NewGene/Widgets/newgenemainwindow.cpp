@@ -135,9 +135,11 @@ void NewGeneMainWindow::doInitialize()
 
 void NewGeneMainWindow::SignalMessageBox(STD_STRING msg)
 {
+
 	QMessageBox msgBox;
 	msgBox.setText( msg.c_str() );
 	msgBox.exec();
+
 }
 
 void NewGeneMainWindow::ReceiveSignalStartProgressBar(int progress_bar_id, STD_INT64 const min_value, STD_INT64 const max_value)
