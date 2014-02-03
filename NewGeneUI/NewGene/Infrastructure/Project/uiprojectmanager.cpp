@@ -318,7 +318,7 @@ void UIProjectManager::OpenOutputDataset(STD_STRING the_output_dataset, QObject 
 	UIInputProject * input_project = getActiveUIInputProject();
 	if (!input_project)
 	{
-		boost::format msg("Please open an input dataset before attempting to open an output dataset.");
+		boost::format msg("Please open or create an input dataset before attempting to open or create an output dataset.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
@@ -327,7 +327,7 @@ void UIProjectManager::OpenOutputDataset(STD_STRING the_output_dataset, QObject 
 
 	bool success = false;
 
-	if (boost::filesystem::exists(the_output_dataset) && !boost::filesystem::is_directory(the_output_dataset))
+	if (!boost::filesystem::is_directory(the_output_dataset))
 	{
 		success = RawOpenOutputProject(messager, boost::filesystem::path(the_output_dataset), mainWindowObject);
 	}
@@ -384,7 +384,7 @@ void UIProjectManager::OpenInputDataset(STD_STRING the_input_dataset, QObject * 
 	bool success = false;
 
 	UIMessager messager;
-	if (boost::filesystem::exists(the_input_dataset) && !boost::filesystem::is_directory(the_input_dataset))
+	if (!boost::filesystem::is_directory(the_input_dataset))
 	{
 		success = RawOpenInputProject(messager, boost::filesystem::path(the_input_dataset), mainWindowObject);
 	}
@@ -466,7 +466,7 @@ void UIProjectManager::CloseCurrentInputDataset()
 bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesystem::path const & input_project_settings_path, QObject * mainWindowObject)
 {
 
-	if (!boost::filesystem::exists(input_project_settings_path) || boost::filesystem::is_directory(input_project_settings_path))
+	if (boost::filesystem::is_directory(input_project_settings_path))
 	{
 		QMessageBox msgBox;
 		boost::format msg("%1%, the input project settings filename, is not a valid file.");
@@ -581,7 +581,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject)
 {
 
-	if (!boost::filesystem::exists(output_project_settings_path) || boost::filesystem::is_directory(output_project_settings_path))
+	if (boost::filesystem::is_directory(output_project_settings_path))
 	{
 		QMessageBox msgBox;
 		boost::format msg("%1%, the input project settings filename, is not a valid file.");
