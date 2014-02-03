@@ -85,9 +85,11 @@
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Messager\Messager.h" />
     <ClInclude Include="ModelAction\ModelActionManager.h" />
+    <ClInclude Include="Model\InputModel.DDL.SQL.h" />
     <ClInclude Include="Model\InputModel.h" />
     <ClInclude Include="Model\Model.h" />
     <ClInclude Include="Model\ModelManager.h" />
+    <ClInclude Include="Model\OutputModel.DDL.SQL.h" />
     <ClInclude Include="Model\OutputModel.h" />
     <ClInclude Include="Model\Tables\Executor.h" />
     <ClInclude Include="Model\Tables\Fields.h" />

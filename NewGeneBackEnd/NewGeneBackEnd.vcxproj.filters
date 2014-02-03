@@ -330,6 +330,12 @@
     <ClInclude Include="Model\Tables\TableInstances\GeneralOptions.h">
       <Filter>Header Files\Model\Tables\TableInstances</Filter>
     </ClInclude>
+    <ClInclude Include="Model\InputModel.DDL.SQL.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\OutputModel.DDL.SQL.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
