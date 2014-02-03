@@ -111,6 +111,10 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 	connect(mainWindowObject, SIGNAL(SignalCloseCurrentOutputDataset()), this, SLOT(CloseCurrentOutputDataset()));
 	connect(mainWindowObject, SIGNAL(SignalOpenInputDataset(STD_STRING, QObject *)), this, SLOT(OpenInputDataset(STD_STRING, QObject *)));
 	connect(mainWindowObject, SIGNAL(SignalOpenOutputDataset(STD_STRING, QObject *)), this, SLOT(OpenOutputDataset(STD_STRING, QObject *)));
+	connect(mainWindowObject, SIGNAL(SignalNewInputDataset()), this, SLOT(NewInputDataset()));
+	connect(mainWindowObject, SIGNAL(SignalNewOutputDataset()), this, SLOT(NewOutputDataset()));
+	connect(mainWindowObject, SIGNAL(SignalSaveCurrentInputDatasetAs()), this, SLOT(SaveCurrentInputDatasetAs()));
+	connect(mainWindowObject, SIGNAL(SignalSaveCurrentOutputDatasetAs()), this, SLOT(SaveCurrentOutputDatasetAs()));
 
 	bool success = false;
 
@@ -657,8 +661,8 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		return false;
 	}
 
-    output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
-        std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject)));
+	output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
+		std::unique_ptr<UIOutputProject>(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject)));
 
 	UIOutputProject * project = getActiveUIOutputProject();
 
@@ -730,4 +734,24 @@ void UIProjectManager::RawCloseOutputProject(UIOutputProject * output_project)
 
 	output_project->deleteLater();
 
+}
+
+void UIProjectManager::NewInputDataset()
+{
+	int m = 0;
+}
+
+void UIProjectManager::NewOutputDataset()
+{
+	int m = 0;
+}
+
+void UIProjectManager::SaveCurrentInputDatasetAs()
+{
+	int m = 0;
+}
+
+void UIProjectManager::SaveCurrentOutputDatasetAs()
+{
+	int m = 0;
 }

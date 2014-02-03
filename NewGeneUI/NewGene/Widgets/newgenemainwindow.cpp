@@ -285,3 +285,31 @@ void NewGeneMainWindow::closeEvent(QCloseEvent *event)
 	event->accept();
 
 }
+
+void NewGeneMainWindow::on_actionNew_Input_Dataset_triggered()
+{
+
+	emit SignalNewInputDataset();
+
+}
+
+void NewGeneMainWindow::on_actionNew_Output_Dataset_triggered()
+{
+
+	emit SignalNewOutputDataset();
+
+}
+
+void NewGeneMainWindow::on_actionSave_Input_Dataset_As_triggered()
+{
+
+	emit SignalSaveCurrentInputDatasetAs();
+
+}
+
+void NewGeneMainWindow::on_actionSave_Output_Dataset_As_triggered()
+{
+
+	emit SignalSaveCurrentOutputDatasetAs();
+
+}

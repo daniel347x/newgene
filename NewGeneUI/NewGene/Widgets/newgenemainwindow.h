@@ -28,6 +28,10 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void SignalCloseCurrentOutputDataset();
 		void SignalOpenInputDataset(STD_STRING, QObject *);
 		void SignalCloseCurrentInputDataset();
+		void SignalNewInputDataset();
+		void SignalNewOutputDataset();
+		void SignalSaveCurrentInputDatasetAs();
+		void SignalSaveCurrentOutputDatasetAs();
 
 	public slots:
 		void doInitialize();
@@ -42,10 +46,14 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void closeEvent(QCloseEvent *event);
 
 	private slots:
-		void on_actionClose_Current_Input_Dataset_triggered();
 		void on_actionOpen_Input_Dataset_triggered();
 		void on_actionOpen_Output_Dataset_triggered();
+		void on_actionClose_Current_Input_Dataset_triggered();
 		void on_actionClose_Current_Output_Dataset_triggered();
+		void on_actionNew_Input_Dataset_triggered();
+		void on_actionNew_Output_Dataset_triggered();
+		void on_actionSave_Input_Dataset_As_triggered();
+		void on_actionSave_Output_Dataset_As_triggered();
 
 	private:
 		Ui::NewGeneMainWindow * ui;
