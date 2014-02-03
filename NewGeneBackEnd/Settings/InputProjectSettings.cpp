@@ -4,7 +4,7 @@
 #define S_PATH_TO_MODEL__1 PATH_TO_MODEL
 #define S_PATH_TO_MODEL__2 SETTING_CLASS_BACKEND_PROJECT_INPUT_SETTING__PATH_TO_MODEL_SETTINGS
 #define S_PATH_TO_MODEL__3 "PATH_TO_MODEL"
-#define S_PATH_TO_MODEL__4 "L:\\daniel347x\\__DanExtras\\NewGene\\Projects\\Input\\TestInputModelSettings.xml"
+#define S_PATH_TO_MODEL__4 "."
 #define S_PATH_TO_MODEL__5 InputProjectBackendSetting__path<INPUT_PROJECT_SETTINGS_BACKEND_NAMESPACE::PATH_TO_MODEL>
 
 std::string newgene_input_project_backend_root_node("newgene.project.input.backend.");

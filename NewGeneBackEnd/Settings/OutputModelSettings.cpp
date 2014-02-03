@@ -5,7 +5,7 @@
 #define S_PATH_TO_MODEL_DATABASE__1 PATH_TO_MODEL_DATABASE
 #define S_PATH_TO_MODEL_DATABASE__2 SETTING_CLASS_MODEL_OUTPUT_SETTING__PATH_TO_MODEL_DATABASE
 #define S_PATH_TO_MODEL_DATABASE__3 "PATH_TO_MODEL_DATABASE"
-#define S_PATH_TO_MODEL_DATABASE__4 "L:\\daniel347x\\__DanExtras\\NewGene\\Projects\\Output\\TestOutputModelDatabase.xml"
+#define S_PATH_TO_MODEL_DATABASE__4 "."
 #define S_PATH_TO_MODEL_DATABASE__5 OutputModelSetting__path<OUTPUT_MODEL_SETTINGS_NAMESPACE::PATH_TO_MODEL_DATABASE>
 
 std::string newgene_output_model_root_node("newgene.model.output.");
