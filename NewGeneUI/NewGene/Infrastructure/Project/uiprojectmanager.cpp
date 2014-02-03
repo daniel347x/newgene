@@ -493,12 +493,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	}
 	if (boost::filesystem::is_directory(path_to_model_settings))
 	{
-		QMessageBox msgBox;
-		boost::format msg("%1%, the input model settings filename, is not a valid file.");
-		msg % path_to_model_settings.string();
-		msgBox.setText(msg.str().c_str());
-		msgBox.exec();
-		return false;
+		path_to_model_settings /= (input_project_settings_path.stem().string() + ".model.xml");
 	}
 	std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
@@ -514,6 +509,8 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	}
 	if (!boost::filesystem::exists(path_to_model_database) || boost::filesystem::is_directory(path_to_model_database))
 	{
+		path_to_model_database /= (input_project_settings_path.stem().string() + ".db");
+
 		QMessageBox msgBox;
 		boost::format msg("%1%, the input model database filename, is not a valid file - we'll be creating a new model here in this block");
 		msg % path_to_model_database.string();
@@ -608,12 +605,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	}
 	if (boost::filesystem::is_directory(path_to_model_settings))
 	{
-		QMessageBox msgBox;
-		boost::format msg("%1%, the output model settings filename, is not a valid file.");
-		msg % path_to_model_settings.string();
-		msgBox.setText(msg.str().c_str());
-		msgBox.exec();
-		return false;
+		path_to_model_settings /= (output_project_settings_path.stem().string() + ".model.xml");
 	}
 	std::shared_ptr<UIOutputModelSettings> model_settings(new UIOutputModelSettings(messager, path_to_model_settings));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
@@ -638,6 +630,8 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	}
 	if (!boost::filesystem::exists(path_to_model_database) || boost::filesystem::is_directory(path_to_model_database))
 	{
+		path_to_model_database /= (output_project_settings_path.stem().string() + ".db");
+
 		QMessageBox msgBox;
 		boost::format msg("%1%, the output model database filename, is not a valid file - we'll be creating a new model here in this block");
 		msg % path_to_model_database.string();
