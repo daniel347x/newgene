@@ -491,7 +491,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		new_path /= path_to_model_settings;
 		path_to_model_settings = new_path;
 	}
-	if (!boost::filesystem::exists(path_to_model_settings) || boost::filesystem::is_directory(path_to_model_settings))
+	if (boost::filesystem::is_directory(path_to_model_settings))
 	{
 		QMessageBox msgBox;
 		boost::format msg("%1%, the input model settings filename, is not a valid file.");
@@ -606,7 +606,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		new_path /= path_to_model_settings;
 		path_to_model_settings = new_path;
 	}
-	if (!boost::filesystem::exists(path_to_model_settings) || boost::filesystem::is_directory(path_to_model_settings))
+	if (boost::filesystem::is_directory(path_to_model_settings))
 	{
 		QMessageBox msgBox;
 		boost::format msg("%1%, the output model settings filename, is not a valid file.");
