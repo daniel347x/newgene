@@ -481,7 +481,8 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	std::shared_ptr<UIInputProjectSettings> project_settings(new UIInputProjectSettings(messager, input_project_settings_path));
 	project_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
-	// Internally creates an instance of backend-layer model settings via SettingsRepositoryFactory
+	// When the UIInputModelSettings instance is created below, it internally creates
+	// an instance of backend-layer model settings
 	auto path_to_model_settings_ = InputProjectPathToModel::get(messager, project_settings->getBackendSettings());
 	boost::filesystem::path path_to_model_settings = path_to_model_settings_->getPath();
 	if (path_to_model_settings.is_relative())
@@ -595,7 +596,8 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	std::shared_ptr<UIOutputProjectSettings> project_settings(new UIOutputProjectSettings(messager, output_project_settings_path));
 	project_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
-	// Internally creates an instance of backend-layer model settings via SettingsRepositoryFactory
+	// When the UIOutputModelSettings instance is created below, it internally creates
+	// an instance of backend-layer model settings
 	auto path_to_model_settings_ = OutputProjectPathToModel::get(messager, project_settings->getBackendSettings());
 	boost::filesystem::path path_to_model_settings = path_to_model_settings_->getPath();
 	if (path_to_model_settings.is_relative())
