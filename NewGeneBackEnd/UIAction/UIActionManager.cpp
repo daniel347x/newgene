@@ -10,7 +10,7 @@ std::atomic<bool> UIActionManager::is_busy(false);
 bool UIActionManager::FailIfBusy(Messager & messager)
 {
 
-	for (int attempts = 0; attempts < 10; ++attempts)
+	for (int attempts = 0; attempts < 50; ++attempts)
 	{
 		{
 			std::lock_guard<std::recursive_mutex> guard(is_busy_mutex);
