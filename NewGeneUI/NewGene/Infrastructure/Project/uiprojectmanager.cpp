@@ -502,7 +502,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	std::shared_ptr<UIInputModelSettings> model_settings(new UIInputModelSettings(messager, path_to_model_settings));
 	model_settings->WriteSettingsToFile(messager); // Writes default settings for those settings not already present
 
-	// Backend model does not know its settings, because multiple settings might point to the same model.
+	// Backend model does not know about the current project's settings, because multiple settings might point to the same model.
 	auto path_to_model_database_ = InputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
 	boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
 	if (path_to_model_database.is_relative())
@@ -625,7 +625,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		return false;
 	}
 
-	// Backend model does not know its settings, because multiple settings might point to the same model.
+	// Backend model does not know about the current project's settings, because multiple settings might point to the same model.
 	auto path_to_model_database_ = OutputModelPathToDatabase::get(messager, model_settings->getBackendSettings());
 	boost::filesystem::path path_to_model_database = path_to_model_database_->getPath();
 	if (path_to_model_database.is_relative())
