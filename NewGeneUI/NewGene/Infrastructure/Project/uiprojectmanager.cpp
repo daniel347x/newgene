@@ -515,7 +515,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	if (!boost::filesystem::exists(path_to_model_database) || boost::filesystem::is_directory(path_to_model_database))
 	{
 		QMessageBox msgBox;
-		boost::format msg("%1%, the input model database filename, is not a valid file.");
+		boost::format msg("%1%, the input model database filename, is not a valid file - we'll be creating a new model here in this block");
 		msg % path_to_model_database.string();
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
@@ -639,7 +639,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	if (!boost::filesystem::exists(path_to_model_database) || boost::filesystem::is_directory(path_to_model_database))
 	{
 		QMessageBox msgBox;
-		boost::format msg("%1%, the output model database filename, is not a valid file.");
+		boost::format msg("%1%, the output model database filename, is not a valid file - we'll be creating a new model here in this block");
 		msg % path_to_model_database.string();
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
