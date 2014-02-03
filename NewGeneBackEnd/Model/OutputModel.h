@@ -1095,6 +1095,20 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 };
 
+template<>
+class ModelFactory<OutputModel>
+{
+
+	public:
+
+		OutputModel * operator()(Messager & messager, boost::filesystem::path const path_to_model_database, std::shared_ptr<InputModelSettings> const input_model_settings_, std::shared_ptr<InputModel> const input_model_)
+		{
+			OutputModel * new_model = new OutputModel(messager, path_to_model_database, input_model_settings_, input_model_);
+			return new_model;
+		}
+
+};
+
 bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
 
 #endif

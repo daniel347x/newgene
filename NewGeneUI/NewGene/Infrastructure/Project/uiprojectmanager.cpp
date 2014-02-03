@@ -510,13 +510,6 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	if (!boost::filesystem::exists(path_to_model_database) || boost::filesystem::is_directory(path_to_model_database))
 	{
 		path_to_model_database /= (input_project_settings_path.stem().string() + ".db");
-
-		QMessageBox msgBox;
-		boost::format msg("%1%, the input model database filename, is not a valid file - we'll be creating a new model here in this block");
-		msg % path_to_model_database.string();
-		msgBox.setText(msg.str().c_str());
-		msgBox.exec();
-		return false;
 	}
 	std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(messager, path_to_model_database));
 	std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
@@ -631,13 +624,6 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	if (!boost::filesystem::exists(path_to_model_database) || boost::filesystem::is_directory(path_to_model_database))
 	{
 		path_to_model_database /= (output_project_settings_path.stem().string() + ".db");
-
-		QMessageBox msgBox;
-		boost::format msg("%1%, the output model database filename, is not a valid file - we'll be creating a new model here in this block");
-		msg % path_to_model_database.string();
-		msgBox.setText(msg.str().c_str());
-		msgBox.exec();
-		return false;
 	}
 	std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(messager, path_to_model_database, std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
 	std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));

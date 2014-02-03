@@ -35,6 +35,20 @@ class InputModel : public Model<INPUT_MODEL_SETTINGS_NAMESPACE::INPUT_MODEL_SETT
 
 };
 
+template<>
+class ModelFactory<InputModel>
+{
+
+public:
+
+	InputModel * operator()(Messager & messager, boost::filesystem::path const path_to_model_database)
+	{
+		InputModel * new_model = new InputModel(messager, path_to_model_database);
+		return new_model;
+	}
+
+};
+
 bool InputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
 
 #endif
