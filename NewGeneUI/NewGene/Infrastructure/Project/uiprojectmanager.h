@@ -131,14 +131,6 @@ class UIProjectManager : public QObject,
 
 	public:
 
-		enum UPDATE_CONNECTIONS_TYPE
-		{
-			  RELEASE_CONNECTIONS_INPUT_PROJECT
-			, ESTABLISH_CONNECTIONS_INPUT_PROJECT
-			, RELEASE_CONNECTIONS_OUTPUT_PROJECT
-			, ESTABLISH_CONNECTIONS_OUTPUT_PROJECT
-		};
-
 #		if 0 // possibly to be implemented in a later version of NewGene to manage multiple tabs for input or output
 		typedef std::vector<std::shared_ptr<UIInputProject>> UIInputProjectsList;
 		typedef std::vector<std::shared_ptr<UIOutputProject>> UIOutputProjectsList;
@@ -235,8 +227,8 @@ class UIProjectManager : public QObject,
 
 	signals:
 
-		void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
-		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
+		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void LoadFromDatabase(UI_INPUT_MODEL_PTR);
 		void LoadFromDatabase(UI_OUTPUT_MODEL_PTR);
 

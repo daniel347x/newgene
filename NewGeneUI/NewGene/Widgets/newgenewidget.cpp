@@ -4,19 +4,22 @@
 #include "newgenewidget.h"
 #include "uistatusmanager.h"
 #include "../../../NewGeneBackEnd/Utilities/UUID.h"
+#include "../Project/uiprojectmanager.h"
+#include "../Project/uiinputproject.h"
+#include "../Project/uioutputproject.h"
 
 NewGeneMainWindow * NewGeneWidget::theMainWindow = nullptr;
 
 NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
 	: self( creation_info.self )
-    , widget_nature(creation_info.widget_nature)
-    , uuid(newUUID())
-    , uuid_parent(creation_info.uuid_parent)
-    , inp(nullptr)
+	, widget_nature(creation_info.widget_nature)
+	, uuid(newUUID())
+	, uuid_parent(creation_info.uuid_parent)
+	, inp(nullptr)
 	, outp(nullptr)
-    , widget_type(creation_info.widget_type)
-    , data_instance(creation_info.data_instance)
-    , top_level(creation_info.top_level)
+	, widget_type(creation_info.widget_type)
+	, data_instance(creation_info.data_instance)
+	, top_level(creation_info.top_level)
 {
 }
 
@@ -30,7 +33,7 @@ void NewGeneWidget::PrepareInputWidget()
 	{
 		return;
 	}
-	self->connect(&projectManagerUI(), SIGNAL(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
+	self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
 }
 
 void NewGeneWidget::PrepareOutputWidget()
@@ -39,8 +42,8 @@ void NewGeneWidget::PrepareOutputWidget()
 	{
 		return;
 	}
-	self->connect(&projectManagerUI(), SIGNAL(UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
-	self->connect(&projectManagerUI(), SIGNAL(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
+	self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
+	self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
 }
 
 NewGeneMainWindow & NewGeneWidget::mainWindow()
@@ -56,12 +59,12 @@ void NewGeneWidget::ShowMessageBox(std::string msg)
 	msgBox.exec();
 }
 
-void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+void NewGeneWidget::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 
 	if (IsOutputProjectWidget())
 	{
-		if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_INPUT_PROJECT)
+		if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 		{
 			Empty();
 			return;
@@ -73,7 +76,7 @@ void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_
 		return;
 	}
 
-	if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_INPUT_PROJECT)
+	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
 		if (project && project == inp)
 		{
@@ -88,7 +91,7 @@ void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_
 		// TODO: release connections here
 	}
 
-	else if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
+	else if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
 	{
 		inp = project;
 
@@ -121,7 +124,7 @@ void NewGeneWidget::UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_
 
 }
 
-void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+void NewGeneWidget::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 
 	if (!IsOutputProjectWidget())
@@ -131,7 +134,7 @@ void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS
 		return;
 	}
 
-	if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		if (project && project == outp)
 		{
@@ -146,7 +149,7 @@ void NewGeneWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS
 		// TODO: release connections here
 	}
 
-	else if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	else if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		outp = project;
 

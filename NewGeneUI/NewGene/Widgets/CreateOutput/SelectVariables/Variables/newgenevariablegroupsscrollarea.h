@@ -22,8 +22,8 @@ class NewGeneVariableGroupsScrollArea : public QWidget, public NewGeneWidget // 
 		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA);
 
 	public slots:
-		void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
-		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
+		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void TestSlot();
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);

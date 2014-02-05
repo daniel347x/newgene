@@ -2,7 +2,6 @@
 #define NEWGENEWIDGET_H
 
 #include "globals.h"
-#include "uiprojectmanager.h"
 #include "../../../NewGeneBackEnd/UIData/DataWidgets.h"
 
 class QWidget;
@@ -23,6 +22,14 @@ class NewGeneWidget
 			, WIDGET_NATURE_GENERAL
 			, WIDGET_NATURE_INPUT_WIDGET
 			, WIDGET_NATURE_OUTPUT_WIDGET
+		};
+
+		enum UPDATE_CONNECTIONS_TYPE
+		{
+			  RELEASE_CONNECTIONS_INPUT_PROJECT
+			, ESTABLISH_CONNECTIONS_INPUT_PROJECT
+			, RELEASE_CONNECTIONS_OUTPUT_PROJECT
+			, ESTABLISH_CONNECTIONS_OUTPUT_PROJECT
 		};
 
 	public:
@@ -46,8 +53,8 @@ class NewGeneWidget
 
 		// ****************************************************************************************************************************
 		// Pseudo-slots.
-		virtual void UpdateInputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
-		virtual void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		virtual void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
+		virtual void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		//
 		/* Remove if unnecessary
 		virtual void RefreshAllWidgets() {}
@@ -178,5 +185,7 @@ class WidgetCreationInfo
 		WidgetInstanceIdentifier data_instance;
 
 };
+
+#include "../q_declare_metatype.h"
 
 #endif // NEWGENEWIDGET_H

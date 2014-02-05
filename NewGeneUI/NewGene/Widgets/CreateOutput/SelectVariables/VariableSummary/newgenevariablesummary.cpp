@@ -36,10 +36,10 @@ void NewGeneVariableSummary::changeEvent( QEvent * e )
 	}
 }
 
-void NewGeneVariableSummary::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+void NewGeneVariableSummary::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
-	if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
 	}

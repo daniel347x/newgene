@@ -243,7 +243,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.h \
 	Infrastructure/UIAction/timerangechange.h \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.h \
-	Infrastructure/UIAction/generaloptions.h
+	Infrastructure/UIAction/generaloptions.h \
+    q_declare_metatype.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

@@ -1,6 +1,10 @@
 #include "newgenevariablesummaryscrollarea.h"
 #include "ui_newgenevariablesummaryscrollarea.h"
 
+#include "../Project/uiprojectmanager.h"
+#include "../Project/uiinputproject.h"
+#include "../Project/uioutputproject.h"
+
 NewGeneVariableSummaryScrollArea::NewGeneVariableSummaryScrollArea( QWidget * parent ) :
 	QWidget( parent ),
 	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, VARIABLE_GROUPS_SUMMARY_SCROLL_AREA, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
@@ -33,11 +37,11 @@ void NewGeneVariableSummaryScrollArea::changeEvent( QEvent * e )
 	}
 }
 
-void NewGeneVariableSummaryScrollArea::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+void NewGeneVariableSummaryScrollArea::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_SCROLL_AREA)));
 
@@ -47,7 +51,7 @@ void NewGeneVariableSummaryScrollArea::UpdateOutputConnections(UIProjectManager:
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)));
 	}
-	else if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
 	}

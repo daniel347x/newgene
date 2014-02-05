@@ -5,6 +5,10 @@
 #	include <boost/date_time/local_time/local_time.hpp>
 #endif
 
+#include "../Project/uiprojectmanager.h"
+#include "../Project/uiinputproject.h"
+#include "../Project/uioutputproject.h"
+
 NewGeneDateTimeWidget::NewGeneDateTimeWidget( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject *) :
 
 	QDateTimeEdit( parent ),
@@ -56,14 +60,14 @@ void NewGeneDateTimeWidget::RefreshAllWidgets()
 	emit RefreshWidget(request);
 }
 
-void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+void NewGeneDateTimeWidget::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
-	if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		outp->UnregisterInterestInChanges(this);
 	}
 
-	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		/* For some reason, setting the "objectName" property in the form editor is not reflected here */
 		/*
@@ -98,7 +102,7 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 
 		if (data_instance.uuid && project)
@@ -113,7 +117,7 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(UIProjectManager::UPDATE_CON
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET)));
 
 	}
-	else if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
 	}
@@ -240,17 +244,17 @@ void NewGeneDateTimeWidget::HandleChanges(DataChangeMessage const & change_messa
 								// Ditto above.
 							}
 							break;
-                        default:
-                            {
-                            }
-                            break;
-                    }
+						default:
+							{
+							}
+							break;
+					}
 				}
 				break;
-            default:
-                {
-                }
-                break;
-        }
+			default:
+				{
+				}
+				break;
+		}
 	});
 }

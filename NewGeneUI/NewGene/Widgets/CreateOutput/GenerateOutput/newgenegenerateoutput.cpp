@@ -6,6 +6,10 @@
 #include <QFileDialog>
 #include <QPlainTextEdit>
 
+#include "../Project/uiprojectmanager.h"
+#include "../Project/uiinputproject.h"
+#include "../Project/uioutputproject.h"
+
 NewGeneGenerateOutput::NewGeneGenerateOutput(QWidget *parent) :
 	QWidget(parent),
 	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_OUTPUT_WIDGET, GENERATE_OUTPUT_TAB, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
@@ -23,18 +27,18 @@ NewGeneGenerateOutput::~NewGeneGenerateOutput()
 	delete ui;
 }
 
-void NewGeneGenerateOutput::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+void NewGeneGenerateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB)));
 		connect(this, SIGNAL(GenerateOutputSignal(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT)));
 	}
-	else if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
 	}

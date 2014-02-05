@@ -3,6 +3,8 @@
 
 #include <QApplication>
 #include "globals.h"
+#include "Widgets/newgenewidget.h"
+#include "q_declare_metatype.h"
 
 class NewGeneApplication : public QApplication
 {

@@ -556,7 +556,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	project->UpdateConnections();
 
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-	emit UpdateInputConnections(ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
+	emit UpdateInputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
 
 	emit LoadFromDatabase(&project->model());
 
@@ -666,7 +666,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	project->UpdateConnections();
 
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-	emit UpdateOutputConnections(ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+	emit UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 
 	emit LoadFromDatabase(&getActiveUIOutputProject()->model());
 
@@ -687,7 +687,7 @@ void UIProjectManager::RawCloseInputProject(UIInputProject * input_project)
 	}
 
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-	emit UpdateInputConnections(RELEASE_CONNECTIONS_INPUT_PROJECT, input_project);
+	emit UpdateInputConnections(NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT, input_project);
 
 	input_project->model().EndLoopAndBackgroundPool(); // blocks
 	input_project->modelSettings().EndLoopAndBackgroundPool(); // blocks
@@ -707,7 +707,7 @@ void UIProjectManager::RawCloseOutputProject(UIOutputProject * output_project)
 	}
 
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
-	emit this->UpdateOutputConnections(RELEASE_CONNECTIONS_OUTPUT_PROJECT, output_project);
+	emit this->UpdateOutputConnections(NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT, output_project);
 
 	output_project->model().EndLoopAndBackgroundPool(); // blocks
 	output_project->modelSettings().EndLoopAndBackgroundPool(); // blocks

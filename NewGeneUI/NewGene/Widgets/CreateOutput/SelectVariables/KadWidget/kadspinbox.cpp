@@ -1,5 +1,9 @@
 #include "kadspinbox.h"
 
+#include "../Project/uiprojectmanager.h"
+#include "../Project/uiinputproject.h"
+#include "../Project/uioutputproject.h"
+
 KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
 
 	QSpinBox( parent ),
@@ -26,7 +30,7 @@ KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance
 	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE, true, *data_instance.uuid);
 	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, false, *data_instance.uuid);
 
-	   UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+	   UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 	   WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(0, WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
 	   emit RefreshWidget(request);
 
@@ -48,16 +52,16 @@ void KadSpinBox::RefreshAllWidgets()
 	emit RefreshWidget(request);
 }
 
-void KadSpinBox::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+void KadSpinBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
-	if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		outp->UnregisterInterestInChanges(this);
 	}
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET)));
 		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE)));
@@ -155,10 +159,10 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 								// Ditto above.
 							}
 							break;
-                        default:
-                            {
-                            }
-                            break;
+						default:
+							{
+							}
+							break;
 					}
 				}
 				break;
@@ -194,17 +198,17 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 								// Should never receive this.
 							}
 							break;
-                        default:
-                            {
-                            }
-                            break;
-                    }
+						default:
+							{
+							}
+							break;
+					}
 				}
 				break;
-            default:
-                {
-                }
-                break;
-        }
+			default:
+				{
+				}
+				break;
+		}
 	});
 }

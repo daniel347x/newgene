@@ -35,7 +35,7 @@ class TimeRangeBox : public QFrame, public NewGeneWidget // do not reorder base 
 		void RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET);
 
 	public slots:
-		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET);
 

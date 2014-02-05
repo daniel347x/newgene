@@ -22,7 +22,7 @@ class NewGeneDateTimeWidget : public QDateTimeEdit, public NewGeneWidget
 
 	public slots:
 
-		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET);
 

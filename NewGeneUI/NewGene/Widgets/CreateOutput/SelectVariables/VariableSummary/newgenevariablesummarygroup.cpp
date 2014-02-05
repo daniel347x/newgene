@@ -4,6 +4,10 @@
 
 #include <QStandardItem>
 
+#include "../Project/uiprojectmanager.h"
+#include "../Project/uiinputproject.h"
+#include "../Project/uioutputproject.h"
+
 NewGeneVariableSummaryGroup::NewGeneVariableSummaryGroup( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
 
 	QGroupBox( parent ),
@@ -31,7 +35,7 @@ NewGeneVariableSummaryGroup::NewGeneVariableSummaryGroup( QWidget * parent, Widg
 
 		project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, true, *data_instance.uuid);
 
-		UpdateOutputConnections(UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
+		UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 		WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
 		emit RefreshWidget(request);
 
@@ -63,21 +67,21 @@ void NewGeneVariableSummaryGroup::changeEvent( QEvent * e )
 	}
 }
 
-void NewGeneVariableSummaryGroup::UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
+void NewGeneVariableSummaryGroup::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
-	if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		outp->UnregisterInterestInChanges(this);
 	}
 
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 
-	if (connection_type == UIProjectManager::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE)));
 		connect(this, SIGNAL(SignalReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED)));
 	}
-	else if (connection_type == UIProjectManager::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
+	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		Empty();
 	}
@@ -284,17 +288,17 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 							  // Ditto above.
 						  }
 						  break;
-                      default:
-                          {
-                          }
-                          break;
-                  }
+					  default:
+						  {
+						  }
+						  break;
+				  }
 			  }
 			  break;
-          default:
-              {
-              }
-              break;
-      }
+		  default:
+			  {
+			  }
+			  break;
+	  }
   });
 }

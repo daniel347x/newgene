@@ -31,7 +31,7 @@ class NewGeneGenerateOutput : public QWidget, public NewGeneWidget
 
 	public slots:
 
-		void UpdateOutputConnections(UIProjectManager::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void on_pushButtonGenerateOutput_clicked();
 		void WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB);
 		void RefreshAllWidgets();
