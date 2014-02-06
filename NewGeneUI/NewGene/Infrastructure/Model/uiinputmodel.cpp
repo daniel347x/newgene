@@ -53,7 +53,7 @@ bool UIInputModel::is_model_equivalent(UIMessager & messager, UIInputModel * mod
 		}
 	}
 
-	return false;
+	return true;
 }
 
 void UIInputModel::UpdateConnections()

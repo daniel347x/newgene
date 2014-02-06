@@ -88,7 +88,7 @@ bool UIOutputModel::is_model_equivalent(UIMessager & messager, UIOutputModel * m
 		}
 	}
 
-	return false;
+	return true;
 }
 
 void UIOutputModel::UpdateConnections()
