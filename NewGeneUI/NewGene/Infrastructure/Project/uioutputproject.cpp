@@ -57,9 +57,16 @@ bool UIOutputProject::is_model_equivalent(UIMessager & messager, UIOutputModel *
 		boost::filesystem::path that_path = that_input_model.getPathToDatabaseFile();
 		try
 		{
-			if (this_path == boost::filesystem::path() || that_path == boost::filesystem::path())
+			bool this_exists = boost::filesystem::exists(this_path);
+			bool that_exists = boost::filesystem::exists(that_path);
+			if (this_exists != that_exists)
 			{
 				return false;
+			}
+
+			if (!this_exists && !that_exists)
+			{
+				return true;
 			}
 
 			boost::filesystem::path this_path_canonical = boost::filesystem::canonical(this_path);
