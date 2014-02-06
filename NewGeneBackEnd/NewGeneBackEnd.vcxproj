@@ -85,11 +85,11 @@
     <ClInclude Include="Manager.h" />
     <ClInclude Include="Messager\Messager.h" />
     <ClInclude Include="ModelAction\ModelActionManager.h" />
-    <ClInclude Include="Model\InputModel.DDL.SQL.h" />
+    <ClInclude Include="Model\InputModelDdlSql.h" />
     <ClInclude Include="Model\InputModel.h" />
     <ClInclude Include="Model\Model.h" />
     <ClInclude Include="Model\ModelManager.h" />
-    <ClInclude Include="Model\OutputModel.DDL.SQL.h" />
+    <ClInclude Include="Model\OutputModelDdlSql.h" />
     <ClInclude Include="Model\OutputModel.h" />
     <ClInclude Include="Model\Tables\Executor.h" />
     <ClInclude Include="Model\Tables\Fields.h" />
@@ -156,9 +156,11 @@
     <ClCompile Include="Messager\Messager.cpp" />
     <ClCompile Include="ModelAction\ModelActionManager.cpp" />
     <ClCompile Include="Model\InputModel.cpp" />
+    <ClCompile Include="Model\InputModelDdlSql.cpp" />
     <ClCompile Include="Model\Model.cpp" />
     <ClCompile Include="Model\ModelManager.cpp" />
     <ClCompile Include="Model\OutputModel.cpp" />
+    <ClCompile Include="Model\OutputModelDdlSql.cpp" />
     <ClCompile Include="Model\Tables\FieldTypes.cpp" />
     <ClCompile Include="Model\Tables\Import\Import.cpp" />
     <ClCompile Include="Model\Tables\Import\ImportDefinitions.cpp" />
@@ -217,10 +219,6 @@
     <ClCompile Include="Utilities\NewGeneException.cpp" />
     <ClCompile Include="Utilities\UUID.cpp" />
     <ClCompile Include="Utilities\WidgetIdentifier.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Model\InputModel.DDL.SQL.cpp" />
-    <None Include="Model\OutputModel.DDL.SQL.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,4 +1,4 @@
-#include "OutputModel.DDL.SQL.h"
+#include "InputModelDdlSql.h"
 
 std::string InputModelDDLSQL()
 {
@@ -6,7 +6,7 @@ std::string InputModelDDLSQL()
 	return std::string(R"~~~(
 
 
-
+ 
 /*************************/
 /*                       */
 /* InputModelDefault.SQL */

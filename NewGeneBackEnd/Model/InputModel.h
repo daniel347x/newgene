@@ -6,7 +6,7 @@
 #include "../Settings/Setting.h"
 #include "Tables/TableManager.h"
 #include <memory>
-#include "InputModel.DDL.SQL.h"
+#include "InputModelDdlSql.h"
 
 typedef std::vector<std::unique_ptr<Table_VariableGroupData>> VariableGroup_DataTables;
 

@@ -330,10 +330,10 @@
     <ClInclude Include="Model\Tables\TableInstances\GeneralOptions.h">
       <Filter>Header Files\Model\Tables\TableInstances</Filter>
     </ClInclude>
-    <ClInclude Include="Model\InputModel.DDL.SQL.h">
+    <ClInclude Include="Model\InputModelDdlSql.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
-    <ClInclude Include="Model\OutputModel.DDL.SQL.h">
+    <ClInclude Include="Model\OutputModelDdlSql.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
   </ItemGroup>
@@ -542,13 +542,11 @@
     <ClCompile Include="Model\Tables\TableInstances\GeneralOptions.cpp">
       <Filter>Source Files\Model\Tables\TableInstances</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Model\InputModel.DDL.SQL.cpp">
+    <ClCompile Include="Model\InputModelDdlSql.cpp">
       <Filter>Source Files\Model</Filter>
-    </None>
-    <None Include="Model\OutputModel.DDL.SQL.cpp">
+    </ClCompile>
+    <ClCompile Include="Model\OutputModelDdlSql.cpp">
       <Filter>Source Files\Model</Filter>
-    </None>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -17,7 +17,7 @@
 #include <string>
 #include <list>
 
-#include "OutputModel.DDL.SQL.h"
+#include "OutputModelDdlSql.h"
 
 class PrimaryKeySequence
 {

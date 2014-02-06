@@ -1,4 +1,4 @@
-#include "OutputModel.DDL.SQL.h"
+#include "OutputModelDdlSql.h"
 
 std::string OutputModelDDLSQL()
 {
