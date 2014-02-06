@@ -2,6 +2,13 @@
 #include "../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 #include "Tables/Import/ImportDefinitions.h"
 
+#include "InputModelDdlSql.h"
+
+std::string InputModel::GetCreationSQL()
+{
+	return InputModelDDLSQL();
+}
+
 void InputModel::LoadTables()
 {
 

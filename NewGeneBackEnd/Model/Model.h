@@ -32,7 +32,6 @@ class Model_basemost
 
 		virtual ~Model_basemost()
 		{
-
 		}
 
 		boost::filesystem::path getPathToDatabaseFile()
@@ -44,15 +43,39 @@ class Model_basemost
 		{
 			if (db == nullptr)
 			{
+				bool exists = true;
+				if (!boost::filesystem::exists(getPathToDatabaseFile()))
+				{
+					exists = false;
+				}
+
 				sqlite3 * db_ = nullptr;
 				int err = sqlite3_open(getPathToDatabaseFile().string().c_str(), &db_);
 				if (err)
 				{
-					return;
+					// TODO: Parse the error codes from https://www.sqlite.org/c3ref/c_abort.html
+					boost::format msg("Error opening database file");
+					throw NewGeneException() << newgene_error_description(msg.str());
 				}
 				db = db_;
+
+				if (!exists)
+				{
+					// Create the new database
+					std::string err;
+					std::string sql = this->GetCreationSQL();
+					bool success = this->RunSQL(sql, err);
+					if (!success)
+					{
+						boost::format msg("Error creating new database: %1%");
+						msg % err.c_str();
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+				}
 			}
 		}
+
+		virtual std::string GetCreationSQL() = 0;
 
 		void UnloadDatabase()
 		{

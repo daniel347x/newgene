@@ -16,6 +16,8 @@
 #include <fstream>
 #include <algorithm>
 
+#include "OutputModelDdlSql.h"
+
 std::recursive_mutex OutputModel::OutputGenerator::is_generating_output_mutex;
 std::atomic<bool> OutputModel::OutputGenerator::is_generating_output(false);
 bool OutputModel::OutputGenerator::cancelled = false;
@@ -28,6 +30,11 @@ int OutputModel::OutputGenerator::number_transaction_ends = 0;
 std::set<std::vector<std::int64_t>> OutputModel::OutputGenerator::TimeRangeMapper_Ints::test_set;
 std::set<std::vector<long double>> OutputModel::OutputGenerator::TimeRangeMapper_Floats::test_set;
 std::set<std::vector<std::string>> OutputModel::OutputGenerator::TimeRangeMapper_Strings::test_set;
+
+std::string OutputModel::GetCreationSQL()
+{
+	return OutputModelDDLSQL();
+}
 
 void OutputModel::LoadTables()
 {
