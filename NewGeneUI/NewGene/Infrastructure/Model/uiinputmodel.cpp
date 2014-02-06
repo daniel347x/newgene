@@ -23,9 +23,17 @@ bool UIInputModel::is_model_equivalent(UIMessager & messager, UIInputModel * mod
 		boost::filesystem::path that_path = model_->backend().getPathToDatabaseFile();
 		try
 		{
-			if (this_path == boost::filesystem::path() || that_path == boost::filesystem::path())
+
+			bool this_exists = boost::filesystem::exists(this_path);
+			bool that_exists = boost::filesystem::exists(that_path);
+			if (this_exists != that_exists)
 			{
 				return false;
+			}
+
+			if (!this_exists && !that_exists)
+			{
+				return true;
 			}
 
 			boost::filesystem::path this_path_canonical = boost::filesystem::canonical(this_path);
@@ -45,7 +53,7 @@ bool UIInputModel::is_model_equivalent(UIMessager & messager, UIInputModel * mod
 		}
 	}
 
-	return true;
+	return false;
 }
 
 void UIInputModel::UpdateConnections()
