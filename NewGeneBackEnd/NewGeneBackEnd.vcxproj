@@ -218,6 +218,10 @@
     <ClCompile Include="Utilities\UUID.cpp" />
     <ClCompile Include="Utilities\WidgetIdentifier.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Model\InputModel.DDL.SQL.cpp" />
+    <None Include="Model\OutputModel.DDL.SQL.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

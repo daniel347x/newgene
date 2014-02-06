@@ -512,7 +512,24 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		path_to_model_database /= (input_project_settings_path.stem().string() + ".db");
 	}
 	std::shared_ptr<InputModel> backend_model(ModelFactory<InputModel>()(messager, path_to_model_database));
-	std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
+	std::shared_ptr<UIInputModel> project_model;
+	try
+	{
+		project_model.reset(new UIInputModel(messager, backend_model));
+	}
+	catch ( boost::exception & e )
+	{
+		if ( std::string const * error_desc = boost::get_error_info<newgene_error_description>( e ) )
+		{
+			boost::format msg( error_desc->c_str() );
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+		}
+		boost::format msg( "Unable to create input project database." );
+		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
+		return false;
+	}
 
 	NewGeneMainWindow * mainWindow = nullptr;
 	try
@@ -626,7 +643,24 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		path_to_model_database /= (output_project_settings_path.stem().string() + ".db");
 	}
 	std::shared_ptr<OutputModel> backend_model(ModelFactory<OutputModel>()(messager, path_to_model_database, std::dynamic_pointer_cast<InputModelSettings>(input_project->backend().modelSettingsSharedPtr()), input_project->backend().modelSharedPtr()));
-	std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
+	std::shared_ptr<UIOutputModel> project_model;
+	try
+	{
+		project_model.reset(new UIOutputModel(messager, backend_model));
+	}
+	catch ( boost::exception & e )
+	{
+		if ( std::string const * error_desc = boost::get_error_info<newgene_error_description>( e ) )
+		{
+			boost::format msg( error_desc->c_str() );
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+		}
+		boost::format msg( "Unable to create output project database." );
+		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
+		return false;
+	}
 
 	NewGeneMainWindow * mainWindow = nullptr;
 	try

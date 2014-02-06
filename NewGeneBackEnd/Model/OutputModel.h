@@ -17,6 +17,8 @@
 #include <string>
 #include <list>
 
+#include "OutputModel.DDL.SQL.h"
+
 class PrimaryKeySequence
 {
 
@@ -1103,7 +1105,26 @@ class ModelFactory<OutputModel>
 
 		OutputModel * operator()(Messager & messager, boost::filesystem::path const path_to_model_database, std::shared_ptr<InputModelSettings> const input_model_settings_, std::shared_ptr<InputModel> const input_model_)
 		{
+			bool exists = true;
+			if (!boost::filesystem::exists(path_to_model_database))
+			{
+				exists = false;
+			}
+
 			OutputModel * new_model = new OutputModel(messager, path_to_model_database, input_model_settings_, input_model_);
+			if (!exists)
+			{
+				// Create the new database
+				std::string err;
+				bool success = new_model->RunSQL(OutputModelDDLSQL(), err);
+				if (!success)
+				{
+					boost::format msg("Error creating new output project database: %1%");
+					msg % err.c_str();
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+			}
+
 			return new_model;
 		}
 

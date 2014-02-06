@@ -543,4 +543,12 @@
       <Filter>Source Files\Model\Tables\TableInstances</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Model\InputModel.DDL.SQL.cpp">
+      <Filter>Source Files\Model</Filter>
+    </None>
+    <None Include="Model\OutputModel.DDL.SQL.cpp">
+      <Filter>Source Files\Model</Filter>
+    </None>
+  </ItemGroup>
 </Project>

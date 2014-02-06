@@ -83,6 +83,20 @@ class Model_basemost
 			}
 		}
 
+		bool RunSQL(std::string const sql, std::string & err)
+		{
+			char * errmsg = nullptr;
+			sqlite3_exec(db, sql.c_str(), NULL, NULL, &errmsg);
+			err.clear();
+			if (errmsg != nullptr)
+			{
+				err = errmsg;
+				sqlite3_free(errmsg);
+				return false;
+			}
+			return true;
+		}
+
 		void ClearRemnantTemporaryTables()
 		{
 			sqlite3_stmt * stmt = NULL;
@@ -166,7 +180,12 @@ class Model : public Model_basemost
 template<typename MODEL_CLASS>
 class ModelFactory
 {
-	// Empty non-specialized class
+
+	// ****************************************************************************** //
+	// Empty non-specialized class.
+	// See InputModel.h and OutputModel.h for SPECIALIZATIONS of this class
+	// ****************************************************************************** //
+
 };
 
 #endif

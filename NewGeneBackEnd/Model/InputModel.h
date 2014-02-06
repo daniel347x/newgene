@@ -6,6 +6,7 @@
 #include "../Settings/Setting.h"
 #include "Tables/TableManager.h"
 #include <memory>
+#include "InputModel.DDL.SQL.h"
 
 typedef std::vector<std::unique_ptr<Table_VariableGroupData>> VariableGroup_DataTables;
 
@@ -43,7 +44,26 @@ public:
 
 	InputModel * operator()(Messager & messager, boost::filesystem::path const path_to_model_database)
 	{
+		bool exists = true;
+		if (!boost::filesystem::exists(path_to_model_database))
+		{
+			exists = false;
+		}
+
 		InputModel * new_model = new InputModel(messager, path_to_model_database);
+		if (!exists)
+		{
+			// Create the new database
+			std::string err;
+			bool success = new_model->RunSQL(InputModelDDLSQL(), err);
+			if (!success)
+			{
+				boost::format msg("Error creating new input project database: %1%");
+				msg % err.c_str();
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+		}
+
 		return new_model;
 	}
 
