@@ -41,6 +41,10 @@ CREATE TABLE [main].[TIMERANGE_SELECTED] (
   [TIMERANGE_START] INT64, 
   [TIMERANGE_END] INT64);
 
+/* Data [main].[TIMERANGE_SELECTED] */
+insert into [main].[TIMERANGE_SELECTED] values(-2208988799912, -1577923199024);
+
+
 /* Drop table [main].[VG_SET_MEMBERS_SELECTED] */
 drop table if exists [main].[VG_SET_MEMBERS_SELECTED];
 
@@ -55,6 +59,7 @@ commit transaction;
 
 /* Enable Foreign Keys */
 pragma foreign_keys = on;
+
 
 
 

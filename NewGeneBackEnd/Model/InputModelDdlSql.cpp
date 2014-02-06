@@ -93,6 +93,23 @@ CREATE TABLE [main].[TIME_GRANULARITY] (
   [TIME_GRANULARITY_DESCRIPTION] VARCHAR(4096) NOT NULL ON CONFLICT FAIL, 
   CONSTRAINT [sqlite_autoindex_TIME_GRANULARITY_2] PRIMARY KEY ([TIME_GRANULARITY_CODE]));
 
+/* Data [main].[TIME_GRANULARITY] */
+insert into [main].[TIME_GRANULARITY] values(10, 'sec', 'second');
+insert into [main].[TIME_GRANULARITY] values(20, 'min', 'minute');
+insert into [main].[TIME_GRANULARITY] values(30, 'hr', 'hour');
+insert into [main].[TIME_GRANULARITY] values(40, 'day', 'day');
+insert into [main].[TIME_GRANULARITY] values(50, 'wk', 'week');
+insert into [main].[TIME_GRANULARITY] values(60, 'mth', 'month');
+insert into [main].[TIME_GRANULARITY] values(70, 'qt', 'quarter');
+insert into [main].[TIME_GRANULARITY] values(80, 'yr', 'year');
+insert into [main].[TIME_GRANULARITY] values(90, 'bi', 'biennial');
+insert into [main].[TIME_GRANULARITY] values(100, 'qd', 'quadrennial');
+insert into [main].[TIME_GRANULARITY] values(110, 'dec', 'decade');
+insert into [main].[TIME_GRANULARITY] values(120, 'cnt', 'century');
+insert into [main].[TIME_GRANULARITY] values(130, 'mil', 'millenium');
+insert into [main].[TIME_GRANULARITY] values(0, 'none', 'none');
+
+
 /* Drop table [main].[UOA_CATEGORY] */
 drop table if exists [main].[UOA_CATEGORY];
 
