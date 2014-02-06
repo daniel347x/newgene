@@ -28,6 +28,8 @@ TimeRangeBox::TimeRangeBox( QWidget * parent ) :
 
 	PrepareOutputWidget();
 
+	this->hide();
+
 }
 
 TimeRangeBox::~TimeRangeBox()
@@ -57,6 +59,7 @@ void TimeRangeBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
+		this->show();
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET)));
 		connect(this, SIGNAL(UpdateDoRandomSampling(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)));
@@ -64,6 +67,7 @@ void TimeRangeBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
+		this->hide();
 		Empty();
 	}
 

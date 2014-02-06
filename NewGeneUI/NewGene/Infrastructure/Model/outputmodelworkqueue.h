@@ -28,7 +28,7 @@ class OutputModelWorkQueue : public ModelWorkQueue<UI_OUTPUT_MODEL>
 		UIOutputModel * get();
 
 		void TestSlot();
-		void LoadFromDatabase(UI_OUTPUT_MODEL_PTR);
+		void LoadFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *);
 
 };
 

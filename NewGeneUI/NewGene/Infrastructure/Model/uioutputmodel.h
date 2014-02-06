@@ -119,7 +119,7 @@ class UIOutputModel : public QObject, public UIModel<UI_OUTPUT_MODEL>
 
 	signals:
 
-		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR);
+		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *);
 
 	public slots:
 

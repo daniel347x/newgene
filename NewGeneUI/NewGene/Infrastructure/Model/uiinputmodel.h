@@ -119,7 +119,7 @@ class UIInputModel : public QObject, public UIModel<UI_INPUT_MODEL>
 
 	signals:
 
-		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR);
+		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR, QObject *);
 
 	public slots:
 

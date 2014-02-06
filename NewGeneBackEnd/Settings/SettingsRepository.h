@@ -66,33 +66,33 @@ public:
 	SettingInfo()
 		: setting_class(SETTING_CLASS_NONE)
 		, setting_category(SETTING_CLASS_CATEGORY__UNKNOWN)
-        , text("")
-        , default_val_string("")
-        , default_val_int32(0)
-        , enum_index(0)
-    {
+		, text("")
+		, default_val_string("")
+		, default_val_int32(0)
+		, enum_index(0)
+	{
 
 	}
 
 	SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, int const enum_index_, std::string const & text_, std::string default_val_string_)
 		: setting_class(setting_class_enum_)
 		, setting_category(SETTING_CLASS_CATEGORY__STRING)
-        , text(text_)
-        , default_val_string(default_val_string_)
-        , default_val_int32(0)
-        , enum_index(enum_index_)
-    {
+		, text(text_)
+		, default_val_string(default_val_string_)
+		, default_val_int32(0)
+		, enum_index(enum_index_)
+	{
 
 	}
 
 	SettingInfo(SETTING_CLASS_ENUM const setting_class_enum_, int const enum_index_, std::string const & text_, std::int32_t default_val_int32_)
 		: setting_class(setting_class_enum_)
 		, setting_category(SETTING_CLASS_CATEGORY__INT32)
-        , text(text_)
-        , default_val_string("")
-        , default_val_int32(default_val_int32_)
-        , enum_index(enum_index_)
-    {
+		, text(text_)
+		, default_val_string("")
+		, default_val_int32(default_val_int32_)
+		, enum_index(enum_index_)
+	{
 
 	}
 
@@ -165,10 +165,10 @@ class SettingsRepository
 
 	protected:
 
-        virtual void SetMapEntry(Messager &, SettingInfo &, boost::property_tree::ptree &) {}
-        virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS *, SettingInfo &) const { return new SETTING_CLASS(messager); };
-        virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo &, std::string const & = NULL) { return new SETTING_CLASS(messager); };
-        virtual void SetPTreeEntry(Messager &, SETTINGS_ENUM, boost::property_tree::ptree &) {};
+		virtual void SetMapEntry(Messager &, SettingInfo &, boost::property_tree::ptree &) {}
+		virtual SETTING_CLASS * CloneSetting(Messager & messager, SETTING_CLASS *, SettingInfo &) const { return new SETTING_CLASS(messager); };
+		virtual SETTING_CLASS * NewSetting(Messager & messager, SettingInfo &, std::string const & = NULL) { return new SETTING_CLASS(messager); };
+		virtual void SetPTreeEntry(Messager &, SETTINGS_ENUM, boost::property_tree::ptree &) {};
 
 		void LoadSettingsFromFile(Messager & messager)
 		{
@@ -271,10 +271,12 @@ class SettingsRepository
 
 		SettingsMap _settings_map;
 
-        SettingsRepository(Messager &, boost::filesystem::path const path_to_settings)
+		SettingsRepository(Messager &, boost::filesystem::path const path_to_settings)
 			: _path_to_settings(path_to_settings)
 		{
 		}
+
+	public:
 
 		void SetSettingsPath(boost::filesystem::path const path_to_settings)
 		{

@@ -26,12 +26,12 @@ void InputModelWorkQueue::SetConnections()
 
 	if (IsDatabasePool())
 	{
-		connect(&projectManagerUI(), SIGNAL(LoadFromDatabase(UI_INPUT_MODEL_PTR)), this, SLOT(LoadFromDatabase(UI_INPUT_MODEL_PTR)));
-		connect(this, SIGNAL(DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR)), static_cast<QObject *>(&projectManagerUI()), SLOT(DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR)));
+		connect(&projectManagerUI(), SIGNAL(LoadFromDatabase(UI_INPUT_MODEL_PTR, QObject *)), this, SLOT(LoadFromDatabase(UI_INPUT_MODEL_PTR, QObject *)));
+		connect(this, SIGNAL(DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR, QObject *)), static_cast<QObject *>(&projectManagerUI()), SLOT(DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR, QObject *)));
 	}
 }
 
-void InputModelWorkQueue::LoadFromDatabase(UI_INPUT_MODEL_PTR model)
+void InputModelWorkQueue::LoadFromDatabase(UI_INPUT_MODEL_PTR model, QObject * mainWindowObject)
 {
 	UIMessagerSingleShot messager;
 	if (!get()->is_model_equivalent(messager.get(), model))
@@ -39,14 +39,12 @@ void InputModelWorkQueue::LoadFromDatabase(UI_INPUT_MODEL_PTR model)
 		return;
 	}
 
-	//emit SignalMessageBox("Input model's \"LoadFromDatabase()\" successfully called and handled.");
-
 	// Lock model and load all from database here
 	{
 		model->backend().LoadTables();
 		get()->loaded(true);
 	}
 
-	emit DoneLoadingFromDatabase(model);
+	emit DoneLoadingFromDatabase(model, mainWindowObject);
 }
 

@@ -53,8 +53,8 @@ class WorkQueueManagerBase : public QObject
 		// Signals for ALL specializations of WorkQueueManager go here,
 		// and are NOT (and don't need to be) defined as virtual
 		void SignalMessageBox(STD_STRING);
-		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR);
-		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR);
+		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR, QObject *);
+		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *);
 		void DataChangeMessageSignal(WidgetChangeMessages);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA);
 		void WidgetDataRefresh(WidgetDataItem_VARIABLE_GROUPS_TOOLBOX);
@@ -75,8 +75,8 @@ class WorkQueueManagerBase : public QObject
 		virtual void TestSlot() {}
 		//
 		// Internal helpers
-		virtual void LoadFromDatabase(UI_INPUT_MODEL_PTR) {}
-		virtual void LoadFromDatabase(UI_OUTPUT_MODEL_PTR) {}
+		virtual void LoadFromDatabase(UI_INPUT_MODEL_PTR, QObject *) {}
+		virtual void LoadFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *) {}
 		//
 		// Data refresh requests
 		virtual void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA) {}

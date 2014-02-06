@@ -28,7 +28,7 @@ class InputModelWorkQueue : public ModelWorkQueue<UI_INPUT_MODEL>
 		UIInputModel * get();
 
 		void TestSlot();
-		void LoadFromDatabase(UI_INPUT_MODEL_PTR);
+		void LoadFromDatabase(UI_INPUT_MODEL_PTR, QObject *);
 
 };
 

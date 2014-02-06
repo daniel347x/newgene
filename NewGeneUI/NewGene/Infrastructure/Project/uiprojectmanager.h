@@ -29,6 +29,8 @@ class UIProjectManager : public QObject,
 
 		static int const number_worker_threads = 1;
 
+		bool loading;
+
 	public:
 
 		//  (list to be maintained by UIProjectManager)
@@ -229,14 +231,14 @@ class UIProjectManager : public QObject,
 
 		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
 		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
-		void LoadFromDatabase(UI_INPUT_MODEL_PTR);
-		void LoadFromDatabase(UI_OUTPUT_MODEL_PTR);
+		void LoadFromDatabase(UI_INPUT_MODEL_PTR, QObject *);
+		void LoadFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *);
 
 	public slots:
 
 		void SignalMessageBox(STD_STRING);
-		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR);
-		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR);
+		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR, QObject *);
+		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *);
 		void OpenInputDataset(STD_STRING, QObject *);
 		void OpenOutputDataset(STD_STRING, QObject *);
 		void CloseCurrentOutputDataset();
@@ -272,8 +274,8 @@ class UIProjectManager : public QObject,
 
 	private:
 
-		bool RawOpenInputProject(UIMessager & messager, boost::filesystem::path const & input_project_settings_path, QObject * mainWindowObject);
-		bool RawOpenOutputProject(UIMessager & messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject);
+		void RawOpenInputProject(UIMessager & messager, boost::filesystem::path const & input_project_settings_path, QObject * mainWindowObject);
+		void RawOpenOutputProject(UIMessager & messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject);
 
 		void RawCloseInputProject(UIInputProject * input_project);
 		void RawCloseOutputProject(UIOutputProject * output_project);

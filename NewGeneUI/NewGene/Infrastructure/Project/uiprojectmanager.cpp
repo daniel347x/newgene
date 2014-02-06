@@ -21,6 +21,7 @@
 
 UIProjectManager::UIProjectManager( QObject * parent )
 	: QObject(parent)
+	, loading(false)
 	, UIManager()
 	, EventLoopThreadManager<UI_PROJECT_MANAGER>(number_worker_threads)
 {
@@ -102,10 +103,12 @@ void UIProjectManager::EndAllLoops()
 
 void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject * mainWindowObject)
 {
+
+	loading = true;
+
 	UIMessager messager;
 	UIMessagerSingleShot messager_(messager);
 	InputProjectFilesList::instance input_project_list = InputProjectFilesList::get(messager);
-	OutputProjectFilesList::instance output_project_list = OutputProjectFilesList::get(messager);
 
 	connect(mainWindowObject, SIGNAL(SignalCloseCurrentInputDataset()), this, SLOT(CloseCurrentInputDataset()));
 	connect(mainWindowObject, SIGNAL(SignalCloseCurrentOutputDataset()), this, SLOT(CloseCurrentOutputDataset()));
@@ -140,61 +143,11 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 		{
 			create_new_instance = true;
 		}
-		else
-		{
-			//InputProjectTabs & tabs = input_tabs[mainWindow];
-			//for_each(tabs.begin(), tabs.end(), [](InputProjectTab & tab)
-			//{
-				//ProjectPaths & paths = tab.first;
-				//UIInputProject * project_ptr = static_cast<UIInputProject*>(tab.second.get());
-			//});
-		}
 
 		if (create_new_instance)
 		{
 
-			success = RawOpenInputProject(messager, input_project_settings_path, mainWindowObject);
-
-		}
-
-	}
-
-	if (success && output_project_list->files.size() == 0)
-	{
-		boost::filesystem::path output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Output", NewGeneFileNames::defaultOutputProjectFileName);
-		if (output_project_path != boost::filesystem::path())
-		{
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, output_project_path.string().c_str()));
-			settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, output_project_path.parent_path()));
-			output_project_list = OutputProjectFilesList::get(messager);
-		}
-	}
-
-	if (success && output_project_list->files.size() == 1)
-	{
-
-		boost::filesystem::path output_project_settings_path = output_project_list->files[0];
-
-		bool create_new_instance = false;
-
-		if (output_tabs.find(mainWindow) == output_tabs.cend())
-		{
-			create_new_instance = true;
-		}
-		else
-		{
-			//OutputProjectTabs & tabs = output_tabs[mainWindow];
-			//for_each(tabs.begin(), tabs.end(), [](OutputProjectTab & tab)
-			//{
-				//ProjectPaths & paths = tab.first;
-				//UIOutputProject * project_ptr = static_cast<UIOutputProject*>(tab.second.get());
-			//});
-		}
-
-		if (create_new_instance)
-		{
-
-			success = RawOpenOutputProject(messager, output_project_settings_path, mainWindowObject);
+			RawOpenInputProject(messager, input_project_settings_path, mainWindowObject);
 
 		}
 
@@ -259,8 +212,11 @@ void UIProjectManager::SignalMessageBox(STD_STRING msg)
 
 }
 
-void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_)
+void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObject * mainWindowObject)
 {
+
+	bool was_loading = loading;
+	loading = false;
 
 	UIMessagerSingleShot messager;
 
@@ -276,16 +232,99 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_)
 		return;
 	}
 
-	if (getActiveUIOutputProject() == nullptr)
+	if (was_loading)
 	{
-		return;
-	}
 
-	emit LoadFromDatabase(&getActiveUIOutputProject()->model());
+		OutputProjectFilesList::instance output_project_list = OutputProjectFilesList::get(messager.get());
+
+		if (output_project_list->files.size() == 0)
+		{
+			boost::filesystem::path output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Output", NewGeneFileNames::defaultOutputProjectFileName);
+			if (output_project_path != boost::filesystem::path())
+			{
+				settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager.get(), output_project_path.string().c_str()));
+				settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager.get(), output_project_path.parent_path()));
+				output_project_list = OutputProjectFilesList::get(messager.get());
+			}
+		}
+
+		if (output_project_list->files.size() == 1)
+		{
+
+			boost::filesystem::path output_project_settings_path = output_project_list->files[0];
+
+			bool create_new_instance = false;
+
+			NewGeneMainWindow * mainWindow = nullptr;
+			try
+			{
+				mainWindow = dynamic_cast<NewGeneMainWindow *>(mainWindowObject);
+			}
+			catch (std::bad_cast &)
+			{
+				return;
+			}
+
+			if (output_tabs.find(mainWindow) == output_tabs.cend())
+			{
+				create_new_instance = true;
+			}
+
+			if (create_new_instance)
+			{
+
+				RawOpenOutputProject(messager.get(), output_project_settings_path, mainWindowObject);
+
+			}
+
+		}
+
+	}
+	else
+	{
+
+		UIInputProject * input_project = getActiveUIInputProject();
+		if (!input_project)
+		{
+			return;
+		}
+
+		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager.get(), input_project->projectSettings().getUISettings().GetSettingsPath().string()));
+
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(nullptr, QString("Open output project?"), QString("Would you also like to open an associated output project?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+		if (reply == QMessageBox::Yes)
+		{
+			OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager.get());
+			QWidget * mainWindow = nullptr;
+			try
+			{
+				mainWindow = dynamic_cast<QWidget*>(mainWindowObject);
+			}
+			catch (std::bad_cast &)
+			{
+
+			}
+			if (mainWindow)
+			{
+				QString the_file = QFileDialog::getOpenFileName(mainWindow, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene output settings file (*.newgene.out.xml)");
+				if (the_file.size())
+				{
+					if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
+					{
+						boost::filesystem::path file_path(the_file.toStdString());
+						settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager.get(), file_path.parent_path()));
+						OpenOutputDataset(file_path.string(), mainWindowObject);
+					}
+				}
+			}
+		}
+
+	}
 
 }
 
-void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_)
+void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_, QObject * mainWindowObject)
 {
 
 	UIMessagerSingleShot messager;
@@ -301,6 +340,14 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_)
 		messager.get().AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_NOT_LOADED, "Output model has completed loading from database, but is marked as not loaded."));
 		return;
 	}
+
+	UIOutputProject * output_project = getActiveUIOutputProject();
+	if (!output_project)
+	{
+		return;
+	}
+
+	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager.get(), output_project->projectSettings().getUISettings().GetSettingsPath().string()));
 
 	getActiveUIInputProject()->DoRefreshAllWidgets();
 	getActiveUIOutputProject()->DoRefreshAllWidgets();
@@ -325,16 +372,9 @@ void UIProjectManager::OpenOutputDataset(STD_STRING the_output_dataset, QObject 
 		return;
 	}
 
-	bool success = false;
-
 	if (!boost::filesystem::is_directory(the_output_dataset))
 	{
-		success = RawOpenOutputProject(messager, boost::filesystem::path(the_output_dataset), mainWindowObject);
-	}
-
-	if (success)
-	{
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager, the_output_dataset));
+		RawOpenOutputProject(messager, boost::filesystem::path(the_output_dataset), mainWindowObject);
 	}
 
 }
@@ -386,43 +426,7 @@ void UIProjectManager::OpenInputDataset(STD_STRING the_input_dataset, QObject * 
 	UIMessager messager;
 	if (!boost::filesystem::is_directory(the_input_dataset))
 	{
-		success = RawOpenInputProject(messager, boost::filesystem::path(the_input_dataset), mainWindowObject);
-	}
-
-	if (success)
-	{
-
-		settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_INPUT_PROJECTS_LIST, InputProjectFilesList(messager, the_input_dataset));
-
-		QMessageBox::StandardButton reply;
-		reply = QMessageBox::question(nullptr, QString("Open output project?"), QString("Would you also like to open an associated output project?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-		if (reply == QMessageBox::Yes)
-		{
-			OpenOutputFilePath::instance folder_path = OpenOutputFilePath::get(messager);
-			QWidget * mainWindow = nullptr;
-			try
-			{
-				mainWindow = dynamic_cast<QWidget*>(mainWindowObject);
-			}
-			catch (std::bad_cast &)
-			{
-
-			}
-			if (mainWindow)
-			{
-				QString the_file = QFileDialog::getOpenFileName(mainWindow, "Choose output dataset", folder_path ? folder_path->getPath().string().c_str() : "", "NewGene output settings file (*.newgene.out.xml)");
-				if (the_file.size())
-				{
-					if (boost::filesystem::exists(the_file.toStdString()) && !boost::filesystem::is_directory(the_file.toStdString()))
-					{
-						boost::filesystem::path file_path(the_file.toStdString());
-						settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager, GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_DATASET_FOLDER_PATH, OpenOutputFilePath(messager, file_path.parent_path()));
-						OpenOutputDataset(file_path.string(), mainWindowObject);
-					}
-				}
-			}
-		}
-
+		RawOpenInputProject(messager, boost::filesystem::path(the_input_dataset), mainWindowObject);
 	}
 
 }
@@ -463,7 +467,7 @@ void UIProjectManager::CloseCurrentInputDataset()
 
 }
 
-bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesystem::path const & input_project_settings_path, QObject * mainWindowObject)
+void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesystem::path const & input_project_settings_path, QObject * mainWindowObject)
 {
 
 	if (boost::filesystem::is_directory(input_project_settings_path))
@@ -473,7 +477,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		msg % input_project_settings_path.string();
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
-		return false;
+		return;
 	}
 
 	// Internally creates both an instance of UI-layer project settings, and an instance of backend-layer project settings
@@ -527,7 +531,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 		}
 		boost::format msg( "Unable to create input project database." );
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__INPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
-		return false;
+		return;
 	}
 	std::shared_ptr<UIInputModel> project_model(new UIInputModel(messager, backend_model));
 
@@ -538,12 +542,12 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	}
 	catch (std::bad_cast &)
 	{
-		return false;
+		return;
 	}
 
 	if (mainWindow == nullptr)
 	{
-		return false;
+		return;
 	}
 
 	// ************************************************************************************************************************************* //
@@ -559,7 +563,7 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	{
 		boost::format msg("No input dataset is open.");
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
-		return false;
+		return;
 	}
 
 	project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
@@ -575,17 +579,11 @@ bool UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 	emit UpdateInputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT, project);
 
-	emit LoadFromDatabase(&project->model());
-
-	boost::format msg("%1% successfully loaded.");
-	msg % input_project_settings_path;
-	messager.UpdateStatusBarText(msg.str(), nullptr);
-
-	return true;
+	emit LoadFromDatabase(&project->model(), mainWindowObject);
 
 }
 
-bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject)
+void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesystem::path const & output_project_settings_path, QObject * mainWindowObject)
 {
 
 	if (boost::filesystem::is_directory(output_project_settings_path))
@@ -595,7 +593,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		msg % output_project_settings_path.string();
 		msgBox.setText(msg.str().c_str());
 		msgBox.exec();
-		return false;
+		return;
 	}
 
 	// Internally creates both an instance of UI-layer project settings, and an instance of backend-layer project settings
@@ -626,7 +624,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	{
 		boost::format msg("NULL input project during attempt to instantiate output project.");
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
-		return false;
+		return;
 	}
 
 	// Backend model does not know about the current project's settings, because multiple settings might point to the same model.
@@ -658,7 +656,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		}
 		boost::format msg("Unable to create output project database.");
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__OUTPUT_MODEL_DATABASE_CANNOT_BE_CREATED, msg.str()));
-		return false;
+		return;
 	}
 	std::shared_ptr<UIOutputModel> project_model(new UIOutputModel(messager, backend_model));
 
@@ -669,12 +667,12 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	}
 	catch (std::bad_cast &)
 	{
-		return false;
+		return;
 	}
 
 	if (mainWindow == nullptr)
 	{
-		return false;
+		return;
 	}
 
 	output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
@@ -683,10 +681,11 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	UIOutputProject * project = getActiveUIOutputProject();
 
 	if (!project)
+
 	{
 		boost::format msg("NULL output project during attempt to instantiate project.");
 		messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__PROJECT_IS_NULL, msg.str()));
-		return false;
+		return;
 	}
 
 	project->InitializeEventLoop(project); // cannot use 'this' in base class with multiple inheritance
@@ -702,13 +701,7 @@ bool UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 	emit UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 
-	emit LoadFromDatabase(&getActiveUIOutputProject()->model());
-
-	boost::format msg("%1% successfully loaded.");
-	msg % output_project_settings_path;
-	messager.UpdateStatusBarText(msg.str(), nullptr);
-
-	return true;
+	emit LoadFromDatabase(&getActiveUIOutputProject()->model(), mainWindowObject);
 
 }
 
