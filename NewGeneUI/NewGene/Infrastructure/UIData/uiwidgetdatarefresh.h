@@ -56,7 +56,8 @@ class DoRefreshInputWidget : public DoRefreshWidget<DATA_WIDGET>
 
 		void operator()()
 		{
-
+			UIMessagerSingleShot messager(queue->get()->messager);
+			uidataManagerUI().getBackendManager().DoRefreshInputWidget(messager.get(), this->widget_refresh_request, queue->get()->backend());
 		}
 
 	protected:
@@ -71,8 +72,8 @@ class DoRefreshOutputWidget : public DoRefreshWidget<DATA_WIDGET>
 
 	public:
 
-		DoRefreshOutputWidget(WidgetDataItemRequest<DATA_WIDGET> const & widget_, OutputProjectWorkQueue * queue_)
-			: DoRefreshWidget<DATA_WIDGET>(widget_)
+		DoRefreshOutputWidget(WidgetDataItemRequest<DATA_WIDGET> const & widget_refresh_request_, OutputProjectWorkQueue * queue_)
+			: DoRefreshWidget<DATA_WIDGET>(widget_refresh_request_)
 			, queue(queue_)
 		{
 
