@@ -140,7 +140,8 @@ SOURCES += main.cpp\
     Widgets/ManageInput/DMUs/newgenemanagedmus.cpp \
     Widgets/ManageInput/UOAs/newgenemanageuoas.cpp \
     Widgets/ManageInput/VGs/newgenemanagevgs.cpp \
-    Widgets/ManageInput/Data/newgenemanagedata.cpp
+    Widgets/ManageInput/Data/newgenemanagedata.cpp \
+    Widgets/ManageInput/DMUs/displaydmusregion.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -256,7 +257,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
     Widgets/ManageInput/DMUs/newgenemanagedmus.h \
     Widgets/ManageInput/UOAs/newgenemanageuoas.h \
     Widgets/ManageInput/VGs/newgenemanagevgs.h \
-    Widgets/ManageInput/Data/newgenemanagedata.h
+    Widgets/ManageInput/Data/newgenemanagedata.h \
+    Widgets/ManageInput/DMUs/displaydmusregion.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -274,7 +276,8 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/ManageInput/DMUs/newgenemanagedmus.ui \
 	Widgets/ManageInput/UOAs/newgenemanageuoas.ui \
 	Widgets/ManageInput/VGs/newgenemanagevgs.ui \
-	Widgets/ManageInput/Data/newgenemanagedata.ui
+	Widgets/ManageInput/Data/newgenemanagedata.ui \
+    Widgets/ManageInput/DMUs/displaydmusregion.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
