@@ -604,10 +604,10 @@ public:
 	}
 	WidgetDataItem<MANAGE_DMUS_WIDGET>(WidgetDataItem<MANAGE_DMUS_WIDGET> const & rhs)
 		: WidgetDataItem_base(rhs)
-		, identifiers(rhs.identifiers)
+		, dmus_and_members(rhs.dmus_and_members)
 	{
 	}
-	WidgetInstanceIdentifiers identifiers;
+	std::vector<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>> dmus_and_members;
 };
 typedef WidgetDataItem<MANAGE_DMUS_WIDGET> WidgetDataItem_MANAGE_DMUS_WIDGET;
 

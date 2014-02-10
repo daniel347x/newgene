@@ -179,6 +179,11 @@ void UIDataManager::DoRefreshInputWidget(Messager & messager, WidgetDataItemRequ
 {
 	InputModel & input_model = project.model();
 	WidgetDataItem_MANAGE_DMUS_WIDGET dmu_management(widget_request);
-	dmu_management.identifiers = input_model.t_dmu_category.getIdentifiers();
+	WidgetInstanceIdentifiers dmus = input_model.t_dmu_category.getIdentifiers();
+	std::for_each(dmus.cbegin(), dmus.cend(), [this, &dmu_management, &input_model](WidgetInstanceIdentifier const & single_dmu)
+	{
+		WidgetInstanceIdentifiers dmu_members = input_model.t_dmu_setmembers.getIdentifiers(*single_dmu.uuid);
+		dmu_management.dmus_and_members.push_back(std::make_pair(single_dmu, dmu_members));
+	});
 	messager.EmitInputWidgetDataRefresh(dmu_management);
 }
