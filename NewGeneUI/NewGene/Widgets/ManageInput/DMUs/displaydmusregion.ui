@@ -20,7 +20,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <widget class="QListView" name="listView"/>
-     <widget class="QListWidget" name="listWidget"/>
+     <widget class="QListView" name="listView_2"/>
      <widget class="QWidget" name="widget" native="true"/>
     </widget>
    </item>

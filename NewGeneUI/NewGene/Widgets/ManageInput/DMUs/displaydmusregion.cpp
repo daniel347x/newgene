@@ -138,8 +138,15 @@ void DisplayDMUsRegion::Empty()
 
 void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
 {
-	QMessageBox msgBox;
-	msgBox.setText( "DMU selection changed" );
-	msgBox.exec();
+
+	if(selected.indexes().isEmpty())
+	{
+	   //clearMyView();
+	}
+	else
+	{
+	   //displayModelIndexInMyView(selection.indexes().first());
+	}
+
 }
 
