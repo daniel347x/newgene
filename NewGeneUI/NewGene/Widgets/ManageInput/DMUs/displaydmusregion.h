@@ -2,6 +2,7 @@
 #define DISPLAYDMUSREGION_H
 
 #include <QWidget>
+#include <QItemSelection>
 #include "../../newgenewidget.h"
 
 namespace Ui
@@ -36,7 +37,7 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 		void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDGET);
 
 	private slots:
-		void ReceiveVariableItemChanged(QStandardItem*);
+		void ReceiveVariableItemChanged(const QItemSelection & selected, const QItemSelection & deselected);
 
 	protected:
 		void Empty();
