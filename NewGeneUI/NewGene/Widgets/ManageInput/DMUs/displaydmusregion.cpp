@@ -187,9 +187,20 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 				QString text(dmu_member.code->c_str());
 				if (dmu_member.longhand && !dmu_member.longhand->empty())
 				{
-					text += " (";
+					bool use_parentheses = false;
+					if (dmu_member.code && !dmu_member.code->empty())
+					{
+						use_parentheses = true;
+					}
+					if (use_parentheses)
+					{
+						text += " (";
+					}
 					text += dmu_member.longhand->c_str();
-					text += ")";
+					if (use_parentheses)
+					{
+						text += ")";
+					}
 				}
 				item->setText(text);
 				item->setEditable(false);
