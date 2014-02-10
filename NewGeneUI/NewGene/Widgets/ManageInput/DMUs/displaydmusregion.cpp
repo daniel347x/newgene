@@ -180,7 +180,9 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 		int index = 0;
 		std::for_each(dmu_members.cbegin(), dmu_members.cend(), [this, &index, &model](WidgetInstanceIdentifier const & dmu_member)
 		{
-			if (dmu_member.code && !dmu_member.code->empty())
+			if ((dmu_member.code && !dmu_member.code->empty())
+				||
+				(dmu_member.longhand && !dmu_member.longhand->empty()))
 			{
 
 				QStandardItem * item = new QStandardItem();
