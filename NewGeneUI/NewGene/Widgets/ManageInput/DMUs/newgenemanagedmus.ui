@@ -2,7 +2,7 @@
  <author></author>
  <comment></comment>
  <exportmacro></exportmacro>
- <class>Form</class>
+ <class>NewGeneManageDMUs</class>
  <widget class="QWidget" name="Form" >
   <property name="geometry" >
    <rect>

@@ -131,15 +131,7 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
       </widget>
       <widget class="QWidget" name="tabInput">
        <property name="styleSheet">
-        <string notr="true">QWidget {
-border-bottom: 9px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #9394ea,
-                                 stop: 0.1 #4d4eff,
-                                 stop: 0.15 #5354dd,
-                                 stop: 1.0 #ff9372
-                                 );
-}
-</string>
+        <string notr="true"/>
        </property>
        <attribute name="title">
         <string> Manage input</string>
