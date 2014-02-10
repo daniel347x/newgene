@@ -1,5 +1,9 @@
 #include "inputprojectworkqueue.h"
 #include "uiinputproject.h"
+#include "Widgets/newgenemainwindow.h"
+#include <QTimer>
+#include "../UIData/uiwidgetdatarefresh.h"
+#include <QStandardItem>
 
 InputProjectWorkQueue::InputProjectWorkQueue(QObject * parent)
 	: WorkQueueManager<UI_INPUT_PROJECT>(parent)
