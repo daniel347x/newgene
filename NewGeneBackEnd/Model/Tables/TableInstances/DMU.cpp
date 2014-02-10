@@ -88,7 +88,37 @@ void Table_DMU_Instance::Load(sqlite3 * db, InputModel * input_model_)
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_FLAGS));
 		if (uuid && fk_DMU_uuid)
 		{
-			identifiers_map[fk_DMU_uuid].push_back(WidgetInstanceIdentifier(uuid, input_model_->t_dmu_category.getIdentifier(fk_DMU_uuid), code, longhand, 0, flags, TIME_GRANULARITY__NONE, MakeNotes(notes1, notes2, notes3)));
+			std::string code_string;
+			if (code)
+			{
+				code_string = code;
+			}
+			std::string longhand_string;
+			if (longhand)
+			{
+				longhand_string = longhand;
+			}
+			std::string flags_string;
+			if (flags)
+			{
+				flags_string = flags;
+			}
+			std::string notes_string_1;
+			if (notes1)
+			{
+				notes_string_1 = notes1;
+			}
+			std::string notes_string_2;
+			if (notes2)
+			{
+				notes_string_2 = notes2;
+			}
+			std::string notes_string_3;
+			if (notes3)
+			{
+				notes_string_3 = notes3;
+			}
+			identifiers_map[fk_DMU_uuid].push_back(WidgetInstanceIdentifier(uuid, input_model_->t_dmu_category.getIdentifier(fk_DMU_uuid), code_string.c_str(), longhand_string.c_str(), 0, flags_string.c_str(), TIME_GRANULARITY__NONE, MakeNotes(notes_string_1.c_str(), notes_string_2.c_str(), notes_string_3.c_str())));
 		}
 	}
 
