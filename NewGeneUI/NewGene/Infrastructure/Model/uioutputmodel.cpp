@@ -71,6 +71,18 @@ bool UIOutputModel::is_model_equivalent(UIMessager & messager, UIOutputModel * m
 				return false;
 			}
 
+			bool this_exists = boost::filesystem::exists(this_path);
+			bool that_exists = boost::filesystem::exists(that_path);
+			if (this_exists != that_exists)
+			{
+				return false;
+			}
+
+			if (!this_exists && !that_exists)
+			{
+				return true;
+			}
+
 			boost::filesystem::path this_path_canonical = boost::filesystem::canonical(this_path);
 			boost::filesystem::path that_path_canonical = boost::filesystem::canonical(that_path);
 

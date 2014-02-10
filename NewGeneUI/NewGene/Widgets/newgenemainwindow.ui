@@ -24,7 +24,16 @@
     <string notr="true"/>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <item>
@@ -103,7 +112,16 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
         <string> Create output dataset </string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayoutOutput">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <item>
@@ -185,7 +203,7 @@ border-bottom: 9px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
   </action>
   <action name="actionNew_Input_Dataset">
    <property name="text">
-    <string>New Input Dataset</string>
+    <string>New Input Dataset...</string>
    </property>
   </action>
   <action name="actionSave_Input_Dataset_As">
