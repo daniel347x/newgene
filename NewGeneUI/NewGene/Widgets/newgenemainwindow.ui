@@ -136,8 +136,20 @@ background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
        <attribute name="title">
         <string> Manage input</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0">
+       <layout class="QVBoxLayout" name="verticalLayoutOutput">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
          <widget class="NewGeneManageInput" name="widget_2" native="true"/>
         </item>
        </layout>
