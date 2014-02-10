@@ -99,7 +99,6 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	variable_groups.active_dmus = project.model().t_variables_selected_identifiers.GetActiveDMUs(&project.model(), &project.model().getInputModel());
 	variable_groups.identifiers = input_model.t_dmu_category.getIdentifiers();
 	messager.EmitOutputWidgetDataRefresh(variable_groups);
-	std::set<WidgetInstanceIdentifier> active_dmus;
 }
 
 /************************************************************************/
@@ -180,5 +179,6 @@ void UIDataManager::DoRefreshInputWidget(Messager & messager, WidgetDataItemRequ
 {
 	InputModel & input_model = project.model();
 	WidgetDataItem_MANAGE_DMUS_WIDGET dmu_management(widget_request);
+	dmu_management.identifiers = input_model.t_dmu_category.getIdentifiers();
 	messager.EmitInputWidgetDataRefresh(dmu_management);
 }

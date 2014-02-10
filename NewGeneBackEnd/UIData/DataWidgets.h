@@ -604,8 +604,10 @@ public:
 	}
 	WidgetDataItem<MANAGE_DMUS_WIDGET>(WidgetDataItem<MANAGE_DMUS_WIDGET> const & rhs)
 		: WidgetDataItem_base(rhs)
+		, identifiers(rhs.identifiers)
 	{
 	}
+	WidgetInstanceIdentifiers identifiers;
 };
 typedef WidgetDataItem<MANAGE_DMUS_WIDGET> WidgetDataItem_MANAGE_DMUS_WIDGET;
 
