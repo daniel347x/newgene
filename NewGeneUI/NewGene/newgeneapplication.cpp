@@ -24,6 +24,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItemRequest_TIMERANGE_REGION_WIDGET>("WidgetDataItemRequest_TIMERANGE_REGION_WIDGET");
 	qRegisterMetaType<WidgetDataItemRequest_DATETIME_WIDGET>("WidgetDataItemRequest_DATETIME_WIDGET");
 	qRegisterMetaType<WidgetDataItemRequest_GENERATE_OUTPUT_TAB>("WidgetDataItemRequest_GENERATE_OUTPUT_TAB");
+	qRegisterMetaType<WidgetDataItemRequest_TIMERANGE_REGION_WIDGET>("WidgetDataItemRequest_MANAGE_DMUS_WIDGET");
 
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>("WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA");
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>("WidgetDataItem_VARIABLE_GROUPS_TOOLBOX");

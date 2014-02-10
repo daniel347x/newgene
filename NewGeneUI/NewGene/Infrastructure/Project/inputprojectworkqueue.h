@@ -24,6 +24,11 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 		// Called in context of Boost WORK POOL threads - NOT in context of this work queue manager's event loop thread
 		void HandleChanges(DataChangeMessage & changes);
 
+		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET & widgetData)
+		{
+			emit WidgetDataRefresh(widgetData);
+		}
+
 	private:
 
 		void * inp;
@@ -36,7 +41,7 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 
 		void TestSlot();
 
-		//void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA);
+		void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET widget);
 
 };
 

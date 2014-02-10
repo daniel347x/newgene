@@ -97,6 +97,7 @@ class NewGeneWidget
 		virtual void RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET) {}
 		// ****************************************************************************************************************************
 
 

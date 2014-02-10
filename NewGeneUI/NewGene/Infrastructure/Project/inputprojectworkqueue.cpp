@@ -35,11 +35,12 @@ void InputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
 }
 
 
-///************************************************************************/
-//// VARIABLE_GROUPS_SCROLL_AREA
-///************************************************************************/
-//void InputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA)
-//{
-//		get()->getWorkService().post(DoRefreshOutputWidget(widget, this));
-//}
+/************************************************************************/
+//
+/************************************************************************/
+void InputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET widget)
+{
+	get()->getWorkService().post(DoRefreshOutputWidget<MANAGE_DMUS_WIDGET>(widget, this));
+}
+
 
