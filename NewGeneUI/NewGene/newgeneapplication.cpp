@@ -35,6 +35,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItem_TIMERANGE_REGION_WIDGET>("WidgetDataItem_TIMERANGE_REGION_WIDGET");
 	qRegisterMetaType<WidgetDataItem_DATETIME_WIDGET>("WidgetDataItem_DATETIME_WIDGET");
 	qRegisterMetaType<WidgetDataItem_GENERATE_OUTPUT_TAB>("WidgetDataItem_GENERATE_OUTPUT_TAB");
+	qRegisterMetaType<WidgetDataItem_MANAGE_DMUS_WIDGET>("WidgetDataItem_MANAGE_DMUS_WIDGET");
 
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>("WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE>("WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE");

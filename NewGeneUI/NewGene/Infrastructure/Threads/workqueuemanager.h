@@ -48,6 +48,7 @@ class WorkQueueManagerBase : public QObject
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET &) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET &) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB &) {}
+		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET &) {}
 
 	signals:
 		// Signals for ALL specializations of WorkQueueManager go here,
@@ -66,6 +67,7 @@ class WorkQueueManagerBase : public QObject
 		void WidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET);
 		void WidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET);
 		void WidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB);
+		void WidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET);
 
 	public slots:
 		// Slots for ALL specializations go here,

@@ -68,6 +68,10 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		{
 			emit WidgetDataRefresh(widgetData);
 		}
+		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET & widgetData)
+		{
+			emit WidgetDataRefresh(widgetData);
+		}
 
 	private:
 

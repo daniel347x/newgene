@@ -307,3 +307,9 @@ void UIMessagerOutputProject::EmitOutputWidgetDataRefresh(WidgetDataItem_GENERAT
 {
 	get()->getQueueManager()->EmitOutputWidgetDataRefresh(widgetData);
 }
+
+void UIMessagerInputProject::EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET & widgetData)
+{
+	get()->getQueueManager()->EmitInputWidgetDataRefresh(widgetData);
+}
+

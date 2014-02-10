@@ -172,3 +172,13 @@ void UIDataManager::DoRefreshOutputWidget(Messager & messager, WidgetDataItemReq
 	WidgetInstanceIdentifier_Int64_Pair timerange_start_identifier;
 	messager.EmitOutputWidgetDataRefresh(generate_output_tab_data);
 }
+
+/************************************************************************/
+// MANAGE_DMUS_WIDGET
+/************************************************************************/
+void UIDataManager::DoRefreshInputWidget(Messager & messager, WidgetDataItemRequest_MANAGE_DMUS_WIDGET const & widget_request, InputProject & project)
+{
+	InputModel & input_model = project.model();
+	WidgetDataItem_MANAGE_DMUS_WIDGET dmu_management(widget_request);
+	messager.EmitInputWidgetDataRefresh(dmu_management);
+}
