@@ -49,7 +49,7 @@ class NewGeneWidget
 		// Be sure to call this only in the context of the UI thread
 		void ShowMessageBox(std::string msg);
 
-	protected:
+	protected slots:
 
 		// ****************************************************************************************************************************
 		// Pseudo-slots.
