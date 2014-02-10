@@ -39,6 +39,11 @@ class Model_basemost
 			return _path_to_model_database;
 		}
 
+		void setPathToDatabaseFile(boost::filesystem::path const & path_to_model_databas)
+		{
+			_path_to_model_database = path_to_model_databas;
+		}
+
 		void LoadDatabase()
 		{
 			if (db == nullptr)
@@ -75,14 +80,38 @@ class Model_basemost
 			}
 		}
 
-		virtual std::string GetCreationSQL() = 0;
-
 		void UnloadDatabase()
 		{
 			if (db != nullptr)
 			{
 				sqlite3_close(db);
 			}
+		}
+
+		virtual std::string GetCreationSQL() = 0;
+
+		void CopyDatabase(Messager & messager, boost::filesystem::path new_database_path)
+		{
+			boost::filesystem::path current_path = getPathToDatabaseFile();
+			if (current_path == new_database_path)
+			{
+				return;
+			}
+			UnloadDatabase();
+			try
+			{
+				boost::filesystem::copy_file(current_path, new_database_path, boost::filesystem::copy_option::overwrite_if_exists);
+			}
+			catch (boost::filesystem::filesystem_error & ex)
+			{
+				boost::format msg("Error copying model database file \"%1%\" to \"%2%\"): %3%");
+				msg % current_path.string() % new_database_path.string() % ex.what();
+				messager.AppendMessage(new MessagerWarningMessage(MESSAGER_MESSAGE__FILE_DOES_NOT_EXIST, msg.str()));
+				LoadDatabase();
+				return;
+			}
+			this->setPathToDatabaseFile(new_database_path);
+			LoadDatabase();
 		}
 
 		sqlite3 * getDb()

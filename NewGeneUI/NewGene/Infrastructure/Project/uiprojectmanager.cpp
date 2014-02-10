@@ -114,10 +114,8 @@ void UIProjectManager::LoadOpenProjects(NewGeneMainWindow* mainWindow, QObject *
 	connect(mainWindowObject, SIGNAL(SignalCloseCurrentOutputDataset()), this, SLOT(CloseCurrentOutputDataset()));
 	connect(mainWindowObject, SIGNAL(SignalOpenInputDataset(STD_STRING, QObject *)), this, SLOT(OpenInputDataset(STD_STRING, QObject *)));
 	connect(mainWindowObject, SIGNAL(SignalOpenOutputDataset(STD_STRING, QObject *)), this, SLOT(OpenOutputDataset(STD_STRING, QObject *)));
-	connect(mainWindowObject, SIGNAL(SignalNewInputDataset()), this, SLOT(NewInputDataset()));
-	connect(mainWindowObject, SIGNAL(SignalNewOutputDataset()), this, SLOT(NewOutputDataset()));
-	connect(mainWindowObject, SIGNAL(SignalSaveCurrentInputDatasetAs()), this, SLOT(SaveCurrentInputDatasetAs()));
-	connect(mainWindowObject, SIGNAL(SignalSaveCurrentOutputDatasetAs()), this, SLOT(SaveCurrentOutputDatasetAs()));
+	connect(mainWindowObject, SIGNAL(SignalSaveCurrentInputDatasetAs(STD_STRING, QObject *)), this, SLOT(SaveCurrentInputDatasetAs(STD_STRING, QObject *)));
+	connect(mainWindowObject, SIGNAL(SignalSaveCurrentOutputDatasetAs(STD_STRING, QObject *)), this, SLOT(SaveCurrentOutputDatasetAs(STD_STRING, QObject *)));
 
 	bool success = false;
 
@@ -745,22 +743,154 @@ void UIProjectManager::RawCloseOutputProject(UIOutputProject * output_project)
 
 }
 
-void UIProjectManager::NewInputDataset()
+void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, QObject * mainWindowObject)
 {
-	int m = 0;
+
+	UIMessager messager;
+	UIMessagerSingleShot messager_(messager);
+
+	UIInputProject * active_input_project = getActiveUIInputProject();
+	if (active_input_project != nullptr)
+	{
+
+		// Create a path object for the path to the project settings
+		boost::filesystem::path input_project_settings_path(the_input_dataset.c_str());
+
+		// Create a path object for the path to the model settings
+		boost::filesystem::path path_to_model_settings(input_project_settings_path);
+		path_to_model_settings /= (input_project_settings_path.stem().string() + ".model.xml");
+
+		// Create a path object for the path to the model database file
+		boost::filesystem::path path_to_model_database(input_project_settings_path);
+		path_to_model_database /= (input_project_settings_path.stem().string() + ".db");
+
+		if (boost::filesystem::exists(input_project_settings_path))
+		{
+			QMessageBox::StandardButton reply;
+			boost::format msg("The input project file \"%1%\" already exists.  Would you like to overwrite it?");
+			msg % input_project_settings_path.string();
+			reply = QMessageBox::question(nullptr, QString("Overwrite input project?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				return;
+			}
+		}
+
+		if (boost::filesystem::exists(path_to_model_settings))
+		{
+			QMessageBox::StandardButton reply;
+			boost::format msg("The input model file \"%1%\" already exists.  Would you like to overwrite it?");
+			msg % path_to_model_settings.string();
+			reply = QMessageBox::question(nullptr, QString("Overwrite input model?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				return;
+			}
+		}
+
+		if (boost::filesystem::exists(path_to_model_database))
+		{
+			QMessageBox::StandardButton reply;
+			boost::format msg("The input model database file \"%1%\" already exists.  Would you like to overwrite it?");
+			msg % path_to_model_database.string();
+			reply = QMessageBox::question(nullptr, QString("Overwrite input model database?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				return;
+			}
+		}
+
+		// Set the new path for the project settings in the currently open project
+		active_input_project->backend().projectSettings().SetSettingsPath(input_project_settings_path);
+
+		// Set the new path for the project settings in the currently open project
+		active_input_project->backend().modelSettings().SetSettingsPath(path_to_model_settings);
+
+		// Write the project settings to file
+		active_input_project->projectSettings().WriteSettingsToFile(messager);
+
+		// Write the model settings to file
+		active_input_project->modelSettings().WriteSettingsToFile(messager);
+
+		// Copy the database
+		active_input_project->backend().model().CopyDatabase(messager, path_to_model_database);
+
+	}
+
 }
 
-void UIProjectManager::NewOutputDataset()
+void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset, QObject * mainWindowObject)
 {
-	int m = 0;
-}
 
-void UIProjectManager::SaveCurrentInputDatasetAs()
-{
-	int m = 0;
-}
+	UIMessager messager;
+	UIMessagerSingleShot messager_(messager);
 
-void UIProjectManager::SaveCurrentOutputDatasetAs()
-{
-	int m = 0;
+	UIOutputProject * active_output_project = getActiveUIOutputProject();
+	if (active_output_project != nullptr)
+	{
+
+		// Create a path object for the path to the project settings
+		boost::filesystem::path output_project_settings_path(the_output_dataset.c_str());
+
+		// Create a path object for the path to the model settings
+		boost::filesystem::path path_to_model_settings(output_project_settings_path);
+		path_to_model_settings /= (output_project_settings_path.stem().string() + ".model.xml");
+
+		// Create a path object for the path to the model database file
+		boost::filesystem::path path_to_model_database(output_project_settings_path);
+		path_to_model_database /= (output_project_settings_path.stem().string() + ".db");
+
+		if (boost::filesystem::exists(output_project_settings_path))
+		{
+			QMessageBox::StandardButton reply;
+			boost::format msg("The output project file \"%1%\" already exists.  Would you like to overwrite it?");
+			msg % output_project_settings_path.string();
+			reply = QMessageBox::question(nullptr, QString("Overwrite output project?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				return;
+			}
+		}
+
+		if (boost::filesystem::exists(path_to_model_settings))
+		{
+			QMessageBox::StandardButton reply;
+			boost::format msg("The output model file \"%1%\" already exists.  Would you like to overwrite it?");
+			msg % path_to_model_settings.string();
+			reply = QMessageBox::question(nullptr, QString("Overwrite output model?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				return;
+			}
+		}
+
+		if (boost::filesystem::exists(path_to_model_database))
+		{
+			QMessageBox::StandardButton reply;
+			boost::format msg("The output model database file \"%1%\" already exists.  Would you like to overwrite it?");
+			msg % path_to_model_database.string();
+			reply = QMessageBox::question(nullptr, QString("Overwrite output model database?"), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				return;
+			}
+		}
+
+		// Set the new path for the project settings in the currently open project
+		active_output_project->backend().projectSettings().SetSettingsPath(output_project_settings_path);
+
+		// Set the new path for the project settings in the currently open project
+		active_output_project->backend().modelSettings().SetSettingsPath(path_to_model_settings);
+
+		// Write the project settings to file
+		active_output_project->projectSettings().WriteSettingsToFile(messager);
+
+		// Write the model settings to file
+		active_output_project->modelSettings().WriteSettingsToFile(messager);
+
+		// Copy the database
+		active_output_project->backend().model().CopyDatabase(messager, path_to_model_database);
+
+	}
+
 }

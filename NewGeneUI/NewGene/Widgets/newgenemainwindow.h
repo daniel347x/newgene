@@ -28,10 +28,8 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 		void SignalCloseCurrentOutputDataset();
 		void SignalOpenInputDataset(STD_STRING, QObject *);
 		void SignalCloseCurrentInputDataset();
-		void SignalNewInputDataset();
-		void SignalNewOutputDataset();
-		void SignalSaveCurrentInputDatasetAs();
-		void SignalSaveCurrentOutputDatasetAs();
+		void SignalSaveCurrentInputDatasetAs(STD_STRING, QObject *);
+		void SignalSaveCurrentOutputDatasetAs(STD_STRING, QObject *);
 
 	public slots:
 		void doInitialize();

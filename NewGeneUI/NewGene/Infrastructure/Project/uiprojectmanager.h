@@ -243,10 +243,8 @@ class UIProjectManager : public QObject,
 		void OpenOutputDataset(STD_STRING, QObject *);
 		void CloseCurrentOutputDataset();
 		void CloseCurrentInputDataset();
-		void NewInputDataset();
-		void NewOutputDataset();
-		void SaveCurrentInputDatasetAs();
-		void SaveCurrentOutputDatasetAs();
+		void SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, QObject * mainWindowObject);
+		void SaveCurrentOutputDatasetAs(STD_STRING the_input_dataset, QObject * mainWindowObject);
 
 	private:
 
