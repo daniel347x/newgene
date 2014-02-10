@@ -79,7 +79,7 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 
 	if (!ui->listView)
 	{
-		boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
+		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
@@ -96,10 +96,10 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 	QStandardItemModel * model = new QStandardItemModel(ui->listView);
 
 	int index = 0;
-	std::for_each(widget_data.dmus_and_members.cbegin(), widget_data.dmus_and_members.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & dmu_and_member)
+	std::for_each(widget_data.dmus_and_members.cbegin(), widget_data.dmus_and_members.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & dmu_and_members)
 	{
-		WidgetInstanceIdentifier const & dmu = dmu_and_member.first;
-		WidgetInstanceIdentifiers const & dmu_members = dmu_and_member.second;
+		WidgetInstanceIdentifier const & dmu = dmu_and_members.first;
+		WidgetInstanceIdentifiers const & dmu_members = dmu_and_members.second;
 		if (dmu.code && !dmu.code->empty())
 		{
 
@@ -115,7 +115,7 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 			item->setEditable(false);
 			item->setCheckable(false);
 			QVariant v;
-			v.setValue(dmu_and_member);
+			v.setValue(dmu_and_members);
 			item->setData(v);
 			model->setItem( index, item );
 
@@ -139,13 +139,73 @@ void DisplayDMUsRegion::Empty()
 void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
 {
 
-	if(selected.indexes().isEmpty())
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
 	{
-	   //clearMyView();
+		return;
 	}
-	else
+
+	UIMessager messager(project);
+
+	if (!ui->listView_2 || !ui->listView)
 	{
-	   //displayModelIndexInMyView(selection.indexes().first());
+		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
+	if (oldModel != nullptr)
+	{
+		delete oldModel;
+	}
+
+	if(!selected.indexes().isEmpty())
+	{
+
+		QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView->model());
+
+		QItemSelectionModel * oldSelectionModel = ui->listView_2->selectionModel();
+		QStandardItemModel * model = new QStandardItemModel(ui->listView);
+
+		QModelIndex selectedIndex = selected.indexes().first();
+
+		QVariant dmu_and_members_variant = dmuModel->data(selectedIndex);
+		std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = dmu_and_members_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
+		WidgetInstanceIdentifier & dmu = dmu_and_members.first;
+		WidgetInstanceIdentifiers & dmu_members = dmu_and_members.second;
+
+		int index = 0;
+		std::for_each(dmu_members.cbegin(), dmu_members.cend(), [this, &index, &model](WidgetInstanceIdentifier const & dmu_member)
+		{
+			if (dmu_member.code && !dmu_member.code->empty())
+			{
+
+				QStandardItem * item = new QStandardItem();
+				QString text(dmu_member.code->c_str());
+				if (dmu_member.longhand && !dmu_member.longhand->empty())
+				{
+					text += " (";
+					text += dmu_member.longhand->c_str();
+					text += ")";
+				}
+				item->setText(text);
+				item->setEditable(false);
+				item->setCheckable(true);
+				QVariant v;
+				v.setValue(dmu_member);
+				item->setData(v);
+				model->setItem( index, item );
+
+				++index;
+
+			}
+		});
+
+		ui->listView_2->setModel(model);
+		if (oldSelectionModel) delete oldSelectionModel;
 	}
 
 }
