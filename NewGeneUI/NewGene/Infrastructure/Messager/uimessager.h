@@ -91,8 +91,8 @@ class UIMessager : public QObject, public Messager
 		virtual void UpdateStatusBarText(std::string const &, void *);
 		virtual void AppendKadStatusText(std::string const &, void *);
 
-        virtual void EmitInputProjectChangeMessage(DataChangeMessage &) {}
-        virtual void EmitOutputProjectChangeMessage(DataChangeMessage &) {}
+		virtual void EmitInputProjectChangeMessage(DataChangeMessage &) {}
+		virtual void EmitOutputProjectChangeMessage(DataChangeMessage &) {}
 
 	signals:
 
@@ -142,9 +142,11 @@ class UIMessagerInputProject : public UIMessager
 		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();
 		virtual void UpdateProgressBarValue(std::int64_t const);
-        virtual void UpdateStatusBarText(std::string const & status_bar_text, void *);
+		virtual void UpdateStatusBarText(std::string const & status_bar_text, void *);
 
 		void EmitInputProjectChangeMessage(DataChangeMessage & changes);
+
+		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET & widgetData);
 
 	protected:
 
@@ -185,7 +187,6 @@ class UIMessagerOutputProject : public UIMessager
 		void EmitOutputWidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET & widgetData);
 		void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET & widgetData);
 		void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB & widgetData);
-		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET & widgetData);
 
 	protected:
 
