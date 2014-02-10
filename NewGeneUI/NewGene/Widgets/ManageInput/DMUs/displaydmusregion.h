@@ -37,7 +37,7 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 		void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDGET);
 
 	private slots:
-		void ReceiveVariableItemChanged(const QItemSelection & selected, const QItemSelection & deselected);
+		void ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 
 	protected:
 		void Empty();
