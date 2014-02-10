@@ -156,7 +156,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 		return;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView_2->model());
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
@@ -168,7 +168,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 		QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView->model());
 
 		QItemSelectionModel * oldSelectionModel = ui->listView_2->selectionModel();
-		QStandardItemModel * model = new QStandardItemModel(ui->listView);
+		QStandardItemModel * model = new QStandardItemModel(ui->listView_2);
 
 		QModelIndex selectedIndex = selected.indexes().first();
 
