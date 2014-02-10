@@ -262,7 +262,11 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/SelectVariables/kadcolumnselectionbox.ui \
 	Widgets/CreateOutput/SelectVariables/timerangebox.ui \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.ui \
-    Widgets/ManageInput/newgenemanageinput.ui
+    Widgets/ManageInput/newgenemanageinput.ui \
+    Widgets/ManageInput/DMUs/newgenemanagedmus.ui \
+    Widgets/ManageInput/UOAs/newgenemanageuoas.ui \
+    Widgets/ManageInput/VGs/newgenemanagevgs.ui \
+    Widgets/ManageInput/Data/newgenemanagedata.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
