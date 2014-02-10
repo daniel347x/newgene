@@ -172,7 +172,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 
 		QModelIndex selectedIndex = selected.indexes().first();
 
-		QVariant dmu_and_members_variant = dmuModel->data(selectedIndex);
+		QVariant dmu_and_members_variant = dmuModel->item(selectedIndex)->data();
 		std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = dmu_and_members_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
 		WidgetInstanceIdentifier & dmu = dmu_and_members.first;
 		WidgetInstanceIdentifiers & dmu_members = dmu_and_members.second;
