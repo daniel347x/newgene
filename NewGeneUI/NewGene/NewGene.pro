@@ -135,8 +135,12 @@ SOURCES += main.cpp\
 	Infrastructure/UIAction/timerangechange.cpp \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.cpp \
 	Infrastructure/UIAction/generaloptions.cpp \
-    Widgets/ManageInput/newgenemanageinput.cpp \
-    Widgets/ManageInput/newgenetabwidgetmanageinput.cpp
+	Widgets/ManageInput/newgenemanageinput.cpp \
+	Widgets/ManageInput/newgenetabwidgetmanageinput.cpp \
+    Widgets/ManageInput/DMUs/newgenemanagedmus.cpp \
+    Widgets/ManageInput/UOAs/newgenemanageuoas.cpp \
+    Widgets/ManageInput/VGs/newgenemanagevgs.cpp \
+    Widgets/ManageInput/Data/newgenemanagedata.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -247,8 +251,12 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.h \
 	Infrastructure/UIAction/generaloptions.h \
 	q_declare_metatype.h \
-    Widgets/ManageInput/newgenemanageinput.h \
-    Widgets/ManageInput/newgenetabwidgetmanageinput.h
+	Widgets/ManageInput/newgenemanageinput.h \
+	Widgets/ManageInput/newgenetabwidgetmanageinput.h \
+    Widgets/ManageInput/DMUs/newgenemanagedmus.h \
+    Widgets/ManageInput/UOAs/newgenemanageuoas.h \
+    Widgets/ManageInput/VGs/newgenemanagevgs.h \
+    Widgets/ManageInput/Data/newgenemanagedata.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -262,11 +270,11 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/SelectVariables/kadcolumnselectionbox.ui \
 	Widgets/CreateOutput/SelectVariables/timerangebox.ui \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.ui \
-    Widgets/ManageInput/newgenemanageinput.ui \
-    Widgets/ManageInput/DMUs/newgenemanagedmus.ui \
-    Widgets/ManageInput/UOAs/newgenemanageuoas.ui \
-    Widgets/ManageInput/VGs/newgenemanagevgs.ui \
-    Widgets/ManageInput/Data/newgenemanagedata.ui
+	Widgets/ManageInput/newgenemanageinput.ui \
+	Widgets/ManageInput/DMUs/newgenemanagedmus.ui \
+	Widgets/ManageInput/UOAs/newgenemanageuoas.ui \
+	Widgets/ManageInput/VGs/newgenemanagevgs.ui \
+	Widgets/ManageInput/Data/newgenemanagedata.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
@@ -290,6 +298,11 @@ INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/VariableSummary
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/Variables
 INCLUDEPATH += $$PWD/Widgets/CreateOutput/SelectVariables/KadWidget
+INCLUDEPATH += $$PWD/Widgets/ManageInput
+INCLUDEPATH += $$PWD/Widgets/ManageInput/DMUs
+INCLUDEPATH += $$PWD/Widgets/ManageInput/UOAs
+INCLUDEPATH += $$PWD/Widgets/ManageInput/VGs
+INCLUDEPATH += $$PWD/Widgets/ManageInput/Data
 INCLUDEPATH += $$PWD/Infrastructure/Model
 INCLUDEPATH += $$PWD/Infrastructure/Model/Base
 INCLUDEPATH += $$PWD/Infrastructure/Model/Indicator
@@ -301,7 +314,6 @@ INCLUDEPATH += $$PWD/Infrastructure/Settings/Base
 INCLUDEPATH += $$PWD/Infrastructure/Settings/Indicator
 INCLUDEPATH += $$PWD/Infrastructure/Settings/Item
 INCLUDEPATH += $$PWD/Infrastructure/Settings/Global
-
 INCLUDEPATH += $$PWD/Infrastructure/Settings/Project
 INCLUDEPATH += $$PWD/Infrastructure/Messager
 INCLUDEPATH += $$PWD/Infrastructure/Documents
