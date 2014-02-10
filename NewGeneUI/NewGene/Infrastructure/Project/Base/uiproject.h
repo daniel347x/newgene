@@ -114,6 +114,15 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 			return *_backend_project;
 		}
 
+		void SetProjectPaths(boost::filesystem::path const & path_to_project_settings, boost::filesystem::path const & path_to_model_settings)
+		{
+			projectSettings().getUISettings().SetSettingsPath(path_to_project_settings);
+			projectSettings().getBackendSettings().SetSettingsPath(path_to_project_settings);
+			backend().projectSettings().SetSettingsPath(path_to_project_settings);
+			modelSettings().getBackendSettings().SetSettingsPath(path_to_model_settings);
+			backend().modelSettings().SetSettingsPath(path_to_model_settings);
+		}
+
 		virtual void UpdateConnections() {}
 		virtual void DoRefreshAllWidgets() {}
 

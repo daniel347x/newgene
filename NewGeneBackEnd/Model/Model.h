@@ -90,7 +90,7 @@ class Model_basemost
 
 		virtual std::string GetCreationSQL() = 0;
 
-		void CopyDatabase(Messager & messager, boost::filesystem::path new_database_path)
+		void SaveDatabaseAs(Messager & messager, boost::filesystem::path new_database_path)
 		{
 			boost::filesystem::path current_path = getPathToDatabaseFile();
 			if (current_path == new_database_path)

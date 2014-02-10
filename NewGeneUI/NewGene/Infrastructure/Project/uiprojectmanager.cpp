@@ -757,12 +757,10 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 		boost::filesystem::path input_project_settings_path(the_input_dataset.c_str());
 
 		// Create a path object for the path to the model settings
-		boost::filesystem::path path_to_model_settings(input_project_settings_path);
-		path_to_model_settings /= (input_project_settings_path.stem().string() + ".model.xml");
+		boost::filesystem::path path_to_model_settings(input_project_settings_path.parent_path() / (input_project_settings_path.stem().string() + ".model.xml"));
 
 		// Create a path object for the path to the model database file
-		boost::filesystem::path path_to_model_database(input_project_settings_path);
-		path_to_model_database /= (input_project_settings_path.stem().string() + ".db");
+		boost::filesystem::path path_to_model_database(input_project_settings_path.parent_path() / (input_project_settings_path.stem().string() + ".db"));
 
 		if (boost::filesystem::exists(input_project_settings_path))
 		{
@@ -801,10 +799,7 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 		}
 
 		// Set the new path for the project settings in the currently open project
-		active_input_project->backend().projectSettings().SetSettingsPath(input_project_settings_path);
-
-		// Set the new path for the project settings in the currently open project
-		active_input_project->backend().modelSettings().SetSettingsPath(path_to_model_settings);
+		active_input_project->SetProjectPaths(input_project_settings_path, path_to_model_settings);
 
 		// Write the project settings to file
 		active_input_project->projectSettings().WriteSettingsToFile(messager);
@@ -813,7 +808,7 @@ void UIProjectManager::SaveCurrentInputDatasetAs(STD_STRING the_input_dataset, Q
 		active_input_project->modelSettings().WriteSettingsToFile(messager);
 
 		// Copy the database
-		active_input_project->backend().model().CopyDatabase(messager, path_to_model_database);
+		active_input_project->backend().model().SaveDatabaseAs(messager, path_to_model_database);
 
 	}
 
@@ -833,12 +828,10 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 		boost::filesystem::path output_project_settings_path(the_output_dataset.c_str());
 
 		// Create a path object for the path to the model settings
-		boost::filesystem::path path_to_model_settings(output_project_settings_path);
-		path_to_model_settings /= (output_project_settings_path.stem().string() + ".model.xml");
+		boost::filesystem::path path_to_model_settings(output_project_settings_path.parent_path() / (output_project_settings_path.stem().string() + ".model.xml"));
 
 		// Create a path object for the path to the model database file
-		boost::filesystem::path path_to_model_database(output_project_settings_path);
-		path_to_model_database /= (output_project_settings_path.stem().string() + ".db");
+		boost::filesystem::path path_to_model_database(output_project_settings_path.parent_path() / (output_project_settings_path.stem().string() + ".db"));
 
 		if (boost::filesystem::exists(output_project_settings_path))
 		{
@@ -877,10 +870,7 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 		}
 
 		// Set the new path for the project settings in the currently open project
-		active_output_project->backend().projectSettings().SetSettingsPath(output_project_settings_path);
-
-		// Set the new path for the project settings in the currently open project
-		active_output_project->backend().modelSettings().SetSettingsPath(path_to_model_settings);
+		active_output_project->SetProjectPaths(output_project_settings_path, path_to_model_settings);
 
 		// Write the project settings to file
 		active_output_project->projectSettings().WriteSettingsToFile(messager);
@@ -889,7 +879,7 @@ void UIProjectManager::SaveCurrentOutputDatasetAs(STD_STRING the_output_dataset,
 		active_output_project->modelSettings().WriteSettingsToFile(messager);
 
 		// Copy the database
-		active_output_project->backend().model().CopyDatabase(messager, path_to_model_database);
+		active_output_project->backend().model().SaveDatabaseAs(messager, path_to_model_database);
 
 	}
 
