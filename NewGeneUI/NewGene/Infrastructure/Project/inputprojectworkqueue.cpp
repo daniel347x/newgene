@@ -40,7 +40,7 @@ void InputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
 /************************************************************************/
 void InputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET widget)
 {
-	get()->getWorkService().post(DoRefreshOutputWidget<MANAGE_DMUS_WIDGET>(widget, this));
+	get()->getWorkService().post(DoRefreshInputWidget<MANAGE_DMUS_WIDGET>(widget, this));
 }
 
 
