@@ -124,6 +124,7 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 		}
 	});
 
+	connect(model, SIGNAL(selectionChanged(const QItemSelection & selected, const QItemSelection & deselected)), this, SLOT(ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)));
 	//connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
 
 	ui->listView->setModel(model);
@@ -134,5 +135,12 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 void DisplayDMUsRegion::Empty()
 {
 
+}
+
+void DisplayDMUsRegion::ReceiveVariableItemChanged(const QItemSelection & selected, const QItemSelection & deselected)
+{
+	QMessageBox msgBox;
+	msgBox.setText( "DMU selection changed" );
+	msgBox.exec();
 }
 

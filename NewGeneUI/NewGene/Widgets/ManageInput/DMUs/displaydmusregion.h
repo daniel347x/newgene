@@ -35,6 +35,9 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDGET);
 
+	private slots:
+		void ReceiveVariableItemChanged(QStandardItem*);
+
 	protected:
 		void Empty();
 
