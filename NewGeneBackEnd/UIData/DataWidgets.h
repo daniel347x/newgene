@@ -27,6 +27,7 @@ enum DATA_WIDGETS
 	, GENERATE_OUTPUT_TAB
 
 	// Input project
+	, MANAGE_DMUS_WIDGET
 
 	, DATA_WIDGETS_LAST
 
@@ -562,5 +563,51 @@ public:
 	}
 };
 typedef WidgetDataItem<GENERATE_OUTPUT_TAB> WidgetDataItem_GENERATE_OUTPUT_TAB;
+
+
+/************************************************************************/
+// MANAGE_DMUS_WIDGET
+/************************************************************************/
+template<>
+class WidgetDataItemRequest<MANAGE_DMUS_WIDGET> : public WidgetDataItemRequest_base
+{
+public:
+	WidgetDataItemRequest<MANAGE_DMUS_WIDGET>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
+	{
+	}
+	WidgetDataItemRequest<MANAGE_DMUS_WIDGET>(WidgetDataItemRequest<MANAGE_DMUS_WIDGET> const & rhs)
+		: WidgetDataItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItemRequest<MANAGE_DMUS_WIDGET> WidgetDataItemRequest_MANAGE_DMUS_WIDGET;
+
+template<>
+class WidgetDataItem<MANAGE_DMUS_WIDGET> : public WidgetDataItem_base
+{
+public:
+	WidgetDataItem<MANAGE_DMUS_WIDGET>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
+	{
+	}
+	WidgetDataItem<MANAGE_DMUS_WIDGET>(WidgetDataItemRequest_base const & request_obj)
+		: WidgetDataItem_base(request_obj)
+	{
+		try
+		{
+			WidgetDataItemRequest_MANAGE_DMUS_WIDGET const & dmu_management_request = dynamic_cast<WidgetDataItemRequest_MANAGE_DMUS_WIDGET const &>(request_obj);
+		}
+		catch (std::bad_cast &)
+		{
+		}
+	}
+	WidgetDataItem<MANAGE_DMUS_WIDGET>(WidgetDataItem<MANAGE_DMUS_WIDGET> const & rhs)
+		: WidgetDataItem_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItem<MANAGE_DMUS_WIDGET> WidgetDataItem_MANAGE_DMUS_WIDGET;
+
 
 #endif
