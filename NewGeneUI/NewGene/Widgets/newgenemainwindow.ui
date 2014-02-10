@@ -144,7 +144,11 @@ border-bottom: 9px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
        <attribute name="title">
         <string> Manage input</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_3"/>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <widget class="NewGeneManageInput" name="widget_2" native="true"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -234,6 +238,12 @@ border-bottom: 9px solid qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
    <class>NewGeneCreateOutput</class>
    <extends>QWidget</extends>
    <header location="global">newgenecreateoutput.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NewGeneManageInput</class>
+   <extends>QWidget</extends>
+   <header location="global">newgenemanageinput.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

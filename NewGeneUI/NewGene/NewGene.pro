@@ -134,7 +134,9 @@ SOURCES += main.cpp\
 	Widgets/CreateOutput/SelectVariables/KadWidget/newgenedatetimewidget.cpp \
 	Infrastructure/UIAction/timerangechange.cpp \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.cpp \
-	Infrastructure/UIAction/generaloptions.cpp
+	Infrastructure/UIAction/generaloptions.cpp \
+    Widgets/ManageInput/newgenemanageinput.cpp \
+    Widgets/ManageInput/newgenetabwidgetmanageinput.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -244,7 +246,9 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Infrastructure/UIAction/timerangechange.h \
 	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.h \
 	Infrastructure/UIAction/generaloptions.h \
-	q_declare_metatype.h
+	q_declare_metatype.h \
+    Widgets/ManageInput/newgenemanageinput.h \
+    Widgets/ManageInput/newgenetabwidgetmanageinput.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -257,7 +261,8 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/SelectVariables/VariableSummary/newgenevariablesummarygroup.ui \
 	Widgets/CreateOutput/SelectVariables/kadcolumnselectionbox.ui \
 	Widgets/CreateOutput/SelectVariables/timerangebox.ui \
-	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.ui
+	Widgets/CreateOutput/GenerateOutput/newgenegenerateoutput.ui \
+    Widgets/ManageInput/newgenemanageinput.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd
