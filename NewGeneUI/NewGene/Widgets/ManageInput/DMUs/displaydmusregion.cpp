@@ -77,7 +77,7 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 
 	UIMessager messager(project);
 
-	if (!ui->listView)
+	if (!ui->listView_dmus)
 	{
 		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
@@ -86,14 +86,14 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 		return;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
 	}
 
-	QItemSelectionModel * oldSelectionModel = ui->listView->selectionModel();
-	QStandardItemModel * model = new QStandardItemModel(ui->listView);
+	QItemSelectionModel * oldSelectionModel = ui->listView_dmus->selectionModel();
+	QStandardItemModel * model = new QStandardItemModel(ui->listView_dmus);
 
 	int index = 0;
 	std::for_each(widget_data.dmus_and_members.cbegin(), widget_data.dmus_and_members.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & dmu_and_members)
@@ -124,10 +124,10 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 		}
 	});
 
-	ui->listView->setModel(model);
+	ui->listView_dmus->setModel(model);
 	if (oldSelectionModel) delete oldSelectionModel;
 
-	connect( ui->listView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveDMUSelectionChanged(const QItemSelection &, const QItemSelection &)));
+	connect( ui->listView_dmus->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveDMUSelectionChanged(const QItemSelection &, const QItemSelection &)));
 
 }
 
@@ -147,7 +147,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 
 	UIMessager messager(project);
 
-	if (!ui->listView_2 || !ui->listView)
+	if (!ui->listView_dmus || !ui->listView_dmu_members)
 	{
 		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
@@ -156,7 +156,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 		return;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView_2->model());
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
@@ -165,10 +165,10 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 	if(!selected.indexes().isEmpty())
 	{
 
-		QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView->model());
+		QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
 
-		QItemSelectionModel * oldSelectionModel = ui->listView_2->selectionModel();
-		QStandardItemModel * model = new QStandardItemModel(ui->listView_2);
+		QItemSelectionModel * oldSelectionModel = ui->listView_dmu_members->selectionModel();
+		QStandardItemModel * model = new QStandardItemModel(ui->listView_dmu_members);
 
 		QModelIndex selectedIndex = selected.indexes().first();
 
@@ -217,9 +217,44 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 			}
 		});
 
-		ui->listView_2->setModel(model);
+		ui->listView_dmu_members->setModel(model);
 		if (oldSelectionModel) delete oldSelectionModel;
 	}
 
 }
 
+
+void DisplayDMUsRegion::on_pushButton_import_dmu_clicked()
+{
+
+}
+
+void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
+{
+
+}
+
+void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
+{
+
+}
+
+void DisplayDMUsRegion::on_pushButton__add_dmu_member_by_hand_clicked()
+{
+
+}
+
+void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
+{
+
+}
+
+void DisplayDMUsRegion::on_pushButton_deselect_all_dmu_members_clicked()
+{
+
+}
+
+void DisplayDMUsRegion::on_pushButton_select_all_dmu_members_clicked()
+{
+
+}

@@ -39,6 +39,20 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 	private slots:
 		void ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 
+		void on_pushButton_import_dmu_clicked();
+
+		void on_pushButton_delete_dmu_clicked();
+
+		void on_pushButton_refresh_dmu_members_from_file_clicked();
+
+		void on_pushButton__add_dmu_member_by_hand_clicked();
+
+		void on_pushButton_delete_selected_dmu_members_clicked();
+
+		void on_pushButton_deselect_all_dmu_members_clicked();
+
+		void on_pushButton_select_all_dmu_members_clicked();
+
 	protected:
 		void Empty();
 
