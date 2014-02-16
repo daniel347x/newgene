@@ -251,10 +251,50 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 
 void DisplayDMUsRegion::on_pushButton_deselect_all_dmu_members_clicked()
 {
-
+	if (!ui->listView_dmu_members)
+	{
+		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	if (model == nullptr)
+	{
+		return;
+	}
+	int nrows = model->rowCount();
+	for (int row=0; row<nrows; ++row) {
+		QStandardItem * item = model->item(row, 0);
+		if (item)
+		{
+			item->setCheckState(Qt::Unchecked);
+		}
+	}
 }
 
 void DisplayDMUsRegion::on_pushButton_select_all_dmu_members_clicked()
 {
-
+	if (!ui->listView_dmu_members)
+	{
+		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	if (model == nullptr)
+	{
+		return;
+	}
+	int nrows = model->rowCount();
+	for (int row=0; row<nrows; ++row) {
+		QStandardItem * item = model->item(row, 0);
+		if (item)
+		{
+			item->setCheckState(Qt::Checked);
+		}
+	}
 }
