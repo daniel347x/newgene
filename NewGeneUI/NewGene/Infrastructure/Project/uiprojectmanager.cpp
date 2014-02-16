@@ -246,6 +246,15 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 
 		if (output_project_list->files.size() == 0)
 		{
+			boost::format msg_title("Open output project at default location?");
+			boost::format msg_text("You have no output project open.  Would you like to open the project at the default location?");
+			QMessageBox::StandardButton reply;
+			reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::No)
+			{
+				return;
+			}
+
 			boost::filesystem::path output_project_path = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DocumentsLocation, "NewGene/Output", NewGeneFileNames::defaultOutputProjectFileName);
 			if (output_project_path != boost::filesystem::path())
 			{
