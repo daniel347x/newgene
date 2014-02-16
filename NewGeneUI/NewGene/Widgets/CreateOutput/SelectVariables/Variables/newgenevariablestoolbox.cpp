@@ -75,7 +75,7 @@ void NewGeneVariablesToolbox::Empty()
 	int nItems = count();
 	for (int n = 0; n < nItems; ++n)
 	{
-		QWidget * child = find(n);
+		QWidget * child = widget(n);
 		removeItem(n);
 		if (child)
 		{
