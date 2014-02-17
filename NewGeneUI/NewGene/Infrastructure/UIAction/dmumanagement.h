@@ -11,13 +11,13 @@
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
-class AddDMU_ : public DoInputAction<>
+class AddDMU_ : public DoInputAction<ACTION_ADD_DMU>
 {
 
 	public:
 
 		AddDMU_(WidgetActionItemRequest_ACTION_ADD_DMU & action_request_, InputProjectWorkQueue * queue_)
-			: DoOutputAction<>(static_cast<WidgetActionItemRequest_ACTION_ADD_DMU>(action_request_), queue_)
+			: DoOutputAction<ACTION_ADD_DMU>(static_cast<WidgetActionItemRequest_ACTION_ADD_DMU>(action_request_), queue_)
 		{
 
 		}
@@ -30,13 +30,13 @@ class AddDMU_ : public DoInputAction<>
 
 };
 
-class DeleteDMU_ : public DoInputAction<>
+class DeleteDMU_ : public DoInputAction<ACTION_DELETE_DMU>
 {
 
 	public:
 
 		DeleteDMU_(WidgetActionItemRequest_ACTION_DELETE_DMU & action_request_, InputProjectWorkQueue * queue_)
-			: DoOutputAction<>(static_cast<WidgetActionItemRequest_ACTION_DELETE_DMU>(action_request_), queue_)
+			: DoOutputAction<ACTION_DELETE_DMU>(static_cast<WidgetActionItemRequest_ACTION_DELETE_DMU>(action_request_), queue_)
 		{
 
 		}
@@ -49,13 +49,13 @@ class DeleteDMU_ : public DoInputAction<>
 
 };
 
-class AddDMUMembers_ : public DoInputAction<>
+class AddDMUMembers_ : public DoInputAction<ACTION_ADD_DMU_MEMBERS>
 {
 
 	public:
 
 		AddDMUMembers_(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS & action_request_, InputProjectWorkQueue * queue_)
-			: DoOutputAction<>(static_cast<WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS>(action_request_), queue_)
+			: DoOutputAction<ACTION_ADD_DMU_MEMBERS>(static_cast<WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS>(action_request_), queue_)
 		{
 
 		}
@@ -68,13 +68,13 @@ class AddDMUMembers_ : public DoInputAction<>
 
 };
 
-class DeleteDMUMembers_ : public DoInputAction<>
+class DeleteDMUMembers_ : public DoInputAction<ACTION_DELETE_DMU_MEMBERS>
 {
 
 	public:
 
 		DeleteDMUMembers_(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS & action_request_, InputProjectWorkQueue * queue_)
-			: DoOutputAction<>(static_cast<WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS>(action_request_), queue_)
+			: DoOutputAction<ACTION_DELETE_DMU_MEMBERS>(static_cast<WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS>(action_request_), queue_)
 		{
 
 		}
@@ -87,13 +87,13 @@ class DeleteDMUMembers_ : public DoInputAction<>
 
 };
 
-class RefreshDMUsFromFile_ : public DoInputAction<>
+class RefreshDMUsFromFile_ : public DoInputAction<ACTION_REFRESH_DMUS_FROM_FILE>
 {
 
 	public:
 
 		RefreshDMUsFromFile_(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE & action_request_, InputProjectWorkQueue * queue_)
-			: DoOutputAction<>(static_cast<WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE>(action_request_), queue_)
+			: DoOutputAction<ACTION_REFRESH_DMUS_FROM_FILE>(static_cast<WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE>(action_request_), queue_)
 		{
 
 		}
