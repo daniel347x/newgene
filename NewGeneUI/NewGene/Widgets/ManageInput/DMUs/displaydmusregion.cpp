@@ -2,6 +2,12 @@
 #include "ui_displaydmusregion.h"
 
 #include <QStandardItem>
+#include <QInputDialog>
+
+#ifndef Q_MOC_RUN
+#	include <boost/algorithm/string.hpp>
+#	include <boost/regex.hpp>
+#endif
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -231,7 +237,67 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 {
 	WidgetActionItemRequest_ACTION_ADD_DMU dummy;
-	emit AddDMU(dummy);
+
+	bool ok = false;
+	QString new_dmu_text = QInputDialog::getText(this, "Enter DMU", "Decision Making Unit category name:", QLineEdit::Normal,"", &ok);
+
+	if (ok)
+	{
+
+		std::string new_dmu = new_dmu_text.toStdString();
+
+		boost::trim(new_dmu);
+
+		if (new_dmu.empty())
+		{
+			boost::format msg("The DMU category you entered is empty.");
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
+		}
+
+		std::string regex_string("[a-zA-Z_][a-zA-Z0-9_]*");
+		boost::regex regex(regex_string);
+		boost::cmatch matches;
+
+		bool valid = false;
+		if (boost::regex_match(new_dmu.c_str(), matches, regex))
+		{
+			// matches[0] contains the original string.  matches[n]
+			// contains a sub_match object for each matching
+			// subexpression
+			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+			// for an exapmle usage
+			if (matches.size() == 2)
+			{
+				std::string the_dmu_string_match(matches[1].first, matches[1].second);
+				if (the_dmu_string_match == new_dmu)
+				{
+					valid = true;
+				}
+			}
+		}
+
+		if (!valid)
+		{
+			boost::format msg("The DMU category you entered is invalid.");
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
+		}
+
+		boost::format msg("The DMU category you entered is VALID.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+
+		//emit AddDMU(dummy);
+
+	}
+
 }
 
 void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
