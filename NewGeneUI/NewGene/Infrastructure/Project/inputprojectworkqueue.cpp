@@ -3,6 +3,7 @@
 #include "Widgets/newgenemainwindow.h"
 #include <QTimer>
 #include "../UIData/uiwidgetdatarefresh.h"
+#include "../UIAction/dmumanagement.h"
 #include <QStandardItem>
 
 InputProjectWorkQueue::InputProjectWorkQueue(QObject * parent)
