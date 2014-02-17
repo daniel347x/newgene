@@ -44,6 +44,11 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE>("WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE>("WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_GENERATE_OUTPUT>("WidgetActionItemRequest_ACTION_GENERATE_OUTPUT");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_DMU>("WidgetActionItemRequest_ACTION_ADD_DMU");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_DMU>("WidgetActionItemRequest_ACTION_DELETE_DMU");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS>("WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS>("WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE>("WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE");
 }
 
 bool NewGeneApplication::notify( QObject * receiver, QEvent * e )

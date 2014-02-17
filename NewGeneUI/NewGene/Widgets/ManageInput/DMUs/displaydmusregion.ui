@@ -40,7 +40,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QPushButton" name="pushButton_import_dmu">
+           <widget class="QPushButton" name="pushButton_add_dmu">
             <property name="text">
              <string>Create New DMU</string>
             </property>
@@ -93,7 +93,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton__add_dmu_member_by_hand">
+           <widget class="QPushButton" name="pushButton_add_dmu_member_by_hand">
             <property name="text">
              <string> Add DMU member... </string>
             </property>

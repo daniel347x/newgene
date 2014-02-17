@@ -22,7 +22,13 @@ class UIActionManager : public Manager<UIActionManager, MANAGER_DESCRIPTION_NAME
 		void DoTimeRangeChange(Messager & messager, WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE const & action_request, OutputProject & project);
 		void DoGenerateOutput(Messager & messager, WidgetActionItemRequest_ACTION_GENERATE_OUTPUT const & action_request, OutputProject & project);
 
-	protected:
+		void AddDMU(Messager & messager, WidgetActionItemRequest_ACTION_ADD_DMU const & action_request, InputProject & project);
+		void DeleteDMU(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_DMU const & action_request, InputProject & project);
+		void AddDMUMembers(Messager & messager, WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS const & action_request, InputProject & project);
+		void DeleteDMUMembers(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS const & action_request, InputProject & project);
+		void RefreshDMUsFromFile(Messager & messager, WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE const & action_request, InputProject & project);
+
+protected:
 
 		bool FailIfBusy(Messager & messager);
 		void EndFailIfBusy();

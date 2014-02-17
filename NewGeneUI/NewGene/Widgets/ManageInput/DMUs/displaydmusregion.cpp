@@ -47,6 +47,11 @@ void DisplayDMUsRegion::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 	{
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET)), inp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET)));
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDGET)));
+		connect(this, SIGNAL(AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU)), inp->getConnector(), SLOT(AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU)));
+		connect(this, SIGNAL(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)), inp->getConnector(), SLOT(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)));
+		connect(this, SIGNAL(AddDMUMemebers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS)), inp->getConnector(), SLOT(AddDMUMemebers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS)));
+		connect(this, SIGNAL(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)), inp->getConnector(), SLOT(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)));
+		connect(this, SIGNAL(RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE)), inp->getConnector(), SLOT(RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE)));
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
@@ -223,30 +228,34 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 
 }
 
-
-void DisplayDMUsRegion::on_pushButton_import_dmu_clicked()
+void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 {
-
+	WidgetActionItemRequest_ACTION_ADD_DMU dummy;
+	emit AddDMU(dummy);
 }
 
 void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 {
-
+	WidgetActionItemRequest_ACTION_DELETE_DMU dummy;
+	emit DeleteDMU(dummy);
 }
 
 void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 {
-
+	WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS dummy;
+	emit AddDMUMembers(dummy);
 }
 
-void DisplayDMUsRegion::on_pushButton__add_dmu_member_by_hand_clicked()
+void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 {
-
+	WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS dummy;
+	emit DeleteDMUMembers(dummy);
 }
 
 void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 {
-
+	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE dummy;
+	emit RefreshDMUsFromFile(dummy);
 }
 
 void DisplayDMUsRegion::on_pushButton_deselect_all_dmu_members_clicked()

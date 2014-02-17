@@ -147,7 +147,7 @@ void NewGeneVariableSummaryGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIAB
 	   }
    });
 
-   // Since these are not checkboxes yet, the following signal will never currently be called
+   // Since these are not checkboxes yet, the following signal will never currently be called - unlike the Variable Group items (not the summary), which *are* checkboxes
    connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
 
    ui->listView->setModel(model);
@@ -158,7 +158,7 @@ void NewGeneVariableSummaryGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIAB
 void NewGeneVariableSummaryGroup::ReceiveVariableItemChanged(QStandardItem * /* currentItem */)
 {
 
-	// Since the items are not checkboxes yet, the following signal will never currently be called
+	// Since the items are not checkboxes yet, this slot will never currently be called - unlike the Variable Group items (not the summary), which *are* checkboxes
 
 	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
 	if (model == nullptr)

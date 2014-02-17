@@ -35,13 +35,27 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 
 	protected:
 
-	// ********************************* //
-	// Slot Overrides
-	// ********************************* //
+		// ********************************* //
+		// Slot Overrides
+		// ********************************* //
 
 		void TestSlot();
 
 		void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET widget);
+
+
+		// ********************************* //
+		// Regular slots
+		// ********************************* //
+
+	public slots:
+
+		// Actions
+		void AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU);
+		void DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU);
+		void AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS);
+		void DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS);
+		void RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE);
 
 };
 

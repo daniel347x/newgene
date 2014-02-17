@@ -16,6 +16,12 @@ enum WIDGET_ACTIONS
 	, ACTION_DATETIME_RANGE_CHANGE
 	, ACTION_GENERATE_OUTPUT
 
+	, ACTION_ADD_DMU
+	, ACTION_DELETE_DMU
+	, ACTION_ADD_DMU_MEMBERS
+	, ACTION_DELETE_DMU_MEMBERS
+	, ACTION_REFRESH_DMUS_FROM_FILE
+
 	, WIDGET_ACTIONS_LAST
 
 };
@@ -383,5 +389,95 @@ public:
 	}
 };
 typedef WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> WidgetActionItemRequest_ACTION_GENERATE_OUTPUT;
+
+/************************************************************************/
+// 
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_ADD_DMU> : public WidgetActionItemRequest_base
+{
+public:
+	WidgetActionItemRequest<ACTION_ADD_DMU>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
+		: WidgetActionItemRequest_base(reason_, items_)
+	{
+	}
+	WidgetActionItemRequest<ACTION_ADD_DMU>(WidgetActionItemRequest<ACTION_ADD_DMU> const & rhs)
+		: WidgetActionItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetActionItemRequest<ACTION_ADD_DMU> WidgetActionItemRequest_ACTION_ADD_DMU;
+
+/************************************************************************/
+// 
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_DELETE_DMU> : public WidgetActionItemRequest_base
+{
+public:
+	WidgetActionItemRequest<ACTION_DELETE_DMU>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
+		: WidgetActionItemRequest_base(reason_, items_)
+	{
+	}
+	WidgetActionItemRequest<ACTION_DELETE_DMU>(WidgetActionItemRequest<ACTION_DELETE_DMU> const & rhs)
+		: WidgetActionItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetActionItemRequest<ACTION_DELETE_DMU> WidgetActionItemRequest_ACTION_DELETE_DMU;
+
+/************************************************************************/
+// 
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> : public WidgetActionItemRequest_base
+{
+public:
+	WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
+		: WidgetActionItemRequest_base(reason_, items_)
+	{
+	}
+	WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS>(WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> const & rhs)
+		: WidgetActionItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS;
+
+/************************************************************************/
+// 
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> : public WidgetActionItemRequest_base
+{
+public:
+	WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
+		: WidgetActionItemRequest_base(reason_, items_)
+	{
+	}
+	WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS>(WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> const & rhs)
+		: WidgetActionItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS;
+
+/************************************************************************/
+// 
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> : public WidgetActionItemRequest_base
+{
+public:
+	WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
+		: WidgetActionItemRequest_base(reason_, items_)
+	{
+	}
+	WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE>(WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> const & rhs)
+		: WidgetActionItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE;
 
 #endif
