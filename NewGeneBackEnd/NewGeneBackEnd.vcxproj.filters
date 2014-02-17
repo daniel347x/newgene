@@ -548,5 +548,8 @@
     <ClCompile Include="Model\OutputModelDdlSql.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
+    <ClCompile Include="UIAction\Controllers\Controller_DMU_Management.cpp">
+      <Filter>Source Files\UIAction\Controllers</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

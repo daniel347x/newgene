@@ -207,6 +207,7 @@
     <ClCompile Include="Triggers\TriggerManager.cpp" />
     <ClCompile Include="UIAction\ActionChanges.cpp" />
     <ClCompile Include="UIAction\ActionWidgets.cpp" />
+    <ClCompile Include="UIAction\Controllers\Controller_DMU_Management.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_GeneralOptions.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_GenerateOutput.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_KAdCountChange.cpp" />
