@@ -51,20 +51,6 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 		{
 
-			DataChangeMessage change_response(&project);
-
-			// ***************************************** //
-			// Prepare data to send back to user interface
-			// ***************************************** //
-			DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
-			DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
-			WidgetInstanceIdentifiers child_identifiers;
-			DataChange change(type, intention, WidgetInstanceIdentifier(), child_identifiers);
-			change.SetPacket(std::make_shared<DataChangePacket_int>(77));
-			change_response.changes.push_back(change);
-
-			messager.EmitChangeMessage(change_response);
-
 		}
 			break;
 
@@ -72,6 +58,20 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 			break;
 
 	}
+
+	DataChangeMessage change_response(&project);
+
+	// ***************************************** //
+	// Prepare data to send back to user interface
+	// ***************************************** //
+	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
+	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
+	WidgetInstanceIdentifiers child_identifiers;
+	DataChange change(type, intention, WidgetInstanceIdentifier(), child_identifiers);
+	change.SetPacket(std::make_shared<DataChangePacket_int>(77));
+	change_response.changes.push_back(change);
+
+	messager.EmitChangeMessage(change_response);
 
 }
 
