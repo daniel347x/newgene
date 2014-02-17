@@ -123,6 +123,11 @@ void NewGeneDateTimeWidget::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNEC
 	}
 }
 
+void NewGeneDateTimeWidget::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+	NewGeneWidget::UpdateInputConnections(connection_type, project);
+}
+
 void NewGeneDateTimeWidget::WidgetDataRefreshReceive(WidgetDataItem_DATETIME_WIDGET widget_data)
 {
 

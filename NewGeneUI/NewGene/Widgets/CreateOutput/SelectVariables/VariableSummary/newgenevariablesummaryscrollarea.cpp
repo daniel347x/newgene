@@ -57,6 +57,11 @@ void NewGeneVariableSummaryScrollArea::UpdateOutputConnections(NewGeneWidget::UP
 	}
 }
 
+void NewGeneVariableSummaryScrollArea::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+	NewGeneWidget::UpdateInputConnections(connection_type, project);
+}
+
 void NewGeneVariableSummaryScrollArea::RefreshAllWidgets()
 {
 	if (outp == nullptr)

@@ -30,6 +30,11 @@ void NewGeneVariablesToolbox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONN
 	}
 }
 
+void NewGeneVariablesToolbox::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+	NewGeneWidget::UpdateInputConnections(connection_type, project);
+}
+
 void NewGeneVariablesToolbox::RefreshAllWidgets()
 {
 	if (outp == nullptr)

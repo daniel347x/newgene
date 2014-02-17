@@ -44,3 +44,8 @@ void NewGeneVariableSummary::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNE
 		Empty();
 	}
 }
+
+void NewGeneVariableSummary::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+	NewGeneWidget::UpdateInputConnections(connection_type, project);
+}

@@ -45,6 +45,11 @@ void NewGeneGenerateOutput::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNEC
 
 }
 
+void NewGeneGenerateOutput::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+	NewGeneWidget::UpdateInputConnections(connection_type, project);
+}
+
 void NewGeneGenerateOutput::on_pushButtonGenerateOutput_clicked()
 {
 

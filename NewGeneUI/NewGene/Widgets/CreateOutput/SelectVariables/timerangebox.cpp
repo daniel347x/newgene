@@ -73,6 +73,11 @@ void TimeRangeBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 
 }
 
+void TimeRangeBox::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
+{
+	NewGeneWidget::UpdateInputConnections(connection_type, project);
+}
+
 void TimeRangeBox::RefreshAllWidgets()
 {
 	if (outp == nullptr)
