@@ -257,7 +257,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 			return;
 		}
 
-		std::string regex_string("[a-zA-Z_][a-zA-Z0-9_]*");
+		std::string regex_string("([a-zA-Z_][a-zA-Z0-9_]*)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
