@@ -43,13 +43,6 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 
 		void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET widget);
 
-
-		// ********************************* //
-		// Regular slots
-		// ********************************* //
-
-	public slots:
-
 		// Actions
 		void AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU);
 		void DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU);

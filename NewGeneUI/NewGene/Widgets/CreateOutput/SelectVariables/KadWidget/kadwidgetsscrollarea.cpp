@@ -45,11 +45,17 @@ void KadWidgetsScrollArea::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTI
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
 	{
-		project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
+		if (project)
+		{
+			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
+		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
-		inp->UnregisterInterestInChanges(this);
+		if (inp)
+		{
+			inp->UnregisterInterestInChanges(this);
+		}
 	}
 }
 

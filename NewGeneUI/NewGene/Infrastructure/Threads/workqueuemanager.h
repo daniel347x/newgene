@@ -93,13 +93,19 @@ class WorkQueueManagerBase : public QObject
 		virtual void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET) {}
 		//
-		// Action responses
+		// Actions
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE) {}
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT) {}
+		//
+		virtual void AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU) {}
+		virtual void DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU) {}
+		virtual void AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS) {}
+		virtual void DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS) {}
+		virtual void RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE) {}
 
 	public:
 		virtual void SetConnections() {}
