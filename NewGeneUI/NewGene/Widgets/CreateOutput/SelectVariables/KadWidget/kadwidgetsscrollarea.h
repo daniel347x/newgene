@@ -13,6 +13,8 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 
 		explicit KadWidgetsScrollArea(QWidget *parent = 0);
 
+		void HandleChanges(DataChangeMessage const &);
+
 	signals:
 
 		void RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA);

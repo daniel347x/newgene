@@ -258,7 +258,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
     Widgets/ManageInput/UOAs/newgenemanageuoas.h \
     Widgets/ManageInput/VGs/newgenemanagevgs.h \
     Widgets/ManageInput/Data/newgenemanagedata.h \
-    Widgets/ManageInput/DMUs/displaydmusregion.h
+    Widgets/ManageInput/DMUs/displaydmusregion.h \
+    Infrastructure/UIAction/dmumanagement.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

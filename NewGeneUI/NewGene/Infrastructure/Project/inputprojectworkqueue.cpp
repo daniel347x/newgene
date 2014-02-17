@@ -50,27 +50,27 @@ void InputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDG
 
 
 
-void AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU action_request)
+void InputProjectWorkQueue::AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU action_request)
 {
-	get()->getWorkService().post((action_request, this));
+	get()->getWorkService().post(AddDMU_(action_request, this));
 }
 
-void DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU action_request)
+void InputProjectWorkQueue::DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU action_request)
 {
-	get()->getWorkService().post((action_request, this));
+	get()->getWorkService().post(DeleteDMU_(action_request, this));
 }
 
-void AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS action_request)
+void InputProjectWorkQueue::AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS action_request)
 {
-	get()->getWorkService().post((action_request, this));
+	get()->getWorkService().post(AddDMUMembers_(action_request, this));
 }
 
-void DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS action_request)
+void InputProjectWorkQueue::DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS action_request)
 {
-	get()->getWorkService().post((action_request, this));
+	get()->getWorkService().post(DeleteDMUMembers_(action_request, this));
 }
 
-void RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request)
+void InputProjectWorkQueue::RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request)
 {
-	get()->getWorkService().post((action_request, this));
+	get()->getWorkService().post(RefreshDMUsFromFile_(action_request, this));
 }
