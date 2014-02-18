@@ -177,15 +177,16 @@ class UIProjectManager : public QObject,
 		// ************************************************************************************************************************************* //
 		// Clang workaround: http://stackoverflow.com/questions/20583591/clang-only-a-pairpath-path-can-be-emplaced-into-a-vector-so-can-a-pairuniq
 		// ************************************************************************************************************************************* //
-		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM, typename UI_MESSAGER_CLASS>
 		struct ProjectTabContents
 		{
 			ProjectPaths paths;
 			std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>> project;
 
-			ProjectTabContents(ProjectPaths && paths_, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>> && project_)
+			ProjectTabContents(ProjectPaths && paths_, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>> && project_, UI_MESSAGER_CLASS * messager_)
 				: paths(std::move(paths_))
 				, project(std::move(project_))
+				, messager(messager_)
 			{
 			}
 
@@ -193,25 +194,27 @@ class UIProjectManager : public QObject,
 				: paths(std::move(rhs.paths))
 				, project(std::move(rhs.project))
 			{}
+
+			std::unique_ptr<UI_MESSAGER_CLASS> messager;
 		};
 
-		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM, typename UI_MESSAGER_CLASS>
 		struct ProjectTab
 		{
 			//typedef std::pair<ProjectPaths, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>>> type;
-			typedef ProjectTabContents<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM> type;
+			typedef ProjectTabContents<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM, UI_MESSAGER_CLASS> type;
 		};
 
-		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM, typename UI_MESSAGER_CLASS>
 		struct ProjectTabs
 		{
-			typedef std::vector<typename ProjectTab<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>::type> type;
+			typedef std::vector<typename ProjectTab<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM, UI_MESSAGER_CLASS>::type> type;
 		};
 
-		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM>
+		template<typename BACKEND_PROJECT_CLASS, typename UI_PROJECT_SETTINGS_CLASS, typename UI_MODEL_SETTINGS_CLASS, typename UI_MODEL_CLASS, WORK_QUEUE_THREAD_LOOP_CLASS_ENUM UI_THREAD_LOOP_CLASS_ENUM, typename UI_MESSAGER_CLASS>
 		struct Tabs
 		{
-			typedef std::map<NewGeneMainWindow *, typename ProjectTabs<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>::type> type;
+			typedef std::map<NewGeneMainWindow *, typename ProjectTabs<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM, UI_MESSAGER_CLASS>::type> type;
 		};
 
 		explicit UIProjectManager( QObject * parent, UIMessager & messager );
@@ -248,14 +251,14 @@ class UIProjectManager : public QObject,
 
 	private:
 
-		typedef ProjectTabs<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>::type InputProjectTabs;
-		typedef ProjectTabs<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>::type OutputProjectTabs;
+		typedef ProjectTabs<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT, UIMessagerInputProject>::type InputProjectTabs;
+		typedef ProjectTabs<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT, UIMessagerOutputProject>::type OutputProjectTabs;
 
-		typedef ProjectTab<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>::type InputProjectTab;
-		typedef ProjectTab<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>::type OutputProjectTab;
+		typedef ProjectTab<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT, UIMessagerInputProject>::type InputProjectTab;
+		typedef ProjectTab<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT, UIMessagerOutputProject>::type OutputProjectTab;
 
-		typedef Tabs<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT>::type InputTabs;
-		typedef Tabs<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>::type OutputTabs;
+		typedef Tabs<InputProject, UIInputProjectSettings, UIInputModelSettings, UIInputModel, UI_INPUT_PROJECT, UIMessagerInputProject>::type InputTabs;
+		typedef Tabs<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT, UIMessagerOutputProject>::type OutputTabs;
 
 		InputTabs input_tabs;
 		OutputTabs output_tabs;
