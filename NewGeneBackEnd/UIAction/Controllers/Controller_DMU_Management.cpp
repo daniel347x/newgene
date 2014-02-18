@@ -96,53 +96,35 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
 
+				std::string new_dmu(proposed_new_dmu);
+
 				boost::format msg("DMU category '%1%' successfully created.");
 				msg % boost::to_upper_copy(proposed_new_dmu);
 				messager.ShowMessageBox(msg.str());
 
-				/*
 				// ***************************************** //
 				// Prepare data to send back to user interface
 				// ***************************************** //
-				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION;
-				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
-				if (!checked)
+
+				WidgetInstanceIdentifier newIdentifier;
+				bool found_newly_created_dmu = input_model.t_dmu_category.getIdentifierFromStringCode(new_dmu, newIdentifier);
+				if (!found_newly_created_dmu)
 				{
-					intention = DATA_CHANGE_INTENTION__REMOVE;
+					boost::format msg("Unable to find newly created DMU.");
+					throw NewGeneException() << newgene_error_description(msg.str());
 				}
-				WidgetInstanceIdentifiers child_identifiers;
-				child_identifiers.push_back(identifier);
-				DataChange change(type, intention, WidgetInstanceIdentifier(*identifier.identifier_parent), child_identifiers);
+
+				WidgetInstanceIdentifiers dmu_members = input_model.t_dmu_setmembers.getIdentifiers(*newIdentifier.uuid);
+
+				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
+				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
+				DataChange change(type, intention, newIdentifier, dmu_members);
+
 				change_response.changes.push_back(change);
-
-				// ***************************************** //
-				// Update database and cache
-				// ***************************************** //
-				output_model.t_variables_selected_identifiers.Update(output_model.getDb(), output_model, input_model, change_response);
-
-				// ***************************************** //
-				// Use updated cache info to set further info
-				// in change_response
-				// ***************************************** //
-				std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
-				change_response.changes.back().set_of_identifiers = active_dmus;
-				*/
 
 			});
 
-			/*
-			// ***************************************** //
-			// Prepare data to send back to user interface
-			// ***************************************** //
-			DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
-			DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
-			WidgetInstanceIdentifiers child_identifiers;
-			DataChange change(type, intention, WidgetInstanceIdentifier(), child_identifiers);
-			change.SetPacket(std::make_shared<DataChangePacket_int>(77));
-			change_response.changes.push_back(change);
-
 			messager.EmitChangeMessage(change_response);
-			*/
 	
 		}
 			break;

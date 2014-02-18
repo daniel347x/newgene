@@ -65,9 +65,18 @@ void DisplayDMUsRegion::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		connect(this, SIGNAL(AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS)), inp->getConnector(), SLOT(AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS)));
 		connect(this, SIGNAL(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)), inp->getConnector(), SLOT(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)));
 		connect(this, SIGNAL(RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE)), inp->getConnector(), SLOT(RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE)));
+
+		if (project)
+		{
+			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
+		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
+		if (inp)
+		{
+			inp->UnregisterInterestInChanges(this);
+		}
 		Empty();
 	}
 
@@ -430,4 +439,108 @@ void DisplayDMUsRegion::on_pushButton_select_all_dmu_members_clicked()
 			item->setCheckState(Qt::Checked);
 		}
 	}
+}
+
+void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
+{
+
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
+	if (!ui->listView_dmus)
+	{
+		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QStandardItemModel * itemModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	if (itemModel == nullptr)
+	{
+		boost::format msg("Invalid list view items in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+\
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel](DataChange const & change)
+	{
+		switch (change.change_type)
+		{
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE:
+				{
+					switch (change.change_intention)
+					{
+						case DATA_CHANGE_INTENTION__ADD:
+							{
+
+								if (change.child_identifiers.size() == 0)
+								{
+									return; // from lambda
+								}
+
+								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
+								{
+									boost::format msg("Invalid new DMU name or description.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+
+								std::string dmu_code = *change.parent_identifier.code;
+								std::string dmu_description = *change.parent_identifier.longhand;
+
+								QStandardItem * item = new QStandardItem();
+								QString text(dmu_code.c_str());
+								if (!dmu_description.empty())
+								{
+									text += " (";
+									text += dmu_description.c_str();
+									text += ")";
+								}
+								item->setText(text);
+								item->setEditable(false);
+								item->setCheckable(false);
+
+								std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = std::make_pair(change.parent_identifier, change.child_identifiers);
+								QVariant v;
+								v.setValue(dmu_and_members);
+								item->setData(v);
+								itemModel->setItem( itemModel->rowCount(), item );
+
+							}
+							break;
+						case DATA_CHANGE_INTENTION__REMOVE:
+							{
+
+							}
+							break;
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								// Should never receive this.
+							}
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+								// Ditto above.
+							}
+							break;
+						default:
+							{
+							}
+							break;
+					}
+				}
+				break;
+			default:
+				{
+				}
+				break;
+		}
+	});
 }
