@@ -8,15 +8,17 @@ UIOutputProject::UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const 
 				std::shared_ptr<UIOutputModelSettings> const & model_settings,
 				std::shared_ptr<UIOutputModel> const & model,
 				QObject * mainWindowObject_,
-				QObject * parent)
+				QObject * parent,
+				UIMessagerOutputProject & messager_)
 	: QObject(parent)
-	, UIProject(project_settings, model_settings, model)
+	, UIProject(project_settings, model_settings, model, parent, messager_)
 	, mainWindowObject(mainWindowObject_)
-	, messager(this)
+	, messager(messager_)
 	, number_timerange_widgets_created(0)
 	, output_pane(nullptr)
-{
-}
+	{
+		messager.set(this);
+	}
 
 void UIOutputProject::SignalMessageBox(STD_STRING msg)
 {

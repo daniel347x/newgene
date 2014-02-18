@@ -12,11 +12,11 @@ class EventLoopThreadManager
 
 	public:
 
-		EventLoopThreadManager(int const number_worker_threads, int const number_pools = 1)
+		EventLoopThreadManager(UIMessager & messager, int const number_worker_threads, int const number_pools = 1)
 			: work(work_service)
-			, worker_pool_ui(work_service, number_worker_threads)
+			, worker_pool_ui(messager, work_service, number_worker_threads)
 			, work_2(work_service_2)
-			, worker_pool_ui_2(work_service_2, number_worker_threads, number_pools == 2)
+			, worker_pool_ui_2(messager, work_service_2, number_worker_threads, number_pools == 2)
 			, work_queue_manager(nullptr)
 			, work_queue_manager_2(nullptr)
 		{

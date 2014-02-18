@@ -61,8 +61,9 @@ class UIProject : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 		UIProject(std::shared_ptr<UI_PROJECT_SETTINGS_CLASS> const & ui_settings,
 				  std::shared_ptr<UI_MODEL_SETTINGS_CLASS> const & ui_model_settings,
 				  std::shared_ptr<UI_MODEL_CLASS> const & ui_model,
-				  QObject * parent = NULL)
-			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
+				  QObject * parent,
+				  UIMessager & messager)
+			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(messager, number_worker_threads)
 			, _project_settings(ui_settings)
 			, _model_settings(ui_model_settings)
 			, _model(ui_model)

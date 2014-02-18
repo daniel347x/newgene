@@ -22,7 +22,8 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 						std::shared_ptr<UIOutputModelSettings> const & model_settings,
 						std::shared_ptr<UIOutputModel> const & model,
 						QObject * mainWindowObject_,
-						QObject * parent = NULL);
+						QObject * parent,
+						UIMessagerOutputProject & messager_);
 
 		void UpdateConnections();
 		void DoRefreshAllWidgets();
@@ -39,7 +40,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 	public:
 
 		QObject * mainWindowObject;
-		UIMessagerOutputProject messager;
+		UIMessagerOutputProject & messager;
 
 		bool is_model_equivalent(UIMessager & messager, UIOutputModel * model);
 
@@ -49,7 +50,7 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 
 	protected:
 
-        WorkQueueManager<UI_OUTPUT_PROJECT> * InstantiateWorkQueue(void * ui_object, bool = false)
+		WorkQueueManager<UI_OUTPUT_PROJECT> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			OutputProjectWorkQueue * work_queue = new OutputProjectWorkQueue();
 			work_queue->SetUIObject(reinterpret_cast<UIOutputProject*>(ui_object));

@@ -6,9 +6,9 @@
 Q_DECLARE_METATYPE(UI_INPUT_MODEL_PTR);
 Q_DECLARE_METATYPE(UI_OUTPUT_MODEL_PTR);
 
-UIModelManager::UIModelManager( QObject * parent )
+UIModelManager::UIModelManager( QObject * parent, UIMessager & messager )
 	: QObject(parent)
-	, UIManager()
+	, UIManager(messager)
 {
 
 	// *************************************************************************

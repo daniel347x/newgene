@@ -17,7 +17,7 @@ class UIModelManager : public QObject, public UIManager<UIModelManager, ModelMan
 {
 		Q_OBJECT
 	public:
-		explicit UIModelManager( QObject * parent = 0 );
+		explicit UIModelManager( QObject * parent, UIMessager & messager );
 
 		//UIInputModel * loadDefaultModel();
 

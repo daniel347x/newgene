@@ -6,6 +6,7 @@
 #include <QProgressBar>
 #include <QStatusBar>
 #include "newgenewidget.h"
+#include "../Infrastructure/Messager/uimessager.h"
 
 #include <memory>
 #include <map>
@@ -22,6 +23,8 @@ class NewGeneMainWindow : public QMainWindow, public NewGeneWidget // do not reo
 	public:
 		explicit NewGeneMainWindow( QWidget * parent = 0 );
 		~NewGeneMainWindow();
+
+		UIMessager messager;
 
 	signals:
 		void SignalOpenOutputDataset(STD_STRING, QObject *);

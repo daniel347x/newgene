@@ -27,26 +27,29 @@
 NewGeneMainWindow::NewGeneMainWindow( QWidget * parent ) :
 	QMainWindow( parent ),
 	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_GENERAL) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
-	ui( new Ui::NewGeneMainWindow )
+	ui( new Ui::NewGeneMainWindow ),
+	messager(parent)
 {
 
 	NewGeneWidget::theMainWindow = this;
+
+	connect(&messager, SIGNAL(DisplayMessageBox(STD_STRING)), this, SLOT(SignalMessageBox(STD_STRING)));
 
 	try
 	{
 
 		// Instantiate Managers in main thread
-		UIStatusManager::getManager();
-		UIDocumentManager::getManager();
-		UILoggingManager::getManager();
-		UISettingsManager::getManager();
-		UIModelManager::getManager();
-		UIProjectManager::getManager();
-		UIThreadManager::getManager();
-		UITriggerManager::getManager();
-		UIUIDataManager::getManager();
-		UIUIActionManager::getManager();
-		UIModelActionManager::getManager();
+		UIStatusManager::getManager(&messager);
+		UIDocumentManager::getManager(&messager);
+		UILoggingManager::getManager(&messager);
+		UISettingsManager::getManager(&messager);
+		UIModelManager::getManager(&messager);
+		UIProjectManager::getManager(&messager);
+		UIThreadManager::getManager(&messager);
+		UITriggerManager::getManager(&messager);
+		UIUIDataManager::getManager(&messager);
+		UIUIActionManager::getManager(&messager);
+		UIModelActionManager::getManager(&messager);
 
 		UIMessager::ManagersInitialized = true;
 

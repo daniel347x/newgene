@@ -94,6 +94,8 @@ class UIMessager : public QObject, public Messager
 		virtual void EmitInputProjectChangeMessage(DataChangeMessage &) {}
 		virtual void EmitOutputProjectChangeMessage(DataChangeMessage &) {}
 
+		void ShowMessageBox(std::string);
+
 	signals:
 
 		void PostStatus(STD_STRING, int, bool);
@@ -130,14 +132,18 @@ class UIMessagerInputProject : public UIMessager
 
 	public:
 
-		UIMessagerInputProject(UIInputProject * inp_, QObject * parent = 0);
+		UIMessagerInputProject(QObject * parent = 0);
+
+		void set(UIInputProject * inp_)
+		{
+			inp = inp_;
+		}
 
 		UIInputProject * get()
 		{
 			return inp;
 		}
 
-		void ShowMessageBox(std::string);
 		bool ShowQuestionMessageBox(std::string, std::string); // title, question text
 		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();
@@ -159,14 +165,18 @@ class UIMessagerOutputProject : public UIMessager
 
 	public:
 
-		UIMessagerOutputProject(UIOutputProject * outp_, QObject * parent = 0);
+		UIMessagerOutputProject(QObject * parent = 0);
+
+		void set(UIOutputProject * outp_)
+		{
+			outp = outp_;
+		}
 
 		UIOutputProject * get()
 		{
 			return outp;
 		}
 
-		void ShowMessageBox(std::string);
 		bool ShowQuestionMessageBox(std::string, std::string); // title, question text
 		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();

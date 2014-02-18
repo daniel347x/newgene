@@ -11,7 +11,7 @@ class UIUIDataManager : public QObject, public UIManager<UIUIDataManager, UIData
 {
 		Q_OBJECT
 	public:
-		explicit UIUIDataManager( QObject * parent = 0 );
+		explicit UIUIDataManager( QObject * parent, UIMessager & messager );
 
 	signals:
 

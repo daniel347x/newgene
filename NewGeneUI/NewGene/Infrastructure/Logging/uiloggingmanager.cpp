@@ -7,9 +7,9 @@
 #include <QCoreApplication>
 #include <fstream>
 
-UILoggingManager::UILoggingManager( QObject * parent )
+UILoggingManager::UILoggingManager( QObject * parent, UIMessager & messager )
 	: QObject(parent)
-	, UIManager()
+	, UIManager(messager)
 {
 
 	// *************************************************************************

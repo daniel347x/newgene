@@ -18,13 +18,14 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 					   std::shared_ptr<UIInputModelSettings> const & model_settings,
 					   std::shared_ptr<UIInputModel> const & model,
 					   QObject * mainWindowObject_,
-					   QObject * parent = NULL)
+					   QObject * parent,
+					   UIMessagerInputProject & messager_)
 			: QObject(parent)
-			, UIProject(project_settings, model_settings, model)
+			, UIProject(project_settings, model_settings, model, parent, messager_)
 			, mainWindowObject(mainWindowObject_)
-			, messager(this)
+			, messager(messager_)
 		{
-
+			messager.set(this);
 		}
 
 		void UpdateConnections();
@@ -42,13 +43,13 @@ class UIInputProject : public QObject, public UIProject<InputProject, UIInputPro
 	public:
 
 		QObject * mainWindowObject;
-		UIMessagerInputProject messager;
+		UIMessagerInputProject & messager;
 
 		bool is_model_equivalent(UIMessager & messager, UIInputModel * model);
 
 	protected:
 
-        WorkQueueManager<UI_INPUT_PROJECT> * InstantiateWorkQueue(void * ui_object, bool = false)
+		WorkQueueManager<UI_INPUT_PROJECT> * InstantiateWorkQueue(void * ui_object, bool = false)
 		{
 			InputProjectWorkQueue * work_queue = new InputProjectWorkQueue();
 			work_queue->SetUIObject(reinterpret_cast<UIInputProject*>(ui_object));

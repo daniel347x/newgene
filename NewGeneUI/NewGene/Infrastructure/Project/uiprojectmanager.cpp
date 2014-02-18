@@ -19,11 +19,11 @@
 #include <QFileDialog>
 #include <QCoreApplication>
 
-UIProjectManager::UIProjectManager( QObject * parent )
+UIProjectManager::UIProjectManager( QObject * parent, UIMessager & messager )
 	: QObject(parent)
 	, loading(false)
-	, UIManager()
-	, EventLoopThreadManager<UI_PROJECT_MANAGER>(number_worker_threads)
+	, UIManager(messager)
+	, EventLoopThreadManager<UI_PROJECT_MANAGER>(messager, number_worker_threads)
 {
 
 	// *************************************************************************

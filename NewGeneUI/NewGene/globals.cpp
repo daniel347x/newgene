@@ -18,62 +18,62 @@ UIMessager dummy_messager;
 Messager * dummy_messager_ptr = &dummy_messager;
 
 template<typename MANAGER_CLASS>
-MANAGER_CLASS & get_a_ui_manager()
+MANAGER_CLASS & get_a_ui_manager(UIMessager * messager)
 {
-	return static_cast<MANAGER_CLASS&>(MANAGER_CLASS::getManager());
+	return static_cast<MANAGER_CLASS&>(MANAGER_CLASS::getManager(messager));
 }
 
-UISettingsManager & settingsManagerUI()
+UISettingsManager & settingsManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UISettingsManager>();
+	return get_a_ui_manager<UISettingsManager>(messager);
 }
 
-UILoggingManager & loggingManagerUI()
+UILoggingManager & loggingManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UILoggingManager>();
+	return get_a_ui_manager<UILoggingManager>(messager);
 }
 
-UIProjectManager & projectManagerUI()
+UIProjectManager & projectManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UIProjectManager>();
+	return get_a_ui_manager<UIProjectManager>(messager);
 }
 
-UIModelManager & modelManagerUI()
+UIModelManager & modelManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UIModelManager>();
+	return get_a_ui_manager<UIModelManager>(messager);
 }
 
-UIDocumentManager & documentManagerUI()
+UIDocumentManager & documentManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UIDocumentManager>();
+	return get_a_ui_manager<UIDocumentManager>(messager);
 }
 
-UIStatusManager & statusManagerUI()
+UIStatusManager & statusManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UIStatusManager>();
+	return get_a_ui_manager<UIStatusManager>(messager);
 }
 
-UITriggerManager & triggerManagerUI()
+UITriggerManager & triggerManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UITriggerManager>();
+	return get_a_ui_manager<UITriggerManager>(messager);
 }
 
-UIThreadManager & threadManagerUI()
+UIThreadManager & threadManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UIThreadManager>();
+	return get_a_ui_manager<UIThreadManager>(messager);
 }
 
-UIUIDataManager & uidataManagerUI()
+UIUIDataManager & uidataManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UIUIDataManager>();
+	return get_a_ui_manager<UIUIDataManager>(messager);
 }
 
-UIUIActionManager & uiactionManagerUI()
+UIUIActionManager & uiactionManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UIUIActionManager>();
+	return get_a_ui_manager<UIUIActionManager>(messager);
 }
 
-UIModelActionManager & modelactionManagerUI()
+UIModelActionManager & modelactionManagerUI(UIMessager * messager)
 {
-	return get_a_ui_manager<UIModelActionManager>();
+	return get_a_ui_manager<UIModelActionManager>(messager);
 }

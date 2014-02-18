@@ -11,7 +11,7 @@ class UITriggerManager : public QObject, public UIManager<UITriggerManager, Trig
 
 	public:
 
-		explicit UITriggerManager( QObject * parent = 0 );
+		explicit UITriggerManager( QObject * parent, UIMessager & messager );
 
 	signals:
 

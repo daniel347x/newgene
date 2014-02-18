@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include "globals.h"
+#include "./Messager/Messager.h"
 
 namespace MANAGER_DESCRIPTION_NAMESPACE
 {
@@ -33,7 +34,8 @@ class Manager
 
 	public:
 
-		explicit Manager()
+		explicit Manager(Messager & messager_)
+			: messager(messager_)
 		{
 
 		}
@@ -65,6 +67,8 @@ class Manager
 		static std::unique_ptr<MANAGER_CLASS> _manager;
 		MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER which;
 		std::string which_descriptor;
+
+		Messager & messager;
 
 };
 

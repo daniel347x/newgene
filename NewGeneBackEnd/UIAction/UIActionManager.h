@@ -14,6 +14,9 @@ class UIActionManager : public Manager<UIActionManager, MANAGER_DESCRIPTION_NAME
 {
 
 	public:
+		UIActionManager(Messager & messager_) : Manager<UIActionManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_ACTION>(messager_) {}
+
+	public:
 
 		void DoVariableGroupSetMemberSelectionChange(Messager & messager, WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED const & action_request, OutputProject & project);
 		void DoKAdCountChange(Messager & messager, WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE const & action_request, OutputProject & project);
@@ -28,7 +31,7 @@ class UIActionManager : public Manager<UIActionManager, MANAGER_DESCRIPTION_NAME
 		void DeleteDMUMembers(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS const & action_request, InputProject & project);
 		void RefreshDMUsFromFile(Messager & messager, WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE const & action_request, InputProject & project);
 
-protected:
+	protected:
 
 		bool FailIfBusy(Messager & messager);
 		void EndFailIfBusy();

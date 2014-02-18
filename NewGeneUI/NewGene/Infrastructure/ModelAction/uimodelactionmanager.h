@@ -11,7 +11,7 @@ class UIModelActionManager : public QObject, public UIManager<UIModelActionManag
 {
 		Q_OBJECT
 	public:
-		explicit UIModelActionManager( QObject * parent = 0 );
+		explicit UIModelActionManager( QObject * parent, UIMessager & messager );
 
 	signals:
 

@@ -8,6 +8,8 @@
 #	include <boost/thread.hpp>
 #endif
 
+#include "../Messager/Messager.h"
+
 
 template<typename WORKER_THREAD_CLASS>
 class ThreadPool
@@ -17,7 +19,7 @@ public:
 
 	typedef std::pair<std::shared_ptr<boost::thread>, std::shared_ptr<WORKER_THREAD_CLASS>> thread_worker; 
 
-	ThreadPool(boost::asio::io_service & work_service, int const nThreads, bool const active_ = true)
+	ThreadPool(Messager & messager, boost::asio::io_service & work_service, int const nThreads, bool const active_ = true)
 		: active(active_)
 	{
 		if (!active)
@@ -27,7 +29,7 @@ public:
 
 		for(int n=0; n<nThreads; ++n)
 		{
-			auto worker = std::make_shared<WORKER_THREAD_CLASS>(work_service);
+			auto worker = std::make_shared<WORKER_THREAD_CLASS>(messager, work_service);
 			threads.push_back(std::make_pair(std::make_shared<boost::thread>(boost::bind(&WORKER_THREAD_CLASS::operator(), worker)), worker));
 		}
 	}

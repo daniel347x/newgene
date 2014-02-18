@@ -11,7 +11,7 @@ class UIUIActionManager : public QObject, public UIManager<UIUIActionManager, UI
 {
 		Q_OBJECT
 	public:
-		explicit UIUIActionManager( QObject * parent = 0 );
+		explicit UIUIActionManager( QObject * parent, UIMessager & messager );
 
 	signals:
 

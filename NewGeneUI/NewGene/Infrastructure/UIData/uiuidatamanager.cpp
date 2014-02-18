@@ -1,9 +1,9 @@
 #include "uiuidatamanager.h"
 #include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 
-UIUIDataManager::UIUIDataManager( QObject * parent )
+UIUIDataManager::UIUIDataManager( QObject * parent, UIMessager & messager )
 	: QObject(parent)
-	, UIManager()
+	, UIManager(messager)
 {
 
 	// *************************************************************************

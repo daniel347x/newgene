@@ -20,8 +20,8 @@ class UIModel : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 	public:
 
-		UIModel(UIMessager &, int const number_worker_threads)
-			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads, number_of_pools)
+		UIModel(UIMessager & messager, int const number_worker_threads)
+			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(messager, number_worker_threads, number_of_pools)
 			, loaded_(false)
 		{
 

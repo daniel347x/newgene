@@ -8,7 +8,8 @@
 
 class ThreadManager : public Manager<ThreadManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS>
 {
-
+public:
+	ThreadManager(Messager & messager_) : Manager<ThreadManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_THREADS>(messager_) {}
 };
 
 #endif

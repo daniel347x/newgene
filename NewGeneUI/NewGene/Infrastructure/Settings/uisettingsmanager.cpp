@@ -12,9 +12,9 @@
 #include <fstream>
 #include <QDebug>
 
-UISettingsManager::UISettingsManager( QObject * parent )
+UISettingsManager::UISettingsManager( QObject * parent, UIMessager & messager )
 	: QObject(parent)
-	, UIManager()
+	, UIManager(messager)
 {
 
 	// *************************************************************************

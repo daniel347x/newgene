@@ -12,6 +12,9 @@ class UIDataManager : public Manager<UIDataManager, MANAGER_DESCRIPTION_NAMESPAC
 {
 
 	public:
+		UIDataManager(Messager & messager_) : Manager<UIDataManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_UI_DATA>(messager_) {}
+
+	public:
 
 		// Output project widget refreshes
 		void DoRefreshOutputWidget(Messager & messager, WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA const & widget_request, OutputProject & project);

@@ -4,9 +4,9 @@
 #include <QStatusBar>
 #include "Widgets/newgenemainwindow.h"
 
-UIStatusManager::UIStatusManager( QObject * parent )
+UIStatusManager::UIStatusManager( QObject * parent, UIMessager & messager )
 	: QObject(parent)
-	, UIManager()
+	, UIManager(messager)
 {
 
 	// *************************************************************************

@@ -11,7 +11,7 @@ class UIDocumentManager : public QObject, public UIManager<UIDocumentManager, Do
 {
 		Q_OBJECT
 	public:
-		explicit UIDocumentManager( QObject * parent = 0 );
+		explicit UIDocumentManager( QObject * parent, UIMessager & messager );
 
 	signals:
 

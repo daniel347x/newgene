@@ -13,7 +13,7 @@ class UILoggingManager : public QObject, public UIManager<UILoggingManager, Logg
 {
 		Q_OBJECT
 	public:
-		explicit UILoggingManager( QObject * parent = 0 );
+		explicit UILoggingManager( QObject * parent, UIMessager & messager );
 
 	signals:
 

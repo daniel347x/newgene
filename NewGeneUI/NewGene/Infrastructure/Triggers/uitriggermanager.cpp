@@ -2,9 +2,9 @@
 #include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 #include "globals.h"
 
-UITriggerManager::UITriggerManager( QObject * parent )
+UITriggerManager::UITriggerManager( QObject * parent, UIMessager & messager )
 	: QObject(parent)
-	, UIManager()
+	, UIManager(messager)
 {
 
 	// *************************************************************************

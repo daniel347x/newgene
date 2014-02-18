@@ -21,7 +21,7 @@ class UIStatusManager : public QObject, public UIManager<UIStatusManager, Status
 			, IMPORTANCE_CRITICAL
 		};
 
-		explicit UIStatusManager( QObject * parent = 0 );
+		explicit UIStatusManager( QObject * parent, UIMessager & messager );
 
 		void LogStatus( QString const & _status, IMPORTANCE const importance_level = IMPORTANCE_STANDARD );
 		void PostStatus( QString const & _status, IMPORTANCE const importance_level = IMPORTANCE_STANDARD, bool const forbidWritingToLog = false );

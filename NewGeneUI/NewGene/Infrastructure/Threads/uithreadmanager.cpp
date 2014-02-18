@@ -1,9 +1,9 @@
 #include "uithreadmanager.h"
 #include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 
-UIThreadManager::UIThreadManager( QObject * parent )
+UIThreadManager::UIThreadManager( QObject * parent, UIMessager & messager )
 	: QObject(parent)
-	, UIManager()
+	, UIManager(messager)
 {
 
 	// *************************************************************************

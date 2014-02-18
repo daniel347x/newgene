@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <memory>
 #include "../../NewGeneBackEnd/Manager.h"
+#include "./Messager/uimessager.h"
 
 class NewGeneMainWindow;
 class NewGeneWidget;
@@ -40,9 +41,10 @@ class UIManager
 
 	public:
 
-		explicit UIManager()
+		explicit UIManager(UIMessager & messager_)
+			: messager(messager_)
 		{
-			MANAGER_CLASS_BACKEND::_manager.reset(new MANAGER_CLASS_BACKEND);
+			MANAGER_CLASS_BACKEND::_manager.reset(new MANAGER_CLASS_BACKEND(messager));
 			MANAGER_CLASS_BACKEND::getManager().which = MANAGER_ENUM_BACKEND;
 			MANAGER_CLASS_BACKEND::getManager().which_descriptor = MANAGER_DESCRIPTION_NAMESPACE::get_text_name_from_enum(MANAGER_ENUM_BACKEND).c_str();
 		}
@@ -63,12 +65,12 @@ class UIManager
 			return *theMainWindow;
 		}
 
-		static UIManager<MANAGER_CLASS_UI, MANAGER_CLASS_BACKEND, MANAGER_ENUM_UI, MANAGER_ENUM_BACKEND> & getManager()
+		static UIManager<MANAGER_CLASS_UI, MANAGER_CLASS_BACKEND, MANAGER_ENUM_UI, MANAGER_ENUM_BACKEND> & getManager(UIMessager * messager = nullptr)
 		{
 
-			if ( _ui_manager == NULL )
+			if ( _ui_manager == NULL && messager != nullptr)
 			{
-				_ui_manager.reset( new MANAGER_CLASS_UI() );
+				_ui_manager.reset( new MANAGER_CLASS_UI(nullptr, *messager) );
 				if ( _ui_manager )
 				{
 					_ui_manager->which = MANAGER_ENUM_UI;
@@ -89,9 +91,10 @@ class UIManager
 
 		static MANAGER_CLASS_BACKEND & getBackendManager()
 		{
-            //MANAGER_CLASS_UI & ui_manager = static_cast<MANAGER_CLASS_UI&>(getManager());
 			return static_cast<MANAGER_CLASS_BACKEND&>(MANAGER_CLASS_BACKEND::getManager());
 		}
+
+	UIMessager & messager;
 
 	protected:
 		MANAGER_DESCRIPTION_NAMESPACE::WHICH_MANAGER_UI which;

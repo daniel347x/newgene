@@ -18,8 +18,8 @@ class UIAllSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 	public:
 
-        UIAllSettings(UIMessager &, int const number_worker_threads)
-			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
+        UIAllSettings(UIMessager & messager, int const number_worker_threads)
+			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(messager, number_worker_threads)
 		{
 
 		}

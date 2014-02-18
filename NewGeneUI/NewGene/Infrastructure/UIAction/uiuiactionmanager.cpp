@@ -1,9 +1,9 @@
 #include "uiuiactionmanager.h"
 #include "../../NewGeneBackEnd/Utilities/NewGeneException.h"
 
-UIUIActionManager::UIUIActionManager( QObject * parent )
+UIUIActionManager::UIUIActionManager( QObject * parent, UIMessager & messager )
 	: QObject(parent)
-	, UIManager()
+	, UIManager(messager)
 {
 
 	// *************************************************************************

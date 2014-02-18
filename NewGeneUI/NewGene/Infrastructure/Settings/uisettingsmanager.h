@@ -36,7 +36,7 @@ class UISettingsManager : public QObject, public UIManager<UISettingsManager, Se
 
 	public:
 
-		explicit UISettingsManager( QObject * parent = 0 );
+		explicit UISettingsManager( QObject * parent, UIMessager & messager );
 
 		std::unique_ptr<BackendGlobalSetting> getSetting(Messager & messager_, GLOBAL_SETTINGS_BACKEND_NAMESPACE::GLOBAL_SETTINGS_BACKEND const which_setting);
 		std::unique_ptr<UIGlobalSetting> getSetting(Messager & messager_, GLOBAL_SETTINGS_UI_NAMESPACE::GLOBAL_SETTINGS_UI const which_setting);

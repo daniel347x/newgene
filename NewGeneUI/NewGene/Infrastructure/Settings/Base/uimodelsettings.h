@@ -13,8 +13,8 @@ class UIModelSettings : public EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>
 
 	public:
 
-        UIModelSettings(UIMessager &, int const number_worker_threads)
-			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(number_worker_threads)
+        UIModelSettings(UIMessager & messager, int const number_worker_threads)
+			: EventLoopThreadManager<UI_THREAD_LOOP_CLASS_ENUM>(messager, number_worker_threads)
 		{
 
 		}

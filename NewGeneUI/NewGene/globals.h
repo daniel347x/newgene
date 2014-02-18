@@ -69,6 +69,7 @@ typedef std::int64_t STD_INT64;
 #include "Infrastructure/Messager/uimessager.h"
 
 class NewGeneMainWindow;
+class UIMessager;
 
 class UIProjectManager;
 class UISettingsManager;
@@ -84,16 +85,16 @@ class UIModelActionManager;
 
 extern NewGeneMainWindow * theMainWindow;
 
-UIProjectManager & projectManagerUI();
-UISettingsManager & settingsManagerUI();
-UILoggingManager & loggingManagerUI();
-UIModelManager & modelManagerUI();
-UIDocumentManager & documentManagerUI();
-UIStatusManager & statusManagerUI();
-UITriggerManager & triggerManagerUI();
-UIThreadManager & threadManagerUI();
-UIUIDataManager & uidataManagerUI();
-UIUIActionManager & uiactionManagerUI();
-UIModelActionManager & modelactionManagerUI();
+UIProjectManager & projectManagerUI(UIMessager * messager = nullptr);
+UISettingsManager & settingsManagerUI(UIMessager * messager = nullptr);
+UILoggingManager & loggingManagerUI(UIMessager * messager = nullptr);
+UIModelManager & modelManagerUI(UIMessager * messager = nullptr);
+UIDocumentManager & documentManagerUI(UIMessager * messager = nullptr);
+UIStatusManager & statusManagerUI(UIMessager * messager = nullptr);
+UITriggerManager & triggerManagerUI(UIMessager * messager = nullptr);
+UIThreadManager & threadManagerUI(UIMessager * messager = nullptr);
+UIUIDataManager & uidataManagerUI(UIMessager * messager = nullptr);
+UIUIActionManager & uiactionManagerUI(UIMessager * messager = nullptr);
+UIModelActionManager & modelactionManagerUI(UIMessager * messager = nullptr);
 
 #endif // GLOBALS_H

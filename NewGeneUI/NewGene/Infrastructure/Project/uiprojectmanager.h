@@ -214,7 +214,7 @@ class UIProjectManager : public QObject,
 			typedef std::map<NewGeneMainWindow *, typename ProjectTabs<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>::type> type;
 		};
 
-		explicit UIProjectManager( QObject * parent = 0 );
+		explicit UIProjectManager( QObject * parent, UIMessager & messager );
 		~UIProjectManager();
 
 		void LoadOpenProjects(NewGeneMainWindow*, QObject*);

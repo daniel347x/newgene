@@ -10,7 +10,7 @@ class UIThreadManager : public QObject, public UIManager<UIThreadManager, Thread
 
 	public:
 
-		explicit UIThreadManager( QObject * parent = 0 );
+		explicit UIThreadManager( QObject * parent, UIMessager & messager );
 
 	signals:
 

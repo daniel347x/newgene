@@ -17,7 +17,7 @@ bool UIMessager::ManagersInitialized = false;
 int UIMessager::next_messager_id = 1;
 
 UIMessager::UIMessager(QObject *parent) :
-    QObject(parent)
+	QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , mode(NORMAL)
   , singleShotActive(false)
@@ -36,6 +36,11 @@ UIMessager::~UIMessager()
 	{
 		displayStatusMessages();
 	}
+}
+
+void UIMessager::ShowMessageBox(std::string msg)
+{
+	emit DisplayMessageBox(msg);
 }
 
 void UIMessager::displayStatusMessages()
@@ -106,9 +111,8 @@ void UIMessager::AppendKadStatusText(std::string const & kad_status_text, void *
 	Messager::AppendKadStatusText(kad_status_text, generator);
 }
 
-UIMessagerInputProject::UIMessagerInputProject(UIInputProject * inp_, QObject * parent)
+UIMessagerInputProject::UIMessagerInputProject(QObject * parent)
 	: UIMessager(parent)
-	, inp(inp_)
 {
 	if (ManagersInitialized)
 	{
@@ -136,9 +140,8 @@ UIMessagerInputProject::UIMessagerInputProject(UIInputProject * inp_, QObject * 
 	}
 }
 
-UIMessagerOutputProject::UIMessagerOutputProject(UIOutputProject * outp_, QObject * parent)
+UIMessagerOutputProject::UIMessagerOutputProject(QObject * parent)
 	: UIMessager(parent)
-	, outp(outp_)
 {
 	if (ManagersInitialized)
 	{
@@ -172,11 +175,6 @@ UIMessagerOutputProject::UIMessagerOutputProject(UIOutputProject * outp_, QObjec
 	}
 }
 
-void UIMessagerInputProject::ShowMessageBox(std::string msg)
-{
-	emit DisplayMessageBox(msg);
-}
-
 bool UIMessagerInputProject::ShowQuestionMessageBox(std::string msg_title, std::string msg_text)
 {
 	bool yes = false;
@@ -201,17 +199,12 @@ void UIMessagerInputProject::UpdateProgressBarValue(std::int64_t const the_value
 
 void UIMessagerInputProject::UpdateStatusBarText(std::string const & the_text, void *)
 {
-    emit SignalUpdateStatusBarText(current_messager_id, the_text);
+	emit SignalUpdateStatusBarText(current_messager_id, the_text);
 }
 
 void UIMessagerInputProject::EmitInputProjectChangeMessage(DataChangeMessage & changes)
 {
 	get()->getQueueManager()->HandleChanges(changes);
-}
-
-void UIMessagerOutputProject::ShowMessageBox(std::string msg)
-{
-	emit DisplayMessageBox(msg);
 }
 
 bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg_title, std::string msg_text)
