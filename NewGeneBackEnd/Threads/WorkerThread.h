@@ -42,11 +42,6 @@ public:
 				work_service.run();
 				break;
 			}
-			catch (std::exception & e)
-			{
-				std::string the_error = e.what();
-				messager.ShowMessageBox(the_error);
-			}
 			catch (boost::exception & e)
 			{
 				if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
@@ -60,6 +55,11 @@ public:
 					messager.ShowMessageBox(msg.str());
 				}
 
+			}
+			catch (std::exception & e)
+			{
+				std::string the_error = e.what();
+				messager.ShowMessageBox(the_error);
 			}
 		}
 	}
