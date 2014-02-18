@@ -14,7 +14,7 @@ public:
 
 	WorkerThread(Messager & messager_, boost::asio::io_service & work_service_)
 		: work_service(work_service_)
-		, messager(messager)
+		, messager(messager_)
 	{
 
 	}

@@ -19,6 +19,12 @@
 void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION_ADD_DMU const & action_request, InputProject & project)
 {
 
+	if (true)
+	{
+		boost::format msg("Test throw");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
 	if (FailIfBusy(messager))
 	{
 		return;
