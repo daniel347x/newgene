@@ -58,6 +58,79 @@ void Table_DMU_Identifier::Load(sqlite3 * db, InputModel * input_model_)
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
+}
+
+bool Table_DMU_Identifier::Exists(sqlite3 * db, InputModel & input_model_, std::string const & dmu)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT COUNT(*) FROM DMU_CATEGORY WHERE DMU_CATEGORY_STRING_CODE = '");
+	sql += boost::to_upper_copy(dmu);
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		return false;
+	}
+	int step_result = 0;
+	bool exists = false;
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		int existing_dmu_count = reinterpret_cast<char const *>(sqlite3_column_int(stmt, 0));
+		if (existing_dmu_count == 1)
+		{
+			exists = true;
+		}
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+	return exists;
+
+}
+
+bool Table_DMU_Identifier::CreateNewDMU(sqlite3 * db, InputModel & input_model_, std::string const & dmu)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	bool already_exists = Exists(db, input_model_, dmu);
+	if (already_exists)
+	{
+		return false;
+	}
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("INSERT INTO DMU_CATEGORY (DMU_CATEGORY_STRING_CODE) '");
+	sql += boost::to_upper_copy(dmu);
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		return false;
+	}
+	int step_result = 0;
+	bool exists = false;
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		int existing_dmu_count = reinterpret_cast<char const *>(sqlite3_column_int(stmt, 0));
+		if (existing_dmu_count == 1)
+		{
+			exists = true;
+		}
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+	return exists;
+
 }
 
 void Table_DMU_Instance::Load(sqlite3 * db, InputModel * input_model_)
@@ -127,4 +200,5 @@ void Table_DMU_Instance::Load(sqlite3 * db, InputModel * input_model_)
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
 }
