@@ -183,7 +183,7 @@ class UIProjectManager : public QObject,
 			ProjectPaths paths;
 			std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>> project;
 
-			ProjectTabContents(ProjectPaths && paths_, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM>> && project_, UI_MESSAGER_CLASS * messager_)
+			ProjectTabContents(ProjectPaths && paths_, std::unique_ptr<UIProject<BACKEND_PROJECT_CLASS, UI_PROJECT_SETTINGS_CLASS, UI_MODEL_SETTINGS_CLASS, UI_MODEL_CLASS, UI_THREAD_LOOP_CLASS_ENUM, UI_MESSAGER_CLASS>> && project_, UI_MESSAGER_CLASS * messager_)
 				: paths(std::move(paths_))
 				, project(std::move(project_))
 				, messager(messager_)
