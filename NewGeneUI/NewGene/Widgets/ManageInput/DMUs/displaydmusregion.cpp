@@ -470,7 +470,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 		msgBox.exec();
 		return;
 	}
-\
+
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel](DataChange const & change)
 	{
 		switch (change.change_type)
