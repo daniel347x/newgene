@@ -516,7 +516,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								QVariant v;
 								v.setValue(dmu_and_members);
 								item->setData(v);
-								itemModel->appendItem( item );
+								itemModel->appendRow( item );
 
 							}
 							break;
