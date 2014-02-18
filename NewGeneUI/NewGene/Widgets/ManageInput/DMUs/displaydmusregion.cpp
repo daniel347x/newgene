@@ -486,11 +486,6 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__ADD:
 							{
 
-								if (change.child_identifiers.size() == 0)
-								{
-									return; // from lambda
-								}
-
 								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
 								{
 									boost::format msg("Invalid new DMU name or description.");

@@ -47,7 +47,7 @@ void KadWidgetsScrollArea::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTI
 	{
 		if (project)
 		{
-			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
+			//project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
 		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
@@ -141,8 +141,4 @@ void KadWidgetsScrollArea::Empty()
 
 void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_message)
 {
-	boost::format msg("Test DMU added");
-	QMessageBox msgBox;
-	msgBox.setText( msg.str().c_str() );
-	msgBox.exec();
 }
