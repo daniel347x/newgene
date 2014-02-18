@@ -110,7 +110,7 @@ bool Table_DMU_Identifier::CreateNewDMU(sqlite3 * db, InputModel & input_model_,
 	std::string new_uuid = newUUID(false);
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("INSERT INTO DMU_CATEGORY (DMU_CATEGORY_UUID, DMU_CATEGORY_STRING_CODE, DMU_CATEGORY_STRING_LONGHAND) VALUES ('");
-	sql += boost::to_upper_copy(dmu);
+	sql += boost::to_upper_copy(new_uuid);
 	sql += "', ?, ?)";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
@@ -118,7 +118,7 @@ bool Table_DMU_Identifier::CreateNewDMU(sqlite3 * db, InputModel & input_model_,
 		boost::format msg("Unable to prepare INSERT statement to create a new DMU category.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-	sqlite3_bind_text(stmt, 1, dmu.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 1, boost::to_upper_copy(dmu).c_str(), -1, SQLITE_TRANSIENT);
 	sqlite3_bind_text(stmt, 2, dmu_description.c_str(), -1, SQLITE_TRANSIENT);
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
