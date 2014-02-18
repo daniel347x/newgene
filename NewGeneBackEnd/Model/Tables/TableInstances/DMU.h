@@ -39,7 +39,7 @@ class Table_DMU_Identifier : public Table<TABLE__DMU_IDENTIFIER, TABLE_INSTANCE_
 		void Load(sqlite3 * db, InputModel * input_model_);
 
 		bool Exists(sqlite3 * db, InputModel & input_model_, std::string const & dmu);
-		bool CreateNewDMU(sqlite3 * db, InputModel & input_model_, std::string const & dmu);
+		bool CreateNewDMU(sqlite3 * db, InputModel & input_model_, std::string const & dmu, std::string const & dmu_description);
 
 };
 

@@ -66,8 +66,18 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 				// Retrieve data sent by user interface
 				// ************************************* //
 				WidgetActionItem const & actionItem = *instanceActionItem.second;
-				WidgetActionItem__String const & actionItemString = static_cast<WidgetActionItem__String const &>(actionItem);
-				std::string proposed_new_dmu = actionItemString.getValue();
+				WidgetActionItem__StringVector const & actionItemString = static_cast<WidgetActionItem__StringVector const &>(actionItem);
+				std::vector<std::string> dmu_strings = actionItemString.getValue();
+				
+				if (dmu_strings.size() != 2)
+				{
+					boost::format msg("A DMU category name, and descriptive text, is required.");
+					messager.ShowMessageBox(msg.str());
+					return;
+				}
+
+				std::string proposed_new_dmu = dmu_strings[0];
+				std::string new_dmu_description = dmu_strings[1];
 
 				bool dmu_already_exists = input_model.t_dmu_category.Exists(input_model.getDb(), input_model, proposed_new_dmu);
 				if (dmu_already_exists)
@@ -78,6 +88,19 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 					return;
 				}
 
+				bool dmu_successfully_created = input_model.t_dmu_category.CreateNewDMU(input_model.getDb(), input_model, proposed_new_dmu, new_dmu_description);
+
+				if (!dmu_successfully_created)
+				{
+					boost::format msg("Unable to execute INSERT statement to create a new DMU category.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				boost::format msg("DMU category '%1%' successfully created.");
+				msg % boost::to_upper_copy(proposed_new_dmu);
+				messager.ShowMessageBox(msg.str());
+
+				/*
 				// ***************************************** //
 				// Prepare data to send back to user interface
 				// ***************************************** //
@@ -103,9 +126,11 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 				// ***************************************** //
 				std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
 				change_response.changes.back().set_of_identifiers = active_dmus;
+				*/
 
 			});
 
+			/*
 			// ***************************************** //
 			// Prepare data to send back to user interface
 			// ***************************************** //
@@ -117,6 +142,7 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 			change_response.changes.push_back(change);
 
 			messager.EmitChangeMessage(change_response);
+			*/
 	
 		}
 			break;

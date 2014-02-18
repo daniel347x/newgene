@@ -300,7 +300,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 		}
 
 		InstanceActionItems actionItems;
-		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__String(new_dmu)))));
+		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{new_dmu, new_dmu})))));
 		WidgetActionItemRequest_ACTION_ADD_DMU action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 		emit AddDMU(action_request);

@@ -227,6 +227,46 @@ class WidgetActionItem__String : public WidgetActionItem
 
 };
 
+class WidgetActionItem__StringVector : public WidgetActionItem
+{
+
+public:
+
+	WidgetActionItem__StringVector(std::vector<std::string> const value__)
+		: WidgetActionItem()
+		, value_(value__)
+	{
+
+	}
+
+	WidgetActionItem__StringVector(WidgetActionItem__StringVector const & rhs)
+		: WidgetActionItem(rhs)
+		, value_(rhs.value_)
+	{
+
+	}
+
+	~WidgetActionItem__StringVector()
+	{
+
+	}
+
+	void setValue(std::vector<std::string> const & value__)
+	{
+		value_ = value__;
+	}
+
+	std::vector<std::string> getValue() const
+	{
+		return value_;
+	}
+
+protected:
+
+	std::vector<std::string> value_;
+
+};
+
 class WidgetActionItem__DateTime : public WidgetActionItem
 {
 
