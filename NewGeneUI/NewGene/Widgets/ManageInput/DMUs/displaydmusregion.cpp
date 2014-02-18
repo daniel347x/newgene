@@ -236,7 +236,6 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 
 void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 {
-	WidgetActionItemRequest_ACTION_ADD_DMU dummy;
 
 	bool ok = false;
 	QString new_dmu_text = QInputDialog::getText(this, "Enter DMU", "Decision Making Unit category name:", QLineEdit::Normal,"", &ok);
@@ -261,6 +260,8 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
+		std::string invalid_string;
+
 		bool valid = false;
 		if (boost::regex_match(new_dmu.c_str(), matches, regex))
 		{
@@ -272,29 +273,37 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 			if (matches.size() == 2)
 			{
 				std::string the_dmu_string_match(matches[1].first, matches[1].second);
-				if (the_dmu_string_match == new_dmu)
+
+				if (the_dmu_string_match.size() <= 255)
 				{
-					valid = true;
+					if (the_dmu_string_match == new_dmu)
+					{
+						valid = true;
+					}
 				}
+				else
+				{
+					invalid_string = ": The length is too long.";
+				}
+
 			}
 		}
 
 		if (!valid)
 		{
-			boost::format msg("The DMU category you entered is invalid.");
+			boost::format msg("The DMU category you entered is invalid%1%");
+			msg % invalid_string;
 			QMessageBox msgBox;
 			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
 			return;
 		}
 
-		boost::format msg("The DMU category you entered is VALID.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
+		InstanceActionItems actionItems;
+		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__String(new_dmu)))));
+		WidgetActionItemRequest_ACTION_ADD_DMU action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
-		//emit AddDMU(dummy);
+		emit AddDMU(action_request);
 
 	}
 

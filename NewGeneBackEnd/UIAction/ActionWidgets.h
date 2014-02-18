@@ -55,7 +55,7 @@ class WidgetActionItem
 
 		}
 
-        WidgetActionItem(WidgetActionItem const &)
+		WidgetActionItem(WidgetActionItem const &)
 		{
 
 		}
@@ -184,6 +184,46 @@ class WidgetActionItem__Int64 : public WidgetActionItem
 	protected:
 
 		std::int64_t value_;
+
+};
+
+class WidgetActionItem__String : public WidgetActionItem
+{
+
+	public:
+
+		WidgetActionItem__String(std::string const value__)
+			: WidgetActionItem()
+			, value_(value__)
+		{
+
+		}
+
+		WidgetActionItem__String(WidgetActionItem__String const & rhs)
+			: WidgetActionItem(rhs)
+			, value_(rhs.value_)
+		{
+
+		}
+
+		~WidgetActionItem__String()
+		{
+
+		}
+
+		void setValue(std::string const value__)
+		{
+			value_ = value__;
+		}
+
+		std::string getValue() const
+		{
+			return value_;
+		}
+
+	protected:
+
+		std::string value_;
 
 };
 
@@ -391,7 +431,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_GENERATE_OUTPUT> WidgetActionItemRequest_ACTION_GENERATE_OUTPUT;
 
 /************************************************************************/
-// 
+//
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_ADD_DMU> : public WidgetActionItemRequest_base
@@ -409,7 +449,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_ADD_DMU> WidgetActionItemRequest_ACTION_ADD_DMU;
 
 /************************************************************************/
-// 
+//
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_DELETE_DMU> : public WidgetActionItemRequest_base
@@ -427,7 +467,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_DELETE_DMU> WidgetActionItemRequest_ACTION_DELETE_DMU;
 
 /************************************************************************/
-// 
+//
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> : public WidgetActionItemRequest_base
@@ -445,7 +485,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_ADD_DMU_MEMBERS> WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS;
 
 /************************************************************************/
-// 
+//
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> : public WidgetActionItemRequest_base
@@ -463,7 +503,7 @@ public:
 typedef WidgetActionItemRequest<ACTION_DELETE_DMU_MEMBERS> WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS;
 
 /************************************************************************/
-// 
+//
 /************************************************************************/
 template<>
 class WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> : public WidgetActionItemRequest_base
