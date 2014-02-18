@@ -35,7 +35,7 @@ UILoggingManager::UILoggingManager( QObject * parent, UIMessager & messager )
 
 bool UILoggingManager::ObtainLogfilePath()
 {
-	loggingPath = settingsManagerUI().ObtainGlobalPath(QStandardPaths::DataLocation, "", NewGeneFileNames::logFileName, true);
+	loggingPath = settingsManagerUI(&messager).ObtainGlobalPath(QStandardPaths::DataLocation, "", NewGeneFileNames::logFileName, true);
 
 	if (loggingPath == boost::filesystem::path())
 	{

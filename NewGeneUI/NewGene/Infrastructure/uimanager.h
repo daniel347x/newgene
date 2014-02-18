@@ -68,7 +68,7 @@ class UIManager
 		static UIManager<MANAGER_CLASS_UI, MANAGER_CLASS_BACKEND, MANAGER_ENUM_UI, MANAGER_ENUM_BACKEND> & getManager(UIMessager * messager = nullptr)
 		{
 
-			if ( _ui_manager == NULL && messager != nullptr)
+			if ( _ui_manager == NULL && messager != nullptr )
 			{
 				_ui_manager.reset( new MANAGER_CLASS_UI(nullptr, *messager) );
 				if ( _ui_manager )
