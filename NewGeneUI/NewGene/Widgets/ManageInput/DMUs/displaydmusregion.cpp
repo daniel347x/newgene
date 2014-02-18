@@ -3,6 +3,13 @@
 
 #include <QStandardItem>
 #include <QInputDialog>
+#include <QDialog>
+#include <QFormLayout>
+#include <QList>
+#include <QLineEdit>
+#include <QString>
+#include <QLabel>
+#include <QDialogButtonBox>
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
@@ -237,75 +244,117 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 {
 
-	bool ok = false;
-	QString new_dmu_text = QInputDialog::getText(this, "Enter DMU", "Decision Making Unit category name:", QLineEdit::Normal,"", &ok);
+	// From http://stackoverflow.com/a/17512615/368896
+	QDialog dialog(this);
+	QFormLayout form(&dialog);
+	form.addRow(new QLabel("Create New DMU"));
+	QList<QLineEdit *> fields;
+	QLineEdit *lineEditName = new QLineEdit(&dialog);
+	QString labelName = QString("Enter Decision Making Unit (DMU) category name:");
+	form.addRow(labelName, lineEditName);
+	fields << lineEditName;
+	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
+	QString labelDescription = QString("Description:");
+	form.addRow(labelDescription, lineEditDescription);
+	fields << lineEditDescription;
 
-	if (ok)
-	{
+	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+	form.addRow(&buttonBox);
 
-		std::string new_dmu = new_dmu_text.toStdString();
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 
-		boost::trim(new_dmu);
-
-		if (new_dmu.empty())
+	std::string proposed_dmu_name;
+	std::string dmu_description;
+	if (dialog.exec() == QDialog::Accepted) {
+		QLineEdit * proposed_dmu_name_field = fields[0];
+		QLineEdit * dmu_description_field = fields[1];
+		if (proposed_dmu_name_field && dmu_description_field)
 		{
-			boost::format msg("The DMU category you entered is empty.");
-			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
-			msgBox.exec();
-			return;
+			proposed_dmu_name = proposed_dmu_name_field->text().toStdString();
+			dmu_description = dmu_description_field->text().toStdString();
 		}
-
-		std::string regex_string("([a-zA-Z_][a-zA-Z0-9_]*)");
-		boost::regex regex(regex_string);
-		boost::cmatch matches;
-
-		std::string invalid_string;
-
-		bool valid = false;
-		if (boost::regex_match(new_dmu.c_str(), matches, regex))
+		else
 		{
-			// matches[0] contains the original string.  matches[n]
-			// contains a sub_match object for each matching
-			// subexpression
-			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
-			// for an exapmle usage
-			if (matches.size() == 2)
-			{
-				std::string the_dmu_string_match(matches[1].first, matches[1].second);
-
-				if (the_dmu_string_match.size() <= 255)
-				{
-					if (the_dmu_string_match == new_dmu)
-					{
-						valid = true;
-					}
-				}
-				else
-				{
-					invalid_string = ": The length is too long.";
-				}
-
-			}
+			boost::format msg("Unable to determine new DMU name and description.");
+			throw NewGeneException() << newgene_error_description(msg.str());
 		}
-
-		if (!valid)
-		{
-			boost::format msg("The DMU category you entered is invalid%1%");
-			msg % invalid_string;
-			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
-			msgBox.exec();
-			return;
-		}
-
-		InstanceActionItems actionItems;
-		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{new_dmu, new_dmu})))));
-		WidgetActionItemRequest_ACTION_ADD_DMU action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
-
-		emit AddDMU(action_request);
-
 	}
+	else
+	{
+		return;
+	}
+
+	boost::trim(proposed_dmu_name);
+	boost::trim(dmu_description);
+
+	if (proposed_dmu_name.empty())
+	{
+		boost::format msg("The DMU category you entered is empty.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	std::string regex_string("([a-zA-Z_][a-zA-Z0-9_]*)");
+	boost::regex regex(regex_string);
+	boost::cmatch matches;
+
+	std::string invalid_string;
+
+	bool valid = false;
+	if (boost::regex_match(proposed_dmu_name.c_str(), matches, regex))
+	{
+		// matches[0] contains the original string.  matches[n]
+		// contains a sub_match object for each matching
+		// subexpression
+		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+		// for an exapmle usage
+		if (matches.size() == 2)
+		{
+			std::string the_dmu_string_match(matches[1].first, matches[1].second);
+
+			if (the_dmu_string_match.size() <= 255)
+			{
+				if (the_dmu_string_match == proposed_dmu_name)
+				{
+					valid = true;
+				}
+			}
+			else
+			{
+				invalid_string = ": The length is too long.";
+			}
+
+		}
+	}
+
+	if (!valid)
+	{
+		boost::format msg("The DMU category you entered is invalid%1%");
+		msg % invalid_string;
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	if (dmu_description.size() > 4096)
+	{
+		boost::format msg("The description is too long.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	InstanceActionItems actionItems;
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_name, dmu_description})))));
+	WidgetActionItemRequest_ACTION_ADD_DMU action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
+
+	emit AddDMU(action_request);
 
 }
 
