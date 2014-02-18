@@ -572,7 +572,6 @@ void UIProjectManager::RawOpenInputProject(UIMessager & messager, boost::filesys
 	// ************************************************************************************************************************************* //
 	std::unique_ptr<UIMessagerInputProject> messager_ptr(new UIMessagerInputProject(nullptr));
 	std::unique_ptr<UIInputProject> project_ptr(new UIInputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr));
-	messager_ptr->set(project_ptr.get());
 	input_tabs[mainWindow].emplace_back(ProjectPaths(input_project_settings_path, path_to_model_settings, path_to_model_database),
 		project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
 		messager_ptr.release());
@@ -697,7 +696,6 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 
 	std::unique_ptr<UIMessagerOutputProject> messager_ptr(new UIMessagerOutputProject(nullptr));
 	std::unique_ptr<UIOutputProject> project_ptr(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr));
-	messager_ptr->set(project_ptr.get());
 	output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
 		project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
 		messager_ptr.release());
