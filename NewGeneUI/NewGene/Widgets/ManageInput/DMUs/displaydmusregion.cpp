@@ -151,6 +151,8 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 		}
 	});
 
+	model->sort(0);
+
 	ui->listView_dmus->setModel(model);
 	if (oldSelectionModel) delete oldSelectionModel;
 
@@ -243,6 +245,8 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 
 			}
 		});
+
+		model->sort(0);
 
 		ui->listView_dmu_members->setModel(model);
 		if (oldSelectionModel) delete oldSelectionModel;
@@ -512,7 +516,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								QVariant v;
 								v.setValue(dmu_and_members);
 								item->setData(v);
-								itemModel->setItem( itemModel->rowCount(), item );
+								itemModel->appendItem( item );
 
 							}
 							break;
@@ -543,4 +547,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 				break;
 		}
 	});
+
+	itemModel->sort(0);
+
 }
