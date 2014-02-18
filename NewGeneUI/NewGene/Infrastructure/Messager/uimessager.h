@@ -134,10 +134,7 @@ class UIMessagerInputProject : public UIMessager
 
 		UIMessagerInputProject(QObject * parent = 0);
 
-		void set(UIInputProject * inp_)
-		{
-			inp = inp_;
-		}
+		void set(UIInputProject * inp_);
 
 		UIInputProject * get()
 		{
@@ -167,10 +164,7 @@ class UIMessagerOutputProject : public UIMessager
 
 		UIMessagerOutputProject(QObject * parent = 0);
 
-		void set(UIOutputProject * outp_)
-		{
-			outp = outp_;
-		}
+		void set(UIOutputProject * outp_);
 
 		UIOutputProject * get()
 		{

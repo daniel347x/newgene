@@ -17,7 +17,7 @@ bool UIMessager::ManagersInitialized = false;
 int UIMessager::next_messager_id = 1;
 
 UIMessager::UIMessager(QObject *parent) :
-	QObject(parent)
+    QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , mode(NORMAL)
   , singleShotActive(false)
@@ -113,7 +113,13 @@ void UIMessager::AppendKadStatusText(std::string const & kad_status_text, void *
 
 UIMessagerInputProject::UIMessagerInputProject(QObject * parent)
 	: UIMessager(parent)
+	, inp(nullptr)
 {
+}
+
+void UIMessagerInputProject::set(UIInputProject * inp_)
+{
+	inp = inp_;
 	if (ManagersInitialized)
 	{
 		if (get())
@@ -142,6 +148,7 @@ UIMessagerInputProject::UIMessagerInputProject(QObject * parent)
 
 UIMessagerOutputProject::UIMessagerOutputProject(QObject * parent)
 	: UIMessager(parent)
+	, outp(nullptr)
 {
 	if (ManagersInitialized)
 	{
@@ -160,6 +167,41 @@ UIMessagerOutputProject::UIMessagerOutputProject(QObject * parent)
 						connect(this, SIGNAL(SignalUpdateProgressBarValue(int, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const)));
 						connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
 						get()->output_pane = theMainWindow->findChild<NewGeneGenerateOutput *>( "widgetOutputPane" );
+						if (get()->output_pane)
+						{
+							connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
+							connect(this, SIGNAL(SignalSetPerformanceLabel(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalSetPerformanceLabel(int, STD_STRING const)));
+						}
+					}
+				}
+				catch (std::bad_cast &)
+				{
+				}
+			}
+		}
+	}
+}
+
+void UIMessagerOutputProject::set(UIOutputProject * outp_)
+{
+	outp = outp_;
+	if (ManagersInitialized)
+	{
+		if (get())
+		{
+			connect(this, SIGNAL(DisplayMessageBox(STD_STRING)), get(), SLOT(SignalMessageBox(STD_STRING)));
+			if (get()->mainWindowObject)
+			{
+				try
+				{
+					NewGeneMainWindow * mainWindow = dynamic_cast<NewGeneMainWindow *>(get()->mainWindowObject);
+					if (theMainWindow)
+					{
+						connect(this, SIGNAL(SignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalStartProgressBar(int, STD_INT64 const, STD_INT64 const)));
+						connect(this, SIGNAL(SignalEndProgressBar(int)), mainWindow, SLOT(ReceiveSignalStopProgressBar(int)));
+						connect(this, SIGNAL(SignalUpdateProgressBarValue(int, STD_INT64 const)), mainWindow, SLOT(ReceiveSignalUpdateProgressBarValue(int, STD_INT64 const)));
+						connect(this, SIGNAL(SignalUpdateStatusBarText(int, STD_STRING const &)), mainWindow, SLOT(ReceiveSignalUpdateStatusBarText(int, STD_STRING const)));
+						get()->output_pane = theMainWindow->findChild<NewGeneGenerateOutput *>("widgetOutputPane");
 						if (get()->output_pane)
 						{
 							connect(this, SIGNAL(SignalAppendKadStatusText(int, STD_STRING const &)), get()->output_pane, SLOT(ReceiveSignalAppendKadStatusText(int, STD_STRING const)));
