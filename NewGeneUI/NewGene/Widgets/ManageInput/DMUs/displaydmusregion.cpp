@@ -408,6 +408,16 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 		return;
 	}
 
+	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	if (dmuModel == nullptr)
+	{
+		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
 	QVariant dmu_and_members_variant = dmuModel->item(selectedIndex.row())->data();
 	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = dmu_and_members_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
 	WidgetInstanceIdentifier & dmu = dmu_and_members.first;
