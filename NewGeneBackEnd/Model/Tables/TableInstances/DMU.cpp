@@ -163,6 +163,11 @@ bool Table_DMU_Identifier::CreateNewDMU(sqlite3 * db, InputModel & input_model_,
 
 }
 
+bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier & dmu)
+{
+	return true;
+}
+
 void Table_DMU_Instance::Load(sqlite3 * db, InputModel * input_model_)
 {
 

@@ -19,12 +19,6 @@
 void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION_ADD_DMU const & action_request, InputProject & project)
 {
 
-	if (true)
-	{
-		boost::format msg("Test throw");
-		throw NewGeneException() << newgene_error_description(msg.str());
-	}
-
 	if (FailIfBusy(messager))
 	{
 		return;
@@ -160,34 +154,66 @@ void UIActionManager::DeleteDMU(Messager & messager, WidgetActionItemRequest_ACT
 		return;
 	}
 
-	InputModel & output_model = project.model();
+	InputModel & input_model = project.model();
 
 	switch (action_request.reason)
 	{
-		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
-		{
 
-		}
-			break;
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
-		{
-
-		}
-			break;
-		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 		{
 
 			DataChangeMessage change_response(&project);
 
-			// ***************************************** //
-			// Prepare data to send back to user interface
-			// ***************************************** //
-			DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
-			DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-			WidgetInstanceIdentifiers child_identifiers;
-			DataChange change(type, intention, WidgetInstanceIdentifier(), child_identifiers);
-			change.SetPacket(std::make_shared<DataChangePacket_int>(77));
-			change_response.changes.push_back(change);
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			{
+
+				WidgetInstanceIdentifier dmu = instanceActionItem.first;
+
+				if (!dmu.code || !dmu.uuid)
+				{
+					boost::format msg("Missing the DMU category to delete.");
+					messager.ShowMessageBox(msg.str());
+					return;
+				}
+
+				// ************************************* //
+				// Retrieve data sent by user interface
+				// ************************************* //
+				std::string dmu_to_delete_code = *dmu.code;
+				std::string dmu_to_delete_uuid = *dmu.uuid;
+
+				bool dmu_already_exists = input_model.t_dmu_category.Exists(input_model.getDb(), input_model, dmu_to_delete_code);
+				if (!dmu_already_exists)
+				{
+					boost::format msg("The DMU category '%1%' is already absent.");
+					msg % boost::to_upper_copy(dmu_to_delete_code);
+					messager.ShowMessageBox(msg.str());
+					return;
+				}
+
+				bool dmu_successfully_deleted = input_model.t_dmu_category.DeleteDMU(input_model.getDb(), input_model, dmu);
+
+				if (!dmu_successfully_deleted)
+				{
+					boost::format msg("Unable to delete the DMU category.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				boost::format msg("DMU category '%1%' successfully deleted.");
+				msg % boost::to_upper_copy(dmu_to_delete_code);
+				messager.ShowMessageBox(msg.str());
+
+				// ***************************************** //
+				// Prepare data to send back to user interface
+				// ***************************************** //
+				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
+				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+				DataChange change(type, intention, dmu, WidgetInstanceIdentifiers());
+				change.SetPacket(std::make_shared<DataChangePacket>());
+				change_response.changes.push_back(change);
+
+			});
+
 
 			messager.EmitChangeMessage(change_response);
 

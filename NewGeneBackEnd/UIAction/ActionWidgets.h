@@ -187,6 +187,86 @@ class WidgetActionItem__Int64 : public WidgetActionItem
 
 };
 
+class WidgetActionItem__WidgetInstanceIdentifier : public WidgetActionItem
+{
+
+	public:
+
+		WidgetActionItem__WidgetInstanceIdentifier(WidgetInstanceIdentifier const & value__)
+			: WidgetActionItem()
+			, value_(value__)
+		{
+
+		}
+
+		WidgetActionItem__WidgetInstanceIdentifier(WidgetActionItem__WidgetInstanceIdentifier const & rhs)
+			: WidgetActionItem(rhs)
+			, value_(rhs.value_)
+		{
+
+		}
+
+		~WidgetActionItem__WidgetInstanceIdentifier()
+		{
+
+		}
+
+		void setValue(WidgetInstanceIdentifier const & value__)
+		{
+			value_ = value__;
+		}
+
+		WidgetInstanceIdentifier getValue() const
+		{
+			return value_;
+		}
+
+	protected:
+
+		WidgetInstanceIdentifier value_;
+
+};
+
+class WidgetActionItem__WidgetInstanceIdentifiers : public WidgetActionItem
+{
+
+	public:
+
+		WidgetActionItem__WidgetInstanceIdentifiers(WidgetInstanceIdentifiers const & value__)
+			: WidgetActionItem()
+			, value_(value__)
+		{
+
+		}
+
+		WidgetActionItem__WidgetInstanceIdentifiers(WidgetActionItem__WidgetInstanceIdentifiers const & rhs)
+			: WidgetActionItem(rhs)
+			, value_(rhs.value_)
+		{
+
+		}
+
+		~WidgetActionItem__WidgetInstanceIdentifiers()
+		{
+
+		}
+
+		void setValue(WidgetInstanceIdentifiers const & value__)
+		{
+			value_ = value__;
+		}
+
+		WidgetInstanceIdentifiers getValue() const
+		{
+			return value_;
+		}
+
+	protected:
+
+		WidgetInstanceIdentifiers value_;
+
+};
+
 class WidgetActionItem__String : public WidgetActionItem
 {
 

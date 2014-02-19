@@ -373,8 +373,51 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 
 void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 {
-	WidgetActionItemRequest_ACTION_DELETE_DMU dummy;
-	emit DeleteDMU(dummy);
+
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
+	if (!ui->listView_dmus || !ui->listView_dmu_members)
+	{
+		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QItemSelectionModel * dmu_selectionModel = ui->listView_dmus->selectionModel();
+	if (dmu_selectionModel == nullptr)
+	{
+		boost::format msg("Invalid selection in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
+	if (!selectedIndex.isValid())
+	{
+		// No selection
+		return;
+	}
+
+	QVariant dmu_and_members_variant = dmuModel->item(selectedIndex.row())->data();
+	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = dmu_and_members_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
+	WidgetInstanceIdentifier & dmu = dmu_and_members.first;
+	WidgetInstanceIdentifiers & dmu_members = dmu_and_members.second;
+
+	InstanceActionItems actionItems;
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu)))));
+	WidgetActionItemRequest_ACTION_DELETE_DMU action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
+	emit DeleteDMU(action_request);
+
 }
 
 void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
