@@ -85,6 +85,7 @@ class Model_basemost
 			if (db != nullptr)
 			{
 				sqlite3_close(db);
+				db = nullptr;
 			}
 		}
 
