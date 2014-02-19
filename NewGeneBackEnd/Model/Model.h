@@ -23,7 +23,7 @@ class Model_basemost
 
 	public:
 
-        Model_basemost(Messager &, boost::filesystem::path const & path_to_model_database)
+		Model_basemost(Messager &, boost::filesystem::path const & path_to_model_database)
 			: _path_to_model_database(path_to_model_database)
 			, db(NULL)
 		{
@@ -110,7 +110,8 @@ class Model_basemost
 				LoadDatabase();
 				return;
 			}
-			this->setPathToDatabaseFile(new_database_path);
+			UnloadDatabase();
+			setPathToDatabaseFile(new_database_path);
 			LoadDatabase();
 		}
 
