@@ -515,4 +515,6 @@ bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_m
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
+	return true;
+
 }

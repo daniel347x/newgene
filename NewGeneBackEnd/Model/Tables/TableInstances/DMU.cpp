@@ -191,10 +191,11 @@ bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, Wi
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("DELETE FROM DMU_CATEGORY WHERE DMU_CATEGORY_UUID = ?");
-	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
-		boost::format msg("Unable to prepare DELETE statement to delete a DMU category.");
+		boost::format msg("Unable to prepare DELETE statement to delete a DMU category: %1%");
+		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 	sqlite3_bind_text(stmt, 1, dmu.uuid->c_str(), -1, SQLITE_TRANSIENT);
