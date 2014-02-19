@@ -571,6 +571,58 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
+								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
+								{
+									boost::format msg("Invalid new DMU name or description.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+
+								std::string dmu_code = *change.parent_identifier.code;
+								std::string dmu_description = *change.parent_identifier.longhand;
+
+								QString text(dmu_code.c_str());
+								if (!dmu_description.empty())
+								{
+									text += " (";
+									text += dmu_description.c_str();
+									text += ")";
+								}
+								QList<QStandardItem *> items = itemModel->findItems(text);
+								if (items.count() == 1)
+								{
+									QStandardItem * dmu_to_remove = items.at(0);
+									if (dmu_to_remove != nullptr)
+									{
+										QModelIndex index_to_remove = itemModel->indexFromItem(dmu_to_remove);
+										dmu_to_remove = itemModel->takeItem(index_to_remove.row());
+										if (dmu_to_remove != nullptr)
+										{
+
+											delete dmu_to_remove;
+											dmu_to_remove = nullptr;
+
+											QItemSelectionModel * selectionModel = ui->listView_dmus->selectionModel();
+											if (selectionModel != nullptr)
+											{
+												selectionModel->clearSelection();
+												QItemSelectionModel * oldDmuSetMembersSelectionModel = ui->listView_dmu_members->selectionModel();
+												QStandardItemModel * dmuSetMembersModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+												if (dmuSetMembersModel != nullptr)
+												{
+													delete dmuSetMembersModel;
+													QStandardItemModel * model = new QStandardItemModel(ui->listView_dmu_members);
+													ui->listView_dmu_members->setModel(model);
+													if (oldDmuSetMembersSelectionModel)
+													{
+														delete oldDmuSetMembersSelectionModel;
+													}
+												}
+											}
+
+										}
+									}
+								}
+
 							}
 							break;
 						case DATA_CHANGE_INTENTION__UPDATE:
