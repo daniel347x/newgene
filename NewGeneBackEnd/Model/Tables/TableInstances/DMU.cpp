@@ -165,7 +165,49 @@ bool Table_DMU_Identifier::CreateNewDMU(sqlite3 * db, InputModel & input_model_,
 
 bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier & dmu)
 {
-	return true;
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor theExecutor(db);
+
+	if (!dmu.code || !dmu.uuid)
+	{
+		return false;
+	}
+
+	bool already_exists = Exists(db, input_model_, *dmu.code);
+	if (!already_exists)
+	{
+		return false;
+	}
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("DELETE FROM DMU_CATEGORY WHERE DMU_CATEGORY_UUID = ?");
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare DELETE statement to delete a DMU category.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	sqlite3_bind_text(stmt, 1, dmu.uuid->c_str(), -1, SQLITE_TRANSIENT);
+	int step_result = 0;
+	step_result = sqlite3_step(stmt);
+	if (step_result != SQLITE_DONE)
+	{
+		boost::format msg("Unable to execute DELETE statement to delete a DMU category: %1%");
+		msg % sqlite3_errstr(step_result);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
+
 }
 
 void Table_DMU_Instance::Load(sqlite3 * db, InputModel * input_model_)
