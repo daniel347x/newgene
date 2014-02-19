@@ -209,7 +209,6 @@ void UIActionManager::DeleteDMU(Messager & messager, WidgetActionItemRequest_ACT
 				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
 				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
 				DataChange change(type, intention, dmu, WidgetInstanceIdentifiers());
-				change.SetPacket(std::make_shared<DataChangePacket>());
 				change_response.changes.push_back(change);
 
 			});
