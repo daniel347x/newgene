@@ -73,7 +73,6 @@ WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 co
 		return WidgetInstanceIdentifiers();
 	}
 
-	// Debugging
 	WidgetInstanceIdentifier uoa = getIdentifier(uuid);
 	if (uoa.IsEmpty())
 	{
@@ -203,6 +202,45 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 	{
 		return false;
 	}
+
+	// Before removing the UOA itself,
+	// pull up any associated variable group instance data tables
+	// (which for robustness of potential user data in error do not enforce FK's)
+	// and remove them
+	WidgetInstanceIdentifiers vgs_to_delete = input_model_.t_vgp_identifiers.RetrieveVGsFromUOA(db, &input_model_, *uoa.uuid);
+	std::for_each(vgs_to_delete.cbegin(), vgs_to_delete.cend(), [&](WidgetInstanceIdentifier const & vg_to_delete)
+	{
+		std::for_each(input_model_.t_vgp_data_vector.begin(), input_model_.t_vgp_data_vector.end(), [&](std::unique_ptr<Table_VariableGroupData> & vg_instance_table)
+		{
+			if (vg_instance_table)
+			{
+				if (boost::iequals(*vg_to_delete.code, vg_instance_table->vg_category_string_code))
+				{
+					vg_instance_table->DeleteDataTable(db, &input_model_);
+				}
+			}
+		});
+
+		input_model_.t_vgp_data_vector.erase(
+			std::remove_if(input_model_.t_vgp_data_vector.begin(),
+						   input_model_.t_vgp_data_vector.end(),
+						   std::bind(
+									[&](std::unique_ptr<Table_VariableGroupData> & vg_instance_table, WidgetInstanceIdentifier const & vg_to_delete_)
+										{
+											bool vg_matches = false;
+											if (vg_instance_table && boost::iequals(vg_instance_table->vg_category_string_code, *vg_to_delete_.code))
+											{
+												vg_matches = true;
+											}
+											return vg_matches;
+										},
+									std::placeholders::_1, vg_to_delete
+									)
+						  ),
+				 input_model_.t_vgp_data_vector.end()
+		);
+
+	});
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("DELETE FROM UOA_CATEGORY WHERE UOA_CATEGORY_UUID = '");

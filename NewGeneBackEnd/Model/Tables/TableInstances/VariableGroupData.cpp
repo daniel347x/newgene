@@ -490,3 +490,29 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 		stmt = nullptr;
 	}
 }
+
+bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_)
+{
+
+	if (!db)
+	{
+		return false;
+	}
+
+	if (!input_model_)
+	{
+		return false;
+	}
+
+	boost::format drop_stmt("DROP TABLE IF EXISTS %1%");
+	drop_stmt % table_name;
+	char * errmsg = nullptr;
+	sqlite3_exec(db, drop_stmt.str().c_str(), NULL, NULL, &errmsg);
+	if (errmsg != nullptr)
+	{
+		sqlite3_free(errmsg);
+		boost::format msg("Unable to delete data for variable group.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+}

@@ -62,6 +62,55 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
+}
+
+WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, InputModel * input_model_, UUID const & uuid)
+{
+
+	if (!db)
+	{
+		return WidgetInstanceIdentifiers();
+	}
+
+	if (!input_model_)
+	{
+		return WidgetInstanceIdentifiers();
+	}
+
+	WidgetInstanceIdentifier uoa = input_model_->t_uoa_category.getIdentifier(uuid);
+	if (uoa.IsEmpty())
+	{
+		return WidgetInstanceIdentifiers();
+	}
+
+	WidgetInstanceIdentifiers vgs;
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT * FROM VG_CATEGORY WHERE VG_CATEGORY_FK_UOA_CATEGORY_UUID = '");
+	sql += uuid;
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to retrieve variable groups associated with unit of analysis.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		char const * uuid_vg = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_UUID));
+		WidgetInstanceIdentifier vg = getIdentifier(uuid_vg);
+		vgs.push_back(vg);
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	return vgs;
+
 }
 
 void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
