@@ -594,32 +594,29 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 									if (dmu_to_remove != nullptr)
 									{
 										QModelIndex index_to_remove = itemModel->indexFromItem(dmu_to_remove);
-										dmu_to_remove = itemModel->takeItem(index_to_remove.row());
-										if (dmu_to_remove != nullptr)
+										itemModel->takeRow(index_to_remove.row());
+
+										delete dmu_to_remove;
+										dmu_to_remove = nullptr;
+
+										QItemSelectionModel * selectionModel = ui->listView_dmus->selectionModel();
+										if (selectionModel != nullptr)
 										{
-
-											delete dmu_to_remove;
-											dmu_to_remove = nullptr;
-
-											QItemSelectionModel * selectionModel = ui->listView_dmus->selectionModel();
-											if (selectionModel != nullptr)
+											selectionModel->clearSelection();
+											QItemSelectionModel * oldDmuSetMembersSelectionModel = ui->listView_dmu_members->selectionModel();
+											QStandardItemModel * dmuSetMembersModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+											if (dmuSetMembersModel != nullptr)
 											{
-												selectionModel->clearSelection();
-												QItemSelectionModel * oldDmuSetMembersSelectionModel = ui->listView_dmu_members->selectionModel();
-												QStandardItemModel * dmuSetMembersModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
-												if (dmuSetMembersModel != nullptr)
+												delete dmuSetMembersModel;
+												QStandardItemModel * model = new QStandardItemModel(ui->listView_dmu_members);
+												ui->listView_dmu_members->setModel(model);
+												if (oldDmuSetMembersSelectionModel)
 												{
-													delete dmuSetMembersModel;
-													QStandardItemModel * model = new QStandardItemModel(ui->listView_dmu_members);
-													ui->listView_dmu_members->setModel(model);
-													if (oldDmuSetMembersSelectionModel)
-													{
-														delete oldDmuSetMembersSelectionModel;
-													}
+													delete oldDmuSetMembersSelectionModel;
 												}
 											}
-
 										}
+
 									}
 								}
 
