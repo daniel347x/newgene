@@ -38,7 +38,7 @@ void InputModel::LoadTables()
 		WidgetInstanceIdentifiers variable_group_identifiers = t_vgp_identifiers.getIdentifiers();
 		std::for_each(variable_group_identifiers.cbegin(), variable_group_identifiers.cend(), [this](WidgetInstanceIdentifier const & variable_group_identifier)
 		{
-			if (false && variable_group_identifier.code)
+			if (variable_group_identifier.code)
 			{
 				std::unique_ptr<Table_VariableGroupData> vg_instance_data(new Table_VariableGroupData(*variable_group_identifier.code));
 #				if 0
@@ -47,33 +47,39 @@ void InputModel::LoadTables()
 #				endif
 				if (!tableManager().TableExists(db, vg_instance_data->table_name))
 				{
-					ImportDefinition new_definition = ImportDefinitions::CreateImportDefinition(*variable_group_identifier.code);
-					if (new_definition.IsEmpty())
+					if (false)
 					{
-						// Todo: log warning
-						return; // from lambda
-					}
-					Importer table_importer(new_definition, this, vg_instance_data.get(), InputModelImportTableFn);
-					bool success = vg_instance_data->ImportStart(db, *variable_group_identifier.code, new_definition, nullptr, this);
-					if (!success)
-					{
-						// Todo: log warning
-						return; // from lambda
-					}
-					success = table_importer.DoImport();
-					if (!success)
-					{
-						// Todo: log warning
-						return; // from lambda
-					}
-					success = vg_instance_data->ImportEnd(db, new_definition, nullptr, this);
-					if (!success)
-					{
-						// Todo: log warning
-						return; // from lambda
+						ImportDefinition new_definition = ImportDefinitions::CreateImportDefinition(*variable_group_identifier.code);
+						if (new_definition.IsEmpty())
+						{
+							// Todo: log warning
+							return; // from lambda
+						}
+						Importer table_importer(new_definition, this, vg_instance_data.get(), InputModelImportTableFn);
+						bool success = vg_instance_data->ImportStart(db, *variable_group_identifier.code, new_definition, nullptr, this);
+						if (!success)
+						{
+							// Todo: log warning
+							return; // from lambda
+						}
+						success = table_importer.DoImport();
+						if (!success)
+						{
+							// Todo: log warning
+							return; // from lambda
+						}
+						success = vg_instance_data->ImportEnd(db, new_definition, nullptr, this);
+						if (!success)
+						{
+							// Todo: log warning
+							return; // from lambda
+						}
 					}
 				}
-				t_vgp_data_vector.push_back(std::move(vg_instance_data));
+				else
+				{
+					t_vgp_data_vector.push_back(std::move(vg_instance_data));
+				}
 			}
 		});
 
