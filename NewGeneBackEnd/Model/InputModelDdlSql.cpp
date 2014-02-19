@@ -7,7 +7,6 @@ std::string InputModelDDLSQL()
 
 
 
-
 /*************************/
 /*                       */
 /* InputModelDefault.SQL */
@@ -60,7 +59,7 @@ drop table if exists [main].[DMU_CATEGORY];
 
 /* Table structure [main].[DMU_CATEGORY] */
 CREATE TABLE [main].[DMU_CATEGORY] (
-  [DMU_CATEGORY_UUID] char(36) NOT NULL ON CONFLICT FAIL CONSTRAINT [CMU_CATEGORY_UUID_CONSTRAINT] UNIQUE ON CONFLICT FAIL, 
+  [DMU_CATEGORY_UUID] char(36) NOT NULL ON CONFLICT FAIL CONSTRAINT [DMU_CATEGORY_UUID_CONSTRAINT] UNIQUE ON CONFLICT FAIL, 
   [DMU_CATEGORY_STRING_CODE] varchar(128) NOT NULL ON CONFLICT FAIL CONSTRAINT [DMU_CATEGORY_STRING_CODE_CONSTRAINT] UNIQUE ON CONFLICT FAIL, 
   [DMU_CATEGORY_STRING_LONGHAND] varchar(4096), 
   [DMU_CATEGORY_NOTES1] varchar(16384), 
@@ -196,6 +195,8 @@ commit transaction;
 
 /* Enable Foreign Keys */
 pragma foreign_keys = on;
+
+
 
 
 
