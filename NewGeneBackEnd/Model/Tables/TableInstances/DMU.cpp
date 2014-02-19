@@ -204,6 +204,10 @@ bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, Wi
 		stmt = nullptr;
 	}
 
+	// Remove from cache
+	std::string flags;
+	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, dmu)), identifiers.end());
+
 	theExecutor.success();
 
 	return theExecutor.succeeded();
