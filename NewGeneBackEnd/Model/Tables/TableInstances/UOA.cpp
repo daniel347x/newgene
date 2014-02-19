@@ -302,7 +302,7 @@ WidgetInstanceIdentifiers Table_UOA_Member::RetrieveUOAsGivenDMU(sqlite3 * db, I
 			if (dmu.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, dmu_candidate))
 			{
 				WidgetInstanceIdentifier uoa(input_model_->t_uoa_category.getIdentifier(uuid));
-				if (std::find_if(uoas.cbegin(), uoas.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, uoa)) != uoas.cend()) {
+				if (std::find_if(uoas.cbegin(), uoas.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, uoa)) == uoas.cend()) {
 					uoas.push_back(uoa);
 				}
 			}
