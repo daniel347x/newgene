@@ -48,6 +48,9 @@ class Table_UOA_Identifier : public Table<TABLE__UOA_IDENTIFIER, TABLE_INSTANCE_
 		// Country=2, MID=1
 		DMU_Counts RetrieveDMUCounts(sqlite3 const * db, InputModel * input_model_, UUID const & uuid);
 
+		bool Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, bool const also_confirm_using_cache = true);
+		bool DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa);
+
 };
 
 class Table_UOA_Member : public Table<TABLE__UOA_MEMBER, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>
@@ -73,6 +76,9 @@ class Table_UOA_Member : public Table<TABLE__UOA_MEMBER, TABLE_INSTANCE_IDENTIFI
 		}
 
 		void Load(sqlite3 * db, InputModel * input_model_);
+
+		// For a given DMU, retrieve all UOA's that depend on it
+		WidgetInstanceIdentifiers RetrieveUOAsGivenDMU(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & dmu);
 
 };
 

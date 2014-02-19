@@ -181,6 +181,14 @@ bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, Wi
 		return false;
 	}
 
+	// Since the schema doesn't allow FK pointing from UOA to UOA_LOOKUP,
+	// we must reverse-map to the UOA's here and then remove those
+	WidgetInstanceIdentifiers uoas = input_model_.t_uoa_setmemberlookup.RetrieveUOAsGivenDMU(db, &input_model_, dmu);
+	std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
+	{
+		input_model_.t_uoa_category.DeleteUOA(db, input_model_, uoa);
+	});
+
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("DELETE FROM DMU_CATEGORY WHERE DMU_CATEGORY_UUID = ?");
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);

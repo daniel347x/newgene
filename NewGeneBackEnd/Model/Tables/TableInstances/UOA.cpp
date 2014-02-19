@@ -6,6 +6,8 @@
 #endif
 #include "../../InputModel.h"
 
+#include <unordered_set>
+
 std::string const Table_UOA_Identifier::UOA_CATEGORY_UUID = "UOA_CATEGORY_UUID";
 std::string const Table_UOA_Identifier::UOA_CATEGORY_STRING_CODE = "UOA_CATEGORY_STRING_CODE";
 std::string const Table_UOA_Identifier::UOA_CATEGORY_STRING_LONGHAND = "UOA_CATEGORY_STRING_LONGHAND";
@@ -58,44 +60,6 @@ void Table_UOA_Identifier::Load(sqlite3 * db, InputModel * input_model_)
 
 }
 
-void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
-{
-
-	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-
-	identifiers_map.clear();
-
-	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT * FROM UOA_CATEGORY_LOOKUP");
-	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-	if (stmt == NULL)
-	{
-		return;
-	}
-	int step_result = 0;
-
-	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
-	{
-		char const * uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_LOOKUP_FK_UOA_CATEGORY_UUID));
-		int const sequence_number = sqlite3_column_int(stmt, INDEX__UOA_CATEGORY_LOOKUP_SEQUENCE_NUMBER);
-		char const * dmu_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_LOOKUP_FK_DMU_CATEGORY_UUID));
-		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ dmu_uuid /* && strlen(dmu_uuid) == UUID_LENGTH */ )
-		{
-			WidgetInstanceIdentifier the_dmu_identifier = input_model_->t_dmu_category.getIdentifier(dmu_uuid);
-			the_dmu_identifier.sequence_number_or_count = sequence_number;
-			identifiers_map[uuid].push_back(the_dmu_identifier);
-
-			// Todo: Add sort by sequence number
-		}
-	}
-
-	if (stmt)
-	{
-		sqlite3_finalize(stmt);
-		stmt = nullptr;
-	}
-}
-
 WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 const * db, InputModel * input_model_, UUID const & uuid)
 {
 
@@ -135,7 +99,6 @@ Table_UOA_Identifier::DMU_Counts Table_UOA_Identifier::RetrieveDMUCounts(sqlite3
 		return DMU_Counts();
 	}
 
-	// Debugging
 	WidgetInstanceIdentifier uoa = getIdentifier(uuid);
 	if (uoa.IsEmpty())
 	{
@@ -170,3 +133,183 @@ Table_UOA_Identifier::DMU_Counts Table_UOA_Identifier::RetrieveDMUCounts(sqlite3
 	return dmu_counts;
 
 }
+
+bool Table_UOA_Identifier::Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, bool const also_confirm_using_cache)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	if (!uoa.uuid)
+	{
+		return false;
+	}
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT COUNT(*) FROM UOA_CATEGORY WHERE UOA_CATEGORY_UUID = '");
+	sql += *uoa.uuid;
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare SELECT statement to search for an existing UOA.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	bool exists = false;
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		int existing_uoa_count = sqlite3_column_int(stmt, 0);
+		if (existing_uoa_count == 1)
+		{
+			exists = true;
+		}
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	if (also_confirm_using_cache)
+	{
+		// Safety check: Cache should match database
+		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, uoa));
+		bool exists_in_cache = (found != identifiers.cend());
+		if (exists != exists_in_cache)
+		{
+			boost::format msg("Cache of UOAs is out-of-sync.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+	}
+
+	return exists;
+
+}
+
+bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor theExecutor(db);
+
+	if (!uoa.uuid)
+	{
+		return false;
+	}
+
+	bool already_exists = Exists(db, input_model_, uoa);
+	if (!already_exists)
+	{
+		return false;
+	}
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("DELETE FROM UOA_CATEGORY WHERE UOA_CATEGORY_UUID = '");
+	sql += *uoa.uuid;
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare DELETE statement to delete a UOA.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	step_result = sqlite3_step(stmt);
+	if (step_result != SQLITE_DONE)
+	{
+		boost::format msg("Unable to execute DELETE statement to delete a UOA: %1%");
+		msg % sqlite3_errstr(step_result);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	// Remove from cache
+	std::string flags;
+	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, uoa)), identifiers.end());
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
+
+}
+
+void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	identifiers_map.clear();
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT * FROM UOA_CATEGORY_LOOKUP");
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		return;
+	}
+	int step_result = 0;
+
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		char const * uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_LOOKUP_FK_UOA_CATEGORY_UUID));
+		int const sequence_number = sqlite3_column_int(stmt, INDEX__UOA_CATEGORY_LOOKUP_SEQUENCE_NUMBER);
+		char const * dmu_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__UOA_CATEGORY_LOOKUP_FK_DMU_CATEGORY_UUID));
+		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ dmu_uuid /* && strlen(dmu_uuid) == UUID_LENGTH */)
+		{
+			WidgetInstanceIdentifier the_dmu_identifier = input_model_->t_dmu_category.getIdentifier(dmu_uuid);
+			the_dmu_identifier.sequence_number_or_count = sequence_number;
+			identifiers_map[uuid].push_back(the_dmu_identifier);
+
+			// Todo: Add sort by sequence number
+		}
+	}
+
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+}
+
+WidgetInstanceIdentifiers Table_UOA_Member::RetrieveUOAsGivenDMU(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & dmu)
+{
+
+	if (!db)
+	{
+		return WidgetInstanceIdentifiers();
+	}
+
+	if (!input_model_)
+	{
+		return WidgetInstanceIdentifiers();
+	}
+
+	// No hash function available; can't use unordered_set
+	//std::unordered_set<WidgetInstanceIdentifier> uoa_set;
+	WidgetInstanceIdentifiers uoas;
+	std::for_each(identifiers_map.cbegin(), identifiers_map.cend(), [&](std::pair<UUID const &, WidgetInstanceIdentifiers> const & mapping_from_uoa_to_dmus)
+	{
+		UUID const uuid(mapping_from_uoa_to_dmus.first);
+		WidgetInstanceIdentifiers const & dmus(mapping_from_uoa_to_dmus.second);
+		std::for_each(dmus.cbegin(), dmus.cend(), [&](WidgetInstanceIdentifier const & dmu_candidate)
+		{
+			if (dmu.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, dmu_candidate))
+			{
+				WidgetInstanceIdentifier uoa(input_model_->t_uoa_category.getIdentifier(uuid));
+				if (std::find_if(uoas.cbegin(), uoas.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, uoa)) != uoas.cend()) {
+					uoas.push_back(uoa);
+				}
+			}
+		});
+	});
+
+	return uoas;
+
+}
+

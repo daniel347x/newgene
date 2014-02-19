@@ -64,6 +64,16 @@ class Model_basemost
 				}
 				db = db_;
 
+				char * errmsg = nullptr;
+				sqlite3_exec(db, "PRAGMA foreign_keys = ON;", NULL, NULL, &errmsg);
+				if (errmsg != nullptr)
+				{
+					boost::format msg("Error preparing database file for foreign key enforcement: %1%");
+					msg % errmsg;
+					sqlite3_free(errmsg);
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
 				if (!exists)
 				{
 					// Create the new database
