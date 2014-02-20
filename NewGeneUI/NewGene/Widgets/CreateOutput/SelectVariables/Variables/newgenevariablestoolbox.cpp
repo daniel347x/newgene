@@ -33,6 +33,20 @@ void NewGeneVariablesToolbox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONN
 void NewGeneVariablesToolbox::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
+	{
+		if (project)
+		{
+			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE, false, "");
+		}
+	}
+	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
+	{
+		if (inp)
+		{
+			inp->UnregisterInterestInChanges(this);
+		}
+	}
 }
 
 void NewGeneVariablesToolbox::RefreshAllWidgets()
@@ -90,4 +104,90 @@ void NewGeneVariablesToolbox::Empty()
 		--n;
 		--nItems;
 	}
+}
+
+void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_message)
+{
+
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
+	{
+		switch (change.change_type)
+		{
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE:
+				{
+					switch (change.change_intention)
+					{
+						case DATA_CHANGE_INTENTION__ADD:
+							{
+
+							}
+							break;
+						case DATA_CHANGE_INTENTION__REMOVE:
+							{
+
+								if (change.parent_identifier.code && change.parent_identifier.uuid)
+								{
+
+									WidgetInstanceIdentifier vg_to_remove(change.parent_identifier);
+
+									int nItems = count();
+									for (int n = 0; n < nItems; ++n)
+									{
+										QWidget * testWidget = widget(n);
+										try
+										{
+											NewGeneVariableGroup * testVG = dynamic_cast<NewGeneVariableGroup*>(testWidget);
+											if (testVG && testVG->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg_to_remove))
+											{
+
+												removeItem(n);
+												delete testVG;
+												testVG = nullptr;
+
+												break;
+
+											}
+										}
+										catch (std::bad_cast &)
+										{
+											// guess not
+										}
+
+									}
+
+								}
+
+							}
+							break;
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								// Should never receive this.
+							}
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+								// Ditto above.
+							}
+							break;
+						default:
+							{
+							}
+							break;
+					}
+				}
+				break;
+			default:
+				{
+				}
+				break;
+		}
+	});
+
 }

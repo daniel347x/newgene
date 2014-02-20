@@ -141,4 +141,97 @@ void KadWidgetsScrollArea::Empty()
 
 void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_message)
 {
+
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
+	{
+		switch (change.change_type)
+		{
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE:
+				{
+					switch (change.change_intention)
+					{
+						case DATA_CHANGE_INTENTION__ADD:
+							{
+
+							}
+							break;
+						case DATA_CHANGE_INTENTION__REMOVE:
+							{
+
+								if (change.parent_identifier.code && change.parent_identifier.uuid)
+								{
+
+									WidgetInstanceIdentifier uoa_to_remove(change.parent_identifier);
+
+									int current_number = layout()->count();
+									bool found = false;
+									QWidget * widgetToRemove = nullptr;
+									QLayoutItem * layoutItemToRemove = nullptr;
+									int i = 0;
+									for (i=0; i<current_number; ++i)
+									{
+										QLayoutItem * testLayoutItem = layout()->itemAt(i);
+										QWidget * testWidget(testLayoutItem->widget());
+										try
+										{
+											KadSpinBox * testSpinBox = dynamic_cast<KadSpinBox*>(testWidget);
+											if (testSpinBox->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, uoa_to_remove))
+											{
+												widgetToRemove = testSpinBox;
+												layoutItemToRemove = testLayoutItem;
+												found = true;
+												break;
+											}
+										}
+										catch (std::bad_cast &)
+										{
+											// guess not
+										}
+
+									}
+
+									if (found && widgetToRemove != nullptr)
+									{
+										layout()->takeAt(i);
+										delete widgetToRemove;
+										delete layoutItemToRemove;
+										widgetToRemove = nullptr;
+										layoutItemToRemove = nullptr;
+									}
+
+								}
+
+							}
+							break;
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								// Should never receive this.
+							}
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+								// Ditto above.
+							}
+							break;
+						default:
+							{
+							}
+							break;
+					}
+				}
+				break;
+			default:
+				{
+				}
+				break;
+		}
+	});
+
 }

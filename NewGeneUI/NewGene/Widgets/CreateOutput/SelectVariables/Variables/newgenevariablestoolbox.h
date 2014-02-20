@@ -14,6 +14,8 @@ class NewGeneVariablesToolbox : public QToolBox, public NewGeneWidget // do not 
 
 		explicit NewGeneVariablesToolbox( QWidget * parent = 0 );
 
+		void HandleChanges(DataChangeMessage const &);
+
 	signals:
 
 		void RefreshWidget(WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX);
