@@ -116,8 +116,12 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 													{
 														identifiers.push_back(std::make_pair(identifier_new, packet->getValue()));
 													}
+													Add(db, *child_identifier.code, packet->getValue());
 												}
-												Modify(db, *child_identifier.code, packet->getValue());
+												else
+												{
+													Modify(db, *child_identifier.code, packet->getValue());
+												}
 											}
 											else
 											{
