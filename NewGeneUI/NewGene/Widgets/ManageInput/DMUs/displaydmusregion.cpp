@@ -577,7 +577,7 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 
 		QModelIndex testIndex = dmuMembersModel->index(i, 0);
 		QStandardItem * testItem = model->item(testIndex.row());
-		if (item->checkState() == Qt::Checked)
+		if (testItem->checkState() == Qt::Checked)
 		{
 			WidgetInstanceIdentifier dmu_member = testItem->data().value<WidgetInstanceIdentifier>();
 			actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu_member), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu_member)))));
