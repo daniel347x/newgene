@@ -333,7 +333,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 		proxyModel->setDynamicSortFilter(true);
 		proxyModel->setSourceModel(model);
 
-		//proxyModel->sort(0);
+		proxyModel->sort(0);
 
 		ui->listView_dmu_members->setModel(proxyModel);
 		if (oldSelectionModel) delete oldSelectionModel;
@@ -670,7 +670,9 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 		return;
 	}
 
-	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel](DataChange const & change)
+	QSortFilterProxyModel_NumbersLast * proxyModel = nullptr;
+
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel, &proxyModel](DataChange const & change)
 	{
 
 		switch (change.change_type)
@@ -756,7 +758,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 											{
 												delete dmuSetMembersModel;
 												QStandardItemModel * model = new QStandardItemModel(ui->listView_dmu_members);
-												QSortFilterProxyModel_NumbersLast *proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_dmu_members);
+												proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_dmu_members);
 												proxyModel->setDynamicSortFilter(true);
 												proxyModel->setSourceModel(model);
 												ui->listView_dmu_members->setModel(proxyModel);
@@ -804,6 +806,9 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 	});
 
-	itemModel->sort(0);
+	if (proxyModel != nullptr)
+	{
+		proxyModel->sort(0);
+	}
 
 }
