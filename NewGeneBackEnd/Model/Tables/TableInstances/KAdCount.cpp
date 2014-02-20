@@ -94,7 +94,8 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 											DataChangePacket_int * packet = static_cast<DataChangePacket_int *>(change.getPacket());
 											if (packet)
 											{
-												std::for_each(this->identifiers.begin(), this->identifiers.end(), [&packet, &child_identifier](WidgetInstanceIdentifier_Int_Pair & cache_identifier)
+												bool found = false;
+												std::for_each(this->identifiers.begin(), this->identifiers.end(), [&found, &packet, &child_identifier](WidgetInstanceIdentifier_Int_Pair & cache_identifier)
 												{
 													if (boost::iequals(*child_identifier.uuid, *cache_identifier.first.uuid))
 													{
@@ -105,6 +106,16 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 														return; // from lambda
 													}
 												});
+												if (!found)
+												{
+													// Must add - the DMU has no entry in the output model database's KAd selection table yet
+													WidgetInstanceIdentifier identifier_new;
+													bool found_parent = input_model_.t_dmu_category.getIdentifierFromStringCode(*child_identifier.code, identifier_new);
+													if (found_parent && identifier_new.uuid && identifier_new.uuid->size() > 0)
+													{
+														identifiers.push_back(std::make_pair(identifier_new, packet->getValue()));
+													}
+												}
 												Modify(db, *child_identifier.code, packet->getValue());
 											}
 											else
