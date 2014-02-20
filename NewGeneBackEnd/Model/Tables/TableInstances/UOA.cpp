@@ -241,6 +241,14 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 	std::string flags;
 	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, uoa)), identifiers.end());
 
+	// ***************************************** //
+	// Prepare data to send back to user interface
+	// ***************************************** //
+	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__UOA_CHANGE;
+	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+	DataChange change(type, intention, uoa, WidgetInstanceIdentifiers());
+	change_message.changes.push_back(change);
+
 	theExecutor.success();
 
 	return theExecutor.succeeded();

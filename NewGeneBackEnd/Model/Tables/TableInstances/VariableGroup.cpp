@@ -118,6 +118,14 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 		input_model_->t_vgp_data_vector.end()
 	);
 
+	// ***************************************** //
+	// Prepare data to send back to user interface
+	// ***************************************** //
+	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE;
+	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+	DataChange change(type, intention, vg, WidgetInstanceIdentifiers());
+	change_message.changes.push_back(change);
+							
 	theExecutor.success();
 
 	return theExecutor.succeeded();

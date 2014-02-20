@@ -217,6 +217,14 @@ bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, Wi
 	std::string flags;
 	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, dmu)), identifiers.end());
 
+	// ***************************************** //
+	// Prepare data to send back to user interface
+	// ***************************************** //
+	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
+	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+	DataChange change(type, intention, dmu, WidgetInstanceIdentifiers());
+	change_message.changes.push_back(change);
+
 	theExecutor.success();
 
 	return theExecutor.succeeded();

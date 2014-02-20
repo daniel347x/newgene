@@ -203,14 +203,6 @@ void UIActionManager::DeleteDMU(Messager & messager, WidgetActionItemRequest_ACT
 				msg % boost::to_upper_copy(dmu_to_delete_code);
 				messager.ShowMessageBox(msg.str());
 
-				// ***************************************** //
-				// Prepare data to send back to user interface
-				// ***************************************** //
-				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE;
-				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-				DataChange change(type, intention, dmu, WidgetInstanceIdentifiers());
-				change_response.changes.push_back(change);
-
 			});
 
 
