@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QModelIndexList>
+#include <QSortFilterProxyModel>
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
@@ -326,6 +327,9 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 
 			}
 		});
+
+		QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel(ui->listView_dmu_members);
+		proxyModel->setSourceModel(model);
 
 		model->sort(0);
 
