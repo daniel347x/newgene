@@ -3,6 +3,7 @@
 
 //#include "Widgets/newgenewidget.h"
 #include "../../NewGeneBackEnd/Utilities/WidgetIdentifier.h"
+#include "./Widgets/Utilities/qsortfilterproxymodel_numberslast.h"
 
 typedef std::pair<NewGeneWidget *, DataChangeMessage> WidgetChangeMessage;
 typedef std::vector<WidgetChangeMessage> WidgetChangeMessages;
@@ -15,6 +16,8 @@ Q_DECLARE_METATYPE(WidgetChangeMessages)
 
 Q_DECLARE_METATYPE(WidgetInstanceIdentifier)
 Q_DECLARE_METATYPE(WidgetInstanceIdentifier_Bool_Pair)
+
+Q_DECLARE_METATYPE(QSortFilterProxyModel_NumbersLast)
 
 // Widget refresh request data
 
