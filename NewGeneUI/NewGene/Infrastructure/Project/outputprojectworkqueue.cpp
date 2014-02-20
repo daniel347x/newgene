@@ -184,6 +184,9 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 	get()->getWorkService().post(GenerateOutput(action_request, this));
 }
 
+
+
+
 void OutputProjectWorkQueue::DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU action_request)
 {
 	get()->getWorkService().post(DeleteDMU_Output(action_request, this));

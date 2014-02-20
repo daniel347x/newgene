@@ -27,7 +27,7 @@ DisplayDMUsRegion::DisplayDMUsRegion(QWidget *parent) :
 
 	ui->setupUi(this);
 
-	PrepareInputWidget();
+	PrepareInputWidget(true);
 
 }
 

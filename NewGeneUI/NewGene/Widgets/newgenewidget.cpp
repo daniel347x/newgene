@@ -27,13 +27,17 @@ NewGeneWidget::~NewGeneWidget()
 {
 }
 
-void NewGeneWidget::PrepareInputWidget()
+void NewGeneWidget::PrepareInputWidget(bool const also_link_output)
 {
 	if (self == nullptr)
 	{
 		return;
 	}
 	self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)), self, SLOT(UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIInputProject *)));
+	if (also_link_output)
+	{
+		self->connect((QObject*)&projectManagerUI(), SIGNAL(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)), self, SLOT(UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE, UIOutputProject *)));
+	}
 }
 
 void NewGeneWidget::PrepareOutputWidget()
