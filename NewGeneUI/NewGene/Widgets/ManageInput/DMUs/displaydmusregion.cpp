@@ -280,14 +280,14 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 
 				QStandardItem * item = new QStandardItem();
 				QString text;
-				if (dmu_member.code && !dmu_member.code->empty())
-				{
-					text += dmu_member.code->c_str();
-				}
 				if (dmu_member.longhand && !dmu_member.longhand->empty())
 				{
+					text += dmu_member.longhand->c_str();
+				}
+				if (dmu_member.code && !dmu_member.code->empty())
+				{
 					bool use_parentheses = false;
-					if (dmu_member.code && !dmu_member.code->empty())
+					if (dmu_member.longhand && !dmu_member.longhand->empty())
 					{
 						use_parentheses = true;
 					}
@@ -295,7 +295,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 					{
 						text += " (";
 					}
-					text += dmu_member.longhand->c_str();
+					text += dmu_member.code->c_str();
 					if (use_parentheses)
 					{
 						text += ")";
