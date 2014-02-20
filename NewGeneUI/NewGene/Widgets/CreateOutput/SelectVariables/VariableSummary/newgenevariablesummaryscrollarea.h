@@ -19,6 +19,8 @@ class NewGeneVariableSummaryScrollArea : public QWidget, public NewGeneWidget //
 		explicit NewGeneVariableSummaryScrollArea( QWidget * parent = 0 );
 		~NewGeneVariableSummaryScrollArea();
 
+		void HandleChanges(DataChangeMessage const &);
+
 	protected:
 
 		void changeEvent( QEvent * e );
