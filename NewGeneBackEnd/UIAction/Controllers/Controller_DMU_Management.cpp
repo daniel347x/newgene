@@ -387,10 +387,11 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 
 			DataChangeMessage change_response(&project);
 
-			//for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
-			//{
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			{
 
-			//	WidgetInstanceIdentifier dmu_member = instanceActionItem.first;
+				WidgetInstanceIdentifier dmu_member = instanceActionItem.first;
+				int m = 0;
 
 			//	if (!dmu.code || !dmu.uuid)
 			//	{
@@ -415,7 +416,7 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 			//	DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
 			//	change_response.changes.push_back(change);
 
-			//});
+			});
 
 			//messager.EmitChangeMessage(change_response);
 
