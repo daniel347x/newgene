@@ -133,8 +133,11 @@ void NewGeneWidget::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TY
 
 	if (!IsOutputProjectWidget())
 	{
-		boost::format msg("Attempting to connect an output project to a widget that has not registered as an output widget.");
-		statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
+		//
+		// This is no longer an error!  Input widgets can optionally request to be triggered on changed output projects
+		//
+		//boost::format msg("Attempting to connect an output project to a widget that has not registered as an output widget.");
+		//statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
 		return;
 	}
 

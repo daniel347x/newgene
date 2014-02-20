@@ -89,17 +89,17 @@ void DisplayDMUsRegion::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
-		connect(this, SIGNAL(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)), outp->getConnector(), SLOT(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)));
 		if (project)
 		{
+			connect(this, SIGNAL(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)), project->getConnector(), SLOT(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)));
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
 		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
-		if (outp)
+		if (project)
 		{
-			outp->UnregisterInterestInChanges(this);
+			project->UnregisterInterestInChanges(this);
 		}
 	}
 
