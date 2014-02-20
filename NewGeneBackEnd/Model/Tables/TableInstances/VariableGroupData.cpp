@@ -494,6 +494,8 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_)
 {
 
+	Executor theExecutor(db);
+
 	if (!db)
 	{
 		return false;
@@ -515,6 +517,8 @@ bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_m
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	return true;
+	theExecutor.success();
+
+	return theExecutor.succeeded();
 
 }

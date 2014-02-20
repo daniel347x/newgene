@@ -68,6 +68,8 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg)
 {
 
+	Executor theExecutor(db);
+
 	if (!db)
 	{
 		return false;
@@ -116,7 +118,9 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 		input_model_->t_vgp_data_vector.end()
 	);
 
-	return true;
+	theExecutor.success();
+
+	return theExecutor.succeeded();
 
 }
 
