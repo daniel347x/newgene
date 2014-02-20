@@ -186,6 +186,46 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 void DisplayDMUsRegion::Empty()
 {
 
+	if (!ui->listView_dmus || !ui->listView_dmu_members)
+	{
+		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QStandardItemModel * oldModel = nullptr;
+	QItemSelectionModel * oldSelectionModel = nullptr;
+
+	oldModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	if (oldModel != nullptr)
+	{
+		delete oldModel;
+		oldModel = nullptr;
+	}
+
+	oldSelectionModel = ui->listView_dmu_members->selectionModel();
+	if (oldSelectionModel != nullptr)
+	{
+		delete oldSelectionModel;
+		oldSelectionModel = nullptr;
+	}
+
+	oldModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	if (oldModel != nullptr)
+	{
+		delete oldModel;
+		oldModel = nullptr;
+	}
+
+	oldSelectionModel = ui->listView_dmus->selectionModel();
+	if (oldSelectionModel != nullptr)
+	{
+		delete oldSelectionModel;
+		oldSelectionModel = nullptr;
+	}
+
 }
 
 void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
@@ -559,6 +599,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 				{
 					switch (change.change_intention)
 					{
+
 						case DATA_CHANGE_INTENTION__ADD:
 							{
 
@@ -591,6 +632,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
@@ -645,19 +687,24 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
 								// Should never receive this.
 							}
+							break;
+
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 								// Ditto above.
 							}
 							break;
+
 						default:
 							{
 							}
 							break;
+
 					}
 				}
 				break;

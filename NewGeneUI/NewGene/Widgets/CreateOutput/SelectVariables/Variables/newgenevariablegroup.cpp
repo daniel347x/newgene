@@ -188,6 +188,7 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 				{
 					switch (change.change_intention)
 					{
+
 						case DATA_CHANGE_INTENTION__ADD:
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
@@ -247,19 +248,24 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
 								// Should never receive this.
 							}
+							break;
+
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 								// Ditto above.
 							}
 							break;
+
 						default:
 							{
 							}
 							break;
+
 					}
 				}
 				break;

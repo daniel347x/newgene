@@ -147,11 +147,13 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 				{
 					switch (change.change_intention)
 					{
+
 						case DATA_CHANGE_INTENTION__ADD:
 							{
 
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
@@ -200,19 +202,24 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 
 							}
 							break;
+
 						case DATA_CHANGE_INTENTION__UPDATE:
 							{
 								// Should never receive this.
 							}
+							break;
+
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
 								// Ditto above.
 							}
 							break;
+
 						default:
 							{
 							}
 							break;
+
 					}
 				}
 				break;
