@@ -27,6 +27,7 @@ class UIActionManager : public Manager<UIActionManager, MANAGER_DESCRIPTION_NAME
 
 		void AddDMU(Messager & messager, WidgetActionItemRequest_ACTION_ADD_DMU const & action_request, InputProject & project);
 		void DeleteDMU(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_DMU const & action_request, InputProject & project);
+		void DeleteDMUOutput(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_DMU const & action_request, OutputProject & project);
 		void AddDMUMembers(Messager & messager, WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS const & action_request, InputProject & project);
 		void DeleteDMUMembers(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS const & action_request, InputProject & project);
 		void RefreshDMUsFromFile(Messager & messager, WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE const & action_request, InputProject & project);

@@ -50,6 +50,9 @@ void InputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDG
 
 
 
+/************************************************************************/
+// DMU MANAGEMENT
+/************************************************************************/
 
 void InputProjectWorkQueue::AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU action_request)
 {
@@ -75,3 +78,4 @@ void InputProjectWorkQueue::RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_R
 {
 	get()->getWorkService().post(RefreshDMUsFromFile_(action_request, this));
 }
+

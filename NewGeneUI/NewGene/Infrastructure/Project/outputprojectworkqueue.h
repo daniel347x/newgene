@@ -101,6 +101,8 @@ class OutputProjectWorkQueue : public WorkQueueManager<UI_OUTPUT_PROJECT>
 		void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE);
 		void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_GENERATE_OUTPUT);
 
+		void DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU);
+
 };
 
 #endif // OUTPUTPROJECTWORKQUEUE_H

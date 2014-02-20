@@ -218,6 +218,90 @@ void UIActionManager::DeleteDMU(Messager & messager, WidgetActionItemRequest_ACT
 
 }
 
+void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_DMU const & action_request, OutputProject & project)
+{
+
+	if (FailIfBusy(messager))
+	{
+		return;
+	}
+
+	BOOST_SCOPE_EXIT(this_)
+	{
+		this_->EndFailIfBusy();
+	} BOOST_SCOPE_EXIT_END
+
+	if (!action_request.items)
+	{
+		return;
+	}
+
+	OutputModel & output_model = project.model();
+	InputModel & input_model = output_model.getInputModel();
+
+	switch (action_request.reason)
+	{
+
+		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
+		{
+
+			DataChangeMessage change_response(&project);
+
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&output_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			{
+
+				WidgetInstanceIdentifier dmu = instanceActionItem.first;
+
+				if (!dmu.code || !dmu.uuid)
+				{
+					boost::format msg("Missing the DMU category to delete.");
+					messager.ShowMessageBox(msg.str());
+					return;
+				}
+
+				// ************************************* //
+				// Retrieve data sent by user interface
+				// ************************************* //
+				std::string dmu_to_delete_code = *dmu.code;
+				std::string dmu_to_delete_uuid = *dmu.uuid;
+
+				// The INPUT model does the bulk of the deleting,
+				// and informs the UI.
+				// Here, we just want to clear a couple things in the output database.
+
+				output_model.t_kad_count.Remove(output_model.getDb(), *dmu.code);
+
+				WidgetInstanceIdentifiers uoas = input_model.t_uoa_setmemberlookup.RetrieveUOAsGivenDMU(input_model.getDb(), &input_model, dmu);
+				std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
+				{
+					if (uoa.uuid)
+					{
+						WidgetInstanceIdentifiers vgs(input_model.t_vgp_identifiers.RetrieveVGsFromUOA(input_model.getDb(), &input_model, *uoa.uuid));
+						std::for_each(vgs.cbegin(), vgs.cend(), [&](WidgetInstanceIdentifier const & vg)
+						{
+							if (vg.code)
+							{
+								output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), *vg.code);
+							}
+						});
+					}
+				});
+
+			});
+
+
+			messager.EmitChangeMessage(change_response);
+
+		}
+		break;
+
+		default:
+			break;
+
+	}
+
+}
+
 void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS const & action_request, InputProject & project)
 {
 

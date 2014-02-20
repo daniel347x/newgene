@@ -237,6 +237,27 @@ void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_m
 	}
 }
 
+void Table_VARIABLES_SELECTED::RemoveAllfromVG(sqlite3 * db, std::string const & vg_category_code)
+{
+	std::string sqlRemove("DELETE FROM VG_SET_MEMBERS_SELECTED WHERE ");
+	sqlRemove += VG_CATEGORY_STRING_CODE;
+	sqlRemove += "='";
+	sqlRemove += vg_category_code;
+	sqlRemove += "'";
+	sqlite3_stmt * stmt = NULL;
+	sqlite3_prepare_v2(db, sqlRemove.c_str(), static_cast<int>(sqlRemove.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		return;
+	}
+	sqlite3_step(stmt);
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+}
+
 Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSelectedVariablesByUOA(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
 {
 	

@@ -49,6 +49,25 @@ class DeleteDMU_ : public DoInputAction<ACTION_DELETE_DMU>
 
 };
 
+class DeleteDMU_Output : public DoOutputAction<ACTION_DELETE_DMU>
+{
+
+	public:
+
+		DeleteDMU_Output(WidgetActionItemRequest_ACTION_DELETE_DMU & action_request_, OutputProjectWorkQueue * queue_)
+			: DoOutputAction<ACTION_DELETE_DMU>(static_cast<WidgetActionItemRequest_ACTION_DELETE_DMU>(action_request_), queue_)
+		{
+
+		}
+
+		void operator()()
+		{
+			UIMessagerSingleShot messager(queue->get()->messager);
+			uiactionManagerUI().getBackendManager().DeleteDMUOutput(messager.get(), action_request, queue->get()->backend());
+		}
+
+};
+
 class AddDMUMembers_ : public DoInputAction<ACTION_ADD_DMU_MEMBERS>
 {
 
