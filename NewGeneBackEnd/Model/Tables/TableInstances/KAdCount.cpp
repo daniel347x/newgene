@@ -162,7 +162,7 @@ void Table_KAD_COUNT::Add(sqlite3 * db, std::string const & dmu_category_code, i
 	sqlAdd += ") VALUES ('";
 	sqlAdd += dmu_category_code;
 	sqlAdd += "',";
-	sqlAdd += value_;
+	sqlAdd += boost::lexical_cast<std::string>(value_);
 	sqlAdd += ")";
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sqlAdd.c_str(), static_cast<int>(sqlAdd.size()) + 1, &stmt, NULL);
