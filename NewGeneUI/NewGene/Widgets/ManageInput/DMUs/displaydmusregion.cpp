@@ -549,8 +549,8 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 		return;
 	}
 
-	QItemSelectionModel * dmu_selectionModel = ui->listView_dmus->selectionModel();
-	if (dmu_selectionModel == nullptr)
+	QItemSelectionModel * dmu_members_selectionModel = ui->listView_dmu_members->selectionModel();
+	if (dmu_members_selectionModel == nullptr)
 	{
 		boost::format msg("Invalid selection in DisplayDMUsRegion widget.");
 		QMessageBox msgBox;
@@ -559,9 +559,9 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 		return;
 	}
 
-	QModelIndexList selectedDmuMembers = dmu_selectionModel->selectedRows();
+	QModelIndexList selectedDmuMembers = dmu_members_selectionModel->selectedRows();
 
-	QStandardItemModel * dmuMembersModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	QSortFilterProxyModel * dmuMembersModel = static_cast<QSortFilterProxyModel*>(ui->listView_dmu_members->model());
 	if (dmuMembersModel == nullptr)
 	{
 		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
@@ -571,6 +571,17 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 		return;
 	}
 
+	QStandardItemModel * model = nullptr;
+	try
+	{
+		model = dynamic_cast<QStandardItemModel *>(dmuMembersModel->sourceModel());
+	}
+	catch (std::bad_cast &)
+	{
+		boost::format msg("Unable to obtain model for DMU member list.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
 	InstanceActionItems actionItems;
 
 	for (int i = 0; i < selectedDmuMembers.size(); ++i)
@@ -578,7 +589,7 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 
 		QModelIndex selectedIndex = selectedDmuMembers.at(i);
 
-		QVariant dmu_member_variant = dmuMembersModel->item(selectedIndex.row())->data();
+		QVariant dmu_member_variant = model->item(selectedIndex.row())->data();
 		WidgetInstanceIdentifier dmu_member = dmu_member_variant.value<WidgetInstanceIdentifier>();
 
 		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu_member), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu_member)))));
