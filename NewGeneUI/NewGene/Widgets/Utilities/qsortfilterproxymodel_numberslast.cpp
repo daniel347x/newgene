@@ -76,29 +76,29 @@ bool QSortFilterProxyModel_NumbersLast::lessThan(const QModelIndex &left, const 
 	if (has_text_left && has_text_right)
 	{
 		// compare by text, for both
-		if (has_code_left && has_code_right)
+		if (has_description_left && has_description_right)
 		{
-			return boost::lexicographical_compare(*identifierLeft.code, *identifierRight.code);
+			return boost::lexicographical_compare(*identifierLeft.longhand, *identifierRight.longhand);
 		}
-		else if (has_code_left && !has_code_right)
+		else if (has_description_left && !has_description_right)
 		{
 			return true;
 		}
-		else if (!has_code_left && has_code_right)
+		else if (!has_description_left && has_description_right)
 		{
 			return false;
 		}
 		else
 		{
-			if (has_description_left && has_description_right)
+			if (has_code_left && has_code_right)
 			{
-				return boost::lexicographical_compare(*identifierLeft.longhand, *identifierRight.longhand);
+				return boost::lexicographical_compare(*identifierLeft.code, *identifierRight.code);
 			}
-			else if (has_description_left && !has_description_right)
+			else if (has_code_left && !has_code_right)
 			{
 				return true;
 			}
-			else if (!has_description_left && has_description_right)
+			else if (!has_code_left && has_code_right)
 			{
 				return false;
 			}
