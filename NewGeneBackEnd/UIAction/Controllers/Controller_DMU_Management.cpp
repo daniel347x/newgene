@@ -382,7 +382,14 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 
 	switch (action_request.reason)
 	{
+
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
+		{
+
+		}
+			break;
+
+		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
 		{
 
 			DataChangeMessage change_response(&project);
@@ -393,28 +400,28 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 				WidgetInstanceIdentifier dmu_member = instanceActionItem.first;
 				int m = 0;
 
-			//	if (!dmu.code || !dmu.uuid)
-			//	{
-			//		boost::format msg("Missing the DMU to delete.");
-			//		messager.ShowMessageBox(msg.str());
-			//		return;
-			//	}
+				//	if (!dmu.code || !dmu.uuid)
+				//	{
+				//		boost::format msg("Missing the DMU to delete.");
+				//		messager.ShowMessageBox(msg.str());
+				//		return;
+				//	}
 
-			//	// ************************************* //
-			//	// Retrieve data sent by user interface
-			//	// ************************************* //
-			//	std::string dmu_member_to_delete_code = *dmu.code;
-			//	std::string dmu_member_to_delete_uuid = *dmu.uuid;
+				//	// ************************************* //
+				//	// Retrieve data sent by user interface
+				//	// ************************************* //
+				//	std::string dmu_member_to_delete_code = *dmu.code;
+				//	std::string dmu_member_to_delete_uuid = *dmu.uuid;
 
-			//	//input_model.t_dmu_setmembers.
+				//	//input_model.t_dmu_setmembers.
 
-			//	// ***************************************** //
-			//	// Prepare data to send back to user interface
-			//	// ***************************************** //
-			//	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-			//	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-			//	DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
-			//	change_response.changes.push_back(change);
+				//	// ***************************************** //
+				//	// Prepare data to send back to user interface
+				//	// ***************************************** //
+				//	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+				//	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+				//	DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
+				//	change_response.changes.push_back(change);
 
 			});
 
@@ -422,11 +429,7 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 
 		}
 			break;
-		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
-		{
 
-		}
-			break;
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 		{
 
