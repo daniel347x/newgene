@@ -163,7 +163,7 @@ bool Table_DMU_Identifier::CreateNewDMU(sqlite3 * db, InputModel & input_model_,
 
 }
 
-bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier & dmu)
+bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier & dmu, DataChangeMessage & change_message)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -186,7 +186,7 @@ bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, Wi
 	WidgetInstanceIdentifiers uoas = input_model_.t_uoa_setmemberlookup.RetrieveUOAsGivenDMU(db, &input_model_, dmu);
 	std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
 	{
-		input_model_.t_uoa_category.DeleteUOA(db, input_model_, uoa);
+		input_model_.t_uoa_category.DeleteUOA(db, input_model_, uoa, change_message);
 	});
 
 	sqlite3_stmt * stmt = NULL;

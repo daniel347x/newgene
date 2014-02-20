@@ -49,7 +49,7 @@ class Table_UOA_Identifier : public Table<TABLE__UOA_IDENTIFIER, TABLE_INSTANCE_
 		DMU_Counts RetrieveDMUCounts(sqlite3 const * db, InputModel * input_model_, UUID const & uuid);
 
 		bool Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, bool const also_confirm_using_cache = true);
-		bool DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa);
+		bool DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, DataChangeMessage & change_message);
 
 };
 

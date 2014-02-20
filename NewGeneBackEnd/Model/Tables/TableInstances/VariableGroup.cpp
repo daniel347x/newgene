@@ -65,7 +65,7 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 
 }
 
-bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg)
+bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, DataChangeMessage & change_message)
 {
 
 	Executor theExecutor(db);
@@ -91,7 +91,7 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 		{
 			if (boost::iequals(*vg.code, vg_instance_table->vg_category_string_code))
 			{
-				vg_instance_table->DeleteDataTable(db, input_model_);
+				vg_instance_table->DeleteDataTable(db, input_model_, change_message);
 			}
 		}
 	});

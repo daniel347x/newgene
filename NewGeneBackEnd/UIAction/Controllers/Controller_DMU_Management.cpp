@@ -191,7 +191,7 @@ void UIActionManager::DeleteDMU(Messager & messager, WidgetActionItemRequest_ACT
 					return;
 				}
 
-				bool dmu_successfully_deleted = input_model.t_dmu_category.DeleteDMU(input_model.getDb(), input_model, dmu);
+				bool dmu_successfully_deleted = input_model.t_dmu_category.DeleteDMU(input_model.getDb(), input_model, dmu, change_response);
 
 				if (!dmu_successfully_deleted)
 				{

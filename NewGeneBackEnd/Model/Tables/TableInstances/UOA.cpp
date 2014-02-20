@@ -185,7 +185,7 @@ bool Table_UOA_Identifier::Exists(sqlite3 * db, InputModel & input_model_, Widge
 
 }
 
-bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa)
+bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, DataChangeMessage & change_message)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -210,7 +210,7 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 	WidgetInstanceIdentifiers vgs_to_delete = input_model_.t_vgp_identifiers.RetrieveVGsFromUOA(db, &input_model_, *uoa.uuid);
 	std::for_each(vgs_to_delete.cbegin(), vgs_to_delete.cend(), [&](WidgetInstanceIdentifier const & vg_to_delete)
 	{
-		input_model_.t_vgp_identifiers.DeleteVG(db, &input_model_, vg_to_delete);
+		input_model_.t_vgp_identifiers.DeleteVG(db, &input_model_, vg_to_delete, change_message);
 	});
 
 	sqlite3_stmt * stmt = NULL;

@@ -491,7 +491,7 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 	}
 }
 
-bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_)
+bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_, DataChangeMessage & change_message)
 {
 
 	Executor theExecutor(db);
