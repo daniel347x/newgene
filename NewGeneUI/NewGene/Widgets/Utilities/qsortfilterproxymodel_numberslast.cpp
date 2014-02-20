@@ -7,6 +7,8 @@
 #	include <boost/algorithm/string.hpp>
 #endif
 
+#include <QStandardItemModel>
+
 QSortFilterProxyModel_NumbersLast::QSortFilterProxyModel_NumbersLast(QObject * parent)
 	: QSortFilterProxyModel(parent)
 {
@@ -15,11 +17,25 @@ QSortFilterProxyModel_NumbersLast::QSortFilterProxyModel_NumbersLast(QObject * p
 bool QSortFilterProxyModel_NumbersLast::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
 
-	QVariant leftData = sourceModel()->data(left);
-	QVariant rightData = sourceModel()->data(right);
+	QStandardItemModel * model = nullptr;
+	try
+	{
+		model = dynamic_cast<QStandardItemModel *>(sourceModel());
+	}
+	catch (std::bad_cast &)
+	{
+		boost::format msg("Unable to obtain model for DMU member list.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
 
-	WidgetInstanceIdentifier identifierLeft = leftData.value<WidgetInstanceIdentifier>();
-	WidgetInstanceIdentifier identifierRight = rightData.value<WidgetInstanceIdentifier>();
+	WidgetInstanceIdentifier identifierLeft = model->item(left.row())->data().value<WidgetInstanceIdentifier>();
+	WidgetInstanceIdentifier identifierRight = model->item(right.row())->data().value<WidgetInstanceIdentifier>();
+
+	// ************************************************************************************************************ //
+	// WHY doesn't the following work?
+	// ************************************************************************************************************ //
+	//WidgetInstanceIdentifier identifierLeft = sourceModel()->data(left).value<WidgetInstanceIdentifier>();
+	//WidgetInstanceIdentifier identifierRight = sourceModel()->data(right).value<WidgetInstanceIdentifier>();
 
 	bool has_code_left = false;
 	if (identifierLeft.code && !identifierLeft.code->empty())
