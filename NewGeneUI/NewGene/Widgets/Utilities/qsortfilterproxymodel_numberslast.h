@@ -10,7 +10,7 @@ class QSortFilterProxyModel_NumbersLast : public QSortFilterProxyModel
 
 	public:
 
-		QSortFilterProxyModel_NumbersLast(QObject * parent);
+		QSortFilterProxyModel_NumbersLast(QObject * parent = nullptr);
 
 		bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
