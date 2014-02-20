@@ -6,10 +6,10 @@
 class QSortFilterProxyModel_NumbersLast : public QSortFilterProxyModel
 {
 
-    public:
-        QSortFilterProxyModel_NumbersLast();
+	public:
+		QSortFilterProxyModel_NumbersLast();
 
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const
+	bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
 };
 
