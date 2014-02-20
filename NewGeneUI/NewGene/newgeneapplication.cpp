@@ -14,8 +14,6 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetInstanceIdentifier>("WidgetInstanceIdentifier");
 	qRegisterMetaType<WidgetInstanceIdentifier_Bool_Pair>("WidgetInstanceIdentifier_Bool_Pair");
 
-	qRegisterMetaType<QSortFilterProxyModel_NumbersLast>("QSortFilterProxyModel_NumbersLast");
-
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA>("WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA");
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX>("WidgetDataItemRequest_VARIABLE_GROUPS_TOOLBOX");
 	qRegisterMetaType<WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE>("WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE");

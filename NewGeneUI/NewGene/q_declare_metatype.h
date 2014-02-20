@@ -17,8 +17,6 @@ Q_DECLARE_METATYPE(WidgetChangeMessages)
 Q_DECLARE_METATYPE(WidgetInstanceIdentifier)
 Q_DECLARE_METATYPE(WidgetInstanceIdentifier_Bool_Pair)
 
-Q_DECLARE_METATYPE(QSortFilterProxyModel_NumbersLast)
-
 // Widget refresh request data
 
 Q_DECLARE_METATYPE(WidgetDataItemRequest_VARIABLE_GROUPS_SCROLL_AREA)

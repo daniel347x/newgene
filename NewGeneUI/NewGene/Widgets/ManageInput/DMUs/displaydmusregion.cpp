@@ -671,10 +671,13 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel](DataChange const & change)
 	{
+
 		switch (change.change_type)
 		{
+
 			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE:
 				{
+
 					switch (change.change_intention)
 					{
 
@@ -786,13 +789,17 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 							break;
 
 					}
+
 				}
 				break;
+
 			default:
 				{
 				}
 				break;
+
 		}
+
 	});
 
 	itemModel->sort(0);
