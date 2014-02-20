@@ -8,6 +8,7 @@
 #include "../UIAction/KAdCountChange.h"
 #include "../UIAction/TimeRangeChange.h"
 #include "../UIAction/GenerateOutput.h"
+#include "../UIAction/dmumanagement.h"
 #include <QStandardItem>
 
 OutputProjectWorkQueue::OutputProjectWorkQueue(QObject * parent)
