@@ -273,13 +273,15 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 		int index = 0;
 		std::for_each(dmu_members.cbegin(), dmu_members.cend(), [this, &index, &model](WidgetInstanceIdentifier const & dmu_member)
 		{
-			if ((dmu_member.code && !dmu_member.code->empty())
-				||
-				(dmu_member.longhand && !dmu_member.longhand->empty()))
+			if (dmu_member.uuid && !dmu_member.uuid->empty())
 			{
 
 				QStandardItem * item = new QStandardItem();
-				QString text(dmu_member.code->c_str());
+				QString text;
+				if (dmu_member.code && !dmu_member.code->empty())
+				{
+					text += dmu_member.code->c_str();
+				}
 				if (dmu_member.longhand && !dmu_member.longhand->empty())
 				{
 					bool use_parentheses = false;
@@ -297,6 +299,21 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 						text += ")";
 					}
 				}
+				bool use_parentheses = false;
+				if ((dmu_member.code && !dmu_member.code->empty()) || (dmu_member.longhand && !dmu_member.longhand->empty()))
+				{
+					use_parentheses = true;
+				}
+				if (use_parentheses)
+				{
+					text += " (";
+				}
+				text += *dmu_member.uuid;
+				if (use_parentheses)
+				{
+					text += ")";
+				}
+
 				item->setText(text);
 				item->setEditable(false);
 				item->setCheckable(true);
