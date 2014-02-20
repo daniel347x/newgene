@@ -5,7 +5,8 @@
 #	include <boost/algorithm/string.hpp>
 #endif
 
-QSortFilterProxyModel_NumbersLast::QSortFilterProxyModel_NumbersLast()
+QSortFilterProxyModel_NumbersLast::QSortFilterProxyModel_NumbersLast(QObject * parent)
+    : QSortFilterProxyModel(parent)
 {
 }
 
