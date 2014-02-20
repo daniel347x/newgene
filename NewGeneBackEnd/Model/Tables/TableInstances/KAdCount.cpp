@@ -99,6 +99,7 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 												{
 													if (boost::iequals(*child_identifier.uuid, *cache_identifier.first.uuid))
 													{
+														found = true;
 														if (packet->getValue() != cache_identifier.second)
 														{
 															cache_identifier.second = packet->getValue();
