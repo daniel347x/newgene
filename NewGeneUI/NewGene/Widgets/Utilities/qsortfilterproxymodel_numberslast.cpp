@@ -1,5 +1,7 @@
 #include "qsortfilterproxymodel_numberslast.h"
 #include "../../../../NewGeneBackEnd/Utilities/WidgetIdentifier.h"
+#include "../../Infrastructure/Project/uiprojectmanager.h"
+#include "../../Infrastructure/Project/uiinputproject.h"
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
