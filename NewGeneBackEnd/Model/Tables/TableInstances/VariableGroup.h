@@ -45,6 +45,8 @@ class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY, TABLE_INSTANCE_IDENTI
 		// For a given UOA, retrieve its VGs
 		WidgetInstanceIdentifiers RetrieveVGsFromUOA(sqlite3 * db, InputModel * input_model_, UUID const & uuid);
 
+		bool DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg);
+
 };
 
 class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>

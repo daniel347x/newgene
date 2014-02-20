@@ -65,6 +65,61 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 
 }
 
+bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg)
+{
+
+	if (!db)
+	{
+		return false;
+	}
+
+	if (!input_model_)
+	{
+		return false;
+	}
+
+	if (!vg.code)
+	{
+		return false;
+	}
+
+	std::for_each(input_model_->t_vgp_data_vector.begin(), input_model_->t_vgp_data_vector.end(), [&](std::unique_ptr<Table_VariableGroupData> & vg_instance_table)
+	{
+		if (vg_instance_table)
+		{
+			if (boost::iequals(*vg.code, vg_instance_table->vg_category_string_code))
+			{
+				vg_instance_table->DeleteDataTable(db, input_model_);
+			}
+		}
+	});
+
+	input_model_->t_vgp_data_vector.erase
+	(
+		std::remove_if(
+			input_model_->t_vgp_data_vector.begin(),
+			input_model_->t_vgp_data_vector.end(),
+			std::bind(
+						[&](std::unique_ptr<Table_VariableGroupData> & vg_instance_table, WidgetInstanceIdentifier const & vg_to_delete_)
+							{
+								bool vg_matches = false;
+								if (vg_instance_table && boost::iequals(vg_instance_table->vg_category_string_code, *vg_to_delete_.code))
+								{
+									vg_matches = true;
+								}
+								return vg_matches;
+							},
+						std::placeholders::_1,
+						vg
+					)
+		),
+		input_model_->t_vgp_data_vector.end()
+	);
+
+	return true;
+
+}
+
 WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, InputModel * input_model_, UUID const & uuid)
 {
 
