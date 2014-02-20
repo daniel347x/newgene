@@ -5,16 +5,16 @@
 #	include <boost/algorithm/string.hpp>
 #endif
 
-QSortFilterProxyModel_NumbersLast::QSortFilterProxyModel_NumbersLast()
-    : QSortFilterProxyModel(nullptr)
+QSortFilterProxyModel_NumbersLast::QSortFilterProxyModel_NumbersLast(QObject * parent)
+	: QSortFilterProxyModel(parent)
 {
 }
 
 bool QSortFilterProxyModel_NumbersLast::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
 
-    QVariant leftData = sourceModel()->data(left);
-    QVariant rightData = sourceModel()->data(right);
+	QVariant leftData = sourceModel()->data(left);
+	QVariant rightData = sourceModel()->data(right);
 
 	WidgetInstanceIdentifier identifierLeft = leftData.value<WidgetInstanceIdentifier>();
 	WidgetInstanceIdentifier identifierRight = rightData.value<WidgetInstanceIdentifier>();
