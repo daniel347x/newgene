@@ -549,18 +549,6 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 		return;
 	}
 
-	QItemSelectionModel * dmu_members_selectionModel = ui->listView_dmu_members->selectionModel();
-	if (dmu_members_selectionModel == nullptr)
-	{
-		boost::format msg("Invalid selection in DisplayDMUsRegion widget.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-	QModelIndexList selectedDmuMembers = dmu_members_selectionModel->selectedRows();
-
 	QSortFilterProxyModel * dmuMembersModel = static_cast<QSortFilterProxyModel*>(ui->listView_dmu_members->model());
 	if (dmuMembersModel == nullptr)
 	{
@@ -584,15 +572,16 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 
 	InstanceActionItems actionItems;
 
-	for (int i = 0; i < selectedDmuMembers.size(); ++i)
+	for (int i = 0; i < dmuMembersModel->rowCount(); ++i)
 	{
 
-		QModelIndex selectedIndex = selectedDmuMembers.at(i);
-
-		QVariant dmu_member_variant = model->item(selectedIndex.row())->data();
-		WidgetInstanceIdentifier dmu_member = dmu_member_variant.value<WidgetInstanceIdentifier>();
-
-		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu_member), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu_member)))));
+		QModelIndex testIndex = dmuMembersModel->index(i, 0);
+		QStandardItem * testItem = model->item(testIndex.row());
+		if (item->checkState() == Qt::Checked)
+		{
+			WidgetInstanceIdentifier dmu_member = testItem->data().value<WidgetInstanceIdentifier>();
+			actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu_member), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu_member)))));
+		}
 
 	}
 
