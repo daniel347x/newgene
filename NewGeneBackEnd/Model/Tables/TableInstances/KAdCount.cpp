@@ -177,7 +177,7 @@ void Table_KAD_COUNT::Add(sqlite3 * db, std::string const & dmu_category_code, i
 
 void Table_KAD_COUNT::Remove(sqlite3 * db, std::string const & dmu_category_code)
 {
-	std::string sqlRemove("DELETE FROM VG_SET_MEMBERS_SELECTED WHERE ");
+	std::string sqlRemove("DELETE FROM KAD_COUNT WHERE ");
 	sqlRemove += KAD_COUNT__DMU_CATEGORY_STRING_CODE;
 	sqlRemove += "='";
 	sqlRemove += dmu_category_code;
