@@ -10,6 +10,7 @@
 #include <QString>
 #include <QLabel>
 #include <QDialogButtonBox>
+#include <QModelIndexList>
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
@@ -495,20 +496,75 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 
 void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 {
-	WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS dummy;
-	emit AddDMUMembers(dummy);
+    //WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
+    //emit RefreshDMUsFromFile(action_request);
 }
 
 void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 {
-	WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS dummy;
-	emit DeleteDMUMembers(dummy);
+	WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS dummy;
+	emit AddDMUMembers(dummy);
 }
 
 void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 {
-	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE dummy;
-	emit RefreshDMUsFromFile(dummy);
+
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
+	if (!ui->listView_dmus || !ui->listView_dmu_members)
+	{
+		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QItemSelectionModel * dmu_selectionModel = ui->listView_dmus->selectionModel();
+	if (dmu_selectionModel == nullptr)
+	{
+		boost::format msg("Invalid selection in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QModelIndexList selectedDmuMembers = dmu_selectionModel->selectedRows();
+
+    QStandardItemModel * dmuMembersModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+    if (dmuMembersModel == nullptr)
+    {
+        boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
+        QMessageBox msgBox;
+        msgBox.setText( msg.str().c_str() );
+        msgBox.exec();
+        return;
+    }
+
+    InstanceActionItems actionItems;
+
+    for (int i = 0; i < selectedDmuMembers.size(); ++i)
+    {
+
+        QModelIndex selectedIndex = selectedDmuMembers.at(i);
+
+        QVariant dmu_member_variant = dmuMembersModel->item(selectedIndex.row())->data();
+        WidgetInstanceIdentifier dmu_member = dmu_member_variant.value<WidgetInstanceIdentifier>();
+
+        actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu_member), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu_member)))));
+
+    }
+
+	WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
+	emit DeleteDMUMembers(action_request);
+
 }
 
 void DisplayDMUsRegion::on_pushButton_deselect_all_dmu_members_clicked()

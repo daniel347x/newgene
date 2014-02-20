@@ -289,7 +289,6 @@ void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemReque
 
 			});
 
-
 			messager.EmitChangeMessage(change_response);
 
 		}
@@ -379,12 +378,46 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 		return;
 	}
 
-	InputModel & output_model = project.model();
+	InputModel & input_model = project.model();
 
 	switch (action_request.reason)
 	{
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
 		{
+
+			DataChangeMessage change_response(&project);
+
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			{
+
+				WidgetInstanceIdentifier dmu_member = instanceActionItem.first;
+
+				if (!dmu.code || !dmu.uuid)
+				{
+					boost::format msg("Missing the DMU to delete.");
+					messager.ShowMessageBox(msg.str());
+					return;
+				}
+
+				// ************************************* //
+				// Retrieve data sent by user interface
+				// ************************************* //
+				std::string dmu_member_to_delete_code = *dmu.code;
+				std::string dmu_member_to_delete_uuid = *dmu.uuid;
+
+				//input_model.t_dmu_setmembers.
+
+				// ***************************************** //
+				// Prepare data to send back to user interface
+				// ***************************************** //
+				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+				DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
+				change_response.changes.push_back(change);
+
+			});
+
+			messager.EmitChangeMessage(change_response);
 
 		}
 			break;
@@ -395,20 +428,6 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 			break;
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 		{
-
-			DataChangeMessage change_response(&project);
-
-			// ***************************************** //
-			// Prepare data to send back to user interface
-			// ***************************************** //
-			DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-			DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-			WidgetInstanceIdentifiers child_identifiers;
-			DataChange change(type, intention, WidgetInstanceIdentifier(), child_identifiers);
-			change.SetPacket(std::make_shared<DataChangePacket_int>(77));
-			change_response.changes.push_back(change);
-
-			messager.EmitChangeMessage(change_response);
 
 		}
 			break;
