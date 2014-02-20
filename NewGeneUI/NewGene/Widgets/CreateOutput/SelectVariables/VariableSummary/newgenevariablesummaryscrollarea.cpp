@@ -60,6 +60,20 @@ void NewGeneVariableSummaryScrollArea::UpdateOutputConnections(NewGeneWidget::UP
 void NewGeneVariableSummaryScrollArea::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project)
 {
 	NewGeneWidget::UpdateInputConnections(connection_type, project);
+	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_INPUT_PROJECT)
+	{
+		if (project)
+		{
+			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE, false, "");
+		}
+	}
+	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
+	{
+		if (inp)
+		{
+			inp->UnregisterInterestInChanges(this);
+		}
+	}
 }
 
 void NewGeneVariableSummaryScrollArea::RefreshAllWidgets()
@@ -111,4 +125,102 @@ void NewGeneVariableSummaryScrollArea::Empty()
 		delete child->widget();
 		delete child;
 	}
+}
+
+
+void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & change_message)
+{
+
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
+	{
+		switch (change.change_type)
+		{
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE:
+				{
+					switch (change.change_intention)
+					{
+						case DATA_CHANGE_INTENTION__ADD:
+							{
+
+							}
+							break;
+						case DATA_CHANGE_INTENTION__REMOVE:
+							{
+
+								if (change.parent_identifier.code && change.parent_identifier.uuid)
+								{
+
+									WidgetInstanceIdentifier vg_to_remove(change.parent_identifier);
+
+									int current_number = layout()->count();
+									bool found = false;
+									QWidget * widgetToRemove = nullptr;
+									QLayoutItem * layoutItemToRemove = nullptr;
+									int i = 0;
+									for (i=0; i<current_number; ++i)
+									{
+										QLayoutItem * testLayoutItem = layout()->itemAt(i);
+										QWidget * testWidget(testLayoutItem->widget());
+										try
+										{
+											NewGeneVariableSummaryGroup * testVG = dynamic_cast<NewGeneVariableSummaryGroup*>(testWidget);
+											if (testVG->data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg_to_remove))
+											{
+												widgetToRemove = testVG;
+												layoutItemToRemove = testLayoutItem;
+												found = true;
+												break;
+											}
+										}
+										catch (std::bad_cast &)
+										{
+											// guess not
+										}
+
+									}
+
+									if (found && widgetToRemove != nullptr)
+									{
+										layout()->takeAt(i);
+										delete widgetToRemove;
+										delete layoutItemToRemove;
+										widgetToRemove = nullptr;
+										layoutItemToRemove = nullptr;
+									}
+
+								}
+
+							}
+							break;
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								// Should never receive this.
+							}
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+								// Ditto above.
+							}
+							break;
+						default:
+							{
+							}
+							break;
+					}
+				}
+				break;
+			default:
+				{
+				}
+				break;
+		}
+	});
+
 }
