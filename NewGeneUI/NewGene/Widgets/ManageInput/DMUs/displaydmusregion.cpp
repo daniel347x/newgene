@@ -20,6 +20,7 @@
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
+#include "../../Utilities/qsortfilterproxymodel_numberslast.h"
 
 DisplayDMUsRegion::DisplayDMUsRegion(QWidget *parent) :
 	QWidget(parent),
@@ -751,6 +752,8 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 											{
 												delete dmuSetMembersModel;
 												QStandardItemModel * model = new QStandardItemModel(ui->listView_dmu_members);
+												QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel(ui->listView_dmu_members);
+												proxyModel->setSourceModel(model);
 												ui->listView_dmu_members->setModel(model);
 												if (oldDmuSetMembersSelectionModel)
 												{
