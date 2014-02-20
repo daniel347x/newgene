@@ -308,7 +308,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 				{
 					text += " (";
 				}
-				text += *dmu_member.uuid;
+				text += dmu_member.uuid->c_str();
 				if (use_parentheses)
 				{
 					text += ")";
@@ -513,8 +513,8 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 
 void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 {
-    //WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
-    //emit RefreshDMUsFromFile(action_request);
+	//WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
+	//emit RefreshDMUsFromFile(action_request);
 }
 
 void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
@@ -555,29 +555,29 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 
 	QModelIndexList selectedDmuMembers = dmu_selectionModel->selectedRows();
 
-    QStandardItemModel * dmuMembersModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
-    if (dmuMembersModel == nullptr)
-    {
-        boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	QStandardItemModel * dmuMembersModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	if (dmuMembersModel == nullptr)
+	{
+		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
 
-    InstanceActionItems actionItems;
+	InstanceActionItems actionItems;
 
-    for (int i = 0; i < selectedDmuMembers.size(); ++i)
-    {
+	for (int i = 0; i < selectedDmuMembers.size(); ++i)
+	{
 
-        QModelIndex selectedIndex = selectedDmuMembers.at(i);
+		QModelIndex selectedIndex = selectedDmuMembers.at(i);
 
-        QVariant dmu_member_variant = dmuMembersModel->item(selectedIndex.row())->data();
-        WidgetInstanceIdentifier dmu_member = dmu_member_variant.value<WidgetInstanceIdentifier>();
+		QVariant dmu_member_variant = dmuMembersModel->item(selectedIndex.row())->data();
+		WidgetInstanceIdentifier dmu_member = dmu_member_variant.value<WidgetInstanceIdentifier>();
 
-        actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu_member), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu_member)))));
+		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu_member), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu_member)))));
 
-    }
+	}
 
 	WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
 	emit DeleteDMUMembers(action_request);
