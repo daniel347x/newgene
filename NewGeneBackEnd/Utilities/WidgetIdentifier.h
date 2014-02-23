@@ -259,6 +259,19 @@ public:
 
 	bool IsEqual(EQUALITY_CHECK_TYPE const check_type, WidgetInstanceIdentifier const & rhs) const
 	{
+
+		// Empty check
+		if (!uuid && !rhs.uuid)
+		{
+			// both are default (empty) WidgetInstanceIdentifiers
+			return true;
+		}
+		if (uuid && rhs.uuid && boost::trim_copy(*uuid).empty() && boost::trim_copy(*rhs.uuid).empty())
+		{
+			// both are default (empty) WidgetInstanceIdentifiers
+			return true;
+		}
+
 		switch (check_type)
 		{
 			case EQUALITY_CHECK_TYPE__UUID:
@@ -296,6 +309,7 @@ public:
 				break;
 		}
 		return false;
+
 	}
 
 	bool IsEmpty()

@@ -78,9 +78,9 @@ class Table_DMU_Instance : public Table<TABLE__DMU_INSTANCE, TABLE_INSTANCE_IDEN
 
 		void Load(sqlite3 * db, InputModel * input_model_);
 
-		bool Exists(sqlite3 * db, InputModel & input_model_, std::string const & dmu, bool const also_confirm_using_cache = true);
-		bool CreateNewDMU(sqlite3 * db, InputModel & input_model_, std::string const & dmu, std::string const & dmu_description);
-		bool DeleteDMU(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier & dmu, DataChangeMessage & change_message);
+		bool Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu, std::string const & dmu_member, bool const also_confirm_using_cache = true);
+		bool CreateNewDmuMember(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, std::string const & dmu_member_code, std::string const & dmu_member_description);
+		bool DeleteDmuMember(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier & dmu_member, DataChangeMessage & change_message);
 
 };
 

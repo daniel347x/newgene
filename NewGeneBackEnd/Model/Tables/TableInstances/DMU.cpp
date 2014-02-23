@@ -97,14 +97,22 @@ bool Table_DMU_Identifier::Exists(sqlite3 * db, InputModel & input_model_, std::
 
 	if (also_confirm_using_cache)
 	{
+
 		// Safety check: Cache should match database
-		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, WidgetInstanceIdentifier(dmu_to_check)));
-		bool exists_in_cache = (found != identifiers.cend());
-		if (exists != exists_in_cache)
+		if (getIdentifierFromStringCode(dmu_to_check, WidgetInstanceIdentifier()) != exists)
 		{
 			boost::format msg("Cache of DMU categories is out-of-sync.");
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
+
+		//auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, WidgetInstanceIdentifier(dmu_to_check)));
+		//bool exists_in_cache = (found != identifiers.cend());
+		//if (exists != exists_in_cache)
+		//{
+		//	boost::format msg("Cache of DMU categories is out-of-sync.");
+		//	throw NewGeneException() << newgene_error_description(msg.str());
+		//}
+
 	}
 
 	return exists;
@@ -298,5 +306,111 @@ void Table_DMU_Instance::Load(sqlite3 * db, InputModel * input_model_)
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
+}
+
+bool Table_DMU_Instance::Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, bool const also_confirm_using_cache)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	if (!dmu_category.uuid || dmu_category.uuid->empty())
+	{
+		boost::format msg("Unable to prepare SELECT statement to search for an existing DMU member.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	std::string dmu_member_to_check(boost::to_upper_copy(dmu_member_uuid));
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT COUNT(*) FROM DMU_SET_MEMBER WHERE UPPER(DMU_SET_MEMBER_UUID) = '");
+	sql += dmu_member_to_check;
+	sql += "' AND UPPER(DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID) = '";
+	sql += *dmu_category.uuid;
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare SELECT statement to search for an existing DMU member.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	bool exists = false;
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		int existing_dmu_count = sqlite3_column_int(stmt, 0);
+		if (existing_dmu_count == 1)
+		{
+			exists = true;
+		}
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	if (also_confirm_using_cache)
+	{
+		// Safety check: Cache should match database
+		if (getIdentifier(dmu_member_uuid, *dmu_category.uuid).IsEmpty() == exists)
+		{
+			boost::format msg("Cache of DMU members is out-of-sync.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+	}
+
+	return exists;
+
+}
+
+bool Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, std::string const & dmu_member_code, std::string const & dmu_member_description)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor theExecutor(db);
+
+	bool already_exists = Exists(db, input_model_, dmu_category, dmu_member_uuid);
+	if (already_exists)
+	{
+		return false;
+	}
+
+	std::string new_uuid(dmu_member_uuid);
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("INSERT INTO DMU_SET_MEMBER (DMU_SET_MEMBER_UUID, DMU_SET_MEMBER_STRING_CODE, DMU_SET_MEMBER_STRING_LONGHAND, DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID) VALUES (");
+	sql += "?, ?, ?, ')";
+	sql += *dmu_category.uuid;
+	sql += ")";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare INSERT statement to create a new DMU member.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	sqlite3_bind_text(stmt, 1, dmu_member_uuid.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 2, dmu_member_code.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 3, dmu_member_description.c_str(), -1, SQLITE_TRANSIENT);
+	int step_result = 0;
+	step_result = sqlite3_step(stmt);
+	if (step_result != SQLITE_DONE)
+	{
+		boost::format msg("Unable to execute INSERT statement to create a new DMU member: %1%");
+		msg % sqlite3_errstr(step_result);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	// Append to cache
+	identifiers_map[*dmu_category.uuid].push_back(WidgetInstanceIdentifier(dmu_member_uuid, dmu_category, dmu_member_code.c_str(), dmu_member_description.c_str(), 0));
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
 
 }

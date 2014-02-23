@@ -374,6 +374,11 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 		{
 			proposed_dmu_name = proposed_dmu_name_field->text().toStdString();
 			dmu_description = dmu_description_field->text().toStdString();
+			if (proposed_dmu_name.empty())
+			{
+				boost::format msg("The DMU category must have a name.");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
 		}
 		else
 		{
@@ -425,7 +430,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 			}
 			else
 			{
-				invalid_string = ": The length is too long.";
+				invalid_string = ": The length is too long (maximum length: 255).";
 			}
 
 		}
@@ -443,7 +448,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 
 	if (dmu_description.size() > 4096)
 	{
-		boost::format msg("The description is too long.");
+		boost::format msg("The description is too long (maximum length: 4096).");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
@@ -525,8 +530,210 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 {
-	WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS dummy;
-	emit AddDMUMembers(dummy);
+
+	// Get selected DMU category
+	QItemSelectionModel * dmu_selectionModel = ui->listView_dmus->selectionModel();
+	if (dmu_selectionModel == nullptr)
+	{
+		boost::format msg("Invalid selection in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
+	if (!selectedIndex.isValid())
+	{
+		// No selection
+		return;
+	}
+
+	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	if (dmuModel == nullptr)
+	{
+		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QVariant dmu_and_members_variant = dmuModel->item(selectedIndex.row())->data();
+	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = dmu_and_members_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
+	WidgetInstanceIdentifier & dmu = dmu_and_members.first;
+	WidgetInstanceIdentifiers & dmu_members = dmu_and_members.second;
+
+
+
+	// From http://stackoverflow.com/a/17512615/368896
+	QDialog dialog(this);
+	QFormLayout form(&dialog);
+	boost::format title("Add DMU member to %1%");
+	title % *dmu.code;
+	form.addRow(new QLabel(title.str().c_str()));
+	QList<QLineEdit *> fields;
+	QLineEdit *lineEditCode = new QLineEdit(&dialog);
+	QString labelCode = QString("Enter uniquely identirying DMU member code:");
+	form.addRow(labelCode, lineEditCode);
+	fields << lineEditCode;
+	QLineEdit *lineEditName = new QLineEdit(&dialog);
+	QString labelName = QString("(Optional) Enter a short abbreviation:");
+	form.addRow(labelName, lineEditName);
+	fields << lineEditName;
+	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
+	QString labelDescription = QString("(Optional) Enter full descriptive text:");
+	form.addRow(labelDescription, lineEditDescription);
+	fields << lineEditDescription;
+
+	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+	form.addRow(&buttonBox);
+
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+
+	std::string proposed_dmu_member_uuid;
+	std::string proposed_dmu_member_code;
+	std::string proposed_dmu_member_description;
+	if (dialog.exec() == QDialog::Accepted) {
+		QLineEdit * proposed_dmu_member_uuid_field = fields[0];
+		QLineEdit * proposed_dmu_member_code_field = fields[1];
+		QLineEdit * proposed_dmu_member_description_field = fields[2];
+		if (proposed_dmu_member_uuid_field)
+		{
+			proposed_dmu_member_uuid = proposed_dmu_member_uuid_field->text().toStdString();
+			proposed_dmu_member_code = proposed_dmu_member_code_field->text().toStdString();
+			proposed_dmu_member_description = proposed_dmu_member_description_field->text().toStdString();
+		}
+		else
+		{
+			boost::format msg("Unable to determine new DMU member code.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+	}
+	else
+	{
+		return;
+	}
+
+
+
+	boost::trim(proposed_dmu_member_uuid);
+	boost::trim(proposed_dmu_member_code);
+	boost::trim(proposed_dmu_member_description);
+
+	if (proposed_dmu_member_uuid.empty())
+	{
+		boost::format msg("The DMU member you entered is empty.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	std::string regex_string_uuid("([a-zA-Z_0-9]*)");
+	boost::regex regex_uuid(regex_string_uuid);
+	boost::cmatch matches_uuid;
+
+	std::string regex_string_code("([a-zA-Z_0-9]*)");
+	boost::regex regex_code(regex_string_code);
+	boost::cmatch matches_code;
+
+	std::string invalid_string;
+
+	bool valid = false;
+	if (boost::regex_match(proposed_dmu_member_uuid.c_str(), matches_uuid, regex_uuid))
+	{
+		// matches[0] contains the original string.  matches[n]
+		// contains a sub_match object for each matching
+		// subexpression
+		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+		// for an exapmle usage
+		if (matches_uuid.size() == 2)
+		{
+			std::string the_dmu_member_uuid_match(matches_uuid[1].first, matches_uuid[1].second);
+
+			if (the_dmu_member_uuid_match.size() <= 36)
+			{
+				if (the_dmu_member_uuid_match == proposed_dmu_member_uuid)
+				{
+					valid = true;
+				}
+			}
+			else
+			{
+				invalid_string = ": The length is too long (maximum length: 36).";
+			}
+
+		}
+	}
+
+	if (!valid)
+	{
+		boost::format msg("The DMU member code you entered is invalid%1%");
+		msg % invalid_string;
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	bool valid = false;
+	if (boost::regex_match(proposed_dmu_member_code.c_str(), matches_code, regex_code))
+	{
+		// matches[0] contains the original string.  matches[n]
+		// contains a sub_match object for each matching
+		// subexpression
+		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+		// for an exapmle usage
+		if (matches_uuid.size() == 2)
+		{
+			std::string the_dmu_member_code_match(matches_code[1].first, matches_code[1].second);
+
+			if (the_dmu_member_code_match == proposed_dmu_member_code)
+			{
+				valid = true;
+			}
+
+		}
+	}
+
+	if (!valid)
+	{
+		boost::format msg("The DMU member abbreviation you entered is invalid");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	if (proposed_dmu_member_code.size() > 128)
+	{
+		boost::format msg("The abbreviation is too long (maximum length: 128).");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	if (proposed_dmu_member_description.size() > 4096)
+	{
+		boost::format msg("The description is too long (maximum length: 4096).");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+
+
+	InstanceActionItems actionItems;
+	actionItems.push_back(std::make_pair(dmu, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_member_uuid, proposed_dmu_member_code, proposed_dmu_member_description})))));
+	WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
+
+	emit AddDMUMembers(action_request);
+
 }
 
 void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()

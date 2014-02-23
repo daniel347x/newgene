@@ -71,7 +71,7 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 				
 				if (dmu_strings.size() != 2)
 				{
-					boost::format msg("A DMU category name, and descriptive text, is required.");
+					boost::format msg("A DMU category name, and descriptive text, are required.");
 					messager.ShowMessageBox(msg.str());
 					return;
 				}
@@ -319,12 +319,120 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 		return;
 	}
 
-	InputModel & output_model = project.model();
+	InputModel & input_model = project.model();
 
 	switch (action_request.reason)
 	{
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
 		{
+
+			DataChangeMessage change_response(&project);
+
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			{
+
+				WidgetInstanceIdentifier dmu_category = instanceActionItem.first;
+				if (!dmu_category.uuid || dmu_category.uuid->empty())
+				{
+					boost::format msg("Missing the associated DMU category.");
+					messager.ShowMessageBox(msg.str());
+					return;
+				}
+
+				if (!instanceActionItem.second)
+				{
+					boost::format msg("Missing a new DMU member.");
+					messager.ShowMessageBox(msg.str());
+					return;
+				}
+
+				// ************************************* //
+				// Retrieve data sent by user interface
+				// ************************************* //
+				WidgetActionItem const & actionItem = *instanceActionItem.second;
+				WidgetActionItem__StringVector const & actionItemString = static_cast<WidgetActionItem__StringVector const &>(actionItem);
+				std::vector<std::string> dmu_strings = actionItemString.getValue();
+
+				if (dmu_strings.size() != 3)
+				{
+					boost::format msg("A DMU member code, name and descriptive text are required.");
+					messager.ShowMessageBox(msg.str());
+					return;
+				}
+
+				std::string proposed_new_dmu_member_uuid = dmu_strings[0];
+				std::string proposed_new_dmu_member_code = dmu_strings[1];
+				std::string proposed_new_dmu_member_description = dmu_strings[2];
+
+				bool dmu_member_already_exists = input_model.t_dmu_setmembers.Exists(input_model.getDb(), input_model, dmu_category, proposed_new_dmu_member_uuid);
+				if (dmu_member_already_exists)
+				{
+					boost::format msg("The DMU member '%1%' already exists for '%2%'.");
+					msg % boost::to_upper_copy(proposed_new_dmu_member_uuid) % boost::to_upper_copy(*dmu_category.code);
+					messager.ShowMessageBox(msg.str());
+					return;
+				}
+
+				bool dmu_member_successfully_created = input_model.t_dmu_setmembers.CreateNewDmuMember(input_model.getDb(), input_model, dmu_category, proposed_new_dmu_member_uuid, proposed_new_dmu_member_code, proposed_new_dmu_member_description);
+
+				if (!dmu_member_successfully_created)
+				{
+					boost::format msg("Unable to execute INSERT statement to create a new DMU member.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				std::string new_dmu_member_uuid(proposed_new_dmu_member_uuid);
+				std::string new_dmu_text(new_dmu_member_uuid);
+				if (!proposed_new_dmu_member_code.empty() || !proposed_new_dmu_member_description.empty())
+				{
+					if (!proposed_new_dmu_member_code.empty())
+					{
+						new_dmu_text += " (";
+						new_dmu_text += proposed_new_dmu_member_code;
+						if (!proposed_new_dmu_member_description.empty())
+						{
+							new_dmu_text += " - \"";
+							new_dmu_text += proposed_new_dmu_member_description;
+							new_dmu_text += "\")";
+						}
+						else
+						{
+							new_dmu_text += ")";
+						}
+					}
+					else
+					{
+						new_dmu_text += "(";
+						new_dmu_text += proposed_new_dmu_member_description;
+						new_dmu_text += ")";
+					}
+				}
+
+				boost::format msg("DMU member '%1%' successfully created.");
+				msg % new_dmu_text;
+				messager.ShowMessageBox(msg.str());
+
+
+				// ***************************************** //
+				// Prepare data to send back to user interface
+				// ***************************************** //
+
+				WidgetInstanceIdentifier newIdentifier;
+				if((newIdentifier = input_model.t_dmu_setmembers.getIdentifier(new_dmu_member_uuid, *dmu_category.uuid)).IsEmpty())
+				{
+					boost::format msg("Unable to find newly created DMU member.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
+				DataChange change(type, intention, newIdentifier, WidgetInstanceIdentifiers());
+
+				change_response.changes.push_back(change);
+
+			});
+
+			messager.EmitChangeMessage(change_response);
 
 		}
 			break;
@@ -335,20 +443,6 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 			break;
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 		{
-
-			DataChangeMessage change_response(&project);
-
-			// ***************************************** //
-			// Prepare data to send back to user interface
-			// ***************************************** //
-			DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-			DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
-			WidgetInstanceIdentifiers child_identifiers;
-			DataChange change(type, intention, WidgetInstanceIdentifier(), child_identifiers);
-			change.SetPacket(std::make_shared<DataChangePacket_int>(77));
-			change_response.changes.push_back(change);
-
-			messager.EmitChangeMessage(change_response);
 
 		}
 			break;
