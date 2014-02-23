@@ -22,6 +22,7 @@ public:
 	bool ImportBlock(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block, int const number_rows_in_block);
 	bool ImportEnd(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_);
 	bool DeleteDataTable(sqlite3 * db, InputModel * input_model_, DataChangeMessage & change_message);
+	bool DeleteDmuMemberRows(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & dmu_member, std::string const & column_name);
 
 	static std::string TableNameFromVGCode(std::string variable_group_code);
 	static std::string ViewNameFromCount(int const view_number);
@@ -29,6 +30,8 @@ public:
 	static std::string ViewNameFromCountTempTimeRanged(int const view_number, int const multiplicity_number);
 	static std::string JoinViewNameFromCount(int const join_number);
 	static std::string JoinViewNameWithTimeRangesFromCount(int const join_number);
+
+	static Table_VariableGroupData * GetInstanceTableFromTableName(sqlite3 * db, InputModel * input_model_, std::string const & table_name);
 
 	static std::string EscapeTicks(std::string const & s);
 
@@ -66,6 +69,11 @@ public:
 
 	void Load(sqlite3 * db, InputModel * input_model_);
 
+	bool DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name);
+
+	// The first element of the pair is the WidgetInstanceIdentifier corresponding to the DMU category associated with the primary key column
+	std::vector<std::pair<WidgetInstanceIdentifier, std::vector<std::string>>> GetColumnNamesCorrespondingToPrimaryKeys(sqlite3 * db, InputModel * input_model_, std::string const & table_name);
+
 };
 
 
@@ -95,6 +103,8 @@ public:
 	}
 
 	void Load(sqlite3 * db, InputModel * input_model_);
+
+	bool DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name);
 
 };
 

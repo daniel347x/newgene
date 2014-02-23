@@ -22,9 +22,6 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 
 		void HandleChanges(DataChangeMessage const &);
 
-		static std::string GetDmuMemberDisplayText(WidgetInstanceIdentifier const & dmu_member);
-		static std::string GetDmuCategoryDisplayText(std::string const & dmu_code, std::string const & dmu_description);
-
 	protected:
 
 		void changeEvent( QEvent * e );

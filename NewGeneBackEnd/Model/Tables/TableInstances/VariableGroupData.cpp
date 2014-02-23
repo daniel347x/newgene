@@ -408,6 +408,141 @@ std::string Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(int con
 	return join_view_name;
 }
 
+Table_VariableGroupData * Table_VariableGroupData::GetInstanceTableFromTableName(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
+{
+
+	if (!db)
+	{
+		return false;
+	}
+
+	if (!input_model_)
+	{
+		return false;
+	}
+
+	auto vg_instance_table = std::find_if(input_model_->t_vgp_data_vector.begin(), input_model_->t_vgp_data_vector.end(), [&](Table_VariableGroupData * test_vg_table)
+	{
+		if (test_vg_table)
+		{
+			if (boost::iequals(test_vg_table->table_name, table_name))
+			{
+				return true;
+			}
+		}
+		return false;
+	});
+
+	if (vg_instance_table != input_model_->t_vgp_data_vector.end())
+	{
+		return vg_instance_table;
+	}
+
+	return nullptr;
+
+}
+
+bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_, DataChangeMessage & change_message)
+{
+
+	Executor theExecutor(db);
+
+	if (!db)
+	{
+		return false;
+	}
+
+	if (!input_model_)
+	{
+		return false;
+	}
+
+	bool dropped_primary_key_metadata = input_model_->t_vgp_data_metadata__primary_keys.DeleteDataTable(db, input_model_, table_name);
+	bool dropped_datetime_metadata = input_model_->t_vgp_data_metadata__datetime_columns.DeleteDataTable(db, input_model_, table_name);
+	if (!dropped_primary_key_metadata || !dropped_datetime_metadata)
+	{
+		boost::format msg("Unable to delete metadata for variable group: %1%");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	boost::format drop_stmt("DROP TABLE IF EXISTS %1%");
+	drop_stmt % table_name;
+	char * errmsg = nullptr;
+	sqlite3_exec(db, drop_stmt.str().c_str(), NULL, NULL, &errmsg);
+	if (errmsg != nullptr)
+	{
+		boost::format msg("Unable to delete data for variable group: %1%");
+		msg % errmsg;
+		sqlite3_free(errmsg);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	// ***************************************** //
+	// Prepare data to send back to user interface
+	// ***************************************** //
+
+	WidgetInstanceIdentifier vg;
+	bool found(input_model_->t_vgp_identifiers.getIdentifierFromStringCode(vg_category_string_code, vg));
+	if (!found)
+	{
+		return false;
+	}
+
+	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__VG_INSTANCE_DATA_CHANGE;
+	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+	DataChange change(type, intention, vg, WidgetInstanceIdentifiers());
+	change_message.changes.push_back(change);
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
+
+}
+
+bool Table_VariableGroupData::DeleteDmuMemberRows(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & dmu_member, std::string const & column_name)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor theExecutor(db);
+
+	if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent || !dmu_member.identifier_parent->code || !dmu_member.identifier_parent->uuid)
+	{
+		return false;
+	}
+
+	WidgetInstanceIdentifier dmu_category = *dmu_member.identifier_parent;
+
+	sqlite3_stmt * stmt = NULL;
+	boost::format sql("DELETE FROM %1% WHERE %2% = '%3%'");
+	sql % table_name % column_name % *dmu_member.uuid;
+	int err = sqlite3_prepare_v2(db, sql.str().c_str(), static_cast<int>(sql.str().size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare DELETE statement to delete DMU member data from column %1% in table %2% corresponding to DMU member %3% in DMU category %4%: %5%");
+		msg % column_name % table_name % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category) % sqlite3_errstr(err);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	step_result = sqlite3_step(stmt);
+	if (step_result != SQLITE_DONE)
+	{
+		boost::format msg("Unable to execute DELETE statement to delete DMU member data from column %1% in table %2% corresponding to DMU member %3% in DMU category %4%: %5%");
+		msg % column_name % table_name % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category) % sqlite3_errstr(err);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
+
+}
+
 void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * input_model_)
 {
 
@@ -453,6 +588,79 @@ void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * in
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
+}
+
+bool Table_VariableGroupMetadata_PrimaryKeys::DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
+{
+
+	Executor theExecutor(db);
+
+	if (!db)
+	{
+		return false;
+	}
+
+	if (!input_model_)
+	{
+		return false;
+	}
+
+	boost::format delete_stmt("DELETE FROM VG_DATA_METADATA__PRIMARY_KEYS WHERE VG_DATA_TABLE_NAME = '%1%");
+	delete_stmt % table_name;
+	char * errmsg = nullptr;
+	sqlite3_exec(db, delete_stmt.str().c_str(), NULL, NULL, &errmsg);
+	if (errmsg != nullptr)
+	{
+		sqlite3_free(errmsg);
+		boost::format msg("Unable to delete data for variable group in primary keys table.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	// delete from cache
+	identifiers_map.erase(table_name);
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
+
+}
+
+std::vector<std::pair<WidgetInstanceIdentifier, std::vector<std::string>>> Table_VariableGroupMetadata_PrimaryKeys::GetColumnNamesCorrespondingToPrimaryKeys(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	WidgetInstanceIdentifiers primary_keys = identifiers_map[table_name];
+
+	// temp storage
+	std::map<std::string, std::vector<std::string>> map_from_dmu_category_code_to_vector_of_primary_key_column_names;
+	std::for_each(primary_keys.cbegin(), primary_keys.cend(), [&](WidgetInstanceIdentifier const & primary_key)
+	{
+		// From above:
+		// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
+		// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
+		// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
+		map_from_dmu_category_code_to_vector_of_primary_key_column_names[*primary_key.code].push_back(*primary_key.longhand);
+	});
+
+	// create output in desired format
+	std::vector<std::pair<WidgetInstanceIdentifier, std::vector<std::string>>> output;
+	std::for_each(map_from_dmu_category_code_to_vector_of_primary_key_column_names.cbegin(), map_from_dmu_category_code_to_vector_of_primary_key_column_names.cend(), [&](std::pair<std::string const, std::vector<std::string>> const & single_dmu_category_primary_key_columns)
+	{
+		std::string const & dmu_category_string_code = single_dmu_category_primary_key_columns.first;
+		std::vector<std::string> const & primary_key_column_names = single_dmu_category_primary_key_columns.second;
+		WidgetInstanceIdentifier dmu_category;
+		bool found = input_model_->t_dmu_category.getIdentifierFromStringCode(dmu_category_string_code, dmu_category);
+		if (!found)
+		{
+			return;
+		}
+		output.push_back(std::make_pair(dmu_category, primary_key_column_names));
+	});
+
+	return output;
+
 }
 
 void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel * input_model_)
@@ -492,7 +700,7 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 
 }
 
-bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_, DataChangeMessage & change_message)
+bool Table_VariableGroupMetadata_DateTimeColumns::DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
 {
 
 	Executor theExecutor(db);
@@ -507,32 +715,19 @@ bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_m
 		return false;
 	}
 
-	boost::format drop_stmt("DROP TABLE IF EXISTS %1%");
-	drop_stmt % table_name;
+	boost::format delete_stmt("DELETE FROM VG_DATA_METADATA__DATETIME_COLUMNS WHERE VG_DATA_TABLE_NAME = '%1%");
+	delete_stmt % table_name;
 	char * errmsg = nullptr;
-	sqlite3_exec(db, drop_stmt.str().c_str(), NULL, NULL, &errmsg);
+	sqlite3_exec(db, delete_stmt.str().c_str(), NULL, NULL, &errmsg);
 	if (errmsg != nullptr)
 	{
 		sqlite3_free(errmsg);
-		boost::format msg("Unable to delete data for variable group.");
+		boost::format msg("Unable to delete data for variable group in datetime table.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	// ***************************************** //
-	// Prepare data to send back to user interface
-	// ***************************************** //
-
-	WidgetInstanceIdentifier vg;
-	bool found(input_model_->t_vgp_identifiers.getIdentifierFromStringCode(vg_category_string_code, vg));
-	if (!found)
-	{
-		return false;
-	}
-
-	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__VG_INSTANCE_DATA_CHANGE;
-	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-	DataChange change(type, intention, vg, WidgetInstanceIdentifiers());
-	change_message.changes.push_back(change);
+	// delete from cache
+	identifiers_map.erase(table_name);
 
 	theExecutor.success();
 

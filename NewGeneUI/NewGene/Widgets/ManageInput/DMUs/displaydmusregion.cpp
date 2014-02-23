@@ -156,12 +156,7 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 		{
 
 			QStandardItem * item = new QStandardItem();
-			std::string dmu_description;
-			if (dmu.longhand && !dmu.longhand->empty())
-			{
-				dmu_description = *dmu.longhand;
-			}
-			std::string text = GetDmuCategoryDisplayText(*dmu.code, dmu_description);
+			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu);
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
@@ -277,7 +272,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 			{
 
 				QStandardItem * item = new QStandardItem();
-				std::string text = GetDmuMemberDisplayText(dmu_member);
+				std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
 
 				item->setText(text.c_str());
 				item->setEditable(false);
@@ -866,10 +861,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 
-								std::string dmu_code = *change.parent_identifier.code;
-								std::string dmu_description = *change.parent_identifier.longhand;
-
-								std::string text = GetDmuCategoryDisplayText(dmu_code, dmu_description);
+								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(change.parent_identifier);
 								QList<QStandardItem *> items = itemModel->findItems(text.c_str());
 								if (items.count() == 1)
 								{
@@ -961,7 +953,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								}
 
 								QStandardItem * item = new QStandardItem();
-								std::string text = GetDmuMemberDisplayText(new_dmu_member);
+								std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(new_dmu_member);
 
 								item->setText(text.c_str());
 								item->setEditable(false);
@@ -983,10 +975,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 
-								std::string dmu_member_code = *change.parent_identifier.code;
-								std::string dmu_member_description = *change.parent_identifier.longhand;
-
-								std::string text = GetDmuCategoryDisplayText(dmu_member_code, dmu_member_description);
+								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(change.parent_identifier);
 								QList<QStandardItem *> items = memberModel->findItems(text.c_str());
 								if (items.count() == 1)
 								{
@@ -1078,63 +1067,5 @@ bool DisplayDMUsRegion::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_ca
 	dmu_members = dmu_and_members.second;
 
 	return true;
-
-}
-
-std::string DisplayDMUsRegion::GetDmuCategoryDisplayText(std::string const & dmu_code, std::string const & dmu_description)
-{
-
-	QString text(dmu_code.c_str());
-	if (!dmu_description.empty())
-	{
-		text += " (";
-		text += dmu_description.c_str();
-		text += ")";
-	}
-	return text.toStdString();
-
-}
-
-std::string DisplayDMUsRegion::GetDmuMemberDisplayText(WidgetInstanceIdentifier const & dmu_member)
-{
-
-	std::string text;
-	if (dmu_member.longhand && !dmu_member.longhand->empty())
-	{
-		text += dmu_member.longhand->c_str();
-	}
-	if (dmu_member.code && !dmu_member.code->empty())
-	{
-		bool use_parentheses = false;
-		if (dmu_member.longhand && !dmu_member.longhand->empty())
-		{
-			use_parentheses = true;
-		}
-		if (use_parentheses)
-		{
-			text += " (";
-		}
-		text += dmu_member.code->c_str();
-		if (use_parentheses)
-		{
-			text += ")";
-		}
-	}
-	bool use_parentheses = false;
-	if ((dmu_member.code && !dmu_member.code->empty()) || (dmu_member.longhand && !dmu_member.longhand->empty()))
-	{
-		use_parentheses = true;
-	}
-	if (use_parentheses)
-	{
-		text += " (";
-	}
-	text += dmu_member.uuid->c_str();
-	if (use_parentheses)
-	{
-		text += ")";
-	}
-
-	return text;
 
 }

@@ -239,6 +239,34 @@ bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, Wi
 
 }
 
+std::string Table_DMU_Identifier::GetDmuCategoryDisplayText(WidgetInstanceIdentifier const & dmu_category)
+{
+
+	if (!dmu_category.code || dmu_category.code->empty())
+	{
+		return std::string();
+	}
+
+	std::string dmu_code(*dmu_category.code);
+
+	std::string dmu_description;
+	if (dmu_category.longhand)
+	{
+		dmu_description = *dmu_category.longhand;
+	}
+
+	std::string text(dmu_code);
+	if (!dmu_description.empty())
+	{
+		text += " (";
+		text += dmu_description.c_str();
+		text += ")";
+	}
+
+	return text;
+
+}
+
 void Table_DMU_Instance::Load(sqlite3 * db, InputModel * input_model_)
 {
 
@@ -412,5 +440,144 @@ bool Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, InputModel & input_mod
 	theExecutor.success();
 
 	return theExecutor.succeeded();
+
+}
+
+bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier & dmu_member)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor theExecutor(db);
+
+	if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent || !dmu_member.identifier_parent->code || !dmu_member.identifier_parent->uuid)
+	{
+		return false;
+	}
+
+	WidgetInstanceIdentifier dmu_category = *dmu_member.identifier_parent;
+
+	bool already_exists = Exists(db, input_model_, dmu_category, *dmu_member.uuid);
+	if (!already_exists)
+	{
+		return false;
+	}
+
+	// Remove corresponding rows from any instance data tables
+	// ... *dmu_member.identifier_parent is the DMU category corresponding to this DMU member
+	WidgetInstanceIdentifiers uoas = input_model_.t_uoa_setmemberlookup.RetrieveUOAsGivenDMU(db, &input_model_, *dmu_member.identifier_parent);
+	std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
+	{
+		WidgetInstanceIdentifiers vgs_to_delete = input_model_.t_vgp_identifiers.RetrieveVGsFromUOA(db, &input_model_, *uoa.uuid);
+		std::for_each(vgs_to_delete.cbegin(), vgs_to_delete.cend(), [&](WidgetInstanceIdentifier const & vg_to_delete)
+		{
+			std::for_each(input_model_.t_vgp_data_vector.begin(), input_model_.t_vgp_data_vector.end(), [&](std::unique_ptr<Table_VariableGroupData> & vg_instance_table)
+			{
+				if (vg_instance_table)
+				{
+					if (boost::iequals(*vg_to_delete.code, vg_instance_table->vg_category_string_code))
+					{
+						std::string table_name = vg_instance_table->table_name;
+						std::vector<std::pair<WidgetInstanceIdentifier, std::vector<std::string>>> dmu_category_and_corresponding_column_names = input_model_.t_vgp_data_metadata__primary_keys.GetColumnNamesCorrespondingToPrimaryKeys(db, &input_model_, table_name);
+						std::for_each(dmu_category_and_corresponding_column_names.cbegin(), dmu_category_and_corresponding_column_names.cend(), [&](std::pair<WidgetInstanceIdentifier, std::vector<std::string>> const & single_dmu_category_and_corresponding_column_names)
+						{
+							WidgetInstanceIdentifier const & dmu_category_primary_key_column = single_dmu_category_and_corresponding_column_names.first;
+							if (dmu_category.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, dmu_category_primary_key_column))
+							{
+								std::vector<std::string> const & corresponding_column_names = single_dmu_category_and_corresponding_column_names.second;
+								std::for_each(corresponding_column_names.cbegin(), corresponding_column_names.cend(), [&](std::string const & corresponding_column_name)
+								{
+									vg_instance_table->DeleteDmuMemberRows(db, &input_model_, dmu_member, corresponding_column_name);
+								});
+							}
+						});
+					}
+				}
+			});
+		});
+	});
+
+	// Remove from DMU_SET_MEMBER table
+	sqlite3_stmt * stmt = NULL;
+	boost::format sql("DELETE FROM DMU_SET_MEMBER WHERE DMU_SET_MEMBER_UUID = '%1%' AND DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID = '%2%'");
+	sql % *dmu_member.uuid % *dmu_category.uuid;
+	int err = sqlite3_prepare_v2(db, sql.str().c_str(), static_cast<int>(sql.str().size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare DELETE statement to delete DMU member: %1%");
+		msg % sqlite3_errstr(err);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	step_result = sqlite3_step(stmt);
+	if (step_result != SQLITE_DONE)
+	{
+		boost::format msg("Unable to prepare DELETE statement to delete DMU member: %1%");
+		msg % sqlite3_errstr(err);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	// Remove from cache
+	identifiers_map[*dmu_category.uuid].erase(std::remove_if(identifiers_map[*dmu_category.uuid].begin(), identifiers_map[*dmu_category.uuid].end(), [&](WidgetInstanceIdentifier & test_dmu_member)
+	{
+		if (test_dmu_member.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, dmu_member))
+		{
+			return true;
+		}
+		return false;
+	}), identifiers_map[*dmu_category.uuid].end());
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
+
+}
+
+std::string Table_DMU_Instance::GetDmuMemberDisplayText(WidgetInstanceIdentifier const & dmu_member)
+{
+
+	std::string text;
+	if (dmu_member.longhand && !dmu_member.longhand->empty())
+	{
+		text += dmu_member.longhand->c_str();
+	}
+	if (dmu_member.code && !dmu_member.code->empty())
+	{
+		bool use_parentheses = false;
+		if (dmu_member.longhand && !dmu_member.longhand->empty())
+		{
+			use_parentheses = true;
+		}
+		if (use_parentheses)
+		{
+			text += " (";
+		}
+		text += dmu_member.code->c_str();
+		if (use_parentheses)
+		{
+			text += ")";
+		}
+	}
+	bool use_parentheses = false;
+	if ((dmu_member.code && !dmu_member.code->empty()) || (dmu_member.longhand && !dmu_member.longhand->empty()))
+	{
+		use_parentheses = true;
+	}
+	if (use_parentheses)
+	{
+		text += " (";
+	}
+	text += dmu_member.uuid->c_str();
+	if (use_parentheses)
+	{
+		text += ")";
+	}
+
+	return text;
 
 }

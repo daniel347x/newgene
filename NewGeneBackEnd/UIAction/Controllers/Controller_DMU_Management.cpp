@@ -494,22 +494,15 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 			{
 
 				WidgetInstanceIdentifier dmu_member = instanceActionItem.first;
-				int m = 0;
 
-				//	if (!dmu.code || !dmu.uuid)
-				//	{
-				//		boost::format msg("Missing the DMU to delete.");
-				//		messager.ShowMessageBox(msg.str());
-				//		return;
-				//	}
+				if (!dmu_member.uuid || dmu_member.uuid->empty())
+				{
+					boost::format msg("Missing the DMU member to delete.");
+					messager.ShowMessageBox(msg.str());
+					return;
+				}
 
-				//	// ************************************* //
-				//	// Retrieve data sent by user interface
-				//	// ************************************* //
-				//	std::string dmu_member_to_delete_code = *dmu.code;
-				//	std::string dmu_member_to_delete_uuid = *dmu.uuid;
-
-				//	//input_model.t_dmu_setmembers.
+				input_model.t_dmu_setmembers.DeleteDmuMember(input_model.getDb(), input_model, dmu_member, change_response);
 
 				//	// ***************************************** //
 				//	// Prepare data to send back to user interface
