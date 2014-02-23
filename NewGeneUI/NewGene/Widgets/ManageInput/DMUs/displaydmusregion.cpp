@@ -679,7 +679,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 		return;
 	}
 
-	bool valid = false;
+	valid = false;
 	if (boost::regex_match(proposed_dmu_member_code.c_str(), matches_code, regex_code))
 	{
 		// matches[0] contains the original string.  matches[n]
