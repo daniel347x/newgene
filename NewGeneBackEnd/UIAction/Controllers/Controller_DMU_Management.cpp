@@ -435,11 +435,13 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 			messager.EmitChangeMessage(change_response);
 
 		}
+
 			break;
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
 		{
 
 		}
+
 			break;
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
 		{
