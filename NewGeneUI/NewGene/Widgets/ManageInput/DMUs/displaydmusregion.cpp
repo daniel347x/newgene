@@ -72,6 +72,7 @@ void DisplayDMUsRegion::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		if (project)
 		{
 			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
+			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE, false, "");
 		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
@@ -95,14 +96,12 @@ void DisplayDMUsRegion::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 		if (project)
 		{
 			connect(this, SIGNAL(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)), project->getConnector(), SLOT(DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU)));
-			project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE, false, "");
 		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
 		if (project)
 		{
-			project->UnregisterInterestInChanges(this);
 		}
 	}
 
@@ -157,14 +156,13 @@ void DisplayDMUsRegion::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDG
 		{
 
 			QStandardItem * item = new QStandardItem();
-			QString text(dmu.code->c_str());
+			std::string dmu_description;
 			if (dmu.longhand && !dmu.longhand->empty())
 			{
-				text += " (";
-				text += dmu.longhand->c_str();
-				text += ")";
+				dmu_description = *dmu.longhand;
 			}
-			item->setText(text);
+			std::string text = GetDmuCategoryDisplayText(*dmu.code, dmu_description);
+			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
 			QVariant v;
@@ -279,44 +277,9 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 			{
 
 				QStandardItem * item = new QStandardItem();
-				QString text;
-				if (dmu_member.longhand && !dmu_member.longhand->empty())
-				{
-					text += dmu_member.longhand->c_str();
-				}
-				if (dmu_member.code && !dmu_member.code->empty())
-				{
-					bool use_parentheses = false;
-					if (dmu_member.longhand && !dmu_member.longhand->empty())
-					{
-						use_parentheses = true;
-					}
-					if (use_parentheses)
-					{
-						text += " (";
-					}
-					text += dmu_member.code->c_str();
-					if (use_parentheses)
-					{
-						text += ")";
-					}
-				}
-				bool use_parentheses = false;
-				if ((dmu_member.code && !dmu_member.code->empty()) || (dmu_member.longhand && !dmu_member.longhand->empty()))
-				{
-					use_parentheses = true;
-				}
-				if (use_parentheses)
-				{
-					text += " (";
-				}
-				text += dmu_member.uuid->c_str();
-				if (use_parentheses)
-				{
-					text += ")";
-				}
+				std::string text = GetDmuMemberDisplayText(dmu_member);
 
-				item->setText(text);
+				item->setText(text.c_str());
 				item->setEditable(false);
 				item->setCheckable(true);
 				QVariant v;
@@ -483,20 +446,11 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 		return;
 	}
 
-	QItemSelectionModel * dmu_selectionModel = ui->listView_dmus->selectionModel();
-	if (dmu_selectionModel == nullptr)
+	WidgetInstanceIdentifier dmu;
+	WidgetInstanceIdentifiers dmu_members;
+	bool is_selected = GetSelectedDmuCategory(dmu, dmu_members);
+	if (!is_selected)
 	{
-		boost::format msg("Invalid selection in DisplayDMUsRegion widget.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-	QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
-	if (!selectedIndex.isValid())
-	{
-		// No selection
 		return;
 	}
 
@@ -509,11 +463,6 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 		msgBox.exec();
 		return;
 	}
-
-	QVariant dmu_and_members_variant = dmuModel->item(selectedIndex.row())->data();
-	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = dmu_and_members_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
-	WidgetInstanceIdentifier & dmu = dmu_and_members.first;
-	WidgetInstanceIdentifiers & dmu_members = dmu_and_members.second;
 
 	InstanceActionItems actionItems;
 	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu)))));
@@ -532,45 +481,19 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 {
 
 	// Get selected DMU category
-	QItemSelectionModel * dmu_selectionModel = ui->listView_dmus->selectionModel();
-	if (dmu_selectionModel == nullptr)
+	WidgetInstanceIdentifier dmu_category;
+	WidgetInstanceIdentifiers dmu_members;
+	bool is_selected = GetSelectedDmuCategory(dmu_category, dmu_members);
+	if (!is_selected)
 	{
-		boost::format msg("Invalid selection in DisplayDMUsRegion widget.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
 		return;
 	}
-
-	QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
-	if (!selectedIndex.isValid())
-	{
-		// No selection
-		return;
-	}
-
-	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
-	if (dmuModel == nullptr)
-	{
-		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-	QVariant dmu_and_members_variant = dmuModel->item(selectedIndex.row())->data();
-	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = dmu_and_members_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
-	WidgetInstanceIdentifier & dmu = dmu_and_members.first;
-	WidgetInstanceIdentifiers & dmu_members = dmu_and_members.second;
-
-
 
 	// From http://stackoverflow.com/a/17512615/368896
 	QDialog dialog(this);
 	QFormLayout form(&dialog);
 	boost::format title("Add DMU member to %1%");
-	title % *dmu.code;
+	title % *dmu_category.code;
 	form.addRow(new QLabel(title.str().c_str()));
 	QList<QLineEdit *> fields;
 	QLineEdit *lineEditCode = new QLineEdit(&dialog);
@@ -729,7 +652,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(dmu, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_member_uuid, proposed_dmu_member_code, proposed_dmu_member_description})))));
+	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_member_uuid, proposed_dmu_member_code, proposed_dmu_member_description})))));
 	WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 	emit AddDMUMembers(action_request);
@@ -877,9 +800,19 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 		return;
 	}
 
+	QStandardItemModel * memberModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	if (memberModel == nullptr)
+	{
+		boost::format msg("Invalid list view items in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
 	QSortFilterProxyModel_NumbersLast * proxyModel = nullptr;
 
-	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel, &proxyModel](DataChange const & change)
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel, &memberModel, &proxyModel](DataChange const & change)
 	{
 
 		switch (change.change_type)
@@ -929,21 +862,15 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
 								{
-									boost::format msg("Invalid new DMU name or description.");
+									boost::format msg("Invalid DMU name or description.");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 
 								std::string dmu_code = *change.parent_identifier.code;
 								std::string dmu_description = *change.parent_identifier.longhand;
 
-								QString text(dmu_code.c_str());
-								if (!dmu_description.empty())
-								{
-									text += " (";
-									text += dmu_description.c_str();
-									text += ")";
-								}
-								QList<QStandardItem *> items = itemModel->findItems(text);
+								std::string text = GetDmuCategoryDisplayText(dmu_code, dmu_description);
+								QList<QStandardItem *> items = itemModel->findItems(text.c_str());
 								if (items.count() == 1)
 								{
 									QStandardItem * dmu_to_remove = items.at(0);
@@ -1004,6 +931,101 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 				}
 				break;
 
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE:
+				{
+
+					switch (change.change_intention)
+					{
+
+						case DATA_CHANGE_INTENTION__ADD:
+							{
+
+								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
+								{
+									boost::format msg("Invalid new DMU member.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+
+								WidgetInstanceIdentifier new_dmu_member(change.parent_identifier);
+
+								std::string dmu_member_uuid = *new_dmu_member.uuid;
+								std::string dmu_member_code;
+								std::string dmu_member_description;
+								if (new_dmu_member.code)
+								{
+									dmu_member_code = *new_dmu_member.code;
+								}
+								if (new_dmu_member.longhand)
+								{
+									dmu_member_description = *new_dmu_member.longhand;
+								}
+
+								QStandardItem * item = new QStandardItem();
+								std::string text = GetDmuMemberDisplayText(new_dmu_member);
+
+								item->setText(text.c_str());
+								item->setEditable(false);
+								item->setCheckable(true);
+								QVariant v;
+								v.setValue(new_dmu_member);
+								item->setData(v);
+								memberModel->appendRow(item);
+
+							}
+							break;
+
+						case DATA_CHANGE_INTENTION__REMOVE:
+							{
+
+								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
+								{
+									boost::format msg("Invalid DMU member name or description.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+
+								std::string dmu_member_code = *change.parent_identifier.code;
+								std::string dmu_member_description = *change.parent_identifier.longhand;
+
+								std::string text = GetDmuCategoryDisplayText(dmu_member_code, dmu_member_description);
+								QList<QStandardItem *> items = memberModel->findItems(text.c_str());
+								if (items.count() == 1)
+								{
+									QStandardItem * dmu_member_to_remove = items.at(0);
+									if (dmu_member_to_remove != nullptr)
+									{
+										QModelIndex index_to_remove = memberModel->indexFromItem(dmu_member_to_remove);
+										memberModel->takeRow(index_to_remove.row());
+
+										delete dmu_member_to_remove;
+										dmu_member_to_remove = nullptr;
+									}
+								}
+
+							}
+							break;
+
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								// Should never receive this.
+							}
+							break;
+
+						case DATA_CHANGE_INTENTION__RESET_ALL:
+							{
+								// Ditto above.
+							}
+							break;
+
+						default:
+							{
+							}
+							break;
+
+					}
+
+				}
+				break;
+
 			default:
 				{
 				}
@@ -1017,5 +1039,102 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 	{
 		proxyModel->sort(0);
 	}
+
+}
+
+bool DisplayDMUsRegion::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_category, WidgetInstanceIdentifiers & dmu_members)
+{
+
+	QItemSelectionModel * dmu_selectionModel = ui->listView_dmus->selectionModel();
+	if (dmu_selectionModel == nullptr)
+	{
+		boost::format msg("Invalid selection in DisplayDMUsRegion widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return false;
+	}
+
+	QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
+	if (!selectedIndex.isValid())
+	{
+		// No selection
+		return false;
+	}
+
+	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	if (dmuModel == nullptr)
+	{
+		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return false;
+	}
+
+	QVariant dmu_and_members_variant = dmuModel->item(selectedIndex.row())->data();
+	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = dmu_and_members_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
+	dmu_category = dmu_and_members.first;
+	dmu_members = dmu_and_members.second;
+
+	return true;
+
+}
+
+std::string DisplayDMUsRegion::GetDmuCategoryDisplayText(std::string const & dmu_code, std::string const & dmu_description)
+{
+
+	QString text(dmu_code.c_str());
+	if (!dmu_description.empty())
+	{
+		text += " (";
+		text += dmu_description.c_str();
+		text += ")";
+	}
+	return text.toStdString();
+
+}
+
+std::string DisplayDMUsRegion::GetDmuMemberDisplayText(WidgetInstanceIdentifier const & dmu_member)
+{
+
+	std::string text;
+	if (dmu_member.longhand && !dmu_member.longhand->empty())
+	{
+		text += dmu_member.longhand->c_str();
+	}
+	if (dmu_member.code && !dmu_member.code->empty())
+	{
+		bool use_parentheses = false;
+		if (dmu_member.longhand && !dmu_member.longhand->empty())
+		{
+			use_parentheses = true;
+		}
+		if (use_parentheses)
+		{
+			text += " (";
+		}
+		text += dmu_member.code->c_str();
+		if (use_parentheses)
+		{
+			text += ")";
+		}
+	}
+	bool use_parentheses = false;
+	if ((dmu_member.code && !dmu_member.code->empty()) || (dmu_member.longhand && !dmu_member.longhand->empty()))
+	{
+		use_parentheses = true;
+	}
+	if (use_parentheses)
+	{
+		text += " (";
+	}
+	text += dmu_member.uuid->c_str();
+	if (use_parentheses)
+	{
+		text += ")";
+	}
+
+	return text;
 
 }
