@@ -485,6 +485,18 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 {
 
+	WidgetInstanceIdentifier dmu_category;
+	WidgetInstanceIdentifiers dmu_members;
+	bool found = GetSelectedDmuCategory(dmu_category, dmu_members);
+	if (!found)
+	{
+		boost::format msg("A DMU category must be selected.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
 	QList<QLineEdit *> fields;
 	QList<QPushButton *> buttons;
 
@@ -564,15 +576,10 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		return;
 	}
 
-	boost::format msg("The DMU data file: '%1%'.  The column name: '%2%'");
-	msg % data_column_file_pathname.string() % data_column_name;
-	QMessageBox msgBox;
-	msgBox.setText( msg.str().c_str() );
-	msgBox.exec();
-	return;
-
-	//WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
-	//emit RefreshDMUsFromFile(action_request);
+	InstanceActionItems actionItems;
+	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{data_column_file_pathname.string(), data_column_name})))));
+	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
+	emit RefreshDMUsFromFile(action_request);
 
 }
 
