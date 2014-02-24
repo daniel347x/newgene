@@ -345,13 +345,19 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 			if (proposed_dmu_name.empty())
 			{
 				boost::format msg("The DMU category must have a name.");
-				throw NewGeneException() << newgene_error_description(msg.str());
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return;
 			}
 		}
 		else
 		{
 			boost::format msg("Unable to determine new DMU name and description.");
-			throw NewGeneException() << newgene_error_description(msg.str());
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
 		}
 	}
 	else
@@ -529,7 +535,10 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		else
 		{
 			boost::format msg("Unable to determine DMU data file name or column name.");
-			throw NewGeneException() << newgene_error_description(msg.str());
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
 		}
 	}
 	else
@@ -540,18 +549,27 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	if (data_column_name.empty())
 	{
 		boost::format msg("The DMU data column must have a name.");
-		throw NewGeneException() << newgene_error_description(msg.str());
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
 	}
 
 	if (!boost::filesystem::exists(data_column_file_pathname) || boost::filesystem::is_directory(data_column_file_pathname))
 	{
 		boost::format msg("The DMU data file does not exist.");
-		throw NewGeneException() << newgene_error_description(msg.str());
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
 	}
 
 	boost::format msg("The DMU data file: '%1%'.  The column name: '%2%'");
 	msg % data_column_file_pathname.string() % data_column_name;
-	throw NewGeneException() << newgene_error_description(msg.str());
+	QMessageBox msgBox;
+	msgBox.setText( msg.str().c_str() );
+	msgBox.exec();
+	return;
 
 	//WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
 	//emit RefreshDMUsFromFile(action_request);
@@ -613,7 +631,10 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 		else
 		{
 			boost::format msg("Unable to determine new DMU member code.");
-			throw NewGeneException() << newgene_error_description(msg.str());
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
 		}
 	}
 	else
@@ -778,7 +799,10 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 	catch (std::bad_cast &)
 	{
 		boost::format msg("Unable to obtain model for DMU member list.");
-		throw NewGeneException() << newgene_error_description(msg.str());
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
 	}
 
 	InstanceActionItems actionItems;
@@ -947,7 +971,10 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
 								{
 									boost::format msg("Invalid new DMU name or description.");
-									throw NewGeneException() << newgene_error_description(msg.str());
+									QMessageBox msgBox;
+									msgBox.setText( msg.str().c_str() );
+									msgBox.exec();
+									return;
 								}
 
 								WidgetInstanceIdentifier const & dmu_category = change.parent_identifier;
@@ -974,7 +1001,10 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
 								{
 									boost::format msg("Invalid DMU name or description.");
-									throw NewGeneException() << newgene_error_description(msg.str());
+									QMessageBox msgBox;
+									msgBox.setText( msg.str().c_str() );
+									msgBox.exec();
+									return;
 								}
 
 								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(change.parent_identifier);
@@ -1069,7 +1099,10 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
 								{
 									boost::format msg("Invalid new DMU member.");
-									throw NewGeneException() << newgene_error_description(msg.str());
+									QMessageBox msgBox;
+									msgBox.setText( msg.str().c_str() );
+									msgBox.exec();
+									return;
 								}
 
 								WidgetInstanceIdentifier new_dmu_member(change.parent_identifier);
@@ -1112,7 +1145,10 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
 								{
 									boost::format msg("Invalid DMU member.");
-									throw NewGeneException() << newgene_error_description(msg.str());
+									QMessageBox msgBox;
+									msgBox.setText( msg.str().c_str() );
+									msgBox.exec();
+									return;
 								}
 
 								WidgetInstanceIdentifier const & dmu_member = change.parent_identifier;
