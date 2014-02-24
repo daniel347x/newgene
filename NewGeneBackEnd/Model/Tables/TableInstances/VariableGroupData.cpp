@@ -421,7 +421,7 @@ Table_VariableGroupData * Table_VariableGroupData::GetInstanceTableFromTableName
 		return false;
 	}
 
-	auto vg_instance_table = std::find_if(input_model_->t_vgp_data_vector.begin(), input_model_->t_vgp_data_vector.end(), [&](Table_VariableGroupData * test_vg_table)
+	auto vg_instance_table = std::find_if(input_model_->t_vgp_data_vector.begin(), input_model_->t_vgp_data_vector.end(), [&](std::unique_ptr<Table_VariableGroupData> & test_vg_table)
 	{
 		if (test_vg_table)
 		{
