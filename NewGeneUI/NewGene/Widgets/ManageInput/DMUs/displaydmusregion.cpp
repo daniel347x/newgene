@@ -550,7 +550,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	}
 
 	boost::format msg("The DMU data file: '%1%'.  The column name: '%2%'");
-	msg % data_column_file_pathname.str() % data_column_name;
+	msg % data_column_file_pathname.string() % data_column_name;
 	throw NewGeneException() << newgene_error_description(msg.str());
 
 	//WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
