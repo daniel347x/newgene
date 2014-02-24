@@ -444,7 +444,7 @@ WidgetInstanceIdentifier Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, In
 
 }
 
-bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier & dmu_member)
+bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_member)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);

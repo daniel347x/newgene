@@ -408,18 +408,6 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 			messager.EmitChangeMessage(change_response);
 
 		}
-
-			break;
-		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
-		{
-
-		}
-
-			break;
-		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
-		{
-
-		}
 			break;
 
 		default:
@@ -452,48 +440,50 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 	switch (action_request.reason)
 	{
 
-		case WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS:
-		{
-
-		}
-			break;
-
 		case WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS:
 		{
 
 			DataChangeMessage change_response(&project);
 
-			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+			std::string result_msg("The following DMU members have been removed:");
+			result_msg += "\n";
+
+			for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
-				WidgetInstanceIdentifier dmu_member = instanceActionItem.first;
+				WidgetInstanceIdentifier const & dmu_member = instanceActionItem.first;
 
-				if (!dmu_member.uuid || dmu_member.uuid->empty())
+				if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent)
 				{
 					boost::format msg("Missing the DMU member to delete.");
 					messager.ShowMessageBox(msg.str());
 					return;
 				}
 
-				input_model.t_dmu_setmembers.DeleteDmuMember(input_model.getDb(), input_model, dmu_member, change_response);
+				WidgetInstanceIdentifier const & dmu_category = *dmu_member.identifier_parent;
 
-				//	// ***************************************** //
-				//	// Prepare data to send back to user interface
-				//	// ***************************************** //
-				//	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
-				//	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-				//	DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
-				//	change_response.changes.push_back(change);
+				boost::format msg("%1% (%2%)\n");
+				msg % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+				result_msg += msg.str();
+
+				input_model.t_dmu_setmembers.DeleteDmuMember(input_model.getDb(), input_model, dmu_member);
+
+
+				// ***************************************** //
+				// Prepare data to send back to user interface
+				// ***************************************** //
+				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
+				DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
+				change_response.changes.push_back(change);
 
 			});
 
-			//messager.EmitChangeMessage(change_response);
+			boost::format msg("%1%");
+			msg % result_msg;
+			messager.ShowMessageBox(msg.str());
 
-		}
-			break;
-
-		case WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS:
-		{
+			messager.EmitChangeMessage(change_response);
 
 		}
 			break;
