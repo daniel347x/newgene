@@ -408,9 +408,9 @@ WidgetInstanceIdentifier Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, In
 	std::string new_uuid(dmu_member_uuid);
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("INSERT INTO DMU_SET_MEMBER (DMU_SET_MEMBER_UUID, DMU_SET_MEMBER_STRING_CODE, DMU_SET_MEMBER_STRING_LONGHAND, DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID) VALUES (");
-	sql += "?, ?, ?, ')";
+	sql += "?, ?, ?, '";
 	sql += *dmu_category.uuid;
-	sql += ")";
+	sql += "')";
 	int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
