@@ -191,12 +191,20 @@ void DisplayDMUsRegion::Empty()
 		return;
 	}
 
-	QStandardItemModel * oldModel = nullptr;
+	QSortFilterProxyModel * oldModel = nullptr;
+	QAbstractItemModel * oldSourceModel = nullptr;
+	QStandardItemModel * oldDmuModel = nullptr;
 	QItemSelectionModel * oldSelectionModel = nullptr;
 
 	oldModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
 	if (oldModel != nullptr)
 	{
+		oldSourceModel = oldModel->sourceModel();
+		if (oldSourceModel != nullptr)
+		{
+			delete oldSourceModel;
+			oldSourceModel = nullptr;
+		}
 		delete oldModel;
 		oldModel = nullptr;
 	}
@@ -208,11 +216,11 @@ void DisplayDMUsRegion::Empty()
 		oldSelectionModel = nullptr;
 	}
 
-	oldModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
-	if (oldModel != nullptr)
+	oldDmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	if (oldDmuModel != nullptr)
 	{
-		delete oldModel;
-		oldModel = nullptr;
+		delete oldDmuModel;
+		oldDmuModel = nullptr;
 	}
 
 	oldSelectionModel = ui->listView_dmus->selectionModel();
@@ -730,9 +738,27 @@ void DisplayDMUsRegion::on_pushButton_deselect_all_dmu_members_clicked()
 	{
 		return;
 	}
-	int nrows = model->rowCount();
+
+	QAbstractItemModel * sourceModel = model->sourceModel();
+	if (sourceModel == nullptr)
+	{
+		return;
+	}
+
+	QStandardItemModel * sourceStandardModel = nullptr;
+	try
+	{
+		sourceStandardModel = dynamic_cast<QStandardItemModel*>(sourceModel);
+	}
+	catch (std::bad_cast &)
+	{
+		// guess not
+		return;
+	}
+
+	int nrows = sourceStandardModel->rowCount();
 	for (int row=0; row<nrows; ++row) {
-		QStandardItem * item = model->item(row, 0);
+		QStandardItem * item = sourceStandardModel->item(row, 0);
 		if (item)
 		{
 			item->setCheckState(Qt::Unchecked);
@@ -755,9 +781,27 @@ void DisplayDMUsRegion::on_pushButton_select_all_dmu_members_clicked()
 	{
 		return;
 	}
-	int nrows = model->rowCount();
+
+	QAbstractItemModel * sourceModel = model->sourceModel();
+	if (sourceModel == nullptr)
+	{
+		return;
+	}
+
+	QStandardItemModel * sourceStandardModel = nullptr;
+	try
+	{
+		sourceStandardModel = dynamic_cast<QStandardItemModel*>(sourceModel);
+	}
+	catch (std::bad_cast &)
+	{
+		// guess not
+		return;
+	}
+
+	int nrows = sourceStandardModel->rowCount();
 	for (int row=0; row<nrows; ++row) {
-		QStandardItem * item = model->item(row, 0);
+		QStandardItem * item = sourceStandardModel->item(row, 0);
 		if (item)
 		{
 			item->setCheckState(Qt::Checked);
@@ -876,11 +920,21 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 											QSortFilterProxyModel_NumbersLast * dmuSetMembersModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
 											if (dmuSetMembersModel != nullptr)
 											{
-												QStandardItemModel * dmuSetMembersSourceModel = dmuSetMembersModel->sourceModel();
-												if (dmuSetMembersSourceModel)
+												QAbstractItemModel * dmuSetMembersSourceModel = dmuSetMembersModel->sourceModel();
+												if (dmuSetMembersSourceModel != nullptr)
 												{
-													delete dmuSetMembersSourceModel;
-													dmuSetMembersSourceModel = nullptr;
+													QStandardItemModel * dmuSetMembersStandardSourceModel = nullptr;
+													try
+													{
+														dmuSetMembersStandardSourceModel = dynamic_cast<QStandardItemModel*>(dmuSetMembersSourceModel);
+													}
+													catch (std::bad_cast &)
+													{
+														// guess not
+														return;
+													}
+													delete dmuSetMembersStandardSourceModel;
+													dmuSetMembersStandardSourceModel = nullptr;
 													delete dmuSetMembersModel;
 													dmuSetMembersModel = nullptr;
 													QStandardItemModel * model = new QStandardItemModel();
@@ -942,9 +996,20 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 								WidgetInstanceIdentifier new_dmu_member(change.parent_identifier);
 
-								QStandardItemModl * memberSourceModel = memberModel->sourceModel();
+								QAbstractItemModel * memberSourceModel = memberModel->sourceModel();
 								if (memberSourceModel)
 								{
+
+									QStandardItemModel * memberStandardSourceModel = nullptr;
+									try
+									{
+										memberStandardSourceModel = dynamic_cast<QStandardItemModel*>(memberSourceModel);
+									}
+									catch (std::bad_cast &)
+									{
+										// guess not
+										return;
+									}
 
 									QStandardItem * item = new QStandardItem();
 									std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(new_dmu_member);
@@ -956,7 +1021,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 									v.setValue(new_dmu_member);
 									item->setData(v);
 
-									memberSourceModel->appendRow(item);
+									memberStandardSourceModel->appendRow(item);
 
 								}
 
@@ -979,15 +1044,26 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								if (memberSourceModel)
 								{
 
+									QStandardItemModel * memberStandardSourceModel = nullptr;
+									try
+									{
+										memberStandardSourceModel = dynamic_cast<QStandardItemModel*>(memberSourceModel);
+									}
+									catch (std::bad_cast &)
+									{
+										// guess not
+										return;
+									}
+
 									std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
-									QList<QStandardItem *> items = memberSourceModel->findItems(text.c_str());
+									QList<QStandardItem *> items = memberStandardSourceModel->findItems(text.c_str());
 									if (items.count() == 1)
 									{
 										QStandardItem * dmu_member_to_remove = items.at(0);
 										if (dmu_member_to_remove != nullptr)
 										{
-											QModelIndex index_to_remove = memberSourceModel->indexFromItem(dmu_member_to_remove);
-											memberSourceModel->takeRow(index_to_remove.row());
+											QModelIndex index_to_remove = memberStandardSourceModel->indexFromItem(dmu_member_to_remove);
+											memberStandardSourceModel->takeRow(index_to_remove.row());
 
 											delete dmu_member_to_remove;
 											dmu_member_to_remove = nullptr;
