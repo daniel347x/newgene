@@ -12,6 +12,8 @@
 #include <QDialogButtonBox>
 #include <QModelIndexList>
 #include <QSortFilterProxyModel>
+#include <QPushButton>
+#include <QFileDialog>
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
@@ -476,8 +478,84 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 
 void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 {
+
+	QList<QLineEdit *> fields;
+	QList<QPushButton *> buttons;
+
+	QDialog dialog(this);
+
+	QFormLayout form(&dialog);
+	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
+
+	form.addRow(new QLabel("DMU member refresh details"));
+
+	QString labelColumnName = QString("Enter DMU data column label:");
+	QLineEdit *lineEditColumnName = new QLineEdit(&dialog);
+	form.addRow(labelColumnName, lineEditColumnName);
+	fields << lineEditColumnName;
+
+	QLineEdit *lineEditFilePathName = new QLineEdit(&dialog);
+	QPushButton *buttonFilePathName = new QPushButton(&dialog);
+	formFileSelection.addWidget(lineEditFilePathName);
+	formFileSelection.addWidget(buttonFilePathName);
+	fields << lineEditFilePathName;
+	buttons << buttonFilePathName;
+
+	QString labelFilePathName = QString("Choose file:");
+	form.addRow(labelFilePathName, &formFileSelection);
+
+	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+	form.addRow(&buttonBox);
+
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+	QObject::connect(buttons[0], &QPushButton::clicked, [&fields, this]()
+	{
+		QString the_file = QFileDialog::getOpenFileName(this, "Choose DMU comma-delimited data file location", "", "");
+		fields[1]->setText(the_file);
+	});
+
+	std::string data_column_name;
+	boost::filesystem::path data_column_file_pathname;
+	if (dialog.exec() == QDialog::Accepted) {
+		QLineEdit * data_column_name_field = fields[0];
+		QLineEdit * data_column_file_pathname_field = fields[1];
+		if (data_column_name_field && data_column_file_pathname_field)
+		{
+			data_column_name = data_column_name_field->text().toStdString();
+			data_column_file_pathname = data_column_file_pathname_field->text().toStdString();
+		}
+		else
+		{
+			boost::format msg("Unable to determine DMU data file name or column name.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+	}
+	else
+	{
+		return;
+	}
+
+	if (data_column_name.empty())
+	{
+		boost::format msg("The DMU data column must have a name.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	if (!boost::filesystem::exists(data_column_file_pathname) || boost::filesystem::is_directory(data_column_file_pathname))
+	{
+		boost::format msg("The DMU data file does not exist.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	boost::format msg("The DMU data file: '%1%'.  The column name: '%2%'");
+	msg % data_column_file_pathname.str() % data_column_name;
+	throw NewGeneException() << newgene_error_description(msg.str());
+
 	//WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
 	//emit RefreshDMUsFromFile(action_request);
+
 }
 
 void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
