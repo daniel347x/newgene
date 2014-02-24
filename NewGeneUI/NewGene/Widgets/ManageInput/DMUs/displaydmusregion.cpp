@@ -830,7 +830,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 								WidgetInstanceIdentifier const & dmu_category = change.parent_identifier;
 
-								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_member);
+								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
 
 								QStandardItem * item = new QStandardItem();
 								item->setText(text);
