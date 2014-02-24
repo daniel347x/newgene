@@ -194,7 +194,7 @@ void DisplayDMUsRegion::Empty()
 	QStandardItemModel * oldModel = nullptr;
 	QItemSelectionModel * oldSelectionModel = nullptr;
 
-	oldModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	oldModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
@@ -244,7 +244,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 		return;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	QSortFilterProxyModel_NumbersLast * oldModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
@@ -256,7 +256,7 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 		QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
 
 		QItemSelectionModel * oldSelectionModel = ui->listView_dmu_members->selectionModel();
-		QStandardItemModel * model = new QStandardItemModel(ui->listView_dmu_members);
+		QStandardItemModel * model = new QStandardItemModel();
 
 		QModelIndex selectedIndex = selected.indexes().first();
 
@@ -674,7 +674,7 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 		return;
 	}
 
-	QSortFilterProxyModel * dmuMembersModel = static_cast<QSortFilterProxyModel*>(ui->listView_dmu_members->model());
+	QSortFilterProxyModel_NumbersLast * dmuMembersModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
 	if (dmuMembersModel == nullptr)
 	{
 		boost::format msg("Invalid model in DisplayDMUsRegion DMU category widget.");
@@ -725,7 +725,7 @@ void DisplayDMUsRegion::on_pushButton_deselect_all_dmu_members_clicked()
 		msgBox.exec();
 		return;
 	}
-	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	QSortFilterProxyModel_NumbersLast * model = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
 	if (model == nullptr)
 	{
 		return;
@@ -750,7 +750,7 @@ void DisplayDMUsRegion::on_pushButton_select_all_dmu_members_clicked()
 		msgBox.exec();
 		return;
 	}
-	QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	QSortFilterProxyModel_NumbersLast * model = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
 	if (model == nullptr)
 	{
 		return;
@@ -795,7 +795,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 		return;
 	}
 
-	QStandardItemModel * memberModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+	QSortFilterProxyModel_NumbersLast * memberModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
 	if (memberModel == nullptr)
 	{
 		boost::format msg("Invalid list view items in DisplayDMUsRegion widget.");
@@ -873,18 +873,26 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 										{
 											selectionModel->clearSelection();
 											QItemSelectionModel * oldDmuSetMembersSelectionModel = ui->listView_dmu_members->selectionModel();
-											QStandardItemModel * dmuSetMembersModel = static_cast<QStandardItemModel*>(ui->listView_dmu_members->model());
+											QSortFilterProxyModel_NumbersLast * dmuSetMembersModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
 											if (dmuSetMembersModel != nullptr)
 											{
-												delete dmuSetMembersModel;
-												QStandardItemModel * model = new QStandardItemModel(ui->listView_dmu_members);
-												proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_dmu_members);
-												proxyModel->setDynamicSortFilter(true);
-												proxyModel->setSourceModel(model);
-												ui->listView_dmu_members->setModel(proxyModel);
-												if (oldDmuSetMembersSelectionModel)
+												QStandardItemModel * dmuSetMembersSourceModel = dmuSetMembersModel->sourceModel();
+												if (dmuSetMembersSourceModel)
 												{
-													delete oldDmuSetMembersSelectionModel;
+													delete dmuSetMembersSourceModel;
+													dmuSetMembersSourceModel = nullptr;
+													delete dmuSetMembersModel;
+													dmuSetMembersModel = nullptr;
+													QStandardItemModel * model = new QStandardItemModel();
+													proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_dmu_members);
+													proxyModel->setDynamicSortFilter(true);
+													proxyModel->setSourceModel(model);
+													ui->listView_dmu_members->setModel(proxyModel);
+													if (oldDmuSetMembersSelectionModel)
+													{
+														delete oldDmuSetMembersSelectionModel;
+														oldDmuSetMembersSelectionModel = nullptr;
+													}
 												}
 											}
 										}
@@ -934,16 +942,23 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 								WidgetInstanceIdentifier new_dmu_member(change.parent_identifier);
 
-								QStandardItem * item = new QStandardItem();
-								std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(new_dmu_member);
+								QStandardItemModl * memberSourceModel = memberModel->sourceModel();
+								if (memberSourceModel)
+								{
 
-								item->setText(text.c_str());
-								item->setEditable(false);
-								item->setCheckable(true);
-								QVariant v;
-								v.setValue(new_dmu_member);
-								item->setData(v);
-								memberModel->appendRow(item);
+									QStandardItem * item = new QStandardItem();
+									std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(new_dmu_member);
+
+									item->setText(text.c_str());
+									item->setEditable(false);
+									item->setCheckable(true);
+									QVariant v;
+									v.setValue(new_dmu_member);
+									item->setData(v);
+
+									memberSourceModel->appendRow(item);
+
+								}
 
 							}
 							break;
@@ -959,19 +974,26 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 								WidgetInstanceIdentifier const & dmu_member = change.parent_identifier;
 
-								std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
-								QList<QStandardItem *> items = memberModel->findItems(text.c_str());
-								if (items.count() == 1)
-								{
-									QStandardItem * dmu_member_to_remove = items.at(0);
-									if (dmu_member_to_remove != nullptr)
-									{
-										QModelIndex index_to_remove = memberModel->indexFromItem(dmu_member_to_remove);
-										memberModel->takeRow(index_to_remove.row());
+								QStandardItemModel * memberSourceModel = memberModel->sourceModel();
 
-										delete dmu_member_to_remove;
-										dmu_member_to_remove = nullptr;
+								if (memberSourceModel)
+								{
+
+									std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
+									QList<QStandardItem *> items = memberSourceModel->findItems(text.c_str());
+									if (items.count() == 1)
+									{
+										QStandardItem * dmu_member_to_remove = items.at(0);
+										if (dmu_member_to_remove != nullptr)
+										{
+											QModelIndex index_to_remove = memberSourceModel->indexFromItem(dmu_member_to_remove);
+											memberSourceModel->takeRow(index_to_remove.row());
+
+											delete dmu_member_to_remove;
+											dmu_member_to_remove = nullptr;
+										}
 									}
+
 								}
 
 							}
