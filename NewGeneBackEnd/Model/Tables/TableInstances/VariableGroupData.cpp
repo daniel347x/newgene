@@ -435,7 +435,7 @@ Table_VariableGroupData * Table_VariableGroupData::GetInstanceTableFromTableName
 
 	if (vg_instance_table != input_model_->t_vgp_data_vector.end())
 	{
-		return vg_instance_table;
+		return vg_instance_table->get();
 	}
 
 	return nullptr;
