@@ -462,7 +462,7 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 
 				WidgetInstanceIdentifier const & dmu_category = *dmu_member.identifier_parent;
 
-				boost::format msg("%1% (%2%)\n");
+				boost::format msg("%1% (from %2%)\n");
 				msg % Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member) % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
 				result_msg += msg.str();
 
