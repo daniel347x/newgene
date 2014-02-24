@@ -237,8 +237,10 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 		stmt = nullptr;
 	}
 
-	// Remove from cache
-	std::string flags;
+	// Remove from cache for table UOA_CATEGORY_LOOKUP
+	input_model_.t_uoa_setmemberlookup.DeleteUOA(db, input_model_, uoa);
+
+	// Remove from our cache
 	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, uoa)), identifiers.end());
 
 	// ***************************************** //
@@ -330,3 +332,17 @@ WidgetInstanceIdentifiers Table_UOA_Member::RetrieveUOAsGivenDMU(sqlite3 * db, I
 
 }
 
+bool Table_UOA_Member::DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa)
+{
+
+	if (!uoa.uuid || uoa.uuid->empty())
+	{
+		return false;
+	}
+
+	// Just delete from the cache
+	identifiers_map.erase(*uoa.uuid);
+
+	return true;
+
+}

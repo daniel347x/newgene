@@ -80,6 +80,9 @@ class Table_UOA_Member : public Table<TABLE__UOA_MEMBER, TABLE_INSTANCE_IDENTIFI
 		// For a given DMU, retrieve all UOA's that depend on it
 		WidgetInstanceIdentifiers RetrieveUOAsGivenDMU(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & dmu);
 
+		// Just delete from the cache
+		bool DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa);
+
 };
 
 #endif
