@@ -716,14 +716,15 @@ bool Table_VariableGroupMetadata_DateTimeColumns::DeleteDataTable(sqlite3 * db, 
 		return false;
 	}
 
-	boost::format delete_stmt("DELETE FROM VG_DATA_METADATA__DATETIME_COLUMNS WHERE VG_DATA_TABLE_NAME = '%1%");
+	boost::format delete_stmt("DELETE FROM VG_DATA_METADATA__DATETIME_COLUMNS WHERE VG_DATA_TABLE_NAME = '%1%'");
 	delete_stmt % table_name;
 	char * errmsg = nullptr;
 	sqlite3_exec(db, delete_stmt.str().c_str(), NULL, NULL, &errmsg);
 	if (errmsg != nullptr)
 	{
+		boost::format msg("Unable to delete data for variable group in datetime table: %1%");
+		msg % errmsg;
 		sqlite3_free(errmsg);
-		boost::format msg("Unable to delete data for variable group in datetime table.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
