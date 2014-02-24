@@ -392,7 +392,7 @@ bool Table_DMU_Instance::Exists(sqlite3 * db, InputModel & input_model_, WidgetI
 
 }
 
-bool Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, std::string const & dmu_member_code, std::string const & dmu_member_description)
+WidgetInstanceIdentifier Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, std::string const & dmu_member_code, std::string const & dmu_member_description)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -402,7 +402,7 @@ bool Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, InputModel & input_mod
 	bool already_exists = Exists(db, input_model_, dmu_category, dmu_member_uuid);
 	if (already_exists)
 	{
-		return false;
+		return WidgetInstanceIdentifier();
 	}
 
 	std::string new_uuid(dmu_member_uuid);
@@ -435,11 +435,12 @@ bool Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, InputModel & input_mod
 	}
 
 	// Append to cache
-	identifiers_map[*dmu_category.uuid].push_back(WidgetInstanceIdentifier(dmu_member_uuid, dmu_category, dmu_member_code.c_str(), dmu_member_description.c_str(), 0));
+	WidgetInstanceIdentifier dmu_member(dmu_member_uuid, dmu_category, dmu_member_code.c_str(), dmu_member_description.c_str(), 0);
+	identifiers_map[*dmu_category.uuid].push_back(dmu_member);
 
 	theExecutor.success();
 
-	return theExecutor.succeeded();
+	return dmu_member;
 
 }
 
