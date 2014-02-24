@@ -352,9 +352,9 @@ bool Table_DMU_Instance::Exists(sqlite3 * db, InputModel & input_model_, WidgetI
 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT COUNT(*) FROM DMU_SET_MEMBER WHERE UPPER(DMU_SET_MEMBER_UUID) = '");
-	sql += dmu_member_to_check;
+	sql += boost::to_upper_copy(dmu_member_to_check);
 	sql += "' AND UPPER(DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID) = '";
-	sql += *dmu_category.uuid;
+	sql += boost::to_upper_copy(*dmu_category.uuid);
 	sql += "'";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
