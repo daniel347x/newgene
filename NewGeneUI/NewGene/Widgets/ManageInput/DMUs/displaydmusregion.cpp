@@ -1031,7 +1031,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
-								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty())
+								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
 								{
 									boost::format msg("Invalid DMU member.");
 									throw NewGeneException() << newgene_error_description(msg.str());
