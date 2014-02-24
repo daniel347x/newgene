@@ -609,12 +609,12 @@ bool Table_VariableGroupMetadata_PrimaryKeys::DeleteDataTable(sqlite3 * db, Inpu
 	boost::format delete_stmt("DELETE FROM VG_DATA_METADATA__PRIMARY_KEYS WHERE VG_DATA_TABLE_NAME = '%1%");
 	delete_stmt % table_name;
 	char * errmsg = nullptr;
-	int rslt = sqlite3_exec(db, delete_stmt.str().c_str(), NULL, NULL, &errmsg);
+	sqlite3_exec(db, delete_stmt.str().c_str(), NULL, NULL, &errmsg);
 	if (errmsg != nullptr)
 	{
-		sqlite3_free(errmsg);
 		boost::format msg("Unable to delete data for variable group in primary keys table: %1%");
-		msg % sqlite3_errstr(rslt);
+		msg % errmsg;
+		sqlite3_free(errmsg);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
