@@ -606,7 +606,7 @@ bool Table_VariableGroupMetadata_PrimaryKeys::DeleteDataTable(sqlite3 * db, Inpu
 		return false;
 	}
 
-	boost::format delete_stmt("DELETE FROM VG_DATA_METADATA__PRIMARY_KEYS WHERE VG_DATA_TABLE_NAME = '%1%");
+	boost::format delete_stmt("DELETE FROM VG_DATA_METADATA__PRIMARY_KEYS WHERE VG_DATA_TABLE_NAME = '%1%'");
 	delete_stmt % table_name;
 	char * errmsg = nullptr;
 	sqlite3_exec(db, delete_stmt.str().c_str(), NULL, NULL, &errmsg);
@@ -628,7 +628,7 @@ bool Table_VariableGroupMetadata_PrimaryKeys::DeleteDataTable(sqlite3 * db, Inpu
 }
 
 std::vector<std::pair<WidgetInstanceIdentifier, std::vector<std::string>>> Table_VariableGroupMetadata_PrimaryKeys::GetColumnNamesCorrespondingToPrimaryKeys(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
-{
+{	
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
