@@ -411,10 +411,11 @@ WidgetInstanceIdentifier Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, In
 	sql += "?, ?, ?, ')";
 	sql += *dmu_category.uuid;
 	sql += ")";
-	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
-		boost::format msg("Unable to prepare INSERT statement to create a new DMU member.");
+		boost::format msg("Unable to prepare INSERT statement to create a new DMU member: %1%");
+		msg % sqlite3_errstr(err);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 	sqlite3_bind_text(stmt, 1, dmu_member_uuid.c_str(), -1, SQLITE_TRANSIENT);
