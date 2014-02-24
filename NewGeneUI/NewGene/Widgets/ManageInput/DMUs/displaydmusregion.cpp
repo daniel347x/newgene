@@ -1039,7 +1039,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 								WidgetInstanceIdentifier const & dmu_member = change.parent_identifier;
 
-								QStandardItemModel * memberSourceModel = memberModel->sourceModel();
+								QAbstractItemModel * memberSourceModel = memberModel->sourceModel();
 
 								if (memberSourceModel)
 								{
