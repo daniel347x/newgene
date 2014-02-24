@@ -833,7 +833,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
 
 								QStandardItem * item = new QStandardItem();
-								item->setText(text);
+								item->setText(text.c_str());
 								item->setEditable(false);
 								item->setCheckable(false);
 
