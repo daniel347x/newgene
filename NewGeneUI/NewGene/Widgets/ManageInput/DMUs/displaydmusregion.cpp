@@ -271,9 +271,9 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 			if (dmu_member.uuid && !dmu_member.uuid->empty())
 			{
 
-				QStandardItem * item = new QStandardItem();
 				std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
 
+				QStandardItem * item = new QStandardItem();
 				item->setText(text.c_str());
 				item->setEditable(false);
 				item->setCheckable(true);
@@ -828,17 +828,11 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 
-								std::string dmu_code = *change.parent_identifier.code;
-								std::string dmu_description = *change.parent_identifier.longhand;
+								WidgetInstanceIdentifier const & dmu_category = change.parent_identifier;
+
+								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_member);
 
 								QStandardItem * item = new QStandardItem();
-								QString text(dmu_code.c_str());
-								if (!dmu_description.empty())
-								{
-									text += " (";
-									text += dmu_description.c_str();
-									text += ")";
-								}
 								item->setText(text);
 								item->setEditable(false);
 								item->setCheckable(false);
@@ -940,18 +934,6 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 								WidgetInstanceIdentifier new_dmu_member(change.parent_identifier);
 
-								std::string dmu_member_uuid = *new_dmu_member.uuid;
-								std::string dmu_member_code;
-								std::string dmu_member_description;
-								if (new_dmu_member.code)
-								{
-									dmu_member_code = *new_dmu_member.code;
-								}
-								if (new_dmu_member.longhand)
-								{
-									dmu_member_description = *new_dmu_member.longhand;
-								}
-
 								QStandardItem * item = new QStandardItem();
 								std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(new_dmu_member);
 
@@ -969,13 +951,15 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
-								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
+								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty())
 								{
-									boost::format msg("Invalid DMU member name or description.");
+									boost::format msg("Invalid DMU member.");
 									throw NewGeneException() << newgene_error_description(msg.str());
 								}
 
-								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(change.parent_identifier);
+								WidgetInstanceIdentifier const & dmu_member = change.parent_identifier;
+
+								std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
 								QList<QStandardItem *> items = memberModel->findItems(text.c_str());
 								if (items.count() == 1)
 								{
