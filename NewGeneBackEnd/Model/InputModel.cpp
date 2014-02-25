@@ -55,20 +55,8 @@ void InputModel::LoadTables()
 							// Todo: log warning
 							return; // from lambda
 						}
-						Importer table_importer(new_definition, this, vg_instance_data.get(), InputModelImportTableFn);
-						bool success = vg_instance_data->ImportStart(db, *variable_group_identifier.code, new_definition, nullptr, this);
-						if (!success)
-						{
-							// Todo: log warning
-							return; // from lambda
-						}
+						Importer table_importer(new_definition, this, vg_instance_data.get(), variable_group_identifier, InputModelImportTableFn);
 						success = table_importer.DoImport();
-						if (!success)
-						{
-							// Todo: log warning
-							return; // from lambda
-						}
-						success = vg_instance_data->ImportEnd(db, new_definition, nullptr, this);
 						if (!success)
 						{
 							// Todo: log warning

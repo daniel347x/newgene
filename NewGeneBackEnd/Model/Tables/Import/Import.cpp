@@ -7,6 +7,8 @@
 #endif
 #include <fstream>
 #include <cstdint>
+#include "../Table.h"
+#include "../../OutputModel.h"
 
 void TimeRangeFieldMapping::ConvertStringToDate(int & year, int & month, int & day, std::string const & the_string)
 {
@@ -375,11 +377,12 @@ bool ImportDefinition::IsEmpty()
 	return false;
 }
 
-Importer::Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, TableImportCallbackFn table_write_callback_)
+Importer::Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_)
 	: import_definition(import_definition_)
 	, table_write_callback(table_write_callback_)
 	, model(model_)
 	, table(table_)
+	, identifier(identifier_)
 {
 }
 
@@ -1619,6 +1622,43 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 bool Importer::DoImport()
 {
 
+	InputModel * inputModel = nullptr;
+	OutputModel * outputModel = nullptr;
+
+	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
+	{
+		try
+		{
+			inputModel = dynamic_cast<InputModel*>(model);
+		}
+		catch (std::bad_cast &)
+		{
+			return false;
+		}
+		if (!table->ImportStart(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
+		{
+			// Todo: log warning
+			return false;
+		}
+	}
+	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__OUTPUT_MODEL)
+	{
+		try
+		{
+			outputModel = dynamic_cast<OutputModel*>(model);
+		}
+		catch (std::bad_cast &)
+		{
+			return false;
+		}
+		inputModel = &outputModel->getInputModel();
+		if (!table->ImportStart(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
+		{
+			// Todo: log warning
+			return false;
+		}
+	}
+
 	InitializeFields();
 
 	// validate
@@ -1685,6 +1725,24 @@ bool Importer::DoImport()
 	{
 		// Todo: log file open failure warning
 		return false;
+	}
+
+	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
+	{
+		if (!table->ImportEnd(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
+		{
+			// Todo: log warning
+			return false;
+		}
+
+	}
+	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__OUTPUT_MODEL)
+	{
+		if (!table->ImportEnd(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
+		{
+			// Todo: log warning
+			return false;
+		}
 	}
 
 	return true;

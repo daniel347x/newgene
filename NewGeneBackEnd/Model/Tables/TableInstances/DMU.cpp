@@ -540,9 +540,17 @@ bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_
 
 }
 
-bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::string const & dmu_refresh_column_label)
+bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::vector<std::string> const & dmu_column_labels)
 {
+
+	std::string const & dmu_member_column_label_uuid = dmu_column_labels[0];
+	std::string const & dmu_member_column_label_code = dmu_column_labels[1];
+	std::string const & dmu_member_column_label_description = dmu_column_labels[2];
+
+
+
 	return true;
+
 }
 
 std::string Table_DMU_Instance::GetDmuMemberDisplayText(WidgetInstanceIdentifier const & dmu_member)

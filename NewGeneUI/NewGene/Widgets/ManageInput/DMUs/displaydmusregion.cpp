@@ -474,10 +474,20 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 	form.addRow(new QLabel("DMU member refresh details"));
 
-	QString labelColumnName = QString("Enter DMU data column label:");
-	QLineEdit *lineEditColumnName = new QLineEdit(&dialog);
-	form.addRow(labelColumnName, lineEditColumnName);
-	fields << lineEditColumnName;
+	QString labelColumnNameUuid = QString("Enter 'code' column label:");
+	QLineEdit *lineEditColumnNameUuid = new QLineEdit(&dialog);
+	form.addRow(labelColumnNameUuid, lineEditColumnNameUuid);
+	fields << lineEditColumnNameUuid;
+
+	QString labelColumnNameCode = QString("Enter 'abbreviation' column label (optional):");
+	QLineEdit *lineEditColumnNameCode = new QLineEdit(&dialog);
+	form.addRow(labelColumnNameCode, lineEditColumnNameCode);
+	fields << lineEditColumnNameCode;
+
+	QString labelColumnNameDescription = QString("Enter 'description' column label (optional):");
+	QLineEdit *lineEditColumnNameDescription = new QLineEdit(&dialog);
+	form.addRow(labelColumnNameDescription, lineEditColumnNameDescription);
+	fields << lineEditColumnNameDescription;
 
 	QLineEdit *lineEditFilePathName = new QLineEdit(&dialog);
 	QPushButton *buttonFilePathName = new QPushButton(&dialog);
@@ -498,17 +508,23 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	QObject::connect(buttons[0], &QPushButton::clicked, [&fields, this]()
 	{
 		QString the_file = QFileDialog::getOpenFileName(this, "Choose DMU comma-delimited data file location", "", "");
-		fields[1]->setText(the_file);
+		fields[3]->setText(the_file);
 	});
 
-	std::string data_column_name;
+	std::string data_column_name_uuid;
+	std::string data_column_name_code;
+	std::string data_column_name_description;
 	boost::filesystem::path data_column_file_pathname;
 	if (dialog.exec() == QDialog::Accepted) {
-		QLineEdit * data_column_name_field = fields[0];
-		QLineEdit * data_column_file_pathname_field = fields[1];
-		if (data_column_name_field && data_column_file_pathname_field)
+		QLineEdit * data_column_name_uuid_field = fields[0];
+		QLineEdit * data_column_name_code_field = fields[1];
+		QLineEdit * data_column_name_description_field = fields[2];
+		QLineEdit * data_column_file_pathname_field = fields[3];
+		if (data_column_name_uuid_field && data_column_name_code_field && data_column_name_description_field && data_column_file_pathname_field)
 		{
-			data_column_name = data_column_name_field->text().toStdString();
+			data_column_name_uuid = data_column_name_uuid_field->text().toStdString();
+			data_column_name_code = data_column_name_code_field->text().toStdString();
+			data_column_name_description = data_column_name_description_field->text().toStdString();
 			data_column_file_pathname = data_column_file_pathname_field->text().toStdString();
 		}
 		else
@@ -525,9 +541,9 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		return;
 	}
 
-	if (data_column_name.empty())
+	if (data_column_name_uuid.empty())
 	{
-		boost::format msg("The DMU data column must have a name.");
+		boost::format msg("The 'code' column name must be present.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
@@ -544,7 +560,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	}
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{data_column_file_pathname.string(), data_column_name})))));
+	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{data_column_file_pathname.string(), data_column_name_uuid, data_column_name_code, data_column_name_description})))));
 	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
 	emit RefreshDMUsFromFile(action_request);
 

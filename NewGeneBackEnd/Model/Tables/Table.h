@@ -23,7 +23,7 @@ class OutputModel;
 
 class TableMetadata_base
 {
-public:
+	public:
 
 };
 
@@ -35,7 +35,7 @@ class TableMetadata : public TableMetadata_base
 
 enum TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE
 {
-	  TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__NONE
+	TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__NONE
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP
 	, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT
@@ -45,12 +45,12 @@ enum TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE
 
 class Table_basemost
 {
-	 
+
 	public:
 
 		enum TABLE_MODEL_TYPE
 		{
-			  TABLE_MODEL_TYPE__INPUT_MODEL
+			TABLE_MODEL_TYPE__INPUT_MODEL
 			, TABLE_MODEL_TYPE__OUTPUT_MODEL
 		};
 
@@ -60,11 +60,11 @@ class Table_basemost
 
 		}
 
-        virtual void Load(sqlite3 *, InputModel * = nullptr) { };
-        virtual void Load(sqlite3 *, OutputModel * = nullptr, InputModel * = nullptr) { };
-        virtual bool ImportStart(sqlite3 *, std::string, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
-        virtual bool ImportBlock(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const) { return true; };
-        virtual bool ImportEnd(sqlite3 *, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
+		virtual void Load(sqlite3 *, InputModel * = nullptr) { };
+		virtual void Load(sqlite3 *, OutputModel * = nullptr, InputModel * = nullptr) { };
+		virtual bool ImportStart(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
+		virtual bool ImportBlock(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const) { return true; };
+		virtual bool ImportEnd(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
 
 		std::recursive_mutex data_mutex;
 		TABLE_MODEL_TYPE table_model_type;
@@ -127,6 +127,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR> : public Tabl
 				{
 					return;
 				}
+
 				if (identifier.code && boost::iequals(code, *identifier.code))
 				{
 					the_identifier = identifier;
@@ -148,6 +149,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR> : public Tabl
 				{
 					return;
 				}
+
 				if (identifier.uuid && boost::iequals(uuid_, *identifier.uuid))
 				{
 					the_identifier = identifier;
@@ -185,10 +187,12 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 		WidgetInstanceIdentifiers getIdentifiers(UUID const & uuid)
 		{
 			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 			if (identifiers_map.find(uuid) == identifiers_map.end())
 			{
 				return WidgetInstanceIdentifiers();
 			}
+
 			return identifiers_map[uuid];
 		}
 
@@ -202,6 +206,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 				{
 					return;
 				}
+
 				if (boost::iequals(parent_uuid, identifiers_.first))
 				{
 
@@ -209,7 +214,8 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 
 					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&code, &parent_uuid, &found, &the_identifier](WidgetInstanceIdentifier const & identifier_)
 					{
-						if (identifier_.code && boost::iequals(code, *identifier_.code) && identifier_.identifier_parent && identifier_.identifier_parent->uuid && boost::iequals(parent_uuid, *identifier_.identifier_parent->uuid))
+						if (identifier_.code && boost::iequals(code, *identifier_.code) && identifier_.identifier_parent && identifier_.identifier_parent->uuid
+							&& boost::iequals(parent_uuid, *identifier_.identifier_parent->uuid))
 						{
 							the_identifier = identifier_;
 							found = true;
@@ -233,6 +239,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 				{
 					return;
 				}
+
 				if (boost::iequals(parent_uuid, identifiers_.first))
 				{
 
@@ -240,7 +247,8 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP> : public Table_b
 
 					std::for_each(identifiers_.second.cbegin(), identifiers_.second.cend(), [&uuid_, &parent_uuid, &found, &the_identifier](WidgetInstanceIdentifier const & identifier_)
 					{
-						if (identifier_.uuid && boost::iequals(uuid_, *identifier_.uuid) && identifier_.identifier_parent && identifier_.identifier_parent->uuid && boost::iequals(parent_uuid, *identifier_.identifier_parent->uuid))
+						if (identifier_.uuid && boost::iequals(uuid_, *identifier_.uuid) && identifier_.identifier_parent && identifier_.identifier_parent->uuid
+							&& boost::iequals(parent_uuid, *identifier_.identifier_parent->uuid))
 						{
 							the_identifier = identifier_;
 							found = true;
@@ -275,7 +283,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 
 	public:
 
-    Table<TABLE_TYPE, CONTAINER_TYPE>(Table_basemost::TABLE_MODEL_TYPE const table_model_type_)
+		Table<TABLE_TYPE, CONTAINER_TYPE>(Table_basemost::TABLE_MODEL_TYPE const table_model_type_)
 			: Table_base<CONTAINER_TYPE>(table_model_type_)
 			, table_type(TABLE_TYPE)
 		{
@@ -284,6 +292,266 @@ class Table : public Table_base<CONTAINER_TYPE>
 
 		TableMetadata<TABLE_TYPE> metadata;
 		TABLE_TYPES table_type;
+
+		virtual std::string GetTableName()
+		{
+			boost::format msg("GetTableName() called in base class");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+		bool ImportBlock(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
+						 int const number_rows_in_block)
+		{
+
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+			Executor executor(db);
+
+			std::string sql_insert;
+
+			sql_insert += "INSERT OR FAIL INTO ";
+			sql_insert += GetTableName();
+			sql_insert += " (";
+
+			bool first = true;
+			std::for_each(import_definition.output_schema.schema.cbegin(),
+						  import_definition.output_schema.schema.cend(), [&import_definition, &sql_insert, &first](SchemaEntry const & schema_entry)
+			{
+				if (!first)
+				{
+					sql_insert += ", ";
+				}
+
+				first = false;
+
+				sql_insert += schema_entry.field_name;
+			});
+
+			sql_insert += ") VALUES ";
+
+			bool failed = false;
+			bool first_row = true;
+
+			for (int row = 0; row < number_rows_in_block; ++row)
+			{
+
+				if (!first_row)
+				{
+					sql_insert += ", ";
+				}
+
+				first_row = false;
+
+				sql_insert += "(";
+
+				DataFields const & row_fields = block[row];
+				first = true;
+				std::for_each(row_fields.cbegin(), row_fields.cend(), [&import_definition, &sql_insert, &first, &failed](std::shared_ptr<BaseField> const & field_data)
+				{
+					if (failed)
+					{
+						return; // from lambda
+					}
+
+					if (!first)
+					{
+						sql_insert += ", ";
+					}
+
+					first = false;
+
+					if (!field_data)
+					{
+						// Todo: log error
+						failed = true;
+						return; // from lambda
+					}
+
+					switch (field_data->GetType())
+					{
+						case FIELD_TYPE_INT32:
+							{
+								Field<FIELD_TYPE_INT32> const & field = static_cast<Field<FIELD_TYPE_INT32> const &>(*field_data);
+								sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+							}
+							break;
+
+						case FIELD_TYPE_INT64:
+							{
+								Field<FIELD_TYPE_INT64> const & field = static_cast<Field<FIELD_TYPE_INT64> const &>(*field_data);
+								sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+							}
+							break;
+
+						case FIELD_TYPE_UINT32:
+							{
+								Field<FIELD_TYPE_UINT32> const & field = static_cast<Field<FIELD_TYPE_UINT32> const &>(*field_data);
+								sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+							}
+							break;
+
+						case FIELD_TYPE_UINT64:
+							{
+								Field<FIELD_TYPE_UINT64> const & field = static_cast<Field<FIELD_TYPE_UINT64> const &>(*field_data);
+								sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+							}
+							break;
+
+						case FIELD_TYPE_FLOAT:
+							{
+								Field<FIELD_TYPE_FLOAT> const & field = static_cast<Field<FIELD_TYPE_FLOAT> const &>(*field_data);
+								sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+							}
+							break;
+
+						case FIELD_TYPE_STRING_FIXED:
+							{
+								Field<FIELD_TYPE_STRING_FIXED> const & field = static_cast<Field<FIELD_TYPE_STRING_FIXED> const &>(*field_data);
+								sql_insert += '\'';
+								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += '\'';
+							}
+							break;
+
+						case FIELD_TYPE_STRING_VAR:
+							{
+								Field<FIELD_TYPE_STRING_VAR> const & field = static_cast<Field<FIELD_TYPE_STRING_VAR> const &>(*field_data);
+								sql_insert += '\'';
+								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += '\'';
+							}
+							break;
+
+						case FIELD_TYPE_TIMESTAMP:
+							{
+								Field<FIELD_TYPE_TIMESTAMP> const & field = static_cast<Field<FIELD_TYPE_TIMESTAMP> const &>(*field_data);
+								sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+							}
+							break;
+
+						case FIELD_TYPE_UUID:
+							{
+								Field<FIELD_TYPE_UUID> const & field = static_cast<Field<FIELD_TYPE_UUID> const &>(*field_data);
+								sql_insert += '\'';
+								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += '\'';
+							}
+							break;
+
+						case FIELD_TYPE_UUID_FOREIGN:
+							{
+								Field<FIELD_TYPE_UUID_FOREIGN> const & field = static_cast<Field<FIELD_TYPE_UUID_FOREIGN> const &>(*field_data);
+								sql_insert += '\'';
+								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += '\'';
+							}
+							break;
+
+						case FIELD_TYPE_STRING_CODE:
+							{
+								Field<FIELD_TYPE_STRING_CODE> const & field = static_cast<Field<FIELD_TYPE_STRING_CODE> const &>(*field_data);
+								sql_insert += '\'';
+								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += '\'';
+							}
+							break;
+
+						case FIELD_TYPE_STRING_LONGHAND:
+							{
+								Field<FIELD_TYPE_STRING_LONGHAND> const & field = static_cast<Field<FIELD_TYPE_STRING_LONGHAND> const &>(*field_data);
+								sql_insert += '\'';
+								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += '\'';
+							}
+							break;
+
+						case FIELD_TYPE_TIME_RANGE:
+							{
+								Field<FIELD_TYPE_TIME_RANGE> const & field = static_cast<Field<FIELD_TYPE_TIME_RANGE> const &>(*field_data);
+								sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
+							}
+							break;
+
+						case FIELD_TYPE_NOTES_1:
+							{
+								Field<FIELD_TYPE_NOTES_1> const & field = static_cast<Field<FIELD_TYPE_NOTES_1> const &>(*field_data);
+								sql_insert += '\'';
+								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += '\'';
+							}
+							break;
+
+						case FIELD_TYPE_NOTES_2:
+							{
+								Field<FIELD_TYPE_NOTES_2> const & field = static_cast<Field<FIELD_TYPE_NOTES_2> const &>(*field_data);
+								sql_insert += '\'';
+								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += '\'';
+							}
+							break;
+
+						case FIELD_TYPE_NOTES_3:
+							{
+								Field<FIELD_TYPE_NOTES_3> const & field = static_cast<Field<FIELD_TYPE_NOTES_3> const &>(*field_data);
+								sql_insert += '\'';
+								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += '\'';
+							}
+							break;
+
+						default:
+							break;
+					}
+				});
+
+				if (failed)
+				{
+					break;
+				}
+
+				sql_insert += ")";
+
+			}
+
+			if (failed)
+			{
+				return false;
+			}
+
+			sqlite3_stmt * stmt = NULL;
+			sqlite3_prepare_v2(db, sql_insert.c_str(), static_cast<int>(sql_insert.size()) + 1, &stmt, NULL);
+
+			if (stmt == NULL)
+			{
+				// TODO: Log error
+				return false;
+			}
+
+			int step_result = 0;
+
+			if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+			{
+				// TODO: Log error
+				if (stmt)
+				{
+					sqlite3_finalize(stmt);
+					stmt = nullptr;
+				}
+
+				return false;
+			}
+
+			executor.success();
+
+			if (stmt)
+			{
+				sqlite3_finalize(stmt);
+				stmt = nullptr;
+			}
+
+			return true;
+
+		}
 
 };
 
@@ -315,6 +583,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT> : pu
 				{
 					return;
 				}
+
 				if (identifier.first.code && boost::iequals(code, *identifier.first.code))
 				{
 					the_identifier = identifier;
@@ -336,6 +605,7 @@ class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT> : pu
 				{
 					return;
 				}
+
 				if (identifier.first.uuid && boost::iequals(uuid_, *identifier.first.uuid))
 				{
 					the_identifier = identifier;
@@ -365,84 +635,87 @@ template<>
 class Table_base<TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR_PLUS_INT64> : public Table_basemost
 {
 
-public:
+	public:
 
-	Table_base(TABLE_MODEL_TYPE const table_model_type_)
-		: Table_basemost(table_model_type_)
-	{
-
-	}
-
-	WidgetInstanceIdentifiers_WithInt64s getIdentifiers()
-	{
-		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-		return identifiers;
-	}
-
-	bool getIdentifierFromStringCodeAndFlags(std::string const code, std::string const & flags, WidgetInstanceIdentifier_Int64_Pair & the_identifier)
-	{
-		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-		bool found = false;
-		std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &flags, &found, &the_identifier](WidgetInstanceIdentifier_Int64_Pair const & identifier)
+		Table_base(TABLE_MODEL_TYPE const table_model_type_)
+			: Table_basemost(table_model_type_)
 		{
-			if (found)
-			{
-				return;
-			}
-			if (identifier.first.code && boost::iequals(code, *identifier.first.code) && identifier.first.flags == flags)
-			{
-				the_identifier = identifier;
-				found = true;
-				return;
-			}
-		});
-		return found;
-	}
 
-	bool getIdentifierFromStringCode(std::string const code, WidgetInstanceIdentifier_Int64_Pair & the_identifier)
-	{
-		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-		bool found = false;
-		std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &found, &the_identifier](WidgetInstanceIdentifier_Int64_Pair const & identifier)
+		}
+
+		WidgetInstanceIdentifiers_WithInt64s getIdentifiers()
 		{
-			if (found)
-			{
-				return;
-			}
-			if (identifier.first.code && boost::iequals(code, *identifier.first.code))
-			{
-				the_identifier = identifier;
-				found = true;
-				return;
-			}
-		});
-		return found;
-	}
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			return identifiers;
+		}
 
-	WidgetInstanceIdentifier_Int64_Pair getIdentifier(UUID const & uuid_)
-	{
-		std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
-		WidgetInstanceIdentifier_Int64_Pair the_identifier;
-		bool found = false;
-		std::for_each(identifiers.cbegin(), identifiers.cend(), [&uuid_, &found, &the_identifier](WidgetInstanceIdentifier_Int64_Pair const & identifier)
+		bool getIdentifierFromStringCodeAndFlags(std::string const code, std::string const & flags, WidgetInstanceIdentifier_Int64_Pair & the_identifier)
 		{
-			if (found)
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			bool found = false;
+			std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &flags, &found, &the_identifier](WidgetInstanceIdentifier_Int64_Pair const & identifier)
 			{
-				return;
-			}
-			if (identifier.first.uuid && boost::iequals(uuid_, *identifier.first.uuid))
+				if (found)
+				{
+					return;
+				}
+
+				if (identifier.first.code && boost::iequals(code, *identifier.first.code) && identifier.first.flags == flags)
+				{
+					the_identifier = identifier;
+					found = true;
+					return;
+				}
+			});
+			return found;
+		}
+
+		bool getIdentifierFromStringCode(std::string const code, WidgetInstanceIdentifier_Int64_Pair & the_identifier)
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			bool found = false;
+			std::for_each(identifiers.cbegin(), identifiers.cend(), [&code, &found, &the_identifier](WidgetInstanceIdentifier_Int64_Pair const & identifier)
 			{
-				the_identifier = identifier;
-				found = true;
-				return;
-			}
-		});
-		return the_identifier;
-	}
+				if (found)
+				{
+					return;
+				}
 
-protected:
+				if (identifier.first.code && boost::iequals(code, *identifier.first.code))
+				{
+					the_identifier = identifier;
+					found = true;
+					return;
+				}
+			});
+			return found;
+		}
 
-	WidgetInstanceIdentifiers_WithInt64s identifiers;
+		WidgetInstanceIdentifier_Int64_Pair getIdentifier(UUID const & uuid_)
+		{
+			std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+			WidgetInstanceIdentifier_Int64_Pair the_identifier;
+			bool found = false;
+			std::for_each(identifiers.cbegin(), identifiers.cend(), [&uuid_, &found, &the_identifier](WidgetInstanceIdentifier_Int64_Pair const & identifier)
+			{
+				if (found)
+				{
+					return;
+				}
+
+				if (identifier.first.uuid && boost::iequals(uuid_, *identifier.first.uuid))
+				{
+					the_identifier = identifier;
+					found = true;
+					return;
+				}
+			});
+			return the_identifier;
+		}
+
+	protected:
+
+		WidgetInstanceIdentifiers_WithInt64s identifiers;
 
 };
 
