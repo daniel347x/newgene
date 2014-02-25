@@ -486,7 +486,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	fields << lineEditFilePathName;
 	buttons << buttonFilePathName;
 
-	QString labelFilePathName = QString("Choose file:");
+	QString labelFilePathName = QString("Choose comma-delimited file:");
 	form.addRow(labelFilePathName, &formFileSelection);
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
