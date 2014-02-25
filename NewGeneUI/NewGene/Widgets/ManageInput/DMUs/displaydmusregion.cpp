@@ -264,47 +264,14 @@ void DisplayDMUsRegion::ReceiveDMUSelectionChanged(const QItemSelection & select
 	{
 
 		QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
-
-		QItemSelectionModel * oldSelectionModel = ui->listView_dmu_members->selectionModel();
-		QStandardItemModel * model = new QStandardItemModel();
-
 		QModelIndex selectedIndex = selected.indexes().first();
-
 		QVariant dmu_and_members_variant = dmuModel->item(selectedIndex.row())->data();
 		std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = dmu_and_members_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
-		WidgetInstanceIdentifier & dmu = dmu_and_members.first;
+		WidgetInstanceIdentifier & dmu_category = dmu_and_members.first;
 		WidgetInstanceIdentifiers & dmu_members = dmu_and_members.second;
 
-		int index = 0;
-		std::for_each(dmu_members.cbegin(), dmu_members.cend(), [this, &index, &model](WidgetInstanceIdentifier const & dmu_member)
-		{
-			if (dmu_member.uuid && !dmu_member.uuid->empty())
-			{
+		ResetDmuMembersPane(dmu_category, dmu_members);
 
-				std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
-
-				QStandardItem * item = new QStandardItem();
-				item->setText(text.c_str());
-				item->setEditable(false);
-				item->setCheckable(true);
-				QVariant v;
-				v.setValue(dmu_member);
-				item->setData(v);
-				model->setItem( index, item );
-
-				++index;
-
-			}
-		});
-
-		QSortFilterProxyModel_NumbersLast *proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_dmu_members);
-		proxyModel->setDynamicSortFilter(true);
-		proxyModel->setSourceModel(model);
-
-		proxyModel->sort(0);
-
-		ui->listView_dmu_members->setModel(proxyModel);
-		if (oldSelectionModel) delete oldSelectionModel;
 	}
 
 }
@@ -1204,7 +1171,21 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
-								// Ditto above.
+
+								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
+								{
+									boost::format msg("Invalid DMU member.");
+									QMessageBox msgBox;
+									msgBox.setText( msg.str().c_str() );
+									msgBox.exec();
+									return;
+								}
+
+								WidgetInstanceIdentifier const & dmu_category = change.parent_identifier;
+								WidgetInstanceIdentifiers const & dmu_members = change.child_identifiers;
+
+								ResetDmuMembersPane(dmu_category, dmu_members);
+
 							}
 							break;
 
@@ -1270,5 +1251,48 @@ bool DisplayDMUsRegion::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_ca
 	dmu_members = dmu_and_members.second;
 
 	return true;
+
+}
+
+void DisplayDMUsRegion::ResetDmuMembersPane(WidgetInstanceIdentifier const & dmu_category, WidgetInstanceIdentifiers const & dmu_members)
+{
+
+	QSortFilterProxyModel_NumbersLast * oldModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
+	if (oldModel != nullptr)
+	{
+		delete oldModel;
+	}
+
+	QItemSelectionModel * oldSelectionModel = ui->listView_dmu_members->selectionModel();
+	QStandardItemModel * model = new QStandardItemModel();
+
+	int index = 0;
+	std::for_each(dmu_members.cbegin(), dmu_members.cend(), [this, &index, &model](WidgetInstanceIdentifier const & dmu_member)
+	{
+		if (dmu_member.uuid && !dmu_member.uuid->empty())
+		{
+
+			std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
+
+			QStandardItem * item = new QStandardItem();
+			item->setText(text.c_str());
+			item->setEditable(false);
+			item->setCheckable(true);
+			QVariant v;
+			v.setValue(dmu_member);
+			item->setData(v);
+			model->setItem( index, item );
+
+			++index;
+
+		}
+	});
+
+	QSortFilterProxyModel_NumbersLast *proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_dmu_members);
+	proxyModel->setDynamicSortFilter(true);
+	proxyModel->setSourceModel(model);
+	proxyModel->sort(0);
+	ui->listView_dmu_members->setModel(proxyModel);
+	if (oldSelectionModel) delete oldSelectionModel;
 
 }

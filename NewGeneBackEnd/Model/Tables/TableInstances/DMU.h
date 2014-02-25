@@ -83,6 +83,7 @@ class Table_DMU_Instance : public Table<TABLE__DMU_INSTANCE, TABLE_INSTANCE_IDEN
 		bool Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu, std::string const & dmu_member, bool const also_confirm_using_cache = true);
 		WidgetInstanceIdentifier CreateNewDmuMember(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, std::string const & dmu_member_uuid, std::string const & dmu_member_code, std::string const & dmu_member_description);
 		bool DeleteDmuMember(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_member);
+		bool RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::string const & dmu_refresh_column_label);
 
 		static std::string GetDmuMemberDisplayText(WidgetInstanceIdentifier const & dmu_member);
 
