@@ -55,7 +55,7 @@ void InputModel::LoadTables()
 							// Todo: log warning
 							return; // from lambda
 						}
-						Importer table_importer(new_definition, this, vg_instance_data.get(), variable_group_identifier, InputModelImportTableFn);
+						Importer table_importer(new_definition, this, vg_instance_data.get(), Importer::INSERT_OR_FAIL, variable_group_identifier, InputModelImportTableFn);
 						bool success = table_importer.DoImport();
 						if (!success)
 						{
@@ -80,13 +80,14 @@ void InputModel::LoadTables()
 
 }
 
-bool InputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
+bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
 {
 
 	try
 	{
 		if (table_->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
 		{
+
 			InputModel * input_model = dynamic_cast<InputModel*>(model_);
 			if (!input_model)
 			{
@@ -98,7 +99,27 @@ bool InputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_
 				// Todo: log warning
 				return false;
 			}
-			table_->ImportBlock(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows);
+
+			switch (importer->mode)
+			{
+
+				case Importer::INSERT_OR_FAIL:
+				{
+					table_->ImportBlockBulk(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows);
+				}
+					break;
+
+				case Importer::INSERT_OR_UPDATE:
+				{
+					table_->ImportBlockUpdate(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows);
+				}
+					break;
+
+				default:
+					break;
+
+			}
+
 		}
 		else
 		{

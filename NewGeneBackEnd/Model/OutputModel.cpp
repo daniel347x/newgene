@@ -55,12 +55,13 @@ void OutputModel::LoadTables()
 
 }
 
-bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
+bool OutputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
 {
 	try
 	{
 		if (table_->table_model_type == Table_basemost::TABLE_MODEL_TYPE__OUTPUT_MODEL)
 		{
+		
 			OutputModel * output_model = dynamic_cast<OutputModel*>(model_);
 			if (!output_model)
 			{
@@ -72,7 +73,27 @@ bool OutputModelImportTableFn(Model_basemost * model_, ImportDefinition & import
 				// Todo: log warning
 				return false;
 			}
-			table_->ImportBlock(output_model->getDb(), import_definition, output_model, &output_model->getInputModel(), table_block, number_rows);
+	
+			switch (importer->mode)
+			{
+
+				case Importer::INSERT_OR_FAIL:
+				{
+					table_->ImportBlockBulk(output_model->getDb(), import_definition, output_model, &output_model->getInputModel(), table_block, number_rows);
+				}
+				break;
+
+				case Importer::INSERT_OR_UPDATE:
+				{
+					table_->ImportBlockUpdate(output_model->getDb(), import_definition, output_model, &output_model->getInputModel(), table_block, number_rows);
+				}
+					break;
+
+				default:
+					break;
+
+			}
+					
 		}
 		else
 		{

@@ -361,11 +361,19 @@ class Importer
 
 	public:
 
-		typedef bool (*TableImportCallbackFn)(Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
+		enum Mode
+		{
+			  INSERT_OR_FAIL = 0
+			, INSERT_OR_UPDATE
+		};
+
+	public:
+
+		typedef bool (*TableImportCallbackFn)(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
 
 		static int const block_size = 500; // Maximum number of rows supported for block insert by SQLite
 
-		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_);
+		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_);
 
 		bool DoImport();
 
@@ -385,6 +393,10 @@ class Importer
 		void InitializeFields();
 		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline);
 		void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop);
+
+	public:
+		
+		Mode mode;
 
 };
 

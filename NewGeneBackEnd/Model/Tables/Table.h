@@ -64,7 +64,8 @@ class Table_basemost
 		virtual void Load(sqlite3 *, InputModel * = nullptr) { };
 		virtual void Load(sqlite3 *, OutputModel * = nullptr, InputModel * = nullptr) { };
 		virtual bool ImportStart(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
-		virtual bool ImportBlock(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const) { return true; };
+		virtual bool ImportBlockBulk(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const) { return true; };
+		virtual bool ImportBlockUpdate(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const) { return true; };
 		virtual bool ImportEnd(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
 
 		std::recursive_mutex data_mutex;
@@ -316,7 +317,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 
-		bool ImportBlock(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
+		bool ImportBlockBulk(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
 						 int const number_rows_in_block)
 		{
 

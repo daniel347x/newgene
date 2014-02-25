@@ -377,12 +377,13 @@ bool ImportDefinition::IsEmpty()
 	return false;
 }
 
-Importer::Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_)
+Importer::Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_)
 	: import_definition(import_definition_)
 	, table_write_callback(table_write_callback_)
 	, model(model_)
 	, table(table_)
 	, identifier(identifier_)
+	, mode(mode_)
 {
 }
 
@@ -1710,7 +1711,7 @@ bool Importer::DoImport()
 			else
 			{
 				// Write rows to database here
-				bool write_succeeded = table_write_callback(model, import_definition, table, output_block, currently_read_lines);
+				bool write_succeeded = table_write_callback(this, model, import_definition, table, output_block, currently_read_lines);
 				if (!write_succeeded)
 				{
 					// Todo: log warning
