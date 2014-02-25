@@ -10,6 +10,8 @@
 #	include <boost/filesystem.hpp>
 #endif
 
+#include "../../../Utilities/WidgetIdentifier.h"
+
 class NameOrIndex
 {
 

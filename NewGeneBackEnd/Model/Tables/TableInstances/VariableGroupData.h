@@ -34,8 +34,6 @@ public:
 
 	static Table_VariableGroupData * GetInstanceTableFromTableName(sqlite3 * db, InputModel * input_model_, std::string const & table_name);
 
-	static std::string EscapeTicks(std::string const & s);
-
 	std::string vg_category_string_code;
 	std::string table_name;
 

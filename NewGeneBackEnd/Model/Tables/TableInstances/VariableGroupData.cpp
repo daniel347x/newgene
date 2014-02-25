@@ -19,22 +19,6 @@ void Table_VariableGroupData::Load(sqlite3 * db, InputModel * input_model_)
 {
 }
 
-std::string Table_VariableGroupData::EscapeTicks(std::string const & s)
-{
-	std::string out;
-	char const * cs = s.c_str();
-	while (*cs != '\0')
-	{
-		if (*cs == '\'')
-		{
-			out += '\'';
-		}
-		out += *cs;
-		++cs;
-	}
-	return out;
-}
-
 bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier const & identifier, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_)
 {
 	

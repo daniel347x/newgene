@@ -16,6 +16,7 @@
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
+#	include <boost/lexical_cast.hpp>
 #endif
 
 class InputModel;
@@ -68,6 +69,22 @@ class Table_basemost
 
 		std::recursive_mutex data_mutex;
 		TABLE_MODEL_TYPE table_model_type;
+
+		static std::string EscapeTicks(std::string const & s)
+		{
+			std::string out;
+			char const * cs = s.c_str();
+			while (*cs != '\0')
+			{
+				if (*cs == '\'')
+				{
+					out += '\'';
+				}
+				out += *cs;
+				++cs;
+			}
+			return out;
+		}
 
 };
 
@@ -408,7 +425,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 							{
 								Field<FIELD_TYPE_STRING_FIXED> const & field = static_cast<Field<FIELD_TYPE_STRING_FIXED> const &>(*field_data);
 								sql_insert += '\'';
-								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 								sql_insert += '\'';
 							}
 							break;
@@ -417,7 +434,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 							{
 								Field<FIELD_TYPE_STRING_VAR> const & field = static_cast<Field<FIELD_TYPE_STRING_VAR> const &>(*field_data);
 								sql_insert += '\'';
-								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 								sql_insert += '\'';
 							}
 							break;
@@ -433,7 +450,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 							{
 								Field<FIELD_TYPE_UUID> const & field = static_cast<Field<FIELD_TYPE_UUID> const &>(*field_data);
 								sql_insert += '\'';
-								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 								sql_insert += '\'';
 							}
 							break;
@@ -442,7 +459,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 							{
 								Field<FIELD_TYPE_UUID_FOREIGN> const & field = static_cast<Field<FIELD_TYPE_UUID_FOREIGN> const &>(*field_data);
 								sql_insert += '\'';
-								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 								sql_insert += '\'';
 							}
 							break;
@@ -451,7 +468,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 							{
 								Field<FIELD_TYPE_STRING_CODE> const & field = static_cast<Field<FIELD_TYPE_STRING_CODE> const &>(*field_data);
 								sql_insert += '\'';
-								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 								sql_insert += '\'';
 							}
 							break;
@@ -460,7 +477,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 							{
 								Field<FIELD_TYPE_STRING_LONGHAND> const & field = static_cast<Field<FIELD_TYPE_STRING_LONGHAND> const &>(*field_data);
 								sql_insert += '\'';
-								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 								sql_insert += '\'';
 							}
 							break;
@@ -476,7 +493,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 							{
 								Field<FIELD_TYPE_NOTES_1> const & field = static_cast<Field<FIELD_TYPE_NOTES_1> const &>(*field_data);
 								sql_insert += '\'';
-								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 								sql_insert += '\'';
 							}
 							break;
@@ -485,7 +502,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 							{
 								Field<FIELD_TYPE_NOTES_2> const & field = static_cast<Field<FIELD_TYPE_NOTES_2> const &>(*field_data);
 								sql_insert += '\'';
-								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 								sql_insert += '\'';
 							}
 							break;
@@ -494,7 +511,7 @@ class Table : public Table_base<CONTAINER_TYPE>
 							{
 								Field<FIELD_TYPE_NOTES_3> const & field = static_cast<Field<FIELD_TYPE_NOTES_3> const &>(*field_data);
 								sql_insert += '\'';
-								sql_insert += Table_VariableGroupData::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
+								sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
 								sql_insert += '\'';
 							}
 							break;

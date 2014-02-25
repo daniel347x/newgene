@@ -56,7 +56,7 @@ void InputModel::LoadTables()
 							return; // from lambda
 						}
 						Importer table_importer(new_definition, this, vg_instance_data.get(), variable_group_identifier, InputModelImportTableFn);
-						success = table_importer.DoImport();
+						bool success = table_importer.DoImport();
 						if (!success)
 						{
 							// Todo: log warning
