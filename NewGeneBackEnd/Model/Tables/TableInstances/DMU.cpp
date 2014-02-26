@@ -543,11 +543,49 @@ bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_
 bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::vector<std::string> const & dmu_column_labels)
 {
 
+	if (!dmu_category.code || dmu_category.code->empty())
+	{
+		boost::format msg("Invalid DMU category in refresh function.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
 	std::string const & dmu_member_column_label_uuid = dmu_column_labels[0];
 	std::string const & dmu_member_column_label_code = dmu_column_labels[1];
 	std::string const & dmu_member_column_label_description = dmu_column_labels[2];
 
+	ImportDefinition import_definition;
 
+	import_definition.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
+	import_definition.input_file = dmu_refresh_file_pathname;
+	import_definition.first_row_is_header_row = true;
+	import_definition.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
+
+	Schema schema_input;
+	Schema schema_output;
+
+	SchemaVector input_schema_vector;
+	SchemaVector output_schema_vector;
+
+	input_schema_vector.push_back(SchemaEntry(*dmu_category.code, FIELD_TYPE_INT32, dmu_member_column_label_uuid));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, dmu_member_column_label_code));
+	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, dmu_member_column_label_description));
+
+	output_schema_vector.push_back(SchemaEntry(*dmu_category.code, FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_UUID, true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_STRING_CODE, true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_STRING_LONGHAND, true));
+
+	ImportDefinition::ImportMappings mappings;
+
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "DISNO"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "DISNO"), FIELD_TYPE_INT32)));
+
+	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn);
+
+	bool success = table_importer.DoImport();
+	if (!success)
+	{
+		boost::format msg("Unable to refresh the DMU list from the file.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
 
 	return true;
 

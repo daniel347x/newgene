@@ -14,6 +14,7 @@
 #include <QSortFilterProxyModel>
 #include <QPushButton>
 #include <QFileDialog>
+#include <QRadioButton>
 
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
@@ -464,52 +465,200 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		return;
 	}
 
+
+
+
+
+
+
 	QList<QLineEdit *> fields;
 	QList<QPushButton *> buttons;
+	QList<QRadioButton *> radioButtons;
+
+
+
+
 
 	QDialog dialog(this);
 
+
+
+
 	QFormLayout form(&dialog);
-	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
+
+
+
+
 
 	form.addRow(new QLabel("DMU member refresh details"));
+
+
+
+
+
 
 	QString labelColumnNameUuid = QString("Enter 'code' column label:");
 	QLineEdit *lineEditColumnNameUuid = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameUuid, lineEditColumnNameUuid);
 	fields << lineEditColumnNameUuid;
 
+
+
 	QString labelColumnNameCode = QString("Enter 'abbreviation' column label (optional):");
 	QLineEdit *lineEditColumnNameCode = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameCode, lineEditColumnNameCode);
 	fields << lineEditColumnNameCode;
+
+
 
 	QString labelColumnNameDescription = QString("Enter 'description' column label (optional):");
 	QLineEdit *lineEditColumnNameDescription = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameDescription, lineEditColumnNameDescription);
 	fields << lineEditColumnNameDescription;
 
+
+
+	QString labelFilePathName = QString("Choose comma-delimited file:");
 	QLineEdit *lineEditFilePathName = new QLineEdit(&dialog);
-	QPushButton *buttonFilePathName = new QPushButton(&dialog);
+	QPushButton *buttonFilePathName = new QPushButton("...", &dialog);
+	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
 	formFileSelection.addWidget(lineEditFilePathName);
 	formFileSelection.addWidget(buttonFilePathName);
 	fields << lineEditFilePathName;
 	buttons << buttonFilePathName;
-
-	QString labelFilePathName = QString("Choose comma-delimited file:");
 	form.addRow(labelFilePathName, &formFileSelection);
+
+
+
+
+	// Time range RADIO BUTTONS
+	form.addRow(new QLabel("Time range options:"));
+	QBoxLayout formTimeRangeSelection(QBoxLayout::LeftToRight);
+	QRadioButton * YButton = new QRadioButton("Year", &dialog);
+	QRadioButton * YMDButton = new QRadioButton("Year, Month, Day", &dialog);
+	formTimeRangeSelection.addWidget(YButton);
+	formTimeRangeSelection.addWidget(YMDButton);
+	radioButtons << YButton;
+	radioButtons << YMDButton;
+	form.addRow(&formTimeRangeSelection);
+
+	YMDButton->setChecked(true);
+
+
+
+
+	// Time range OPTIONS - Year
+	QFormLayout formYearOptions;
+	QWidget YearWidget;
+	YearWidget.setLayout(&formYearOptions);
+
+	// year
+	QString labelyYearStart = QString("'Year Start' column name:");
+	QLineEdit * lineEdityYearStart = new QLineEdit(&dialog);
+	formYearOptions.addRow(labelyYearStart, lineEdityYearStart);
+	fields << lineEdityYearStart;
+	QString labelyYearEnd = QString("'Year End' column name:");
+	QLineEdit * lineEdityYearEnd = new QLineEdit(&dialog);
+	formYearOptions.addRow(labelyYearEnd, lineEdityYearEnd);
+	fields << lineEdityYearEnd;
+
+	YearWidget.hide();
+
+	form.addRow(&formYearOptions);
+
+
+
+	// Time range OPTIONS - Year, Month, Day
+	QFormLayout formYearMonthDayOptions;
+	QWidget YearMonthDayWidget;
+	YearMonthDayWidget.setLayout(&formYearMonthDayOptions);
+
+	// year
+	QString labelymdYearStart = QString("'Year Start' column name:");
+	QLineEdit * lineEditymdYearStart = new QLineEdit(&dialog);
+	formYearMonthDayOptions.addRow(labelymdYearStart, lineEditymdYearStart);
+	fields << lineEditymdYearStart;
+	QString labelymdYearEnd = QString("'Year End' column name:");
+	QLineEdit * lineEditymdYearEnd = new QLineEdit(&dialog);
+	formYearMonthDayOptions.addRow(labelymdYearEnd, lineEditymdYearEnd);
+	fields << lineEditymdYearEnd;
+
+	// month
+	QString labelymdMonthStart = QString("'Month Start' column name:");
+	QLineEdit * lineEditymdMonthStart = new QLineEdit(&dialog);
+	formYearMonthDayOptions.addRow(labelymdMonthStart, lineEditymdMonthStart);
+	fields << lineEditymdMonthStart;
+	QString labelymdMonthEnd = QString("'Month End' column name:");
+	QLineEdit * lineEditymdMonthEnd = new QLineEdit(&dialog);
+	formYearMonthDayOptions.addRow(labelymdMonthEnd, lineEditymdMonthEnd);
+	fields << lineEditymdMonthEnd;
+
+	// day
+	QString labelymdDayStart = QString("'Day Start' column name:");
+	QLineEdit * lineEditymdDayStart = new QLineEdit(&dialog);
+	formYearMonthDayOptions.addRow(labelymdDayStart, lineEditymdDayStart);
+	fields << lineEditymdDayStart;
+	QString labelymdDayEnd = QString("'Day End' column name:");
+	QLineEdit * lineEditymdDayEnd = new QLineEdit(&dialog);
+	formYearMonthDayOptions.addRow(labelymdDayEnd, lineEditymdDayEnd);
+	fields << lineEditymdDayEnd;
+
+	YearMonthDayWidget.show();
+
+	form.addRow(&YearMonthDayWidget);
+
+
+
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
 	form.addRow(&buttonBox);
 
+
+
+
+
+
 	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
-	QObject::connect(buttons[0], &QPushButton::clicked, [&fields, this]()
+	QObject::connect(buttonFilePathName, &QPushButton::clicked, [&lineEditFilePathName, this]()
 	{
 		QString the_file = QFileDialog::getOpenFileName(this, "Choose DMU comma-delimited data file location", "", "");
-		fields[3]->setText(the_file);
+		lineEditFilePathName->setText(the_file);
 	});
+
+	QObject::connect(YButton, &QRadioButton::toggled, [&YButton, &YMDButton, &YearWidget, &YearMonthDayWidget, this]()
+	{
+		YearMonthDayWidget.hide();
+		YearWidget.hide();
+		if (YButton->isChecked())
+		{
+			YearWidget.show();
+		}
+		if (YMDButton->isChecked())
+		{
+			YearMonthDayWidget.show();
+		}
+	});
+
+	QObject::connect(YMDButton, &QRadioButton::toggled, [&YButton, &YMDButton, &YearWidget, &YearMonthDayWidget, this]()
+	{
+		YearMonthDayWidget.hide();
+		YearWidget.hide();
+		if (YButton->isChecked())
+		{
+			YearWidget.show();
+		}
+		if (YMDButton->isChecked())
+		{
+			YearMonthDayWidget.show();
+		}
+	});
+
+
+
+
+
 
 	std::string data_column_name_uuid;
 	std::string data_column_name_code;
