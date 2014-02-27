@@ -548,8 +548,8 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 
 	// Time range OPTIONS - Year
-	QFormLayout formYearOptions;
 	QWidget YearWidget;
+	QFormLayout formYearOptions(&YearWidget);
 	YearWidget.setLayout(&formYearOptions);
 
 	// year
@@ -569,8 +569,8 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 
 	// Time range OPTIONS - Year, Month, Day
-	QFormLayout formYearMonthDayOptions;
 	QWidget YearMonthDayWidget;
+	QFormLayout formYearMonthDayOptions(&YearMonthDayWidget);
 	YearMonthDayWidget.setLayout(&formYearMonthDayOptions);
 
 	// year
