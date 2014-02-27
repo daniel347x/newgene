@@ -554,17 +554,17 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 	// year
 	QString labelyYearStart = QString("'Year Start' column name:");
-	QLineEdit * lineEdityYearStart = new QLineEdit(&dialog);
+	QLineEdit * lineEdityYearStart = new QLineEdit(&YearWidget);
 	formYearOptions.addRow(labelyYearStart, lineEdityYearStart);
 	fields << lineEdityYearStart;
 	QString labelyYearEnd = QString("'Year End' column name:");
-	QLineEdit * lineEdityYearEnd = new QLineEdit(&dialog);
+	QLineEdit * lineEdityYearEnd = new QLineEdit(&YearWidget);
 	formYearOptions.addRow(labelyYearEnd, lineEdityYearEnd);
 	fields << lineEdityYearEnd;
 
 	YearWidget.hide();
 
-	form.addRow(&formYearOptions);
+	form.addRow(&YearWidget);
 
 
 
@@ -575,31 +575,31 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 	// year
 	QString labelymdYearStart = QString("'Year Start' column name:");
-	QLineEdit * lineEditymdYearStart = new QLineEdit(&dialog);
+	QLineEdit * lineEditymdYearStart = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdYearStart, lineEditymdYearStart);
 	fields << lineEditymdYearStart;
 	QString labelymdYearEnd = QString("'Year End' column name:");
-	QLineEdit * lineEditymdYearEnd = new QLineEdit(&dialog);
+	QLineEdit * lineEditymdYearEnd = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdYearEnd, lineEditymdYearEnd);
 	fields << lineEditymdYearEnd;
 
 	// month
 	QString labelymdMonthStart = QString("'Month Start' column name:");
-	QLineEdit * lineEditymdMonthStart = new QLineEdit(&dialog);
+	QLineEdit * lineEditymdMonthStart = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdMonthStart, lineEditymdMonthStart);
 	fields << lineEditymdMonthStart;
 	QString labelymdMonthEnd = QString("'Month End' column name:");
-	QLineEdit * lineEditymdMonthEnd = new QLineEdit(&dialog);
+	QLineEdit * lineEditymdMonthEnd = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdMonthEnd, lineEditymdMonthEnd);
 	fields << lineEditymdMonthEnd;
 
 	// day
 	QString labelymdDayStart = QString("'Day Start' column name:");
-	QLineEdit * lineEditymdDayStart = new QLineEdit(&dialog);
+	QLineEdit * lineEditymdDayStart = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdDayStart, lineEditymdDayStart);
 	fields << lineEditymdDayStart;
 	QString labelymdDayEnd = QString("'Day End' column name:");
-	QLineEdit * lineEditymdDayEnd = new QLineEdit(&dialog);
+	QLineEdit * lineEditymdDayEnd = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdDayEnd, lineEditymdDayEnd);
 	fields << lineEditymdDayEnd;
 
