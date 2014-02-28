@@ -145,6 +145,7 @@
     <ClInclude Include="UIData\DataWidgets.h" />
     <ClInclude Include="UIData\UIDataManager.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
+    <ClInclude Include="Utilities\TimeRangeHelper.h" />
     <ClInclude Include="Utilities\UUID.h" />
     <ClInclude Include="Utilities\Validation.h" />
     <ClInclude Include="Utilities\WidgetIdentifier.h" />
@@ -219,6 +220,7 @@
     <ClCompile Include="UIData\DataWidgets.cpp" />
     <ClCompile Include="UIData\UIDataManager.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
+    <ClCompile Include="Utilities\TimeRangeHelper.cpp" />
     <ClCompile Include="Utilities\UUID.cpp" />
     <ClCompile Include="Utilities\Validation.cpp" />
     <ClCompile Include="Utilities\WidgetIdentifier.cpp" />

@@ -26,6 +26,7 @@
 #include "../../Utilities/qsortfilterproxymodel_numberslast.h"
 #include "../../Utilities/importdialoghelper.h"
 #include "../../../../../NewGeneBackEnd/Utilities/Validation.h"
+#include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
 
 DisplayDMUsRegion::DisplayDMUsRegion(QWidget *parent) :
 	QWidget(parent),
@@ -467,12 +468,6 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		return;
 	}
 
-
-
-
-
-
-
 	QList<QLineEdit *> fields;
 
 	QDialog dialog(this);
@@ -512,6 +507,8 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 	std::vector<std::string> dataFileChooser;
 	std::vector<std::string> dataTimeRange;
+
+	TimeRange::TimeRangeImportMode timeRangeMode = TimeRange::TIME_RANGE_IMPORT_MODE__NONE;
 
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, [&dialog]()
@@ -567,7 +564,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		}
 		if (valid)
 		{
-			valid = ValidateTimeRangeBlock(fieldsTimeRange, dataTimeRange, errorMsg);
+			valid = ValidateTimeRangeBlock(fieldsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
 		}
 
 		if (!valid)
@@ -585,12 +582,13 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 	});
 
-	boost::filesystem::path data_column_file_pathname;
-
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
+
+	// validation already taken place
+	boost::filesystem::path data_column_file_pathname(dataFileChooser[0]);
 
 	InstanceActionItems actionItems;
 	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{data_column_file_pathname.string(), data_column_name_uuid, data_column_name_code, data_column_name_description})))));

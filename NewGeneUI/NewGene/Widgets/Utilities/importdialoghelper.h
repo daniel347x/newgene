@@ -8,7 +8,7 @@ namespace ImportDialogHelper
     bool ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> & dataFileChooser, std::string & errorMsg);
 
     void AddTimeRangeSelectorBlock(QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange);
-    bool ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeRange, std::vector<std::string> & dataTimeRange, std::string & errorMsg);
+    bool ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeRange, std::vector<std::string> & dataTimeRange, TimeRange::TimeRangeImportMode & timeRangeImportMode, std::string & errorMsg);
 
 }
 

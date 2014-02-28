@@ -12,6 +12,14 @@ namespace Validation
 
 	bool ValidateColumnName(std::string & proposed_column_name, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg);
 
+	bool ValidateYearInteger(std::string & proposed_year_integer, short & theYear, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg);
+	bool ValidateMonthInteger(std::string & proposed_month_integer, short & theMonth, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg);
+	bool ValidateDayInteger(short const theYear, short const theMonth, std::string & proposed_day_integer, short & theDay, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg);
+
+	bool ValidateDate1beforeDate2(short const y1, short const m1, short const d1, short const y2, short const m2, short const d2, std::string & errMsg);
+
+	bool ValidateDatePair(std::string & y1, std::string & m1, std::string & d1, std::string & y2, std::string & m2, std::string & d2, std::string & errorMsg);
+
 }
 
 #endif

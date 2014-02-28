@@ -1,4 +1,5 @@
 #include "importdialoghelper.h"
+#include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
 
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>
@@ -32,6 +33,7 @@ bool ImportDialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFil
 {
 
 	bool valid = false;
+	dataFileChooser.clear();
 
 	QLineEdit * data_column_file_pathname_field = fieldsFileChooser[0];
 
@@ -87,11 +89,11 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QFormLayout & form, QList<QLi
 	QString labelyYearStart = QString("'Year Start' column name:");
 	QLineEdit * lineEdityYearStart = new QLineEdit(&YearWidget);
 	formYearOptions.addRow(labelyYearStart, lineEdityYearStart);
-	fieldsTimeRange << lineEdityYearStart;
+	fieldsTimeRange << lineEdityYearStart;                                  // 1
 	QString labelyYearEnd = QString("'Year End' column name:");
 	QLineEdit * lineEdityYearEnd = new QLineEdit(&YearWidget);
 	formYearOptions.addRow(labelyYearEnd, lineEdityYearEnd);
-	fieldsTimeRange << lineEdityYearEnd;
+	fieldsTimeRange << lineEdityYearEnd;                                    // 2
 
 	YearWidget.hide();
 	form.addRow(&YearWidget);
@@ -106,31 +108,31 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QFormLayout & form, QList<QLi
 	QString labelymdYearStart = QString("'Year Start' column name:");
 	QLineEdit * lineEditymdYearStart = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdYearStart, lineEditymdYearStart);
-	fieldsTimeRange << lineEditymdYearStart;
+	fieldsTimeRange << lineEditymdYearStart;                                // 3
 	QString labelymdYearEnd = QString("'Year End' column name:");
 	QLineEdit * lineEditymdYearEnd = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdYearEnd, lineEditymdYearEnd);
-	fieldsTimeRange << lineEditymdYearEnd;
+	fieldsTimeRange << lineEditymdYearEnd;                                  // 4
 
 	// month
 	QString labelymdMonthStart = QString("'Month Start' column name:");
 	QLineEdit * lineEditymdMonthStart = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdMonthStart, lineEditymdMonthStart);
-	fieldsTimeRange << lineEditymdMonthStart;
+	fieldsTimeRange << lineEditymdMonthStart;                               // 5
 	QString labelymdMonthEnd = QString("'Month End' column name:");
 	QLineEdit * lineEditymdMonthEnd = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdMonthEnd, lineEditymdMonthEnd);
-	fieldsTimeRange << lineEditymdMonthEnd;
+	fieldsTimeRange << lineEditymdMonthEnd;                                 // 6
 
 	// day
 	QString labelymdDayStart = QString("'Day Start' column name:");
 	QLineEdit * lineEditymdDayStart = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdDayStart, lineEditymdDayStart);
-	fieldsTimeRange << lineEditymdDayStart;
+	fieldsTimeRange << lineEditymdDayStart;                                 // 7
 	QString labelymdDayEnd = QString("'Day End' column name:");
 	QLineEdit * lineEditymdDayEnd = new QLineEdit(&YearMonthDayWidget);
 	formYearMonthDayOptions.addRow(labelymdDayEnd, lineEditymdDayEnd);
-	fieldsTimeRange << lineEditymdDayEnd;
+	fieldsTimeRange << lineEditymdDayEnd;                                   // 8
 
 	YearMonthDayWidget.show();
 	form.addRow(&YearMonthDayWidget);
@@ -166,7 +168,129 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QFormLayout & form, QList<QLi
 
 }
 
-bool ImportDialogHelper::ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeRange, std::vector<std::string> & dataTimeRange)
+bool ImportDialogHelper::ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeRange, std::vector<std::string> & dataTimeRange, TimeRange::TimeRangeImportMode & timeRangeImportMode, std::string & errorMsg)
 {
+
+	timeRangeImportMode = TimeRange::TIME_RANGE_IMPORT_MODE__NONE;
+	dataTimeRange.clear();
+
+	if (YButton->isChecked())
+	{
+
+		timeRangeImportMode = TimeRange::TIME_RANGE_IMPORT_MODE__YEAR;
+
+		int currentIndex = 0;
+		QLineEdit * timeRange_y_yearStart = fieldsTimeRange[currentIndex++];
+		QLineEdit * timeRange_y_yearEnd = fieldsTimeRange[currentIndex++];
+
+		if (!timeRange_y_yearStart || !timeRange_y_yearEnd)
+		{
+			boost::format msg("Invalid date fields");
+			errorMsg = msg.str();
+			return false;
+		}
+
+		std::string y_yearStart(timeRange_y_yearStart->text().toStdString());
+		std::string y_yearEnd(timeRange_y_yearEnd->text().toStdString());
+
+		bool valid = true;
+
+		if (valid)
+		{
+			valid = Validation::ValidateColumnName(y_yearStart, "Start Year", true, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateColumnName(y_yearEnd, "End Year", true, errorMsg);
+		}
+
+		if (valid)
+		{
+			dataTimeRange.push_back(y_yearStart);
+			dataTimeRange.push_back(y_yearEnd);
+		}
+
+		return valid;
+
+	}
+
+	else if (YMDButton->isChecked())
+	{
+
+		timeRangeImportMode = TimeRange::TIME_RANGE_IMPORT_MODE__YEAR_MONTH_DAY;
+
+		int currentIndex = 2;
+		QLineEdit * timeRange_ymd_yearStart = fieldsTimeRange[currentIndex++];
+		QLineEdit * timeRange_ymd_yearEnd = fieldsTimeRange[currentIndex++];
+		QLineEdit * timeRange_ymd_monthStart = fieldsTimeRange[currentIndex++];
+		QLineEdit * timeRange_ymd_monthEnd = fieldsTimeRange[currentIndex++];
+		QLineEdit * timeRange_ymd_dayStart = fieldsTimeRange[currentIndex++];
+		QLineEdit * timeRange_ymd_dayEnd = fieldsTimeRange[currentIndex++];
+
+		if (!timeRange_ymd_yearStart || !timeRange_ymd_yearEnd || !timeRange_ymd_monthStart || !timeRange_ymd_monthEnd || !timeRange_ymd_dayStart || !timeRange_ymd_dayEnd)
+		{
+			boost::format msg("Invalid date fields");
+			errorMsg = msg.str();
+			return false;
+		}
+
+		std::string ymd_yearStart(timeRange_ymd_yearStart->text().toStdString());
+		std::string ymd_yearEnd(timeRange_ymd_yearEnd->text().toStdString());
+		std::string ymd_monthStart(timeRange_ymd_monthStart->text().toStdString());
+		std::string ymd_monthEnd(timeRange_ymd_monthEnd->text().toStdString());
+		std::string ymd_dayStart(timeRange_ymd_dayStart->text().toStdString());
+		std::string ymd_dayEnd(timeRange_ymd_dayEnd->text().toStdString());
+
+		bool valid = true;
+
+		if (valid)
+		{
+			valid = Validation::ValidateColumnName(ymd_yearStart, "Start Year", true, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateColumnName(ymd_monthStart, "Start Month", true, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateColumnName(ymd_dayStart, "Start Day", true, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateColumnName(ymd_yearEnd, "End Year", true, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateColumnName(ymd_monthEnd, "End Month", true, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateColumnName(ymd_dayEnd, "End Day", true, errorMsg);
+		}
+
+		if (valid)
+		{
+			dataTimeRange.push_back(ymd_yearStart);
+			dataTimeRange.push_back(ymd_monthStart);
+			dataTimeRange.push_back(ymd_dayStart);
+			dataTimeRange.push_back(ymd_yearEnd);
+			dataTimeRange.push_back(ymd_monthEnd);
+			dataTimeRange.push_back(ymd_dayEnd);
+		}
+
+		return valid;
+
+	}
+
+	boost::format msg("Invalid time range specification.");
+	errorMsg = msg.str();
+
+	return false;
 
 }

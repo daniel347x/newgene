@@ -339,6 +339,9 @@
     <ClInclude Include="Utilities\Validation.h">
       <Filter>Header Files\Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\TimeRangeHelper.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -555,6 +558,9 @@
       <Filter>Source Files\UIAction\Controllers</Filter>
     </ClCompile>
     <ClCompile Include="Utilities\Validation.cpp">
+      <Filter>Source Files\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\TimeRangeHelper.cpp">
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
