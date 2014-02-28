@@ -10,6 +10,8 @@
 #include <QLabel>
 #include <QRadioButton>
 
+#include "../../../../NewGeneBackEnd/Utilities/Validation.h"
+
 void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
 {
 
