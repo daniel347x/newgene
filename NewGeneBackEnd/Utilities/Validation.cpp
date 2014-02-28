@@ -141,44 +141,63 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 	boost::trim(proposed_column_name);
 
 	bool valid = true;
-	if (proposed_column_name.empty())
+
+	if (valid)
 	{
-		if (required)
+		if (proposed_column_name.empty())
 		{
-			boost::format msg("The '%1%' column name cannot be empty.");
+			if (required)
+			{
+				boost::format msg("The '%1%' column name cannot be empty.");
+				msg % column_description_for_invalid_message;
+				errorMsg = msg.str();
+				valid = false;
+			}
+		}
+	}
+
+	if (valid)
+	{
+		if (proposed_column_name.size() > 1024)
+		{
+			boost::format msg("The '%1%' column name is too long.");
 			msg % column_description_for_invalid_message;
 			errorMsg = msg.str();
 			valid = false;
 		}
+
 	}
 
-	if (proposed_column_name.size() > 1024)
+	if (valid)
 	{
-		boost::format msg("The '%1%' column name is too long.");
-		msg % column_description_for_invalid_message;
-		errorMsg = msg.str();
-		valid = false;
-	}
 
-	std::string regex_string("([a-zA-Z_0-9]*)");
-	boost::regex regex(regex_string);
-	boost::cmatch matches;
+		std::string regex_string("([a-zA-Z_0-9]*)");
+		boost::regex regex(regex_string);
+		boost::cmatch matches;
 
-	bool valid = true;
-	if (valid && boost::regex_match(proposed_column_name.c_str(), matches, regex))
-	{
-		// matches[0] contains the original string.  matches[n]
-		// contains a sub_match object for each matching
-		// subexpression
-		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
-		// for an example usage
-		if (valid && matches.size() == 2)
+		if (boost::regex_match(proposed_column_name.c_str(), matches, regex))
 		{
-			std::string the_match(matches[1].first, matches[1].second);
-
-			if (valid && the_match == proposed_column_name)
+			// matches[0] contains the original string.  matches[n]
+			// contains a sub_match object for each matching
+			// subexpression
+			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+			// for an example usage
+			if (valid && matches.size() == 2)
 			{
-				// no-op
+				std::string the_match(matches[1].first, matches[1].second);
+
+				if (valid && the_match == proposed_column_name)
+				{
+					// no-op
+				}
+				else
+				{
+					boost::format msg("The '%1%' column name is invalid.");
+					msg % column_description_for_invalid_message;
+					errorMsg = msg.str();
+					valid = false;
+				}
+
 			}
 			else
 			{
@@ -187,15 +206,8 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 				errorMsg = msg.str();
 				valid = false;
 			}
+		}
 
-		}
-		else
-		{
-			boost::format msg("The '%1%' column name is invalid.");
-			msg % column_description_for_invalid_message;
-			errorMsg = msg.str();
-			valid = false;
-		}
 	}
 
 	return valid;
@@ -208,68 +220,77 @@ bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short 
 	boost::trim(proposed_year_integer);
 
 	bool valid = true;
-	if (proposed_year_integer.empty())
+
+	if (valid)
 	{
-		if (required)
+		if (proposed_year_integer.empty())
 		{
-			boost::format msg("The '%1%' cannot be empty.");
-			msg % column_description_for_invalid_message;
-			errorMsg = msg.str();
-			valid = false;
+			if (required)
+			{
+				boost::format msg("The '%1%' cannot be empty.");
+				msg % column_description_for_invalid_message;
+				errorMsg = msg.str();
+				valid = false;
+			}
 		}
 	}
 
-	std::string regex_string("([0-9]*)");
-	boost::regex regex(regex_string);
-	boost::cmatch matches;
-
-	bool valid = false;
-	if (valid && boost::regex_match(proposed_year_integer.c_str(), matches, regex))
+	if (valid)
 	{
-		// matches[0] contains the original string.  matches[n]
-		// contains a sub_match object for each matching
-		// subexpression
-		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
-		// for an example usage
-		if (valid && matches.size() == 2)
+
+		std::string regex_string("([0-9]*)");
+		boost::regex regex(regex_string);
+		boost::cmatch matches;
+
+		valid = false;
+		if (boost::regex_match(proposed_year_integer.c_str(), matches, regex))
 		{
-			std::string the_match(matches[1].first, matches[1].second);
-
-			if (valid)
+			// matches[0] contains the original string.  matches[n]
+			// contains a sub_match object for each matching
+			// subexpression
+			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+			// for an example usage
+			if (valid && matches.size() == 2)
 			{
+				std::string the_match(matches[1].first, matches[1].second);
 
-				try
+				if (valid)
 				{
-					std::string the_year_string(matches[1].first, matches[1].second);
-					theYear = boost::lexical_cast<short>(the_year_string);
 
-					if (theYear >= 1752 && theYear <= 3000)
+					try
 					{
-						valid = true;
+						std::string the_year_string(matches[1].first, matches[1].second);
+						theYear = boost::lexical_cast<short>(the_year_string);
+
+						if (theYear >= 1752 && theYear <= 3000)
+						{
+							valid = true;
+						}
+
+					}
+					catch (boost::bad_lexical_cast &)
+					{
+						// no-op
 					}
 
 				}
-				catch (boost::bad_lexical_cast &)
-				{
-					// no-op
-				}
-								
-			}
 
-			if (!valid)
+				if (!valid)
+				{
+					boost::format msg("The '%1%' is invalid.  It must be an integer between 1752 and 3000.");
+					msg % column_description_for_invalid_message;
+					errorMsg = msg.str();
+				}
+
+			}
+			else
 			{
-				boost::format msg("The '%1%' is invalid.  It must be an integer between 1752 and 3000.");
+				boost::format msg("The '%1%' column name is invalid.");
 				msg % column_description_for_invalid_message;
 				errorMsg = msg.str();
 			}
+		}
 
-		}
-		else
-		{
-			boost::format msg("The '%1%' column name is invalid.");
-			msg % column_description_for_invalid_message;
-			errorMsg = msg.str();
-		}
 	}
 
 	return valid;
@@ -282,66 +303,75 @@ bool Validation::ValidateMonthInteger(std::string & proposed_month_integer, shor
 	boost::trim(proposed_month_integer);
 
 	bool valid = true;
-	if (proposed_month_integer.empty())
+
+	if (valid)
 	{
-		if (required)
+		if (proposed_month_integer.empty())
 		{
-			boost::format msg("The '%1%' cannot be empty.");
-			msg % column_description_for_invalid_message;
-			errorMsg = msg.str();
-			valid = false;
+			if (required)
+			{
+				boost::format msg("The '%1%' cannot be empty.");
+				msg % column_description_for_invalid_message;
+				errorMsg = msg.str();
+				valid = false;
+			}
 		}
 	}
 
-	std::string regex_string("([0-9]*)");
-	boost::regex regex(regex_string);
-	boost::cmatch matches;
-
-	bool valid = false;
-	if (valid && boost::regex_match(proposed_month_integer.c_str(), matches, regex))
+	if (valid)
 	{
-		// matches[0] contains the original string.  matches[n]
-		// contains a sub_match object for each matching
-		// subexpression
-		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
-		// for an example usage
-		if (valid && matches.size() == 2)
+
+		std::string regex_string("([0-9]*)");
+		boost::regex regex(regex_string);
+		boost::cmatch matches;
+
+		valid = false;
+		if (boost::regex_match(proposed_month_integer.c_str(), matches, regex))
 		{
-			std::string the_match(matches[1].first, matches[1].second);
-
-			if (valid)
+			// matches[0] contains the original string.  matches[n]
+			// contains a sub_match object for each matching
+			// subexpression
+			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+			// for an example usage
+			if (valid && matches.size() == 2)
 			{
+				std::string the_match(matches[1].first, matches[1].second);
 
-				try
+				if (valid)
 				{
-					std::string the_month_string(matches[1].first, matches[1].second);
-					theMonth = boost::lexical_cast<short>(the_month_string);
-					if (theMonth >= 1 && theMonth <= 12)
+
+					try
 					{
-						valid = true;
+						std::string the_month_string(matches[1].first, matches[1].second);
+						theMonth = boost::lexical_cast<short>(the_month_string);
+						if (theMonth >= 1 && theMonth <= 12)
+						{
+							valid = true;
+						}
 					}
+					catch (boost::bad_lexical_cast &)
+					{
+						// no-op
+					}
+
 				}
-				catch (boost::bad_lexical_cast &)
+
+				if (!valid)
 				{
-					// no-op
+					boost::format msg("The '%1%' is invalid.  It must be an integer between 1 and 12.");
+					msg % column_description_for_invalid_message;
+					errorMsg = msg.str();
 				}
 
 			}
-
-			if (!valid)
+			else
 			{
-				boost::format msg("The '%1%' is invalid.  It must be an integer between 1 and 12.");
+				boost::format msg("The '%1%' column name is invalid.");
 				msg % column_description_for_invalid_message;
 				errorMsg = msg.str();
 			}
+		}
 
-		}
-		else
-		{
-			boost::format msg("The '%1%' column name is invalid.");
-			msg % column_description_for_invalid_message;
-			errorMsg = msg.str();
-		}
 	}
 
 	return valid;
@@ -354,86 +384,96 @@ bool Validation::ValidateDayInteger(short const theYear, short const theMonth, s
 	boost::trim(proposed_day_integer);
 
 	bool valid = true;
-	if (proposed_day_integer.empty())
+
+	if (valid)
 	{
-		if (required)
+		if (proposed_day_integer.empty())
 		{
-			boost::format msg("The '%1%' cannot be empty.");
-			msg % column_description_for_invalid_message;
-			errorMsg = msg.str();
-			valid = false;
+			if (required)
+			{
+				boost::format msg("The '%1%' cannot be empty.");
+				msg % column_description_for_invalid_message;
+				errorMsg = msg.str();
+				valid = false;
+			}
 		}
 	}
 
-	std::string regex_string("([0-9]*)");
-	boost::regex regex(regex_string);
-	boost::cmatch matches;
-
-	bool valid = false;
-	if (valid && boost::regex_match(proposed_day_integer.c_str(), matches, regex))
+	if (valid)
 	{
-		// matches[0] contains the original string.  matches[n]
-		// contains a sub_match object for each matching
-		// subexpression
-		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
-		// for an example usage
-		if (valid && matches.size() == 2)
+
+		std::string regex_string("([0-9]*)");
+		boost::regex regex(regex_string);
+		boost::cmatch matches;
+
+		valid = false;
+
+		if (boost::regex_match(proposed_day_integer.c_str(), matches, regex))
 		{
-			std::string the_match(matches[1].first, matches[1].second);
-
-			if (valid)
+			// matches[0] contains the original string.  matches[n]
+			// contains a sub_match object for each matching
+			// subexpression
+			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+			// for an example usage
+			if (valid && matches.size() == 2)
 			{
+				std::string the_match(matches[1].first, matches[1].second);
 
-				try
+				if (valid)
 				{
 
-					std::string the_day_string(matches[1].first, matches[1].second);
-					theDay = boost::lexical_cast<short>(the_day_string);
-					boost::gregorian::greg_year y(theYear);
-					boost::gregorian::greg_month m(theMonth);
-					boost::gregorian::greg_day d(theDay);
-					boost::gregorian::date ymd(y, m, d);
-					boost::gregorian::date lastday = ymd.end_of_month();
-
-					if (lastday.day() >= theDay)
+					try
 					{
-						valid = true;
+
+						std::string the_day_string(matches[1].first, matches[1].second);
+						theDay = boost::lexical_cast<short>(the_day_string);
+						boost::gregorian::greg_year y(theYear);
+						boost::gregorian::greg_month m(theMonth);
+						boost::gregorian::greg_day d(theDay);
+						boost::gregorian::date ymd(y, m, d);
+						boost::gregorian::date lastday = ymd.end_of_month();
+
+						if (lastday.day() >= theDay)
+						{
+							valid = true;
+						}
+
+					}
+					catch (boost::bad_lexical_cast &)
+					{
+						// no-op
+					}
+					catch (boost::gregorian::bad_year &)
+					{
+						// no-op
+					}
+					catch (boost::gregorian::bad_month &)
+					{
+						// no-op
+					}
+					catch (boost::gregorian::bad_day_of_month &)
+					{
+						// no-op
 					}
 
 				}
-				catch (boost::bad_lexical_cast &)
+
+				if (!valid)
 				{
-					// no-op
-				}
-				catch (boost::gregorian::bad_year &)
-				{
-					// no-op
-				}
-				catch (boost::gregorian::bad_month &)
-				{
-					// no-op
-				}
-				catch (boost::gregorian::bad_day_of_month &)
-				{
-					// no-op
+					boost::format msg("The '%1%' is invalid.");
+					msg % column_description_for_invalid_message;
+					errorMsg = msg.str();
 				}
 
 			}
-
-			if (!valid)
+			else
 			{
-				boost::format msg("The '%1%' is invalid.");
+				boost::format msg("The '%1%' column name is invalid.");
 				msg % column_description_for_invalid_message;
 				errorMsg = msg.str();
 			}
+		}
 
-		}
-		else
-		{
-			boost::format msg("The '%1%' column name is invalid.");
-			msg % column_description_for_invalid_message;
-			errorMsg = msg.str();
-		}
 	}
 
 	return valid;
