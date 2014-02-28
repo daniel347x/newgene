@@ -563,5 +563,8 @@
     <ClCompile Include="Utilities\TimeRangeHelper.cpp">
       <Filter>Source Files\Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="Model\Tables\Table.cpp">
+      <Filter>Source Files\Model\Tables</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

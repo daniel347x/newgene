@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "FieldTypes.h"
+#include "../../Utilities/WidgetIdentifier.h"
 
 class SchemaEntry
 {
@@ -43,6 +44,7 @@ class SchemaEntry
 	FIELD_TYPE field_type;
 	std::string field_name;
 	std::shared_ptr<std::string> dmu_category_string_code; // primary key field
+	WidgetInstanceIdentifier dmu_category;
 	bool required;
 
 };
