@@ -4,6 +4,11 @@
 #	include <boost/filesystem.hpp>
 #endif
 
+#include <QPushButton>
+#include <QFileDialog>
+#include <QLabel>
+#include <QRadioButton>
+
 void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
 {
 
@@ -17,9 +22,9 @@ void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & for
 	//buttons << buttonFilePathName;
 	form.addRow(labelFilePathName, &formFileSelection);
 
-	QObject::connect(buttonFilePathName, &QPushButton::clicked, [&lineEditFilePathName, this]()
+	QObject::connect(buttonFilePathName, &QPushButton::clicked, [&]()
 	{
-		QString the_file = QFileDialog::getOpenFileName(this, fileChooserStrings[1].c_str(), fileChooserStrings[2].c_str(), fileChooserStrings[2].c_str());
+		QString the_file = QFileDialog::getOpenFileName(&dialog, fileChooserStrings[1].c_str(), fileChooserStrings[2].c_str(), fileChooserStrings[2].c_str());
 		if (!the_file.isEmpty())
 		{
 			lineEditFilePathName->setText(the_file);
@@ -65,7 +70,7 @@ bool ImportDialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFil
 
 }
 
-void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange)
+void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange)
 {
 
 	// Time range RADIO BUTTONS
@@ -77,6 +82,8 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout
 	formTimeRangeSelection.addWidget(YMDButton);
 	form.addRow(&formTimeRangeSelection);
 	YMDButton->setChecked(true);
+
+	radioButtonsTimeRange << YButton << YMDButton;
 
 
 	// Time range OPTIONS - Year
@@ -137,7 +144,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout
 	form.addRow(&YearMonthDayWidget);
 
 
-	QObject::connect(YButton, &QRadioButton::toggled, [&YButton, &YMDButton, &YearWidget, &YearMonthDayWidget, this]()
+	QObject::connect(YButton, &QRadioButton::toggled, [&]()
 	{
 		YearMonthDayWidget.hide();
 		YearWidget.hide();
@@ -151,7 +158,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout
 		}
 	});
 
-	QObject::connect(YMDButton, &QRadioButton::toggled, [&YButton, &YMDButton, &YearWidget, &YearMonthDayWidget, this]()
+	QObject::connect(YMDButton, &QRadioButton::toggled, [&]()
 	{
 		YearMonthDayWidget.hide();
 		YearWidget.hide();
@@ -167,11 +174,21 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout
 
 }
 
-bool ImportDialogHelper::ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeRange, std::vector<std::string> & dataTimeRange, TimeRange::TimeRangeImportMode & timeRangeImportMode, std::string & errorMsg)
+bool ImportDialogHelper::ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange, std::vector<std::string> & dataTimeRange, TimeRange::TimeRangeImportMode & timeRangeImportMode, std::string & errorMsg)
 {
 
 	timeRangeImportMode = TimeRange::TIME_RANGE_IMPORT_MODE__NONE;
 	dataTimeRange.clear();
+
+	QRadioButton * YButton = radioButtonsTimeRange[0];
+	QRadioButton * YMDButton = radioButtonsTimeRange[1];
+
+	if (!YButton || !YMDButton)
+	{
+		boost::format msg("Invalid time range selection radio buttons");
+		errorMsg = msg.str();
+		return false;
+	}
 
 	if (YButton->isChecked())
 	{

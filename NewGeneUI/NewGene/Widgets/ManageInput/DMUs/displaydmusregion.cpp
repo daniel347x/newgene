@@ -495,7 +495,8 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	ImportDialogHelper::AddFileChooserBlock(form, fieldsFileChooser, fileChooserStrings);
 
 	QList<QLineEdit *> fieldsTimeRange;
-	ImportDialogHelper::AddTimeRangeSelectorBlock(form, fieldsTimeRange);
+	QList<QRadioButton *> radioButtonsTimeRange;
+	ImportDialogHelper::AddTimeRangeSelectorBlock(form, fieldsTimeRange, radioButtonsTimeRange);
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
@@ -565,7 +566,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		}
 		if (valid)
 		{
-			valid = ImportDialogHelper::ValidateTimeRangeBlock(fieldsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
+			valid = ImportDialogHelper::ValidateTimeRangeBlock(fieldsTimeRange, radioButtonsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
 		}
 
 		if (!valid)
