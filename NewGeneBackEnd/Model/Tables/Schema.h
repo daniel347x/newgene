@@ -41,11 +41,20 @@ class SchemaEntry
         {
 		}
 
-	FIELD_TYPE field_type;
-	std::string field_name;
-	std::shared_ptr<std::string> dmu_category_string_code; // primary key field
-	WidgetInstanceIdentifier dmu_category;
-	bool required;
+		bool IsPrimaryKey() const
+		{
+			if (!dmu_category_string_code || dmu_category_string_code->empty())
+			{
+				return false;
+			}
+			return true;
+		}
+
+		FIELD_TYPE field_type;
+		std::string field_name;
+		std::shared_ptr<std::string> dmu_category_string_code; // primary key field
+		//WidgetInstanceIdentifier dmu_category; // when needed, bring this in
+		bool required;
 
 };
 

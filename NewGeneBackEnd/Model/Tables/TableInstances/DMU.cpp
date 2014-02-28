@@ -543,7 +543,7 @@ bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_
 bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::vector<std::string> const & dmu_column_labels)
 {
 
-	if (!dmu_category.code || dmu_category.code->empty())
+	if (!dmu_category.code || dmu_category.code->empty() || dmu_category.uuid->empty())
 	{
 		boost::format msg("Invalid DMU category in refresh function.");
 		throw NewGeneException() << newgene_error_description(msg.str());
@@ -586,6 +586,9 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_STRING_LONGHAND, true));
 		mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, dmu_member_column_label_description), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, DMU_SET_MEMBER_STRING_LONGHAND), FIELD_TYPE_STRING_FIXED)));
 	}
+
+	output_schema_vector.push_back(SchemaEntry(*dmu_category.code, FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID, true));
+	mappings.push_back(std::make_shared<HardCodedFieldMapping>(std::make_shared<Field<FIELD_TYPE_STRING_FIXED>>("DmuFK", FieldValue<FIELD_TYPE_STRING_FIXED>(*dmu_category.uuid)), std::make_pair(NameOrIndex(NameOrIndex::NAME, DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID), FIELD_TYPE_STRING_FIXED)));
 
 	//switch (timeRangeMode)
 	//{

@@ -68,6 +68,12 @@ class Table_basemost
 		virtual bool ImportStart(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
 		virtual bool ImportBlockBulk  (sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const);
 		virtual bool ImportBlockUpdate(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const);
+
+		int TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db);
+		void TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db);
+
+		std::string FieldDataAsSqlText(std::shared_ptr<BaseField> const & field_data, std::string & sql_insert);
+
 		virtual bool ImportEnd(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
 
 		std::recursive_mutex data_mutex;
