@@ -7,6 +7,7 @@
 #ifndef Q_MOC_RUN
 #	include <boost/scope_exit.hpp>
 #endif
+#include "../../Utilities/TimeRangeHelper.h"
 
 /************************************************************************/
 // ACTION_ADD_DMU
@@ -548,13 +549,6 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 				WidgetActionItem const & actionItem = *instanceActionItem.second;
 				WidgetActionItem__StringVector const & actionItemString = static_cast<WidgetActionItem__StringVector const &>(actionItem);
 				std::vector<std::string> dmu_refresh_strings = actionItemString.getValue();
-
-				if (dmu_refresh_strings.size() != 2)
-				{
-					boost::format msg("A file name, and column label, are required.");
-					messager.ShowMessageBox(msg.str());
-					return;
-				}
 
 				std::string dmu_refresh_file_pathname = dmu_refresh_strings[0];
 				std::vector<std::string> dmu_refresh_column_labels(dmu_refresh_strings.cbegin() + 1, dmu_refresh_strings.cend());

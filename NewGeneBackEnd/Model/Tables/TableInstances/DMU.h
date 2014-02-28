@@ -5,6 +5,7 @@
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #endif
+#include "../../../Utilities/TimeRangeHelper.h"
 
 class Table_DMU_Identifier : public Table<TABLE__DMU_IDENTIFIER, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR>
 {

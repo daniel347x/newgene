@@ -347,6 +347,46 @@ protected:
 
 };
 
+class WidgetActionItem__StringVector_Plus_Int : public WidgetActionItem__StringVector
+{
+
+	public:
+
+		WidgetActionItem__StringVector_Plus_Int(std::vector<std::string> const value__, int const intValue__)
+			: WidgetActionItem__StringVector(value__)
+			, intValue_(intValue__)
+		{
+
+		}
+
+		WidgetActionItem__StringVector_Plus_Int(WidgetActionItem__StringVector_Plus_Int const & rhs)
+			: WidgetActionItem__StringVector(rhs)
+			, intValue_(rhs.intValue_)
+		{
+
+		}
+
+		~WidgetActionItem__StringVector_Plus_Int()
+		{
+
+		}
+
+		void setIntValue(int const & value__)
+		{
+			intValue_ = value__;
+		}
+
+		int getIntValue() const
+		{
+			return intValue_;
+		}
+
+	protected:
+
+		int intValue_;
+
+};
+
 class WidgetActionItem__DateTime : public WidgetActionItem
 {
 

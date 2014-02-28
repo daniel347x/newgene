@@ -549,9 +549,10 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	std::string const & dmu_member_column_label_uuid = dmu_column_labels[0];
-	std::string const & dmu_member_column_label_code = dmu_column_labels[1];
-	std::string const & dmu_member_column_label_description = dmu_column_labels[2];
+	int currentIndex = 0;
+	std::string const & dmu_member_column_label_uuid = dmu_column_labels[currentIndex++];
+	std::string const & dmu_member_column_label_code = dmu_column_labels[currentIndex++];
+	std::string const & dmu_member_column_label_description = dmu_column_labels[currentIndex++];
 
 	ImportDefinition import_definition;
 
@@ -566,17 +567,81 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	SchemaVector input_schema_vector;
 	SchemaVector output_schema_vector;
 
-	input_schema_vector.push_back(SchemaEntry(*dmu_category.code, FIELD_TYPE_INT32, dmu_member_column_label_uuid));
-	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, dmu_member_column_label_code));
-	input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, dmu_member_column_label_description));
-
-	output_schema_vector.push_back(SchemaEntry(*dmu_category.code, FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_UUID, true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_STRING_CODE, true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_STRING_LONGHAND, true));
-
 	ImportDefinition::ImportMappings mappings;
 
-	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, "DISNO"), FIELD_TYPE_INT32), std::make_pair(NameOrIndex(NameOrIndex::NAME, "DISNO"), FIELD_TYPE_INT32)));
+	input_schema_vector.push_back(SchemaEntry(*dmu_category.code, FIELD_TYPE_STRING_FIXED, dmu_member_column_label_uuid));
+	output_schema_vector.push_back(SchemaEntry(*dmu_category.code, FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_UUID, true));
+	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, dmu_member_column_label_uuid), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, DMU_SET_MEMBER_UUID), FIELD_TYPE_STRING_FIXED)));
+
+	if (!dmu_member_column_label_code.empty())
+	{
+		input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, dmu_member_column_label_code));
+		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_STRING_CODE, true));
+		mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, dmu_member_column_label_code), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, DMU_SET_MEMBER_STRING_CODE), FIELD_TYPE_STRING_FIXED)));
+	}
+
+	if (!dmu_member_column_label_description.empty())
+	{
+		input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, dmu_member_column_label_description));
+		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_STRING_LONGHAND, true));
+		mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, dmu_member_column_label_description), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, DMU_SET_MEMBER_STRING_LONGHAND), FIELD_TYPE_STRING_FIXED)));
+	}
+
+	//switch (timeRangeMode)
+	//{
+
+	//	case TimeRange::TIME_RANGE_IMPORT_MODE__YEAR_MONTH_DAY:
+	//	{
+
+	//		std::string const & yearStart = dmu_column_labels[currentIndex++];
+	//		std::string const & monthStart = dmu_column_labels[currentIndex++];
+	//		std::string const & dayStart = dmu_column_labels[currentIndex++];
+	//		std::string const & yearEnd = dmu_column_labels[currentIndex++];
+	//		std::string const & monthEnd = dmu_column_labels[currentIndex++];
+	//		std::string const & dayEnd = dmu_column_labels[currentIndex++];
+
+	//		std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
+	//		FieldTypeEntries input_file_fields;
+	//		FieldTypeEntries output_table_fields;
+	//		FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, dayStart), FIELD_TYPE_INT32);
+	//		FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, monthStart), FIELD_TYPE_INT32);
+	//		FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, yearStart), FIELD_TYPE_INT32);
+	//		FieldTypeEntry input_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, dayEnd), FIELD_TYPE_INT32);
+	//		FieldTypeEntry input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, monthEnd), FIELD_TYPE_INT32);
+	//		FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, yearEnd), FIELD_TYPE_INT32);
+	//		input_file_fields.push_back(input_time_field__DayStart);
+	//		input_file_fields.push_back(input_time_field__MonthStart);
+	//		input_file_fields.push_back(input_time_field__YearStart);
+	//		input_file_fields.push_back(input_time_field__DayEnd);
+	//		input_file_fields.push_back(input_time_field__MonthEnd);
+	//		input_file_fields.push_back(input_time_field__YearEnd);
+	//		FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
+	//		FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+	//		output_table_fields.push_back(output_time_field__DayStart);
+	//		output_table_fields.push_back(output_time_field__DayEnd);
+	//		time_range_mapping->input_file_fields = input_file_fields;
+	//		time_range_mapping->output_table_fields = output_table_fields;
+	//		mappings.push_back(time_range_mapping);
+
+	//	}
+	//	break;
+
+	//	case TimeRange::TIME_RANGE_IMPORT_MODE__YEAR:
+	//	{
+
+	//		std::string const & yearStart = dmu_column_labels[currentIndex++];
+	//		std::string const & yearEnd = dmu_column_labels[currentIndex++];
+
+	//	}
+	//	break;
+
+	//	default:
+	//	{
+	//		return false;
+	//	}
+	//	break;
+
+	//}
 
 	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn);
 

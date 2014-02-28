@@ -494,9 +494,9 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited file", "Choose DMU comma-delimited data file location", "", "" };
 	ImportDialogHelper::AddFileChooserBlock(dialog, form, fieldsFileChooser, fileChooserStrings);
 
-	QList<QLineEdit *> fieldsTimeRange;
-	QList<QRadioButton *> radioButtonsTimeRange;
-	ImportDialogHelper::AddTimeRangeSelectorBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange);
+	//QList<QLineEdit *> fieldsTimeRange;
+	//QList<QRadioButton *> radioButtonsTimeRange;
+	//ImportDialogHelper::AddTimeRangeSelectorBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange);
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
@@ -509,7 +509,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	std::vector<std::string> dataFileChooser;
 	std::vector<std::string> dataTimeRange;
 
-	TimeRange::TimeRangeImportMode timeRangeMode = TimeRange::TIME_RANGE_IMPORT_MODE__NONE;
+	//TimeRange::TimeRangeImportMode timeRangeMode = TimeRange::TIME_RANGE_IMPORT_MODE__NONE;
 
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
@@ -564,10 +564,10 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		{
 			valid = ImportDialogHelper::ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
 		}
-		if (valid)
-		{
-			valid = ImportDialogHelper::ValidateTimeRangeBlock(fieldsTimeRange, radioButtonsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
-		}
+		//if (valid)
+		//{
+		//	valid = ImportDialogHelper::ValidateTimeRangeBlock(fieldsTimeRange, radioButtonsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
+		//}
 
 		if (!valid)
 		{
@@ -593,7 +593,10 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	boost::filesystem::path data_column_file_pathname(dataFileChooser[0]);
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{data_column_file_pathname.string(), data_column_name_uuid, data_column_name_code, data_column_name_description})))));
+	std::vector<std::string> column_names{data_column_file_pathname.string(), data_column_name_uuid, data_column_name_code, data_column_name_description};
+	//column_names.insert(column_names.end(), dataTimeRange.begin(), dataTimeRange.end());
+	//actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector_Plus_Int(column_names, (int)timeRangeMode)))));
+	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(column_names)))));
 	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
 	emit RefreshDMUsFromFile(action_request);
 
