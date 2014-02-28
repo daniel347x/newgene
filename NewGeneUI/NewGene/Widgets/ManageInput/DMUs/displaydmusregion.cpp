@@ -588,7 +588,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		return;
 	}
 
-	// validation already taken place
+	// validation has already taken place
 	boost::filesystem::path data_column_file_pathname(dataFileChooser[0]);
 
 	InstanceActionItems actionItems;

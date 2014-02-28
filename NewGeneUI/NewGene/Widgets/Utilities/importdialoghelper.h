@@ -2,6 +2,11 @@
 #define IMPORTDIALOGHELPER_H
 
 #include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QList>
+#include <vector>
+#include <string>
 
 namespace ImportDialogHelper
 {
