@@ -5,6 +5,7 @@
 #include <QDialog>
 #include <QFormLayout>
 #include <QLineEdit>
+#include <QRadioButton>
 #include <QList>
 #include <vector>
 #include <string>

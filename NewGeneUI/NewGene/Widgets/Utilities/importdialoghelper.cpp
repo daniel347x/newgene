@@ -2,6 +2,7 @@
 
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>
+#	include <boost/format.hpp>
 #endif
 
 #include <QPushButton>
