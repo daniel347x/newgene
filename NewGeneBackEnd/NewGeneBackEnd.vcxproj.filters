@@ -336,6 +336,9 @@
     <ClInclude Include="Model\OutputModelDdlSql.h">
       <Filter>Header Files\Model</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\Validation.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -550,6 +553,9 @@
     </ClCompile>
     <ClCompile Include="UIAction\Controllers\Controller_DMU_Management.cpp">
       <Filter>Source Files\UIAction\Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\Validation.cpp">
+      <Filter>Source Files\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

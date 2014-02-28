@@ -24,6 +24,8 @@
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../../Utilities/qsortfilterproxymodel_numberslast.h"
+#include "../../Utilities/importdialoghelper.h"
+#include "../../../../../NewGeneBackEnd/Utilities/Validation.h"
 
 DisplayDMUsRegion::DisplayDMUsRegion(QWidget *parent) :
 	QWidget(parent),
@@ -472,239 +474,121 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 
 	QList<QLineEdit *> fields;
-	QList<QPushButton *> buttons;
-	QList<QRadioButton *> radioButtons;
-
-
-
-
 
 	QDialog dialog(this);
-
-
-
-
 	QFormLayout form(&dialog);
 
-
-
-
-
 	form.addRow(new QLabel("DMU member refresh details"));
-
-
-
-
-
 
 	QString labelColumnNameUuid = QString("Enter 'code' column label:");
 	QLineEdit *lineEditColumnNameUuid = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameUuid, lineEditColumnNameUuid);
 	fields << lineEditColumnNameUuid;
 
-
-
 	QString labelColumnNameCode = QString("Enter 'abbreviation' column label (optional):");
 	QLineEdit *lineEditColumnNameCode = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameCode, lineEditColumnNameCode);
 	fields << lineEditColumnNameCode;
-
-
 
 	QString labelColumnNameDescription = QString("Enter 'description' column label (optional):");
 	QLineEdit *lineEditColumnNameDescription = new QLineEdit(&dialog);
 	form.addRow(labelColumnNameDescription, lineEditColumnNameDescription);
 	fields << lineEditColumnNameDescription;
 
+	QList<QLineEdit *> fieldsFileChooser;
+	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited file", "Choose DMU comma-delimited data file location", "", "" };
+	ImportDialogHelper::AddFileChooserBlock(form, fieldsFileChooser, fileChooserStrings);
 
-
-	QString labelFilePathName = QString("Choose comma-delimited file:");
-	QLineEdit *lineEditFilePathName = new QLineEdit(&dialog);
-	QPushButton *buttonFilePathName = new QPushButton("...", &dialog);
-	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
-	formFileSelection.addWidget(lineEditFilePathName);
-	formFileSelection.addWidget(buttonFilePathName);
-	fields << lineEditFilePathName;
-	buttons << buttonFilePathName;
-	form.addRow(labelFilePathName, &formFileSelection);
-
-
-
-
-	// Time range RADIO BUTTONS
-	form.addRow(new QLabel("Time range options:"));
-	QBoxLayout formTimeRangeSelection(QBoxLayout::LeftToRight);
-	QRadioButton * YButton = new QRadioButton("Year", &dialog);
-	QRadioButton * YMDButton = new QRadioButton("Year, Month, Day", &dialog);
-	formTimeRangeSelection.addWidget(YButton);
-	formTimeRangeSelection.addWidget(YMDButton);
-	radioButtons << YButton;
-	radioButtons << YMDButton;
-	form.addRow(&formTimeRangeSelection);
-
-	YMDButton->setChecked(true);
-
-
-
-
-	// Time range OPTIONS - Year
-	QWidget YearWidget;
-	QFormLayout formYearOptions(&YearWidget);
-	YearWidget.setLayout(&formYearOptions);
-
-	// year
-	QString labelyYearStart = QString("'Year Start' column name:");
-	QLineEdit * lineEdityYearStart = new QLineEdit(&YearWidget);
-	formYearOptions.addRow(labelyYearStart, lineEdityYearStart);
-	fields << lineEdityYearStart;
-	QString labelyYearEnd = QString("'Year End' column name:");
-	QLineEdit * lineEdityYearEnd = new QLineEdit(&YearWidget);
-	formYearOptions.addRow(labelyYearEnd, lineEdityYearEnd);
-	fields << lineEdityYearEnd;
-
-	YearWidget.hide();
-
-	form.addRow(&YearWidget);
-
-
-
-	// Time range OPTIONS - Year, Month, Day
-	QWidget YearMonthDayWidget;
-	QFormLayout formYearMonthDayOptions(&YearMonthDayWidget);
-	YearMonthDayWidget.setLayout(&formYearMonthDayOptions);
-
-	// year
-	QString labelymdYearStart = QString("'Year Start' column name:");
-	QLineEdit * lineEditymdYearStart = new QLineEdit(&YearMonthDayWidget);
-	formYearMonthDayOptions.addRow(labelymdYearStart, lineEditymdYearStart);
-	fields << lineEditymdYearStart;
-	QString labelymdYearEnd = QString("'Year End' column name:");
-	QLineEdit * lineEditymdYearEnd = new QLineEdit(&YearMonthDayWidget);
-	formYearMonthDayOptions.addRow(labelymdYearEnd, lineEditymdYearEnd);
-	fields << lineEditymdYearEnd;
-
-	// month
-	QString labelymdMonthStart = QString("'Month Start' column name:");
-	QLineEdit * lineEditymdMonthStart = new QLineEdit(&YearMonthDayWidget);
-	formYearMonthDayOptions.addRow(labelymdMonthStart, lineEditymdMonthStart);
-	fields << lineEditymdMonthStart;
-	QString labelymdMonthEnd = QString("'Month End' column name:");
-	QLineEdit * lineEditymdMonthEnd = new QLineEdit(&YearMonthDayWidget);
-	formYearMonthDayOptions.addRow(labelymdMonthEnd, lineEditymdMonthEnd);
-	fields << lineEditymdMonthEnd;
-
-	// day
-	QString labelymdDayStart = QString("'Day Start' column name:");
-	QLineEdit * lineEditymdDayStart = new QLineEdit(&YearMonthDayWidget);
-	formYearMonthDayOptions.addRow(labelymdDayStart, lineEditymdDayStart);
-	fields << lineEditymdDayStart;
-	QString labelymdDayEnd = QString("'Day End' column name:");
-	QLineEdit * lineEditymdDayEnd = new QLineEdit(&YearMonthDayWidget);
-	formYearMonthDayOptions.addRow(labelymdDayEnd, lineEditymdDayEnd);
-	fields << lineEditymdDayEnd;
-
-	YearMonthDayWidget.show();
-
-	form.addRow(&YearMonthDayWidget);
-
-
-
+	QList<QLineEdit *> fieldsTimeRange;
+	ImportDialogHelper::AddTimeRangeSelectorBlock(form, fieldsTimeRange);
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
 	form.addRow(&buttonBox);
 
-
-
-
-
-
-	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
-	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
-	QObject::connect(buttonFilePathName, &QPushButton::clicked, [&lineEditFilePathName, this]()
-	{
-		QString the_file = QFileDialog::getOpenFileName(this, "Choose DMU comma-delimited data file location", "", "");
-		lineEditFilePathName->setText(the_file);
-	});
-
-	QObject::connect(YButton, &QRadioButton::toggled, [&YButton, &YMDButton, &YearWidget, &YearMonthDayWidget, this]()
-	{
-		YearMonthDayWidget.hide();
-		YearWidget.hide();
-		if (YButton->isChecked())
-		{
-			YearWidget.show();
-		}
-		if (YMDButton->isChecked())
-		{
-			YearMonthDayWidget.show();
-		}
-	});
-
-	QObject::connect(YMDButton, &QRadioButton::toggled, [&YButton, &YMDButton, &YearWidget, &YearMonthDayWidget, this]()
-	{
-		YearMonthDayWidget.hide();
-		YearWidget.hide();
-		if (YButton->isChecked())
-		{
-			YearWidget.show();
-		}
-		if (YMDButton->isChecked())
-		{
-			YearMonthDayWidget.show();
-		}
-	});
-
-
-
-
-
-
 	std::string data_column_name_uuid;
 	std::string data_column_name_code;
 	std::string data_column_name_description;
-	boost::filesystem::path data_column_file_pathname;
-	if (dialog.exec() == QDialog::Accepted) {
-		QLineEdit * data_column_name_uuid_field = fields[0];
-		QLineEdit * data_column_name_code_field = fields[1];
-		QLineEdit * data_column_name_description_field = fields[2];
-		QLineEdit * data_column_file_pathname_field = fields[3];
-		if (data_column_name_uuid_field && data_column_name_code_field && data_column_name_description_field && data_column_file_pathname_field)
+
+	std::vector<std::string> dataFileChooser;
+	std::vector<std::string> dataTimeRange;
+
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, [&dialog]()
+	{
+		// data validation here
+		bool valid = true;
+
+		// Custom validation
+		if (valid)
 		{
+
+			std::string errorMsg;
+
+			QLineEdit * data_column_name_uuid_field = fields[0];
+			QLineEdit * data_column_name_code_field = fields[1];
+			QLineEdit * data_column_name_description_field = fields[2];
+			if (!data_column_name_uuid_field && !data_column_name_code_field && !data_column_name_description_field)
+			{
+				valid = false;
+				errorMsg = "Invalid DMU.";
+			}
+
+		}
+
+		if (valid)
+		{
+
 			data_column_name_uuid = data_column_name_uuid_field->text().toStdString();
 			data_column_name_code = data_column_name_code_field->text().toStdString();
 			data_column_name_description = data_column_name_description_field->text().toStdString();
-			data_column_file_pathname = data_column_file_pathname_field->text().toStdString();
+
 		}
-		else
+
+		if (valid)
 		{
-			boost::format msg("Unable to determine DMU data file name or column name.");
+			valid = Validation::ValidateColumnName(data_column_name_uuid, "Code", true, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateColumnName(data_column_name_code, "Abbreviation", false, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateColumnName(data_column_name_description, "Description", false, errorMsg);
+		}
+
+		// Factored validation
+		if (valid)
+		{
+			valid = ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
+		}
+		if (valid)
+		{
+			valid = ValidateTimeRangeBlock(fieldsTimeRange, dataTimeRange, errorMsg);
+		}
+
+		if (!valid)
+		{
+			boost::format msg(errorMsg);
 			QMessageBox msgBox;
 			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
-			return;
 		}
-	}
-	else
-	{
-		return;
-	}
 
-	if (data_column_name_uuid.empty())
-	{
-		boost::format msg("The 'code' column name must be present.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
+		if (valid)
+		{
+			dialog.accept();
+		}
 
-	if (!boost::filesystem::exists(data_column_file_pathname) || boost::filesystem::is_directory(data_column_file_pathname))
+	});
+
+	boost::filesystem::path data_column_file_pathname;
+
+	if (dialog.exec() != QDialog::Accepted)
 	{
-		boost::format msg("The DMU data file does not exist.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
 		return;
 	}
 
@@ -751,146 +635,69 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
 	form.addRow(&buttonBox);
 
-	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
-	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
-
 	std::string proposed_dmu_member_uuid;
 	std::string proposed_dmu_member_code;
 	std::string proposed_dmu_member_description;
-	if (dialog.exec() == QDialog::Accepted) {
+
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, [&]()
+	{
+
+		bool valid = true;
+		std::string errorMsg;
+
 		QLineEdit * proposed_dmu_member_uuid_field = fields[0];
 		QLineEdit * proposed_dmu_member_code_field = fields[1];
 		QLineEdit * proposed_dmu_member_description_field = fields[2];
-		if (proposed_dmu_member_uuid_field)
+		if (!proposed_dmu_member_uuid_field || !proposed_dmu_member_code_field || !proposed_dmu_member_description_field)
 		{
+
+			boost::format msg("Unable to determine new DMU member code.");
+			errorMsg = msg.str();
+			valid = false;
+
+		}
+
+		if (valid)
+		{
+
 			proposed_dmu_member_uuid = proposed_dmu_member_uuid_field->text().toStdString();
 			proposed_dmu_member_code = proposed_dmu_member_code_field->text().toStdString();
 			proposed_dmu_member_description = proposed_dmu_member_description_field->text().toStdString();
+
 		}
-		else
+
+		if (valid)
 		{
-			boost::format msg("Unable to determine new DMU member code.");
+			valid = Validation::ValidateDmuMemberUUID(proposed_dmu_member_uuid, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateDmuMemberCode(proposed_dmu_member_code, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateDmuMemberCode(proposed_dmu_member_description, errorMsg);
+		}
+
+		if (!valid)
+		{
 			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
+			msgBox.setText(errorMsg.str().c_str());
 			msgBox.exec();
 			return;
 		}
-	}
-	else
+
+		dialog.accept();
+
+	});
+
+	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
-
-
-
-	boost::trim(proposed_dmu_member_uuid);
-	boost::trim(proposed_dmu_member_code);
-	boost::trim(proposed_dmu_member_description);
-
-	if (proposed_dmu_member_uuid.empty())
-	{
-		boost::format msg("The DMU member you entered is empty.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-	std::string regex_string_uuid("([a-zA-Z_0-9]*)");
-	boost::regex regex_uuid(regex_string_uuid);
-	boost::cmatch matches_uuid;
-
-	std::string regex_string_code("([a-zA-Z_0-9]*)");
-	boost::regex regex_code(regex_string_code);
-	boost::cmatch matches_code;
-
-	std::string invalid_string;
-
-	bool valid = false;
-	if (boost::regex_match(proposed_dmu_member_uuid.c_str(), matches_uuid, regex_uuid))
-	{
-		// matches[0] contains the original string.  matches[n]
-		// contains a sub_match object for each matching
-		// subexpression
-		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
-		// for an exapmle usage
-		if (matches_uuid.size() == 2)
-		{
-			std::string the_dmu_member_uuid_match(matches_uuid[1].first, matches_uuid[1].second);
-
-			if (the_dmu_member_uuid_match.size() <= 36)
-			{
-				if (the_dmu_member_uuid_match == proposed_dmu_member_uuid)
-				{
-					valid = true;
-				}
-			}
-			else
-			{
-				invalid_string = ": The length is too long (maximum length: 36).";
-			}
-
-		}
-	}
-
-	if (!valid)
-	{
-		boost::format msg("The DMU member code you entered is invalid%1%");
-		msg % invalid_string;
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-	valid = false;
-	if (boost::regex_match(proposed_dmu_member_code.c_str(), matches_code, regex_code))
-	{
-		// matches[0] contains the original string.  matches[n]
-		// contains a sub_match object for each matching
-		// subexpression
-		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
-		// for an exapmle usage
-		if (matches_uuid.size() == 2)
-		{
-			std::string the_dmu_member_code_match(matches_code[1].first, matches_code[1].second);
-
-			if (the_dmu_member_code_match == proposed_dmu_member_code)
-			{
-				valid = true;
-			}
-
-		}
-	}
-
-	if (!valid)
-	{
-		boost::format msg("The DMU member abbreviation you entered is invalid");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-	if (proposed_dmu_member_code.size() > 128)
-	{
-		boost::format msg("The abbreviation is too long (maximum length: 128).");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-	if (proposed_dmu_member_description.size() > 4096)
-	{
-		boost::format msg("The description is too long (maximum length: 4096).");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-
 
 	InstanceActionItems actionItems;
 	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_member_uuid, proposed_dmu_member_code, proposed_dmu_member_description})))));
