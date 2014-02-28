@@ -4,7 +4,7 @@
 #	include <boost/filesystem.hpp>
 #endif
 
-void ImportDialogHelper::AddFileChooserBlock(QFormLayout & form, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
+void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
 {
 
 	QString labelFilePathName = QString( fileChooserStrings[0].c_str() );
@@ -65,7 +65,7 @@ bool ImportDialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFil
 
 }
 
-void ImportDialogHelper::AddTimeRangeSelectorBlock(QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange)
+void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange)
 {
 
 	// Time range RADIO BUTTONS
