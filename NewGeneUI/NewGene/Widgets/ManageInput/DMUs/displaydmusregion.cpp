@@ -511,20 +511,21 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	TimeRange::TimeRangeImportMode timeRangeMode = TimeRange::TIME_RANGE_IMPORT_MODE__NONE;
 
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
-	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, [&dialog]()
+	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
 		// data validation here
 		bool valid = true;
+
+		std::string errorMsg;
+
+		QLineEdit * data_column_name_uuid_field = fields[0];
+		QLineEdit * data_column_name_code_field = fields[1];
+		QLineEdit * data_column_name_description_field = fields[2];
 
 		// Custom validation
 		if (valid)
 		{
 
-			std::string errorMsg;
-
-			QLineEdit * data_column_name_uuid_field = fields[0];
-			QLineEdit * data_column_name_code_field = fields[1];
-			QLineEdit * data_column_name_description_field = fields[2];
 			if (!data_column_name_uuid_field && !data_column_name_code_field && !data_column_name_description_field)
 			{
 				valid = false;
@@ -560,11 +561,11 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		// Factored validation
 		if (valid)
 		{
-			valid = ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
+			valid = ImportDialogHelper::ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
 		}
 		if (valid)
 		{
-			valid = ValidateTimeRangeBlock(fieldsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
+			valid = ImportDialogHelper::ValidateTimeRangeBlock(fieldsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
 		}
 
 		if (!valid)
@@ -638,7 +639,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 	std::string proposed_dmu_member_description;
 
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
-	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, [&]()
+	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
 
 		bool valid = true;
@@ -683,7 +684,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 		if (!valid)
 		{
 			QMessageBox msgBox;
-			msgBox.setText(errorMsg.str().c_str());
+			msgBox.setText(errorMsg.c_str());
 			msgBox.exec();
 			return;
 		}
