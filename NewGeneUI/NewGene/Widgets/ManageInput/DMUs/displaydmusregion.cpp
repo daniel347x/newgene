@@ -890,19 +890,9 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 		return;
 	}
 
-	QSortFilterProxyModel_NumbersLast * memberModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
-	if (memberModel == nullptr)
-	{
-		boost::format msg("Invalid list view items in DisplayDMUsRegion widget.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
 	QSortFilterProxyModel_NumbersLast * proxyModel = nullptr;
 
-	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel, &memberModel, &proxyModel](DataChange const & change)
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel, &proxyModel](DataChange const & change)
 	{
 
 		switch (change.change_type)
@@ -1038,6 +1028,16 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 
 			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE:
 				{
+
+					QSortFilterProxyModel_NumbersLast * memberModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
+					if (memberModel == nullptr)
+					{
+						boost::format msg("Invalid members list view items in DisplayDMUsRegion widget.");
+						QMessageBox msgBox;
+						msgBox.setText( msg.str().c_str() );
+						msgBox.exec();
+						return;
+					}
 
 					switch (change.change_intention)
 					{
