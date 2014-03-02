@@ -15,15 +15,23 @@
 void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
 {
 
-	QString labelFilePathName = QString( fileChooserStrings[0].c_str() );
-	QLineEdit *lineEditFilePathName = new QLineEdit(&dialog);
-	QPushButton *buttonFilePathName = new QPushButton("...", &dialog);
+	QWidget FileChooserWidget;
 	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
+	FileChooserWidget.setLayout(&formFileSelection);
+
+	QString labelFilePathName = QString( fileChooserStrings[0].c_str() );
+
+	QLineEdit *lineEditFilePathName = new QLineEdit(&FileChooserWidget);
+	QPushButton *buttonFilePathName = new QPushButton("...", &FileChooserWidget);
+
 	formFileSelection.addWidget(lineEditFilePathName);
 	formFileSelection.addWidget(buttonFilePathName);
+
 	fieldsFileChooser << lineEditFilePathName;
-	//buttons << buttonFilePathName;
-	form.addRow(labelFilePathName, &formFileSelection);
+
+	form.addRow(&FileChooserWidget);
+
+	FileChooserWidget.show();
 
 	QObject::connect(buttonFilePathName, &QPushButton::clicked, [&]()
 	{
