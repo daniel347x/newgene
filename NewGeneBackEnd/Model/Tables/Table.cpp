@@ -325,11 +325,13 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 		if (innerFailed)
 		{
+			++index;
 			return;
 		}
 
 		if (schema_entry.IsPrimaryKey())
 		{
+			++index;
 			return; // These are automatically covered by the "WHERE" clause
 		}
 
@@ -338,6 +340,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 		if (!field_data)
 		{
 			// Todo: log error
+			++index;
 			innerFailed = true;
 			return;
 		}
@@ -376,6 +379,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 		if (innerFailed)
 		{
+			++index;
 			return;
 		}
 
@@ -387,6 +391,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 			if (!field_data)
 			{
 				// Todo: log error
+				++index;
 				innerFailed = true;
 				return;
 			}
@@ -496,6 +501,7 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 
 		if (innerFailed)
 		{
+			++index;
 			return;
 		}
 
@@ -504,6 +510,7 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 		if (!field_data)
 		{
 			// Todo: log error
+			++index;
 			innerFailed = true;
 			return;
 		}
