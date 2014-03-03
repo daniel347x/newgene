@@ -12,79 +12,31 @@
 
 #include "../../../../NewGeneBackEnd/Utilities/Validation.h"
 
-void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
+void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBoxLayout & formFileSelection, QWidget & FileChooserWidget, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
 {
 
-//	//QDialog dialog(this);
-//	//QFormLayout form(&dialog);
+	FileChooserWidget.setLayout(&formFileSelection);
 
-	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
+	QString labelFilePathName = QString( fileChooserStrings[0].c_str() );
 
-//	//form.addRow(new QLabel("DMU member refresh details"));
+	QLineEdit *lineEditFilePathName = new QLineEdit(&FileChooserWidget);
+	QPushButton *buttonFilePathName = new QPushButton("...", &FileChooserWidget);
 
-//	//QString labelColumnName = QString("Enter DMU data column label:");
-//	//QLineEdit *lineEditColumnName = new QLineEdit(&dialog);
-//	//form.addRow(labelColumnName, lineEditColumnName);
-//	//fields << lineEditColumnName;
-
-	QLineEdit *lineEditFilePathName = new QLineEdit(&dialog);
-	QPushButton *buttonFilePathName = new QPushButton(&dialog);
 	formFileSelection.addWidget(lineEditFilePathName);
 	formFileSelection.addWidget(buttonFilePathName);
-	//fields << lineEditFilePathName;
-	//buttons << buttonFilePathName;
 
-	QString labelFilePathName = QString("Choose file:");
-	form.addRow(labelFilePathName, &formFileSelection);
+	fieldsFileChooser << lineEditFilePathName;
 
-//	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
-//	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
-//	form.addRow(&buttonBox);
+	form.addRow(labelFilePathName, &FileChooserWidget);
 
-//	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
-//	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
-//	QObject::connect(buttons[0], &QPushButton::clicked, [&fields, this]()
-//	{
-//		QString the_file = QFileDialog::getOpenFileName(this, "Choose DMU comma-delimited data file location", "", "");
-//		fields[1]->setText(the_file);
-//	});
-
-
-
-
-
-
-
-
-//	//QWidget FileChooserWidget;
-//	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
-//	//FileChooserWidget.setLayout(&formFileSelection);
-
-//	QString labelFilePathName = QString( fileChooserStrings[0].c_str() );
-
-//	//QLineEdit *lineEditFilePathName = new QLineEdit(&FileChooserWidget);
-//	//QPushButton *buttonFilePathName = new QPushButton("...", &FileChooserWidget);
-//	QLineEdit *lineEditFilePathName = new QLineEdit(&dialog);
-//	QPushButton *buttonFilePathName = new QPushButton("...", &dialog);
-
-//	formFileSelection.addWidget(lineEditFilePathName);
-//	formFileSelection.addWidget(buttonFilePathName);
-
-//	fieldsFileChooser << lineEditFilePathName;
-
-//	//form.addRow(labelFilePathName, &FileChooserWidget);
-//	form.addRow(labelFilePathName, &formFileSelection);
-
-//	//FileChooserWidget.show();
-
-//	QObject::connect(buttonFilePathName, &QPushButton::clicked, [&]()
-//	{
-//		QString the_file = QFileDialog::getOpenFileName(&dialog, fileChooserStrings[1].c_str(), fileChooserStrings[2].c_str(), fileChooserStrings[2].c_str());
-//		if (!the_file.isEmpty())
-//		{
-//			lineEditFilePathName->setText(the_file);
-//		}
-//	});
+	QObject::connect(buttonFilePathName, &QPushButton::clicked, [&]()
+	{
+		QString the_file = QFileDialog::getOpenFileName(&dialog, fileChooserStrings[1].c_str(), fileChooserStrings[2].c_str(), fileChooserStrings[2].c_str());
+		if (!the_file.isEmpty())
+		{
+			lineEditFilePathName->setText(the_file);
+		}
+	});
 
 }
 

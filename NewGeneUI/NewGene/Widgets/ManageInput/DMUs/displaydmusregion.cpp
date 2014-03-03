@@ -24,7 +24,8 @@
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../../Utilities/qsortfilterproxymodel_numberslast.h"
-#include "../../Utilities/importdialoghelper.h"
+//#include "../../Utilities/importdialoghelper.h"
+#include "../../Utilities/foo.h"
 #include "../../../../../NewGeneBackEnd/Utilities/Validation.h"
 #include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
 
@@ -468,10 +469,12 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		return;
 	}
 
-	QList<QLineEdit *> fields;
-
 	QDialog dialog(this);
 	QFormLayout form(&dialog);
+	QWidget FileChooserWidget;
+	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
+
+	QList<QLineEdit *> fields;
 
 	form.addRow(new QLabel("DMU member refresh details"));
 
@@ -492,7 +495,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 	QList<QLineEdit *> fieldsFileChooser;
 	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited file", "Choose DMU comma-delimited data file location", "", "" };
-	ImportDialogHelper::AddFileChooserBlock(dialog, form, fieldsFileChooser, fileChooserStrings);
+	ImportDialogHelper::AddFileChooserBlock(dialog, form, formFileSelection, FileChooserWidget, fieldsFileChooser, fileChooserStrings);
 
 	//QList<QLineEdit *> fieldsTimeRange;
 	//QList<QRadioButton *> radioButtonsTimeRange;
