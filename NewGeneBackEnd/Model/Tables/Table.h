@@ -73,7 +73,7 @@ class Table_basemost
 		int TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db);
 		void TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db);
 
-		std::string FieldDataAsSqlText(std::shared_ptr<BaseField> const & field_data, std::string & sql_insert);
+		void FieldDataAsSqlText(std::shared_ptr<BaseField> const & field_data, std::string & sql_insert);
 
 		virtual bool ImportEnd(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
 

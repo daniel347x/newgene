@@ -69,7 +69,7 @@ bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 			first = false;
 
-			sql_insert += FieldDataAsSqlText(field_data, sql_insert);
+			FieldDataAsSqlText(field_data, sql_insert);
 
 		});
 
@@ -166,7 +166,7 @@ bool Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 
 }
 
-std::string Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field_data, std::string & sql_insert)
+void Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field_data, std::string & sql_insert)
 {
 	switch (field_data->GetType())
 	{
@@ -349,7 +349,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 		sql_insert += " = ";
 
-		sql_insert += FieldDataAsSqlText(field_data, sql_insert);
+		FieldDataAsSqlText(field_data, sql_insert);
 
 		++index;
 
@@ -398,7 +398,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 			sql_insert += " = ";
 
-			sql_insert += FieldDataAsSqlText(field_data, sql_insert);
+			FieldDataAsSqlText(field_data, sql_insert);
 
 		}
 
@@ -511,7 +511,7 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 
 		first = false;
 
-		sql_insert += FieldDataAsSqlText(field_data, sql_insert);
+		FieldDataAsSqlText(field_data, sql_insert);
 
 		++index;
 
