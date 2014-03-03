@@ -43,7 +43,7 @@ void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & for
 bool ImportDialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> & dataFileChooser, std::string & errorMsg)
 {
 
-	bool valid = false;
+	bool valid = true;
 	dataFileChooser.clear();
 
 	QLineEdit * data_column_file_pathname_field = fieldsFileChooser[0];
