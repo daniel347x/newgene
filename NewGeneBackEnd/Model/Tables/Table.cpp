@@ -328,6 +328,11 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 			return;
 		}
 
+		if (schema_entry.IsPrimaryKey())
+		{
+			return; // These are automatically covered by the "WHERE" clause
+		}
+
 		std::shared_ptr<BaseField> const & field_data = row_fields[index];
 
 		if (!field_data)

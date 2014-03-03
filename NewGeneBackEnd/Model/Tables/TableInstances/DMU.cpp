@@ -569,8 +569,8 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 
 	ImportDefinition::ImportMappings mappings;
 
-	input_schema_vector.push_back(SchemaEntry(*dmu_category.code, FIELD_TYPE_STRING_FIXED, dmu_member_column_label_uuid));
-	output_schema_vector.push_back(SchemaEntry(*dmu_category.code, FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_UUID, true));
+	input_schema_vector.push_back(SchemaEntry(*dmu_category.uuid, FIELD_TYPE_STRING_FIXED, dmu_member_column_label_uuid));
+	output_schema_vector.push_back(SchemaEntry(*dmu_category.uuid, FIELD_TYPE_STRING_FIXED, DMU_SET_MEMBER_UUID, true));
 	mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, dmu_member_column_label_uuid), FIELD_TYPE_STRING_FIXED), std::make_pair(NameOrIndex(NameOrIndex::NAME, DMU_SET_MEMBER_UUID), FIELD_TYPE_STRING_FIXED)));
 
 	if (!dmu_member_column_label_code.empty())
