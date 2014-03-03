@@ -29,7 +29,7 @@ void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & for
 
 	form.addRow(labelFilePathName, &FileChooserWidget);
 
-	QObject::connect(buttonFilePathName, &QPushButton::clicked, [&]()
+	QObject::connect(buttonFilePathName, &QPushButton::clicked, [=, &dialog, &fileChooserStrings]()
 	{
 		QString the_file = QFileDialog::getOpenFileName(&dialog, fileChooserStrings[1].c_str(), fileChooserStrings[2].c_str(), fileChooserStrings[2].c_str());
 		if (!the_file.isEmpty())
