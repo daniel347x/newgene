@@ -393,6 +393,11 @@ class Importer
 		void InitializeFields();
 		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline);
 		void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop);
+		void ReadFieldFromFile(char * & current_line_ptr, int & current_lines_read, int const & current_column_index, char * & parsed_line_ptr, bool & stop, SchemaEntry const & column);
+		void SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop);
+		void ReadOneDataField(SchemaEntry const &column, BaseField & theField, char * & current_line_ptr, char * & parsed_line_ptr, bool & stop);
+		void EatWhitespace(char * & current_line_ptr);
+		void EatSeparator(char * & current_line_ptr);
 
 	public:
 		

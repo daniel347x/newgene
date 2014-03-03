@@ -9,6 +9,10 @@
 #include "FieldTypes.h"
 #include "../../Utilities/WidgetIdentifier.h"
 
+#ifndef Q_MOC_RUN
+#	include <boost/dynamic_bitset.hpp>
+#endif
+
 class SchemaEntry
 {
 
@@ -68,9 +72,12 @@ class Schema
 		Schema();
 		Schema(Schema const & rhs);
 
+		void ReorderAccToColumnNames(std::vector<std::string> const & colnames);
+
 	public:
 
 		SchemaVector schema;
+		boost::dynamic_bitset<> validcols;
 
 };
 

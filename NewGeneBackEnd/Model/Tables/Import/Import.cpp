@@ -15,77 +15,82 @@ void TimeRangeFieldMapping::ConvertStringToDate(int & year, int & month, int & d
 
 	boost::tokenizer<> tok(the_string);
 	int count = 0;
-	for(boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
+
+	for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
 	{
 		switch (count)
 		{
-		case 0:
-			{
-				std::string test = *it;
-				year = boost::lexical_cast<int>(*it);
-			}
-			break;
-		case 1:
-			{
-				std::string test = *it;
-				std::string the_month = *it;
-				if (boost::iequals(*it, "jan"))
+			case 0:
 				{
-					month = 1;
+					std::string test = *it;
+					year = boost::lexical_cast<int>(*it);
 				}
-				else if (boost::iequals(*it, "feb"))
+				break;
+
+			case 1:
 				{
-					month = 2;
+					std::string test = *it;
+					std::string the_month = *it;
+
+					if (boost::iequals(*it, "jan"))
+					{
+						month = 1;
+					}
+					else if (boost::iequals(*it, "feb"))
+					{
+						month = 2;
+					}
+					else if (boost::iequals(*it, "mar"))
+					{
+						month = 3;
+					}
+					else if (boost::iequals(*it, "apr"))
+					{
+						month = 4;
+					}
+					else if (boost::iequals(*it, "may"))
+					{
+						month = 5;
+					}
+					else if (boost::iequals(*it, "jun"))
+					{
+						month = 6;
+					}
+					else if (boost::iequals(*it, "jul"))
+					{
+						month = 7;
+					}
+					else if (boost::iequals(*it, "aug"))
+					{
+						month = 8;
+					}
+					else if (boost::iequals(*it, "sep"))
+					{
+						month = 9;
+					}
+					else if (boost::iequals(*it, "oct"))
+					{
+						month = 10;
+					}
+					else if (boost::iequals(*it, "nov"))
+					{
+						month = 11;
+					}
+					else if (boost::iequals(*it, "dec"))
+					{
+						month = 12;
+					}
 				}
-				else if (boost::iequals(*it, "mar"))
+				break;
+
+			case 2:
 				{
-					month = 3;
+					std::string test = *it;
+					day = boost::lexical_cast<int>(*it);
 				}
-				else if (boost::iequals(*it, "apr"))
-				{
-					month = 4;
-				}
-				else if (boost::iequals(*it, "may"))
-				{
-					month = 5;
-				}
-				else if (boost::iequals(*it, "jun"))
-				{
-					month = 6;
-				}
-				else if (boost::iequals(*it, "jul"))
-				{
-					month = 7;
-				}
-				else if (boost::iequals(*it, "aug"))
-				{
-					month = 8;
-				}
-				else if (boost::iequals(*it, "sep"))
-				{
-					month = 9;
-				}
-				else if (boost::iequals(*it, "oct"))
-				{
-					month = 10;
-				}
-				else if (boost::iequals(*it, "nov"))
-				{
-					month = 11;
-				}
-				else if (boost::iequals(*it, "dec"))
-				{
-					month = 12;
-				}
-			}
-			break;
-		case 2:
-			{
-				std::string test = *it;
-				day = boost::lexical_cast<int>(*it);
-			}
-			break;
+				break;
 		}
+
 		++count;
 	}
 
@@ -93,7 +98,7 @@ void TimeRangeFieldMapping::ConvertStringToDate(int & year, int & month, int & d
 
 void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields, DataFields const & output_data_fields)
 {
-	switch(time_range_type)
+	switch (time_range_type)
 	{
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE:
 			{
@@ -114,7 +119,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				Field<FIELD_TYPE_INT64> & the_output_field_start_int = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_datetime_start);
 				Field<FIELD_TYPE_INT64> & the_output_field_end_int = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_datetime_end);
 
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
 				int year = 0, month = 0, day = 0;
 				ConvertStringToDate(year, month, day, the_input_field_start_string.GetValueReference());
@@ -151,7 +156,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				Field<FIELD_TYPE_INT64> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_end);
 
 				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field_int32.GetValueReference(), 1, 1));
 				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field_int32.GetValueReference() + 1, 1, 1));
 
@@ -184,7 +189,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				Field<FIELD_TYPE_INT64> & the_output_field_day_start_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_day_start);
 
 				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
 				boost::gregorian::date row_start_date(the_input_field_year_int32.GetValueReference(),
 													  the_input_field_month_int32.GetValueReference() > 0 ? the_input_field_month_int32.GetValueReference() : 12,
@@ -211,7 +216,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start || !the_input_field_day_end || !the_input_field_month_end || !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end)
+				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start || !the_input_field_day_end || !the_input_field_month_end
+					|| !the_input_field_year_end || !the_output_field_day_start || !the_output_field_day_end)
 				{
 					// Todo: log warning
 					return;
@@ -227,7 +233,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				Field<FIELD_TYPE_INT64> & the_output_field_day_end_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_day_end);
 
 				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
 
 				int year_start = the_input_field_year_start_int32.GetValueReference();
@@ -266,7 +272,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					year_end += 1;
 					month_end = 1;
 					day_end = 1;
-					
+
 					// do not add a day to the end; we've already handled it
 					end_handled = true;
 				}
@@ -320,7 +326,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start || !the_input_field_day_end || !the_input_field_month_end || !the_input_field_year_end || !the_output_field_year_start || !the_output_field_year_end)
+				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start || !the_input_field_day_end || !the_input_field_month_end
+					|| !the_input_field_year_end || !the_output_field_year_start || !the_output_field_year_end)
 				{
 					// Todo: log warning
 					return;
@@ -336,7 +343,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				Field<FIELD_TYPE_INT64> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_end);
 
 				// convert year to ms since jan 1, 1970 00:00:00.000
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970,1,1));
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 				boost::gregorian::date row_start_date(the_input_field_year_start_int32.GetValueReference(), 1, 1);
 				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
 				boost::gregorian::date row_end_date(the_input_field_year_end_int32.GetValueReference() + 1, 1, 1);
@@ -374,10 +381,12 @@ bool ImportDefinition::IsEmpty()
 	{
 		return true;
 	}
+
 	return false;
 }
 
-Importer::Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_)
+Importer::Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_,
+				   TableImportCallbackFn table_write_callback_)
 	: import_definition(import_definition_)
 	, table_write_callback(table_write_callback_)
 	, model(model_)
@@ -390,7 +399,7 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 void Importer::InitializeFields()
 {
 
-	for (int n=0; n<block_size; ++n)
+	for (int n = 0; n < block_size; ++n)
 	{
 
 		DataFields fields;
@@ -399,109 +408,125 @@ void Importer::InitializeFields()
 		{
 			FIELD_TYPE field_type = column.field_type;
 			std::string field_name = column.field_name;
+
 			switch (field_type)
 			{
-			case FIELD_TYPE_INT32:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_INT32>> field = std::make_shared<Field<FIELD_TYPE_INT32>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_INT64:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_INT64>> field = std::make_shared<Field<FIELD_TYPE_INT64>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_UINT32:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_UINT32>> field = std::make_shared<Field<FIELD_TYPE_UINT32>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_UINT64:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_UINT64>> field = std::make_shared<Field<FIELD_TYPE_UINT64>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_STRING_FIXED:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_STRING_FIXED>> field = std::make_shared<Field<FIELD_TYPE_STRING_FIXED>>(field_name);
-					std::string testname1 = field->GetName();
-					fields.push_back(field);
-					std::shared_ptr<BaseField> test = fields[fields.size()-1];
-					std::string testname = test->GetName();
-					BaseField * testcase = test.get();
-					std::string testname3 = testcase->GetName();
-				}
-				break;
-			case FIELD_TYPE_STRING_VAR:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_STRING_VAR>> field = std::make_shared<Field<FIELD_TYPE_STRING_VAR>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_FLOAT:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_FLOAT>> field = std::make_shared<Field<FIELD_TYPE_FLOAT>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_TIMESTAMP:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_TIMESTAMP>> field = std::make_shared<Field<FIELD_TYPE_TIMESTAMP>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_UUID:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_UUID>> field = std::make_shared<Field<FIELD_TYPE_UUID>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_UUID_FOREIGN:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_UUID_FOREIGN>> field = std::make_shared<Field<FIELD_TYPE_UUID_FOREIGN>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_STRING_CODE:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_STRING_CODE>> field = std::make_shared<Field<FIELD_TYPE_STRING_CODE>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_STRING_LONGHAND:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_STRING_LONGHAND>> field = std::make_shared<Field<FIELD_TYPE_STRING_LONGHAND>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_TIME_RANGE:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_TIME_RANGE>> field = std::make_shared<Field<FIELD_TYPE_TIME_RANGE>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_NOTES_1:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_NOTES_1>> field = std::make_shared<Field<FIELD_TYPE_NOTES_1>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_NOTES_2:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_NOTES_2>> field = std::make_shared<Field<FIELD_TYPE_NOTES_2>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_NOTES_3:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_NOTES_3>> field = std::make_shared<Field<FIELD_TYPE_NOTES_3>>(field_name);
-					fields.push_back(field);
-				}
-				break;
+				case FIELD_TYPE_INT32:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_INT32>> field = std::make_shared<Field<FIELD_TYPE_INT32>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_INT64:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_INT64>> field = std::make_shared<Field<FIELD_TYPE_INT64>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_UINT32:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_UINT32>> field = std::make_shared<Field<FIELD_TYPE_UINT32>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_UINT64:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_UINT64>> field = std::make_shared<Field<FIELD_TYPE_UINT64>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_STRING_FIXED:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_STRING_FIXED>> field = std::make_shared<Field<FIELD_TYPE_STRING_FIXED>>(field_name);
+						std::string testname1 = field->GetName();
+						fields.push_back(field);
+						std::shared_ptr<BaseField> test = fields[fields.size() - 1];
+						std::string testname = test->GetName();
+						BaseField * testcase = test.get();
+						std::string testname3 = testcase->GetName();
+					}
+					break;
+
+				case FIELD_TYPE_STRING_VAR:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_STRING_VAR>> field = std::make_shared<Field<FIELD_TYPE_STRING_VAR>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_FLOAT:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_FLOAT>> field = std::make_shared<Field<FIELD_TYPE_FLOAT>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_TIMESTAMP:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_TIMESTAMP>> field = std::make_shared<Field<FIELD_TYPE_TIMESTAMP>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_UUID:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_UUID>> field = std::make_shared<Field<FIELD_TYPE_UUID>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_UUID_FOREIGN:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_UUID_FOREIGN>> field = std::make_shared<Field<FIELD_TYPE_UUID_FOREIGN>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_STRING_CODE:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_STRING_CODE>> field = std::make_shared<Field<FIELD_TYPE_STRING_CODE>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_STRING_LONGHAND:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_STRING_LONGHAND>> field = std::make_shared<Field<FIELD_TYPE_STRING_LONGHAND>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_TIME_RANGE:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_TIME_RANGE>> field = std::make_shared<Field<FIELD_TYPE_TIME_RANGE>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_NOTES_1:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_NOTES_1>> field = std::make_shared<Field<FIELD_TYPE_NOTES_1>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_NOTES_2:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_NOTES_2>> field = std::make_shared<Field<FIELD_TYPE_NOTES_2>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_NOTES_3:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_NOTES_3>> field = std::make_shared<Field<FIELD_TYPE_NOTES_3>>(field_name);
+						fields.push_back(field);
+					}
+					break;
 			}
 		});
 
@@ -509,7 +534,7 @@ void Importer::InitializeFields()
 
 	}
 
-	for (int n=0; n<block_size; ++n)
+	for (int n = 0; n < block_size; ++n)
 	{
 
 		DataFields fields;
@@ -518,104 +543,120 @@ void Importer::InitializeFields()
 		{
 			FIELD_TYPE field_type = column.field_type;
 			std::string field_name = column.field_name;
+
 			switch (field_type)
 			{
-			case FIELD_TYPE_INT32:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_INT32>> field = std::make_shared<Field<FIELD_TYPE_INT32>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_INT64:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_INT64>> field = std::make_shared<Field<FIELD_TYPE_INT64>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_UINT32:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_UINT32>> field = std::make_shared<Field<FIELD_TYPE_UINT32>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_UINT64:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_UINT64>> field = std::make_shared<Field<FIELD_TYPE_UINT64>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_STRING_FIXED:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_STRING_FIXED>> field = std::make_shared<Field<FIELD_TYPE_STRING_FIXED>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_STRING_VAR:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_STRING_VAR>> field = std::make_shared<Field<FIELD_TYPE_STRING_VAR>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_FLOAT:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_FLOAT>> field = std::make_shared<Field<FIELD_TYPE_FLOAT>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_TIMESTAMP:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_TIMESTAMP>> field = std::make_shared<Field<FIELD_TYPE_TIMESTAMP>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_UUID:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_UUID>> field = std::make_shared<Field<FIELD_TYPE_UUID>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_UUID_FOREIGN:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_UUID_FOREIGN>> field = std::make_shared<Field<FIELD_TYPE_UUID_FOREIGN>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_STRING_CODE:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_STRING_CODE>> field = std::make_shared<Field<FIELD_TYPE_STRING_CODE>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_STRING_LONGHAND:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_STRING_LONGHAND>> field = std::make_shared<Field<FIELD_TYPE_STRING_LONGHAND>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_TIME_RANGE:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_TIME_RANGE>> field = std::make_shared<Field<FIELD_TYPE_TIME_RANGE>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_NOTES_1:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_NOTES_1>> field = std::make_shared<Field<FIELD_TYPE_NOTES_1>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_NOTES_2:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_NOTES_2>> field = std::make_shared<Field<FIELD_TYPE_NOTES_2>>(field_name);
-					fields.push_back(field);
-				}
-				break;
-			case FIELD_TYPE_NOTES_3:
-				{
-					std::shared_ptr<Field<FIELD_TYPE_NOTES_3>> field = std::make_shared<Field<FIELD_TYPE_NOTES_3>>(field_name);
-					fields.push_back(field);
-				}
-				break;
+				case FIELD_TYPE_INT32:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_INT32>> field = std::make_shared<Field<FIELD_TYPE_INT32>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_INT64:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_INT64>> field = std::make_shared<Field<FIELD_TYPE_INT64>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_UINT32:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_UINT32>> field = std::make_shared<Field<FIELD_TYPE_UINT32>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_UINT64:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_UINT64>> field = std::make_shared<Field<FIELD_TYPE_UINT64>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_STRING_FIXED:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_STRING_FIXED>> field = std::make_shared<Field<FIELD_TYPE_STRING_FIXED>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_STRING_VAR:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_STRING_VAR>> field = std::make_shared<Field<FIELD_TYPE_STRING_VAR>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_FLOAT:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_FLOAT>> field = std::make_shared<Field<FIELD_TYPE_FLOAT>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_TIMESTAMP:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_TIMESTAMP>> field = std::make_shared<Field<FIELD_TYPE_TIMESTAMP>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_UUID:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_UUID>> field = std::make_shared<Field<FIELD_TYPE_UUID>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_UUID_FOREIGN:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_UUID_FOREIGN>> field = std::make_shared<Field<FIELD_TYPE_UUID_FOREIGN>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_STRING_CODE:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_STRING_CODE>> field = std::make_shared<Field<FIELD_TYPE_STRING_CODE>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_STRING_LONGHAND:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_STRING_LONGHAND>> field = std::make_shared<Field<FIELD_TYPE_STRING_LONGHAND>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_TIME_RANGE:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_TIME_RANGE>> field = std::make_shared<Field<FIELD_TYPE_TIME_RANGE>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_NOTES_1:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_NOTES_1>> field = std::make_shared<Field<FIELD_TYPE_NOTES_1>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_NOTES_2:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_NOTES_2>> field = std::make_shared<Field<FIELD_TYPE_NOTES_2>>(field_name);
+						fields.push_back(field);
+					}
+					break;
+
+				case FIELD_TYPE_NOTES_3:
+					{
+						std::shared_ptr<Field<FIELD_TYPE_NOTES_3>> field = std::make_shared<Field<FIELD_TYPE_NOTES_3>>(field_name);
+						fields.push_back(field);
+					}
+					break;
 			}
 		});
 
@@ -632,12 +673,14 @@ bool Importer::ValidateMapping()
 
 	// loop through input schema pushing back required indices
 	int current_index = 0;
-	std::for_each(import_definition.input_schema.schema.cbegin(), import_definition.input_schema.schema.cend(), [this, &indices_required_are_matched, &current_index](SchemaEntry const & schema_entry)
+	std::for_each(import_definition.input_schema.schema.cbegin(),
+				  import_definition.input_schema.schema.cend(), [this, &indices_required_are_matched, &current_index](SchemaEntry const & schema_entry)
 	{
 		if (schema_entry.required)
 		{
 			indices_required_are_matched.push_back(std::make_pair(current_index, false)); // start off with false, indicating NOT MATCHED yet
 		}
+
 		++current_index;
 	});
 
@@ -647,13 +690,13 @@ bool Importer::ValidateMapping()
 		if (!field_mapping)
 		{
 			// TODO: Import problem warning
-			return; // from lambda
+			return;
 		}
 
 		if (!field_mapping->Validate())
 		{
 			// TODO: Import problem warning
-			return; // from lambda
+			return;
 		}
 
 		std::for_each(field_mapping->input_file_fields.cbegin(), field_mapping->input_file_fields.cend(), [this](FieldTypeEntry const & input_entry)
@@ -683,113 +726,121 @@ bool Importer::ValidateMapping()
 		switch (field_mapping->field_mapping_type)
 		{
 
-		case FieldMapping::FIELD_MAPPING_TYPE__ONE_TO_ONE:
-			{
-				try
+			case FieldMapping::FIELD_MAPPING_TYPE__ONE_TO_ONE:
 				{
-					OneToOneFieldMapping const & the_mapping = dynamic_cast<OneToOneFieldMapping const &>(*field_mapping);
-					FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
-
-					// search the output schema to see what numeric index this corresponds to, and set it in indices_required_are_matched
-					int current_index = 0;
-					std::for_each(import_definition.output_schema.schema.cbegin(), import_definition.output_schema.schema.cend(), [this, &output_entry, &indices_required_are_matched, &current_index](SchemaEntry const & output_schema_entry)
+					try
 					{
-						bool match = false;
-						if (output_entry.first.name_or_index == NameOrIndex::NAME)
+						OneToOneFieldMapping const & the_mapping = dynamic_cast<OneToOneFieldMapping const &>(*field_mapping);
+						FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
+
+						// search the output schema to see what numeric index this corresponds to, and set it in indices_required_are_matched
+						int current_index = 0;
+						std::for_each(import_definition.output_schema.schema.cbegin(),
+									  import_definition.output_schema.schema.cend(), [this, &output_entry, &indices_required_are_matched, &current_index](SchemaEntry const & output_schema_entry)
 						{
-							if (boost::iequals(output_entry.first.name, output_schema_entry.field_name))
+							bool match = false;
+
+							if (output_entry.first.name_or_index == NameOrIndex::NAME)
 							{
-								match = true;
-							}
-						}
-						else
-						{
-							if (output_entry.first.index == current_index)
-							{
-								match = true;
-							}
-						}
-						if (match)
-						{
-							std::for_each(indices_required_are_matched.begin(), indices_required_are_matched.end(), [&current_index](std::pair<int, bool> & the_pair)
-							{
-								if (the_pair.first == current_index)
+								if (boost::iequals(output_entry.first.name, output_schema_entry.field_name))
 								{
-									the_pair.second = true;
+									match = true;
 								}
-							});
-						}
-						++current_index;
-					});
-				}
-				catch (std::bad_cast &)
-				{
-					// TODO: Import problem warning
-					return; // from lambda
-				}
-			}
-			break;
+							}
+							else
+							{
+								if (output_entry.first.index == current_index)
+								{
+									match = true;
+								}
+							}
 
-		case FieldMapping::FIELD_MAPPING_TYPE__HARD_CODED:
-			{
-				try
-				{
-					HardCodedFieldMapping const & the_mapping = dynamic_cast<HardCodedFieldMapping const &>(*field_mapping);
-					FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
+							if (match)
+							{
+								std::for_each(indices_required_are_matched.begin(), indices_required_are_matched.end(), [&current_index](std::pair<int, bool> & the_pair)
+								{
+									if (the_pair.first == current_index)
+									{
+										the_pair.second = true;
+									}
+								});
+							}
 
-					// search the output schema to see what numeric index this corresponds to, and set it in indices_required_are_matched
-					int current_index = 0;
-					std::for_each(import_definition.output_schema.schema.cbegin(), import_definition.output_schema.schema.cend(), [this, &output_entry, &indices_required_are_matched, &current_index](SchemaEntry const & output_schema_entry)
+							++current_index;
+						});
+					}
+					catch (std::bad_cast &)
 					{
-						bool match = false;
-						if (output_entry.first.name_or_index == NameOrIndex::NAME)
-						{
-							if (boost::iequals(output_entry.first.name, output_schema_entry.field_name))
-							{
-								match = true;
-							}
-						}
-						else
-						{
-							if (output_entry.first.index == current_index)
-							{
-								match = true;
-							}
-						}
-						if (match)
-						{
-							std::for_each(indices_required_are_matched.begin(), indices_required_are_matched.end(), [&current_index](std::pair<int, bool> & the_pair)
-							{
-								if (the_pair.first == current_index)
-								{
-									the_pair.second = true;
-								}
-							});
-						}
-						++current_index;
-					});
+						// TODO: Import problem warning
+						return;
+					}
 				}
-				catch (std::bad_cast &)
-				{
-					// TODO: Import problem warning
-					return; // from lambda
-				}
-			}
-			break;
+				break;
 
-		case FieldMapping::FIELD_MAPPING_TYPE__TIME_RANGE:
-			{
-				try
+			case FieldMapping::FIELD_MAPPING_TYPE__HARD_CODED:
 				{
-					TimeRangeFieldMapping const & the_mapping = dynamic_cast<TimeRangeFieldMapping const &>(*field_mapping);
+					try
+					{
+						HardCodedFieldMapping const & the_mapping = dynamic_cast<HardCodedFieldMapping const &>(*field_mapping);
+						FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
+
+						// search the output schema to see what numeric index this corresponds to, and set it in indices_required_are_matched
+						int current_index = 0;
+						std::for_each(import_definition.output_schema.schema.cbegin(),
+									  import_definition.output_schema.schema.cend(), [this, &output_entry, &indices_required_are_matched, &current_index](SchemaEntry const & output_schema_entry)
+						{
+							bool match = false;
+
+							if (output_entry.first.name_or_index == NameOrIndex::NAME)
+							{
+								if (boost::iequals(output_entry.first.name, output_schema_entry.field_name))
+								{
+									match = true;
+								}
+							}
+							else
+							{
+								if (output_entry.first.index == current_index)
+								{
+									match = true;
+								}
+							}
+
+							if (match)
+							{
+								std::for_each(indices_required_are_matched.begin(), indices_required_are_matched.end(), [&current_index](std::pair<int, bool> & the_pair)
+								{
+									if (the_pair.first == current_index)
+									{
+										the_pair.second = true;
+									}
+								});
+							}
+
+							++current_index;
+						});
+					}
+					catch (std::bad_cast &)
+					{
+						// TODO: Import problem warning
+						return;
+					}
 				}
-				catch (std::bad_cast &)
+				break;
+
+			case FieldMapping::FIELD_MAPPING_TYPE__TIME_RANGE:
 				{
-					// TODO: Import problem warning
-					return; // from lambda
+					try
+					{
+						TimeRangeFieldMapping const & the_mapping = dynamic_cast<TimeRangeFieldMapping const &>(*field_mapping);
+					}
+					catch (std::bad_cast &)
+					{
+						// TODO: Import problem warning
+						return;
+					}
 				}
-			}
-			break;
+				break;
 
 		}
 	});
@@ -814,13 +865,15 @@ bool Importer::ValidateMapping()
 
 }
 
-void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop)
+void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop)
 {
 	bool is_quoted_field = false;
 	char * starting_parsed_pointer = parsed_line_ptr;
+
 	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED)
 	{
 		is_quoted_field = true;
+
 		if (*current_line_ptr != '\'')
 		{
 			is_quoted_field = false;
@@ -833,6 +886,7 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 	else if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED)
 	{
 		is_quoted_field = true;
+
 		if (*current_line_ptr != '"')
 		{
 			is_quoted_field = false;
@@ -842,14 +896,17 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 			++current_line_ptr;
 		}
 	}
+
 	if (*current_line_ptr == '\0')
 	{
 		// Todo: warning
 		stop = true;
-		return; // from lambda
+		return;
 	}
+
 	bool escapemode = false;
 	bool done = false;
+
 	while (!done)
 	{
 		if (*current_line_ptr == '\0')
@@ -860,6 +917,7 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 				while (parsed_line_ptr > starting_parsed_pointer)
 				{
 					--parsed_line_ptr;
+
 					if (*parsed_line_ptr == ' ')
 					{
 						*parsed_line_ptr = '\0';
@@ -876,6 +934,7 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 				while (parsed_line_ptr > starting_parsed_pointer)
 				{
 					--parsed_line_ptr;
+
 					if (*parsed_line_ptr == ' ' || *parsed_line_ptr == '\t')
 					{
 						*parsed_line_ptr = '\0';
@@ -887,9 +946,11 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 					}
 				}
 			}
+
 			done = true;
 			continue;
 		}
+
 		if (escapemode)
 		{
 			*(parsed_line_ptr) = *current_line_ptr;
@@ -908,6 +969,7 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 					continue;
 				}
 			}
+
 			if (is_quoted_field && import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED)
 			{
 				if (*current_line_ptr == '\'')
@@ -939,6 +1001,7 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 					}
 				}
 			}
+
 			if (!done)
 			{
 				*(parsed_line_ptr) = *current_line_ptr;
@@ -946,7 +1009,9 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 				*parsed_line_ptr = '\0';
 			}
 		}
+
 		++current_line_ptr;
+
 		if (done)
 		{
 			// Whitespace on right
@@ -955,6 +1020,7 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 				while (parsed_line_ptr > starting_parsed_pointer)
 				{
 					--parsed_line_ptr;
+
 					if (*parsed_line_ptr == ' ')
 					{
 						*parsed_line_ptr = '\0';
@@ -971,6 +1037,7 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 				while (parsed_line_ptr > starting_parsed_pointer)
 				{
 					--parsed_line_ptr;
+
 					if (*parsed_line_ptr == ' ' || *parsed_line_ptr == '\t')
 					{
 						*parsed_line_ptr = '\0';
@@ -982,16 +1049,19 @@ void Importer::RetrieveStringField(char * & current_line_ptr, char * & parsed_li
 					}
 				}
 			}
+
 			++parsed_line_ptr;
 			*parsed_line_ptr = '\0';
 		}
 	}
+
 	parsed_line_ptr = starting_parsed_pointer;
 }
 
 std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_entry, DataFields const & data_fields)
 {
 	std::shared_ptr<BaseField> the_field;
+
 	if (field_type_entry.first.name_or_index == NameOrIndex::NAME)
 	{
 		std::string const & input_field_name = field_type_entry.first.name;
@@ -1010,238 +1080,104 @@ std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_e
 			the_field = data_fields[field_type_entry.first.index];
 		}
 	}
+
 	return the_field;
+}
+
+void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_read, int const & current_column_index, char *& parsed_line_ptr, bool & stop,
+								 SchemaEntry const & column)
+{
+
+	// use sscanf to read in the type, based on switch on "column"'s type type-traits... read it into input_block[current_lines_read]
+	std::shared_ptr<BaseField> field_entry = input_block[current_lines_read][current_column_index];
+
+	if (!field_entry)
+	{
+		// Todo: warning log here
+		stop = true;
+		return;
+	}
+
+	BaseField & theField = *field_entry;
+
+	EatWhitespace(current_line_ptr);
+
+	if (*current_line_ptr == '\0')
+	{
+		// Todo: warning
+		stop = true;
+		return;
+	}
+
+	ReadOneDataField(column, theField, current_line_ptr, parsed_line_ptr, stop);
+
+	if (stop)
+	{
+		return;
+	}
+
+	EatWhitespace(current_line_ptr);
+	EatSeparator(current_line_ptr);
+
+}
+
+void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop)
+{
+
+	EatWhitespace(current_line_ptr);
+
+	if (*current_line_ptr == '\0')
+	{
+		// Todo: warning
+		stop = true;
+		return;
+	}
+
+	// read it, and do nothing with it
+	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+
+	if (stop)
+	{
+		return;
+	}
+
+	EatWhitespace(current_line_ptr);
+	EatSeparator(current_line_ptr);
+
 }
 
 int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline)
 {
 	int current_lines_read = 0;
+
 	while (data_file.getline(line, MAX_LINE_SIZE - 1) && data_file.good())
 	{
 
 		char * current_line_ptr = line;
 		char * parsed_line_ptr = parsedline;
 		*parsed_line_ptr = '\0';
-		int current_column_index = 0;
 		bool stop = false;
-		std::for_each(import_definition.input_schema.schema.cbegin(), import_definition.input_schema.schema.cend(), [this, &current_line_ptr, &current_lines_read, &current_column_index, &parsed_line_ptr, &stop](SchemaEntry const & column)
+
+		int nCols = import_definition.input_schema.validcols.size();
+		int nValColIdx = 0;
+
+		for (int ncol = 0; ncol < nCols; ++ncol)
 		{
 			if (stop)
 			{
-				return; // from lambda
+				break;
 			}
 
-			// use sscanf to read in the type, based on switch on "column"'s type type-traits... read it into input_block[current_lines_read]
-			std::shared_ptr<BaseField> field_entry = input_block[current_lines_read][current_column_index];
-			if (!field_entry)
+			if (import_definition.input_schema.validcols[ncol])
 			{
-				// Todo: warning log here
-				stop = true;
-				return; // from lambda
-			}
-			++current_column_index;
-			BaseField & theField = *field_entry;
-
-			// whitespace
-			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
-			{
-				while (*current_line_ptr == ' ') ++current_line_ptr;
+				ReadFieldFromFile(current_line_ptr, current_lines_read, nValColIdx, parsed_line_ptr, stop, import_definition.input_schema.schema[nValColIdx]);
+				++nValColIdx;
 			}
 			else
 			{
-				while (*current_line_ptr == ' ' || *current_line_ptr == '\t') ++current_line_ptr;
+				SkipFieldInFile(current_line_ptr, parsed_line_ptr, stop);
 			}
-			if (*current_line_ptr == '\0')
-			{
-				// Todo: warning
-				stop = true;
-				return; // from lambda
-			}
-
-			try
-			{
-				int number_chars_read = 0;
-				switch (column.field_type)
-				{
-				case FIELD_TYPE_INT32:
-					{
-						Field<FIELD_TYPE_INT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT32>&>(theField);
-						sscanf(current_line_ptr, "%d%n", &data_entry.GetValueReference(), &number_chars_read);
-						current_line_ptr += number_chars_read;
-					}
-					break;
-				case FIELD_TYPE_INT64:
-					{
-						Field<FIELD_TYPE_INT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT64>&>(theField);
-						sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
-						current_line_ptr += number_chars_read;
-					}
-					break;
-				case FIELD_TYPE_UINT32:
-					{
-						Field<FIELD_TYPE_UINT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(theField);
-						sscanf(current_line_ptr, "%d%n", &data_entry.GetValueReference(), &number_chars_read);
-						current_line_ptr += number_chars_read;
-					}
-					break;
-				case FIELD_TYPE_UINT64:
-					{
-						Field<FIELD_TYPE_UINT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(theField);
-						sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
-						current_line_ptr += number_chars_read;
-					}
-					break;
-				case FIELD_TYPE_STRING_FIXED:
-					{
-						Field<FIELD_TYPE_STRING_FIXED> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(parsed_line_ptr);
-					}
-					break;
-				case FIELD_TYPE_STRING_VAR:
-					{
-						Field<FIELD_TYPE_STRING_VAR> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(parsed_line_ptr);
-					}
-					break;
-				case FIELD_TYPE_FLOAT:
-					{
-						Field<FIELD_TYPE_FLOAT> & data_entry = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(theField);
-						float temp;
-						sscanf(current_line_ptr, "%f%n", &temp, &number_chars_read);
-						data_entry.GetValueReference() = temp;
-						current_line_ptr += number_chars_read;
-					}
-					break;
-				case FIELD_TYPE_TIMESTAMP:
-					{
-						Field<FIELD_TYPE_TIMESTAMP> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(theField);
-						sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference());
-						current_line_ptr += number_chars_read;
-					}
-					break;
-				case FIELD_TYPE_UUID:
-					{
-						Field<FIELD_TYPE_UUID> & data_entry = dynamic_cast<Field<FIELD_TYPE_UUID>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(parsed_line_ptr);
-					}
-					break;
-				case FIELD_TYPE_UUID_FOREIGN:
-					{
-						Field<FIELD_TYPE_UUID_FOREIGN> & data_entry = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(parsed_line_ptr);
-					}
-					break;
-				case FIELD_TYPE_STRING_CODE:
-					{
-						Field<FIELD_TYPE_STRING_CODE> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(parsed_line_ptr);
-					}
-					break;
-				case FIELD_TYPE_STRING_LONGHAND:
-					{
-						Field<FIELD_TYPE_STRING_LONGHAND> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(parsed_line_ptr);
-					}
-					break;
-				case FIELD_TYPE_TIME_RANGE:
-					{
-						Field<FIELD_TYPE_TIME_RANGE> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(theField);
-						sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
-					}
-					break;
-				case FIELD_TYPE_NOTES_1:
-					{
-						Field<FIELD_TYPE_NOTES_1> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(parsed_line_ptr);
-					}
-					break;
-				case FIELD_TYPE_NOTES_2:
-					{
-						Field<FIELD_TYPE_NOTES_2> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(parsed_line_ptr);
-					}
-					break;
-				case FIELD_TYPE_NOTES_3:
-					{
-						Field<FIELD_TYPE_NOTES_3> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(theField);
-						RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
-						if (stop)
-						{
-							return; // from lambda
-						}
-						data_entry.SetValue(parsed_line_ptr);
-					}
-					break;
-				}
-			}
-			catch (std::bad_cast &)
-			{
-				// Todo: log warning here
-				stop = true;
-				return; // from lambda
-			}
-
-			// whitespace
-			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
-			{
-				while (*current_line_ptr == ' ') ++current_line_ptr;
-			}
-			else
-			{
-				while (*current_line_ptr == ' ' || *current_line_ptr == '\t') ++current_line_ptr;
-			}
-
-			// eat separator
-			if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
-			{
-				if (*current_line_ptr == '\t') ++current_line_ptr; 
-			}
-			else
-			{
-				if (*current_line_ptr == ',') ++current_line_ptr; 
-			}
-
-		});
+		}
 
 		if (stop)
 		{
@@ -1252,355 +1188,385 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 		DataFields & input_data_fields = input_block[current_lines_read];
 		DataFields & output_data_fields = output_block[current_lines_read];
 		stop = false;
-		std::for_each(import_definition.mappings.begin(), import_definition.mappings.end(), [this, &input_data_fields, &output_data_fields, &stop](std::shared_ptr<FieldMapping> & field_mapping)
+		std::for_each(import_definition.mappings.begin(), import_definition.mappings.end(), [this, &input_data_fields, &output_data_fields, &stop](
+						  std::shared_ptr<FieldMapping> & field_mapping)
 		{
 			if (!field_mapping)
 			{
 				// TODO: Import problem warning
 				stop = true;
-				return; // from lambda
+				return;
 			}
 
 			if (!field_mapping->Validate())
 			{
 				// TODO: Import problem warning
 				stop = true;
-				return; // from lambda
+				return;
 			}
 
 			switch (field_mapping->field_mapping_type)
 			{
 
-			case FieldMapping::FIELD_MAPPING_TYPE__ONE_TO_ONE:
-				{
-					try
+				case FieldMapping::FIELD_MAPPING_TYPE__ONE_TO_ONE:
 					{
-
-						OneToOneFieldMapping const & the_mapping = dynamic_cast<OneToOneFieldMapping const &>(*field_mapping);
-						FieldTypeEntry const & input_entry = field_mapping->input_file_fields[0];
-						FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
-
-						if (input_entry.second != output_entry.second)
+						try
 						{
-							// Todo: log warning
+
+							OneToOneFieldMapping const & the_mapping = dynamic_cast<OneToOneFieldMapping const &>(*field_mapping);
+							FieldTypeEntry const & input_entry = field_mapping->input_file_fields[0];
+							FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
+
+							if (input_entry.second != output_entry.second)
+							{
+								// Todo: log warning
+								stop = true;
+								return;
+							}
+
+							// perform the mapping here
+
+							std::shared_ptr<BaseField> the_input_field = RetrieveDataField(input_entry, input_data_fields);
+							std::shared_ptr<BaseField> the_output_field = RetrieveDataField(output_entry, output_data_fields);;
+
+							if (the_input_field && the_output_field)
+							{
+								// map them
+								try
+								{
+									switch (the_input_field->GetType())
+									{
+										case FIELD_TYPE_INT32:
+											{
+												Field<FIELD_TYPE_INT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_input_field);
+												Field<FIELD_TYPE_INT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_INT64:
+											{
+												Field<FIELD_TYPE_INT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_input_field);
+												Field<FIELD_TYPE_INT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_UINT32:
+											{
+												Field<FIELD_TYPE_UINT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_input_field);
+												Field<FIELD_TYPE_UINT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_UINT64:
+											{
+												Field<FIELD_TYPE_UINT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_input_field);
+												Field<FIELD_TYPE_UINT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_STRING_FIXED:
+											{
+												Field<FIELD_TYPE_STRING_FIXED> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_input_field);
+												Field<FIELD_TYPE_STRING_FIXED> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_STRING_VAR:
+											{
+												Field<FIELD_TYPE_STRING_VAR> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_input_field);
+												Field<FIELD_TYPE_STRING_VAR> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_FLOAT:
+											{
+												Field<FIELD_TYPE_FLOAT> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(*the_input_field);
+												Field<FIELD_TYPE_FLOAT> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_TIMESTAMP:
+											{
+												Field<FIELD_TYPE_TIMESTAMP> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_input_field);
+												Field<FIELD_TYPE_TIMESTAMP> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_UUID:
+											{
+												Field<FIELD_TYPE_UUID> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_input_field);
+												Field<FIELD_TYPE_UUID> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_UUID_FOREIGN:
+											{
+												Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_input_field);
+												Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_STRING_CODE:
+											{
+												Field<FIELD_TYPE_STRING_CODE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_input_field);
+												Field<FIELD_TYPE_STRING_CODE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_STRING_LONGHAND:
+											{
+												Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_input_field);
+												Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_TIME_RANGE:
+											{
+												Field<FIELD_TYPE_TIME_RANGE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_input_field);
+												Field<FIELD_TYPE_TIME_RANGE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_NOTES_1:
+											{
+												Field<FIELD_TYPE_NOTES_1> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_input_field);
+												Field<FIELD_TYPE_NOTES_1> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_NOTES_2:
+											{
+												Field<FIELD_TYPE_NOTES_2> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_input_field);
+												Field<FIELD_TYPE_NOTES_2> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_NOTES_3:
+											{
+												Field<FIELD_TYPE_NOTES_3> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_input_field);
+												Field<FIELD_TYPE_NOTES_3> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+									}
+								}
+								catch (std::bad_cast &)
+								{
+									// Todo: log warning
+									stop = true;
+									return;
+								}
+							}
+
+						}
+						catch (std::bad_cast &)
+						{
+							// TODO: Import problem warning
 							stop = true;
-							return; // from lambda
+							return;
 						}
-
-						// perform the mapping here
-
-						std::shared_ptr<BaseField> the_input_field = RetrieveDataField(input_entry, input_data_fields);
-						std::shared_ptr<BaseField> the_output_field = RetrieveDataField(output_entry, output_data_fields);;
-
-						if (the_input_field && the_output_field)
-						{
-							// map them
-							try
-							{
-								switch (the_input_field->GetType())
-								{
-								case FIELD_TYPE_INT32:
-									{
-										Field<FIELD_TYPE_INT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_input_field);
-										Field<FIELD_TYPE_INT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_INT64:
-									{
-										Field<FIELD_TYPE_INT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_input_field);
-										Field<FIELD_TYPE_INT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_UINT32:
-									{
-										Field<FIELD_TYPE_UINT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_input_field);
-										Field<FIELD_TYPE_UINT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_UINT64:
-									{
-										Field<FIELD_TYPE_UINT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_input_field);
-										Field<FIELD_TYPE_UINT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_STRING_FIXED:
-									{
-										Field<FIELD_TYPE_STRING_FIXED> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_input_field);
-										Field<FIELD_TYPE_STRING_FIXED> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_STRING_VAR:
-									{
-										Field<FIELD_TYPE_STRING_VAR> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_input_field);
-										Field<FIELD_TYPE_STRING_VAR> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_FLOAT:
-									{
-										Field<FIELD_TYPE_FLOAT> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(*the_input_field);
-										Field<FIELD_TYPE_FLOAT> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_TIMESTAMP:
-									{
-										Field<FIELD_TYPE_TIMESTAMP> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_input_field);
-										Field<FIELD_TYPE_TIMESTAMP> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_UUID:
-									{
-										Field<FIELD_TYPE_UUID> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_input_field);
-										Field<FIELD_TYPE_UUID> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_UUID_FOREIGN:
-									{
-										Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_input_field);
-										Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_STRING_CODE:
-									{
-										Field<FIELD_TYPE_STRING_CODE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_input_field);
-										Field<FIELD_TYPE_STRING_CODE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_STRING_LONGHAND:
-									{
-										Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_input_field);
-										Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_TIME_RANGE:
-									{
-										Field<FIELD_TYPE_TIME_RANGE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_input_field);
-										Field<FIELD_TYPE_TIME_RANGE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_NOTES_1:
-									{
-										Field<FIELD_TYPE_NOTES_1> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_input_field);
-										Field<FIELD_TYPE_NOTES_1> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_NOTES_2:
-									{
-										Field<FIELD_TYPE_NOTES_2> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_input_field);
-										Field<FIELD_TYPE_NOTES_2> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_NOTES_3:
-									{
-										Field<FIELD_TYPE_NOTES_3> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_input_field);
-										Field<FIELD_TYPE_NOTES_3> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								}
-							}
-							catch (std::bad_cast &)
-							{
-								// Todo: log warning
-								stop = true;
-								return; // from lambda
-							}
-						}
-
 					}
-					catch (std::bad_cast &)
+					break;
+
+				case FieldMapping::FIELD_MAPPING_TYPE__HARD_CODED:
 					{
-						// TODO: Import problem warning
-						stop = true;
-						return; // from lambda
-					}
-				}
-				break;
-
-			case FieldMapping::FIELD_MAPPING_TYPE__HARD_CODED:
-				{
-					try
-					{
-
-						HardCodedFieldMapping const & the_mapping = dynamic_cast<HardCodedFieldMapping const &>(*field_mapping);
-						FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
-
-						// perform the mapping here
-
-						std::shared_ptr<BaseField> the_input_field = the_mapping.data;
-						std::shared_ptr<BaseField> the_output_field = RetrieveDataField(output_entry, output_data_fields);
-
-						if (the_input_field && the_output_field)
+						try
 						{
 
-							if (the_input_field->GetType() != the_output_field->GetType())
-							{
-								// Todo: log warning
-								stop = true;
-								return; // from lambda
-							}
+							HardCodedFieldMapping const & the_mapping = dynamic_cast<HardCodedFieldMapping const &>(*field_mapping);
+							FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
 
-							// map them
-							try
+							// perform the mapping here
+
+							std::shared_ptr<BaseField> the_input_field = the_mapping.data;
+							std::shared_ptr<BaseField> the_output_field = RetrieveDataField(output_entry, output_data_fields);
+
+							if (the_input_field && the_output_field)
 							{
-								switch (the_input_field->GetType())
+
+								if (the_input_field->GetType() != the_output_field->GetType())
 								{
-								case FIELD_TYPE_INT32:
+									// Todo: log warning
+									stop = true;
+									return;
+								}
+
+								// map them
+								try
+								{
+									switch (the_input_field->GetType())
 									{
-										Field<FIELD_TYPE_INT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_input_field);
-										Field<FIELD_TYPE_INT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
+										case FIELD_TYPE_INT32:
+											{
+												Field<FIELD_TYPE_INT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_input_field);
+												Field<FIELD_TYPE_INT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_INT64:
+											{
+												Field<FIELD_TYPE_INT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_input_field);
+												Field<FIELD_TYPE_INT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_UINT32:
+											{
+												Field<FIELD_TYPE_UINT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_input_field);
+												Field<FIELD_TYPE_UINT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_UINT64:
+											{
+												Field<FIELD_TYPE_UINT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_input_field);
+												Field<FIELD_TYPE_UINT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_STRING_FIXED:
+											{
+												Field<FIELD_TYPE_STRING_FIXED> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_input_field);
+												Field<FIELD_TYPE_STRING_FIXED> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_STRING_VAR:
+											{
+												Field<FIELD_TYPE_STRING_VAR> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_input_field);
+												Field<FIELD_TYPE_STRING_VAR> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_TIMESTAMP:
+											{
+												Field<FIELD_TYPE_TIMESTAMP> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_input_field);
+												Field<FIELD_TYPE_TIMESTAMP> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_UUID:
+											{
+												Field<FIELD_TYPE_UUID> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_input_field);
+												Field<FIELD_TYPE_UUID> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_UUID_FOREIGN:
+											{
+												Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_input_field);
+												Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_STRING_CODE:
+											{
+												Field<FIELD_TYPE_STRING_CODE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_input_field);
+												Field<FIELD_TYPE_STRING_CODE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_STRING_LONGHAND:
+											{
+												Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_input_field);
+												Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_TIME_RANGE:
+											{
+												Field<FIELD_TYPE_TIME_RANGE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_input_field);
+												Field<FIELD_TYPE_TIME_RANGE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_NOTES_1:
+											{
+												Field<FIELD_TYPE_NOTES_1> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_input_field);
+												Field<FIELD_TYPE_NOTES_1> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_NOTES_2:
+											{
+												Field<FIELD_TYPE_NOTES_2> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_input_field);
+												Field<FIELD_TYPE_NOTES_2> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
+
+										case FIELD_TYPE_NOTES_3:
+											{
+												Field<FIELD_TYPE_NOTES_3> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_input_field);
+												Field<FIELD_TYPE_NOTES_3> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_output_field);
+												data_entry_output.SetValue(data_entry_input.GetValueReference());
+											}
+											break;
 									}
-									break;
-								case FIELD_TYPE_INT64:
-									{
-										Field<FIELD_TYPE_INT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_input_field);
-										Field<FIELD_TYPE_INT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_UINT32:
-									{
-										Field<FIELD_TYPE_UINT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_input_field);
-										Field<FIELD_TYPE_UINT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_UINT64:
-									{
-										Field<FIELD_TYPE_UINT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_input_field);
-										Field<FIELD_TYPE_UINT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_STRING_FIXED:
-									{
-										Field<FIELD_TYPE_STRING_FIXED> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_input_field);
-										Field<FIELD_TYPE_STRING_FIXED> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_STRING_VAR:
-									{
-										Field<FIELD_TYPE_STRING_VAR> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_input_field);
-										Field<FIELD_TYPE_STRING_VAR> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_TIMESTAMP:
-									{
-										Field<FIELD_TYPE_TIMESTAMP> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_input_field);
-										Field<FIELD_TYPE_TIMESTAMP> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_UUID:
-									{
-										Field<FIELD_TYPE_UUID> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_input_field);
-										Field<FIELD_TYPE_UUID> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_UUID_FOREIGN:
-									{
-										Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_input_field);
-										Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_STRING_CODE:
-									{
-										Field<FIELD_TYPE_STRING_CODE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_input_field);
-										Field<FIELD_TYPE_STRING_CODE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_STRING_LONGHAND:
-									{
-										Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_input_field);
-										Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_TIME_RANGE:
-									{
-										Field<FIELD_TYPE_TIME_RANGE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_input_field);
-										Field<FIELD_TYPE_TIME_RANGE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_NOTES_1:
-									{
-										Field<FIELD_TYPE_NOTES_1> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_input_field);
-										Field<FIELD_TYPE_NOTES_1> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_NOTES_2:
-									{
-										Field<FIELD_TYPE_NOTES_2> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_input_field);
-										Field<FIELD_TYPE_NOTES_2> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
-								case FIELD_TYPE_NOTES_3:
-									{
-										Field<FIELD_TYPE_NOTES_3> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_input_field);
-										Field<FIELD_TYPE_NOTES_3> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_output_field);
-										data_entry_output.SetValue(data_entry_input.GetValueReference());
-									}
-									break;
+								}
+								catch (std::bad_cast &)
+								{
+									// Todo: log warning
+									stop = true;
+									return;
 								}
 							}
-							catch (std::bad_cast &)
-							{
-								// Todo: log warning
-								stop = true;
-								return; // from lambda
-							}
+
 						}
-
+						catch (std::bad_cast &)
+						{
+							// TODO: Import problem warning
+							stop = true;
+							return;
+						}
 					}
-					catch (std::bad_cast &)
+					break;
+
+				case FieldMapping::FIELD_MAPPING_TYPE__TIME_RANGE:
 					{
-						// TODO: Import problem warning
-						stop = true;
-						return; // from lambda
-					}
-				}
-				break;
+						try
+						{
 
-			case FieldMapping::FIELD_MAPPING_TYPE__TIME_RANGE:
-				{
-					try
-					{
+							TimeRangeFieldMapping & the_mapping = dynamic_cast<TimeRangeFieldMapping &>(*field_mapping);
+							the_mapping.PerformMapping(input_data_fields, output_data_fields);
 
-						TimeRangeFieldMapping & the_mapping = dynamic_cast<TimeRangeFieldMapping &>(*field_mapping);
-						the_mapping.PerformMapping(input_data_fields, output_data_fields);
-
+						}
+						catch (std::bad_cast &)
+						{
+							// TODO: Import problem warning
+							stop = true;
+							return;
+						}
 					}
-					catch (std::bad_cast &)
-					{
-						// TODO: Import problem warning
-						stop = true;
-						return; // from lambda
-					}
-				}
-				break;
+					break;
 
 			}
 		});
@@ -1611,6 +1577,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 		}
 
 		++current_lines_read;
+
 		if (current_lines_read == block_size)
 		{
 			return current_lines_read;
@@ -1630,29 +1597,33 @@ bool Importer::DoImport()
 	{
 		try
 		{
-			inputModel = dynamic_cast<InputModel*>(model);
+			inputModel = dynamic_cast<InputModel *>(model);
 		}
 		catch (std::bad_cast &)
 		{
 			return false;
 		}
+
 		if (!table->ImportStart(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
 		{
 			// Todo: log warning
 			return false;
 		}
 	}
+
 	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__OUTPUT_MODEL)
 	{
 		try
 		{
-			outputModel = dynamic_cast<OutputModel*>(model);
+			outputModel = dynamic_cast<OutputModel *>(model);
 		}
 		catch (std::bad_cast &)
 		{
 			return false;
 		}
+
 		inputModel = &outputModel->getInputModel();
+
 		if (!table->ImportStart(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
 		{
 			// Todo: log warning
@@ -1660,19 +1631,11 @@ bool Importer::DoImport()
 		}
 	}
 
-	InitializeFields();
-
-	// validate
-	if (!ValidateMapping())
-	{
-		// TODO: Error logging
-		return false;
-	}
-
 	// TODO: try/finally or exit block
 	// open file
 	std::fstream data_file;
 	data_file.open(import_definition.input_file.c_str(), std::ios::in);
+
 	if (data_file.is_open())
 	{
 
@@ -1682,7 +1645,6 @@ bool Importer::DoImport()
 		// skip first row if necessary
 		if (import_definition.first_row_is_header_row && data_file.good())
 		{
-			// TODO: Validate column headers
 			data_file.getline(line, MAX_LINE_SIZE - 1);
 		}
 
@@ -1692,12 +1654,28 @@ bool Importer::DoImport()
 			return true;
 		}
 
+		std::vector<std::string> colnames;
+		boost::split(colnames, line, boost::is_any_of(", "));
+		import_definition.input_schema.ReorderAccToColumnNames(colnames);
+
+		InitializeFields();
+
+		// validate
+		if (!ValidateMapping())
+		{
+			// TODO: Error logging
+			data_file.close();
+			return false;
+		}
+
 		std::int64_t current_lines_read = 0;
 
 		int currently_read_lines = 0;
+
 		while (true)
 		{
 			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline);
+
 			if (currently_read_lines == -1)
 			{
 				// Todo: log warning
@@ -1712,6 +1690,7 @@ bool Importer::DoImport()
 			{
 				// Write rows to database here
 				bool write_succeeded = table_write_callback(this, model, import_definition, table, output_block, currently_read_lines);
+
 				if (!write_succeeded)
 				{
 					// Todo: log warning
@@ -1737,6 +1716,7 @@ bool Importer::DoImport()
 		}
 
 	}
+
 	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__OUTPUT_MODEL)
 	{
 		if (!table->ImportEnd(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
@@ -1748,4 +1728,228 @@ bool Importer::DoImport()
 
 	return true;
 
+}
+
+void Importer::EatWhitespace(char *& current_line_ptr)
+{
+	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
+	{
+		while (*current_line_ptr == ' ') { ++current_line_ptr; }
+	}
+	else
+	{
+		while (*current_line_ptr == ' ' || *current_line_ptr == '\t') { ++current_line_ptr; }
+	}
+}
+
+void Importer::EatSeparator(char *& current_line_ptr)
+{
+	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
+	{
+		if (*current_line_ptr == '\t') { ++current_line_ptr; }
+	}
+	else
+	{
+		if (*current_line_ptr == ',') { ++current_line_ptr; }
+	}
+}
+
+void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField, char *& current_line_ptr, char *& parsed_line_ptr, bool & stop)
+{
+	try
+	{
+		int number_chars_read = 0;
+
+		switch (column.field_type)
+		{
+			case FIELD_TYPE_INT32:
+				{
+					Field<FIELD_TYPE_INT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT32>&>(theField);
+					sscanf(current_line_ptr, "%d%n", &data_entry.GetValueReference(), &number_chars_read);
+					current_line_ptr += number_chars_read;
+				}
+				break;
+
+			case FIELD_TYPE_INT64:
+				{
+					Field<FIELD_TYPE_INT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT64>&>(theField);
+					sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
+					current_line_ptr += number_chars_read;
+				}
+				break;
+
+			case FIELD_TYPE_UINT32:
+				{
+					Field<FIELD_TYPE_UINT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(theField);
+					sscanf(current_line_ptr, "%d%n", &data_entry.GetValueReference(), &number_chars_read);
+					current_line_ptr += number_chars_read;
+				}
+				break;
+
+			case FIELD_TYPE_UINT64:
+				{
+					Field<FIELD_TYPE_UINT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(theField);
+					sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
+					current_line_ptr += number_chars_read;
+				}
+				break;
+
+			case FIELD_TYPE_STRING_FIXED:
+				{
+					Field<FIELD_TYPE_STRING_FIXED> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(theField);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+
+					if (stop)
+					{
+						return;
+					}
+
+					data_entry.SetValue(parsed_line_ptr);
+				}
+				break;
+
+			case FIELD_TYPE_STRING_VAR:
+				{
+					Field<FIELD_TYPE_STRING_VAR> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(theField);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+
+					if (stop)
+					{
+						return;
+					}
+
+					data_entry.SetValue(parsed_line_ptr);
+				}
+				break;
+
+			case FIELD_TYPE_FLOAT:
+				{
+					Field<FIELD_TYPE_FLOAT> & data_entry = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(theField);
+					float temp;
+					sscanf(current_line_ptr, "%f%n", &temp, &number_chars_read);
+					data_entry.GetValueReference() = temp;
+					current_line_ptr += number_chars_read;
+				}
+				break;
+
+			case FIELD_TYPE_TIMESTAMP:
+				{
+					Field<FIELD_TYPE_TIMESTAMP> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(theField);
+					sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference());
+					current_line_ptr += number_chars_read;
+				}
+				break;
+
+			case FIELD_TYPE_UUID:
+				{
+					Field<FIELD_TYPE_UUID> & data_entry = dynamic_cast<Field<FIELD_TYPE_UUID>&>(theField);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+
+					if (stop)
+					{
+						return;
+					}
+
+					data_entry.SetValue(parsed_line_ptr);
+				}
+				break;
+
+			case FIELD_TYPE_UUID_FOREIGN:
+				{
+					Field<FIELD_TYPE_UUID_FOREIGN> & data_entry = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(theField);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+
+					if (stop)
+					{
+						return;
+					}
+
+					data_entry.SetValue(parsed_line_ptr);
+				}
+				break;
+
+			case FIELD_TYPE_STRING_CODE:
+				{
+					Field<FIELD_TYPE_STRING_CODE> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(theField);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+
+					if (stop)
+					{
+						return;
+					}
+
+					data_entry.SetValue(parsed_line_ptr);
+				}
+				break;
+
+			case FIELD_TYPE_STRING_LONGHAND:
+				{
+					Field<FIELD_TYPE_STRING_LONGHAND> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(theField);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+
+					if (stop)
+					{
+						return;
+					}
+
+					data_entry.SetValue(parsed_line_ptr);
+				}
+				break;
+
+			case FIELD_TYPE_TIME_RANGE:
+				{
+					Field<FIELD_TYPE_TIME_RANGE> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(theField);
+					sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
+				}
+				break;
+
+			case FIELD_TYPE_NOTES_1:
+				{
+					Field<FIELD_TYPE_NOTES_1> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(theField);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+
+					if (stop)
+					{
+						return;
+					}
+
+					data_entry.SetValue(parsed_line_ptr);
+				}
+				break;
+
+			case FIELD_TYPE_NOTES_2:
+				{
+					Field<FIELD_TYPE_NOTES_2> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(theField);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+
+					if (stop)
+					{
+						return;
+					}
+
+					data_entry.SetValue(parsed_line_ptr);
+				}
+				break;
+
+			case FIELD_TYPE_NOTES_3:
+				{
+					Field<FIELD_TYPE_NOTES_3> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(theField);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+
+					if (stop)
+					{
+						return;
+					}
+
+					data_entry.SetValue(parsed_line_ptr);
+				}
+				break;
+		}
+	}
+	catch (std::bad_cast &)
+	{
+		// Todo: log warning here
+		stop = true;
+		return;
+	}
 }
