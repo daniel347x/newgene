@@ -24,8 +24,7 @@
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../../Utilities/qsortfilterproxymodel_numberslast.h"
-//#include "../../Utilities/importdialoghelper.h"
-#include "../../Utilities/foo.h"
+#include "../../Utilities/importdialoghelper.h"
 #include "../../../../../NewGeneBackEnd/Utilities/Validation.h"
 #include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
 
