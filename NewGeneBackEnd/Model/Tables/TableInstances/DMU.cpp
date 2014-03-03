@@ -646,6 +646,14 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 
 	//}
 
+	schema_input.schema = input_schema_vector;
+	schema_output.schema = output_schema_vector;
+
+	import_definition.input_schema = schema_input;
+	import_definition.output_schema = schema_output;
+
+	import_definition.mappings = mappings;
+
 	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn);
 
 	bool success = table_importer.DoImport();

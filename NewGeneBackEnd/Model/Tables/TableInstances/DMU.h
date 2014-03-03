@@ -34,7 +34,7 @@ class Table_DMU_Identifier : public Table<TABLE__DMU_IDENTIFIER, TABLE_INSTANCE_
 		Table_DMU_Identifier()
 			: Table<TABLE__DMU_IDENTIFIER, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__VECTOR>(Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
 		{
-
+			table_name = "DMU_CATEGORY";
 		}
 
 		void Load(sqlite3 * db, InputModel * input_model_);
@@ -76,7 +76,7 @@ class Table_DMU_Instance : public Table<TABLE__DMU_INSTANCE, TABLE_INSTANCE_IDEN
 		Table_DMU_Instance()
 			: Table<TABLE__DMU_INSTANCE, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__MAP>(Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
 		{
-
+				table_name = "DMU_SET_MEMBER";
 		}
 
 		void Load(sqlite3 * db, InputModel * input_model_);

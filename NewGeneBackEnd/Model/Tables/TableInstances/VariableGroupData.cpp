@@ -205,11 +205,6 @@ Table_VariableGroupData * Table_VariableGroupData::GetInstanceTableFromTableName
 
 }
 
-std::string Table_VariableGroupData::GetTableName()
-{
-	return table_name;
-}
-
 bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_, DataChangeMessage & change_message)
 {
 

@@ -12,9 +12,8 @@ public:
 	Table_VariableGroupData(std::string const & vg_category_string_code_)
 		: Table<TABLE__VG_INPUT_DATA, TABLE_INSTANCE_IDENTIFIER_CONTAINER_TYPE__NONE>(Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
 		, vg_category_string_code(vg_category_string_code_)
-		, table_name(Table_VariableGroupData::TableNameFromVGCode(vg_category_string_code))
 	{
-
+		table_name = Table_VariableGroupData::TableNameFromVGCode(vg_category_string_code);
 	}
 
 	void Load(sqlite3 * db, InputModel * input_model_);
@@ -22,8 +21,6 @@ public:
 	bool ImportEnd(sqlite3 * db, WidgetInstanceIdentifier const & identifier, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_);
 	bool DeleteDataTable(sqlite3 * db, InputModel * input_model_, DataChangeMessage & change_message);
 	bool DeleteDmuMemberRows(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & dmu_member, std::string const & column_name);
-
-	std::string GetTableName();
 
 	static std::string TableNameFromVGCode(std::string variable_group_code);
 	static std::string ViewNameFromCount(int const view_number);
@@ -35,7 +32,6 @@ public:
 	static Table_VariableGroupData * GetInstanceTableFromTableName(sqlite3 * db, InputModel * input_model_, std::string const & table_name);
 
 	std::string vg_category_string_code;
-	std::string table_name;
 
 };
 

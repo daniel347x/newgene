@@ -61,8 +61,9 @@ class Table_basemost
 
 		}
 
-		virtual std::string GetTableName() { return std::string(); }
-		
+		std::string GetTableName() { return table_name; }
+		std::string table_name;
+
 		virtual void Load(sqlite3 *, InputModel * = nullptr) { };
 		virtual void Load(sqlite3 *, OutputModel * = nullptr, InputModel * = nullptr) { };
 		virtual bool ImportStart(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
