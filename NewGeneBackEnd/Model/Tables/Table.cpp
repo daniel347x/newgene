@@ -304,7 +304,6 @@ void Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field
 			break;
 	}
 
-	return sql_insert;
 }
 
 int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const & import_definition, sqlite3 * db)
