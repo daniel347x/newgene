@@ -150,6 +150,7 @@ class UIMessagerInputProject : public UIMessager
 		void EmitInputProjectChangeMessage(DataChangeMessage & changes);
 
 		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET & widgetData);
+		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_UOAS_WIDGET & widgetData);
 
 	protected:
 

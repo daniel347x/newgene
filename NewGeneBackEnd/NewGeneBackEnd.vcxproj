@@ -215,6 +215,7 @@
     <ClCompile Include="UIAction\Controllers\Controller_GenerateOutput.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_KAdCountChange.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_TimeRangeChange.cpp" />
+    <ClCompile Include="UIAction\Controllers\Controller_UOA_Management.cpp" />
     <ClCompile Include="UIAction\Controllers\Controller_VariableGroupSetMemberSelectionChange.cpp" />
     <ClCompile Include="UIAction\UIActionManager.cpp" />
     <ClCompile Include="UIData\DataChanges.cpp" />

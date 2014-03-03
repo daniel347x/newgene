@@ -24,7 +24,8 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItemRequest_TIMERANGE_REGION_WIDGET>("WidgetDataItemRequest_TIMERANGE_REGION_WIDGET");
 	qRegisterMetaType<WidgetDataItemRequest_DATETIME_WIDGET>("WidgetDataItemRequest_DATETIME_WIDGET");
 	qRegisterMetaType<WidgetDataItemRequest_GENERATE_OUTPUT_TAB>("WidgetDataItemRequest_GENERATE_OUTPUT_TAB");
-	qRegisterMetaType<WidgetDataItemRequest_TIMERANGE_REGION_WIDGET>("WidgetDataItemRequest_MANAGE_DMUS_WIDGET");
+	qRegisterMetaType<WidgetDataItemRequest_MANAGE_DMUS_WIDGET>("WidgetDataItemRequest_MANAGE_DMUS_WIDGET");
+	qRegisterMetaType<WidgetDataItemRequest_MANAGE_UOAS_WIDGET>("WidgetDataItemRequest_MANAGE_UOAS_WIDGET");
 
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>("WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA");
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>("WidgetDataItem_VARIABLE_GROUPS_TOOLBOX");
@@ -37,6 +38,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItem_DATETIME_WIDGET>("WidgetDataItem_DATETIME_WIDGET");
 	qRegisterMetaType<WidgetDataItem_GENERATE_OUTPUT_TAB>("WidgetDataItem_GENERATE_OUTPUT_TAB");
 	qRegisterMetaType<WidgetDataItem_MANAGE_DMUS_WIDGET>("WidgetDataItem_MANAGE_DMUS_WIDGET");
+	qRegisterMetaType<WidgetDataItem_MANAGE_UOAS_WIDGET>("WidgetDataItem_MANAGE_UOAS_WIDGET");
 
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>("WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE>("WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE");
@@ -49,6 +51,8 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS>("WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS>("WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE>("WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_UOA>("WidgetActionItemRequest_ACTION_ADD_UOA");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_UOA>("WidgetActionItemRequest_ACTION_DELETE_UOA");
 }
 
 bool NewGeneApplication::notify( QObject * receiver, QEvent * e )

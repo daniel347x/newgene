@@ -187,3 +187,19 @@ void UIDataManager::DoRefreshInputWidget(Messager & messager, WidgetDataItemRequ
 	});
 	messager.EmitInputWidgetDataRefresh(dmu_management);
 }
+
+/************************************************************************/
+// MANAGE_UOAS_WIDGET
+/************************************************************************/
+void UIDataManager::DoRefreshInputWidget(Messager & messager, WidgetDataItemRequest_MANAGE_UOAS_WIDGET const & widget_request, InputProject & project)
+{
+	InputModel & input_model = project.model();
+	WidgetDataItem_MANAGE_UOAS_WIDGET uoa_management(widget_request);
+	WidgetInstanceIdentifiers uoas = input_model.t_dmu_category.getIdentifiers();
+	std::for_each(uoas.cbegin(), uoas.cend(), [this, &uoa_management, &input_model](WidgetInstanceIdentifier const & single_uoa)
+	{
+		WidgetInstanceIdentifiers uoa_members = input_model.t_dmu_setmembers.getIdentifiers(*single_uoa.uuid);
+		uoa_management.uoas_and_members.push_back(std::make_pair(single_uoa, uoa_members));
+	});
+	messager.EmitInputWidgetDataRefresh(uoa_management);
+}

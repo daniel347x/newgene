@@ -21,6 +21,8 @@ enum WIDGET_ACTIONS
 	, ACTION_ADD_DMU_MEMBERS
 	, ACTION_DELETE_DMU_MEMBERS
 	, ACTION_REFRESH_DMUS_FROM_FILE
+	, ACTION_ADD_UOA
+	, ACTION_DELETE_UOA
 
 	, WIDGET_ACTIONS_LAST
 
@@ -679,5 +681,41 @@ public:
 	}
 };
 typedef WidgetActionItemRequest<ACTION_REFRESH_DMUS_FROM_FILE> WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE;
+
+/************************************************************************/
+//
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_ADD_UOA> : public WidgetActionItemRequest_base
+{
+public:
+	WidgetActionItemRequest<ACTION_ADD_UOA>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
+		: WidgetActionItemRequest_base(reason_, items_)
+	{
+	}
+	WidgetActionItemRequest<ACTION_ADD_UOA>(WidgetActionItemRequest<ACTION_ADD_UOA> const & rhs)
+		: WidgetActionItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetActionItemRequest<ACTION_ADD_UOA> WidgetActionItemRequest_ACTION_ADD_UOA;
+
+/************************************************************************/
+//
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_DELETE_UOA> : public WidgetActionItemRequest_base
+{
+public:
+	WidgetActionItemRequest<ACTION_DELETE_UOA>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, InstanceActionItems items_ = InstanceActionItems())
+		: WidgetActionItemRequest_base(reason_, items_)
+	{
+	}
+	WidgetActionItemRequest<ACTION_DELETE_UOA>(WidgetActionItemRequest<ACTION_DELETE_UOA> const & rhs)
+		: WidgetActionItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetActionItemRequest<ACTION_DELETE_UOA> WidgetActionItemRequest_ACTION_DELETE_UOA;
 
 #endif

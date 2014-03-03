@@ -41,13 +41,17 @@ void InputProjectWorkQueue::HandleChanges(DataChangeMessage & changes)
 
 
 /************************************************************************/
-//
+// Refresh Widget functionality
 /************************************************************************/
 void InputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET widget)
 {
 	get()->getWorkService().post(DoRefreshInputWidget<MANAGE_DMUS_WIDGET>(widget, this));
 }
 
+void InputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_MANAGE_UOAS_WIDGET widget)
+{
+	get()->getWorkService().post(DoRefreshInputWidget<MANAGE_UOAS_WIDGET>(widget, this));
+}
 
 
 /************************************************************************/
@@ -77,5 +81,21 @@ void InputProjectWorkQueue::DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELE
 void InputProjectWorkQueue::RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request)
 {
 	get()->getWorkService().post(RefreshDMUsFromFile_(action_request, this));
+}
+
+
+
+/************************************************************************/
+// UOA MANAGEMENT
+/************************************************************************/
+
+void InputProjectWorkQueue::AddUOA(WidgetActionItemRequest_ACTION_ADD_UOA action_request)
+{
+	get()->getWorkService().post(AddUOA_(action_request, this));
+}
+
+void InputProjectWorkQueue::DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA action_request)
+{
+	get()->getWorkService().post(DeleteUOA_(action_request, this));
 }
 

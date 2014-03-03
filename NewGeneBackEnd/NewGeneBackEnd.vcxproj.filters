@@ -566,5 +566,8 @@
     <ClCompile Include="Model\Tables\Table.cpp">
       <Filter>Source Files\Model\Tables</Filter>
     </ClCompile>
+    <ClCompile Include="UIAction\Controllers\Controller_UOA_Management.cpp">
+      <Filter>Source Files\UIAction\Controllers</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

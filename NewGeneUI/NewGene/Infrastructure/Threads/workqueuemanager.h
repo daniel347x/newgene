@@ -49,6 +49,7 @@ class WorkQueueManagerBase : public QObject
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET &) {}
 		virtual void EmitOutputWidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB &) {}
 		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET &) {}
+		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_UOAS_WIDGET &) {}
 
 	signals:
 		// Signals for ALL specializations of WorkQueueManager go here,
@@ -68,6 +69,7 @@ class WorkQueueManagerBase : public QObject
 		void WidgetDataRefresh(WidgetDataItem_DATETIME_WIDGET);
 		void WidgetDataRefresh(WidgetDataItem_GENERATE_OUTPUT_TAB);
 		void WidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET);
+		void WidgetDataRefresh(WidgetDataItem_MANAGE_UOAS_WIDGET);
 
 	public slots:
 		// Slots for ALL specializations go here,
@@ -92,6 +94,7 @@ class WorkQueueManagerBase : public QObject
 		virtual void RefreshWidget(WidgetDataItemRequest_DATETIME_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_UOAS_WIDGET) {}
 		//
 		// Actions
 		virtual void ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED) {}
@@ -106,6 +109,8 @@ class WorkQueueManagerBase : public QObject
 		virtual void AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS) {}
 		virtual void DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS) {}
 		virtual void RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE) {}
+		virtual void AddUOA(WidgetActionItemRequest_ACTION_ADD_UOA) {}
+		virtual void DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA) {}
 
 	public:
 		virtual void SetConnections() {}

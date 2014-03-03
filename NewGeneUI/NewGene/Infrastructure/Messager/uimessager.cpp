@@ -318,3 +318,7 @@ void UIMessagerInputProject::EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DM
 	get()->getQueueManager()->EmitInputWidgetDataRefresh(widgetData);
 }
 
+void UIMessagerInputProject::EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_UOAS_WIDGET & widgetData)
+{
+	get()->getQueueManager()->EmitInputWidgetDataRefresh(widgetData);
+}

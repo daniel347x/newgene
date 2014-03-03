@@ -28,6 +28,10 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 		{
 			emit WidgetDataRefresh(widgetData);
 		}
+		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_UOAS_WIDGET & widgetData)
+		{
+			emit WidgetDataRefresh(widgetData);
+		}
 
 	private:
 
@@ -42,6 +46,7 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 		void TestSlot();
 
 		void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET widget);
+		void RefreshWidget(WidgetDataItemRequest_MANAGE_UOAS_WIDGET widget);
 
 		// Actions
 		void AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU);
@@ -49,6 +54,8 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 		void AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS);
 		void DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS);
 		void RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE);
+		void AddUOA(WidgetActionItemRequest_ACTION_ADD_UOA);
+		void DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA);
 
 };
 
