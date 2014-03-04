@@ -456,6 +456,64 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 
 		});
 
+		QObject::connect(remove, &QPushButton::clicked, [&]()
+		{
+
+			QStandardItemModel * rhsModel = static_cast<QStandardItemModel*>(rhs->model());
+			if (rhsModel == nullptr)
+			{
+				boost::format msg("Invalid rhs list view items in Construct UOA popup.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			QItemSelectionModel * dmu_selectionModel = rhs->selectionModel();
+			if (dmu_selectionModel == nullptr)
+			{
+				boost::format msg("Invalid rhs selection in Create UOA widget.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
+			if (!selectedIndex.isValid())
+			{
+				// No selection
+				return false;
+			}
+
+			QVariant dmu_category_variant = rhsModel->item(selectedIndex.row())->data();
+			WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
+
+			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+			QList<QStandardItem *> items = rhsModel->findItems(text.c_str());
+			if (items.count() == 1)
+			{
+				QStandardItem * dmu_to_remove = items.at(0);
+				if (dmu_to_remove != nullptr)
+				{
+					QModelIndex index_to_remove = rhsModel->indexFromItem(dmu_to_remove);
+					rhsModel->takeRow(index_to_remove.row());
+
+					delete dmu_to_remove;
+					dmu_to_remove = nullptr;
+
+					QItemSelectionModel * selectionModel = rhs->selectionModel();
+					if (selectionModel != nullptr)
+					{
+						selectionModel->clearSelection();
+					}
+				}
+			}
+
+			return true;
+
+		});
+
 	}
 
 }
