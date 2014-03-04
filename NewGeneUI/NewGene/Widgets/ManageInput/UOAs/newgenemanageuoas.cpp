@@ -245,6 +245,92 @@ void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 {
 
+	// From http://stackoverflow.com/a/17512615/368896
+	QDialog dialog(this);
+	QFormLayout form(&dialog);
+	form.addRow(new QLabel("Create New UOA"));
+	QList<QLineEdit *> fields;
+	QLineEdit *lineEditCode = new QLineEdit(&dialog);
+	QString labelCode = QString("Enter a brief identifying code for the new Unit of Analysis (all caps):");
+	form.addRow(labelCode, lineEditCode);
+	fields << lineEditCode;
+	//QLineEdit *lineEditDescription = new QLineEdit(&dialog);
+	//QString labelDescription = QString("Description:");
+	//form.addRow(labelDescription, lineEditDescription);
+	//fields << lineEditDescription;
+
+	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+	form.addRow(&buttonBox);
+
+	std::string proposed_uoa_name;
+	//std::string uoa_description;
+
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
+	{
+
+		QLineEdit * proposed_uoa_code_field = fields[0];
+		//QLineEdit * uoa_description_field = fields[1];
+		if (proposed_uoa_code_field)
+		{
+			proposed_uoa_code = proposed_uoa_code_field->text().toStdString();
+			//uoa_description = uoa_description_field->text().toStdString();
+			if (proposed_uoa_code.empty())
+			{
+				boost::format msg("The UOA must have an identifying code (typically, a short, all-caps string).");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return;
+			}
+		}
+		else
+		{
+			boost::format msg("Unable to determine new UOA code.");
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
+		}
+
+		boost::trim(proposed_uoa_code);
+		//boost::trim(uoa_description);
+
+		bool valid = true;
+
+		if (valid)
+		{
+			valid = Validation::ValidateUoaCode(proposed_uoa_code, errorMsg);
+		}
+
+		//if (valid)
+		//{
+		//	valid = Validation::ValidateUoaDescription(uoa_description, errorMsg);
+		//}
+
+		if (!valid)
+		{
+			boost::format msg("%1%");
+			msg % errorMsg;
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
+		}
+
+		if (valid)
+		{
+			dialog.accept();
+		}
+
+	});
+
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
 	InstanceActionItems actionItems;
 	//actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_name, dmu_description})))));
 	WidgetActionItemRequest_ACTION_ADD_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);

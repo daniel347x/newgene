@@ -301,12 +301,13 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
 	form.addRow(&buttonBox);
 
-	QObject::connect(&buttonBox, SIGNAL(accepted()), &dialog, SLOT(accept()));
-	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
-
 	std::string proposed_dmu_name;
 	std::string dmu_description;
-	if (dialog.exec() == QDialog::Accepted) {
+
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
+	{
+
 		QLineEdit * proposed_dmu_name_field = fields[0];
 		QLineEdit * dmu_description_field = fields[1];
 		if (proposed_dmu_name_field && dmu_description_field)
@@ -330,73 +331,50 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 			msgBox.exec();
 			return;
 		}
-	}
-	else
-	{
-		return;
-	}
 
-	boost::trim(proposed_dmu_name);
-	boost::trim(dmu_description);
+		boost::trim(proposed_dmu_name);
+		boost::trim(dmu_description);
 
-	if (proposed_dmu_name.empty())
-	{
-		boost::format msg("The DMU category you entered is empty.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-	std::string regex_string("([a-zA-Z_][a-zA-Z0-9_]*)");
-	boost::regex regex(regex_string);
-	boost::cmatch matches;
-
-	std::string invalid_string;
-
-	bool valid = false;
-	if (boost::regex_match(proposed_dmu_name.c_str(), matches, regex))
-	{
-		// matches[0] contains the original string.  matches[n]
-		// contains a sub_match object for each matching
-		// subexpression
-		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
-		// for an exapmle usage
-		if (matches.size() == 2)
+		if (proposed_dmu_name.empty())
 		{
-			std::string the_dmu_string_match(matches[1].first, matches[1].second);
-
-			if (the_dmu_string_match.size() <= 255)
-			{
-				if (the_dmu_string_match == proposed_dmu_name)
-				{
-					valid = true;
-				}
-			}
-			else
-			{
-				invalid_string = ": The length is too long (maximum length: 255).";
-			}
-
+			boost::format msg("The DMU category you entered is empty.");
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
 		}
-	}
 
-	if (!valid)
-	{
-		boost::format msg("The DMU category you entered is invalid%1%");
-		msg % invalid_string;
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
+		bool valid = true;
 
-	if (dmu_description.size() > 4096)
+		if (valid)
+		{
+			valid = Validation::ValidateDmuCode(proposed_dmu_name, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateDmuDescription(dmu_description, errorMsg);
+		}
+
+		if (!valid)
+		{
+			boost::format msg("%1%");
+			msg % errorMsg;
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
+		}
+
+		if (valid)
+		{
+			dialog.accept();
+		}
+
+	});
+
+	if (dialog.exec() != QDialog::Accepted)
 	{
-		boost::format msg("The description is too long (maximum length: 4096).");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
 		return;
 	}
 

@@ -205,7 +205,6 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 
 				});
 
-
 				messager.EmitChangeMessage(change_response);
 
 			}

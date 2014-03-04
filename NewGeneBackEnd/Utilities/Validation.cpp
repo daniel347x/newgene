@@ -135,6 +135,23 @@ bool Validation::ValidateDmuMemberDescription(std::string & proposed_dmu_member_
 
 }
 
+bool Validation::ValidateDmuDescription(std::string & proposed_dmu_description, std::string & errorMsg)
+{
+
+	boost::trim(proposed_dmu_description);
+
+	bool valid = true;
+	if (proposed_dmu_description.size() > 4096)
+	{
+		boost::format msg("The description is too long (maximum length: 4096).");
+		errorMsg = msg.str();
+		valid = false;
+	}
+
+	return valid;
+
+}
+
 bool Validation::ValidateColumnName(std::string & proposed_column_name, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
 {
 
@@ -203,6 +220,150 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 			{
 				boost::format msg("The '%1%' column name is invalid.");
 				msg % column_description_for_invalid_message;
+				errorMsg = msg.str();
+				valid = false;
+			}
+		}
+
+	}
+
+	return valid;
+
+}
+
+bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & errorMsg)
+{
+
+	boost::trim(proposed_dmu_code);
+
+	bool valid = true;
+
+	if (valid)
+	{
+		if (proposed_dmu_code.empty())
+		{
+			boost::format msg("The DMU code cannot be empty.");
+			errorMsg = msg.str();
+			valid = false;
+		}
+	}
+
+	if (valid)
+	{
+		if (proposed_dmu_code.size() > 128)
+		{
+			boost::format msg("The DMU code is too long (maximum length: 128).");
+			errorMsg = msg.str();
+			valid = false;
+		}
+
+	}
+
+	if (valid)
+	{
+
+		std::string regex_string("([a-zA-Z]+)");
+		boost::regex regex(regex_string);
+		boost::cmatch matches;
+
+		if (boost::regex_match(proposed_dmu_code.c_str(), matches, regex))
+		{
+			// matches[0] contains the original string.  matches[n]
+			// contains a sub_match object for each matching
+			// subexpression
+			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+			// for an example usage
+			if (valid && matches.size() == 2)
+			{
+				std::string the_match(matches[1].first, matches[1].second);
+
+				if (valid && the_match == proposed_dmu_code)
+				{
+					// no-op
+				}
+				else
+				{
+					boost::format msg("The DMU code is invalid.  Only letters are allowed.");
+					errorMsg = msg.str();
+					valid = false;
+				}
+
+			}
+			else
+			{
+				boost::format msg("The DMU code is invalid.");
+				errorMsg = msg.str();
+				valid = false;
+			}
+		}
+
+	}
+
+	return valid;
+
+}
+
+bool Validation::ValidateUoaCode(std::string & proposed_uoa_code, std::string & errorMsg)
+{
+
+	boost::trim(proposed_uoa_code);
+
+	bool valid = true;
+
+	if (valid)
+	{
+		if (proposed_uoa_code.empty())
+		{
+			boost::format msg("The UOA code cannot be empty.");
+			errorMsg = msg.str();
+			valid = false;
+		}
+	}
+
+	if (valid)
+	{
+		if (proposed_uoa_code.size() > 128)
+		{
+			boost::format msg("The UOA code is too long (maximum length: 128).");
+			errorMsg = msg.str();
+			valid = false;
+		}
+
+	}
+
+	if (valid)
+	{
+
+		std::string regex_string("([a-zA-Z]+)");
+		boost::regex regex(regex_string);
+		boost::cmatch matches;
+
+		if (boost::regex_match(proposed_uoa_code.c_str(), matches, regex))
+		{
+			// matches[0] contains the original string.  matches[n]
+			// contains a sub_match object for each matching
+			// subexpression
+			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+			// for an example usage
+			if (valid && matches.size() == 2)
+			{
+				std::string the_match(matches[1].first, matches[1].second);
+
+				if (valid && the_match == proposed_uoa_code)
+				{
+					// no-op
+				}
+				else
+				{
+					boost::format msg("The UOA code is invalid.  Only letters are allowed.");
+					errorMsg = msg.str();
+					valid = false;
+				}
+
+			}
+			else
+			{
+				boost::format msg("The UOA code is invalid.");
 				errorMsg = msg.str();
 				valid = false;
 			}

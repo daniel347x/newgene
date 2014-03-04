@@ -6,9 +6,14 @@
 namespace Validation
 {
 
+	bool ValidateDmuCode(std::string & proposed_dmu_code, std::string & errorMsg);
+	bool ValidateDmuDescription(std::string & proposed_dmu_member_description, std::string & errorMsg);
+
 	bool ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, std::string & errorMsg);
 	bool ValidateDmuMemberCode(std::string & proposed_dmu_member_code, std::string & errorMsg);
 	bool ValidateDmuMemberDescription(std::string & proposed_dmu_member_description, std::string & errorMsg);
+
+	bool ValidateUoaCode(std::string & proposed_uoa_code, std::string & errorMsg);
 
 	bool ValidateColumnName(std::string & proposed_column_name, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg);
 
