@@ -283,7 +283,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	QVBoxLayout formConstructionDivider;
 	QListView * lhs = nullptr;
 	QListView * rhs = nullptr;
-	ImportDialogHelper::AddUoaCreationBlock(dialog, form, UoaConstructionWidget, formOverall, UoaConstructionPanes, formConstructionPanes, formConstructionDivider, lhs, rhs);
+	ImportDialogHelper::AddUoaCreationBlock(dialog, form, UoaConstructionWidget, formOverall, UoaConstructionPanes, formConstructionPanes, formConstructionDivider, lhs, rhs, dmu_categories);
 
 	if (!lhs || !rhs)
 	{

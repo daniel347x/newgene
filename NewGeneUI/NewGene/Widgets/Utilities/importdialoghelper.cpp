@@ -11,9 +11,13 @@
 #include <QRadioButton>
 #include <QListView>
 #include <QSpacerItem>
+#include <QStandardItemModel>
 
-#include "../../../../NewGeneBackEnd/Utilities/WidgetIdentifier.h"
-#include "../../../../NewGeneBackEnd/Utilities/Validation.h"
+#include "../Project/uiprojectmanager.h"
+#include "../Project/uiinputproject.h"
+#include "../../../../../NewGeneBackEnd/Utilities/Validation.h"
+#include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
+#include "../../../../NewGeneBackEnd/Model/InputModel.h"
 #include "../../../../NewGeneBackEnd/Model/Tables/TableInstances/DMU.h"
 
 void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBoxLayout & formFileSelection, QWidget & FileChooserWidget, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
@@ -360,7 +364,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 	QStandardItemModel * model = new QStandardItemModel(lhs);
 
 	int index = 0;
-	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifiers const & dmu_category)
+	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
 	{
 		if (dmu_category.uuid && !dmu_category.uuid->empty() && dmu_category.code && !dmu_category.code->empty())
 		{
