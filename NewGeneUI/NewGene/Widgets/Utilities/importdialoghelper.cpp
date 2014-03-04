@@ -482,11 +482,6 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 			QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
 			if (!selectedIndex.isValid())
 			{
-				// No selection
-				boost::format msg("Nothing to remove.");
-				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
-				msgBox.exec();
 				return false;
 			}
 
