@@ -388,4 +388,63 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 
 	lhs->setModel(model);
 
+
+	QObject::connect(add, &QPushButton::clicked, [&]()
+	{
+
+		QItemSelectionModel * dmu_selectionModel = lhs->selectionModel();
+		if (dmu_selectionModel == nullptr)
+		{
+			boost::format msg("Invalid selection in Create UOA widget.");
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
+		}
+
+		QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
+		if (!selectedIndex.isValid())
+		{
+			// No selection
+			return false;
+		}
+
+		QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(lhs->model());
+		if (dmuModel == nullptr)
+		{
+			boost::format msg("Invalid model in Create UOA widget.");
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return false;
+		}
+
+		QVariant dmu_category_variant = dmuModel->item(selectedIndex.row())->data();
+		WidgetInstanceIdentifier dmu_category = uoa_and_dmu_categories_variant.value<WidgetInstanceIdentifier>();
+
+
+
+		QStandardItemModel * rhsModel = static_cast<QStandardItemModel*>(rhs->model());
+		if (rhsModel == nullptr)
+		{
+			boost::format msg("Invalid rhs model in Create UOA widget.");
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return;
+		}
+
+		std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+		QStandardItem * item = new QStandardItem();
+		item->setText(text.c_str());
+		item->setEditable(false);
+		item->setCheckable(false);
+
+		QVariant v;
+		v.setValue(dmu_category);
+		item->setData(v);
+		rhsModel->appendRow( item );
+
+	});
+
 }
