@@ -266,6 +266,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	QWidget UoaConstructionPanes;
 	QHBoxLayout formConstructionPanes;
 	QVBoxLayout formConstructionDivider;
+	ImportDialogHelper::AddUoaCreationBlock(dialog, form, UoaConstructionWidget, formOverall, UoaConstructionPanes, formConstructionPanes, formConstructionDivider);
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
