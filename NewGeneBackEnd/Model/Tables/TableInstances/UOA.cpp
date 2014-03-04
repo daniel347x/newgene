@@ -260,7 +260,7 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories)
 {
 
-	if (uoa_category.uuid || uoa_category.uuid->empty())
+	if (!uoa_category.uuid || uoa_category.uuid->empty())
 	{
 		boost::format msg("Bad unit of analysis in model.");
 		throw NewGeneException() << newgene_error_description(msg.str());
