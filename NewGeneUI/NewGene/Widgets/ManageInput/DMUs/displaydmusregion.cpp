@@ -909,9 +909,9 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__ADD:
 							{
 
-								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
+								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty() || !change.parent_identifier.code || (*change.parent_identifier.code).empty())
 								{
-									boost::format msg("Invalid new DMU name or description.");
+									boost::format msg("Invalid new DMU name.");
 									QMessageBox msgBox;
 									msgBox.setText( msg.str().c_str() );
 									msgBox.exec();

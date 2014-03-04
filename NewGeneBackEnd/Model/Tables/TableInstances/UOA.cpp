@@ -257,6 +257,84 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 
 }
 
+std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories)
+{
+
+	if (uoa_category.uuid || uoa_category.uuid->empty())
+	{
+		boost::format msg("Bad unit of analysis in model.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	bool has_code = false;
+	bool has_description = false;
+
+	std::string displayText;
+
+	if (uoa_category.code && !uoa_category.code->empty())
+	{
+		has_code = true;
+	}
+
+	if (uoa_category.longhand && !uoa_category.longhand->empty())
+	{
+		has_description = true;
+	}
+
+	if (has_code || has_description)
+	{
+		if (!has_code)
+		{
+			displayText += *uoa_category.longhand;
+			displayText += " (";
+			displayText += *uoa_category.uuid;
+			displayText += ")";
+		}
+		else if (!has_description)
+		{
+			displayText += *uoa_category.code;
+			displayText += " (";
+			displayText += *uoa_category.uuid;
+			displayText += ")";
+		}
+		else
+		{
+			displayText += *uoa_category.longhand;
+			displayText += " (";
+			displayText += *uoa_category.code;
+			displayText += " - ";
+			displayText += *uoa_category.uuid;
+			displayText += ")";
+		}
+	}
+	else
+	{
+		displayText += *uoa_category.uuid;
+	}
+
+
+	// Now the DMU categories
+
+	displayText += " (";
+	bool first = true;
+	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
+	{
+		if (!dmu_category.code || dmu_category.code->empty())
+		{
+			boost::format msg("Bad DMU category member of a UOA.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		if (!first)
+		{
+			displayText += ", ";
+		}
+		first = false;
+		displayText += *dmu_category.code;
+	});
+	displayText += ")";
+
+}
+
 void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
 {
 

@@ -652,10 +652,10 @@ public:
 	}
 	WidgetDataItem<MANAGE_UOAS_WIDGET>(WidgetDataItem<MANAGE_UOAS_WIDGET> const & rhs)
 		: WidgetDataItem_base(rhs)
-		, uoas_and_members(rhs.uoas_and_members)
+		, uoas_and_dmu_categories(rhs.uoas_and_dmu_categories)
 	{
 	}
-	std::vector<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>> uoas_and_members;
+	std::vector<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>> uoas_and_dmu_categories;
 };
 typedef WidgetDataItem<MANAGE_UOAS_WIDGET> WidgetDataItem_MANAGE_UOAS_WIDGET;
 

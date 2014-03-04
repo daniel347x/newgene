@@ -109,39 +109,41 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 
 	UIMessager messager(project);
 
-	if (!ui->listView_dmus)
+	if (!ui->listViewManageUOAs)
 	{
-		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
 		return;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->NewGeneManageUOAs->model());
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
 	}
 
-	QItemSelectionModel * oldSelectionModel = ui->listView_dmus->selectionModel();
-	QStandardItemModel * model = new QStandardItemModel(ui->listView_dmus);
+	QItemSelectionModel * oldSelectionModel = ui->NewGeneManageUOAs->selectionModel();
+	QStandardItemModel * model = new QStandardItemModel(ui->NewGeneManageUOAs);
 
 	int index = 0;
-	std::for_each(widget_data.dmus_and_members.cbegin(), widget_data.dmus_and_members.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & dmu_and_members)
+	std::for_each(widget_data.uoas_and_dmu_categories.cbegin(), widget_data.uoas_and_dmu_categories.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & uoa_and_dmu_categories)
 	{
-		WidgetInstanceIdentifier const & dmu = dmu_and_members.first;
-		WidgetInstanceIdentifiers const & dmu_members = dmu_and_members.second;
-		if (dmu.code && !dmu.code->empty())
+		WidgetInstanceIdentifier const & uoa_category = uoa_and_dmu_categories.first;
+		WidgetInstanceIdentifiers const & dmu_categories = uoa_and_dmu_categories.second;
+		if (uoa_category.uuid && !uoa_category.uuid->empty())
 		{
 
+			std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> uoa_and_dmu_categories = std::make_pair(uoa_category, dmu_categories);
+
 			QStandardItem * item = new QStandardItem();
-			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu);
+			std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa, dmu_categories);
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
 			QVariant v;
-			v.setValue(dmu_and_members);
+			v.setValue(uoa_and_dmu_categories);
 			item->setData(v);
 			model->setItem( index, item );
 
@@ -152,58 +154,41 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 
 	model->sort(0);
 
-	ui->listView_dmus->setModel(model);
+	ui->NewGeneManageUOAs->setModel(model);
 	if (oldSelectionModel) delete oldSelectionModel;
-
-	connect( ui->listView_dmus->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this, SLOT(ReceiveDMUSelectionChanged(const QItemSelection &, const QItemSelection &)));
 
 }
 
 void NewGeneManageUOAs::DisplayDMUsRegion::Empty()
 {
 
-	if (!ui->listView_dmus || !ui->listView_dmu_members)
+	if (!ui->listViewManageUOAs)
 	{
-		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
 		return;
 	}
 
-	QSortFilterProxyModel * oldModel = nullptr;
-	QAbstractItemModel * oldSourceModel = nullptr;
-	QStandardItemModel * oldDmuModel = nullptr;
+	QStandardItemModel * oldModel = nullptr;
 	QItemSelectionModel * oldSelectionModel = nullptr;
 
-	oldModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
-	if (oldModel != nullptr)
-	{
-		oldSourceModel = oldModel->sourceModel();
-		if (oldSourceModel != nullptr)
-		{
-			delete oldSourceModel;
-			oldSourceModel = nullptr;
-		}
-		delete oldModel;
-		oldModel = nullptr;
-	}
-
-	oldSelectionModel = ui->listView_dmu_members->selectionModel();
+	oldSelectionModel = ui->listViewManageUOAs->selectionModel();
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
 		oldSelectionModel = nullptr;
 	}
 
-	oldDmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
-	if (oldDmuModel != nullptr)
+	oldModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
+	if (oldModel != nullptr)
 	{
-		delete oldDmuModel;
-		oldDmuModel = nullptr;
+		delete oldModel;
+		oldModel = nullptr;
 	}
 
-	oldSelectionModel = ui->listView_dmus->selectionModel();
+	oldSelectionModel = ui->listViewManageUOAs->selectionModel();
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
@@ -244,26 +229,24 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 
 	UIMessager messager(project);
 
-	if (!ui->listView_dmus)
+	if (!ui->listViewManageUOAs)
 	{
-		boost::format msg("Invalid list view in DisplayDMUsRegion widget.");
+		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
 		return;
 	}
 
-	QStandardItemModel * itemModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	QStandardItemModel * itemModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
 	if (itemModel == nullptr)
 	{
-		boost::format msg("Invalid list view items in DisplayDMUsRegion widget.");
+		boost::format msg("Invalid list view items in NewGeneManageUOAs widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
 		return;
 	}
-
-	QSortFilterProxyModel_NumbersLast * proxyModel = nullptr;
 
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel, &proxyModel](DataChange const & change)
 	{
@@ -271,7 +254,7 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 		switch (change.change_type)
 		{
 
-			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__DMU_CHANGE:
+			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__UOA_CHANGE:
 				{
 
 					switch (change.change_intention)
@@ -280,27 +263,28 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__ADD:
 							{
 
-								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
+								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
 								{
-									boost::format msg("Invalid new DMU name or description.");
+									boost::format msg("Invalid new UOA ID.");
 									QMessageBox msgBox;
 									msgBox.setText( msg.str().c_str() );
 									msgBox.exec();
 									return;
 								}
 
-								WidgetInstanceIdentifier const & dmu_category = change.parent_identifier;
+								WidgetInstanceIdentifier const & uoa_category = change.parent_identifier;
+								WidgetInstanceIdentifiers const & dmu_categories = change.child_identifiers;
 
-								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+								std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
 
 								QStandardItem * item = new QStandardItem();
 								item->setText(text.c_str());
 								item->setEditable(false);
 								item->setCheckable(false);
 
-								std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> dmu_and_members = std::make_pair(change.parent_identifier, change.child_identifiers);
+								std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> uoa_and_dmu_categories = std::make_pair(uoa_category, dmu_categories);
 								QVariant v;
-								v.setValue(dmu_and_members);
+								v.setValue(uoa_and_dmu_categories);
 								item->setData(v);
 								itemModel->appendRow( item );
 
@@ -310,65 +294,32 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
-								if (!change.parent_identifier.code || (*change.parent_identifier.code).empty() || !change.parent_identifier.longhand)
+								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
 								{
-									boost::format msg("Invalid DMU name or description.");
+									boost::format msg("Invalid new UOA ID.");
 									QMessageBox msgBox;
 									msgBox.setText( msg.str().c_str() );
 									msgBox.exec();
 									return;
 								}
 
-								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(change.parent_identifier);
+								std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
 								QList<QStandardItem *> items = itemModel->findItems(text.c_str());
 								if (items.count() == 1)
 								{
-									QStandardItem * dmu_to_remove = items.at(0);
-									if (dmu_to_remove != nullptr)
+									QStandardItem * uoa_to_remove = items.at(0);
+									if (uoa_to_remove != nullptr)
 									{
-										QModelIndex index_to_remove = itemModel->indexFromItem(dmu_to_remove);
+										QModelIndex index_to_remove = itemModel->indexFromItem(uoa_to_remove);
 										itemModel->takeRow(index_to_remove.row());
 
-										delete dmu_to_remove;
-										dmu_to_remove = nullptr;
+										delete uoa_to_remove;
+										uoa_to_remove = nullptr;
 
-										QItemSelectionModel * selectionModel = ui->listView_dmus->selectionModel();
+										QItemSelectionModel * selectionModel = ui->listViewManageUOAs->selectionModel();
 										if (selectionModel != nullptr)
 										{
 											selectionModel->clearSelection();
-											QItemSelectionModel * oldDmuSetMembersSelectionModel = ui->listView_dmu_members->selectionModel();
-											QSortFilterProxyModel_NumbersLast * dmuSetMembersModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
-											if (dmuSetMembersModel != nullptr)
-											{
-												QAbstractItemModel * dmuSetMembersSourceModel = dmuSetMembersModel->sourceModel();
-												if (dmuSetMembersSourceModel != nullptr)
-												{
-													QStandardItemModel * dmuSetMembersStandardSourceModel = nullptr;
-													try
-													{
-														dmuSetMembersStandardSourceModel = dynamic_cast<QStandardItemModel*>(dmuSetMembersSourceModel);
-													}
-													catch (std::bad_cast &)
-													{
-														// guess not
-														return;
-													}
-													delete dmuSetMembersStandardSourceModel;
-													dmuSetMembersStandardSourceModel = nullptr;
-													delete dmuSetMembersModel;
-													dmuSetMembersModel = nullptr;
-													QStandardItemModel * model = new QStandardItemModel();
-													proxyModel = new QSortFilterProxyModel_NumbersLast(ui->listView_dmu_members);
-													proxyModel->setDynamicSortFilter(true);
-													proxyModel->setSourceModel(model);
-													ui->listView_dmu_members->setModel(proxyModel);
-													if (oldDmuSetMembersSelectionModel)
-													{
-														delete oldDmuSetMembersSelectionModel;
-														oldDmuSetMembersSelectionModel = nullptr;
-													}
-												}
-											}
 										}
 
 									}
@@ -399,154 +350,6 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 				}
 				break;
 
-			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE:
-				{
-
-					QSortFilterProxyModel_NumbersLast * memberModel = static_cast<QSortFilterProxyModel_NumbersLast*>(ui->listView_dmu_members->model());
-					if (memberModel == nullptr)
-					{
-						boost::format msg("Invalid members list view items in DisplayDMUsRegion widget.");
-						QMessageBox msgBox;
-						msgBox.setText( msg.str().c_str() );
-						msgBox.exec();
-						return;
-					}
-
-					switch (change.change_intention)
-					{
-
-						case DATA_CHANGE_INTENTION__ADD:
-							{
-
-								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
-								{
-									boost::format msg("Invalid new DMU member.");
-									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
-									msgBox.exec();
-									return;
-								}
-
-								WidgetInstanceIdentifier new_dmu_member(change.parent_identifier);
-
-								QAbstractItemModel * memberSourceModel = memberModel->sourceModel();
-								if (memberSourceModel)
-								{
-
-									QStandardItemModel * memberStandardSourceModel = nullptr;
-									try
-									{
-										memberStandardSourceModel = dynamic_cast<QStandardItemModel*>(memberSourceModel);
-									}
-									catch (std::bad_cast &)
-									{
-										// guess not
-										return;
-									}
-
-									QStandardItem * item = new QStandardItem();
-									std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(new_dmu_member);
-
-									item->setText(text.c_str());
-									item->setEditable(false);
-									item->setCheckable(true);
-									QVariant v;
-									v.setValue(new_dmu_member);
-									item->setData(v);
-
-									memberStandardSourceModel->appendRow(item);
-
-								}
-
-							}
-							break;
-
-						case DATA_CHANGE_INTENTION__REMOVE:
-							{
-
-								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
-								{
-									boost::format msg("Invalid DMU member.");
-									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
-									msgBox.exec();
-									return;
-								}
-
-								WidgetInstanceIdentifier const & dmu_member = change.parent_identifier;
-
-								QAbstractItemModel * memberSourceModel = memberModel->sourceModel();
-
-								if (memberSourceModel)
-								{
-
-									QStandardItemModel * memberStandardSourceModel = nullptr;
-									try
-									{
-										memberStandardSourceModel = dynamic_cast<QStandardItemModel*>(memberSourceModel);
-									}
-									catch (std::bad_cast &)
-									{
-										// guess not
-										return;
-									}
-
-									std::string text = Table_DMU_Instance::GetDmuMemberDisplayText(dmu_member);
-									QList<QStandardItem *> items = memberStandardSourceModel->findItems(text.c_str());
-									if (items.count() == 1)
-									{
-										QStandardItem * dmu_member_to_remove = items.at(0);
-										if (dmu_member_to_remove != nullptr)
-										{
-											QModelIndex index_to_remove = memberStandardSourceModel->indexFromItem(dmu_member_to_remove);
-											memberStandardSourceModel->takeRow(index_to_remove.row());
-
-											delete dmu_member_to_remove;
-											dmu_member_to_remove = nullptr;
-										}
-									}
-
-								}
-
-							}
-							break;
-
-						case DATA_CHANGE_INTENTION__UPDATE:
-							{
-								// Should never receive this.
-							}
-							break;
-
-						case DATA_CHANGE_INTENTION__RESET_ALL:
-							{
-
-								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
-								{
-									boost::format msg("Invalid DMU member.");
-									QMessageBox msgBox;
-									msgBox.setText( msg.str().c_str() );
-									msgBox.exec();
-									return;
-								}
-
-								WidgetInstanceIdentifier const & dmu_category = change.parent_identifier;
-								WidgetInstanceIdentifiers const & dmu_members = change.child_identifiers;
-
-								ResetDmuMembersPane(dmu_category, dmu_members);
-
-							}
-							break;
-
-						default:
-							{
-							}
-							break;
-
-					}
-
-				}
-				break;
-
 			default:
 				{
 				}
@@ -555,10 +358,5 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 		}
 
 	});
-
-	if (proxyModel != nullptr)
-	{
-		proxyModel->sort(0);
-	}
 
 }
