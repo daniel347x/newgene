@@ -389,6 +389,9 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 	lhs->setModel(model);
 
 
+	QStandardItemModel * rhsModel = new QStandardItemModel(rhs);
+	rhs->setModel(rhsModel);
+
 	QObject::connect(add, &QPushButton::clicked, [&]()
 	{
 
@@ -409,30 +412,8 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 			return false;
 		}
 
-		QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(lhs->model());
-		if (dmuModel == nullptr)
-		{
-			boost::format msg("Invalid model in Create UOA widget.");
-			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
-			msgBox.exec();
-			return false;
-		}
-
-		QVariant dmu_category_variant = dmuModel->item(selectedIndex.row())->data();
+		QVariant dmu_category_variant = model->item(selectedIndex.row())->data();
 		WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
-
-
-
-		QStandardItemModel * rhsModel = static_cast<QStandardItemModel*>(rhs->model());
-		if (rhsModel == nullptr)
-		{
-			boost::format msg("Invalid rhs model in Create UOA widget.");
-			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
-			msgBox.exec();
-			return false;
-		}
 
 		std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
 		QStandardItem * item = new QStandardItem();
