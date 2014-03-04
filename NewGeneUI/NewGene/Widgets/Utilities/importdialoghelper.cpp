@@ -438,7 +438,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 				return false;
 			}
 
-			QVariant dmu_category_variant = model->item(selectedIndex.row())->data();
+			QVariant dmu_category_variant = lhsModel->item(selectedIndex.row())->data();
 			WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
 
 			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
