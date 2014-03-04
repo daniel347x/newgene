@@ -349,7 +349,10 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 	formConstructionPanes.addWidget(middle);
 	formConstructionPanes.addWidget(rhs);
 
+	UoaConstructionPanes.setLayout(&formConstructionPanes);
 	formOverall.addWidget(title);
-	formOverall.addWidget(&UoaConstructionWidget);
+	formOverall.addWidget(&UoaConstructionPanes);
+	UoaConstructionWidget.setLayout(&formOverall);
+	form.addRow(&UoaConstructionWidget);
 
 }
