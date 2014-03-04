@@ -496,7 +496,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
 
 			boost::format msg("Text: ");
-			msg % text;
+			msg % text.c_str();
 			QMessageBox msgBox;
 			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
