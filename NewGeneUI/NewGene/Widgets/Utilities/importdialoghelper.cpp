@@ -483,6 +483,10 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 			if (!selectedIndex.isValid())
 			{
 				// No selection
+				boost::format msg("Nothing to remove.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
 				return false;
 			}
 
@@ -508,6 +512,24 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 						selectionModel->clearSelection();
 					}
 				}
+				else
+				{
+					// No selection
+					boost::format msg("Empty DMU to remove.");
+					QMessageBox msgBox;
+					msgBox.setText( msg.str().c_str() );
+					msgBox.exec();
+					return false;
+				}
+			}
+			else
+			{
+				// No selection
+				boost::format msg("More than one selection.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
 			}
 
 			return true;
