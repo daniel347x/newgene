@@ -494,6 +494,13 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 			WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
 
 			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+
+			boost::format msg("Text: ");
+			msg % text;
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+
 			QList<QStandardItem *> items = rhsModel->findItems(text.c_str());
 			if (items.count() == 1)
 			{
@@ -524,8 +531,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 			}
 			else
 			{
-				// No selection
-				boost::format msg("More than one selection.");
+				boost::format msg("Zero, or more than one, selection.");
 				QMessageBox msgBox;
 				msgBox.setText( msg.str().c_str() );
 				msgBox.exec();
