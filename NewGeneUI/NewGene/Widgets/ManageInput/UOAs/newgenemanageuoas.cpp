@@ -79,7 +79,7 @@ void NewGeneManageUOAs::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTION
 	{
 		if (project)
 		{
-			connect(this, SIGNAL(DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_DMU)), project->getConnector(), SLOT(DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA)));
+			connect(this, SIGNAL(DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA)), project->getConnector(), SLOT(DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA)));
 		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
