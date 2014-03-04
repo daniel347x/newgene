@@ -11,6 +11,7 @@
 #include "../../Utilities/importdialoghelper.h"
 #include "../../../../../NewGeneBackEnd/Utilities/Validation.h"
 #include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
+#include "../../../../NewGeneBackEnd/Model/InputModel.h"
 
 NewGeneManageUOAs::NewGeneManageUOAs( QWidget * parent ) :
 	QWidget( parent ),
@@ -261,12 +262,37 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	//form.addRow(labelDescription, lineEditDescription);
 	//fields << lineEditDescription;
 
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		boost::format msg("Bad input project.  Unable to create \"New UOA\" dialog.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	UIInputModel & ui_input_model = project->model();
+	InputModel & backend_input_model = ui_input_model.getBackendModel();
+	WidgetInstanceIdentifiers dmu_categories = backend_input_model.t_dmu_category.getIdentifiers();
+
 	QWidget UoaConstructionWidget;
 	QVBoxLayout formOverall;
 	QWidget UoaConstructionPanes;
 	QHBoxLayout formConstructionPanes;
 	QVBoxLayout formConstructionDivider;
-	ImportDialogHelper::AddUoaCreationBlock(dialog, form, UoaConstructionWidget, formOverall, UoaConstructionPanes, formConstructionPanes, formConstructionDivider);
+	QListView * lhs = nullptr;
+	QListView * rhs = nullptr;
+	ImportDialogHelper::AddUoaCreationBlock(dialog, form, UoaConstructionWidget, formOverall, UoaConstructionPanes, formConstructionPanes, formConstructionDivider, lhs, rhs);
+
+	if (!lhs || !rhs)
+	{
+		boost::format msg("Unable to create \"New UOA\" dialog.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);

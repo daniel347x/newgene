@@ -12,7 +12,9 @@
 #include <QListView>
 #include <QSpacerItem>
 
+#include "../../../../NewGeneBackEnd/Utilities/WidgetIdentifier.h"
 #include "../../../../NewGeneBackEnd/Utilities/Validation.h"
+#include "../../../../NewGeneBackEnd/Model/Tables/TableInstances/DMU.h"
 
 void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBoxLayout & formFileSelection, QWidget & FileChooserWidget, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
 {
@@ -325,16 +327,16 @@ bool ImportDialogHelper::ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeR
 
 }
 
-void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider)
+void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories)
 {
 
 	QString labelTitle = QString("Create a new Unit of Analysis");
 	QLabel * title = new QLabel(labelTitle, &dialog);
 
-	QListView * lhs = new QListView(&UoaConstructionPanes);
+	lhs = new QListView(&UoaConstructionPanes);
 	QWidget * middle = new QWidget(&UoaConstructionPanes);
 	middle->setLayout(&formConstructionDivider);
-	QListView * rhs = new QListView(&UoaConstructionPanes);
+	rhs = new QListView(&UoaConstructionPanes);
 
 	QSpacerItem * middlespacetop = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
 	QPushButton * add = new QPushButton(">>>", middle);
@@ -354,5 +356,32 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 	formOverall.addWidget(&UoaConstructionPanes);
 	UoaConstructionWidget.setLayout(&formOverall);
 	form.addRow(&UoaConstructionWidget);
+
+	QStandardItemModel * model = new QStandardItemModel(lhs);
+
+	int index = 0;
+	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifiers const & dmu_category)
+	{
+		if (dmu_category.uuid && !dmu_category.uuid->empty() && dmu_category.code && !dmu_category.code->empty())
+		{
+
+			QStandardItem * item = new QStandardItem();
+			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+			item->setText(text.c_str());
+			item->setEditable(false);
+			item->setCheckable(false);
+			QVariant v;
+			v.setValue(dmu_category);
+			item->setData(v);
+			model->setItem( index, item );
+
+			++index;
+
+		}
+	});
+
+	model->sort(0);
+
+	lhs->setModel(model);
 
 }
