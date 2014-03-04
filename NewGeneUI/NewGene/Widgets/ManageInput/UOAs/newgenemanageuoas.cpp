@@ -1,6 +1,8 @@
 #include "newgenemanageuoas.h"
 #include "ui_newgenemanageuoas.h"
 
+#include <QStandardItemModel>
+
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
 #include "../../Utilities/qsortfilterproxymodel_numberslast.h"
@@ -118,14 +120,14 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 		return;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->NewGeneManageUOAs->model());
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
 	}
 
-	QItemSelectionModel * oldSelectionModel = ui->NewGeneManageUOAs->selectionModel();
-	QStandardItemModel * model = new QStandardItemModel(ui->NewGeneManageUOAs);
+	QItemSelectionModel * oldSelectionModel = ui->listViewManageUOAs->selectionModel();
+	QStandardItemModel * model = new QStandardItemModel(ui->listViewManageUOAs);
 
 	int index = 0;
 	std::for_each(widget_data.uoas_and_dmu_categories.cbegin(), widget_data.uoas_and_dmu_categories.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & uoa_and_dmu_categories)
@@ -138,7 +140,7 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 			std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> uoa_and_dmu_categories = std::make_pair(uoa_category, dmu_categories);
 
 			QStandardItem * item = new QStandardItem();
-			std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa, dmu_categories);
+			std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
@@ -154,12 +156,12 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 
 	model->sort(0);
 
-	ui->NewGeneManageUOAs->setModel(model);
+	ui->listViewManageUOAs->setModel(model);
 	if (oldSelectionModel) delete oldSelectionModel;
 
 }
 
-void NewGeneManageUOAs::DisplayDMUsRegion::Empty()
+void NewGeneManageUOAs::Empty()
 {
 
 	if (!ui->listViewManageUOAs)
@@ -203,7 +205,7 @@ void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 	InstanceActionItems actionItems;
 	//actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu)))));
 	WidgetActionItemRequest_ACTION_DELETE_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
-	emit DeleteDMU(action_request);
+	emit DeleteUOA(action_request);
 
 }
 
@@ -214,7 +216,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	//actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_name, dmu_description})))));
 	WidgetActionItemRequest_ACTION_ADD_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
-	emit AddDMU(action_request);
+	emit AddUOA(action_request);
 
 }
 
@@ -248,7 +250,7 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 		return;
 	}
 
-	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel, &proxyModel](DataChange const & change)
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this, &itemModel](DataChange const & change)
 	{
 
 		switch (change.change_type)
@@ -302,6 +304,9 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 									msgBox.exec();
 									return;
 								}
+
+								WidgetInstanceIdentifier const & uoa_category = change.parent_identifier;
+								WidgetInstanceIdentifiers const & dmu_categories = change.child_identifiers;
 
 								std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
 								QList<QStandardItem *> items = itemModel->findItems(text.c_str());

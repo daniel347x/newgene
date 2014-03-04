@@ -4,6 +4,7 @@
 #include <QTimer>
 #include "../UIData/uiwidgetdatarefresh.h"
 #include "../UIAction/dmumanagement.h"
+#include "../UIAction/uoamanagement.h"
 #include <QStandardItem>
 
 InputProjectWorkQueue::InputProjectWorkQueue(QObject * parent)
