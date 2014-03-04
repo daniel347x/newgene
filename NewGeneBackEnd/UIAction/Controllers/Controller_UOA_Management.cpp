@@ -167,9 +167,9 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
-					WidgetInstanceIdentifier dmu = instanceActionItem.first;
+					WidgetInstanceIdentifier uoa_category = instanceActionItem.first;
 
-					if (!dmu.code || !dmu.uuid)
+					if (!uoa_category.uuid || uoa_category.uuid->empty())
 					{
 						boost::format msg("Missing the UOA to delete.");
 						messager.ShowMessageBox(msg.str());
@@ -179,29 +179,28 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 					// ************************************* //
 					// Retrieve data sent by user interface
 					// ************************************* //
-					std::string dmu_to_delete_code = *dmu.code;
-					std::string dmu_to_delete_uuid = *dmu.uuid;
+					std::string uoa_to_delete_display_text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category);
 
-					bool dmu_already_exists = input_model.t_dmu_category.Exists(input_model.getDb(), input_model, dmu_to_delete_code);
+					bool uoa_already_exists = input_model.t_uoa_category.Exists(input_model.getDb(), input_model, uoa_category);
 
-					if (!dmu_already_exists)
+					if (!uoa_already_exists)
 					{
 						boost::format msg("The UOA '%1%' is already absent.");
-						msg % boost::to_upper_copy(dmu_to_delete_code);
+						msg % boost::to_upper_copy(uoa_to_delete_display_text);
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
 
-					bool dmu_successfully_deleted = input_model.t_dmu_category.DeleteDMU(input_model.getDb(), input_model, dmu, change_response);
+					bool uoa_successfully_deleted = input_model.t_uoa_category.DeleteUOA(input_model.getDb(), input_model, uoa_category, change_response);
 
-					if (!dmu_successfully_deleted)
+					if (!uoa_successfully_deleted)
 					{
 						boost::format msg("Unable to delete the UOA.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
 					boost::format msg("UOA '%1%' successfully deleted.");
-					msg % boost::to_upper_copy(dmu_to_delete_code);
+					msg % boost::to_upper_copy(uoa_to_delete_display_text);
 					messager.ShowMessageBox(msg.str());
 
 				});
