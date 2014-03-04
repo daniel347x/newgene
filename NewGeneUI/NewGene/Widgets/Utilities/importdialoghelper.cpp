@@ -399,7 +399,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 			QMessageBox msgBox;
 			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
-			return;
+			return false;
 		}
 
 		QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
@@ -420,7 +420,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 		}
 
 		QVariant dmu_category_variant = dmuModel->item(selectedIndex.row())->data();
-		WidgetInstanceIdentifier dmu_category = uoa_and_dmu_categories_variant.value<WidgetInstanceIdentifier>();
+		WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
 
 
 
@@ -431,7 +431,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 			QMessageBox msgBox;
 			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
-			return;
+			return false;
 		}
 
 		std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
@@ -444,6 +444,8 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 		v.setValue(dmu_category);
 		item->setData(v);
 		rhsModel->appendRow( item );
+
+		return true;
 
 	});
 
