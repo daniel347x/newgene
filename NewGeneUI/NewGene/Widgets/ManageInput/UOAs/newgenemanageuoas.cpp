@@ -200,8 +200,43 @@ void NewGeneManageUOAs::Empty()
 void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 {
 
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
+	if (!ui->listViewManageUOAs)
+	{
+		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	WidgetInstanceIdentifier uoa_category;
+	WidgetInstanceIdentifiers uoa_dmu_categories;
+	bool is_selected = GetSelectedUoaCategory(uoa_category, dmu_members);
+	if (!is_selected)
+	{
+		return;
+	}
+
+	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	if (dmuModel == nullptr)
+	{
+		boost::format msg("Invalid model in NewGeneManageUOAs DMU category widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
 	InstanceActionItems actionItems;
-	//actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu)))));
+	actionItems.push_back(std::make_pair(uoa_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers(uoa_dmu_categories)))));
 	WidgetActionItemRequest_ACTION_DELETE_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
 	emit DeleteUOA(action_request);
 
@@ -361,5 +396,44 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 		}
 
 	});
+
+}
+
+bool NewGeneManageUOAs::GetSelectedUoaCategory(WidgetInstanceIdentifier & uoa_category, WidgetInstanceIdentifiers & uoa_dmu_categories)
+{
+
+	QItemSelectionModel * uoa_selectionModel = ui->listViewManageUOAs->selectionModel();
+	if (uoa_selectionModel == nullptr)
+	{
+		boost::format msg("Invalid selection in NewGeneManageUOAs widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return false;
+	}
+
+	QModelIndex selectedIndex = uoa_selectionModel->currentIndex();
+	if (!selectedIndex.isValid())
+	{
+		// No selection
+		return false;
+	}
+
+	QStandardItemModel * uoaModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
+	if (uoaModel == nullptr)
+	{
+		boost::format msg("Invalid model in NewGeneManageUOAs DMU category widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return false;
+	}
+
+	QVariant uoa_and_dmu_categories_variant = uoaModel->item(selectedIndex.row())->data();
+	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> uoa_and_dmu_categories = uoa_and_dmu_categories_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
+	uoa_category = uoa_and_dmu_categories.first;
+	uoa_dmu_categories = uoa_and_dmu_categories.second;
+
+	return true;
 
 }

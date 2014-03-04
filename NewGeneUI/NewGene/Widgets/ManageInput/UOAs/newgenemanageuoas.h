@@ -49,6 +49,11 @@ class NewGeneManageUOAs : public QWidget, public NewGeneWidget // do not reorder
 	private slots:
 		void on_pushButton_deleteUOA_clicked();
 		void on_pushButton_createUOA_clicked();
+
+	protected:
+
+		bool GetSelectedUoaCategory(WidgetInstanceIdentifier & uoa_category, WidgetInstanceIdentifiers & uoa_dmu_categories);
+
 };
 
 #endif // NEWGENEMANAGEUOAS_H
