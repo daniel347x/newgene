@@ -286,24 +286,24 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 		if (!has_code)
 		{
 			displayText += *uoa_category.longhand;
-			displayText += " (";
-			displayText += *uoa_category.uuid;
-			displayText += ")";
+			//displayText += " (";
+			//displayText += *uoa_category.uuid;
+			//displayText += ")";
 		}
 		else if (!has_description)
 		{
 			displayText += *uoa_category.code;
-			displayText += " (";
-			displayText += *uoa_category.uuid;
-			displayText += ")";
+			//displayText += " (";
+			//displayText += *uoa_category.uuid;
+			//displayText += ")";
 		}
 		else
 		{
 			displayText += *uoa_category.longhand;
 			displayText += " (";
 			displayText += *uoa_category.code;
-			displayText += " - ";
-			displayText += *uoa_category.uuid;
+			//displayText += " - ";
+			//displayText += *uoa_category.uuid;
 			displayText += ")";
 		}
 	}
