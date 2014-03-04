@@ -2,6 +2,7 @@
 #include "ui_newgenemanageuoas.h"
 
 #include <QStandardItemModel>
+#include <QListView>
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -258,6 +259,12 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	//QString labelDescription = QString("Description:");
 	//form.addRow(labelDescription, lineEditDescription);
 	//fields << lineEditDescription;
+
+	QWidget UoaConstructionWidget;
+	QVBoxLayout formOverall;
+	QWidget UoaConstructionPanes;
+	QHBoxLayout formConstructionPanes;
+	QVBoxLayout formConstructionDivider;
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);

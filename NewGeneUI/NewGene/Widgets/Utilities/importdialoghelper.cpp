@@ -9,6 +9,8 @@
 #include <QFileDialog>
 #include <QLabel>
 #include <QRadioButton>
+#include <QListView>
+#include <QSpacerItem>
 
 #include "../../../../NewGeneBackEnd/Utilities/Validation.h"
 
@@ -79,6 +81,11 @@ bool ImportDialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFil
 
 void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange)
 {
+
+	// ******************************************************************************************** //
+	// Urgent TODO: Pass all widgets/layouts that are local (created on stack)
+	// in the calling function and pass by reference into this function
+	// ******************************************************************************************** //
 
 	// Time range RADIO BUTTONS
 	form.addRow(new QLabel("Time range options:"));
@@ -315,5 +322,34 @@ bool ImportDialogHelper::ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeR
 	errorMsg = msg.str();
 
 	return false;
+
+}
+
+void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider)
+{
+
+	QString labelTitle = QString("Create a new Unit of Analysis");
+	QLabel title = new QLabel(labelTitle, &dialog);
+
+	QListView * lhs = new QListView(&UoaConstructionPanes);
+	QWidget * middle = new QWidget(&UoaConstructionPanes);
+	middle->setLayout(formConstructionDivider);
+	QListView * rhs = new QListView(&UoaConstructionPanes);
+
+	QSpacerItem * middlespacetop = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+	QPushButton * add = new QPushButton('>>>', &middle);
+	QPushButton * remove = new QPushButton('<<<', &middle);
+	QSpacerItem * middlespacebottom = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+	formConstructionDivider->addWidget(middlespacetop);
+	formConstructionDivider->addWidget(add);
+	formConstructionDivider->addWidget(remove);
+	formConstructionDivider->addWidget(middlespacebottom);
+
+	formConstructionPanes->addWidget(lhs);
+	formConstructionPanes->addWidget(middle);
+	formConstructionPanes->addWidget(rhs);
+
+	formOverall->addWidget(title);
+	formOverall->addWidget(UoaConstructionWidget);
 
 }

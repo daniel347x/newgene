@@ -167,7 +167,17 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
+					if (!instanceActionItem.second)
+					{
+						boost::format msg("The DMU identifiers are invalid.");
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
 					WidgetInstanceIdentifier uoa_category = instanceActionItem.first;
+					WidgetActionItem const & actionItem = *instanceActionItem.second;
+					WidgetActionItem__WidgetInstanceIdentifiers const & actionItemDMUs = static_cast<WidgetActionItem__WidgetInstanceIdentifiers const &>(actionItem);
+					WidgetInstanceIdentifiers dmu_categories = actionItemDMUs.getValue();
 
 					if (!uoa_category.uuid || uoa_category.uuid->empty())
 					{
@@ -179,7 +189,7 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 					// ************************************* //
 					// Retrieve data sent by user interface
 					// ************************************* //
-					std::string uoa_to_delete_display_text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category);
+					std::string uoa_to_delete_display_text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
 
 					bool uoa_already_exists = input_model.t_uoa_category.Exists(input_model.getDb(), input_model, uoa_category);
 
