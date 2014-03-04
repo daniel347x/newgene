@@ -408,7 +408,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 				QMessageBox msgBox;
 				msgBox.setText( msg.str().c_str() );
 				msgBox.exec();
-				return;
+				return false;
 			}
 
 			QStandardItemModel * rhsModel = static_cast<QStandardItemModel*>(rhs->model());
@@ -418,7 +418,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 				QMessageBox msgBox;
 				msgBox.setText( msg.str().c_str() );
 				msgBox.exec();
-				return;
+				return false;
 			}
 
 			QItemSelectionModel * dmu_selectionModel = lhs->selectionModel();
