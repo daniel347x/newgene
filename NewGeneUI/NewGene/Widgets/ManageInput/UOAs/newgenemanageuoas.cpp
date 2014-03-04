@@ -301,6 +301,8 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	std::string proposed_uoa_code;
 	//std::string uoa_description;
 
+	WidgetInstanceIdentifiers dmu_categories_to_use;
+
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
@@ -358,18 +360,41 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 
 		if (valid)
 		{
-			dialog.accept();
-		}
 
-	});
+			// retrieve the chosen DMU categories
+			QStandardItemModel * rhsModel = static_cast<QStandardItemModel*>(rhs->model());
+			if (rhsModel == nullptr)
+			{
+				boost::format msg("Invalid rhs list view items in Construct UOA popup.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			int dmurows = rhsModel->rowCount();
+			QList<QStandardItem*> list;
+			for (int dmurow = 0; dmurow < dmurows; ++dmurow)
+			{
+				QVariant dmu_category_variant = rhsModel->item(dmurow)->data();
+				WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
+				dmu_categories_to_use.push_back(dmu_category);
+			}
+
+            dialog.accept();
+        }
+
+    });
 
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
+	std::string new_uoa_code(proposed_uoa_code);
+
 	InstanceActionItems actionItems;
-	//actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{proposed_dmu_name, dmu_description})))));
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(dmu_categories_to_use, new_uoa_code)))));
 	WidgetActionItemRequest_ACTION_ADD_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 	emit AddUOA(action_request);

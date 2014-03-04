@@ -269,6 +269,46 @@ class WidgetActionItem__WidgetInstanceIdentifiers : public WidgetActionItem
 
 };
 
+class WidgetActionItem__WidgetInstanceIdentifiers_Plus_String : public WidgetActionItem__WidgetInstanceIdentifiers
+{
+
+public:
+
+	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(WidgetInstanceIdentifiers const & value__, std::string const & the_string__)
+		: WidgetActionItem__WidgetInstanceIdentifiers(value__)
+		, the_string_(the_string__)
+	{
+
+	}
+
+	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const & rhs)
+		: WidgetActionItem__WidgetInstanceIdentifiers(rhs)
+		, the_string_(rhs.the_string_)
+	{
+
+	}
+
+	~WidgetActionItem__WidgetInstanceIdentifiers_Plus_String()
+	{
+
+	}
+
+	void setValueString(std::string const & the_string__)
+	{
+		the_string_ = the_string__;
+	}
+
+	WidgetInstanceIdentifiers getValueString() const
+	{
+		return the_string_;
+	}
+
+protected:
+
+	std::string the_string_;
+
+};
+
 class WidgetActionItem__String : public WidgetActionItem
 {
 
