@@ -298,7 +298,7 @@ public:
 		the_string_ = the_string__;
 	}
 
-	WidgetInstanceIdentifiers getValueString() const
+	std::string getValueString() const
 	{
 		return the_string_;
 	}
