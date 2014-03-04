@@ -329,27 +329,27 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 {
 
 	QString labelTitle = QString("Create a new Unit of Analysis");
-	QLabel title = new QLabel(labelTitle, &dialog);
+	QLabel * title = new QLabel(labelTitle, &dialog);
 
 	QListView * lhs = new QListView(&UoaConstructionPanes);
 	QWidget * middle = new QWidget(&UoaConstructionPanes);
-	middle->setLayout(formConstructionDivider);
+	middle->setLayout(&formConstructionDivider);
 	QListView * rhs = new QListView(&UoaConstructionPanes);
 
 	QSpacerItem * middlespacetop = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-	QPushButton * add = new QPushButton('>>>', &middle);
-	QPushButton * remove = new QPushButton('<<<', &middle);
+	QPushButton * add = new QPushButton(">>>", middle);
+	QPushButton * remove = new QPushButton("<<<", middle);
 	QSpacerItem * middlespacebottom = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-	formConstructionDivider->addWidget(middlespacetop);
-	formConstructionDivider->addWidget(add);
-	formConstructionDivider->addWidget(remove);
-	formConstructionDivider->addWidget(middlespacebottom);
+	formConstructionDivider.addItem(middlespacetop);
+	formConstructionDivider.addWidget(add);
+	formConstructionDivider.addWidget(remove);
+	formConstructionDivider.addItem(middlespacebottom);
 
-	formConstructionPanes->addWidget(lhs);
-	formConstructionPanes->addWidget(middle);
-	formConstructionPanes->addWidget(rhs);
+	formConstructionPanes.addWidget(lhs);
+	formConstructionPanes.addWidget(middle);
+	formConstructionPanes.addWidget(rhs);
 
-	formOverall->addWidget(title);
-	formOverall->addWidget(UoaConstructionWidget);
+	formOverall.addWidget(title);
+	formOverall.addWidget(&UoaConstructionWidget);
 
 }

@@ -3,6 +3,7 @@
 
 #include <QStandardItemModel>
 #include <QListView>
+#include <QDialogButtonBox>
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -220,13 +221,13 @@ void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 
 	WidgetInstanceIdentifier uoa_category;
 	WidgetInstanceIdentifiers uoa_dmu_categories;
-	bool is_selected = GetSelectedUoaCategory(uoa_category, dmu_members);
+	bool is_selected = GetSelectedUoaCategory(uoa_category, uoa_dmu_categories);
 	if (!is_selected)
 	{
 		return;
 	}
 
-	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listView_dmus->model());
+	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
 	if (dmuModel == nullptr)
 	{
 		boost::format msg("Invalid model in NewGeneManageUOAs DMU category widget.");
@@ -270,12 +271,14 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
 	form.addRow(&buttonBox);
 
-	std::string proposed_uoa_name;
+	std::string proposed_uoa_code;
 	//std::string uoa_description;
 
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
+
+		std::string errorMsg;
 
 		QLineEdit * proposed_uoa_code_field = fields[0];
 		//QLineEdit * uoa_description_field = fields[1];

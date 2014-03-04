@@ -308,6 +308,8 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
 
+		std::string errorMsg;
+
 		QLineEdit * proposed_dmu_name_field = fields[0];
 		QLineEdit * dmu_description_field = fields[1];
 		if (proposed_dmu_name_field && dmu_description_field)
