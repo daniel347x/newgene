@@ -195,11 +195,16 @@ void UIDataManager::DoRefreshInputWidget(Messager & messager, WidgetDataItemRequ
 {
 	InputModel & input_model = project.model();
 	WidgetDataItem_MANAGE_UOAS_WIDGET uoa_management(widget_request);
-	WidgetInstanceIdentifiers uoas = input_model.t_dmu_category.getIdentifiers();
+	WidgetInstanceIdentifiers uoas = input_model.t_uoa_category.getIdentifiers();
 	std::for_each(uoas.cbegin(), uoas.cend(), [this, &uoa_management, &input_model](WidgetInstanceIdentifier const & single_uoa)
 	{
-		WidgetInstanceIdentifiers uoa_members = input_model.t_dmu_setmembers.getIdentifiers(*single_uoa.uuid);
-		uoa_management.uoas_and_members.push_back(std::make_pair(single_uoa, uoa_members));
+		if (!single_uoa.uuid || single_uoa.uuid->empty())
+		{
+			boost::format msg("Bad UOA in action handler.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		WidgetInstanceIdentifiers dmu_categories = input_model.t_uoa_category.RetrieveDMUCategories(input_model.getDb(), &input_model, *single_uoa.uuid);
+		uoa_management.uoas_and_dmu_categories.push_back(std::make_pair(single_uoa, dmu_categories));
 	});
 	messager.EmitInputWidgetDataRefresh(uoa_management);
 }
