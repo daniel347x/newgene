@@ -334,34 +334,34 @@ bool ImportDialogHelper::ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeR
 void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories)
 {
 
+	QString labelTitle = QString("Create a new Unit of Analysis");
+	QLabel * title = new QLabel(labelTitle, &dialog);
+
+	lhs = new QListView(&UoaConstructionPanes);
+	QWidget * middle = new QWidget(&UoaConstructionPanes);
+	middle->setLayout(&formConstructionDivider);
+	rhs = new QListView(&UoaConstructionPanes);
+
+	QSpacerItem * middlespacetop = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+	QPushButton * add = new QPushButton(">>>", middle);
+	QPushButton * remove = new QPushButton("<<<", middle);
+	QSpacerItem * middlespacebottom = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+	formConstructionDivider.addItem(middlespacetop);
+	formConstructionDivider.addWidget(add);
+	formConstructionDivider.addWidget(remove);
+	formConstructionDivider.addItem(middlespacebottom);
+
+	formConstructionPanes.addWidget(lhs);
+	formConstructionPanes.addWidget(middle);
+	formConstructionPanes.addWidget(rhs);
+
+	UoaConstructionPanes.setLayout(&formConstructionPanes);
+	formOverall.addWidget(title);
+	formOverall.addWidget(&UoaConstructionPanes);
+	UoaConstructionWidget.setLayout(&formOverall);
+	form.addRow(&UoaConstructionWidget);
+
 	{
-
-		QString labelTitle = QString("Create a new Unit of Analysis");
-		QLabel * title = new QLabel(labelTitle, &dialog);
-
-		lhs = new QListView(&UoaConstructionPanes);
-		QWidget * middle = new QWidget(&UoaConstructionPanes);
-		middle->setLayout(&formConstructionDivider);
-		rhs = new QListView(&UoaConstructionPanes);
-
-		QSpacerItem * middlespacetop = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-		QPushButton * add = new QPushButton(">>>", middle);
-		QPushButton * remove = new QPushButton("<<<", middle);
-		QSpacerItem * middlespacebottom = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-		formConstructionDivider.addItem(middlespacetop);
-		formConstructionDivider.addWidget(add);
-		formConstructionDivider.addWidget(remove);
-		formConstructionDivider.addItem(middlespacebottom);
-
-		formConstructionPanes.addWidget(lhs);
-		formConstructionPanes.addWidget(middle);
-		formConstructionPanes.addWidget(rhs);
-
-		UoaConstructionPanes.setLayout(&formConstructionPanes);
-		formOverall.addWidget(title);
-		formOverall.addWidget(&UoaConstructionPanes);
-		UoaConstructionWidget.setLayout(&formOverall);
-		form.addRow(&UoaConstructionWidget);
 
 		QStandardItemModel * model = new QStandardItemModel(lhs);
 
