@@ -490,53 +490,13 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 				return false;
 			}
 
-			QVariant dmu_category_variant = rhsModel->item(selectedIndex.row())->data();
-			WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
+			//QVariant dmu_category_variant = rhsModel->item(selectedIndex.row())->data();
+			//WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
 
-			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+			//std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
 
-			boost::format msg("Text: %1%");
-			msg % text.c_str();
-			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
-			msgBox.exec();
-
-			QList<QStandardItem *> items = rhsModel->findItems(text.c_str());
-			if (items.count() == 1)
-			{
-				QStandardItem * dmu_to_remove = items.at(0);
-				if (dmu_to_remove != nullptr)
-				{
-					QModelIndex index_to_remove = rhsModel->indexFromItem(dmu_to_remove);
-					rhsModel->takeRow(index_to_remove.row());
-
-					delete dmu_to_remove;
-					dmu_to_remove = nullptr;
-
-					QItemSelectionModel * selectionModel = rhs->selectionModel();
-					if (selectionModel != nullptr)
-					{
-						selectionModel->clearSelection();
-					}
-				}
-				else
-				{
-					// No selection
-					boost::format msg("Empty DMU to remove.");
-					QMessageBox msgBox;
-					msgBox.setText( msg.str().c_str() );
-					msgBox.exec();
-					return false;
-				}
-			}
-			else
-			{
-				boost::format msg("Zero, or more than one, selection.");
-				QMessageBox msgBox;
-				msgBox.setText( msg.str().c_str() );
-				msgBox.exec();
-				return false;
-			}
+			rhsModel->takeRow(selectedIndex.row());
+			dmu_selectionModel->clearSelection();
 
 			return true;
 
