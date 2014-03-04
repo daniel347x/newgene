@@ -137,8 +137,6 @@ void NewGeneManageUOAs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDG
 		if (uoa_category.uuid && !uoa_category.uuid->empty())
 		{
 
-			std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> uoa_and_dmu_categories = std::make_pair(uoa_category, dmu_categories);
-
 			QStandardItem * item = new QStandardItem();
 			std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
 			item->setText(text.c_str());

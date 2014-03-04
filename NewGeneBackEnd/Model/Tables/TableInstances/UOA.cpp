@@ -333,6 +333,8 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 	});
 	displayText += ")";
 
+	return displayText;
+
 }
 
 void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
