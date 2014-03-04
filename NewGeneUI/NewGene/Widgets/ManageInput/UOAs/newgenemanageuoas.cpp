@@ -321,7 +321,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 				QMessageBox msgBox;
 				msgBox.setText( msg.str().c_str() );
 				msgBox.exec();
-				return;
+				return false;
 			}
 		}
 		else
@@ -330,7 +330,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 			QMessageBox msgBox;
 			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
-			return;
+			return false;
 		}
 
 		boost::trim(proposed_uoa_code);
@@ -355,7 +355,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 			QMessageBox msgBox;
 			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
-			return;
+			return false;
 		}
 
 		if (valid)
@@ -381,10 +381,10 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 				dmu_categories_to_use.push_back(dmu_category);
 			}
 
-            dialog.accept();
-        }
+			dialog.accept();
+		}
 
-    });
+	});
 
 	if (dialog.exec() != QDialog::Accepted)
 	{
