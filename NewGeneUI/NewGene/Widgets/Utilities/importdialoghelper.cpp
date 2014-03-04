@@ -334,100 +334,128 @@ bool ImportDialogHelper::ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeR
 void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories)
 {
 
-	QString labelTitle = QString("Create a new Unit of Analysis");
-	QLabel * title = new QLabel(labelTitle, &dialog);
-
-	lhs = new QListView(&UoaConstructionPanes);
-	QWidget * middle = new QWidget(&UoaConstructionPanes);
-	middle->setLayout(&formConstructionDivider);
-	rhs = new QListView(&UoaConstructionPanes);
-
-	QSpacerItem * middlespacetop = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-	QPushButton * add = new QPushButton(">>>", middle);
-	QPushButton * remove = new QPushButton("<<<", middle);
-	QSpacerItem * middlespacebottom = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
-	formConstructionDivider.addItem(middlespacetop);
-	formConstructionDivider.addWidget(add);
-	formConstructionDivider.addWidget(remove);
-	formConstructionDivider.addItem(middlespacebottom);
-
-	formConstructionPanes.addWidget(lhs);
-	formConstructionPanes.addWidget(middle);
-	formConstructionPanes.addWidget(rhs);
-
-	UoaConstructionPanes.setLayout(&formConstructionPanes);
-	formOverall.addWidget(title);
-	formOverall.addWidget(&UoaConstructionPanes);
-	UoaConstructionWidget.setLayout(&formOverall);
-	form.addRow(&UoaConstructionWidget);
-
-	QStandardItemModel * model = new QStandardItemModel(lhs);
-
-	int index = 0;
-	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
 	{
-		if (dmu_category.uuid && !dmu_category.uuid->empty() && dmu_category.code && !dmu_category.code->empty())
+
+		QString labelTitle = QString("Create a new Unit of Analysis");
+		QLabel * title = new QLabel(labelTitle, &dialog);
+
+		lhs = new QListView(&UoaConstructionPanes);
+		QWidget * middle = new QWidget(&UoaConstructionPanes);
+		middle->setLayout(&formConstructionDivider);
+		rhs = new QListView(&UoaConstructionPanes);
+
+		QSpacerItem * middlespacetop = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+		QPushButton * add = new QPushButton(">>>", middle);
+		QPushButton * remove = new QPushButton("<<<", middle);
+		QSpacerItem * middlespacebottom = new QSpacerItem(1,1, QSizePolicy::Expanding, QSizePolicy::Fixed);
+		formConstructionDivider.addItem(middlespacetop);
+		formConstructionDivider.addWidget(add);
+		formConstructionDivider.addWidget(remove);
+		formConstructionDivider.addItem(middlespacebottom);
+
+		formConstructionPanes.addWidget(lhs);
+		formConstructionPanes.addWidget(middle);
+		formConstructionPanes.addWidget(rhs);
+
+		UoaConstructionPanes.setLayout(&formConstructionPanes);
+		formOverall.addWidget(title);
+		formOverall.addWidget(&UoaConstructionPanes);
+		UoaConstructionWidget.setLayout(&formOverall);
+		form.addRow(&UoaConstructionWidget);
+
+		QStandardItemModel * model = new QStandardItemModel(lhs);
+
+		int index = 0;
+		std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
+		{
+			if (dmu_category.uuid && !dmu_category.uuid->empty() && dmu_category.code && !dmu_category.code->empty())
+			{
+
+				QStandardItem * item = new QStandardItem();
+				std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+				item->setText(text.c_str());
+				item->setEditable(false);
+				item->setCheckable(false);
+				QVariant v;
+				v.setValue(dmu_category);
+				item->setData(v);
+				model->setItem( index, item );
+
+				++index;
+
+			}
+		});
+
+		model->sort(0);
+
+		lhs->setModel(model);
+
+
+		QStandardItemModel * rhsModel = new QStandardItemModel(rhs);
+		rhs->setModel(rhsModel);
+
+	}
+
+	{
+
+		QObject::connect(add, &QPushButton::clicked, [&]()
 		{
 
-			QStandardItem * item = new QStandardItem();
+			QStandardItemModel * lhsModel = static_cast<QStandardItemModel*>(lhs->model());
+			if (lhsModel == nullptr)
+			{
+				boost::format msg("Invalid list view items in Construct UOA popup.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return;
+			}
+
+			QStandardItemModel * rhsModel = static_cast<QStandardItemModel*>(rhs->model());
+			if (rhsModel == nullptr)
+			{
+				boost::format msg("Invalid rhs list view items in Construct UOA popup.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return;
+			}
+
+			QItemSelectionModel * dmu_selectionModel = lhs->selectionModel();
+			if (dmu_selectionModel == nullptr)
+			{
+				boost::format msg("Invalid selection in Create UOA widget.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
+			if (!selectedIndex.isValid())
+			{
+				// No selection
+				return false;
+			}
+
+			QVariant dmu_category_variant = model->item(selectedIndex.row())->data();
+			WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
+
 			std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+			QStandardItem * item = new QStandardItem();
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
+
 			QVariant v;
 			v.setValue(dmu_category);
 			item->setData(v);
-			model->setItem( index, item );
+			rhsModel->appendRow( item );
 
-			++index;
+			return true;
 
-		}
-	});
+		});
 
-	model->sort(0);
-
-	lhs->setModel(model);
-
-
-	QStandardItemModel * rhsModel = new QStandardItemModel(rhs);
-	rhs->setModel(rhsModel);
-
-	QObject::connect(add, &QPushButton::clicked, [&]()
-	{
-
-		QItemSelectionModel * dmu_selectionModel = lhs->selectionModel();
-		if (dmu_selectionModel == nullptr)
-		{
-			boost::format msg("Invalid selection in Create UOA widget.");
-			QMessageBox msgBox;
-			msgBox.setText( msg.str().c_str() );
-			msgBox.exec();
-			return false;
-		}
-
-		QModelIndex selectedIndex = dmu_selectionModel->currentIndex();
-		if (!selectedIndex.isValid())
-		{
-			// No selection
-			return false;
-		}
-
-		QVariant dmu_category_variant = model->item(selectedIndex.row())->data();
-		WidgetInstanceIdentifier dmu_category = dmu_category_variant.value<WidgetInstanceIdentifier>();
-
-		std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
-		QStandardItem * item = new QStandardItem();
-		item->setText(text.c_str());
-		item->setEditable(false);
-		item->setCheckable(false);
-
-		QVariant v;
-		v.setValue(dmu_category);
-		item->setData(v);
-		rhsModel->appendRow( item );
-
-		return true;
-
-	});
+	}
 
 }
