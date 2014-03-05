@@ -570,7 +570,7 @@ bool Table_UOA_Member::CreateNewUOA(sqlite3 * db, InputModel & input_model, std:
 		sql += uoa_uuid;
 		sql += "', ";
 		sql += sequence_number;
-		sql += "', '";
+		sql += ", '";
 		sql += *dmu_category.uuid;
 		sql += "')";
 		sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
