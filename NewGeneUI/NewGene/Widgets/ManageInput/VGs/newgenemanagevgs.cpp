@@ -443,9 +443,9 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	QVBoxLayout formOverall;
 	QWidget VgConstructionPanes;
 	QHBoxLayout formConstructionPane;
-	QVBoxLayout formConstructionButtons;
 	QListView * listpane = nullptr;
-	ImportDialogHelper::AddVgCreationBlock(dialog, form, VgConstructionWidget, formOverall, VgConstructionPanes, formConstructionPane, formConstructionButtons, listpane);
+	WidgetInstanceIdentifiers uoas = backend_input_model.t_uoa_category.getIdentifiers();
+	ImportDialogHelper::AddVgCreationBlock(dialog, form, VgConstructionWidget, formOverall, VgConstructionPanes, formConstructionPane, listpane, uoas);
 
 	if (!listpane)
 	{
@@ -599,7 +599,7 @@ void NewGeneManageVGs::on_pushButton_remove_vg_clicked()
 
 	WidgetInstanceIdentifier vg;
 	WidgetInstanceIdentifier uoa;
-	bool is_selected = GetSelectedVg(vg, uoa);
+	bool is_selected = GetSelectedVG(vg, uoa);
 	if (!is_selected)
 	{
 		return;

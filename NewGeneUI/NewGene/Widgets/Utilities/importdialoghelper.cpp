@@ -519,7 +519,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 
 }
 
-void ImportDialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QVBoxLayout & formConstructionButtons, QListView *& listpane, WidgetInstanceIdentifiers const & uoas)
+void ImportDialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, WidgetInstanceIdentifiers const & uoas)
 {
 
 	QString labelTitle = QString("Choose the unit of analysis:");
