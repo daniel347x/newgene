@@ -241,7 +241,7 @@ bool Table_UOA_Identifier::ExistsByCode(sqlite3 * db, InputModel & input_model_,
 
 }
 
-bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, DataChangeMessage & change_message)
+bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, WidgetInstanceIdentifiers const & dmu_categories, DataChangeMessage & change_message)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -304,7 +304,7 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 	// ***************************************** //
 	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__UOA_CHANGE;
 	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-	DataChange change(type, intention, uoa, WidgetInstanceIdentifiers());
+	DataChange change(type, intention, uoa, dmu_categories);
 	change_message.changes.push_back(change);
 
 	theExecutor.success();

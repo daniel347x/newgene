@@ -198,7 +198,7 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 						return;
 					}
 
-					bool uoa_successfully_deleted = input_model.t_uoa_category.DeleteUOA(input_model.getDb(), input_model, uoa_category, change_response);
+					bool uoa_successfully_deleted = input_model.t_uoa_category.DeleteUOA(input_model.getDb(), input_model, uoa_category, dmu_categories, change_response);
 
 					if (!uoa_successfully_deleted)
 					{
