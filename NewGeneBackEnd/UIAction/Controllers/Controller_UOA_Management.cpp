@@ -115,7 +115,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 
 					WidgetInstanceIdentifiers dmu_categories_test = input_model.t_uoa_category.RetrieveDMUCategories(input_model.getDb(), &input_model, *newIdentifier.uuid);
 
-					if (!std::equal(dmu_categories.cbegin(), dmu_categories.cend(), dmu_categories_test.cbegin(), [](WidgetInstanceIdentifier const & lhs, WidgetInstanceIdentifier const & rhs)
+					if (dmu_categories.size() != dmu_categories_test.size() || !std::equal(dmu_categories.cbegin(), dmu_categories.cend(), dmu_categories_test.cbegin(), [](WidgetInstanceIdentifier const & lhs, WidgetInstanceIdentifier const & rhs)
 							{
 								return lhs.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, rhs);
 							}
