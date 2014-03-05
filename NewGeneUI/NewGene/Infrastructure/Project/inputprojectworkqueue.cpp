@@ -5,6 +5,7 @@
 #include "../UIData/uiwidgetdatarefresh.h"
 #include "../UIAction/dmumanagement.h"
 #include "../UIAction/uoamanagement.h"
+#include "../UIAction/vgmanagement.h"
 #include <QStandardItem>
 
 InputProjectWorkQueue::InputProjectWorkQueue(QObject * parent)
@@ -117,7 +118,7 @@ void InputProjectWorkQueue::CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG ac
 
 void InputProjectWorkQueue::DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG action_request)
 {
-	get()->getWorkService().post(DeletevG_(action_request, this));
+	get()->getWorkService().post(DeleteVG_(action_request, this));
 }
 
 void InputProjectWorkQueue::RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG action_request)
