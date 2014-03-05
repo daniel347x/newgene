@@ -85,6 +85,24 @@ bool ImportDialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFil
 
 }
 
+void ImportDialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog, QFormLayout & form, QVBoxLayout & formTimeRangeGranularitySelection, QList<QRadioButton *> & radioButtonsTimeRangeGranularity)
+{
+
+	// Time range RADIO BUTTONS
+	form.addRow(new QLabel("Time range granularity options:"));
+	QRadioButton * NButton = new QRadioButton("None", &dialog);
+	QRadioButton * YButton = new QRadioButton("Year", &dialog);
+	QRadioButton * YMDButton = new QRadioButton("Year, Month, Day", &dialog);
+	formTimeRangeSelection.addWidget(NButton);
+	formTimeRangeSelection.addWidget(YButton);
+	formTimeRangeSelection.addWidget(YMDButton);
+	form.addRow(&formTimeRangeSelection);
+	NButton->setChecked(true);
+
+	radioButtonsTimeRangeGranularity << NButton << YButton << YMDButton;
+
+}
+
 void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange)
 {
 

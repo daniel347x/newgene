@@ -309,6 +309,46 @@ protected:
 
 };
 
+class WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int : public WidgetActionItem__WidgetInstanceIdentifiers_Plus_String
+{
+
+public:
+
+	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(WidgetInstanceIdentifiers const & value__, std::string const & the_string__, int const & the_int__)
+		: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(value__, the_string__)
+		, the_int_(the_int__)
+	{
+
+	}
+
+	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int const & rhs)
+		: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(rhs)
+		, the_int_(rhs.the_int_)
+	{
+
+	}
+
+	~WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int()
+	{
+
+	}
+
+	void setValueInt(int const & the_int__)
+	{
+		the_int_ = the_int__;
+	}
+
+	int getValueInt() const
+	{
+		return the_int_;
+	}
+
+protected:
+
+	int the_int_;
+
+};
+
 class WidgetActionItem__String : public WidgetActionItem
 {
 

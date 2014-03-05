@@ -12,6 +12,7 @@
 #include "../../../../../NewGeneBackEnd/Utilities/Validation.h"
 #include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
 #include "../../../../NewGeneBackEnd/Model/InputModel.h"
+#include "../../../../NewGeneBackEnd/Model/TimeGranularity.h"
 
 NewGeneManageUOAs::NewGeneManageUOAs( QWidget * parent ) :
 	QWidget( parent ),
@@ -248,6 +249,20 @@ void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 {
 
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		boost::format msg("Bad input project.  Unable to create \"New UOA\" dialog.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	UIInputModel & ui_input_model = project->model();
+	InputModel & backend_input_model = ui_input_model.getBackendModel();
+	WidgetInstanceIdentifiers dmu_categories = backend_input_model.t_dmu_category.getIdentifiers();
+
 	// From http://stackoverflow.com/a/17512615/368896
 	QDialog dialog(this);
 	QFormLayout form(&dialog);
@@ -262,19 +277,9 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	//form.addRow(labelDescription, lineEditDescription);
 	//fields << lineEditDescription;
 
-	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
-	if (project == nullptr)
-	{
-		boost::format msg("Bad input project.  Unable to create \"New UOA\" dialog.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-	UIInputModel & ui_input_model = project->model();
-	InputModel & backend_input_model = ui_input_model.getBackendModel();
-	WidgetInstanceIdentifiers dmu_categories = backend_input_model.t_dmu_category.getIdentifiers();
+	QVBoxLayout formTimeRangeGranularitySelection();
+	QList<QRadioButton *> radioButtonsTimeRangeGranularity;
+	ImportDialogHelper::AddTimeRangeGranularitySelectionBlock(dialog, form, formTimeRangeGranularitySelection, radioButtonsTimeRangeGranularity);
 
 	QWidget UoaConstructionWidget;
 	QVBoxLayout formOverall;
@@ -302,6 +307,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	//std::string uoa_description;
 
 	WidgetInstanceIdentifiers dmu_categories_to_use;
+	TIME_GRANULARITY time_granularity;
 
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
@@ -361,6 +367,58 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 		if (valid)
 		{
 
+			// retrieve the time range granularity
+			if(radioButtonsTimeRangeGranularity.isEmpty())
+			{
+				boost::format msg("No time range granularity selected.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			int index_time_granularity = 0;
+			foreach(QRadioButton * rb, radioButtonsTimeRangeGranularity)
+			{
+				if (rb->isChecked())
+				{
+					break;
+				}
+				++index_time_granularity;
+			}
+			switch (index_time_granularity)
+			{
+
+				case 0:
+					{
+						time_granularity = TIME_GRANULARITY__NONE;
+					}
+					break;
+
+				case 1:
+					{
+						time_granularity = TIME_GRANULARITY__YEAR;
+					}
+					break;
+
+				case 2:
+					{
+						time_granularity = TIME_GRANULARITY__DAY;
+					}
+					break;
+
+				default:
+					{
+						boost::format msg("Invalid time range granularity selected.");
+						QMessageBox msgBox;
+						msgBox.setText( msg.str().c_str() );
+						msgBox.exec();
+						return false;
+					}
+					break;
+
+			}
+
 			// retrieve the chosen DMU categories
 			QStandardItemModel * rhsModel = static_cast<QStandardItemModel*>(rhs->model());
 			if (rhsModel == nullptr)
@@ -394,7 +452,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	std::string new_uoa_code(proposed_uoa_code);
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String(dmu_categories_to_use, new_uoa_code)))));
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(dmu_categories_to_use, new_uoa_code, time_granularity)))));
 	WidgetActionItemRequest_ACTION_ADD_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 	emit AddUOA(action_request);
