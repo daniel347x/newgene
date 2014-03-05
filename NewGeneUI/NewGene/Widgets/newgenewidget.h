@@ -78,6 +78,7 @@ class NewGeneWidget
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_GENERATE_OUTPUT_TAB) {}
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDGET) {}
 		virtual void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_UOAS_WIDGET) {}
+		virtual void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET) {}
 		// ****************************************************************************************************************************
 
 	protected:
@@ -100,6 +101,7 @@ class NewGeneWidget
 		virtual void RefreshWidget(WidgetDataItemRequest_GENERATE_OUTPUT_TAB) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET) {}
 		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_UOAS_WIDGET) {}
+		virtual void RefreshWidget(WidgetDataItemRequest_MANAGE_VGS_WIDGET) {}
 		// ****************************************************************************************************************************
 
 

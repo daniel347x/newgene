@@ -191,3 +191,13 @@ void OutputProjectWorkQueue::DeleteDMU(WidgetActionItemRequest_ACTION_DELETE_DMU
 {
 	get()->getWorkService().post(DeleteDMU_Output(action_request, this));
 }
+
+void OutputProjectWorkQueue::DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA action_request)
+{
+	get()->getWorkService().post(DeleteUOA_Output(action_request, this));
+}
+
+void OutputProjectWorkQueue::DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG action_request)
+{
+	get()->getWorkService().post(DeleteVG_Output(action_request, this));
+}

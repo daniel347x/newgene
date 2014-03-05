@@ -569,5 +569,8 @@
     <ClCompile Include="UIAction\Controllers\Controller_UOA_Management.cpp">
       <Filter>Source Files\UIAction\Controllers</Filter>
     </ClCompile>
+    <ClCompile Include="UIAction\Controllers\Controller_VG_Management.cpp">
+      <Filter>Source Files\UIAction\Controllers</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

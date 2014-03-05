@@ -205,7 +205,7 @@ Table_VariableGroupData * Table_VariableGroupData::GetInstanceTableFromTableName
 
 }
 
-bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_, DataChangeMessage & change_message)
+bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_)
 {
 
 	Executor theExecutor(db);
@@ -239,22 +239,6 @@ bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_m
 		sqlite3_free(errmsg);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-
-	// ***************************************** //
-	// Prepare data to send back to user interface
-	// ***************************************** //
-
-	WidgetInstanceIdentifier vg;
-	bool found(input_model_->t_vgp_identifiers.getIdentifierFromStringCode(vg_category_string_code, vg));
-	if (!found)
-	{
-		return false;
-	}
-
-	DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__VG_INSTANCE_DATA_CHANGE;
-	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
-	DataChange change(type, intention, vg, WidgetInstanceIdentifiers());
-	change_message.changes.push_back(change);
 
 	theExecutor.success();
 

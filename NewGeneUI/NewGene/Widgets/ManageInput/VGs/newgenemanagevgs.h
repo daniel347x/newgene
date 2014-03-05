@@ -19,9 +19,12 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 		explicit NewGeneManageVGs( QWidget * parent = 0 );
 		~NewGeneManageVGs();
 
+		void HandleChanges(DataChangeMessage const &);
+
 	protected:
 
 		void changeEvent( QEvent * e );
+		void Empty();
 
 	private:
 
@@ -30,8 +33,22 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 	public:
 
 	signals:
+		void RefreshWidget(WidgetDataItemRequest_MANAGE_VGS_WIDGET);
+
+		// Actions
+		void CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG);
+		void DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG);
+		void RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG);
 
 	public slots:
+		void UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIInputProject * project);
+		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
+		void RefreshAllWidgets();
+		void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET);
+
+	protected:
+
+		bool GetSelectedVG(WidgetInstanceIdentifier & vg_category, WidgetInstanceIdentifier & uoa_category);
 
 };
 

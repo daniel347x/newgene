@@ -54,6 +54,11 @@ void InputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_MANAGE_UOAS_WIDG
 	get()->getWorkService().post(DoRefreshInputWidget<MANAGE_UOAS_WIDGET>(widget, this));
 }
 
+void InputProjectWorkQueue::RefreshWidget(WidgetDataItemRequest_MANAGE_VGS_WIDGET widget)
+{
+	get()->getWorkService().post(DoRefreshInputWidget<MANAGE_VGS_WIDGET>(widget, this));
+}
+
 
 /************************************************************************/
 // DMU MANAGEMENT
@@ -98,5 +103,25 @@ void InputProjectWorkQueue::AddUOA(WidgetActionItemRequest_ACTION_ADD_UOA action
 void InputProjectWorkQueue::DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA action_request)
 {
 	get()->getWorkService().post(DeleteUOA_(action_request, this));
+}
+
+
+/************************************************************************/
+// VG MANAGEMENT
+/************************************************************************/
+
+void InputProjectWorkQueue::CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG action_request)
+{
+	get()->getWorkService().post(CreateVG_(action_request, this));
+}
+
+void InputProjectWorkQueue::DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG action_request)
+{
+	get()->getWorkService().post(DeletevG_(action_request, this));
+}
+
+void InputProjectWorkQueue::RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG action_request)
+{
+	get()->getWorkService().post(RefreshVG_(action_request, this));
 }
 

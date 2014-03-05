@@ -32,6 +32,10 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 		{
 			emit WidgetDataRefresh(widgetData);
 		}
+		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_VGS_WIDGET & widgetData)
+		{
+			emit WidgetDataRefresh(widgetData);
+		}
 
 	private:
 
@@ -47,6 +51,7 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 
 		void RefreshWidget(WidgetDataItemRequest_MANAGE_DMUS_WIDGET widget);
 		void RefreshWidget(WidgetDataItemRequest_MANAGE_UOAS_WIDGET widget);
+		void RefreshWidget(WidgetDataItemRequest_MANAGE_VGS_WIDGET widget);
 
 		// Actions
 		void AddDMU(WidgetActionItemRequest_ACTION_ADD_DMU);
@@ -56,6 +61,9 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 		void RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE);
 		void AddUOA(WidgetActionItemRequest_ACTION_ADD_UOA);
 		void DeleteUOA(WidgetActionItemRequest_ACTION_DELETE_UOA);
+		void CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG);
+		void DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG);
+		void RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG);
 
 };
 

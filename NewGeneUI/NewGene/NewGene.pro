@@ -262,7 +262,8 @@ HEADERS  += Widgets/newgenemainwindow.h \
     Infrastructure/UIAction/dmumanagement.h \
     Widgets/Utilities/qsortfilterproxymodel_numberslast.h \
     Widgets/Utilities/importdialoghelper.h \
-    Infrastructure/UIAction/uoamanagement.h
+    Infrastructure/UIAction/uoamanagement.h \
+    Infrastructure/UIAction/vgmanagement.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

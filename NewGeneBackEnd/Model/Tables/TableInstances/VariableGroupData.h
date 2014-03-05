@@ -19,7 +19,7 @@ public:
 	void Load(sqlite3 * db, InputModel * input_model_);
 	bool ImportStart(sqlite3 * db, WidgetInstanceIdentifier const & identifier, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_);
 	bool ImportEnd(sqlite3 * db, WidgetInstanceIdentifier const & identifier, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_);
-	bool DeleteDataTable(sqlite3 * db, InputModel * input_model_, DataChangeMessage & change_message);
+	bool DeleteDataTable(sqlite3 * db, InputModel * input_model_);
 	bool DeleteDmuMemberRows(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & dmu_member, std::string const & column_name);
 
 	static std::string TableNameFromVGCode(std::string variable_group_code);

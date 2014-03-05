@@ -322,3 +322,8 @@ void UIMessagerInputProject::EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_UO
 {
 	get()->getQueueManager()->EmitInputWidgetDataRefresh(widgetData);
 }
+
+void UIMessagerInputProject::EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_VGS_WIDGET & widgetData)
+{
+	get()->getQueueManager()->EmitInputWidgetDataRefresh(widgetData);
+}

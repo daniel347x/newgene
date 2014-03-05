@@ -26,6 +26,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItemRequest_GENERATE_OUTPUT_TAB>("WidgetDataItemRequest_GENERATE_OUTPUT_TAB");
 	qRegisterMetaType<WidgetDataItemRequest_MANAGE_DMUS_WIDGET>("WidgetDataItemRequest_MANAGE_DMUS_WIDGET");
 	qRegisterMetaType<WidgetDataItemRequest_MANAGE_UOAS_WIDGET>("WidgetDataItemRequest_MANAGE_UOAS_WIDGET");
+	qRegisterMetaType<WidgetDataItemRequest_MANAGE_VGS_WIDGET>("WidgetDataItemRequest_MANAGE_VGS_WIDGET");
 
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA>("WidgetDataItem_VARIABLE_GROUPS_SCROLL_AREA");
 	qRegisterMetaType<WidgetDataItem_VARIABLE_GROUPS_TOOLBOX>("WidgetDataItem_VARIABLE_GROUPS_TOOLBOX");
@@ -39,6 +40,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetDataItem_GENERATE_OUTPUT_TAB>("WidgetDataItem_GENERATE_OUTPUT_TAB");
 	qRegisterMetaType<WidgetDataItem_MANAGE_DMUS_WIDGET>("WidgetDataItem_MANAGE_DMUS_WIDGET");
 	qRegisterMetaType<WidgetDataItem_MANAGE_UOAS_WIDGET>("WidgetDataItem_MANAGE_UOAS_WIDGET");
+	qRegisterMetaType<WidgetDataItem_MANAGE_VGS_WIDGET>("WidgetDataItem_MANAGE_VGS_WIDGET");
 
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED>("WidgetActionItemRequest_ACTION_VARIABLE_GROUP_SET_MEMBER_SELECTION_CHANGED");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE>("WidgetActionItemRequest_ACTION_KAD_COUNT_CHANGE");
@@ -53,6 +55,9 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE>("WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_ADD_UOA>("WidgetActionItemRequest_ACTION_ADD_UOA");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_UOA>("WidgetActionItemRequest_ACTION_DELETE_UOA");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_CREATE_VG>("WidgetActionItemRequest_ACTION_CREATE_VG");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_VG>("WidgetActionItemRequest_ACTION_DELETE_VG");
+	qRegisterMetaType<WidgetActionItemRequest_ACTION_REFRESH_VG>("WidgetActionItemRequest_ACTION_REFRESH_VG");
 }
 
 bool NewGeneApplication::notify( QObject * receiver, QEvent * e )

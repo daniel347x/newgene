@@ -29,6 +29,7 @@ enum DATA_WIDGETS
 	// Input project
 	, MANAGE_DMUS_WIDGET
 	, MANAGE_UOAS_WIDGET
+	, MANAGE_VGS_WIDGET
 
 	, DATA_WIDGETS_LAST
 
@@ -659,5 +660,51 @@ public:
 };
 typedef WidgetDataItem<MANAGE_UOAS_WIDGET> WidgetDataItem_MANAGE_UOAS_WIDGET;
 
+
+/************************************************************************/
+// MANAGE_VGS_WIDGET
+/************************************************************************/
+template<>
+class WidgetDataItemRequest<MANAGE_VGS_WIDGET> : public WidgetDataItemRequest_base
+{
+public:
+	WidgetDataItemRequest<MANAGE_VGS_WIDGET>(WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItemRequest_base(reason_, identifier_)
+	{
+	}
+	WidgetDataItemRequest<MANAGE_VGS_WIDGET>(WidgetDataItemRequest<MANAGE_VGS_WIDGET> const & rhs)
+		: WidgetDataItemRequest_base(rhs)
+	{
+	}
+};
+typedef WidgetDataItemRequest<MANAGE_VGS_WIDGET> WidgetDataItemRequest_MANAGE_VGS_WIDGET;
+
+template<>
+class WidgetDataItem<MANAGE_VGS_WIDGET> : public WidgetDataItem_base
+{
+public:
+	WidgetDataItem<MANAGE_VGS_WIDGET>(WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+		: WidgetDataItem_base(request_reason_, identifier_)
+	{
+	}
+	WidgetDataItem<MANAGE_VGS_WIDGET>(WidgetDataItemRequest_base const & request_obj)
+		: WidgetDataItem_base(request_obj)
+	{
+		try
+		{
+			WidgetDataItemRequest_MANAGE_VGS_WIDGET const & vg_management_request = dynamic_cast<WidgetDataItemRequest_MANAGE_VGS_WIDGET const &>(request_obj);
+		}
+		catch (std::bad_cast &)
+		{
+		}
+	}
+	WidgetDataItem<MANAGE_VGS_WIDGET>(WidgetDataItem<MANAGE_VGS_WIDGET> const & rhs)
+		: WidgetDataItem_base(rhs)
+		, vgs_and_uoa(rhs.vgs_and_uoa)
+	{
+	}
+	std::vector<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier>> vgs_and_uoa;
+};
+typedef WidgetDataItem<MANAGE_VGS_WIDGET> WidgetDataItem_MANAGE_VGS_WIDGET;
 
 #endif
