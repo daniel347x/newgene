@@ -9,6 +9,8 @@
 #include "../UIAction/TimeRangeChange.h"
 #include "../UIAction/GenerateOutput.h"
 #include "../UIAction/dmumanagement.h"
+#include "../UIAction/uoamanagement.h"
+#include "../UIAction/vgmanagement.h"
 #include <QStandardItem>
 
 OutputProjectWorkQueue::OutputProjectWorkQueue(QObject * parent)
