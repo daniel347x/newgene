@@ -277,7 +277,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	//form.addRow(labelDescription, lineEditDescription);
 	//fields << lineEditDescription;
 
-	QVBoxLayout formTimeRangeGranularitySelection();
+	QVBoxLayout formTimeRangeGranularitySelection;
 	QList<QRadioButton *> radioButtonsTimeRangeGranularity;
 	ImportDialogHelper::AddTimeRangeGranularitySelectionBlock(dialog, form, formTimeRangeGranularitySelection, radioButtonsTimeRangeGranularity);
 
