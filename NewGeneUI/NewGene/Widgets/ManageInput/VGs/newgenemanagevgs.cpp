@@ -1,6 +1,18 @@
 #include "newgenemanagevgs.h"
 #include "ui_newgenemanagevgs.h"
 
+#include <QStandardItemModel>
+#include <QListView>
+#include <QDialogButtonBox>
+
+#include "../Project/uiprojectmanager.h"
+#include "../Project/uiinputproject.h"
+#include "../../Utilities/importdialoghelper.h"
+#include "../../../../../NewGeneBackEnd/Utilities/Validation.h"
+#include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
+#include "../../../../NewGeneBackEnd/Model/InputModel.h"
+#include "../../../../NewGeneBackEnd/Model/TimeGranularity.h"
+
 NewGeneManageVGs::NewGeneManageVGs( QWidget * parent ) :
 	QWidget( parent ),
 	NewGeneWidget( WidgetCreationInfo(this, WIDGET_NATURE_INPUT_WIDGET, MANAGE_VGS_WIDGET, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
