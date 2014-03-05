@@ -183,7 +183,7 @@ WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, In
 std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const & vg)
 {
 	
-	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty() || !vg.identifier_parent)
 	{
 		boost::format msg("Bad VG in GetVgDisplayText().");
 		throw NewGeneException() << newgene_error_description(msg.str());
@@ -208,6 +208,8 @@ std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const &
 	{
 		displayText += *vg.code;
 	}
+
+	displayText += Table_UOA_Identifier::GetUoaCategoryDisplayText(*vg.identifier_parent, WidgetInstanceIdentifiers());
 
 	return displayText;
 

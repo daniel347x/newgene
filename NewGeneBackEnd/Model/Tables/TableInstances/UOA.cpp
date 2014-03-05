@@ -432,25 +432,27 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 	}
 
 
-	// Now the DMU categories
-
-	displayText += " (";
-	bool first = true;
-	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
+	// Now the DMU categories, if requested
+	if (!dmu_categories.empty())
 	{
-		if (!dmu_category.code || dmu_category.code->empty())
+		displayText += " (";
+		bool first = true;
+		std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
 		{
-			boost::format msg("Bad DMU category member of a UOA.");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-		if (!first)
-		{
-			displayText += ", ";
-		}
-		first = false;
-		displayText += *dmu_category.code;
-	});
-	displayText += ")";
+			if (!dmu_category.code || dmu_category.code->empty())
+			{
+				boost::format msg("Bad DMU category member of a UOA.");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+			if (!first)
+			{
+				displayText += ", ";
+			}
+			first = false;
+			displayText += *dmu_category.code;
+		});
+		displayText += ")";
+	}
 
 	return displayText;
 
