@@ -358,7 +358,7 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 	}
 
 	std::string flags;
-	WidgetInstanceIdentifier UOA_category_identifier(new_uuid, new_uoa, std::string(), 0, flags.c_str(), TIME_GRANULARITY__NONE, MakeNotes(std::string(), std::string(), std::string()));
+	WidgetInstanceIdentifier UOA_category_identifier(new_uuid, new_uoa, uoa_description, 0, flags.c_str(), TIME_GRANULARITY__NONE, MakeNotes(std::string(), std::string(), std::string()));
 	identifiers.push_back(UOA_category_identifier);
 	Sort();
 
