@@ -91,7 +91,7 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 		{
 			if (boost::iequals(*vg.code, vg_instance_table->vg_category_string_code))
 			{
-				vg_instance_table->DeleteDataTable(db, input_model_, change_message);
+				vg_instance_table->DeleteDataTable(db, input_model_);
 			}
 		}
 	});
