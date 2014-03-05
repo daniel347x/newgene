@@ -547,7 +547,7 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 
 								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
 								{
-									boost::format msg("Invalid new UOA ID.");
+									boost::format msg("Invalid UOA to remove.");
 									QMessageBox msgBox;
 									msgBox.setText( msg.str().c_str() );
 									msgBox.exec();

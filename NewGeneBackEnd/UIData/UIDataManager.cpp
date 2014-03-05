@@ -216,16 +216,15 @@ void UIDataManager::DoRefreshInputWidget(Messager & messager, WidgetDataItemRequ
 {
 	InputModel & input_model = project.model();
 	WidgetDataItem_MANAGE_VGS_WIDGET vg_management(widget_request);
-	WidgetInstanceIdentifiers vgs = input_model.t_vg_category.getIdentifiers();
+	WidgetInstanceIdentifiers vgs = input_model.t_vgp_identifiers.getIdentifiers();
 	std::for_each(vgs.cbegin(), vgs.cend(), [this, &vg_management, &input_model](WidgetInstanceIdentifier const & single_vg)
 	{
-		if (!single_vg.uuid || single_vg.uuid->empty())
+		if (!single_vg.uuid || single_vg.uuid->empty() || !single_vg.identifier_parent)
 		{
 			boost::format msg("Bad VG in action handler.");
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
-		WidgetInstanceIdentifier uoa = input_model.t_vg_category.RetrieveUOA(input_model.getDb(), &input_model, single_vg);
-		vg_management.vgs_and_uoa.push_back(std::make_pair(single_vg, uoa));
+		vg_management.vgs_and_uoa.push_back(std::make_pair(single_vg, *single_vg.identifier_parent));
 	});
 	messager.EmitInputWidgetDataRefresh(vg_management);
 }

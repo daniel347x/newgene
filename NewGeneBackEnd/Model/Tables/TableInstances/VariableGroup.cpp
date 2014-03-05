@@ -180,6 +180,39 @@ WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, In
 
 }
 
+std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const & vg)
+{
+	
+	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+	{
+		boost::format msg("Bad VG in GetVgDisplayText().");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	bool has_description = false;
+	if (vg.longhand && !vg.longhand->empty())
+	{
+		has_description = true;
+	}
+
+	std::string displayText;
+
+	if (has_description)
+	{
+		displayText += *vg.longhand;
+		displayText += " (";
+		displayText += *vg.code;
+		displayText += ")";
+	}
+	else
+	{
+		displayText += *vg.code;
+	}
+
+	return displayText;
+
+}
+
 void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 {
 

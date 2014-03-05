@@ -102,39 +102,39 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 
 	UIMessager messager(project);
 
-	if (!ui->listViewManageUOAs)
+	if (!ui->listViewManageVGs)
 	{
-		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
+		boost::format msg("Invalid list view in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
 		return;
 	}
 
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listViewManageVGs->model());
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
 	}
 
-	QItemSelectionModel * oldSelectionModel = ui->listViewManageUOAs->selectionModel();
-	QStandardItemModel * model = new QStandardItemModel(ui->listViewManageUOAs);
+	QItemSelectionModel * oldSelectionModel = ui->listViewManageVGs->selectionModel();
+	QStandardItemModel * model = new QStandardItemModel(ui->listViewManageVGs);
 
 	int index = 0;
-	std::for_each(widget_data.uoas_and_dmu_categories.cbegin(), widget_data.uoas_and_dmu_categories.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & uoa_and_dmu_categories)
+	std::for_each(widget_data.vgs_and_uoa.cbegin(), widget_data.vgs_and_uoa.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier> const & vg_and_uoa)
 	{
-		WidgetInstanceIdentifier const & uoa_category = uoa_and_dmu_categories.first;
-		WidgetInstanceIdentifiers const & dmu_categories = uoa_and_dmu_categories.second;
-		if (uoa_category.uuid && !uoa_category.uuid->empty())
+		WidgetInstanceIdentifier const & vg = vg_and_uoa.first;
+		WidgetInstanceIdentifier const & uoa = vg_and_uoa.second;
+		if (vg.uuid && !vg_and_uoa.uuid->empty() && vg.code && !vg.code->empty())
 		{
 
 			QStandardItem * item = new QStandardItem();
-			std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
+			std::string text = Table_VG_CATEGORY::GetVgDisplayText(vg);
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
 			QVariant v;
-			v.setValue(uoa_and_dmu_categories);
+			v.setValue(vg_and_uoa);
 			item->setData(v);
 			model->setItem( index, item );
 
@@ -145,7 +145,7 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 
 	model->sort(0);
 
-	ui->listViewManageUOAs->setModel(model);
+	ui->listViewManageVGs->setModel(model);
 	if (oldSelectionModel) delete oldSelectionModel;
 
 }
@@ -153,9 +153,9 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 void NewGeneManageVGs::Empty()
 {
 
-	if (!ui->listViewManageUOAs)
+	if (!ui->listViewManageVGs)
 	{
-		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
+		boost::format msg("Invalid list view in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
@@ -165,21 +165,21 @@ void NewGeneManageVGs::Empty()
 	QStandardItemModel * oldModel = nullptr;
 	QItemSelectionModel * oldSelectionModel = nullptr;
 
-	oldSelectionModel = ui->listViewManageUOAs->selectionModel();
+	oldSelectionModel = ui->listViewManageVGs->selectionModel();
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
 		oldSelectionModel = nullptr;
 	}
 
-	oldModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
+	oldModel = static_cast<QStandardItemModel*>(ui->listViewManageVGs->model());
 	if (oldModel != nullptr)
 	{
 		delete oldModel;
 		oldModel = nullptr;
 	}
 
-	oldSelectionModel = ui->listViewManageUOAs->selectionModel();
+	oldSelectionModel = ui->listViewManageVGs->selectionModel();
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
@@ -199,19 +199,19 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 
 	UIMessager messager(project);
 
-	if (!ui->listViewManageUOAs)
+	if (!ui->listViewManageVGs)
 	{
-		boost::format msg("Invalid list view in NewGeneManageUOAs widget.");
+		boost::format msg("Invalid list view in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
 		return;
 	}
 
-	QStandardItemModel * itemModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
+	QStandardItemModel * itemModel = static_cast<QStandardItemModel*>(ui->listViewManageVGs->model());
 	if (itemModel == nullptr)
 	{
-		boost::format msg("Invalid list view items in NewGeneManageUOAs widget.");
+		boost::format msg("Invalid list view items in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
@@ -233,28 +233,28 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__ADD:
 							{
 
-								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
+								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty() || !change.parent_identifier.code || change.parent_identifier.code->empty() || !change.parent_identifier.identifier_parent)
 								{
-									boost::format msg("Invalid new UOA ID.");
+									boost::format msg("Invalid new VG ID, code, or associated UOA.");
 									QMessageBox msgBox;
 									msgBox.setText( msg.str().c_str() );
 									msgBox.exec();
 									return;
 								}
 
-								WidgetInstanceIdentifier const & uoa_category = change.parent_identifier;
-								WidgetInstanceIdentifiers const & dmu_categories = change.child_identifiers;
+								WidgetInstanceIdentifier const & vg = change.parent_identifier;
+								WidgetInstanceIdentifier const & uoa = *vg.identifier_parent;
 
-								std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
+								std::string text = Table_VG_CATEGORY::GetUoaCategoryDisplayText(vg, uoa);
 
 								QStandardItem * item = new QStandardItem();
 								item->setText(text.c_str());
 								item->setEditable(false);
 								item->setCheckable(false);
 
-								std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> uoa_and_dmu_categories = std::make_pair(uoa_category, dmu_categories);
+								std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier> vg_and_uoa = std::make_pair(vg, uoa);
 								QVariant v;
-								v.setValue(uoa_and_dmu_categories);
+								v.setValue(vg_and_uoa);
 								item->setData(v);
 								itemModel->appendRow( item );
 
@@ -264,39 +264,46 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
 
-								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty())
+								if (!change.parent_identifier.uuid || (*change.parent_identifier.uuid).empty() || !change.parent_identifier.code || change.parent_identifier.code->empty() || !change.parent_identifier.identifier_parent)
 								{
-									boost::format msg("Invalid new UOA ID.");
+									boost::format msg("Invalid VG to remove.");
 									QMessageBox msgBox;
 									msgBox.setText( msg.str().c_str() );
 									msgBox.exec();
 									return;
 								}
 
-								WidgetInstanceIdentifier const & uoa_category = change.parent_identifier;
-								WidgetInstanceIdentifiers const & dmu_categories = change.child_identifiers;
+								WidgetInstanceIdentifier const & vg = change.parent_identifier;
+								WidgetInstanceIdentifier const & uoa = *vg.identifier_parent;
 
 								int numberItems = itemModel->rowCount();
 								for(int currentItem = 0; currentItem < numberItems; ++currentItem)
 								{
-									QStandardItem * uoa_to_remove_item = itemModel->item(currentItem);
-									if (uoa_to_remove_item != nullptr)
+									QStandardItem * vg_to_remove_item = itemModel->item(currentItem);
+									if (vg_to_remove_item != nullptr)
 									{
 
-										QVariant uoa_and_dmu_categories_variant = uoa_to_remove_item->data();
-										std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const uoa_and_dmu_categories = uoa_and_dmu_categories_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
-										WidgetInstanceIdentifier const & uoa = uoa_and_dmu_categories.first;
+										QVariant vg_and_uoa_variant = vg_to_remove_item->data();
+										std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier> const vg_and_uoa = vg_and_uoa_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier>>();
+										WidgetInstanceIdentifier const & vg_test = change.parent_identifier;
+										if (!vg_test.identifier_parent)
+										{
+											continue;
+										}
+										WidgetInstanceIdentifier const & uoa_test = *vg_test.identifier_parent;
 
-										if (uoa.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, uoa_category))
+										if (vg_test.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg)
+											&&
+											uoa_test.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, uoa))
 										{
 
-											QModelIndex index_to_remove = itemModel->indexFromItem(uoa_to_remove_item);
+											QModelIndex index_to_remove = itemModel->indexFromItem(vg_to_remove_item);
 											itemModel->takeRow(index_to_remove.row());
 
-											delete uoa_to_remove_item;
-											uoa_to_remove_item = nullptr;
+											delete vg_to_remove_item;
+											vg_to_remove_item = nullptr;
 
-											QItemSelectionModel * selectionModel = ui->listViewManageUOAs->selectionModel();
+											QItemSelectionModel * selectionModel = ui->listViewManageVGs->selectionModel();
 											if (selectionModel != nullptr)
 											{
 												selectionModel->clearSelection();
@@ -345,40 +352,44 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 
 }
 
-bool NewGeneManageVGs::GetSelectedVG(WidgetInstanceIdentifier & vg_category, WidgetInstanceIdentifier & uoa_category)
+bool NewGeneManageVGs::GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstanceIdentifier & uoa)
 {
 
-	QItemSelectionModel * uoa_selectionModel = ui->listViewManageUOAs->selectionModel();
-	if (uoa_selectionModel == nullptr)
+	QItemSelectionModel * vg_selectionModel = ui->listViewManageVGs->selectionModel();
+	if (vg_selectionModel == nullptr)
 	{
-		boost::format msg("Invalid selection in NewGeneManageUOAs widget.");
+		boost::format msg("Invalid selection in NewGeneManageVGs widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
 		return false;
 	}
 
-	QModelIndex selectedIndex = uoa_selectionModel->currentIndex();
+	QModelIndex selectedIndex = vg_selectionModel->currentIndex();
 	if (!selectedIndex.isValid())
 	{
 		// No selection
 		return false;
 	}
 
-	QStandardItemModel * uoaModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
-	if (uoaModel == nullptr)
+	QStandardItemModel * vgModel = static_cast<QStandardItemModel*>(ui->listViewManageVGs->model());
+	if (vgModel == nullptr)
 	{
-		boost::format msg("Invalid model in NewGeneManageUOAs DMU category widget.");
+		boost::format msg("Invalid model in NewGeneManageVGs DMU category widget.");
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
 		return false;
 	}
 
-	QVariant uoa_and_dmu_categories_variant = uoaModel->item(selectedIndex.row())->data();
-	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> uoa_and_dmu_categories = uoa_and_dmu_categories_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
-	uoa_category = uoa_and_dmu_categories.first;
-	uoa_dmu_categories = uoa_and_dmu_categories.second;
+	QVariant vg_and_uoa_variant = vgModel->item(selectedIndex.row())->data();
+	std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier> vg_and_uoa = vg_and_uoa_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier>>();
+	vg = vg_and_uoa.first;
+	if (!vg.identifier_parent)
+	{
+		return false;
+	}
+	uoa = vg.identifier_parent;
 
 	return true;
 

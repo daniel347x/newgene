@@ -48,7 +48,7 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 
 	protected:
 
-		bool GetSelectedVG(WidgetInstanceIdentifier & vg_category, WidgetInstanceIdentifier & uoa_category);
+		bool GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstanceIdentifier & uoa);
 
 };
 
