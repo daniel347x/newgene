@@ -557,23 +557,33 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 								WidgetInstanceIdentifier const & uoa_category = change.parent_identifier;
 								WidgetInstanceIdentifiers const & dmu_categories = change.child_identifiers;
 
-								std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
-								QList<QStandardItem *> items = itemModel->findItems(text.c_str());
-								if (items.count() == 1)
+								QList<QStandardItem *> uoas_to_remove = itemModel->findItems();
+								foreach(QStandardItem * uoa_to_remove_item, uoas_to_remove)
 								{
-									QStandardItem * uoa_to_remove = items.at(0);
-									if (uoa_to_remove != nullptr)
+									if (uoa_to_remove_item != nullptr)
 									{
-										QModelIndex index_to_remove = itemModel->indexFromItem(uoa_to_remove);
-										itemModel->takeRow(index_to_remove.row());
 
-										delete uoa_to_remove;
-										uoa_to_remove = nullptr;
+										QVariant uoa_and_dmu_categories_variant = uoa_to_remove_item->data();
+										std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const uoa_and_dmu_categories = uoa_and_dmu_categories_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers>>();
+										WidgetInstanceIdentifier const & uoa = uoa_and_dmu_categories.first;
 
-										QItemSelectionModel * selectionModel = ui->listViewManageUOAs->selectionModel();
-										if (selectionModel != nullptr)
+										if (uoa.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, uoa_category))
 										{
-											selectionModel->clearSelection();
+
+											QModelIndex index_to_remove = itemModel->indexFromItem(uoa_to_remove_item);
+											itemModel->takeRow(index_to_remove.row());
+
+											delete uoa_to_remove;
+											uoa_to_remove = nullptr;
+
+											QItemSelectionModel * selectionModel = ui->listViewManageUOAs->selectionModel();
+											if (selectionModel != nullptr)
+											{
+												selectionModel->clearSelection();
+											}
+
+											break;
+
 										}
 
 									}
