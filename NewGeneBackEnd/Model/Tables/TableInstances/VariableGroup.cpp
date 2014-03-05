@@ -250,7 +250,7 @@ bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std:
 
 }
 
-bool Table_VG_CATEGORY::Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & vg, bool const also_confirm_using_cache = true)
+bool Table_VG_CATEGORY::Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & vg, bool const also_confirm_using_cache)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -302,7 +302,7 @@ bool Table_VG_CATEGORY::Exists(sqlite3 * db, InputModel & input_model_, WidgetIn
 
 }
 
-bool Table_VG_CATEGORY::ExistsByUuid(sqlite3 * db, InputModel & input_model_, std::string const & vg_uuid, bool const also_confirm_using_cache = true)
+bool Table_VG_CATEGORY::ExistsByUuid(sqlite3 * db, InputModel & input_model_, std::string const & vg_uuid, bool const also_confirm_using_cache)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -336,6 +336,7 @@ bool Table_VG_CATEGORY::ExistsByUuid(sqlite3 * db, InputModel & input_model_, st
 	if (also_confirm_using_cache)
 	{
 		// Safety check: Cache should match database
+		WidgetInstanceIdentifier vg(vg_uuid, "", "", 0);
 		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg));
 		bool exists_in_cache = (found != identifiers.cend());
 		if (exists != exists_in_cache)
@@ -349,7 +350,7 @@ bool Table_VG_CATEGORY::ExistsByUuid(sqlite3 * db, InputModel & input_model_, st
 
 }
 
-bool Table_VG_CATEGORY::ExistsByCode(sqlite3 * db, InputModel & input_model_, std::string const & vg_code_, bool const also_confirm_using_cache = true)
+bool Table_VG_CATEGORY::ExistsByCode(sqlite3 * db, InputModel & input_model_, std::string const & vg_code_, bool const also_confirm_using_cache)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -392,7 +393,8 @@ bool Table_VG_CATEGORY::ExistsByCode(sqlite3 * db, InputModel & input_model_, st
 	if (also_confirm_using_cache)
 	{
 		// Safety check: Cache should match database
-		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg));
+		WidgetInstanceIdentifier vg(vg_code);
+		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, vg));
 		bool exists_in_cache = (found != identifiers.cend());
 		if (exists != exists_in_cache)
 		{

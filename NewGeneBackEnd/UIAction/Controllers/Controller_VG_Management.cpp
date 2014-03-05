@@ -96,7 +96,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 					}
 
 					boost::format msg("VG '%1%' successfully created.");
-					msg % boost::to_upper_copy(vg_code);
+					msg % boost::to_upper_copy(new_vg_code);
 					messager.ShowMessageBox(msg.str());
 
 					// ***************************************** //
@@ -104,7 +104,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 					// ***************************************** //
 
 					WidgetInstanceIdentifier newIdentifier;
-					bool found_newly_created_vg = input_model.t_vgp_identifiers.getIdentifierFromStringCode(vg_code, newIdentifier);
+					bool found_newly_created_vg = input_model.t_vgp_identifiers.getIdentifierFromStringCode(new_vg_code, newIdentifier);
 
 					if (!found_newly_created_vg || !newIdentifier.uuid || newIdentifier.uuid->empty() || !newIdentifier.code || newIdentifier.code->empty() || !newIdentifier.identifier_parent)
 					{
