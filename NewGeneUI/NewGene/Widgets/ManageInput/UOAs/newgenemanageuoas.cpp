@@ -557,9 +557,10 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 								WidgetInstanceIdentifier const & uoa_category = change.parent_identifier;
 								WidgetInstanceIdentifiers const & dmu_categories = change.child_identifiers;
 
-								QList<QStandardItem *> uoas_to_remove = itemModel->findItems();
-								foreach(QStandardItem * uoa_to_remove_item, uoas_to_remove)
+								int numberItems = itemModel->rowCount();
+								for(int currentItem = 0; currentItem < numberItems; ++currentItem)
 								{
+									QStandardItem * uoa_to_remove_item = itemModel->item(currentItem);
 									if (uoa_to_remove_item != nullptr)
 									{
 
