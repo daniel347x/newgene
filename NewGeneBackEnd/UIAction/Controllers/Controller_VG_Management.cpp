@@ -307,3 +307,97 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 	}
 
 }
+
+void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACTION_REFRESH_VG const & action_request, InputProject & project)
+{
+
+	if (FailIfBusy(messager))
+	{
+		return;
+	}
+
+	BOOST_SCOPE_EXIT(this_)
+	{
+		this_->EndFailIfBusy();
+	} BOOST_SCOPE_EXIT_END
+
+	if (!action_request.items)
+	{
+		return;
+	}
+
+	InputModel & input_model = project.model();
+
+	switch (action_request.reason)
+	{
+
+	case WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION:
+	{
+
+														 DataChangeMessage change_response(&project);
+
+														 for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+														 {
+
+															 WidgetInstanceIdentifier dmu_category = instanceActionItem.first;
+
+															 if (!dmu_category.code || !dmu_category.uuid || dmu_category.code->empty() || dmu_category.uuid->empty())
+															 {
+																 boost::format msg("Missing the DMU category to refresh.");
+																 messager.ShowMessageBox(msg.str());
+																 return;
+															 }
+
+															 if (!instanceActionItem.second)
+															 {
+																 boost::format msg("Missing DMU refresh information.");
+																 messager.ShowMessageBox(msg.str());
+																 return;
+															 }
+
+															 // ************************************* //
+															 // Retrieve data sent by user interface
+															 // ************************************* //
+															 WidgetActionItem const & actionItem = *instanceActionItem.second;
+															 WidgetActionItem__StringVector const & actionItemString = static_cast<WidgetActionItem__StringVector const &>(actionItem);
+															 std::vector<std::string> dmu_refresh_strings = actionItemString.getValue();
+
+															 std::string dmu_refresh_file_pathname = dmu_refresh_strings[0];
+															 std::vector<std::string> dmu_refresh_column_labels(dmu_refresh_strings.cbegin() + 1, dmu_refresh_strings.cend());
+
+															 bool success = input_model.t_dmu_setmembers.RefreshFromFile(input_model.getDb(), input_model, dmu_category, boost::filesystem::path(dmu_refresh_file_pathname), dmu_refresh_column_labels);
+
+															 if (!success)
+															 {
+																 return;
+															 }
+
+															 boost::format msg("DMU category '%1%' successfully refreshed from file.");
+															 msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+															 messager.ShowMessageBox(msg.str());
+
+															 // ***************************************** //
+															 // Prepare data to send back to user interface
+															 // ***************************************** //
+
+															 WidgetInstanceIdentifiers dmu_members = input_model.t_dmu_setmembers.getIdentifiers(*dmu_category.uuid);
+
+															 DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__DMU_MEMBERS_CHANGE;
+															 DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__RESET_ALL;
+															 DataChange change(type, intention, dmu_category, dmu_members);
+
+															 change_response.changes.push_back(change);
+
+														 });
+
+														 messager.EmitChangeMessage(change_response);
+
+	}
+		break;
+
+	default:
+		break;
+
+	}
+
+}
