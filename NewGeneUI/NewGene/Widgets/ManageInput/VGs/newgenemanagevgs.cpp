@@ -570,7 +570,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	std::string new_vg_code(proposed_vg_code);
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(uoa_to_use, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem_StringVector(std::vector<std::string>{new_vg_code, vg_description})))));
+	actionItems.push_back(std::make_pair(uoa_to_use, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(std::vector<std::string>{new_vg_code, vg_description})))));
 	WidgetActionItemRequest_ACTION_CREATE_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 	emit CreateVG(action_request);

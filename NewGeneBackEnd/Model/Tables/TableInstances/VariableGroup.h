@@ -45,6 +45,11 @@ class Table_VG_CATEGORY : public Table<TABLE__VG_CATEGORY, TABLE_INSTANCE_IDENTI
 		// For a given UOA, retrieve its VGs
 		WidgetInstanceIdentifiers RetrieveVGsFromUOA(sqlite3 * db, InputModel * input_model_, UUID const & uuid);
 
+		bool Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & vg, bool const also_confirm_using_cache = true);
+		bool ExistsByUuid(sqlite3 * db, InputModel & input_model_, std::string const & vg_uuid, bool const also_confirm_using_cache = true);
+		bool ExistsByCode(sqlite3 * db, InputModel & input_model_, std::string const & vg_code, bool const also_confirm_using_cache = true);
+
+		bool CreateNewVG(sqlite3 * db, InputModel & input_model, std::string const & vg_code, std::string const & vg_description, WidgetInstanceIdentifier const & uoa_to_use);
 		bool DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, DataChangeMessage & change_message);
 
 		static std::string GetVgDisplayText(WidgetInstanceIdentifier const & vg);

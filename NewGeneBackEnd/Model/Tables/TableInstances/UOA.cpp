@@ -195,6 +195,7 @@ bool Table_UOA_Identifier::ExistsByCode(sqlite3 * db, InputModel & input_model_,
 
 	std::string proposed_uoa_code(uoa_code);
 	boost::trim(proposed_uoa_code);
+	boost::to_upper(proposed_uoa_code);
 
 	if (proposed_uoa_code.empty())
 	{

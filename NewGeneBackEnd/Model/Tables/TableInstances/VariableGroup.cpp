@@ -4,6 +4,7 @@
 #ifndef Q_MOC_RUN
 #	include <boost/algorithm/string.hpp>
 #endif
+#include "../../../Utilities/UUID.h"
 #include "../../InputModel.h"
 
 std::string const Table_VG_CATEGORY::VG_CATEGORY_UUID = "VG_CATEGORY_UUID";
@@ -177,6 +178,224 @@ WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, In
 	}
 
 	return vgs;
+
+}
+
+bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std::string const & vg_code_, std::string const & vg_description, WidgetInstanceIdentifier const & uoa_to_use)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor theExecutor(db);
+
+	if (!uoa_to_use.uuid)
+	{
+		boost::format msg("Bad UOA in attempted creation of VG");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	std::string vg_code = boost::trim_copy(vg_code_);
+	boost::to_upper(vg_code);
+
+	bool already_exists = ExistsByCode(db, input_model, vg_code);
+	if (already_exists)
+	{
+		return false;
+	}
+
+	std::string new_uuid(boost::to_upper_copy(newUUID(false)));
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("INSERT INTO VG_CATEGORY (VG_CATEGORY_UUID, VG_CATEGORY_STRING_CODE, VG_CATEGORY_STRING_LONGHAND, VG_CATEGORY_NOTES1, VG_CATEGORY_NOTES2, VG_CATEGORY_NOTES3, VG_CATEGORY_FK_UOA_CATEGORY_UUID, VG_CATEGORY_FLAGS) VALUES ('");
+	sql += new_uuid;
+	sql += "', ?, ?, '', '', '', ?, '')";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare INSERT statement to create a new variable group.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	sqlite3_bind_text(stmt, 1, vg_code.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 2, vg_description.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 3, uoa_to_use.uuid->c_str(), -1, SQLITE_TRANSIENT);
+	int step_result = 0;
+	step_result = sqlite3_step(stmt);
+	if (step_result != SQLITE_DONE)
+	{
+		boost::format msg("Unable to execute INSERT statement to create a new VG: %1%");
+		msg % sqlite3_errstr(step_result);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	std::string flags;
+	WidgetInstanceIdentifier vg_category_identifier(new_uuid, vg_code, vg_description, 0, flags.c_str(), TIME_GRANULARITY__NONE, MakeNotes(std::string(), std::string(), std::string()));
+	vg_category_identifier.identifier_parent = std::make_shared<WidgetInstanceIdentifier>(uoa_to_use);
+	identifiers.push_back(vg_category_identifier);
+
+	// Do not create the table here.  Wait for them to import data, and create the table then.
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
+
+}
+
+bool Table_VG_CATEGORY::Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & vg, bool const also_confirm_using_cache = true)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	if (!vg.uuid || !vg.code)
+	{
+		return false;
+	}
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT COUNT(*) FROM VG_CATEGORY WHERE VG_CATEGORY_UUID = '");
+	sql += *vg.uuid;
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare SELECT statement to search for an existing VG.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	bool exists = false;
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		int existing_vg_count = sqlite3_column_int(stmt, 0);
+		if (existing_vg_count == 1)
+		{
+			exists = true;
+		}
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	if (also_confirm_using_cache)
+	{
+		// Safety check: Cache should match database
+		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg));
+		bool exists_in_cache = (found != identifiers.cend());
+		if (exists != exists_in_cache)
+		{
+			boost::format msg("Cache of VGs is out-of-sync.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+	}
+
+	return exists;
+
+}
+
+bool Table_VG_CATEGORY::ExistsByUuid(sqlite3 * db, InputModel & input_model_, std::string const & vg_uuid, bool const also_confirm_using_cache = true)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT COUNT(*) FROM VG_CATEGORY WHERE VG_CATEGORY_UUID = '");
+	sql += vg_uuid;
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare SELECT statement to search for an existing VG.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	bool exists = false;
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		int existing_vg_count = sqlite3_column_int(stmt, 0);
+		if (existing_vg_count == 1)
+		{
+			exists = true;
+		}
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	if (also_confirm_using_cache)
+	{
+		// Safety check: Cache should match database
+		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg));
+		bool exists_in_cache = (found != identifiers.cend());
+		if (exists != exists_in_cache)
+		{
+			boost::format msg("Cache of VGs is out-of-sync.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+	}
+
+	return exists;
+
+}
+
+bool Table_VG_CATEGORY::ExistsByCode(sqlite3 * db, InputModel & input_model_, std::string const & vg_code_, bool const also_confirm_using_cache = true)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	std::string vg_code(vg_code_);
+	boost::trim(vg_code);
+	boost::to_upper(vg_code);
+
+	if (vg_code.empty())
+	{
+		return false;
+	}
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT COUNT(*) FROM VG_CATEGORY WHERE VG_CATEGORY_STRING_CODE = '");
+	sql += vg_code;
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare SELECT statement to search for an existing VG.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	bool exists = false;
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		int existing_vg_count = sqlite3_column_int(stmt, 0);
+		if (existing_vg_count == 1)
+		{
+			exists = true;
+		}
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	if (also_confirm_using_cache)
+	{
+		// Safety check: Cache should match database
+		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg));
+		bool exists_in_cache = (found != identifiers.cend());
+		if (exists != exists_in_cache)
+		{
+			boost::format msg("Cache of VGs is out-of-sync.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+	}
+
+	return exists;
 
 }
 

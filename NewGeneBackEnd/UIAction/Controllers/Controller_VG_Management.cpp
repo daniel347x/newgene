@@ -30,7 +30,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 	if (!action_request.items)
 	{
-		boost::format msg("There are no new UOAs to add.");
+		boost::format msg("There are no new VGs to add.");
 		messager.ShowMessageBox(msg.str());
 		return;
 	}
@@ -39,7 +39,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 	if (!action_request.items || action_request.items->size() == 0)
 	{
-		boost::format msg("There are no new UOAs to add.");
+		boost::format msg("There are no new VGs to add.");
 		messager.ShowMessageBox(msg.str());
 		return;
 	}
@@ -56,7 +56,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 				{
 					if (!instanceActionItem.second)
 					{
-						boost::format msg("Missing the new UOA to create.");
+						boost::format msg("Missing the new VG to create.");
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
@@ -64,42 +64,39 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 					// ************************************* //
 					// Retrieve data sent by user interface
 					// ************************************* //
+					WidgetInstanceIdentifier const & uoa_to_use = instanceActionItem.first;
 					WidgetActionItem const & actionItem = *instanceActionItem.second;
-					WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const & actionItemWsStringStringInt =
-						static_cast<WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const &>(actionItem);
-					WidgetInstanceIdentifiers const & dmu_categories = actionItemWsStringStringInt.getValue();
-					std::string const & new_uoa_code = actionItemWsStringStringInt.getValueString();
-					std::string const & uoa_description = actionItemWsStringStringInt.getValueString2();
-					int const & the_time_granularity = actionItemWsStringStringInt.getValueInt();
-					TIME_GRANULARITY time_granularity = (TIME_GRANULARITY)the_time_granularity;
-
-					if (dmu_categories.size() == 0)
+					WidgetActionItem__StringVector const & actionItemStrings = static_cast<WidgetActionItem__StringVector const &>(actionItem);
+					std::vector<std::string> const & vg_strings = actionItemStrings.getValue();
+					if (vg_strings.size() == 0)
 					{
-						boost::format msg("At least one DMU category is required to create a new UOA.");
+						boost::format msg("Incorrect internal data format for VG creation.");
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+					std::string const & new_vg_code = vg_strings[0];
+					std::string const & vg_description = vg_strings[1];
+
+					bool vg_already_exists = input_model.t_vgp_identifiers.ExistsByCode(input_model.getDb(), input_model, new_vg_code);
+
+					if (vg_already_exists)
+					{
+						boost::format msg("The VG code '%1%' already exists.");
+						msg % boost::to_upper_copy(new_vg_code);
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
 
-					bool uoa_already_exists = input_model.t_uoa_category.ExistsByCode(input_model.getDb(), input_model, new_uoa_code);
+					bool vg_successfully_created = input_model.t_vgp_identifiers.CreateNewVG(input_model.getDb(), input_model, new_vg_code, vg_description, uoa_to_use);
 
-					if (uoa_already_exists)
+					if (!vg_successfully_created)
 					{
-						boost::format msg("The UOA code '%1%' already exists.");
-						msg % boost::to_upper_copy(new_uoa_code);
-						messager.ShowMessageBox(msg.str());
-						return;
-					}
-
-					bool uoa_successfully_created = input_model.t_uoa_category.CreateNewUOA(input_model.getDb(), input_model, new_uoa_code, uoa_description, dmu_categories, time_granularity);
-
-					if (!uoa_successfully_created)
-					{
-						boost::format msg("Unable to execute INSERT statement to create a new UOA category.");
+						boost::format msg("Unable to execute INSERT statement to create a new VG category.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					boost::format msg("UOA '%1%' successfully created.");
-					msg % boost::to_upper_copy(new_uoa_code);
+					boost::format msg("VG '%1%' successfully created.");
+					msg % boost::to_upper_copy(vg_code);
 					messager.ShowMessageBox(msg.str());
 
 					// ***************************************** //
@@ -107,17 +104,17 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 					// ***************************************** //
 
 					WidgetInstanceIdentifier newIdentifier;
-					bool found_newly_created_uoa = input_model.t_uoa_category.getIdentifierFromStringCode(new_uoa_code, newIdentifier);
+					bool found_newly_created_vg = input_model.t_vgp_identifiers.getIdentifierFromStringCode(vg_code, newIdentifier);
 
-					if (!found_newly_created_uoa || !newIdentifier.uuid || newIdentifier.uuid->empty())
+					if (!found_newly_created_vg || !newIdentifier.uuid || newIdentifier.uuid->empty() || !newIdentifier.code || newIdentifier.code->empty() || !newIdentifier.identifier_parent)
 					{
-						boost::format msg("Unable to find newly created UOA.");
+						boost::format msg("Unable to find newly created VG.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__UOA_CHANGE;
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE;
 					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
-					DataChange change(type, intention, newIdentifier, dmu_categories);
+					DataChange change(type, intention, newIdentifier, WidgetInstanceIdentifiers());
 
 					change_response.changes.push_back(change);
 
