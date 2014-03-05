@@ -341,7 +341,7 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 	}
 	std::string new_uoa(boost::to_upper_copy(uoa_code));
 	sqlite3_bind_text(stmt, 1, new_uoa.c_str(), -1, SQLITE_TRANSIENT);
-	sqlite3_bind_text(stmt, 1, uoa_description.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt, 2, uoa_description.c_str(), -1, SQLITE_TRANSIENT);
 	sqlite3_bind_int(stmt, 3, (int)time_granularity);
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
