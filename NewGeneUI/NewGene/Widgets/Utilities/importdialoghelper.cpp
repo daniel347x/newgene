@@ -352,7 +352,7 @@ bool ImportDialogHelper::ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeR
 void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories)
 {
 
-	QString labelTitle = QString("Create a new Unit of Analysis");
+	QString labelTitle = QString("Define the DMU categories for the new Unit of Analysis:");
 	QLabel * title = new QLabel(labelTitle, &dialog);
 
 	lhs = new QListView(&UoaConstructionPanes);
