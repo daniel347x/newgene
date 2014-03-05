@@ -439,6 +439,15 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 				dmu_categories_to_use.push_back(dmu_category);
 			}
 
+			if (dmu_categories_to_use.empty())
+			{
+				boost::format msg("At least one DMU category must be included in the definition of the unit of analysis.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
 			dialog.accept();
 		}
 
