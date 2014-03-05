@@ -2,6 +2,7 @@
 #define NEWGENEMANAGEVGS_H
 
 #include <QWidget>
+#include <QItemSelection>
 #include "../../newgenewidget.h"
 
 namespace Ui
