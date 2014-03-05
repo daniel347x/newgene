@@ -51,7 +51,7 @@ class Table_UOA_Identifier : public Table<TABLE__UOA_IDENTIFIER, TABLE_INSTANCE_
 		bool Exists(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, bool const also_confirm_using_cache = true);
 		bool ExistsByCode(sqlite3 * db, InputModel & input_model_, std::string const & uoa_code, bool const also_confirm_using_cache);
 		bool DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, DataChangeMessage & change_message);
-		bool CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & new_uoa_code, WidgetInstanceIdentifiers const & dmu_categories);
+		bool CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & uoa_code, WidgetInstanceIdentifiers const & dmu_categories, TIME_GRANULARITY const & time_granularity);
 
 		static std::string GetUoaCategoryDisplayText(WidgetInstanceIdentifier const & uoa_category, WidgetInstanceIdentifiers const & dmu_categories);
 
@@ -86,6 +86,9 @@ class Table_UOA_Member : public Table<TABLE__UOA_MEMBER, TABLE_INSTANCE_IDENTIFI
 
 		// Just delete from the cache
 		bool DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa);
+
+		// Create a new UOA
+		bool CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & uoa_uuid, WidgetInstanceIdentifiers dmu_categories);
 
 };
 

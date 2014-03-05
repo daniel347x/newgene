@@ -5,6 +5,7 @@
 #	include <boost/algorithm/string.hpp>
 #endif
 #include "../../InputModel.h"
+#include "../../../Utilities/UUID.h"
 
 #include <unordered_set>
 
@@ -312,8 +313,65 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 
 }
 
-bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & new_uoa_code, WidgetInstanceIdentifiers const & dmu_categories)
+bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & new_uoa_code, WidgetInstanceIdentifiers const & dmu_categories, TIME_GRANULARITY const & time_granularity)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor theExecutor(db);
+
+	std::string uoa_code = boost::trim_copy(new_uoa_code);
+
+	bool already_exists = ExistsByCode(db, input_model, uoa_code);
+	if (already_exists)
+	{
+		return false;
+	}
+
+	std::string new_uuid(boost::to_upper_copy(newUUID(false)));
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("INSERT INTO UOA_CATEGORY (UOA_CATEGORY_UUID, UOA_CATEGORY_STRING_CODE, UOA_CATEGORY_STRING_LONGHAND, UOA_CATEGORY_TIME_GRANULARITY, UOA_CATEGORY_NOTES1, UOA_CATEGORY_NOTES2, UOA_CATEGORY_NOTES3, UOA_CATEGORY_FLAGS) VALUES ('");
+	sql += new_uuid;
+	sql += "', ?, '', ?, '', '', '', '')";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare INSERT statement to create a new unit of analysis.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	std::string new_uoa(boost::to_upper_copy(uoa_code));
+	sqlite3_bind_text(stmt, 1, new_uoa.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_int(stmt, 1, (int)time_granularity);
+	int step_result = 0;
+	step_result = sqlite3_step(stmt);
+	if (step_result != SQLITE_DONE)
+	{
+		boost::format msg("Unable to execute INSERT statement to create a new UOA: %1%");
+		msg % sqlite3_errstr(step_result);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	std::string flags;
+	WidgetInstanceIdentifier UOA_category_identifier(new_uuid, new_uoa, std::string(), 0, flags.c_str(), TIME_GRANULARITY__NONE, MakeNotes(std::string(), std::string(), std::string()));
+	identifiers.push_back(UOA_category_identifier);
+	Sort();
+
+	bool added_dmu_category_lookups = input_model.t_uoa_setmemberlookup.CreateNewUOA(db, input_model, new_uuid, dmu_categories);
+	if (!added_dmu_category_lookups)
+	{
+		boost::format msg("Unable to create new UOA-DMU category entries in lookup table: %1%");
+		msg % sqlite3_errstr(step_result);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
 
 }
 
@@ -484,5 +542,59 @@ bool Table_UOA_Member::DeleteUOA(sqlite3 * db, InputModel & input_model_, Widget
 	identifiers_map.erase(*uoa.uuid);
 
 	return true;
+
+}
+
+bool Table_UOA_Member::CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & uoa_uuid, WidgetInstanceIdentifiers dmu_categories)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	Executor theExecutor(db);
+
+	int sequence_number = 0;
+	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
+	{
+
+		if (!dmu_category.uuid || dmu_category.uuid->empty())
+		{
+			boost::format msg("Bad DMU category member of a UOA.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+		++sequence_number;
+
+		sqlite3_stmt * stmt = NULL;
+		std::string sql("INSERT INTO UOA_CATEGORY_LOOKUP (UOA_CATEGORY_LOOKUP_FK_UOA_CATEGORY_UUID, UOA_CATEGORY_LOOKUP_SEQUENCE_NUMBER, UOA_CATEGORY_LOOKUP_FK_DMU_CATEGORY_UUID) VALUES ('");
+		sql += uoa_uuid;
+		sql += "', ";
+		sql += sequence_number;
+		sql += "', '";
+		sql += *dmu_category.uuid;
+		sql += "')";
+		sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+		if (stmt == NULL)
+		{
+			boost::format msg("Unable to prepare INSERT statement to create a new UOA-DMU category mapping.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		int step_result = 0;
+		step_result = sqlite3_step(stmt);
+		if (step_result != SQLITE_DONE)
+		{
+			boost::format msg("Unable to execute INSERT statement to create a new UOA-DMU category mapping: %1%");
+			msg % sqlite3_errstr(step_result);
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		if (stmt)
+		{
+			sqlite3_finalize(stmt);
+			stmt = nullptr;
+		}
+	});
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
 
 }
