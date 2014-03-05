@@ -569,7 +569,7 @@ bool Table_UOA_Member::CreateNewUOA(sqlite3 * db, InputModel & input_model, std:
 		std::string sql("INSERT INTO UOA_CATEGORY_LOOKUP (UOA_CATEGORY_LOOKUP_FK_UOA_CATEGORY_UUID, UOA_CATEGORY_LOOKUP_SEQUENCE_NUMBER, UOA_CATEGORY_LOOKUP_FK_DMU_CATEGORY_UUID) VALUES ('");
 		sql += uoa_uuid;
 		sql += "', ";
-		sql += sequence_number;
+		sql += boost::lexical_cast<std::string>(sequence_number);
 		sql += ", '";
 		sql += *dmu_category.uuid;
 		sql += "')";
