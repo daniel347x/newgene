@@ -574,8 +574,8 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 											QModelIndex index_to_remove = itemModel->indexFromItem(uoa_to_remove_item);
 											itemModel->takeRow(index_to_remove.row());
 
-											delete uoa_to_remove;
-											uoa_to_remove = nullptr;
+											delete uoa_to_remove_item;
+											uoa_to_remove_item = nullptr;
 
 											QItemSelectionModel * selectionModel = ui->listViewManageUOAs->selectionModel();
 											if (selectionModel != nullptr)
