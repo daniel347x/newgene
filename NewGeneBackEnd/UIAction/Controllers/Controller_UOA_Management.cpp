@@ -111,7 +111,17 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					WidgetInstanceIdentifiers dmu_categories = input_model.t_uoa_category.RetrieveDMUCategories(input_model.getDb(), &input_model, *newIdentifier.uuid);
+					WidgetInstanceIdentifiers dmu_categories_test = input_model.t_uoa_category.RetrieveDMUCategories(input_model.getDb(), &input_model, *newIdentifier.uuid);
+
+					if (!std::equal(dmu_categories.cbegin(), dmu_categories.cend(), dmu_categories_test.cbegin(), [](WidgetInstanceIdentifier const & lhs, WidgetInstanceIdentifier const & rhs)
+							{
+								return lhs.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, rhs);
+							}
+						))
+					{
+						boost::format msg("Mismatch in number of DMU categories created for new UOA in comparison with number requested.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
 
 					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__UOA_CHANGE;
 					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
