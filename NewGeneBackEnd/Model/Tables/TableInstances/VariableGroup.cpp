@@ -209,8 +209,14 @@ std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const &
 		displayText += *vg.code;
 	}
 
+	WidgetInstanceIdentifiers dmu_categories;
+	if ((*vg.identifier_parent).foreign_key_identifiers)
+	{
+		dmu_categories = *(*vg.identifier_parent).foreign_key_identifiers;
+	}
+
 	displayText += " (Corresponds to UOA: ";
-	displayText += Table_UOA_Identifier::GetUoaCategoryDisplayText(*vg.identifier_parent, WidgetInstanceIdentifiers());
+	displayText += Table_UOA_Identifier::GetUoaCategoryDisplayText(*vg.identifier_parent, dmu_categories);
 	displayText += ")";
 
 	return displayText;

@@ -406,3 +406,213 @@ bool NewGeneManageVGs::GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstan
 	return true;
 
 }
+
+void NewGeneManageVGs::on_pushButton_add_vg_clicked()
+{
+
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		boost::format msg("Bad input project.  Unable to create \"New VG\" dialog.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	UIInputModel & ui_input_model = project->model();
+	InputModel & backend_input_model = ui_input_model.getBackendModel();
+	WidgetInstanceIdentifiers dmu_categories = backend_input_model.t_dmu_category.getIdentifiers();
+
+	// From http://stackoverflow.com/a/17512615/368896
+	QDialog dialog(this);
+	QFormLayout form(&dialog);
+	form.addRow(new QLabel("Create new variable group"));
+	QList<QLineEdit *> fields;
+	QLineEdit *lineEditCode = new QLineEdit(&dialog);
+	QString labelCode = QString("Enter a brief identifying code for the new variable group (all caps):");
+	form.addRow(labelCode, lineEditCode);
+	fields << lineEditCode;
+
+	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
+	QString labelDescription = QString("Description:");
+	form.addRow(labelDescription, lineEditDescription);
+	fields << lineEditDescription;
+
+	QWidget VgConstructionWidget;
+	QVBoxLayout formOverall;
+	QWidget VgConstructionPanes;
+	QHBoxLayout formConstructionPane;
+	QVBoxLayout formConstructionButtons;
+	QListView * listpane = nullptr;
+	ImportDialogHelper::AddVgCreationBlock(dialog, form, VgConstructionWidget, formOverall, VgConstructionPanes, formConstructionPane, formConstructionButtons, listpane);
+
+	if (!listpane)
+	{
+		boost::format msg("Unable to create \"New VG\" dialog.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+	form.addRow(&buttonBox);
+
+	std::string proposed_vg_code;
+	std::string vg_description;
+
+	WidgetInstanceIdentifier uoa_to_use;
+
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
+	{
+
+		std::string errorMsg;
+
+		QLineEdit * proposed_vg_code_field = fields[0];
+		QLineEdit * vg_description_field = fields[1];
+		if (proposed_vg_code_field && vg_description_field)
+		{
+			proposed_vg_code = proposed_vg_code_field->text().toStdString();
+			vg_description = vg_description_field->text().toStdString();
+			if (proposed_vg_code.empty())
+			{
+				boost::format msg("The VG must have an identifying code (typically, a short, all-caps string).");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+		}
+		else
+		{
+			boost::format msg("Unable to determine new VG code or description.");
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return false;
+		}
+
+		boost::trim(proposed_vg_code);
+		boost::trim(vg_description);
+
+		bool valid = true;
+
+		if (valid)
+		{
+			valid = Validation::ValidateVgCode(proposed_vg_code, errorMsg);
+		}
+
+		if (valid)
+		{
+			valid = Validation::ValidateVgDescription(vg_description, errorMsg);
+		}
+
+		if (!valid)
+		{
+			boost::format msg("%1%");
+			msg % errorMsg;
+			QMessageBox msgBox;
+			msgBox.setText( msg.str().c_str() );
+			msgBox.exec();
+			return false;
+		}
+
+		if (valid)
+		{
+
+			// retrieve the UOA to associate with the new variable group
+			QStandardItemModel * listpaneModel = static_cast<QStandardItemModel*>(listpane->model());
+			if (listpaneModel == nullptr)
+			{
+				boost::format msg("Invalid list view items in Construct VG popup.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			QItemSelectionModel * listpane_selectionModel = listpane->selectionModel();
+			if (listpane_selectionModel == nullptr)
+			{
+				boost::format msg("Invalid selection in New VG popup.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			QModelIndex selectedIndex = listpane_selectionModel->currentIndex();
+			if (!selectedIndex.isValid())
+			{
+				boost::format msg("A unit of analysis must be associated with the new variable group.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			QVariant uoa_variant = listpaneModel->item(selectedIndex.row())->data();
+			uoa_to_use = uoa_variant.value<WidgetInstanceIdentifier>();
+
+			dialog.accept();
+		}
+
+	});
+
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	std::string new_vg_code(proposed_vg_code);
+
+	InstanceActionItems actionItems;
+	actionItems.push_back(std::make_pair(uoa_to_use, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem_StringVector(std::vector<std::string>{new_vg_code, vg_description})))));
+	WidgetActionItemRequest_ACTION_CREATE_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
+
+	emit CreateVG(action_request);
+
+}
+
+void NewGeneManageVGs::on_pushButton_remove_vg_clicked()
+{
+
+	UIInputProject * project = projectManagerUI().getActiveUIInputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	UIMessager messager(project);
+
+	if (!ui->listViewManageVGs)
+	{
+		boost::format msg("Invalid list view in NewGeneManageVGs widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	WidgetInstanceIdentifier vg;
+	WidgetInstanceIdentifier uoa;
+	bool is_selected = GetSelectedVg(vg, uoa);
+	if (!is_selected)
+	{
+		return;
+	}
+
+	InstanceActionItems actionItems;
+	actionItems.push_back(std::make_pair(vg, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem()))));
+	WidgetActionItemRequest_ACTION_DELETE_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
+	emit DeleteVG(action_request);
+
+}
+
+void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
+{
+
+}

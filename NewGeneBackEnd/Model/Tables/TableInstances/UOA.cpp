@@ -50,6 +50,8 @@ void Table_UOA_Identifier::Load(sqlite3 * db, InputModel * input_model_)
 		if (uuid /* && */ /* strlen(uuid) == UUID_LENGTH && */ )
 		{
 			WidgetInstanceIdentifier uoa_category_identifier(uuid, code, longhand, 0, flags, time_granularity, MakeNotes(notes1, notes2, notes3));
+			WidgetInstanceIdentifiers dmu_categories = input_model_->t_uoa_setmemberlookup.getIdentifiers(std::string(uuid));
+			uoa_category_identifier.foreign_key_identifiers = std::make_shared<WidgetInstanceIdentifiers>(dmu_categories);
 			identifiers.push_back(uoa_category_identifier);
 		}
 	}

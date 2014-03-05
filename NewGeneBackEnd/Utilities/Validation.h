@@ -16,6 +16,9 @@ namespace Validation
 	bool ValidateUoaCode(std::string & proposed_uoa_code, std::string & errorMsg);
 	bool ValidateUoaDescription(std::string & proposed_uoa_description, std::string & errorMsg);
 
+	bool ValidateVgCode(std::string & proposed_vg_code, std::string & errorMsg);
+	bool ValidateVgDescription(std::string & proposed_vg_description, std::string & errorMsg);
+
 	bool ValidateColumnName(std::string & proposed_column_name, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg);
 
 	bool ValidateYearInteger(std::string & proposed_year_integer, short & theYear, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg);

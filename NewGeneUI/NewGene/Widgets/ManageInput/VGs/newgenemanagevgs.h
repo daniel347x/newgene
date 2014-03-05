@@ -51,6 +51,10 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 
 		bool GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstanceIdentifier & uoa);
 
+	private slots:
+		void on_pushButton_add_vg_clicked();
+		void on_pushButton_remove_vg_clicked();
+		void on_pushButton_refresh_vg_clicked();
 };
 
 #endif // NEWGENEMANAGEVGS_H

@@ -228,16 +228,6 @@ void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 		return;
 	}
 
-	QStandardItemModel * dmuModel = static_cast<QStandardItemModel*>(ui->listViewManageUOAs->model());
-	if (dmuModel == nullptr)
-	{
-		boost::format msg("Invalid model in NewGeneManageUOAs DMU category widget.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
 	InstanceActionItems actionItems;
 	actionItems.push_back(std::make_pair(uoa_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers(uoa_dmu_categories)))));
 	WidgetActionItemRequest_ACTION_DELETE_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);

@@ -392,6 +392,95 @@ bool Validation::ValidateUoaDescription(std::string & proposed_uoa_description, 
 
 }
 
+bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & errorMsg)
+{
+
+	boost::trim(proposed_vg_code);
+
+	bool valid = true;
+
+	if (valid)
+	{
+		if (proposed_vg_code.empty())
+		{
+			boost::format msg("The VG code cannot be empty.");
+			errorMsg = msg.str();
+			valid = false;
+		}
+	}
+
+	if (valid)
+	{
+		if (proposed_vg_code.size() > 128)
+		{
+			boost::format msg("The VG code is too long (maximum length: 128).");
+			errorMsg = msg.str();
+			valid = false;
+		}
+
+	}
+
+	if (valid)
+	{
+
+		std::string regex_string("([a-zA-Z]+)");
+		boost::regex regex(regex_string);
+		boost::cmatch matches;
+
+		if (boost::regex_match(proposed_vg_code.c_str(), matches, regex))
+		{
+			// matches[0] contains the original string.  matches[n]
+			// contains a sub_match object for each matching
+			// subexpression
+			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+			// for an example usage
+			if (valid && matches.size() == 2)
+			{
+				std::string the_match(matches[1].first, matches[1].second);
+
+				if (valid && the_match == proposed_vg_code)
+				{
+					// no-op
+				}
+				else
+				{
+					boost::format msg("The VG code is invalid.  Only letters are allowed.");
+					errorMsg = msg.str();
+					valid = false;
+				}
+
+			}
+			else
+			{
+				boost::format msg("The VG code is invalid.");
+				errorMsg = msg.str();
+				valid = false;
+			}
+		}
+
+	}
+
+	return valid;
+
+}
+
+bool Validation::ValidateVgDescription(std::string & proposed_vg_description, std::string & errorMsg)
+{
+
+	boost::trim(proposed_vg_description);
+
+	bool valid = true;
+	if (proposed_vg_description.size() > 4096)
+	{
+		boost::format msg("The description is too long (maximum length: 4096).");
+		errorMsg = msg.str();
+		valid = false;
+	}
+
+	return valid;
+
+}
+
 bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short & theYear, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
 {
 
