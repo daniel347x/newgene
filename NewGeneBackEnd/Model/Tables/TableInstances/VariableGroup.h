@@ -93,6 +93,7 @@ class Table_VG_SET_MEMBER : public Table<TABLE__VG_SET_MEMBER, TABLE_INSTANCE_ID
 		}
 
 		void Load(sqlite3 * db, InputModel * input_model_ = nullptr);
+		bool DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg);
 
 };
 

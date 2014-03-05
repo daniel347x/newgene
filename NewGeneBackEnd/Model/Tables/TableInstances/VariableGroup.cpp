@@ -119,6 +119,12 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 		input_model_->t_vgp_data_vector.end()
 	);
 
+	// Remove from cache for table VG_SET_MEMBER
+	input_model_->t_vgp_setmembers.DeleteVG(db, input_model_, vg);
+
+	// Remove from our cache
+	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg)), identifiers.end());
+
 	// ***************************************** //
 	// Prepare data to send back to user interface
 	// ***************************************** //
@@ -481,4 +487,19 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+}
+
+bool Table_VG_SET_MEMBER::DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg)
+{
+
+	if (!vg.uuid || vg.uuid->empty())
+	{
+		return false;
+	}
+
+	// Just delete from the cache (cascading delete handles this in the DB)
+	identifiers_map.erase(*vg.uuid);
+
+	return true;
+
 }

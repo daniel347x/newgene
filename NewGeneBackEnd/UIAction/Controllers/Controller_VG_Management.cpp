@@ -163,21 +163,11 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
-					if (!instanceActionItem.second)
-					{
-						boost::format msg("The DMU identifiers are invalid.");
-						messager.ShowMessageBox(msg.str());
-						return;
-					}
+					WidgetInstanceIdentifier vg = instanceActionItem.first;
 
-					WidgetInstanceIdentifier uoa_category = instanceActionItem.first;
-					WidgetActionItem const & actionItem = *instanceActionItem.second;
-					WidgetActionItem__WidgetInstanceIdentifiers const & actionItemDMUs = static_cast<WidgetActionItem__WidgetInstanceIdentifiers const &>(actionItem);
-					WidgetInstanceIdentifiers dmu_categories = actionItemDMUs.getValue();
-
-					if (!uoa_category.uuid || uoa_category.uuid->empty())
+					if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
 					{
-						boost::format msg("Missing the UOA to delete.");
+						boost::format msg("Missing the VG to delete.");
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
@@ -185,28 +175,28 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 					// ************************************* //
 					// Retrieve data sent by user interface
 					// ************************************* //
-					std::string uoa_to_delete_display_text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa_category, dmu_categories);
+					std::string vg_to_delete_display_text = Table_VG_CATEGORY::GetVgDisplayText(vg);
 
-					bool uoa_already_exists = input_model.t_uoa_category.Exists(input_model.getDb(), input_model, uoa_category);
+					bool vg_already_exists = input_model.t_vgp_identifiers.Exists(input_model.getDb(), input_model, vg);
 
-					if (!uoa_already_exists)
+					if (!vg_already_exists)
 					{
-						boost::format msg("The UOA '%1%' is already absent.");
-						msg % boost::to_upper_copy(uoa_to_delete_display_text);
+						boost::format msg("The VG '%1%' is already absent.");
+						msg % boost::to_upper_copy(vg_to_delete_display_text);
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
 
-					bool uoa_successfully_deleted = input_model.t_uoa_category.DeleteUOA(input_model.getDb(), input_model, uoa_category, change_response);
+					bool vg_successfully_deleted = input_model.t_vgp_identifiers.DeleteVG(input_model.getDb(), &input_model, vg, change_response);
 
-					if (!uoa_successfully_deleted)
+					if (!vg_successfully_deleted)
 					{
-						boost::format msg("Unable to delete the UOA.");
+						boost::format msg("Unable to delete the VG.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					boost::format msg("UOA '%1%' successfully deleted.");
-					msg % boost::to_upper_copy(uoa_to_delete_display_text);
+					boost::format msg("VG '%1%' successfully deleted.");
+					msg % Table_VG_CATEGORY::GetVgDisplayText(vg);
 					messager.ShowMessageBox(msg.str());
 
 				});

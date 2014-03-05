@@ -269,7 +269,13 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 	WidgetInstanceIdentifiers vgs_to_delete = input_model_.t_vgp_identifiers.RetrieveVGsFromUOA(db, &input_model_, *uoa.uuid);
 	std::for_each(vgs_to_delete.cbegin(), vgs_to_delete.cend(), [&](WidgetInstanceIdentifier const & vg_to_delete)
 	{
-		input_model_.t_vgp_identifiers.DeleteVG(db, &input_model_, vg_to_delete, change_message);
+		bool successful_delete = input_model_.t_vgp_identifiers.DeleteVG(db, &input_model_, vg_to_delete, change_message);
+		if (!successful_delete)
+		{
+			boost::format msg("Unable to delete variable group %1%.");
+			msg % Table_VG_CATEGORY::GetVgDisplayText(vg_to_delete);
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
 	});
 
 	sqlite3_stmt * stmt = NULL;
@@ -544,7 +550,7 @@ bool Table_UOA_Member::DeleteUOA(sqlite3 * db, InputModel & input_model_, Widget
 		return false;
 	}
 
-	// Just delete from the cache
+	// Just delete from the cache (cascading delete handles this in the DB)
 	identifiers_map.erase(*uoa.uuid);
 
 	return true;
