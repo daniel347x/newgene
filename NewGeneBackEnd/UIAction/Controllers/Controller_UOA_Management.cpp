@@ -85,7 +85,8 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 						return;
 					}
 
-					bool uoa_successfully_created = input_model.t_uoa_category.CreateNewUOA(input_model.getDb(), input_model, new_uoa_code, dmu_categories);
+					TIME_GRANULARITY time_granularity = TIME_GRANULARITY__NONE;
+					bool uoa_successfully_created = input_model.t_uoa_category.CreateNewUOA(input_model.getDb(), input_model, new_uoa_code, dmu_categories, time_granularity);
 
 					if (!uoa_successfully_created)
 					{
