@@ -55,7 +55,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 				{
 					if (!instanceActionItem.second)
 					{
-						boost::format msg("Missing a new UOA.");
+						boost::format msg("Missing the new UOA to create.");
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
@@ -64,41 +64,37 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 					// Retrieve data sent by user interface
 					// ************************************* //
 					WidgetActionItem const & actionItem = *instanceActionItem.second;
-					WidgetActionItem__StringVector const & actionItemString = static_cast<WidgetActionItem__StringVector const &>(actionItem);
-					std::vector<std::string> dmu_strings = actionItemString.getValue();
+					WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const & actionItemWsString = static_cast<WidgetActionItem__WidgetInstanceIdentifiers_Plus_String const &>(actionItem);
+					WidgetInstanceIdentifiers const & dmu_categories = actionItemWsString.getValue();
+					std::string const & new_uoa_code = actionItemWsString.getValueString();
 
-					if (dmu_strings.size() != 2)
+					if (dmu_categories.size() == 0)
 					{
-						boost::format msg("A UOA category name, and descriptive text, are required.");
+						boost::format msg("At least one DMU category is required to create a new UOA.");
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
 
-					std::string proposed_new_dmu = dmu_strings[0];
-					std::string new_dmu_description = dmu_strings[1];
+					bool uoa_already_exists = input_model.t_uoa_category.ExistsByCode(input_model.getDb(), input_model, new_uoa_code);
 
-					bool dmu_already_exists = input_model.t_dmu_category.Exists(input_model.getDb(), input_model, proposed_new_dmu);
-
-					if (dmu_already_exists)
+					if (uoa_already_exists)
 					{
-						boost::format msg("The UOA category '%1%' already exists.");
-						msg % boost::to_upper_copy(proposed_new_dmu);
+						boost::format msg("The UOA code '%1%' already exists.");
+						msg % boost::to_upper_copy(new_uoa_code);
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
 
-					bool dmu_successfully_created = input_model.t_dmu_category.CreateNewDMU(input_model.getDb(), input_model, proposed_new_dmu, new_dmu_description);
+					bool uoa_successfully_created = input_model.t_uoa_category.CreateNewUOA(input_model.getDb(), input_model, new_uoa_code, dmu_categories);
 
-					if (!dmu_successfully_created)
+					if (!uoa_successfully_created)
 					{
 						boost::format msg("Unable to execute INSERT statement to create a new UOA category.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					std::string new_dmu(proposed_new_dmu);
-
-					boost::format msg("UOA category '%1%' successfully created.");
-					msg % boost::to_upper_copy(proposed_new_dmu);
+					boost::format msg("UOA '%1%' successfully created.");
+					msg % boost::to_upper_copy(new_uoa_code);
 					messager.ShowMessageBox(msg.str());
 
 					// ***************************************** //
@@ -106,19 +102,19 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 					// ***************************************** //
 
 					WidgetInstanceIdentifier newIdentifier;
-					bool found_newly_created_dmu = input_model.t_dmu_category.getIdentifierFromStringCode(new_dmu, newIdentifier);
+					bool found_newly_created_uoa = input_model.t_uoa_category.getIdentifierFromStringCode(new_uoa_code, newIdentifier);
 
-					if (!found_newly_created_dmu)
+					if (!found_newly_created_uoa || !newIdentifier.uuid || newIdentifier.uuid->empty())
 					{
 						boost::format msg("Unable to find newly created UOA.");
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					WidgetInstanceIdentifiers dmu_members = input_model.t_dmu_setmembers.getIdentifiers(*newIdentifier.uuid);
+					WidgetInstanceIdentifiers dmu_categories = input_model.t_uoa_category.RetrieveDMUCategories(input_model.getDb(), &input_model, *newIdentifier.uuid);
 
 					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__INPUT_MODEL__UOA_CHANGE;
 					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__ADD;
-					DataChange change(type, intention, newIdentifier, dmu_members);
+					DataChange change(type, intention, newIdentifier, dmu_categories);
 
 					change_response.changes.push_back(change);
 

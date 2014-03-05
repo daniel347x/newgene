@@ -185,6 +185,61 @@ bool Table_UOA_Identifier::Exists(sqlite3 * db, InputModel & input_model_, Widge
 
 }
 
+bool Table_UOA_Identifier::ExistsByCode(sqlite3 * db, InputModel & input_model_, std::string const & uoa_code, bool const also_confirm_using_cache)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	std::string proposed_uoa_code(uoa_code);
+	boost::trim(proposed_uoa_code);
+
+	if (proposed_uoa_code.empty())
+	{
+		return false;
+	}
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("SELECT COUNT(*) FROM UOA_CATEGORY WHERE UOA_CATEGORY_STRING_CODE = '");
+	sql += proposed_uoa_code;
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare SELECT statement to search for an existing UOA code.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	bool exists = false;
+	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+	{
+		int existing_uoa_count = sqlite3_column_int(stmt, 0);
+		if (existing_uoa_count == 1)
+		{
+			exists = true;
+		}
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+	if (also_confirm_using_cache)
+	{
+		// Safety check: Cache should match database
+		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, proposed_uoa_code));
+		bool exists_in_cache = (found != identifiers.cend());
+		if (exists != exists_in_cache)
+		{
+			boost::format msg("Cache of UOAs is out-of-sync.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+	}
+
+	return exists;
+
+}
+
 bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa, DataChangeMessage & change_message)
 {
 
@@ -254,6 +309,11 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 	theExecutor.success();
 
 	return theExecutor.succeeded();
+
+}
+
+bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & new_uoa_code, WidgetInstanceIdentifiers const & dmu_categories)
+{
 
 }
 
