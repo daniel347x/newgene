@@ -93,10 +93,10 @@ void ImportDialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog,
 	QRadioButton * NButton = new QRadioButton("None", &dialog);
 	QRadioButton * YButton = new QRadioButton("Year", &dialog);
 	QRadioButton * YMDButton = new QRadioButton("Year, Month, Day", &dialog);
-	formTimeRangeSelection.addWidget(NButton);
-	formTimeRangeSelection.addWidget(YButton);
-	formTimeRangeSelection.addWidget(YMDButton);
-	form.addRow(&formTimeRangeSelection);
+	formTimeRangeGranularitySelection.addWidget(NButton);
+	formTimeRangeGranularitySelection.addWidget(YButton);
+	formTimeRangeGranularitySelection.addWidget(YMDButton);
+	form.addRow(&formTimeRangeGranularitySelection);
 	NButton->setChecked(true);
 
 	radioButtonsTimeRangeGranularity << NButton << YButton << YMDButton;
