@@ -137,7 +137,7 @@ void NewGeneManageVGs::WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET
 	{
 		WidgetInstanceIdentifier const & vg = vg_and_uoa.first;
 		WidgetInstanceIdentifier const & uoa = vg_and_uoa.second;
-		if (vg.uuid && !vg_and_uoa.uuid->empty() && vg.code && !vg.code->empty())
+		if (vg.uuid && !vg.uuid->empty() && vg.code && !vg.code->empty())
 		{
 
 			QStandardItem * item = new QStandardItem();
@@ -257,7 +257,7 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 								WidgetInstanceIdentifier const & vg = change.parent_identifier;
 								WidgetInstanceIdentifier const & uoa = *vg.identifier_parent;
 
-								std::string text = Table_VG_CATEGORY::GetUoaCategoryDisplayText(vg, uoa);
+								std::string text = Table_VG_CATEGORY::GetVgDisplayText(vg);
 
 								QStandardItem * item = new QStandardItem();
 								item->setText(text.c_str());
@@ -401,7 +401,7 @@ bool NewGeneManageVGs::GetSelectedVG(WidgetInstanceIdentifier & vg, WidgetInstan
 	{
 		return false;
 	}
-	uoa = vg.identifier_parent;
+	uoa = *vg.identifier_parent;
 
 	return true;
 
