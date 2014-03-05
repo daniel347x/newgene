@@ -313,7 +313,7 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 
 }
 
-bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & new_uoa_code, WidgetInstanceIdentifiers const & dmu_categories, TIME_GRANULARITY const & time_granularity)
+bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, std::string const & new_uoa_code, std::string const & uoa_description, WidgetInstanceIdentifiers const & dmu_categories, TIME_GRANULARITY const & time_granularity)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -332,7 +332,7 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("INSERT INTO UOA_CATEGORY (UOA_CATEGORY_UUID, UOA_CATEGORY_STRING_CODE, UOA_CATEGORY_STRING_LONGHAND, UOA_CATEGORY_TIME_GRANULARITY, UOA_CATEGORY_NOTES1, UOA_CATEGORY_NOTES2, UOA_CATEGORY_NOTES3, UOA_CATEGORY_FLAGS) VALUES ('");
 	sql += new_uuid;
-	sql += "', ?, '', ?, '', '', '', '')";
+	sql += "', ?, ?, ?, '', '', '', '')";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
@@ -341,7 +341,8 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 	}
 	std::string new_uoa(boost::to_upper_copy(uoa_code));
 	sqlite3_bind_text(stmt, 1, new_uoa.c_str(), -1, SQLITE_TRANSIENT);
-	sqlite3_bind_int(stmt, 1, (int)time_granularity);
+	sqlite3_bind_text(stmt, 1, uoa_description.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_int(stmt, 3, (int)time_granularity);
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
 	if (step_result != SQLITE_DONE)

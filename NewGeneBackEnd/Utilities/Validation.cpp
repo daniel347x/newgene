@@ -375,6 +375,23 @@ bool Validation::ValidateUoaCode(std::string & proposed_uoa_code, std::string & 
 
 }
 
+bool Validation::ValidateUoaDescription(std::string & proposed_uoa_description, std::string & errorMsg)
+{
+
+	boost::trim(proposed_uoa_description);
+
+	bool valid = true;
+	if (proposed_uoa_description.size() > 4096)
+	{
+		boost::format msg("The description is too long (maximum length: 4096).");
+		errorMsg = msg.str();
+		valid = false;
+	}
+
+	return valid;
+
+}
+
 bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short & theYear, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
 {
 

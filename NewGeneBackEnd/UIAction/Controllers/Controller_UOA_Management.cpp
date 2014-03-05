@@ -64,10 +64,11 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 					// Retrieve data sent by user interface
 					// ************************************* //
 					WidgetActionItem const & actionItem = *instanceActionItem.second;
-					WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int const & actionItemWsStringInt = static_cast<WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int const &>(actionItem);
-					WidgetInstanceIdentifiers const & dmu_categories = actionItemWsStringInt.getValue();
-					std::string const & new_uoa_code = actionItemWsStringInt.getValueString();
-					int const & the_time_granularity = actionItemWsStringInt.getValueInt();
+					WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const & actionItemWsStringStringInt = static_cast<WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const &>(actionItem);
+					WidgetInstanceIdentifiers const & dmu_categories = actionItemWsStringStringInt.getValue();
+					std::string const & new_uoa_code = actionItemWsStringStringInt.getValueString();
+					std::string const & uoa_description = actionItemWsStringStringInt.getValueString2();
+					int const & the_time_granularity = actionItemWsStringStringInt.getValueInt();
 					TIME_GRANULARITY time_granularity = (TIME_GRANULARITY)the_time_granularity;
 
 					if (dmu_categories.size() == 0)
@@ -87,7 +88,7 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 						return;
 					}
 
-					bool uoa_successfully_created = input_model.t_uoa_category.CreateNewUOA(input_model.getDb(), input_model, new_uoa_code, dmu_categories, time_granularity);
+					bool uoa_successfully_created = input_model.t_uoa_category.CreateNewUOA(input_model.getDb(), input_model, new_uoa_code, uoa_description, dmu_categories, time_granularity);
 
 					if (!uoa_successfully_created)
 					{

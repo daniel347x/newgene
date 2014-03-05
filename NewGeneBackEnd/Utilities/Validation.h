@@ -14,6 +14,7 @@ namespace Validation
 	bool ValidateDmuMemberDescription(std::string & proposed_dmu_member_description, std::string & errorMsg);
 
 	bool ValidateUoaCode(std::string & proposed_uoa_code, std::string & errorMsg);
+	bool ValidateUoaDescription(std::string & proposed_uoa_description, std::string & errorMsg);
 
 	bool ValidateColumnName(std::string & proposed_column_name, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg);
 

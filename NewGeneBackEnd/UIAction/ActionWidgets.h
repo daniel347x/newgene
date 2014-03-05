@@ -349,6 +349,46 @@ protected:
 
 };
 
+class WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int : public WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int
+{
+
+public:
+
+	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int(WidgetInstanceIdentifiers const & value__, std::string const & the_string__, std::string const & the_string2__, int const & the_int__)
+		: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(value__, the_string__, the_int__)
+		, the_string2_(the_string2__)
+	{
+
+	}
+
+	WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int(WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int const & rhs)
+		: WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(rhs)
+		, the_string2_(rhs.the_string2_)
+	{
+
+	}
+
+	~WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int()
+	{
+
+	}
+
+	void setValueString2(std::string const & the_string2__)
+	{
+		the_string2_ = the_string2__;
+	}
+
+	std::string getValueString2() const
+	{
+		return the_string2_;
+	}
+
+protected:
+
+	std::string the_string2_;
+
+};
+
 class WidgetActionItem__String : public WidgetActionItem
 {
 

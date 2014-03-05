@@ -272,10 +272,11 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	QString labelCode = QString("Enter a brief identifying code for the new Unit of Analysis (all caps):");
 	form.addRow(labelCode, lineEditCode);
 	fields << lineEditCode;
-	//QLineEdit *lineEditDescription = new QLineEdit(&dialog);
-	//QString labelDescription = QString("Description:");
-	//form.addRow(labelDescription, lineEditDescription);
-	//fields << lineEditDescription;
+
+	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
+	QString labelDescription = QString("Description:");
+	form.addRow(labelDescription, lineEditDescription);
+	fields << lineEditDescription;
 
 	QVBoxLayout formTimeRangeGranularitySelection;
 	QList<QRadioButton *> radioButtonsTimeRangeGranularity;
@@ -304,7 +305,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	form.addRow(&buttonBox);
 
 	std::string proposed_uoa_code;
-	//std::string uoa_description;
+	std::string uoa_description;
 
 	WidgetInstanceIdentifiers dmu_categories_to_use;
 	TIME_GRANULARITY time_granularity;
@@ -316,11 +317,11 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 		std::string errorMsg;
 
 		QLineEdit * proposed_uoa_code_field = fields[0];
-		//QLineEdit * uoa_description_field = fields[1];
-		if (proposed_uoa_code_field)
+		QLineEdit * uoa_description_field = fields[1];
+		if (proposed_uoa_code_field && uoa_description_field)
 		{
 			proposed_uoa_code = proposed_uoa_code_field->text().toStdString();
-			//uoa_description = uoa_description_field->text().toStdString();
+			uoa_description = uoa_description_field->text().toStdString();
 			if (proposed_uoa_code.empty())
 			{
 				boost::format msg("The UOA must have an identifying code (typically, a short, all-caps string).");
@@ -332,7 +333,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 		}
 		else
 		{
-			boost::format msg("Unable to determine new UOA code.");
+			boost::format msg("Unable to determine new UOA code or description.");
 			QMessageBox msgBox;
 			msgBox.setText( msg.str().c_str() );
 			msgBox.exec();
@@ -340,7 +341,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 		}
 
 		boost::trim(proposed_uoa_code);
-		//boost::trim(uoa_description);
+		boost::trim(uoa_description);
 
 		bool valid = true;
 
@@ -349,10 +350,10 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 			valid = Validation::ValidateUoaCode(proposed_uoa_code, errorMsg);
 		}
 
-		//if (valid)
-		//{
-		//	valid = Validation::ValidateUoaDescription(uoa_description, errorMsg);
-		//}
+		if (valid)
+		{
+			valid = Validation::ValidateUoaDescription(uoa_description, errorMsg);
+		}
 
 		if (!valid)
 		{
@@ -461,7 +462,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	std::string new_uoa_code(proposed_uoa_code);
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_And_Int(dmu_categories_to_use, new_uoa_code, time_granularity)))));
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers_Plus_String_String_And_Int(dmu_categories_to_use, new_uoa_code, uoa_description, time_granularity)))));
 	WidgetActionItemRequest_ACTION_ADD_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__ADD_ITEMS, actionItems);
 
 	emit AddUOA(action_request);
