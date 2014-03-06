@@ -24,100 +24,210 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
+	if (!db)
+	{
+		boost::format msg("Invalid DB in import routine for VG.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
 	Executor executor(db);
 
 	if (!identifier.code || identifier.code->empty() || !identifier.uuid || identifier.uuid->empty())
 	{
-		return false;
+		boost::format msg("Invalid variable group identifier in import routine.");
+		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	if (db)
+	if (!tableManager().TableExists(db, TableNameFromVGCode(*identifier.code)))
 	{
-		if (!tableManager().TableExists(db, TableNameFromVGCode(*identifier.code)))
+
+
+		// Create the VG data table
+		std::string sql_create;
+		sql_create += "CREATE TABLE ";
+		sql_create += table_name;
+		sql_create += " (";
+
+		bool first = true;
+		std::for_each(import_definition.output_schema.schema.cbegin(),
+					  import_definition.output_schema.schema.cend(), [&import_definition, &sql_create, &first](SchemaEntry const & table_schema_entry)
+		{
+			if (!first)
+			{
+				sql_create += ", ";
+			}
+
+			first = false;
+			sql_create += table_schema_entry.field_name;
+			sql_create += " ";
+
+			switch (table_schema_entry.field_type)
+			{
+				case FIELD_TYPE_INT32:
+				case FIELD_TYPE_INT64:
+				case FIELD_TYPE_UINT32:
+				case FIELD_TYPE_UINT64:
+					{
+						sql_create += "INTEGER";
+					}
+					break;
+
+				case FIELD_TYPE_STRING_FIXED:
+				case FIELD_TYPE_STRING_VAR:
+				case FIELD_TYPE_UUID:
+				case FIELD_TYPE_UUID_FOREIGN:
+				case FIELD_TYPE_STRING_CODE:
+				case FIELD_TYPE_STRING_LONGHAND:
+				case FIELD_TYPE_TIME_RANGE:
+				case FIELD_TYPE_NOTES_1:
+				case FIELD_TYPE_NOTES_2:
+				case FIELD_TYPE_NOTES_3:
+					{
+						sql_create += "TEXT";
+					}
+					break;
+
+				case FIELD_TYPE_TIMESTAMP:
+					{
+						sql_create += "INTEGER";
+					}
+					break;
+
+				case FIELD_TYPE_FLOAT:
+					{
+						sql_create += "REAL";
+					}
+					break;
+
+				default:
+					{
+						sql_create += "TEXT";
+					}
+					break;
+			}
+		});
+
+		sql_create += ")";
+
+		sqlite3_stmt * stmt = NULL;
+		int err = sqlite3_prepare_v2(db, sql_create.c_str(), static_cast<int>(sql_create.size()) + 1, &stmt, NULL);
+
+		if (stmt == NULL)
+		{
+			boost::format msg("Cannot create SQL \"%1%\" in VG import: %2%");
+			msg % sql_create % sqlite3_errstr(err);
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+		int step_result = 0;
+
+		if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+		{
+			boost::format msg("Cannot execute SQL \"%1%\" in VG import: %2%");
+			msg % sql_create % sqlite3_errstr(step_result);
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+		if (stmt)
+		{
+			sqlite3_finalize(stmt);
+			stmt = nullptr;
+		}
+
+
+
+
+
+
+		// Add the data columns of the table to the VG_SET_MEMBER table
+		int sequence_number = 0;
+		std::for_each(import_definition.output_schema.schema.cbegin(),
+					  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & table_schema_entry)
 		{
 
+			std::string sql;
+			std::string new_uuid(boost::to_upper_copy(newUUID(false)));
+			sql += "INSERT INTO VG_SET_MEMBER (VG_SET_MEMBER_UUID, VG_SET_MEMBER_STRING_CODE, VG_SET_MEMBER_STRING_LONGHAND, VG_SET_MEMBER_SEQUENCE_NUMBER, VG_SET_MEMBER_NOTES1, VG_SET_MEMBER_NOTES2, VG_SET_MEMBER_NOTES3, VG_SET_MEMBER_FK_VG_CATEGORY_UUID, VG_SET_MEMBER_FLAGS, VG_SET_MEMBER_DATA_TYPE)";
+			sql += " VALUES ('";
+			sql += new_uuid;
+			sql += "', '";
+			sql += table_schema_entry.field_name;
+			// TODO: the following line
+			//sql += table_schema_entry.field_description;
+			sql += "', '', ";
+			sql += boost::lexical_cast<std::string>(sequence_number);
+			sql += ", '', '', '', '";
+			sql += *identifier.uuid;
+			sql += "', '', '";
 
-			// Create the VG data table
-			std::string sql_create;
-			sql_create += "CREATE TABLE ";
-			sql_create += table_name;
-			sql_create += " (";
-
-			bool first = true;
-			std::for_each(import_definition.output_schema.schema.cbegin(),
-						  import_definition.output_schema.schema.cend(), [&import_definition, &sql_create, &first](SchemaEntry const & table_schema_entry)
+			switch (table_schema_entry.field_type)
 			{
-				if (!first)
-				{
-					sql_create += ", ";
-				}
+				case FIELD_TYPE_INT32:
+				case FIELD_TYPE_UINT32:
+					{
+						sql += "INT32";
+					}
+					break;
 
-				first = false;
-				sql_create += table_schema_entry.field_name;
-				sql_create += " ";
+				case FIELD_TYPE_INT64:
+				case FIELD_TYPE_UINT64:
+					{
+						sql += "INT64";
+					}
+					break;
 
-				switch (table_schema_entry.field_type)
-				{
-					case FIELD_TYPE_INT32:
-					case FIELD_TYPE_INT64:
-					case FIELD_TYPE_UINT32:
-					case FIELD_TYPE_UINT64:
-						{
-							sql_create += "INTEGER";
-						}
-						break;
+				case FIELD_TYPE_STRING_FIXED:
+				case FIELD_TYPE_STRING_VAR:
+				case FIELD_TYPE_UUID:
+				case FIELD_TYPE_UUID_FOREIGN:
+				case FIELD_TYPE_STRING_CODE:
+				case FIELD_TYPE_STRING_LONGHAND:
+				case FIELD_TYPE_TIME_RANGE:
+				case FIELD_TYPE_NOTES_1:
+				case FIELD_TYPE_NOTES_2:
+				case FIELD_TYPE_NOTES_3:
+					{
+						sql += "STRING";
+					}
+					break;
 
-					case FIELD_TYPE_STRING_FIXED:
-					case FIELD_TYPE_STRING_VAR:
-					case FIELD_TYPE_UUID:
-					case FIELD_TYPE_UUID_FOREIGN:
-					case FIELD_TYPE_STRING_CODE:
-					case FIELD_TYPE_STRING_LONGHAND:
-					case FIELD_TYPE_TIME_RANGE:
-					case FIELD_TYPE_NOTES_1:
-					case FIELD_TYPE_NOTES_2:
-					case FIELD_TYPE_NOTES_3:
-						{
-							sql_create += "TEXT";
-						}
-						break;
+				case FIELD_TYPE_TIMESTAMP:
+					{
+						sql += "INT64";
+					}
+					break;
 
-					case FIELD_TYPE_TIMESTAMP:
-						{
-							sql_create += "INTEGER";
-						}
-						break;
+				case FIELD_TYPE_FLOAT:
+					{
+						sql += "FLOAT";
+					}
+					break;
 
-					case FIELD_TYPE_FLOAT:
-						{
-							sql_create += "REAL";
-						}
-						break;
+				default:
+					{
+						sql += "STRING";
+					}
+					break;
+			}
 
-					default:
-						{
-							sql_create += "TEXT";
-						}
-						break;
-				}
-			});
-
-			sql_create += ")";
-
+			sql += "')";
 			sqlite3_stmt * stmt = NULL;
-			sqlite3_prepare_v2(db, sql_create.c_str(), static_cast<int>(sql_create.size()) + 1, &stmt, NULL);
+			int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 
 			if (stmt == NULL)
 			{
-				return false;
+				boost::format msg("Cannot create SQL \"%1%\" in VG import: %2%");
+				msg % sql % sqlite3_errstr(err);
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 
 			int step_result = 0;
 
-			if ((step_result = sqlite3_step(stmt)) == SQLITE_DONE)
+			if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
 			{
-				executor.success();
-				return true;
+				boost::format msg("Cannot execute SQL \"%1%\" in VG import: %2%");
+				msg % sql % sqlite3_errstr(step_result);
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 
 			if (stmt)
@@ -126,199 +236,114 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 				stmt = nullptr;
 			}
 
+			++sequence_number;
+		});
+
+
+
+		// Add entry to the VG_DATA_METADATA__DATETIME_COLUMNS table
+		{
+			std::string sql;
+			sql += "INSERT INTO VG_DATA_METADATA__DATETIME_COLUMNS (VG_DATA_TABLE_NAME, VG_DATETIME_START_COLUMN_NAME, VG_DATETIME_END_COLUMN_NAME, VG_DATA_FK_VG_CATEGORY_UUID)";
+			sql += " VALUES ('";
+			sql += table_name;
+			sql += "', 'DATETIME_ROW_START', 'DATETIME_ROW_END', '";
+			sql += *identifier.uuid;
+			sql += "')";
+			sqlite3_stmt * stmt = NULL;
+			int err = sqlite3_prepare_v2(db, sql_create.c_str(), static_cast<int>(sql_create.size()) + 1, &stmt, NULL);
+
+			if (stmt == NULL)
+			{
+				boost::format msg("Cannot create SQL \"%1%\" in VG import: %2%");
+				msg % sql % sqlite3_errstr(err);
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
+			int step_result = 0;
+
+			if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+			{
+				boost::format msg("Cannot execute SQL \"%1%\" in VG import: %2%");
+				msg % sql % sqlite3_errstr(step_result);
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
+			if (stmt)
+			{
+				sqlite3_finalize(stmt);
+				stmt = nullptr;
+			}
+		}
 
 
 
 
 
-			// Add the data columns of the table to the VG_SET_MEMBER table
-			int sequence_number = 0;
+
+		// Add entry to the VG_DATA_METADATA__PRIMARY_KEYS table
+		{
+			sequence_number = 0;
 			std::for_each(import_definition.output_schema.schema.cbegin(),
 						  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & table_schema_entry)
 			{
 
-				std::string sql;
-				std::string new_uuid(boost::to_upper_copy(newUUID(false)));
-				sql += "INSERT INTO VG_SET_MEMBER (VG_SET_MEMBER_UUID, VG_SET_MEMBER_STRING_CODE, VG_SET_MEMBER_STRING_LONGHAND, VG_SET_MEMBER_SEQUENCE_NUMBER, VG_SET_MEMBER_NOTES1, VG_SET_MEMBER_NOTES2, VG_SET_MEMBER_NOTES3, VG_SET_MEMBER_FK_VG_CATEGORY_UUID, VG_SET_MEMBER_FLAGS, VG_SET_MEMBER_DATA_TYPE)";
-				sql += " VALUES ('";
-				sql += new_uuid;
-				sql += "', '";
-				sql += table_schema_entry.field_name;
-				//sql += table_schema_entry.field_description; // TODO
-				sql += "', '', ";
-				sql += boost::lexical_cast<std::string>(sequence_number);
-				sql += ", '', '', '', '";
-				sql += *identifier.uuid;
-				sql += "', '', '";
-				switch (table_schema_entry.field_type)
+				if (table_schema_entry.IsPrimaryKey())
 				{
-					case FIELD_TYPE_INT32:
-					case FIELD_TYPE_UINT32:
-						{
-							sql += "INT32";
-						}
-						break;
-
-					case FIELD_TYPE_INT64:
-					case FIELD_TYPE_UINT64:
-						{
-							sql += "INT64";
-						}
-						break;
-
-					case FIELD_TYPE_STRING_FIXED:
-					case FIELD_TYPE_STRING_VAR:
-					case FIELD_TYPE_UUID:
-					case FIELD_TYPE_UUID_FOREIGN:
-					case FIELD_TYPE_STRING_CODE:
-					case FIELD_TYPE_STRING_LONGHAND:
-					case FIELD_TYPE_TIME_RANGE:
-					case FIELD_TYPE_NOTES_1:
-					case FIELD_TYPE_NOTES_2:
-					case FIELD_TYPE_NOTES_3:
-						{
-							sql += "STRING";
-						}
-						break;
-
-					case FIELD_TYPE_TIMESTAMP:
-						{
-							sql += "INT64";
-						}
-						break;
-
-					case FIELD_TYPE_FLOAT:
-						{
-							sql += "FLOAT";
-						}
-						break;
-
-					default:
-						{
-							sql += "STRING";
-						}
-						break;
-				}
-
-				sql += "')";
-				sqlite3_stmt * stmt = NULL;
-				sqlite3_prepare_v2(db, sql_create.c_str(), static_cast<int>(sql_create.size()) + 1, &stmt, NULL);
-
-				if (stmt == NULL)
-				{
-					return;
-				}
-
-				int step_result = 0;
-
-				if ((step_result = sqlite3_step(stmt)) == SQLITE_DONE)
-				{
-					executor.success();
-				}
-
-				if (stmt)
-				{
-					sqlite3_finalize(stmt);
-					stmt = nullptr;
-				}
-
-				++sequence_number;
-			});
-
-
-
-			// Add entry to the VG_DATA_METADATA__DATETIME_COLUMNS table
-			{
-				std::string sql;
-				sql += "INSERT INTO VG_DATA_METADATA__DATETIME_COLUMNS (VG_DATA_TABLE_NAME, VG_DATETIME_START_COLUMN_NAME, VG_DATETIME_END_COLUMN_NAME, VG_DATA_FK_VG_CATEGORY_UUID)";
-				sql += " VALUES ('";
-				sql += table_name;
-				sql += "', 'DATETIME_ROW_START', 'DATETIME_ROW_END', '";
-				sql += *identifier.uuid;
-				sql += "')";
-				sqlite3_stmt * stmt = NULL;
-				sqlite3_prepare_v2(db, sql_create.c_str(), static_cast<int>(sql_create.size()) + 1, &stmt, NULL);
-
-				if (stmt == NULL)
-				{
-					return false;
-				}
-
-				int step_result = 0;
-
-				if ((step_result = sqlite3_step(stmt)) == SQLITE_DONE)
-				{
-					executor.success();
-				}
-
-				if (stmt)
-				{
-					sqlite3_finalize(stmt);
-					stmt = nullptr;
-				}
-			}
-
-
-
-
-
-
-			// Add entry to the VG_DATA_METADATA__PRIMARY_KEYS table
-			{
-				sequence_number = 0;
-				std::for_each(import_definition.output_schema.schema.cbegin(),
-					import_definition.output_schema.schema.cend(), [&](SchemaEntry const & table_schema_entry)
-				{
-
-					if (table_schema_entry.IsPrimaryKey())
+					if (!table_schema_entry.dmu_category_string_code)
 					{
-						if (!table_schema_entry.dmu_category_string_code)
-						{
-							boost::format msg("Bad DMU code in construction of entries for primary key table.");
-							throw NewGeneException() << newgene_error_description(msg.str());
-						}
-						std::string sql;
-						sql += "INSERT INTO VG_DATA_METADATA__PRIMARY_KEYS (VG_DATA_TABLE_NAME, VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME, VG_DATA_TABLE_FK_DMU_CATEGORY_CODE, VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER, VG_DATA_TABLE_PRIMARY_KEY_IS_NUMERIC)";
-						sql += " VALUES ('";
-						sql += table_name;
-						sql += "', '";
-						sql += table_schema_entry.field_name;
-						sql += "', '";
-						sql += *table_schema_entry.dmu_category_string_code;
-						sql += "', ";
-						sql += boost::lexical_cast<std::string>(sequence_number);
-						sql += "', 0)";
-						sqlite3_stmt * stmt = NULL;
-						sqlite3_prepare_v2(db, sql_create.c_str(), static_cast<int>(sql_create.size()) + 1, &stmt, NULL);
-
-						if (stmt == NULL)
-						{
-							return;
-						}
-
-						int step_result = 0;
-
-						if ((step_result = sqlite3_step(stmt)) == SQLITE_DONE)
-						{
-							executor.success();
-						}
-
-						if (stmt)
-						{
-							sqlite3_finalize(stmt);
-							stmt = nullptr;
-						}
-						++sequence_number;
+						boost::format msg("Bad DMU code in construction of entries for primary key table.");
+						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-				});
-			}
+					std::string sql;
+					sql += "INSERT INTO VG_DATA_METADATA__PRIMARY_KEYS (VG_DATA_TABLE_NAME, VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME, VG_DATA_TABLE_FK_DMU_CATEGORY_CODE, VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER, VG_DATA_TABLE_PRIMARY_KEY_IS_NUMERIC)";
+					sql += " VALUES ('";
+					sql += table_name;
+					sql += "', '";
+					sql += table_schema_entry.field_name;
+					sql += "', '";
+					sql += *table_schema_entry.dmu_category_string_code;
+					sql += "', ";
+					sql += boost::lexical_cast<std::string>(sequence_number);
+					sql += "', 0)";
+					sqlite3_stmt * stmt = NULL;
+					int err = sqlite3_prepare_v2(db, sql_create.c_str(), static_cast<int>(sql_create.size()) + 1, &stmt, NULL);
 
+					if (stmt == NULL)
+					{
+						boost::format msg("Cannot create SQL \"%1%\" in VG import: %2%");
+						msg % sql % sqlite3_errstr(err);
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
 
+					int step_result = 0;
+
+					if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+					{
+						boost::format msg("Cannot execute SQL \"%1%\" in VG import: %2%");
+						msg % sql % sqlite3_errstr(step_result);
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+
+					if (stmt)
+					{
+						sqlite3_finalize(stmt);
+						stmt = nullptr;
+					}
+
+					++sequence_number;
+				}
+
+			});
 		}
+
+
 	}
 
-	return false;
+	executor.success();
+
+	return executor.succeeded();
 
 }
 
