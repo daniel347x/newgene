@@ -695,7 +695,7 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 	}
 
 	std::unique_ptr<UIMessagerOutputProject> messager_ptr(new UIMessagerOutputProject(nullptr));
-	std::unique_ptr<UIOutputProject> project_ptr(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr));
+	std::unique_ptr<UIOutputProject> project_ptr(new UIOutputProject(project_settings, model_settings, project_model, mainWindowObject, nullptr, *messager_ptr, input_project));
 	output_tabs[mainWindow].emplace_back(ProjectPaths(output_project_settings_path, path_to_model_settings, path_to_model_database),
 		project_ptr.release(), // can't use move() in the initialization list, I think, because we might have a custom deleter
 		messager_ptr.release());
@@ -754,6 +754,8 @@ void UIProjectManager::RawCloseOutputProject(UIOutputProject * output_project)
 	{
 		return;
 	}
+
+	output_project->setUIInputProject(nullptr);
 
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 	emit this->UpdateOutputConnections(NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT, output_project);

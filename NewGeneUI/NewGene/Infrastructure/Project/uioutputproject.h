@@ -11,6 +11,7 @@
 #include "outputprojectworkqueue.h"
 
 class NewGeneGenerateOutput;
+class UIInputProject;
 
 class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutputProjectSettings, UIOutputModelSettings, UIOutputModel, UI_OUTPUT_PROJECT>
 {
@@ -23,7 +24,8 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 						std::shared_ptr<UIOutputModel> const & model,
 						QObject * mainWindowObject_,
 						QObject * parent,
-						UIMessagerOutputProject & messager_);
+						UIMessagerOutputProject & messager_,
+						UIInputProject * inp);
 
 		void UpdateConnections();
 		void DoRefreshAllWidgets();
@@ -48,6 +50,16 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 
 		NewGeneGenerateOutput * output_pane;
 
+		UIInputProject * getUIInputProject()
+		{
+			return _inp;
+		}
+
+		void setUIInputProject(UIInputProject * inp)
+		{
+			_inp = inp;
+		}
+
 	protected:
 
 		WorkQueueManager<UI_OUTPUT_PROJECT> * InstantiateWorkQueue(void * ui_object, bool = false)
@@ -57,6 +69,8 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 			work_queue->SetConnections();
 			return work_queue;
 		}
+
+		UIInputProject * _inp;
 
 };
 

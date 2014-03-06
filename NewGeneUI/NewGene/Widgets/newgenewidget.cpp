@@ -75,11 +75,6 @@ void NewGeneWidget::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 		}
 	}
 
-	if (!IsInputProjectWidget())
-	{
-		return;
-	}
-
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
 	{
 		if (project && project == inp)
@@ -120,7 +115,7 @@ void NewGeneWidget::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 			return;
 		}
 
-		if (IsTopLevel())
+		if (IsInputProjectWidget() && IsTopLevel())
 		{
 			self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
 		}
