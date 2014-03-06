@@ -27,11 +27,11 @@ NewGeneWidget::~NewGeneWidget()
 {
 	if (outp)
 	{
-		outp->UnregisterInterestInChanges(self);
+		outp->UnregisterInterestInChanges(this);
 	}
 	if (inp)
 	{
-		inp->UnregisterInterestInChanges(self);
+		inp->UnregisterInterestInChanges(this);
 	}
 
 	if (inp)
