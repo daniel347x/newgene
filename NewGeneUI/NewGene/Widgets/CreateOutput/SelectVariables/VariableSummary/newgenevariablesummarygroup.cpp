@@ -245,10 +245,6 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 						  }
 					  case DATA_CHANGE_INTENTION__RESET_ALL:
 						  {
-
-							  WidgetInstanceIdentifiers vg_members = change.child_identifiers;
-							  bool success = ResetAll(vg_members);
-
 						  }
 						  break;
 					  default:

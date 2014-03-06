@@ -70,7 +70,7 @@ void NewGeneVariablesToolbox::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_G
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
 			WidgetInstanceIdentifier new_identifier(identifier);
-			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, new_identifier, outp );
+			NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, new_identifier, outp, inp );
 			addItem( tmpGrp, identifier.longhand->c_str() );
 		}
 	});
@@ -130,7 +130,7 @@ void NewGeneVariablesToolbox::HandleChanges(DataChangeMessage const & change_mes
 								if (change.parent_identifier.code && change.parent_identifier.uuid && change.parent_identifier.longhand)
 								{
 									WidgetInstanceIdentifier new_identifier = change.parent_identifier;
-									NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, new_identifier, outp );
+									NewGeneVariableGroup * tmpGrp = new NewGeneVariableGroup( this, new_identifier, outp, inp );
 									addItem( tmpGrp, new_identifier.longhand->c_str() );
 								}
 							}

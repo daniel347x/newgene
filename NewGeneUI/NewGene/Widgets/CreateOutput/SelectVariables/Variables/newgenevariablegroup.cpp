@@ -7,7 +7,7 @@
 #include "../Project/uiinputproject.h"
 #include "../Project/uioutputproject.h"
 
-NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project ) :
+NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIdentifier data_instance_, UIOutputProject * project, UIInputProject * inproject ) :
 
 	QWidget( parent ),
 
@@ -33,6 +33,7 @@ NewGeneVariableGroup::NewGeneVariableGroup( QWidget * parent, WidgetInstanceIden
 	{
 
 		project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, true, *data_instance.uuid);
+		inproject->RegisterInterestInChange(this, DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE, true, *data_instance.uuid);
 
 		UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 		WidgetDataItemRequest_VARIABLE_GROUP_VARIABLE_GROUP_INSTANCE request(WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
@@ -95,13 +96,8 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 		return;
 	}
 
-	WidgetInstanceIdentifiers vg_members;
 	auto vg_members_and_bools = widget_data.identifiers;
-	std::for_each(vg_members_and_bools.cbegin(), vg_members_and_bools.cend(), [&](std::pair<WidgetInstanceIdentifier, bool> const & vg_member_and_bool)
-	{
-		vg_members.push_back(vg_member_and_bool.first);
-	});
-	bool success = ResetAll(vg_members);
+	bool success = ResetAll(vg_members_and_bools);
 
 }
 
@@ -140,6 +136,34 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 	{
 		switch (change.change_type)
 		{
+			case DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE:
+				{
+
+					switch (change.change_intention)
+					{
+
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								WidgetInstanceIdentifiers vg_members = change.child_identifiers;
+								std::vector<std::pair<WidgetInstanceIdentifier, bool>> vg_members_and_bools;
+								std::for_each(vg_members.cbegin(), vg_members.cend(), [&](WidgetInstanceIdentifier const & identifier)
+								{
+									vg_members_and_bools.push_back(std::make_pair(identifier, false));
+								});
+								bool success = ResetAll(vg_members_and_bools);
+							}
+							break;
+
+						default:
+							{
+
+							}
+							break;
+
+					}
+				}
+				break;
+
 			case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION:
 				{
 					switch (change.change_intention)
@@ -213,8 +237,6 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
-								WidgetInstanceIdentifiers vg_members = change.child_identifiers;
-								bool success = ResetAll(vg_members);
 							}
 							break;
 
@@ -234,7 +256,7 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 	});
 }
 
-bool NewGeneVariableGroup::ResetAll(WidgetInstanceIdentifiers const & vg_members)
+bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifier, bool>> const & vg_members_and_bools)
 {
 
 	if (!ui->listView)
@@ -256,8 +278,10 @@ bool NewGeneVariableGroup::ResetAll(WidgetInstanceIdentifiers const & vg_members
 	QStandardItemModel * model = new QStandardItemModel(ui->listView);
 
 	int index = 0;
-	std::for_each(vg_members.cbegin(), vg_members.cend(), [this, &index, &model](WidgetInstanceIdentifier const & identifier)
+	std::for_each(vg_members_and_bools.cbegin(), vg_members_and_bools.cend(), [this, &index, &model](std::pair<WidgetInstanceIdentifier, bool> const & vg_member_and_bool)
 	{
+		WidgetInstanceIdentifier const & identifier = vg_member_and_bool.first;
+		bool checked = vg_member_and_bool.second;
 		if (identifier.longhand && !identifier.longhand->empty())
 		{
 
@@ -266,6 +290,10 @@ bool NewGeneVariableGroup::ResetAll(WidgetInstanceIdentifiers const & vg_members
 			item->setEditable(false);
 			item->setCheckable(true);
 			item->setCheckState(Qt::Unchecked);
+			if (checked)
+			{
+				item->setCheckState(Qt::Checked);
+			}
 			QVariant v;
 			v.setValue(identifier);
 			item->setData(v);
