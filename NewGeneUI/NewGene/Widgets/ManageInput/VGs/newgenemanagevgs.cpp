@@ -627,6 +627,17 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		return;
 	}
 
+	if (!uoa.foreign_key_identifiers || uoa.foreign_key_identifiers->size() == 0)
+	{
+		boost::format msg("DMU's cannot be found for the UOA associated with the selected variable group.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	WidgetInstanceIdentifiers dmu_categories = *(uoa.foreign_key_identifiers);
+
 	QDialog dialog(this);
 	QFormLayout form(&dialog);
 	QWidget FileChooserWidget;
@@ -650,6 +661,20 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		ImportDialogHelper::AddTimeRangeSelectorBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, formTimeRangeSelection, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, uoa.time_granularity);
 	}
 
+	QList<QLineEdit *> fieldsDMU;
+	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu)
+	{
+
+		std::string dmu_description = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu);
+		boost::format msg("Enter the column name for \"%1%\":");
+		msg % dmu_description;
+		QString labelDmu = QString(msg.str().c_str());
+		QLineEdit * lineEditDMU = new QLineEdit(&dialog);
+		form.addRow(labelDmu, lineEditDMU);
+		fieldsDMU << lineEditDMU;
+
+	});
+
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
 	form.addRow(&buttonBox);
@@ -660,8 +685,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	std::vector<std::string> dataFileChooser;
 	std::vector<std::string> dataTimeRange;
-
-	//TimeRange::TimeRangeImportMode timeRangeMode = TimeRange::TIME_RANGE_IMPORT_MODE__NONE;
+	std::vector<std::string> dataDmuColNames;
 
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
@@ -671,55 +695,73 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 		std::string errorMsg;
 
-		QLineEdit * data_column_name_uuid_field = fields[0];
-		QLineEdit * data_column_name_code_field = fields[1];
-		QLineEdit * data_column_name_description_field = fields[2];
-
-		// Custom validation
 		if (valid)
 		{
-
-			if (!data_column_name_uuid_field && !data_column_name_code_field && !data_column_name_description_field)
+			int index = 0;
+			std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu)
 			{
-				valid = false;
-				errorMsg = "Invalid DMU.";
-			}
 
+				if (!valid)
+				{
+					++index;
+					return;
+				}
+
+				if (valid)
+				{
+					QLineEdit * data_column_dmu = fields[index];
+					if (!data_column_dmu)
+					{
+						valid = false;
+						errorMsg = "Invalid DMU.";
+						++index;
+						return;
+					}
+				}
+
+				std::string data_column_name;
+				if (valid)
+				{
+					data_column_name = data_column_dmu->text().toStdString();
+				}
+
+				if (valid)
+				{
+
+					valid = Validation::ValidateColumnName(data_column_name, "DMU", true, errorMsg);
+					if (!valid)
+					{
+						valid = false;
+						errorMsg = "Invalid DMU column name.";
+						++index;
+						return;
+					}
+
+				}
+
+				if (valid)
+				{
+					dataDmuColNames.push_back(data_column_name);
+				}
+
+				++index;
+
+			});
 		}
 
-		if (valid)
-		{
-
-			data_column_name_uuid = data_column_name_uuid_field->text().toStdString();
-			data_column_name_code = data_column_name_code_field->text().toStdString();
-			data_column_name_description = data_column_name_description_field->text().toStdString();
-
-		}
-
-		if (valid)
-		{
-			valid = Validation::ValidateColumnName(data_column_name_uuid, "Code", true, errorMsg);
-		}
-
-		if (valid)
-		{
-			valid = Validation::ValidateColumnName(data_column_name_code, "Abbreviation", false, errorMsg);
-		}
-
-		if (valid)
-		{
-			valid = Validation::ValidateColumnName(data_column_name_description, "Description", false, errorMsg);
-		}
-
-		// Factored validation
 		if (valid)
 		{
 			valid = ImportDialogHelper::ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
 		}
-		//if (valid)
-		//{
-		//	valid = ImportDialogHelper::ValidateTimeRangeBlock(fieldsTimeRange, radioButtonsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
-		//}
+		if (valid)
+		{
+			if (uoa.time_granularity != TIME_GRANULARITY__NONE)
+			{
+				valid = ImportDialogHelper::ValidateTimeRangeBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, formTimeRangeSelection, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, uoa.time_granularity, dataTimeRange, errorMsg);
+			}
+		}
+
+
 
 		if (!valid)
 		{
@@ -745,9 +787,6 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	boost::filesystem::path data_column_file_pathname(dataFileChooser[0]);
 
 	InstanceActionItems actionItems;
-	std::vector<std::string> column_names{data_column_file_pathname.string(), data_column_name_uuid, data_column_name_code, data_column_name_description};
-	//column_names.insert(column_names.end(), dataTimeRange.begin(), dataTimeRange.end());
-	//actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector_Plus_Int(column_names, (int)timeRangeMode)))));
 	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(column_names)))));
 	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
 	emit RefreshDMUsFromFile(action_request);

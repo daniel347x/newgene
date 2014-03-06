@@ -21,7 +21,7 @@ namespace ImportDialogHelper
 	void AddTimeRangeGranularitySelectionBlock(QDialog & dialog, QFormLayout & form, QVBoxLayout & formTimeRangeGranularitySelection, QList<QRadioButton *> & radioButtonsTimeRangeGranularity);
 
 	void AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange, QBoxLayout & formTimeRangeSelection, QWidget & YearWidget, QFormLayout & formYearOptions, QWidget & YearMonthDayWidget, QFormLayout & formYearMonthDayOptions, TIME_RANGE_GRANULARITY const & time_range_granularity);
-	bool ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange, std::vector<std::string> & dataTimeRange, TimeRange::TimeRangeImportMode & timeRangeImportMode, std::string & errorMsg);
+	bool ValidateTimeRangeBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange, QWidget & YearWidget, QFormLayout & formYearOptions, QWidget & YearMonthDayWidget, QFormLayout & formYearMonthDayOptions, TIME_RANGE_GRANULARITY const & time_range_granularity, std::string errorMsg);
 
 	void AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories);
 	void AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, WidgetInstanceIdentifiers const & uoas);

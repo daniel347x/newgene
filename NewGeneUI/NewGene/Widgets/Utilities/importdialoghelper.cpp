@@ -226,10 +226,10 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout
 
 }
 
-bool ImportDialogHelper::ValidateTimeRangeBlock(QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange, std::vector<std::string> & dataTimeRange, TimeRange::TimeRangeImportMode & timeRangeImportMode, std::string & errorMsg)
+bool ImportDialogHelper::ValidateTimeRangeBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange, QWidget & YearWidget, QFormLayout & formYearOptions, QWidget & YearMonthDayWidget, QFormLayout & formYearMonthDayOptions, TIME_RANGE_GRANULARITY const & time_range_granularity, std::vector<std::string> & dataTimeRange, std::string errorMsg)
 {
 
-	timeRangeImportMode = TimeRange::TIME_RANGE_IMPORT_MODE__NONE;
+	TIME_RANGE_GRANULARITY const & timeRangeImportMode = time_range_granularity;
 	dataTimeRange.clear();
 
 	QRadioButton * YButton = radioButtonsTimeRange[0];
