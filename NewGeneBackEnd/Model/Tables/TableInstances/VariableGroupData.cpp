@@ -319,6 +319,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 	definition.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	definition.input_file = filepathname;
 	definition.first_row_is_header_row = true;
+	definition.second_row_is_data_type_row = true;
 	definition.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
 
 	Schema schema_input;
@@ -332,17 +333,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		std::fstream data_file;
 		data_file.open(definition.input_file.c_str(), std::ios::in);
 
-		// Get column names from the file
-		char line[MAX_LINE_SIZE];
-		char parsedline[MAX_LINE_SIZE];
-
-		// skip first row if necessary
-		if (data_file.good())
-		{
-			data_file.getline(line, MAX_LINE_SIZE - 1);
-		}
-
-		if (!data_file.good())
+		if (!data_file.is_open() || !data_file.good())
 		{
 			data_file.close();
 			boost::format msg("Cannot open data file \"%1%\"");
@@ -351,9 +342,40 @@ bool Table_VariableGroupData::BuildImportDefinition
 			return false;
 		}
 
+		// Get column names from the file
+		char line[MAX_LINE_SIZE];
+		char parsedline[MAX_LINE_SIZE];
+
+		// skip first row if necessary
+		data_file.getline(line, MAX_LINE_SIZE - 1);
+
+		if (!data_file.good())
+		{
+			data_file.close();
+			boost::format msg("Cannot read first line of data file \"%1%\"");
+			msg % definition.input_file.c_str();
+			errorMsg = msg.str();
+			return false;
+		}
+
 		std::vector<std::string> colnames;
 		boost::split(colnames, line, boost::is_any_of(","));
 		std::transform(colnames.begin(), colnames.end(), colnames.begin(), boost::trim<std::string>);
+
+		data_file.getline(line, MAX_LINE_SIZE - 1);
+
+		if (!data_file.good())
+		{
+			data_file.close();
+			boost::format msg("Cannot read second line of data file \"%1%\"");
+			msg % definition.input_file.c_str();
+			errorMsg = msg.str();
+			return false;
+		}
+
+		std::vector<std::string> coltypes;
+		boost::split(coltypes, line, boost::is_any_of(","));
+		std::transform(coltypes.begin(), coltypes.end(), coltypes.begin(), boost::trim<std::string>);
 
 		data_file.close();
 
@@ -365,6 +387,51 @@ bool Table_VariableGroupData::BuildImportDefinition
 			return false;
 		}
 
+		if (coltypes.size() != colnames.size())
+		{
+			boost::format msg("The number of column types on the second line does not match the number of columns.");
+			errorMsg = msg.str();
+			return false;
+		}
+
+		std::vector<FIELD_TYPE> fieldtypes;
+		bool validtype = true;
+		std::for_each(coltypes.cbegin(), coltypes.cend(), [&](std::string coltype)
+		{
+			if (!validtype)
+			{
+				return;
+			}
+			boost::trim(coltype);
+			boost::to_lower(coltype);
+			if (coltype == "int" || coltype == "int32")
+			{
+				fieldtypes.push_back(FIELD_TYPE_INT32);
+			}
+			else if (coltype == "int64")
+			{
+				fieldtypes.push_back(FIELD_TYPE_INT64);
+			}
+			else if (coltype == "string")
+			{
+				fieldtypes.push_back(FIELD_TYPE_STRING_FIXED);
+			}
+			else if (coltype == "float" || coltype == "double")
+			{
+				fieldtypes.push_back(FIELD_TYPE_FLOAT);
+			}
+			else
+			{
+				validtype = false;
+			}
+		});
+		if (!validtype)
+		{
+			boost::format msg("The column type specifications on the second line are invalid.");
+			errorMsg = msg.str();
+			return false;
+		}
+			
 		// If the table already exists, check that the columns match
 		WidgetInstanceIdentifiers existing_column_identifiers = input_model_->t_vgp_setmembers.getIdentifiers(*vg.uuid);
 		if (!existing_column_identifiers.empty())
@@ -415,6 +482,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		}
 
 		int number_primary_key_cols = 0;
+		int colindex = 0;
 		std::for_each(colnames.cbegin(), colnames.cend(), [&](std::string const & colname)
 		{
 			// Determine if this is a primary key field
@@ -438,12 +506,15 @@ bool Table_VariableGroupData::BuildImportDefinition
 			
 			if (primary_key_col)
 			{
-				input_schema_vector.push_back(SchemaEntry(colname, FIELD_TYPE_INT32, colname));
+				input_schema_vector.push_back(SchemaEntry(colname, fieldtypes[colindex], colname));
+				output_schema_vector.push_back(SchemaEntry(colname, fieldtypes[colindex], colname, true));
 			}
 			else
 			{
-				input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, colname));
+				input_schema_vector.push_back(SchemaEntry(fieldtypes[colindex], colname));
+				output_schema_vector.push_back(SchemaEntry(fieldtypes[colindex], colname, true));
 			}
+			++colindex;
 		});
 
 		// No double-counting, because all column names are guaranteed unique,

@@ -368,6 +368,7 @@ ImportDefinition::ImportDefinition(ImportDefinition const & rhs)
 	: mappings(rhs.mappings)
 	, input_file(rhs.input_file)
 	, first_row_is_header_row(rhs.first_row_is_header_row)
+	, second_row_is_data_type_row(rhs.second_row_is_data_type_row)
 	, input_schema(rhs.input_schema)
 	, output_schema(rhs.output_schema)
 	, format_qualifiers(rhs.format_qualifiers)
@@ -1658,6 +1659,18 @@ bool Importer::DoImport()
 		boost::split(colnames, line, boost::is_any_of(","));
 		std::transform(colnames.begin(), colnames.end(), colnames.begin(), boost::trim<std::string>);
 		import_definition.input_schema.ReorderAccToColumnNames(colnames);
+
+		// skip second row if necessary
+		if (import_definition.second_row_is_data_type_row && data_file.good())
+		{
+			data_file.getline(line, MAX_LINE_SIZE - 1);
+		}
+
+		if (!data_file.good())
+		{
+			data_file.close();
+			return true;
+		}
 
 		InitializeFields();
 

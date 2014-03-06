@@ -559,6 +559,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	import_definition.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	import_definition.input_file = dmu_refresh_file_pathname;
 	import_definition.first_row_is_header_row = true;
+	import_definition.second_row_is_data_type_row = false;
 	import_definition.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
 
 	Schema schema_input;
