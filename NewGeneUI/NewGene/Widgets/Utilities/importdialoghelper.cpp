@@ -374,7 +374,7 @@ bool ImportDialogHelper::ValidateTimeRangeBlock(QDialog & dialog,
 
 		if (valid)
 		{
-			std::transform(dataTimeRange.begin(), dataTimeRange.end(), boost::trim<std::string&>);
+			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
 			std::set<std::string> testtimerangecols(dataTimeRange.cbegin(), dataTimeRange.cend());
 			if (testtimerangecols.size() != dataTimeRange.size())
 			{
