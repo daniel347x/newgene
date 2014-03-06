@@ -151,6 +151,14 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 						case DATA_CHANGE_INTENTION__ADD:
 							{
 
+								if (change.parent_identifier.uuid && change.parent_identifier.code && change.parent_identifier.longhand)
+								{
+									WidgetInstanceIdentifier new_identifier(change.parent_identifier);
+									NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup( this, new_identifier, outp );
+									tmpGrp->setTitle(identifier.longhand->c_str());
+									layout()->addWidget(tmpGrp);
+								}
+
 							}
 							break;
 

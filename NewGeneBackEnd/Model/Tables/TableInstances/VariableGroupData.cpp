@@ -152,9 +152,11 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 			sql += new_uuid;
 			sql += "', '";
 			sql += table_schema_entry.field_name;
+			sql += "', '";
 			// TODO: the following line
 			//sql += table_schema_entry.field_description;
-			sql += "', '', ";
+			sql += table_schema_entry.field_name;
+			sql += "', ";
 			sql += boost::lexical_cast<std::string>(sequence_number);
 			sql += ", '', '', '', '";
 			sql += *identifier.uuid;

@@ -168,7 +168,7 @@ bool Table_VARIABLES_SELECTED::Update(sqlite3 * db, OutputModel & output_model_,
 					}
 				case DATA_CHANGE_INTENTION__RESET_ALL:
 					{
-						// Ditto above.
+						// Only set when VG's are created, at which time this will not be called because this is only triggered from a user selecting/deselecting a checkbox
 					}
 					break;
                     default:

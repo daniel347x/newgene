@@ -195,7 +195,8 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__UPDATE:
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
-								// Should never receive this.
+								// This message is only received when a new VG has been added,
+								// which is guaranteed to have nothing selected to start
 							}
 							break;
 						default:

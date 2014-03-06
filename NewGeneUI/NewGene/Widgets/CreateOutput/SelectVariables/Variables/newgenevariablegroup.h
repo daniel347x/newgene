@@ -34,6 +34,7 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 
 	protected:
 		void changeEvent( QEvent * e );
+		bool ResetAll(WidgetInstanceIdentifiers const & vg_members);
 
 	private:
 		Ui::NewGeneVariableGroup * ui;

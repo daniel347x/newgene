@@ -49,6 +49,7 @@ class NewGeneVariableSummaryGroup : public QGroupBox, public NewGeneWidget // do
 	protected:
 
 		void changeEvent( QEvent * e );
+		bool ResetAll(WidgetInstanceIdentifiers const & vg_members);
 
 	private:
 

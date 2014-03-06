@@ -95,56 +95,8 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 		return;
 	}
 
-	if (!ui->listView)
-	{
-		boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
-		QMessageBox msgBox;
-		msgBox.setText( msg.str().c_str() );
-		msgBox.exec();
-		return;
-	}
-
-	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
-	if (oldModel != nullptr)
-	{
-		delete oldModel;
-	}
-
-	QItemSelectionModel * oldSelectionModel = ui->listView->selectionModel();
-	QStandardItemModel * model = new QStandardItemModel(ui->listView);
-
-	int index = 0;
-	std::for_each(widget_data.identifiers.cbegin(), widget_data.identifiers.cend(), [this, &index, &model](WidgetInstanceIdentifier_Bool_Pair const & identifier)
-	{
-		if (identifier.first.longhand && !identifier.first.longhand->empty())
-		{
-
-			QStandardItem * item = new QStandardItem();
-			item->setText(QString(identifier.first.longhand->c_str()));
-			item->setEditable(false);
-			item->setCheckable(true);
-			if (identifier.second)
-			{
-				item->setCheckState(Qt::Checked);
-			}
-			else
-			{
-				item->setCheckState(Qt::Unchecked);
-			}
-			QVariant v;
-			v.setValue(identifier);
-			item->setData(v);
-			model->setItem( index, item );
-
-			++index;
-
-		}
-	});
-
-	connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
-
-	ui->listView->setModel(model);
-	if (oldSelectionModel) delete oldSelectionModel;
+	WidgetInstanceIdentifiers vg_members = widget_data.identifiers;
+	bool success = ResetAll(vg_members);
 
 }
 
@@ -168,8 +120,7 @@ void NewGeneVariableGroup::ReceiveVariableItemChanged(QStandardItem * currentIte
 			checked = true;
 		}
 		QVariant currentIdentifier = currentItem->data();
-		WidgetInstanceIdentifier_Bool_Pair identifier_bool = currentIdentifier.value<WidgetInstanceIdentifier_Bool_Pair>();
-		WidgetInstanceIdentifier identifier = identifier_bool.first;
+		WidgetInstanceIdentifier identifier = currentIdentifier.value<WidgetInstanceIdentifier>();
 		actionItems.push_back(std::make_pair(identifier, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(checked)))));
 	}
 
@@ -257,7 +208,8 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 
 						case DATA_CHANGE_INTENTION__RESET_ALL:
 							{
-								// Ditto above.
+								WidgetInstanceIdentifiers vg_members = change.child_identifiers;
+								bool success = ResetAll(vg_members);
 							}
 							break;
 
@@ -275,4 +227,55 @@ void NewGeneVariableGroup::HandleChanges(DataChangeMessage const & change_messag
 				break;
 		}
 	});
+}
+
+bool NewGeneVariableGroup::ResetAll(WidgetInstanceIdentifiers const & vg_members)
+{
+
+	if (!ui->listView)
+	{
+		boost::format msg("Invalid list view in NewGeneVariableGroup widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return false;
+	}
+
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
+	if (oldModel != nullptr)
+	{
+		delete oldModel;
+	}
+
+	QItemSelectionModel * oldSelectionModel = ui->listView->selectionModel();
+	QStandardItemModel * model = new QStandardItemModel(ui->listView);
+
+	int index = 0;
+	std::for_each(vg_members.cbegin(), vg_members.cend(), [this, &index, &model](WidgetInstanceIdentifier const & identifier)
+	{
+		if (identifier.longhand && !identifier.longhand->empty())
+		{
+
+			QStandardItem * item = new QStandardItem();
+			item->setText(QString(identifier.longhand->c_str()));
+			item->setEditable(false);
+			item->setCheckable(true);
+			item->setCheckState(Qt::Unchecked);
+			QVariant v;
+			v.setValue(identifier);
+			item->setData(v);
+			model->setItem( index, item );
+
+			++index;
+
+		}
+	});
+
+	connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
+
+	ui->listView->setModel(model);
+	if (oldSelectionModel) delete oldSelectionModel;
+
+	return true;
+
 }
