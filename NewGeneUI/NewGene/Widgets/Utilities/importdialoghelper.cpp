@@ -103,7 +103,16 @@ void ImportDialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog,
 
 }
 
-void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange, QWidget & YearWidget, QFormLayout & formYearOptions, QWidget & YearMonthDayWidget, QFormLayout & formYearMonthDayOptions, TIME_GRANULARITY const & time_range_granularity)
+void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog,
+												   QFormLayout & form,
+												   QList<QLineEdit *> & fieldsTimeRange,
+												   QList<QRadioButton *> & radioButtonsTimeRange,
+												   QBoxLayout & formTimeRangeSelection,
+												   QWidget & YearWidget,
+												   QFormLayout & formYearOptions,
+												   QWidget & YearMonthDayWidget,
+												   QFormLayout & formYearMonthDayOptions,
+												   TIME_GRANULARITY const & time_range_granularity)
 {
 
 	// Time range RADIO BUTTONS
@@ -115,7 +124,8 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout
 	form.addRow(&formTimeRangeSelection);
 
 	radioButtonsTimeRange << YButton << YMDButton;
-	radioButtonsTimeRange.hide();
+	YButton->hide();
+	YMDButton->hide();
 
 	// Time range OPTIONS - Year
 	YearWidget.setLayout(&formYearOptions);

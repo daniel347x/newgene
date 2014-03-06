@@ -552,6 +552,73 @@ class WidgetActionItem__DateTime : public WidgetActionItem
 
 };
 
+class WidgetActionItem__ImportVariableGroup : public WidgetActionItem
+{
+
+public:
+
+	WidgetActionItem__ImportVariableGroup(WidgetInstanceIdentifier const & vg, std::vector<std::string> const & timeRangeCols, std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, boost::filesystem::path const & filepathname, TIME_GRANULARITY const & the_time_granularity)
+		: WidgetActionItem()
+		, variable_group(vg)
+		, timeRangeColumnNames(timeRangeCols)
+		, dmusAndColumnNames(dmusAndCols)
+		, filePathName(filepathname)
+		, time_granularity(the_time_granularity)
+	{
+
+	}
+
+	WidgetActionItem__ImportVariableGroup(WidgetActionItem__ImportVariableGroup const & rhs)
+		: WidgetActionItem(rhs)
+		, variable_group(rhs.variable_group)
+		, timeRangeColumnNames(rhs.timeRangeColumnNames)
+		, dmusAndColumnNames(rhs.dmusAndColumnNames)
+		, filePathName(rhs.filePathName)
+		, time_granularity(rhs.time_granularity)
+	{
+
+	}
+
+	~WidgetActionItem__ImportVariableGroup()
+	{
+
+	}
+
+	WidgetInstanceIdentifier getVG() const
+	{
+		return variable_group;
+	}
+
+	std::vector<std::string> getTimeRangeColNames() const
+	{
+		return timeRangeColumnNames;
+	}
+
+	std::vector<std::pair<WidgetInstanceIdentifier, std::string>> getDmusAndColNames() const
+	{
+		return dmusAndColumnNames;
+	}
+
+	boost::filesystem::path getFilePathName() const
+	{
+		return filePathName;
+	}
+
+	TIME_GRANULARITY getTimeGranularity() const
+	{
+		return time_granularity;
+	}
+
+protected:
+
+	WidgetInstanceIdentifier variable_group;
+	std::vector<std::string> timeRangeColumnNames;
+	std::vector<std::pair<WidgetInstanceIdentifier, std::string>> dmusAndColumnNames;
+	boost::filesystem::path filePathName;
+	TIME_GRANULARITY time_granularity;
+
+};
+
 class WidgetActionItem__GenerateOutput : public WidgetActionItem
 {
 

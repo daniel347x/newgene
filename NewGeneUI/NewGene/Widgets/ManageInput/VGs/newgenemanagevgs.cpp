@@ -783,12 +783,20 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		return;
 	}
 
-//	// validation has already taken place
-//	boost::filesystem::path data_column_file_pathname(dataFileChooser[0]);
+	// validation has already taken place
+	boost::filesystem::path data_column_file_pathname(dataFileChooser[0]);
 
-//	InstanceActionItems actionItems;
-//	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(column_names)))));
-//	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
-//	emit RefreshDMUsFromFile(action_request);
+	std::vector<std::pair<WidgetInstanceIdentifier, std::string>> dmusAndColumnNames;
+	index = 0;
+	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu)
+	{
+		dmusAndColumnNames.push_back(std::make_pair(dmu, dataDmuColNames[index]));
+		++index;
+	});
+
+	InstanceActionItems actionItems;
+	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__ImportVariableGroup(vg, dataTimeRange, dmusAndColumnNames, data_column_file_pathname, uoa.time_granularity)))));
+	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
+	emit RefreshDMUsFromFile(action_request);
 
 }
