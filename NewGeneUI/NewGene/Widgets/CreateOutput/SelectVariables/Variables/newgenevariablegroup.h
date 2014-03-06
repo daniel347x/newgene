@@ -16,7 +16,7 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 		Q_OBJECT
 
 	public:
-		explicit NewGeneVariableGroup( QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr, UIInputProject * project = nullptr );
+		explicit NewGeneVariableGroup( QWidget * parent = 0, WidgetInstanceIdentifier data_instance = WidgetInstanceIdentifier(), UIOutputProject * project = nullptr, UIInputProject * inproject = nullptr );
 		~NewGeneVariableGroup();
 
 		void HandleChanges(DataChangeMessage const &);
@@ -34,7 +34,7 @@ class NewGeneVariableGroup : public QWidget, public NewGeneWidget // do not reor
 
 	protected:
 		void changeEvent( QEvent * e );
-		bool ResetAll(WidgetInstanceIdentifiers const & vg_members);
+		bool ResetAll(std::vector<std::pair<WidgetInstanceIdentifier, bool>> const & vg_members_and_bools);
 
 	private:
 		Ui::NewGeneVariableGroup * ui;
