@@ -17,10 +17,6 @@ std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_TABLE_NAM
 std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_TABLE_DATETIME_START_COLUMN_NAME = "VG_DATETIME_START_COLUMN_NAME";
 std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_TABLE_DATETIME_END_COLUMN_NAME = "VG_DATETIME_END_COLUMN_NAME";
 
-void Table_VariableGroupData::Load(sqlite3 * db, InputModel * input_model_)
-{
-}
-
 bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier const & identifier, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_)
 {
 	

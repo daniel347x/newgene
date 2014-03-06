@@ -355,12 +355,21 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 					std::string errorMsg;
 					Table_VariableGroupData * new_table = new Table_VariableGroupData(*variable_group.code);
-					ImportDefinition definition;
-					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity, definition, errorMsg);
+					ImportDefinition import_definition;
+					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity, import_definition, errorMsg);
 					if (!success)
 					{
 						boost::format msg("Failed to build the import definition: %1%");
 						msg % errorMsg;
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
+					Importer table_importer(import_definition, &input_model, new_table, Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn);
+					bool success = table_importer.DoImport();
+					if (!success)
+					{
+						boost::format msg("Unable to import or refresh the variable group from the file.");
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
