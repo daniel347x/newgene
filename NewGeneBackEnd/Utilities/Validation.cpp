@@ -262,7 +262,7 @@ bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & 
 	if (valid)
 	{
 
-		std::string regex_string("([a-zA-Z]+)");
+		std::string regex_string("([a-zA-Z_]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
@@ -334,7 +334,7 @@ bool Validation::ValidateUoaCode(std::string & proposed_uoa_code, std::string & 
 	if (valid)
 	{
 
-		std::string regex_string("([a-zA-Z]+)");
+		std::string regex_string("([a-zA-Z_]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
@@ -423,7 +423,7 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 	if (valid)
 	{
 
-		std::string regex_string("([a-zA-Z]+)");
+		std::string regex_string("([a-zA-Z_]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
