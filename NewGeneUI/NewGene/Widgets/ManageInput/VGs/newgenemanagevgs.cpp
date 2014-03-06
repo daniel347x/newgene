@@ -82,7 +82,7 @@ void NewGeneManageVGs::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 	{
 		if (project)
 		{
-			connect(this, SIGNAL(DeleteVG(WidgetActionItemRequest_ACTION_DELETE_UOA)), project->getConnector(), SLOT(DeleteVG(WidgetActionItemRequest_ACTION_DELETE_UOA)));
+			connect(this, SIGNAL(DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG)), project->getConnector(), SLOT(DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG)));
 		}
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT)
