@@ -251,7 +251,7 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 			sql += *identifier.uuid;
 			sql += "')";
 			sqlite3_stmt * stmt = NULL;
-			int err = sqlite3_prepare_v2(db, sql_create.c_str(), static_cast<int>(sql_create.size()) + 1, &stmt, NULL);
+			int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 
 			if (stmt == NULL)
 			{
@@ -308,7 +308,7 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 					sql += boost::lexical_cast<std::string>(sequence_number);
 					sql += "', 0)";
 					sqlite3_stmt * stmt = NULL;
-					int err = sqlite3_prepare_v2(db, sql_create.c_str(), static_cast<int>(sql_create.size()) + 1, &stmt, NULL);
+					int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 
 					if (stmt == NULL)
 					{
