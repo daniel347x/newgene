@@ -306,7 +306,7 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 					sql += *table_schema_entry.dmu_category_string_code;
 					sql += "', ";
 					sql += boost::lexical_cast<std::string>(sequence_number);
-					sql += "', 0)";
+					sql += ", 0)";
 					sqlite3_stmt * stmt = NULL;
 					int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
 
