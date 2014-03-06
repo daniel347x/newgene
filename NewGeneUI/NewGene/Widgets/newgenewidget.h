@@ -42,7 +42,7 @@ class NewGeneWidget
 
 		bool IsTopLevel() { return top_level; }
 
-		virtual void PrepareInputWidget(bool const also_link_output = false);
+		virtual void PrepareInputWidget(bool const also_link_output = true);
 		virtual void PrepareOutputWidget();
 		virtual void HandleChanges(DataChangeMessage const &) {}
 

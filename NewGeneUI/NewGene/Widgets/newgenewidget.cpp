@@ -25,6 +25,22 @@ NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
 
 NewGeneWidget::~NewGeneWidget()
 {
+	if (inp)
+	{
+		inp->RemoveWidgetFromUUIDMap(uuid);
+		if (data_instance.uuid)
+		{
+			inp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
+		}
+	}
+	if (outp)
+	{
+		outp->RemoveWidgetFromUUIDMap(uuid);
+		if (data_instance.uuid)
+		{
+			outp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
+		}
+	}
 }
 
 void NewGeneWidget::PrepareInputWidget(bool const also_link_output)
@@ -126,16 +142,6 @@ void NewGeneWidget::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 void NewGeneWidget::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project)
 {
 
-	if (!IsOutputProjectWidget())
-	{
-		//
-		// This is no longer an error!  Input widgets can optionally request to be triggered on changed output projects
-		//
-		//boost::format msg("Attempting to connect an output project to a widget that has not registered as an output widget.");
-		//statusManagerUI().PostStatus( msg.str().c_str(), UIStatusManager::IMPORTANCE_HIGH, true );
-		return;
-	}
-
 	if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
 		if (project && project == outp)
@@ -176,7 +182,7 @@ void NewGeneWidget::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TY
 			return;
 		}
 
-		if (IsTopLevel())
+		if (IsOutputProjectWidget() && IsTopLevel())
 		{
 			self->connect(project, SIGNAL(RefreshAllWidgets()), self, SLOT(RefreshAllWidgets()));
 		}
