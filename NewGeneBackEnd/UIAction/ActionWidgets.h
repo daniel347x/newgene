@@ -2,6 +2,9 @@
 #define ACTIONWIDGETS_H
 
 #include "../Utilities/WidgetIdentifier.h"
+#ifndef Q_MOC_RUN
+#	include <boost/filesystem.hpp>
+#endif
 
 enum WIDGET_ACTIONS
 {
