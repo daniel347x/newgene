@@ -299,7 +299,7 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 
 										QVariant vg_and_uoa_variant = vg_to_remove_item->data();
 										std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier> const vg_and_uoa = vg_and_uoa_variant.value<std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifier>>();
-										WidgetInstanceIdentifier const & vg_test = change.parent_identifier;
+										WidgetInstanceIdentifier const & vg_test = vg_and_uoa.first;
 										if (!vg_test.identifier_parent)
 										{
 											continue;
