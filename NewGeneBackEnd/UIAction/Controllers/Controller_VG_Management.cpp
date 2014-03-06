@@ -355,11 +355,11 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 					std::string errorMsg;
 					Table_VariableGroupData * new_table = new Table_VariableGroupData(*variable_group.code);
-					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity, errorMsg);
-
+					ImportDefinition definition;
+					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity, definition, errorMsg);
 					if (!success)
 					{
-						boost::format msg("Failed to refresh the VG from file: %1%");
+						boost::format msg("Failed to build the import definition: %1%");
 						msg % errorMsg;
 						messager.ShowMessageBox(msg.str());
 						return;

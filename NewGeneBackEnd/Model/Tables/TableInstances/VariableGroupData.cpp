@@ -293,14 +293,15 @@ bool Table_VariableGroupData::DeleteDmuMemberRows(sqlite3 * db, InputModel * inp
 }
 
 bool Table_VariableGroupData::BuildImportDefinition
-	(
-		sqlite3 * db, 
-		InputModel * input_model_, 
-		WidgetInstanceIdentifier const & vg, 
-		std::vector<std::string> const & timeRangeCols, 
-		std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, 
-		boost::filesystem::path const & filepathname, 
+(
+		sqlite3 * db,
+		InputModel * input_model_,
+		WidgetInstanceIdentifier const & vg,
+		std::vector<std::string> const & timeRangeCols,
+		std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols,
+		boost::filesystem::path const & filepathname,
 		TIME_GRANULARITY const & the_time_granularity,
+		ImportDefinition & definition,
 		std::string & errorMsg
 	)
 {
@@ -314,8 +315,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 	std::string table_name = Table_VariableGroupData::TableNameFromVGCode(*vg.code);
 
-	ImportDefinition definition;
-
 	definition.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	definition.input_file = filepathname;
 	definition.first_row_is_header_row = true;
@@ -327,6 +326,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 	SchemaVector input_schema_vector;
 	SchemaVector output_schema_vector;
+
+	ImportDefinition::ImportMappings mappings;
 
 	{
 
@@ -570,8 +571,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 			}
 		}
 
-		ImportDefinition::ImportMappings mappings;
-
 		// First, the time range mapping
 		switch (the_time_granularity)
 		{
@@ -663,7 +662,22 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		}
 
+		colindex = 0;
+		std::for_each(colnames.cbegin(), colnames.cend(), [&](std::string const & colname)
+		{
+			mappings.push_back(std::make_shared<OneToOneFieldMapping>(std::make_pair(NameOrIndex(NameOrIndex::NAME, colname), fieldtypes[colindex]), std::make_pair(NameOrIndex(NameOrIndex::NAME, colname), fieldtypes[colindex])));
+			++colindex;
+		});
+
 	}
+
+	schema_input.schema = input_schema_vector;
+	schema_output.schema = output_schema_vector;
+
+	definition.input_schema = schema_input;
+	definition.output_schema = schema_output;
+
+	definition.mappings = mappings;
 
 }
 
