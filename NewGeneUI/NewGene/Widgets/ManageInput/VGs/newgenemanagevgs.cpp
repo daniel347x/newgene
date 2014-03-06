@@ -649,15 +649,15 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited data file", "Choose comma-delimited data file location", "", "" };
 	ImportDialogHelper::AddFileChooserBlock(dialog, form, formFileSelection, FileChooserWidget, fieldsFileChooser, fileChooserStrings);
 
+	QList<QLineEdit *> fieldsTimeRange;
+	QList<QRadioButton *> radioButtonsTimeRange;
+	QBoxLayout formTimeRangeSelection(QBoxLayout::LeftToRight);
+	QWidget YearWidget;
+	QFormLayout formYearOptions(&YearWidget);
+	QWidget YearMonthDayWidget;
+	QFormLayout formYearMonthDayOptions(&YearMonthDayWidget);
 	if (uoa.time_granularity != TIME_GRANULARITY__NONE)
 	{
-		QList<QLineEdit *> fieldsTimeRange;
-		QList<QRadioButton *> radioButtonsTimeRange;
-		QBoxLayout formTimeRangeSelection(QBoxLayout::LeftToRight);
-		QWidget YearWidget;
-		QFormLayout formYearOptions(&YearWidget);
-		QWidget YearMonthDayWidget;
-		QFormLayout formYearMonthDayOptions(&YearMonthDayWidget);
 		ImportDialogHelper::AddTimeRangeSelectorBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, formTimeRangeSelection, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, uoa.time_granularity);
 	}
 
@@ -707,9 +707,10 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 					return;
 				}
 
+				QLineEdit * data_column_dmu = nullptr;
 				if (valid)
 				{
-					QLineEdit * data_column_dmu = fields[index];
+					data_column_dmu = fieldsDMU[index];
 					if (!data_column_dmu)
 					{
 						valid = false;
@@ -757,11 +758,9 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		{
 			if (uoa.time_granularity != TIME_GRANULARITY__NONE)
 			{
-				valid = ImportDialogHelper::ValidateTimeRangeBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, formTimeRangeSelection, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, uoa.time_granularity, dataTimeRange, errorMsg);
+				valid = ImportDialogHelper::ValidateTimeRangeBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, uoa.time_granularity, dataTimeRange, errorMsg);
 			}
 		}
-
-
 
 		if (!valid)
 		{
@@ -787,7 +786,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	boost::filesystem::path data_column_file_pathname(dataFileChooser[0]);
 
 	std::vector<std::pair<WidgetInstanceIdentifier, std::string>> dmusAndColumnNames;
-	index = 0;
+	int index = 0;
 	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu)
 	{
 		dmusAndColumnNames.push_back(std::make_pair(dmu, dataDmuColNames[index]));
@@ -795,8 +794,8 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	});
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__ImportVariableGroup(vg, dataTimeRange, dmusAndColumnNames, data_column_file_pathname, uoa.time_granularity)))));
-	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
-	emit RefreshDMUsFromFile(action_request);
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__ImportVariableGroup(vg, dataTimeRange, dmusAndColumnNames, data_column_file_pathname, uoa.time_granularity)))));
+	WidgetActionItemRequest_ACTION_REFRESH_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
+	emit RefreshVG(action_request);
 
 }

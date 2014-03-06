@@ -41,7 +41,9 @@ namespace ImportDialogHelper
 								   QFormLayout & formYearOptions,
 								   QWidget & YearMonthDayWidget,
 								   QFormLayout & formYearMonthDayOptions,
-								   TIME_GRANULARITY const & time_range_granularity, std::string errorMsg
+								   TIME_GRANULARITY const & time_range_granularity,
+								   std::vector<std::string> & dataTimeRange,
+								   std::string errorMsg
 			);
 
 	void AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories);

@@ -236,10 +236,19 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog,
 
 }
 
-bool ImportDialogHelper::ValidateTimeRangeBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange, QWidget & YearWidget, QFormLayout & formYearOptions, QWidget & YearMonthDayWidget, QFormLayout & formYearMonthDayOptions, TIME_GRANULARITY const & time_range_granularity, std::vector<std::string> & dataTimeRange, std::string errorMsg)
+bool ImportDialogHelper::ValidateTimeRangeBlock(QDialog & dialog,
+												QFormLayout & form,
+												QList<QLineEdit *> & fieldsTimeRange,
+												QList<QRadioButton *> & radioButtonsTimeRange,
+												QWidget & YearWidget,
+												QFormLayout & formYearOptions,
+												QWidget & YearMonthDayWidget,
+												QFormLayout & formYearMonthDayOptions,
+												TIME_GRANULARITY const & time_range_granularity,
+												std::vector<std::string> & dataTimeRange,
+												std::string errorMsg)
 {
 
-	TIME_GRANULARITY const & timeRangeImportMode = time_range_granularity;
 	dataTimeRange.clear();
 
 	QRadioButton * YButton = radioButtonsTimeRange[0];
@@ -254,8 +263,6 @@ bool ImportDialogHelper::ValidateTimeRangeBlock(QDialog & dialog, QFormLayout & 
 
 	if (YButton->isChecked())
 	{
-
-		timeRangeImportMode = TimeRange::TIME_RANGE_IMPORT_MODE__YEAR;
 
 		int currentIndex = 0;
 		QLineEdit * timeRange_y_yearStart = fieldsTimeRange[currentIndex++];
@@ -295,8 +302,6 @@ bool ImportDialogHelper::ValidateTimeRangeBlock(QDialog & dialog, QFormLayout & 
 
 	else if (YMDButton->isChecked())
 	{
-
-		timeRangeImportMode = TimeRange::TIME_RANGE_IMPORT_MODE__YEAR_MONTH_DAY;
 
 		int currentIndex = 2;
 		QLineEdit * timeRange_ymd_yearStart = fieldsTimeRange[currentIndex++];
