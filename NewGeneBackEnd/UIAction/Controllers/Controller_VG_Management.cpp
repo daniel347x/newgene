@@ -95,7 +95,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 
-					boost::format msg("VG '%1%' successfully created.");
+					boost::format msg("Variable group '%1%' successfully created.");
 					msg % boost::to_upper_copy(new_vg_code);
 					messager.ShowMessageBox(msg.str());
 
