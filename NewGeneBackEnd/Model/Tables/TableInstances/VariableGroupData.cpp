@@ -728,10 +728,12 @@ bool Table_VariableGroupData::BuildImportDefinition
 			// Determine if this is a primary key field
 			bool primary_key_col = true;
 
+			WidgetInstanceIdentifier the_dmu;
 			if (std::find_if(dmusAndCols.cbegin(), dmusAndCols.cend(), [&](std::pair<WidgetInstanceIdentifier, std::string> const & dmuAndCol) -> bool
 		{
 			if (dmuAndCol.second == colname)
 				{
+					the_dmu = dmuAndCol.first;
 					return true;
 				}
 				return false;
@@ -743,6 +745,15 @@ bool Table_VariableGroupData::BuildImportDefinition
 			else
 			{
 				++number_primary_key_cols;
+			}
+
+			if (primary_key_col)
+			{
+				if (!the_dmu.code || the_dmu.code->empty())
+				{
+					boost::format msg("The DMU associated with a primary key column specifications is invalid in the VG import.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
 			}
 
 			// Determine if this is a time range column
@@ -767,8 +778,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			if (primary_key_col)
 			{
-				input_schema_vector.push_back(SchemaEntry(colname, fieldtypes[colindex], colname));
-				output_schema_vector.push_back(SchemaEntry(colname, fieldtypes[colindex], colname, true));
+				input_schema_vector.push_back(SchemaEntry(*the_dmu.code, fieldtypes[colindex], colname));
+				output_schema_vector.push_back(SchemaEntry(*the_dmu.code, fieldtypes[colindex], colname, true));
 			}
 			else
 			{
