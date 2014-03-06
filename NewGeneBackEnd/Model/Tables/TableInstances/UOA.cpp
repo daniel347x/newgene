@@ -469,10 +469,10 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 			displayText += " (No time granularity)";
 			break;
 		case TIME_GRANULARITY__YEAR:
-			displayText += " (Year time granularity)";
+			displayText += " (Year granularity)";
 			break;
 		case TIME_GRANULARITY__DAY:
-			displayText += " (Day time granularity)";
+			displayText += " (Day granularity)";
 			break;
 	}
 
