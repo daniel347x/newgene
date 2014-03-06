@@ -40,6 +40,15 @@ NewGeneWidget::~NewGeneWidget()
 		{
 			outp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
 		}
+		UIInputProject * _inp = outp->getUIInputProject();
+		if (_inp)
+		{
+			_inp->RemoveWidgetFromUUIDMap(uuid);
+			if (data_instance.uuid)
+			{
+				_inp->RemoveWidgetDataItemFromUUIDMap(uuid_parent, *data_instance.uuid);
+			}
+		}
 	}
 }
 
