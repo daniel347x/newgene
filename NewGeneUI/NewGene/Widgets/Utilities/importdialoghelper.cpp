@@ -103,30 +103,21 @@ void ImportDialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog,
 
 }
 
-void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange)
+void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout & form, QList<QLineEdit *> & fieldsTimeRange, QList<QRadioButton *> & radioButtonsTimeRange, QWidget & YearWidget, QFormLayout & formYearOptions, QWidget & YearMonthDayWidget, QFormLayout & formYearMonthDayOptions, TIME_RANGE_GRANULARITY const & time_range_granularity)
 {
-
-	// ******************************************************************************************** //
-	// Urgent TODO: Pass all widgets/layouts that are local (created on stack)
-	// in the calling function and pass by reference into this function
-	// ******************************************************************************************** //
 
 	// Time range RADIO BUTTONS
 	form.addRow(new QLabel("Time range options:"));
-	QBoxLayout formTimeRangeSelection(QBoxLayout::LeftToRight);
 	QRadioButton * YButton = new QRadioButton("Year", &dialog);
 	QRadioButton * YMDButton = new QRadioButton("Year, Month, Day", &dialog);
 	formTimeRangeSelection.addWidget(YButton);
 	formTimeRangeSelection.addWidget(YMDButton);
 	form.addRow(&formTimeRangeSelection);
-	YMDButton->setChecked(true);
 
 	radioButtonsTimeRange << YButton << YMDButton;
-
+	radioButtonsTimeRange.hide();
 
 	// Time range OPTIONS - Year
-	QWidget YearWidget;
-	QFormLayout formYearOptions(&YearWidget);
 	YearWidget.setLayout(&formYearOptions);
 
 	// year
@@ -144,8 +135,6 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout
 
 
 	// Time range OPTIONS - Year, Month, Day
-	QWidget YearMonthDayWidget;
-	QFormLayout formYearMonthDayOptions(&YearMonthDayWidget);
 	YearMonthDayWidget.setLayout(&formYearMonthDayOptions);
 
 	// year
@@ -178,9 +167,34 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog, QFormLayout
 	formYearMonthDayOptions.addRow(labelymdDayEnd, lineEditymdDayEnd);
 	fieldsTimeRange << lineEditymdDayEnd;                                   // 8
 
-	YearMonthDayWidget.show();
+	YearMonthDayWidget.hide();
 	form.addRow(&YearMonthDayWidget);
 
+	switch (time_range_granularity)
+	{
+
+		case TIME_GRANULARITY__DAY:
+			{
+				YMDButton->setChecked(true);
+				YearMonthDayWidget.show();
+			}
+			break;
+
+		case TIME_GRANULARITY__YEAR:
+			{
+				YButton->setChecked(true);
+				YearWidget.show();
+			}
+			break;
+
+		default:
+			{
+				boost::format msg("Invalid time range setting.");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+			break;
+
+	}
 
 	QObject::connect(YButton, &QRadioButton::toggled, [&]()
 	{
