@@ -384,15 +384,10 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 					WidgetInstanceIdentifiers vg_members = input_model.t_vgp_setmembers.getIdentifiers(*variable_group.uuid);
 
-					DATA_CHANGE_TYPE type1 = DATA_CHANGE_TYPE__INPUT_MODEL__VG_CHANGE;
-					DATA_CHANGE_INTENTION intention1 = DATA_CHANGE_INTENTION__ADD;
-					DataChange change1(type1, intention1, variable_group, vg_members);
-					change_response.changes.push_back(change1);
-
-					DATA_CHANGE_TYPE type2 = DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION;
-					DATA_CHANGE_INTENTION intention2 = DATA_CHANGE_INTENTION__RESET_ALL;
-					DataChange change2(type2, intention2, variable_group, vg_members);
-					change_response.changes.push_back(change2);
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__RESET_ALL;
+					DataChange change(type, intention, variable_group, vg_members);
+					change_response.changes.push_back(change);
 
 				});
 
