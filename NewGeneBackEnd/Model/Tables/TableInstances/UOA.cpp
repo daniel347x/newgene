@@ -463,6 +463,19 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 		displayText += ")";
 	}
 
+	switch (uoa_category.time_granularity)
+	{
+		case TIME_GRANULARITY__NONE:
+			displayText += " (No time granularity)";
+			break;
+		case TIME_GRANULARITY__YEAR:
+			displayText += " (Year time granularity)";
+			break;
+		case TIME_GRANULARITY__DAY:
+			displayText += " (Day time granularity)";
+			break;
+	}
+
 	return displayText;
 
 }
