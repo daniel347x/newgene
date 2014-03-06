@@ -52,6 +52,7 @@ NewGeneWidget::~NewGeneWidget()
 		UIInputProject * _inp = outp->getUIInputProject();
 		if (_inp)
 		{
+			_inp->UnregisterInterestInChanges(this);
 			_inp->RemoveWidgetFromUUIDMap(uuid);
 			if (data_instance.uuid)
 			{
