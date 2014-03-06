@@ -5,6 +5,7 @@
 #ifndef Q_MOC_RUN
 #	include <boost/lexical_cast.hpp>
 #endif
+#include "../../../Utilities/UUID.h"
 
 #include <set>
 
@@ -240,7 +241,7 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 
 				if (stmt == NULL)
 				{
-					return;
+					return false;
 				}
 
 				int step_result = 0;
