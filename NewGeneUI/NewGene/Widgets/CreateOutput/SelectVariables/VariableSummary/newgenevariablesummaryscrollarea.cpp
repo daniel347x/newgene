@@ -155,7 +155,7 @@ void NewGeneVariableSummaryScrollArea::HandleChanges(DataChangeMessage const & c
 								{
 									WidgetInstanceIdentifier new_identifier(change.parent_identifier);
 									NewGeneVariableSummaryGroup * tmpGrp = new NewGeneVariableSummaryGroup( this, new_identifier, outp );
-									tmpGrp->setTitle(identifier.longhand->c_str());
+									tmpGrp->setTitle(new_identifier.longhand->c_str());
 									layout()->addWidget(tmpGrp);
 								}
 

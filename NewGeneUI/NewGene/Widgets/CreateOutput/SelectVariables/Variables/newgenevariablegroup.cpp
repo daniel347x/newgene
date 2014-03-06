@@ -95,7 +95,12 @@ void NewGeneVariableGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROU
 		return;
 	}
 
-	WidgetInstanceIdentifiers vg_members = widget_data.identifiers;
+	WidgetInstanceIdentifiers vg_members;
+	auto vg_members_and_bools = widget_data.identifiers;
+	std::for_each(vg_members_and_bools.cbegin(), vg_members_and_bools.cend(), [&](std::pair<WidgetInstanceIdentifier, bool> const & vg_member_and_bool)
+	{
+		vg_members.push_back(vg_member_and_bool.first);
+	});
 	bool success = ResetAll(vg_members);
 
 }
