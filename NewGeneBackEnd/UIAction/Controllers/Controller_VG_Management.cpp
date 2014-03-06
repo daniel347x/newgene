@@ -353,11 +353,14 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						return;
 					}
 
-					bool success = input_model.t_dmu_setmembers.RefreshFromFile(input_model.getDb(), input_model, dmu_category, boost::filesystem::path(dmu_refresh_file_pathname),dmu_refresh_column_labels);
+					std::string errorMsg;
+					Table_VariableGroupData * new_table = new Table_VariableGroupData(*variable_group.code);
+					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity, errorMsg);
 
 					if (!success)
 					{
-						boost::format msg("Failed to refresh the VG from file.");
+						boost::format msg("Failed to refresh the VG from file: %1%");
+						msg % errorMsg;
 						messager.ShowMessageBox(msg.str());
 						return;
 					}

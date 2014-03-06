@@ -6,6 +6,8 @@
 #	include <boost/lexical_cast.hpp>
 #endif
 
+#include <set>
+
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_NAME = "VG_DATA_TABLE_NAME";
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME = "VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME";
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_FK_DMU_CATEGORY_CODE = "VG_DATA_TABLE_FK_DMU_CATEGORY_CODE";
@@ -287,6 +289,174 @@ bool Table_VariableGroupData::DeleteDmuMemberRows(sqlite3 * db, InputModel * inp
 	theExecutor.success();
 
 	return theExecutor.succeeded();
+
+}
+
+bool Table_VariableGroupData::BuildImportDefinition
+	(
+		sqlite3 * db, 
+		InputModel * input_model_, 
+		WidgetInstanceIdentifier const & vg, 
+		std::vector<std::string> const & timeRangeCols, 
+		std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, 
+		boost::filesystem::path const & filepathname, 
+		TIME_GRANULARITY const & the_time_granularity,
+		std::string & errorMsg
+	)
+{
+
+	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+	{
+		boost::format msg("Missing the VG to refresh in the model.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+		return;
+	}
+
+	std::string table_name = Table_VariableGroupData::TableNameFromVGCode(*vg.code);
+
+	ImportDefinition definition;
+
+	definition.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
+	definition.input_file = filepathname;
+	definition.first_row_is_header_row = true;
+	definition.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
+
+	Schema schema_input;
+	Schema schema_output;
+
+	SchemaVector input_schema_vector;
+	SchemaVector output_schema_vector;
+
+	{
+
+		std::fstream data_file;
+		data_file.open(definition.input_file.c_str(), std::ios::in);
+
+		// Get column names from the file
+		char line[MAX_LINE_SIZE];
+		char parsedline[MAX_LINE_SIZE];
+
+		// skip first row if necessary
+		if (data_file.good())
+		{
+			data_file.getline(line, MAX_LINE_SIZE - 1);
+		}
+
+		if (!data_file.good())
+		{
+			data_file.close();
+			boost::format msg("Cannot open data file \"%1%\"");
+			msg % definition.input_file.c_str();
+			errorMsg = msg.str();
+			return false;
+		}
+
+		std::vector<std::string> colnames;
+		boost::split(colnames, line, boost::is_any_of(","));
+		std::transform(colnames.begin(), colnames.end(), colnames.begin(), boost::trim<std::string>);
+
+		data_file.close();
+
+		std::set<std::string> testcols(colnames.cbegin(), colnames.cend());
+		if (testcols.size() != colnames.size())
+		{
+			boost::format msg("There are duplicate column names in the input.");
+			errorMsg = msg.str();
+			return false;
+		}
+
+		// If the table already exists, check that the columns match
+		WidgetInstanceIdentifiers existing_column_identifiers = input_model_->t_vgp_setmembers.getIdentifiers(*vg.uuid);
+		if (!existing_column_identifiers.empty())
+		{
+
+			if (existing_column_identifiers.size() != colnames.size())
+			{
+				boost::format msg("The number of columns in the input file does not match the number of columns in the existing data.");
+				msg % definition.input_file.c_str();
+				errorMsg = msg.str();
+				return false;
+			}
+
+			bool mismatch = false;
+			int index = 0;
+			std::for_each(existing_column_identifiers.cbegin(), existing_column_identifiers.cend(), [&](WidgetInstanceIdentifier const & existing_column_identifier)
+			{
+
+				if (mismatch)
+				{
+					return;
+				}
+
+				if (!existing_column_identifier.code || existing_column_identifier.code->empty())
+				{
+					mismatch = true;
+					return;
+				}
+
+				if (*existing_column_identifier.code != colnames[index])
+				{
+					mismatch = true;
+					return;
+				}
+
+				++index;
+
+			});
+
+			if (mismatch)
+			{
+				boost::format msg("The column names in the input file do not match the column names for the existing data.");
+				msg % definition.input_file.c_str();
+				errorMsg = msg.str();
+				return false;
+			}
+
+		}
+
+		int number_primary_key_cols = 0;
+		std::for_each(colnames.cbegin(), colnames.cend(), [&](std::string const & colname)
+		{
+			// Determine if this is a primary key field
+			bool primary_key_col = true;
+			if (std::find_if(dmusAndCols.cbegin(), dmusAndCols.cend(), [&](std::pair<WidgetInstanceIdentifier, std::string> const & dmuAndCol) -> bool
+				{
+					if (dmuAndCol.second == colname)
+					{
+						return true;
+					}
+					return false;
+				}) == dmusAndCols.cend())
+			{
+				// Not a key field
+				primary_key_col = false;
+			}
+			else
+			{
+				++number_primary_key_cols;
+			}
+			
+			if (primary_key_col)
+			{
+				input_schema_vector.push_back(SchemaEntry(colname, FIELD_TYPE_INT32, colname));
+			}
+			else
+			{
+				input_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, colname));
+			}
+		});
+
+		// No double-counting, because all column names are guaranteed unique,
+		// with a test both on the client side (for duplicate DMU primary key column names)
+		// and a test above (for any duplicate column names)
+		if (number_primary_key_cols != dmusAndCols.size())
+		{
+			boost::format msg("Not all specified DMU primary key columns could be found in the input file.");
+			errorMsg = msg.str();
+			return false;
+		}
+
+	}
 
 }
 

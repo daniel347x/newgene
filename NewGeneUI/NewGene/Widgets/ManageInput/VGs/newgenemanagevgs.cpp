@@ -13,6 +13,8 @@
 #include "../../../../NewGeneBackEnd/Model/InputModel.h"
 #include "../../../../NewGeneBackEnd/Model/TimeGranularity.h"
 
+#include <set>
+
 NewGeneManageVGs::NewGeneManageVGs( QWidget * parent ) :
 	QWidget( parent ),
 	NewGeneWidget( WidgetCreationInfo(this, parent, WIDGET_NATURE_INPUT_WIDGET, MANAGE_VGS_WIDGET, true) ), // 'this' pointer is cast by compiler to proper Widget instance, which is already created due to order in which base classes appear in class definition
@@ -748,6 +750,18 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 				++index;
 
 			});
+		}
+
+		if (valid)
+		{
+			// Test that primary key column names are unique
+			std::set<std::string> testkeys(dataDmuColNames.cbegin(), dataDmuColNames.cend());
+			if (testkeys.size() != dataDmuColNames.size())
+			{
+				valid = false;
+				errorMsg = "Duplicate column names detected for DMU primary key columns.";
+				return;
+			}
 		}
 
 		if (valid)

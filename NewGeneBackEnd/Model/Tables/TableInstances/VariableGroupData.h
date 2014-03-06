@@ -21,6 +21,7 @@ public:
 	bool ImportEnd(sqlite3 * db, WidgetInstanceIdentifier const & identifier, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_);
 	bool DeleteDataTable(sqlite3 * db, InputModel * input_model_);
 	bool DeleteDmuMemberRows(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & dmu_member, std::string const & column_name);
+	bool BuildImportDefinition(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::vector<std::string> const & timeRangeCols, std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, boost::filesystem::path const & filepathname, TIME_GRANULARITY const & the_time_granularity, std::string & errorMsg);
 
 	static std::string TableNameFromVGCode(std::string variable_group_code);
 	static std::string ViewNameFromCount(int const view_number);

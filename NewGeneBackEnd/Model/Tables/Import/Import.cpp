@@ -1655,7 +1655,8 @@ bool Importer::DoImport()
 		}
 
 		std::vector<std::string> colnames;
-		boost::split(colnames, line, boost::is_any_of(", "));
+		boost::split(colnames, line, boost::is_any_of(","));
+		std::transform(colnames.begin(), colnames.end(), colnames.begin(), boost::trim<std::string>);
 		import_definition.input_schema.ReorderAccToColumnNames(colnames);
 
 		InitializeFields();
