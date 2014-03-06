@@ -306,7 +306,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 	{
 		boost::format msg("Missing the VG to refresh in the model.");
 		throw NewGeneException() << newgene_error_description(msg.str());
-		return;
 	}
 
 	std::string table_name = Table_VariableGroupData::TableNameFromVGCode(*vg.code);
@@ -341,7 +340,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		// Get column names from the file
 		char line[MAX_LINE_SIZE];
-		char parsedline[MAX_LINE_SIZE];
 
 		// skip first row if necessary
 		data_file.getline(line, MAX_LINE_SIZE - 1);
@@ -357,7 +355,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		std::vector<std::string> colnames;
 		boost::split(colnames, line, boost::is_any_of(","));
-		std::transform(colnames.begin(), colnames.end(), colnames.begin(), boost::trim<std::string&>);
+		std::for_each(colnames.begin(), colnames.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
 
 		data_file.getline(line, MAX_LINE_SIZE - 1);
 
@@ -372,7 +370,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		std::vector<std::string> coltypes;
 		boost::split(coltypes, line, boost::is_any_of(","));
-		std::transform(coltypes.begin(), coltypes.end(), coltypes.begin(), boost::trim<std::string&>);
+		std::for_each(coltypes.begin(), coltypes.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
 
 		data_file.close();
 
@@ -674,6 +672,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 	definition.output_schema = schema_output;
 
 	definition.mappings = mappings;
+
+	return true;
 
 }
 

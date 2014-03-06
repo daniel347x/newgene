@@ -1657,7 +1657,7 @@ bool Importer::DoImport()
 
 		std::vector<std::string> colnames;
 		boost::split(colnames, line, boost::is_any_of(","));
-		std::transform(colnames.begin(), colnames.end(), colnames.begin(), boost::trim<std::string>);
+		std::for_each(colnames.begin(), colnames.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
 		import_definition.input_schema.ReorderAccToColumnNames(colnames);
 
 		// skip second row if necessary

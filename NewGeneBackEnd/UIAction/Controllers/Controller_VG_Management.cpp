@@ -366,7 +366,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					}
 
 					Importer table_importer(import_definition, &input_model, new_table, Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn);
-					bool success = table_importer.DoImport();
+					success = table_importer.DoImport();
 					if (!success)
 					{
 						boost::format msg("Unable to import or refresh the variable group from the file.");
