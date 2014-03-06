@@ -49,6 +49,10 @@ NewGeneVariableGroup::~NewGeneVariableGroup()
 	{
 		outp->UnregisterInterestInChanges(this);
 	}
+	if (inp)
+	{
+		inp->UnregisterInterestInChanges(this);
+	}
 	delete ui;
 }
 

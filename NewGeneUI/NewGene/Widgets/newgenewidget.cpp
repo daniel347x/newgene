@@ -25,6 +25,15 @@ NewGeneWidget::NewGeneWidget( WidgetCreationInfo const & creation_info )
 
 NewGeneWidget::~NewGeneWidget()
 {
+	if (outp)
+	{
+		outp->UnregisterInterestInChanges(self);
+	}
+	if (inp)
+	{
+		inp->UnregisterInterestInChanges(self);
+	}
+
 	if (inp)
 	{
 		inp->RemoveWidgetFromUUIDMap(uuid);
