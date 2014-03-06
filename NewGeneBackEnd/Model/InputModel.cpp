@@ -23,11 +23,11 @@ void InputModel::LoadTables()
 		t_dmu_setmembers.Load(db, this);
 		t_dmu_setmembers.Sort();
 
-		t_uoa_category.Load(db, this);
-		t_uoa_category.Sort();
-
 		t_uoa_setmemberlookup.Load(db, this);
 		t_uoa_setmemberlookup.Sort();
+
+		t_uoa_category.Load(db, this);
+		t_uoa_category.Sort();
 
 		t_vgp_identifiers.Load(db, this);
 		t_vgp_identifiers.Sort();
