@@ -783,12 +783,12 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		return;
 	}
 
-	// validation has already taken place
-	boost::filesystem::path data_column_file_pathname(dataFileChooser[0]);
+//	// validation has already taken place
+//	boost::filesystem::path data_column_file_pathname(dataFileChooser[0]);
 
-	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(column_names)))));
-	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
-	emit RefreshDMUsFromFile(action_request);
+//	InstanceActionItems actionItems;
+//	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(column_names)))));
+//	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
+//	emit RefreshDMUsFromFile(action_request);
 
 }
