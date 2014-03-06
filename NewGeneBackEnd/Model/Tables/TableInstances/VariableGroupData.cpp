@@ -360,7 +360,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		std::vector<std::string> colnames;
 		boost::split(colnames, line, boost::is_any_of(","));
-		std::transform(colnames.begin(), colnames.end(), colnames.begin(), boost::trim<std::string>);
+		std::transform(colnames.begin(), colnames.end(), colnames.begin(), boost::trim<std::string&>);
 
 		data_file.getline(line, MAX_LINE_SIZE - 1);
 
@@ -375,7 +375,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		std::vector<std::string> coltypes;
 		boost::split(coltypes, line, boost::is_any_of(","));
-		std::transform(coltypes.begin(), coltypes.end(), coltypes.begin(), boost::trim<std::string>);
+		std::transform(coltypes.begin(), coltypes.end(), coltypes.begin(), boost::trim<std::string&>);
 
 		data_file.close();
 
@@ -482,6 +482,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		}
 
 		int number_primary_key_cols = 0;
+		int number_time_range_cols = 0;
 		int colindex = 0;
 		std::for_each(colnames.cbegin(), colnames.cend(), [&](std::string const & colname)
 		{
@@ -504,6 +505,25 @@ bool Table_VariableGroupData::BuildImportDefinition
 				++number_primary_key_cols;
 			}
 			
+			// Determine if this is a time range column
+			bool time_range_col = true;
+			if (std::find_if(timeRangeCols.cbegin(), timeRangeCols.cend(), [&](std::string const & timeRangeCol) -> bool
+			{
+				if (timeRangeCol == colname)
+				{
+					return true;
+				}
+				return false;
+			}) == timeRangeCols.cend())
+			{
+				// Not a time range column
+				// no-op
+			}
+			else
+			{
+				++number_time_range_cols;
+			}
+
 			if (primary_key_col)
 			{
 				input_schema_vector.push_back(SchemaEntry(colname, fieldtypes[colindex], colname));
@@ -525,6 +545,122 @@ bool Table_VariableGroupData::BuildImportDefinition
 			boost::format msg("Not all specified DMU primary key columns could be found in the input file.");
 			errorMsg = msg.str();
 			return false;
+		}
+
+		// Time-range duplicates have also been screened
+		if (number_time_range_cols != timeRangeCols.size())
+		{
+			bool good = false;
+			if (the_time_granularity == TIME_GRANULARITY__YEAR)
+			{
+				if (timeRangeCols.size() == 2 && boost::trim_copy(timeRangeCols[1]).empty())
+				{
+					if (number_time_range_cols == 1)
+					{
+						// special case: this is OK, just one column
+						good = true;
+					}
+				}
+			}
+			if (!good)
+			{
+				boost::format msg("Not all specified time range columns could be found in the input file.");
+				errorMsg = msg.str();
+				return false;
+			}
+		}
+
+		ImportDefinition::ImportMappings mappings;
+
+		// First, the time range mapping
+		switch (the_time_granularity)
+		{
+
+			case TIME_GRANULARITY__DAY:
+			{
+				if (timeRangeCols.size() != 6)
+				{
+					boost::format msg("There should be 6 time columns.");
+					errorMsg = msg.str();
+					return false;
+				}
+				std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
+				FieldTypeEntries input_file_fields;
+				FieldTypeEntries output_table_fields;
+				FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_INT32);
+				FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_INT32);
+				FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[2]), FIELD_TYPE_INT32);
+				FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[3]), FIELD_TYPE_INT32);
+				FieldTypeEntry input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[4]), FIELD_TYPE_INT32);
+				FieldTypeEntry input_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[5]), FIELD_TYPE_INT32);
+				input_file_fields.push_back(input_time_field__YearStart);
+				input_file_fields.push_back(input_time_field__MonthStart);
+				input_file_fields.push_back(input_time_field__DayStart);
+				input_file_fields.push_back(input_time_field__YearEnd);
+				input_file_fields.push_back(input_time_field__MonthEnd);
+				input_file_fields.push_back(input_time_field__DayEnd);
+				FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
+				FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+				output_table_fields.push_back(output_time_field__DayStart);
+				output_table_fields.push_back(output_time_field__DayEnd);
+				time_range_mapping->input_file_fields = input_file_fields;
+				time_range_mapping->output_table_fields = output_table_fields;
+				mappings.push_back(time_range_mapping);
+			}
+			break;
+
+			case TIME_GRANULARITY__YEAR:
+			{
+				// Time-range mapping
+				if (timeRangeCols.size() != 2)
+				{
+					boost::format msg("There should be 2 time columns.");
+					errorMsg = msg.str();
+					return false;
+				}
+				if (boost::trim_copy(timeRangeCols[1]).empty())
+				{
+					std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
+					FieldTypeEntries input_file_fields;
+					FieldTypeEntries output_table_fields;
+					FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_INT32);
+					input_file_fields.push_back(input_time_field__Year);
+					FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
+					FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+					output_table_fields.push_back(output_time_field__YearStart);
+					output_table_fields.push_back(output_time_field__YearEnd);
+					time_range_mapping->input_file_fields = input_file_fields;
+					time_range_mapping->output_table_fields = output_table_fields;
+					mappings.push_back(time_range_mapping);
+				}
+				else
+				{
+					std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR);
+					FieldTypeEntries input_file_fields;
+					FieldTypeEntries output_table_fields;
+					FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_INT32);
+					FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_INT32);
+					input_file_fields.push_back(input_time_field__YearStart);
+					input_file_fields.push_back(input_time_field__YearEnd);
+					FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
+					FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+					output_table_fields.push_back(output_time_field__YearStart);
+					output_table_fields.push_back(output_time_field__YearEnd);
+					time_range_mapping->input_file_fields = input_file_fields;
+					time_range_mapping->output_table_fields = output_table_fields;
+					mappings.push_back(time_range_mapping);
+				}
+			}
+			break;
+
+			default:
+			{
+				boost::format msg("Invalid time range specification in construction of import definition for variable group.");
+				errorMsg = msg.str();
+				return false;
+			}
+			break;
+
 		}
 
 	}

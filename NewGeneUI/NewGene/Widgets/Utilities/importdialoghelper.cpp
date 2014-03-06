@@ -20,6 +20,8 @@
 #include "../../../../NewGeneBackEnd/Model/InputModel.h"
 #include "../../../../NewGeneBackEnd/Model/Tables/TableInstances/DMU.h"
 
+#include <set>
+
 void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBoxLayout & formFileSelection, QWidget & FileChooserWidget, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
 {
 
@@ -135,7 +137,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(QDialog & dialog,
 	QLineEdit * lineEdityYearStart = new QLineEdit(&YearWidget);
 	formYearOptions.addRow(labelyYearStart, lineEdityYearStart);
 	fieldsTimeRange << lineEdityYearStart;                                  // 1
-	QString labelyYearEnd = QString("'Year End' column name:");
+	QString labelyYearEnd = QString("'Year End' column name (leave blank if not present):");
 	QLineEdit * lineEdityYearEnd = new QLineEdit(&YearWidget);
 	formYearOptions.addRow(labelyYearEnd, lineEdityYearEnd);
 	fieldsTimeRange << lineEdityYearEnd;                                    // 2
@@ -287,7 +289,10 @@ bool ImportDialogHelper::ValidateTimeRangeBlock(QDialog & dialog,
 
 		if (valid)
 		{
-			valid = Validation::ValidateColumnName(y_yearEnd, "End Year", true, errorMsg);
+			if (!boost::trim_copy(y_yearEnd).empty())
+			{
+				valid = Validation::ValidateColumnName(y_yearEnd, "End Year", true, errorMsg);
+			}
 		}
 
 		if (valid)
@@ -365,6 +370,18 @@ bool ImportDialogHelper::ValidateTimeRangeBlock(QDialog & dialog,
 			dataTimeRange.push_back(ymd_yearEnd);
 			dataTimeRange.push_back(ymd_monthEnd);
 			dataTimeRange.push_back(ymd_dayEnd);
+		}
+
+		if (valid)
+		{
+			std::transform(dataTimeRange.begin(), dataTimeRange.end(), boost::trim<std::string&>);
+			std::set<std::string> testtimerangecols(dataTimeRange.cbegin(), dataTimeRange.cend());
+			if (testtimerangecols.size() != dataTimeRange.size())
+			{
+				boost::format msg("Duplicate time range column names");
+				errorMsg = msg.str();
+				return false;
+			}
 		}
 
 		return valid;
