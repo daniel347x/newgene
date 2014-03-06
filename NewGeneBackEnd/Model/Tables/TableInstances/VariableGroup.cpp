@@ -81,9 +81,33 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 		return false;
 	}
 
-	if (!vg.code)
+	if (!vg.code || vg.code->empty() || !vg.uuid || vg.uuid->empty())
 	{
 		return false;
+	}
+
+	bool already_exists = ExistsByCode(db, *input_model_, *vg.code);
+	if (!already_exists)
+	{
+		boost::format msg("The variable group %1% does not exist.");
+		msg % *vg.code;
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	already_exists = ExistsByUuid(db, *input_model_, *vg.uuid);
+	if (!already_exists)
+	{
+		boost::format msg("The variable group %1% does not exist.");
+		msg % *vg.code;
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	already_exists = Exists(db, *input_model_, vg);
+	if (!already_exists)
+	{
+		boost::format msg("The variable group %1% does not exist.");
+		msg % *vg.code;
+		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
 	std::for_each(input_model_->t_vgp_data_vector.begin(), input_model_->t_vgp_data_vector.end(), [&](std::unique_ptr<Table_VariableGroupData> & vg_instance_table)
@@ -118,6 +142,30 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 		),
 		input_model_->t_vgp_data_vector.end()
 	);
+
+	sqlite3_stmt * stmt = NULL;
+	std::string sql("DELETE FROM VG_CATEGORY WHERE VG_CATEGORY_UUID = '");
+	sql += *vg.uuid;
+	sql += "'";
+	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		boost::format msg("Unable to prepare DELETE statement to delete the VG.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	int step_result = 0;
+	step_result = sqlite3_step(stmt);
+	if (step_result != SQLITE_DONE)
+	{
+		boost::format msg("Unable to execute DELETE statement to delete the VG: %1%");
+		msg % sqlite3_errstr(step_result);
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
 
 	// Remove from cache for table VG_SET_MEMBER
 	input_model_->t_vgp_setmembers.DeleteVG(db, input_model_, vg);
