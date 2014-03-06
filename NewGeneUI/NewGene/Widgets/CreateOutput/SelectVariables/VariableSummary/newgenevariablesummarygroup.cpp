@@ -101,17 +101,17 @@ void NewGeneVariableSummaryGroup::RefreshAllWidgets()
 void NewGeneVariableSummaryGroup::WidgetDataRefreshReceive(WidgetDataItem_VARIABLE_GROUPS_SUMMARY_VARIABLE_GROUP_INSTANCE widget_data)
 {
 
-    if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid) )
-    {
-        boost::format msg("Invalid widget refresh in NewGeneVariableSummary widget.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	if (!data_instance.uuid || !widget_data.identifier || !widget_data.identifier->uuid || (*data_instance.uuid) != (*widget_data.identifier->uuid) )
+	{
+		boost::format msg("Invalid widget refresh in NewGeneVariableSummary widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
 
-    WidgetInstanceIdentifiers vg_members = widget_data.identifiers;
-    bool success = ResetAll(vg_members);
+	WidgetInstanceIdentifiers vg_members = widget_data.identifiers;
+	bool success = ResetAll(vg_members);
 
 }
 
@@ -137,18 +137,18 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 {
   std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [this](DataChange const & change)
   {
-      switch (change.change_type)
-      {
-          case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION:
-              {
-                  switch (change.change_intention)
-                  {
-                      case DATA_CHANGE_INTENTION__ADD:
-                      case DATA_CHANGE_INTENTION__REMOVE:
-                          {
-                              // This is the OUTPUT model changing.
-                              // "Add" means to simply add an item that is CHECKED (previously unchecked) -
-                              // NOT to add a new variable.  That would be an input model change type.
+	  switch (change.change_type)
+	  {
+		  case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION:
+			  {
+				  switch (change.change_intention)
+				  {
+					  case DATA_CHANGE_INTENTION__ADD:
+					  case DATA_CHANGE_INTENTION__REMOVE:
+						  {
+							  // This is the OUTPUT model changing.
+							  // "Add" means to simply add an item that is CHECKED (previously unchecked) -
+							  // NOT to add a new variable.  That would be an input model change type.
 
 							  QStandardItemModel * model = static_cast<QStandardItemModel*>(ui->listView->model());
 							  if (model == nullptr)
@@ -269,47 +269,47 @@ void NewGeneVariableSummaryGroup::HandleChanges(DataChangeMessage const & change
 bool NewGeneVariableSummaryGroup::ResetAll(WidgetInstanceIdentifiers const & vg_members)
 {
 
-    if (!ui->listView)
-    {
-        boost::format msg("Invalid list view in NewGeneVariableSummaryGroup widget.");
-        QMessageBox msgBox;
-        msgBox.setText( msg.str().c_str() );
-        msgBox.exec();
-        return;
-    }
+	if (!ui->listView)
+	{
+		boost::format msg("Invalid list view in NewGeneVariableSummaryGroup widget.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return false;
+	}
 
-    QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
-    if (oldModel != nullptr)
-    {
-        delete oldModel;
-    }
+	QStandardItemModel * oldModel = static_cast<QStandardItemModel*>(ui->listView->model());
+	if (oldModel != nullptr)
+	{
+		delete oldModel;
+	}
 
-    QItemSelectionModel * oldSelectionModel = ui->listView->selectionModel();
-    QStandardItemModel * model = new QStandardItemModel(ui->listView);
+	QItemSelectionModel * oldSelectionModel = ui->listView->selectionModel();
+	QStandardItemModel * model = new QStandardItemModel(ui->listView);
 
-    int index = 0;
-    std::for_each(vg_members.cbegin(), vg_members.cend(), [this, &index, &model](WidgetInstanceIdentifier const & identifier)
-    {
-        if (identifier.longhand && !identifier.longhand->empty())
-        {
+	int index = 0;
+	std::for_each(vg_members.cbegin(), vg_members.cend(), [this, &index, &model](WidgetInstanceIdentifier const & identifier)
+	{
+		if (identifier.longhand && !identifier.longhand->empty())
+		{
 
-            QStandardItem * item = new QStandardItem();
-            item->setText(QString(identifier.longhand->c_str()));
-            item->setEditable(false);
-            QVariant v;
-            v.setValue(identifier);
-            item->setData(v);
-            model->setItem( index, item );
+			QStandardItem * item = new QStandardItem();
+			item->setText(QString(identifier.longhand->c_str()));
+			item->setEditable(false);
+			QVariant v;
+			v.setValue(identifier);
+			item->setData(v);
+			model->setItem( index, item );
 
-            ++index;
+			++index;
 
-        }
-    });
+		}
+	});
 
-    // Since these are not checkboxes yet, the following signal will never currently be called - unlike the Variable Group items (not the summary), which *are* checkboxes
-    connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
+	// Since these are not checkboxes yet, the following signal will never currently be called - unlike the Variable Group items (not the summary), which *are* checkboxes
+	connect(model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(ReceiveVariableItemChanged(QStandardItem*)));
 
-    ui->listView->setModel(model);
-    if (oldSelectionModel) delete oldSelectionModel;
+	ui->listView->setModel(model);
+	if (oldSelectionModel) delete oldSelectionModel;
 
 }
