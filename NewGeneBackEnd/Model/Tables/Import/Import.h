@@ -347,7 +347,8 @@ class ImportDefinition
 		ImportMappings mappings;
 		boost::filesystem::path input_file;
 		bool first_row_is_header_row;
-		bool second_row_is_data_type_row;
+		bool second_row_is_column_description_row;
+		bool third_row_is_data_type_row;
 		Schema input_schema;
 		Schema output_schema;
 		int format_qualifiers;

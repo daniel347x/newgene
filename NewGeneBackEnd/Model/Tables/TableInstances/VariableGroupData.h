@@ -16,7 +16,7 @@ public:
 		table_name = Table_VariableGroupData::TableNameFromVGCode(vg_category_string_code);
 	}
 
-	bool BuildImportDefinition(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::vector<std::string> const & timeRangeCols, std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, boost::filesystem::path const & filepathname, TIME_GRANULARITY const & the_time_granularity, ImportDefinition & definition, std::string & errorMsg);
+	bool BuildImportDefinition(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::vector<std::string> const & timeRangeCols, std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, boost::filesystem::path const & filepathname, TIME_GRANULARITY const & the_time_granularity, bool const inputFileContainsColumnDescriptions, bool const inputFileContainsColumnDataTypes, ImportDefinition & definition, std::string & errorMsg);
 	bool ImportStart(sqlite3 * db, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_);
 	bool ImportEnd(sqlite3 * db, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_);
 

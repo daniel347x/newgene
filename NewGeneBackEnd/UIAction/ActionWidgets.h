@@ -560,13 +560,15 @@ class WidgetActionItem__ImportVariableGroup : public WidgetActionItem
 
 public:
 
-	WidgetActionItem__ImportVariableGroup(WidgetInstanceIdentifier const & vg, std::vector<std::string> const & timeRangeCols, std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, boost::filesystem::path const & filepathname, TIME_GRANULARITY const & the_time_granularity)
+	WidgetActionItem__ImportVariableGroup(WidgetInstanceIdentifier const & vg, std::vector<std::string> const & timeRangeCols, std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, boost::filesystem::path const & filepathname, TIME_GRANULARITY const & the_time_granularity, bool const inputFileContainsColumnDescriptions_, bool const inputFileContainsColumnDataTypes_)
 		: WidgetActionItem()
 		, variable_group(vg)
 		, timeRangeColumnNames(timeRangeCols)
 		, dmusAndColumnNames(dmusAndCols)
 		, filePathName(filepathname)
 		, time_granularity(the_time_granularity)
+		, inputFileContainsColumnDescriptions(inputFileContainsColumnDescriptions_)
+		, inputFileContainsColumnDataTypes(inputFileContainsColumnDataTypes_)
 	{
 
 	}
@@ -578,6 +580,8 @@ public:
 		, dmusAndColumnNames(rhs.dmusAndColumnNames)
 		, filePathName(rhs.filePathName)
 		, time_granularity(rhs.time_granularity)
+		, inputFileContainsColumnDescriptions(rhs.inputFileContainsColumnDescriptions)
+		, inputFileContainsColumnDataTypes(rhs.inputFileContainsColumnDataTypes)
 	{
 
 	}
@@ -612,6 +616,16 @@ public:
 		return time_granularity;
 	}
 
+	bool doesInputFileContainsColumnDescriptions() const
+	{
+		return inputFileContainsColumnDescriptions;
+	}
+	
+	bool doesInputFileContainsColumnDataTypes() const
+	{
+		return inputFileContainsColumnDataTypes;
+	}
+
 protected:
 
 	WidgetInstanceIdentifier variable_group;
@@ -619,6 +633,8 @@ protected:
 	std::vector<std::pair<WidgetInstanceIdentifier, std::string>> dmusAndColumnNames;
 	boost::filesystem::path filePathName;
 	TIME_GRANULARITY time_granularity;
+	bool inputFileContainsColumnDescriptions;
+	bool inputFileContainsColumnDataTypes
 
 };
 

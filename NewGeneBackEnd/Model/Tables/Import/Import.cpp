@@ -368,7 +368,8 @@ ImportDefinition::ImportDefinition(ImportDefinition const & rhs)
 	: mappings(rhs.mappings)
 	, input_file(rhs.input_file)
 	, first_row_is_header_row(rhs.first_row_is_header_row)
-	, second_row_is_data_type_row(rhs.second_row_is_data_type_row)
+	, second_row_is_column_description_row(rhs.second_row_is_column_description_row)
+	, third_row_is_data_type_row(rhs.third_row_is_data_type_row)
 	, input_schema(rhs.input_schema)
 	, output_schema(rhs.output_schema)
 	, format_qualifiers(rhs.format_qualifiers)
@@ -1643,27 +1644,57 @@ bool Importer::DoImport()
 		char line[MAX_LINE_SIZE];
 		char parsedline[MAX_LINE_SIZE];
 
-		// skip first row if necessary
+		// handle the column label row
 		if (import_definition.first_row_is_header_row && data_file.good())
 		{
+
 			data_file.getline(line, MAX_LINE_SIZE - 1);
+
+			if (!data_file.good())
+			{
+				data_file.close();
+				return true;
+			}
+
+			// The column names have already been set
+			// but we need to read them again here
+			std::vector<std::string> colnames;
+			boost::split(colnames, line, boost::is_any_of(","));
+			std::for_each(colnames.begin(), colnames.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
+			import_definition.input_schema.ReorderAccToColumnNames(colnames);
+
 		}
 
-		if (!data_file.good())
+		// handle the column description row
+		if (import_definition.third_row_is_data_type_row && data_file.good())
 		{
-			data_file.close();
-			return true;
+
+			data_file.getline(line, MAX_LINE_SIZE - 1);
+
+			if (!data_file.good())
+			{
+				data_file.close();
+				return true;
+			}
+
+			// The column descriptions have already been read
+
 		}
 
-		std::vector<std::string> colnames;
-		boost::split(colnames, line, boost::is_any_of(","));
-		std::for_each(colnames.begin(), colnames.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
-		import_definition.input_schema.ReorderAccToColumnNames(colnames);
-
-		// skip second row if necessary
-		if (import_definition.second_row_is_data_type_row && data_file.good())
+		// handle the column data types
+		if (import_definition.third_row_is_data_type_row && data_file.good())
 		{
+
 			data_file.getline(line, MAX_LINE_SIZE - 1);
+
+			if (!data_file.good())
+			{
+				data_file.close();
+				return true;
+			}
+
+			// The data types have already been read
+
 		}
 
 		if (!data_file.good())

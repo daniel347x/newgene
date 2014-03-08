@@ -333,6 +333,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 	std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols,
 	boost::filesystem::path const & filepathname,
 	TIME_GRANULARITY const & the_time_granularity,
+	bool const inputFileContainsColumnDescriptions,
+	bool const inputFileContainsColumnDataTypes,
 	ImportDefinition & definition,
 	std::string & errorMsg
 )
@@ -351,7 +353,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 	definition.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	definition.input_file = filepathname;
 	definition.first_row_is_header_row = true;
-	definition.second_row_is_data_type_row = true;
+	definition.second_row_is_column_description_row = inputFileContainsColumnDescriptions;
+	definition.third_row_is_data_type_row = inputFileContainsColumnDataTypes;
 	definition.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
 
 	Schema schema_input;
@@ -376,41 +379,32 @@ bool Table_VariableGroupData::BuildImportDefinition
 			return false;
 		}
 
-		// Get column names from the file
+
+
 		char line[MAX_LINE_SIZE];
 
-		// skip first row if necessary
-		data_file.getline(line, MAX_LINE_SIZE - 1);
 
-		if (!data_file.good())
-		{
-			data_file.close();
-			boost::format msg("Cannot read first line of data file \"%1%\"");
-			msg % definition.input_file.c_str();
-			errorMsg = msg.str();
-			return false;
-		}
 
+		// handle the column names row
 		std::vector<std::string> colnames;
-		boost::split(colnames, line, boost::is_any_of(","));
-		std::for_each(colnames.begin(), colnames.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
-
-		data_file.getline(line, MAX_LINE_SIZE - 1);
-
-		if (!data_file.good())
+		if (definition.first_row_is_header_row && data_file.good())
 		{
-			data_file.close();
-			boost::format msg("Cannot read second line of data file \"%1%\"");
-			msg % definition.input_file.c_str();
-			errorMsg = msg.str();
-			return false;
+
+			data_file.getline(line, MAX_LINE_SIZE - 1);
+
+			if (!data_file.good())
+			{
+				data_file.close();
+				boost::format msg("Cannot read column names from the data file \"%1%\"");
+				msg % definition.input_file.c_str();
+				errorMsg = msg.str();
+				return true;
+			}
+
+			boost::split(colnames, line, boost::is_any_of(","));
+			std::for_each(colnames.begin(), colnames.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
+
 		}
-
-		std::vector<std::string> coltypes;
-		boost::split(coltypes, line, boost::is_any_of(","));
-		std::for_each(coltypes.begin(), coltypes.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
-
-		data_file.close();
 
 		std::set<std::string> testcols(colnames.cbegin(), colnames.cend());
 
@@ -421,12 +415,91 @@ bool Table_VariableGroupData::BuildImportDefinition
 			return false;
 		}
 
-		if (coltypes.size() != colnames.size())
+
+
+		// handle the column descriptions row
+		std::vector<std::string> coldescriptions;
+		if (definition.second_row_is_column_description_row && data_file.good())
 		{
-			boost::format msg("The number of column types on the second line does not match the number of columns.");
+
+			data_file.getline(line, MAX_LINE_SIZE - 1);
+
+			if (!data_file.good())
+			{
+				data_file.close();
+				boost::format msg("Cannot read column descriptions from the data file \"%1%\"");
+				msg % definition.input_file.c_str();
+				errorMsg = msg.str();
+				return true;
+			}
+
+			boost::split(coldescriptions, line, boost::is_any_of(","));
+			std::for_each(coldescriptions.begin(), coldescriptions.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
+
+		}
+
+		if (!data_file.good())
+		{
+			data_file.close();
+			return true;
+		}
+
+		if (coldescriptions.size() != colnames.size())
+		{
+			boost::format msg("The number of column descriptions does not match the number of columns.");
 			errorMsg = msg.str();
 			return false;
 		}
+
+
+
+		// handle the column data types
+		std::vector<std::string> coltypes;
+		if (definition.third_row_is_data_type_row && data_file.good())
+		{
+
+			data_file.getline(line, MAX_LINE_SIZE - 1);
+
+			if (!data_file.good())
+			{
+				data_file.close();
+				boost::format msg("Cannot read column data types from the data file \"%1%\"");
+				msg % definition.input_file.c_str();
+				errorMsg = msg.str();
+				return true;
+			}
+
+			boost::split(coltypes, line, boost::is_any_of(","));
+			std::for_each(coltypes.begin(), coltypes.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
+
+		}
+
+		if (!data_file.good())
+		{
+			data_file.close();
+			return true;
+		}
+
+		if (coltypes.size() != colnames.size())
+		{
+			boost::format msg("The number of column types does not match the number of columns.");
+			errorMsg = msg.str();
+			return false;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		std::vector<FIELD_TYPE> fieldtypes;
 		bool validtype = true;

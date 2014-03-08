@@ -4,6 +4,7 @@
 #include <QStandardItemModel>
 #include <QListView>
 #include <QDialogButtonBox>
+#include <QCheckBox>
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -677,6 +678,21 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	});
 
+
+	// Add rows that allow the user to state whether the input file has rows containing the column descriptions, or describing the column data types
+	QList<QCheckBox *> fieldsCheckboxes;
+
+	QString labelIncludeColumnDescriptions = QString("Data file includes a row with column descriptions");
+	QCheckBox * checkboxIncludeColumnDescriptions = new QCheckBox(labelIncludeColumnDescriptions, &dialog);
+	form.addRow(checkboxIncludeColumnDescriptions);
+	fieldsCheckboxes << checkboxIncludeColumnDescriptions;
+
+	QString labelIncludeDataTypes = QString("Data file includes a row with the column data types");
+	QCheckBox * checkboxIncludeDataTypes = new QCheckBox(labelIncludeDataTypes, &dialog);
+	form.addRow(checkboxIncludeDataTypes);
+	fieldsCheckboxes << checkboxIncludeDataTypes;
+
+
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
 	form.addRow(&buttonBox);
@@ -688,6 +704,9 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	std::vector<std::string> dataFileChooser;
 	std::vector<std::string> dataTimeRange;
 	std::vector<std::string> dataDmuColNames;
+
+	bool inputFileContainsColumnDescriptions = false;
+	bool inputFileContainsColumnDataTypes = false;
 
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
@@ -776,6 +795,12 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 			}
 		}
 
+		if (valid)
+		{
+			inputFileContainsColumnDescriptions = checkboxIncludeColumnDescriptions->isChecked();
+			inputFileContainsColumnDataTypes = checkboxIncludeDataTypes->isChecked();
+		}
+
 		if (!valid)
 		{
 			boost::format msg(errorMsg);
@@ -808,7 +833,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	});
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__ImportVariableGroup(vg, dataTimeRange, dmusAndColumnNames, data_column_file_pathname, uoa.time_granularity)))));
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__ImportVariableGroup(vg, dataTimeRange, dmusAndColumnNames, data_column_file_pathname, uoa.time_granularity, inputFileContainsColumnDescriptions, inputFileContainsColumnDataTypes)))));
 	WidgetActionItemRequest_ACTION_REFRESH_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
 	emit RefreshVG(action_request);
 

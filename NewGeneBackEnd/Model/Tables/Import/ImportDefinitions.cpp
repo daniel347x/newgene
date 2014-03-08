@@ -64,7 +64,8 @@ ImportDefinition Development__CreateImportDefinition_CINC()
 		import_definition__cinc.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 		import_definition__cinc.input_file = "L:\\daniel347x\\__DanExtras\\NewGene\\NEWGENEDATA\\NMC_v4_0.csv";
 		import_definition__cinc.first_row_is_header_row = true;
-		import_definition__cinc.second_row_is_data_type_row = false;
+		import_definition__cinc.second_row_is_column_description_row = false;
+		import_definition__cinc.third_row_is_data_type_row = false;
 		import_definition__cinc.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
 
 		Schema schema_input;
@@ -147,7 +148,8 @@ ImportDefinition Development__CreateImportDefinition_CINC()
 		import_definition__cinc.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 		import_definition__cinc.input_file = "L:\\daniel347x\\__DanExtras\\NewGene\\NEWGENEDATA\\cinc_countries.csv";
 		import_definition__cinc.first_row_is_header_row = true;
-		import_definition__cinc.second_row_is_data_type_row = false;
+		import_definition__cinc.second_row_is_column_description_row = false;
+		import_definition__cinc.third_row_is_data_type_row = false;
 		import_definition__cinc.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
 
 		Schema schema_input;
@@ -235,7 +237,8 @@ ImportDefinition Development__CreateImportDefinition_COW()
 	import_definition__cow.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	import_definition__cow.input_file = "L:\\daniel347x\\__DanExtras\\EuGene\\InputDat\\MIDB_3.10.csv";
 	import_definition__cow.first_row_is_header_row = true;
-	import_definition__cow.second_row_is_data_type_row = false;
+	import_definition__cow.second_row_is_column_description_row = false;
+	import_definition__cow.third_row_is_data_type_row = false;
 	import_definition__cow.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
 
 	Schema schema_input;
@@ -353,7 +356,8 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	import_definition__maoz.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	import_definition__maoz.input_file = "L:\\daniel347x\\__DanExtras\\EuGene\\InputDat\\dyadmid602.csv";
 	import_definition__maoz.first_row_is_header_row = true;
-	import_definition__maoz.second_row_is_data_type_row = false;
+	import_definition__maoz.second_row_is_column_description_row = false;
+	import_definition__maoz.third_row_is_data_type_row = false;
 	import_definition__maoz.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
 
 	Schema schema_input;
@@ -600,7 +604,8 @@ ImportDefinition Development__CreateImportDefinition_Cty()
 	import_definition__cty.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	import_definition__cty.input_file = "L:\\daniel347x\\__DanExtras\\EuGene\\InputDat\\states2008.1.csv";
 	import_definition__cty.first_row_is_header_row = true;
-	import_definition__cty.second_row_is_data_type_row = false;
+	import_definition__cty.second_row_is_column_description_row = false;
+	import_definition__cty.third_row_is_data_type_row = false;
 	import_definition__cty.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
 
 	Schema schema_input;
@@ -676,7 +681,8 @@ ImportDefinition Development__CreateImportDefinition_Mid()
 	import_definition__cty.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	import_definition__cty.input_file = "L:\\daniel347x\\__DanExtras\\EuGene\\InputDat\\MIDA_3.10.csv";
 	import_definition__cty.first_row_is_header_row = true;
-	import_definition__cty.second_row_is_data_type_row = false;
+	import_definition__cty.second_row_is_column_description_row = false;
+	import_definition__cty.third_row_is_data_type_row = false;
 	import_definition__cty.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED;
 
 	Schema schema_input;
@@ -803,7 +809,8 @@ ImportDefinition Development__CreateImportDefinition_MidNames()
 	import_definition__mid.import_type = ImportDefinition::IMPORT_TYPE__INPUT_MODEL;
 	import_definition__mid.input_file = "L:\\daniel347x\\__DanExtras\\EuGene\\InputDat\\MIDC_210.TXT";
 	import_definition__mid.first_row_is_header_row = true;
-	import_definition__mid.second_row_is_data_type_row = false;
+	import_definition__mid.second_row_is_column_description_row = false;
+	import_definition__mid.third_row_is_data_type_row = false;
 	import_definition__mid.format_qualifiers = ImportDefinition::FORMAT_QUALIFIERS__COMMA_DELIMITED | ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED;
 
 	Schema schema_input;

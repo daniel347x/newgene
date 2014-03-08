@@ -345,6 +345,8 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					std::vector<std::pair<WidgetInstanceIdentifier, std::string>> dmusAndColumnNames = actionItemData.getDmusAndColNames();
 					boost::filesystem::path filePathName = actionItemData.getFilePathName();
 					TIME_GRANULARITY time_granularity = actionItemData.getTimeGranularity();
+					bool inputFileContainsColumnDescriptions = actionItemData.doesInputFileContainsColumnDescriptions();
+					bool inputFileContainsColumnDataTypes = actionItemData.doesInputFileContainsColumnDataTypes();
 
 					if (!variable_group.uuid || variable_group.uuid->empty() || !variable_group.code || variable_group.code->empty())
 					{
@@ -362,7 +364,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						return;
 					}
 					ImportDefinition import_definition;
-					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity, import_definition, errorMsg);
+					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity, inputFileContainsColumnDescriptions, inputFileContainsColumnDataTypes, import_definition, errorMsg);
 					if (!success)
 					{
 						new_table->DeleteDataTable(input_model.getDb(), &input_model);
