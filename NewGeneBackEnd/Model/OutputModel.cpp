@@ -910,14 +910,14 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		}
 		first = false;
 
-		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_numeric)
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += "CAST (";
 		}
 
 		sql_string += unformatted_column.column_name_in_temporary_table;
 
-		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_numeric)
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += " AS INTEGER)";
 		}
@@ -1041,14 +1041,14 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		}
 		first = false;
 
-		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_numeric)
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += "CAST (";
 		}
 
 		sql_string += unformatted_column.column_name_in_temporary_table;
 
-		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_numeric)
+		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += " AS INTEGER)";
 		}
@@ -1552,7 +1552,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_left += " IS NOT NULL THEN ";
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_left += "CAST (";
 					}
@@ -1560,7 +1560,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_left += previous_column_names[column_count];
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_left += " AS INTEGER)";
 					}
@@ -1568,7 +1568,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_left += " ELSE ";
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_left += "CAST (";
 					}
@@ -1576,7 +1576,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_left += previous_column_names[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first]];
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_left += " AS INTEGER)";
 					}
@@ -1589,7 +1589,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_right += " IS NOT NULL THEN ";
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_right += "CAST (";
 					}
@@ -1597,7 +1597,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_right += previous_column_names[column_count];
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_right += " AS INTEGER)";
 					}
@@ -1605,7 +1605,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_right += " ELSE ";
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_right += "CAST (";
 					}
@@ -1613,7 +1613,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_right += previous_column_names[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_right += " AS INTEGER)";
 					}
@@ -1645,7 +1645,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_right += " IS NOT NULL THEN ";
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_right += "CAST (";
 					}
@@ -1653,7 +1653,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_right += previous_column_names[column_count];
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_right += " AS INTEGER)";
 					}
@@ -1661,7 +1661,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_right += " ELSE ";
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_right += "CAST (";
 					}
@@ -1669,7 +1669,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first]];
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_right += " AS INTEGER)";
 					}
@@ -1682,7 +1682,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_left += " IS NOT NULL THEN ";
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_left += "CAST (";
 					}
@@ -1690,7 +1690,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_left += previous_column_names[column_count];
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_left += " AS INTEGER)";
 					}
@@ -1698,7 +1698,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_left += " ELSE ";
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_left += "CAST (";
 					}
@@ -1706,7 +1706,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					sql_select_left += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
 
 					// Not legal for outer joins - but child table should already have proper column type
-					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_left += " AS INTEGER)";
 					}
@@ -1721,7 +1721,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 		{
 
 			// Not legal for outer joins - but child table should already have proper column type
-			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 			{
 				sql_select_left += "CAST (";
 			}
@@ -1740,7 +1740,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			sql_select_left += previous_column_names[column_count];
 
 			// Not legal for outer joins - but child table should already have proper column type
-			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 			{
 				sql_select_left += " AS INTEGER)";
 			}
@@ -1749,7 +1749,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			sql_select_left += new_column.column_name_in_temporary_table;
 
 			// Not legal for outer joins - but child table should already have proper column type
-			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 			{
 				sql_select_right += "CAST (";
 			}
@@ -1757,7 +1757,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			sql_select_right += previous_column_names[column_count];
 
 			// Not legal for outer joins - but child table should already have proper column type
-			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 			{
 				sql_select_right += " AS INTEGER)";
 			}
@@ -2025,14 +2025,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 								first = false;
 
 								// Not legal for outer joins - but child table should already have proper column type
-								if (false && view_column.primary_key_should_be_treated_as_numeric)
+								if (false && view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_order_by += "CAST (";
 								}
 								sql_order_by += view_column.column_name_in_temporary_table;
 
 								// Not legal for outer joins - but child table should already have proper column type
-								if (false && view_column.primary_key_should_be_treated_as_numeric)
+								if (false && view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_order_by += " AS INTEGER)";
 								}
@@ -2079,14 +2079,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 												first = false;
 
 												// Not legal for outer joins - but child table should already have proper column type
-												if (false && view_column.primary_key_should_be_treated_as_numeric)
+												if (false && view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 												{
 													sql_order_by += "CAST (";
 												}
 												sql_order_by += view_column.column_name_in_temporary_table;
 
 												// Not legal for outer joins - but child table should already have proper column type
-												if (false && view_column.primary_key_should_be_treated_as_numeric)
+												if (false && view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 												{
 													sql_order_by += " AS INTEGER)";
 												}
@@ -7056,14 +7056,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 			first = false;
 
-			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 			{
 				sql_string += "CAST (";
 			}
 
 			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
 
-			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 			{
 				sql_string += " AS INTEGER)";
 			}
@@ -7182,12 +7182,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 									sql_string += " ORDER BY ";
 								}
 								first = false;
-								if (view_column.primary_key_should_be_treated_as_numeric)
+								if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_string += "CAST (";
 								}
 								sql_string += view_column.column_name_in_temporary_table;
-								if (view_column.primary_key_should_be_treated_as_numeric)
+								if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_string += " AS INTEGER)";
 								}
@@ -7240,12 +7240,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 										sql_string += " ORDER BY ";
 									}
 									first = false;
-									if (view_column.primary_key_should_be_treated_as_numeric)
+									if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 									{
 										sql_string += "CAST (";
 									}
 									sql_string += view_column.column_name_in_temporary_table;
-									if (view_column.primary_key_should_be_treated_as_numeric)
+									if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 									{
 										sql_string += " AS INTEGER)";
 									}
@@ -7432,14 +7432,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 		first = false;
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += "CAST (";
 		}
 
 		sql_string += primary_variable_group_x1_columns.columns_in_view[the_index].column_name_in_temporary_table; // This is the original column name
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += " AS INTEGER)";
 		}
@@ -7607,14 +7607,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 		first = false;
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += "CAST (";
 		}
 
 		sql_string += first_final_primary_variable_group_columns.columns_in_view[the_index].column_name_in_temporary_table; // This is the original column name
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += " AS INTEGER)";
 		}
@@ -7960,7 +7960,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 		first = false;
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += "CAST (";
 		}
@@ -7976,7 +7976,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
 		}
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += " AS INTEGER)";
 		}
@@ -8356,12 +8356,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 									sql_string += " ORDER BY ";
 								}
 								first = false;
-								if (view_column.primary_key_should_be_treated_as_numeric)
+								if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_string += "CAST (";
 								}
 								sql_string += view_column.column_name_in_temporary_table;
-								if (view_column.primary_key_should_be_treated_as_numeric)
+								if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_string += " AS INTEGER)";
 								}
@@ -8402,12 +8402,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 												sql_string += " ORDER BY ";
 											}
 											first = false;
-											if (view_column.primary_key_should_be_treated_as_numeric)
+											if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 											{
 												sql_string += "CAST (";
 											}
 											sql_string += view_column.column_name_in_temporary_table;
-											if (view_column.primary_key_should_be_treated_as_numeric)
+											if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 											{
 												sql_string += " AS INTEGER)";
 											}
@@ -9925,7 +9925,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		first = false;
 
 		// Not legal for outer joins - but child table should already have proper column type
-		if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += "CAST (";
 		}
@@ -9942,7 +9942,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 
 		// Not legal for outer joins - but child table should already have proper column type
-		if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_string += " AS INTEGER)";
 		}
@@ -10294,12 +10294,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 													sql_string += " ORDER BY ";
 												}
 												first = false;
-												if (view_column.primary_key_should_be_treated_as_numeric)
+												if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 												{
 													sql_string += "CAST (";
 												}
 												sql_string += view_column.column_name_in_temporary_table;
-												if (view_column.primary_key_should_be_treated_as_numeric)
+												if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 												{
 													sql_string += " AS INTEGER)";
 												}
@@ -10372,12 +10372,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 									sql_string += " ORDER BY ";
 								}
 								first = false;
-								if (view_column.primary_key_should_be_treated_as_numeric)
+								if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_string += "CAST (";
 								}
 								sql_string += view_column.column_name_in_temporary_table;
-								if (view_column.primary_key_should_be_treated_as_numeric)
+								if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_string += " AS INTEGER)";
 								}
@@ -10547,14 +10547,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 		first = false;
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_create_empty_table += "CAST(";
 		}
 
 		sql_create_empty_table += previous_table_column_names[the_index];
 
-		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_numeric)
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
 			sql_create_empty_table += " AS INTEGER)";
 		}
@@ -11585,7 +11585,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 									{
 										if (primary_key_in_variable_group_metadata.flags == "n")
 										{
-											column_in_variable_group_data_table.primary_key_should_be_treated_as_numeric = true;
+											column_in_variable_group_data_table.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key = true;
 										}
 									}
 								});
@@ -14692,12 +14692,12 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityOnes(ColumnsInTempView
 								sql_create_final_primary_group_table += " ORDER BY ";
 							}
 							first = false;
-							if (view_column.primary_key_should_be_treated_as_numeric)
+							if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 							{
 								sql_create_final_primary_group_table += "CAST (";
 							}
 							sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
-							if (view_column.primary_key_should_be_treated_as_numeric)
+							if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 							{
 								sql_create_final_primary_group_table += " AS INTEGER)";
 							}
@@ -14769,12 +14769,12 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityGreaterThanOnes(Column
 											sql_create_final_primary_group_table += " ORDER BY ";
 										}
 										first = false;
-										if (view_column.primary_key_should_be_treated_as_numeric)
+										if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 										{
 											sql_create_final_primary_group_table += "CAST (";
 										}
 										sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
-										if (view_column.primary_key_should_be_treated_as_numeric)
+										if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 										{
 											sql_create_final_primary_group_table += " AS INTEGER)";
 										}

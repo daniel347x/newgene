@@ -354,25 +354,74 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					}
 
 					std::string errorMsg;
-					Table_VariableGroupData * new_table = new Table_VariableGroupData(*variable_group.code);
+					std::unique_ptr<Table_VariableGroupData> new_table(new Table_VariableGroupData(*variable_group.code));
+					if (new_table == nullptr)
+					{
+						boost::format msg("Out of memory.  Cannot import the variable group data.");
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
 					ImportDefinition import_definition;
 					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity, import_definition, errorMsg);
 					if (!success)
 					{
+						new_table->DeleteDataTable(input_model.getDb(), &input_model);
 						boost::format msg("Failed to build the import definition: %1%");
 						msg % errorMsg;
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
 
-					Importer table_importer(import_definition, &input_model, new_table, Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn);
+					// Add the metadata for the new table to the VG_DATA_METADATA__DATETIME_COLUMNS table
+					errorMsg.clear();
+					success = input_model.t_vgp_data_metadata__datetime_columns.AddDataTable(input_model.getDb(), &input_model, variable_group, errorMsg);
+					if (!success)
+					{
+						new_table->DeleteDataTable(input_model.getDb(), &input_model);
+						boost::format msg("%1%");
+						if (errorMsg.empty())
+						{
+							msg % errorMsg;
+						}
+						else
+						{
+							msg % "Unable to create date/time column entries for the variable group.";
+						}
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
+					// Add the metadata for the new table to the VG_DATA_METADATA__PRIMARY_KEYS table
+					errorMsg.clear();
+					success = input_model.t_vgp_data_metadata__primary_keys.AddDataTable(input_model.getDb(), &input_model, variable_group, import_definition.primary_keys_info, errorMsg);
+					if (!success)
+					{
+						new_table->DeleteDataTable(input_model.getDb(), &input_model);
+						boost::format msg("%1%");
+						if (errorMsg.empty())
+						{
+							msg % errorMsg;
+						}
+						else
+						{
+							msg % "Unable to create primary key metadata column entries for the variable group.";
+						}
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
+					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn);
 					success = table_importer.DoImport();
 					if (!success)
 					{
+						new_table->DeleteDataTable(input_model.getDb(), &input_model);
 						boost::format msg("Unable to import or refresh the variable group from the file.");
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
+
+					// Success!  Turn the pointer over to the input model
+					input_model.t_vgp_data_vector.push_back(std::move(new_table));
 
 					boost::format msg("VG '%1%' successfully refreshed from file.");
 					msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group);

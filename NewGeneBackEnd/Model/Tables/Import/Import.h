@@ -352,6 +352,7 @@ class ImportDefinition
 		Schema output_schema;
 		int format_qualifiers;
 		IMPORT_TYPE import_type;
+		std::vector<std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE>> primary_keys_info;
 
 };
 

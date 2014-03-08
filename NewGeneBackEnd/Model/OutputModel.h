@@ -133,7 +133,7 @@ class ColumnsInTempView
                     , total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category(-1)
                     , total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category(-1)
                     , total_k_spin_count_across_multiplicities_for_dmu_category(-1)
-                    , primary_key_should_be_treated_as_numeric(false)
+                    , primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key(false)
 					, originally_datetime(false)
 				{
 
@@ -172,7 +172,7 @@ class ColumnsInTempView
 				int total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 				int total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category;
 				int total_k_spin_count_across_multiplicities_for_dmu_category;
-				bool primary_key_should_be_treated_as_numeric;
+				bool primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key;
 				bool originally_datetime;
 
 		};

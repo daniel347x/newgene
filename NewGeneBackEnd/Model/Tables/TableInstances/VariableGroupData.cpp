@@ -13,10 +13,12 @@ std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_NAME = 
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME = "VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME";
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_FK_DMU_CATEGORY_CODE = "VG_DATA_TABLE_FK_DMU_CATEGORY_CODE";
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER = "VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER";
+std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_PRIMARY_KEY_FIELD_TYPE = "VG_DATA_TABLE_PRIMARY_KEY_FIELD_TYPE";
 
 std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_TABLE_NAME = "VG_DATA_TABLE_NAME";
 std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_TABLE_DATETIME_START_COLUMN_NAME = "VG_DATETIME_START_COLUMN_NAME";
 std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_TABLE_DATETIME_END_COLUMN_NAME = "VG_DATETIME_END_COLUMN_NAME";
+std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_FK_VG_CATEGORY_UUID = "VG_DATA_FK_VG_CATEGORY_UUID";
 
 bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier const & identifier, ImportDefinition const & import_definition, OutputModel * output_model_,
 		InputModel * input_model_)
@@ -241,106 +243,6 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 			++sequence_number;
 		});
 
-
-
-		// Add entry to the VG_DATA_METADATA__DATETIME_COLUMNS table
-		{
-			std::string sql;
-			sql += "INSERT INTO VG_DATA_METADATA__DATETIME_COLUMNS (VG_DATA_TABLE_NAME, VG_DATETIME_START_COLUMN_NAME, VG_DATETIME_END_COLUMN_NAME, VG_DATA_FK_VG_CATEGORY_UUID)";
-			sql += " VALUES ('";
-			sql += table_name;
-			sql += "', 'DATETIME_ROW_START', 'DATETIME_ROW_END', '";
-			sql += *identifier.uuid;
-			sql += "')";
-			sqlite3_stmt * stmt = NULL;
-			int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
-			if (stmt == NULL)
-			{
-				boost::format msg("Cannot create SQL \"%1%\" in VG import: %2%");
-				msg % sql % sqlite3_errstr(err);
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
-
-			int step_result = 0;
-
-			if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
-			{
-				boost::format msg("Cannot execute SQL \"%1%\" in VG import: %2%");
-				msg % sql % sqlite3_errstr(step_result);
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
-
-			if (stmt)
-			{
-				sqlite3_finalize(stmt);
-				stmt = nullptr;
-			}
-		}
-
-
-
-
-
-
-		// Add entry to the VG_DATA_METADATA__PRIMARY_KEYS table
-		{
-			sequence_number = 0;
-			std::for_each(import_definition.output_schema.schema.cbegin(),
-						  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & table_schema_entry)
-			{
-
-				if (table_schema_entry.IsPrimaryKey())
-				{
-					if (!table_schema_entry.dmu_category_string_code)
-					{
-						boost::format msg("Bad DMU code in construction of entries for primary key table.");
-						throw NewGeneException() << newgene_error_description(msg.str());
-					}
-
-					std::string sql;
-					sql += "INSERT INTO VG_DATA_METADATA__PRIMARY_KEYS (VG_DATA_TABLE_NAME, VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME, VG_DATA_TABLE_FK_DMU_CATEGORY_CODE, VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER, VG_DATA_TABLE_PRIMARY_KEY_IS_NUMERIC)";
-					sql += " VALUES ('";
-					sql += table_name;
-					sql += "', '";
-					sql += table_schema_entry.field_name;
-					sql += "', '";
-					sql += *table_schema_entry.dmu_category_string_code;
-					sql += "', ";
-					sql += boost::lexical_cast<std::string>(sequence_number);
-					sql += ", 0)";
-					sqlite3_stmt * stmt = NULL;
-					int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
-					if (stmt == NULL)
-					{
-						boost::format msg("Cannot create SQL \"%1%\" in VG import: %2%");
-						msg % sql % sqlite3_errstr(err);
-						throw NewGeneException() << newgene_error_description(msg.str());
-					}
-
-					int step_result = 0;
-
-					if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
-					{
-						boost::format msg("Cannot execute SQL \"%1%\" in VG import: %2%");
-						msg % sql % sqlite3_errstr(step_result);
-						throw NewGeneException() << newgene_error_description(msg.str());
-					}
-
-					if (stmt)
-					{
-						sqlite3_finalize(stmt);
-						stmt = nullptr;
-					}
-
-					++sequence_number;
-				}
-
-			});
-		}
-
-
 	}
 
 	executor.success();
@@ -543,6 +445,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 )
 {
 
+	definition.primary_keys_info.clear();
+
 	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
 	{
 		boost::format msg("Missing the VG to refresh in the model.");
@@ -731,6 +635,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 			bool primary_key_col = true;
 
 			WidgetInstanceIdentifier the_dmu;
+
 			if (std::find_if(dmusAndCols.cbegin(), dmusAndCols.cend(), [&](std::pair<WidgetInstanceIdentifier, std::string> const & dmuAndCol) -> bool
 		{
 			if (dmuAndCol.second == colname)
@@ -782,6 +687,14 @@ bool Table_VariableGroupData::BuildImportDefinition
 			{
 				input_schema_vector.push_back(SchemaEntry(*the_dmu.code, fieldtypes[colindex], colname));
 				output_schema_vector.push_back(SchemaEntry(*the_dmu.code, fieldtypes[colindex], colname, true));
+
+				if (fieldtypes[colindex] == FIELD_TYPE_FLOAT)
+				{
+					boost::format msg("A primary key column cannot be defined as a floating-point value type.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				definition.primary_keys_info.push_back(std::make_tuple(the_dmu, colname, fieldtypes[colindex]));
 			}
 			else
 			{
@@ -791,6 +704,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			++colindex;
 		});
+
+
 
 		// No double-counting, because all column names are guaranteed unique,
 		// with a test both on the client side (for duplicate DMU primary key column names)
@@ -968,7 +883,7 @@ void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * in
 		char const * vg_data_primary_key_column_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME));
 		char const * vg_data_dmu_category_code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_FK_DMU_CATEGORY_CODE));
 		int vg_data_primary_key_sequence_number = sqlite3_column_int(stmt, INDEX__VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER);
-		int vg_data_primary_key_is_numeric = sqlite3_column_int(stmt, INDEX__VG_DATA_TABLE_PRIMARY_KEY_IS_NUMERIC);
+		char const * vg_data_primary_key_field_type = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_PRIMARY_KEY_FIELD_TYPE));
 
 		if (vg_data_dmu_category_code && strlen(vg_data_dmu_category_code))
 		{
@@ -980,9 +895,30 @@ void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * in
 			// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
 			std::string flags;
 
-			if (vg_data_primary_key_is_numeric)
+			std::string the_primary_key_field_type(vg_data_primary_key_field_type);
+
+
+			// ************************************************************************************************************ //
+			// float not allowed as primary key field type!
+			// ************************************************************************************************************ //
+			if (boost::iequals(the_primary_key_field_type, "float") || boost::iequals(the_primary_key_field_type, "double"))
 			{
+				boost::format msg("Floating-point column type is not allowed as a primary key column!");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
+
+
+			if (boost::iequals(the_primary_key_field_type, "int") || boost::iequals(the_primary_key_field_type, "int64"))
+			{
+				// "n" for int
 				flags = "n";
+			}
+
+			if (boost::iequals(the_primary_key_field_type, "string"))
+			{
+				// "s" for string
+				flags = "s";
 			}
 
 			identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_dmu_category_code), vg_data_primary_key_column_name, vg_data_primary_key_sequence_number,
@@ -995,6 +931,118 @@ void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * in
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
+}
+
+bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg,
+		std::vector<std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE>> const & primary_keys_info, std::string errorMsg)
+{
+
+	Executor theExecutor(db);
+
+	if (!db)
+	{
+		return false;
+	}
+
+	if (!input_model_)
+	{
+		return false;
+	}
+
+	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+	{
+		return false;
+	}
+
+	std::string new_table_name = Table_VariableGroupData::TableNameFromVGCode(*vg.code);
+
+	errorMsg.clear();
+	int sequence = 1;
+	std::for_each(primary_keys_info.cbegin(), primary_keys_info.cend(), [&](std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE> const & primary_key_info)
+	{
+
+		if (!errorMsg.empty())
+		{
+			return;
+		}
+
+		WidgetInstanceIdentifier const & dmu = std::get<0>(primary_key_info);
+		std::string const & column_name = std::get<1>(primary_key_info);
+		FIELD_TYPE const & field_type = std::get<2>(primary_key_info);
+
+		if (!dmu.uuid || dmu.uuid->empty() || !dmu.code || dmu.code->empty() || column_name.empty())
+		{
+			errorMsg = "Bad DMU or column name when attempting to create primary key entry in metadata table for a variable group.";
+			return;
+		}
+
+		boost::format
+		add_stmt("INSERT INTO VG_DATA_METADATA__PRIMARY_KEYS (VG_DATA_TABLE_NAME, VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME, VG_DATA_TABLE_FK_DMU_CATEGORY_CODE, VG_DATA_TABLE_PRIMARY_KEY_SEQUENCE_NUMBER, VG_DATA_TABLE_PRIMARY_KEY_FIELD_TYPE) VALUES ('%1%', '%2%', '%3%', %4%, '%5%')");
+		add_stmt % new_table_name;
+		add_stmt % column_name.c_str();
+		add_stmt % dmu.code->c_str();
+		add_stmt % boost::lexical_cast<std::string>(sequence).c_str();
+
+		std::string flags;
+
+		switch (field_type)
+		{
+
+			case FIELD_TYPE_STRING_FIXED:
+			case FIELD_TYPE_STRING_VAR:
+				{
+					add_stmt % "STRING";
+					flags = "s";
+				}
+				break;
+
+			case FIELD_TYPE_INT32:
+			case FIELD_TYPE_INT64:
+				{
+					add_stmt % "INT";
+					flags = "n";
+				}
+
+				// Default to int
+			default:
+				{
+					add_stmt % "INT";
+					flags = "n";
+				}
+				break;
+
+		}
+
+		char * errmsg = nullptr;
+		sqlite3_exec(db, add_stmt.str().c_str(), NULL, NULL, &errmsg);
+
+		if (errmsg != nullptr)
+		{
+			boost::format msg("Unable to add primary key data for variable group into metadata table: %1%");
+			msg % errmsg;
+			sqlite3_free(errmsg);
+			errorMsg = msg.str();
+			return;
+		}
+
+		// maps:
+		// vg_data_table_name =>
+		// a vector of primary keys (each a DMU category identifier)
+		// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
+		// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
+		// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
+
+		identifiers_map[new_table_name].clear();
+		identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(std::string(*dmu.code), column_name, sequence, flags.c_str()));
+
+		++sequence;
+
+	});
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
 
 }
 
@@ -1076,6 +1124,9 @@ std::vector<std::pair<WidgetInstanceIdentifier, std::vector<std::string>>> Table
 
 }
 
+std::string Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName = "DATETIME_ROW_START";
+std::string Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName = "DATETIME_ROW_END";
+
 void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel * input_model_)
 {
 
@@ -1112,6 +1163,60 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
+}
+
+bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string errorMsg)
+{
+
+	Executor theExecutor(db);
+
+	if (!db)
+	{
+		return false;
+	}
+
+	if (!input_model_)
+	{
+		return false;
+	}
+
+	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+	{
+		return false;
+	}
+
+	std::string new_table_name = Table_VariableGroupData::TableNameFromVGCode(*vg.code);
+
+	boost::format
+	add_stmt("INSERT INTO VG_DATA_METADATA__DATETIME_COLUMNS (VG_DATA_TABLE_NAME, VG_DATETIME_START_COLUMN_NAME, VG_DATETIME_END_COLUMN_NAME, VG_DATA_FK_VG_CATEGORY_UUID) VALUES ('%1%', '%2%', '%3%', '%4%')");
+	add_stmt % new_table_name;
+	add_stmt % DefaultDatetimeStartColumnName % DefaultDatetimeEndColumnName;
+	add_stmt % *vg.uuid;
+	char * errmsg = nullptr;
+	sqlite3_exec(db, add_stmt.str().c_str(), NULL, NULL, &errmsg);
+
+	if (errmsg != nullptr)
+	{
+		boost::format msg("Unable to add data for variable group into datetime table: %1%");
+		msg % errmsg;
+		sqlite3_free(errmsg);
+		errorMsg = msg.str();
+		return false;
+	}
+
+	// add to cache
+	// maps:
+	// vg_data_table_name =>
+	// a pair of datetime keys stuck into a vector (the first for the start datetime; the second for the end datetime)
+	// In the WidgetInstanceIdentifier, the CODE is set to the column name
+	identifiers_map[new_table_name].clear();
+	identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(DefaultDatetimeStartColumnName));
+	identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(DefaultDatetimeEndColumnName));
+
+	theExecutor.success();
+
+	return theExecutor.succeeded();
 
 }
 
