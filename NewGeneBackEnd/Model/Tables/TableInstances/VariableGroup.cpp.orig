@@ -34,16 +34,13 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 	identifiers.clear();
 
 	sqlite3_stmt * stmt = NULL;
-	std::string sql("SELECT * FROM VG_CATEGORY");
+	std::string sql("SELECT * FROM VG_CATEGORY");	
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
 	if (stmt == NULL)
 	{
 		return;
 	}
-
 	int step_result = 0;
-
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		char const * uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_UUID));
@@ -54,15 +51,13 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 		char const * notes3 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_NOTES3));
 		char const * fk_uoa_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_FK_UOA_CATEGORY_UUID));
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_FLAGS));
-
-		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand) && fk_uoa_uuid /* && strlen(fk_uoa_uuid) == UUID_LENGTH */)
+		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand) && fk_uoa_uuid /* && strlen(fk_uoa_uuid) == UUID_LENGTH */ )
 		{
 			WidgetInstanceIdentifier uoa_identifier = input_model_->t_uoa_category.getIdentifier(fk_uoa_uuid);
 			WidgetInstanceIdentifier vg_category_identifier(uuid, uoa_identifier, code, longhand, 0, flags, uoa_identifier.time_granularity, MakeNotes(notes1, notes2, notes3));
 			identifiers.push_back(vg_category_identifier);
 		}
 	}
-
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -92,7 +87,6 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 	}
 
 	bool already_exists = ExistsByCode(db, *input_model_, *vg.code);
-
 	if (!already_exists)
 	{
 		boost::format msg("The variable group %1% does not exist.");
@@ -101,7 +95,6 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 	}
 
 	already_exists = ExistsByUuid(db, *input_model_, *vg.uuid);
-
 	if (!already_exists)
 	{
 		boost::format msg("The variable group %1% does not exist.");
@@ -110,7 +103,6 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 	}
 
 	already_exists = Exists(db, *input_model_, vg);
-
 	if (!already_exists)
 	{
 		boost::format msg("The variable group %1% does not exist.");
@@ -135,22 +127,20 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 			input_model_->t_vgp_data_vector.begin(),
 			input_model_->t_vgp_data_vector.end(),
 			std::bind(
-				[&](std::unique_ptr<Table_VariableGroupData> & vg_instance_table, WidgetInstanceIdentifier const & vg_to_delete_)
-	{
-		bool vg_matches = false;
-
-		if (vg_instance_table && boost::iequals(vg_instance_table->vg_category_string_code, *vg_to_delete_.code))
-		{
-			vg_matches = true;
-		}
-
-		return vg_matches;
-	},
-	std::placeholders::_1,
-	vg
-			)
+						[&](std::unique_ptr<Table_VariableGroupData> & vg_instance_table, WidgetInstanceIdentifier const & vg_to_delete_)
+							{
+								bool vg_matches = false;
+								if (vg_instance_table && boost::iequals(vg_instance_table->vg_category_string_code, *vg_to_delete_.code))
+								{
+									vg_matches = true;
+								}
+								return vg_matches;
+							},
+						std::placeholders::_1,
+						vg
+					)
 		),
-	input_model_->t_vgp_data_vector.end()
+		input_model_->t_vgp_data_vector.end()
 	);
 
 	sqlite3_stmt * stmt = NULL;
@@ -158,23 +148,19 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 	sql += *vg.uuid;
 	sql += "'";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare DELETE statement to delete the VG.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
-
 	if (step_result != SQLITE_DONE)
 	{
 		boost::format msg("Unable to execute DELETE statement to delete the VG: %1%");
 		msg % sqlite3_errstr(step_result);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -185,8 +171,7 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 	input_model_->t_vgp_setmembers.DeleteVG(db, input_model_, vg);
 
 	// Remove from our cache
-	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1,
-									 WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg)), identifiers.end());
+	identifiers.erase(std::remove_if(identifiers.begin(), identifiers.end(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg)), identifiers.end());
 
 	// ***************************************** //
 	// Prepare data to send back to user interface
@@ -195,7 +180,7 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 	DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
 	DataChange change(type, intention, vg, WidgetInstanceIdentifiers());
 	change_message.changes.push_back(change);
-
+							
 	theExecutor.success();
 
 	return theExecutor.succeeded();
@@ -216,7 +201,6 @@ WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, In
 	}
 
 	WidgetInstanceIdentifier uoa = input_model_->t_uoa_category.getIdentifier(uuid);
-
 	if (uoa.IsEmpty())
 	{
 		return WidgetInstanceIdentifiers();
@@ -229,22 +213,18 @@ WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, In
 	sql += uuid;
 	sql += "'";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to retrieve variable groups associated with unit of analysis.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-
 	int step_result = 0;
-
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		char const * uuid_vg = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_CATEGORY_UUID));
 		WidgetInstanceIdentifier vg = getIdentifier(uuid_vg);
 		vgs.push_back(vg);
 	}
-
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -255,8 +235,7 @@ WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, In
 
 }
 
-bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std::string const & vg_code_, std::string const & vg_description,
-									WidgetInstanceIdentifier const & uoa_to_use)
+bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std::string const & vg_code_, std::string const & vg_description, WidgetInstanceIdentifier const & uoa_to_use)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -273,7 +252,6 @@ bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std:
 	boost::to_upper(vg_code);
 
 	bool already_exists = ExistsByCode(db, input_model, vg_code);
-
 	if (already_exists)
 	{
 		return false;
@@ -281,31 +259,26 @@ bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std:
 
 	std::string new_uuid(boost::to_upper_copy(newUUID(false)));
 	sqlite3_stmt * stmt = NULL;
-	std::string
-	sql("INSERT INTO VG_CATEGORY (VG_CATEGORY_UUID, VG_CATEGORY_STRING_CODE, VG_CATEGORY_STRING_LONGHAND, VG_CATEGORY_NOTES1, VG_CATEGORY_NOTES2, VG_CATEGORY_NOTES3, VG_CATEGORY_FK_UOA_CATEGORY_UUID, VG_CATEGORY_FLAGS) VALUES ('");
+	std::string sql("INSERT INTO VG_CATEGORY (VG_CATEGORY_UUID, VG_CATEGORY_STRING_CODE, VG_CATEGORY_STRING_LONGHAND, VG_CATEGORY_NOTES1, VG_CATEGORY_NOTES2, VG_CATEGORY_NOTES3, VG_CATEGORY_FK_UOA_CATEGORY_UUID, VG_CATEGORY_FLAGS) VALUES ('");
 	sql += new_uuid;
 	sql += "', ?, ?, '', '', '', ?, '')";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare INSERT statement to create a new variable group.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-
 	sqlite3_bind_text(stmt, 1, vg_code.c_str(), -1, SQLITE_TRANSIENT);
 	sqlite3_bind_text(stmt, 2, vg_description.c_str(), -1, SQLITE_TRANSIENT);
 	sqlite3_bind_text(stmt, 3, uoa_to_use.uuid->c_str(), -1, SQLITE_TRANSIENT);
 	int step_result = 0;
 	step_result = sqlite3_step(stmt);
-
 	if (step_result != SQLITE_DONE)
 	{
 		boost::format msg("Unable to execute INSERT statement to create a new VG: %1%");
 		msg % sqlite3_errstr(step_result);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -313,8 +286,7 @@ bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std:
 	}
 
 	std::string flags;
-	WidgetInstanceIdentifier vg_category_identifier(new_uuid, vg_code, vg_description, 0, flags.c_str(), TIME_GRANULARITY__NONE, MakeNotes(std::string(), std::string(),
-			std::string()));
+	WidgetInstanceIdentifier vg_category_identifier(new_uuid, vg_code, vg_description, 0, flags.c_str(), TIME_GRANULARITY__NONE, MakeNotes(std::string(), std::string(), std::string()));
 	vg_category_identifier.identifier_parent = std::make_shared<WidgetInstanceIdentifier>(uoa_to_use);
 	identifiers.push_back(vg_category_identifier);
 
@@ -341,26 +313,21 @@ bool Table_VG_CATEGORY::Exists(sqlite3 * db, InputModel & input_model_, WidgetIn
 	sql += *vg.uuid;
 	sql += "'";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare SELECT statement to search for an existing VG.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-
 	int step_result = 0;
 	bool exists = false;
-
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		int existing_vg_count = sqlite3_column_int(stmt, 0);
-
 		if (existing_vg_count == 1)
 		{
 			exists = true;
 		}
 	}
-
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -370,10 +337,8 @@ bool Table_VG_CATEGORY::Exists(sqlite3 * db, InputModel & input_model_, WidgetIn
 	if (also_confirm_using_cache)
 	{
 		// Safety check: Cache should match database
-		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1,
-								  WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg));
+		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg));
 		bool exists_in_cache = (found != identifiers.cend());
-
 		if (exists != exists_in_cache)
 		{
 			boost::format msg("Cache of VGs is out-of-sync.");
@@ -395,26 +360,21 @@ bool Table_VG_CATEGORY::ExistsByUuid(sqlite3 * db, InputModel & input_model_, st
 	sql += vg_uuid;
 	sql += "'";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare SELECT statement to search for an existing VG.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-
 	int step_result = 0;
 	bool exists = false;
-
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		int existing_vg_count = sqlite3_column_int(stmt, 0);
-
 		if (existing_vg_count == 1)
 		{
 			exists = true;
 		}
 	}
-
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -425,10 +385,8 @@ bool Table_VG_CATEGORY::ExistsByUuid(sqlite3 * db, InputModel & input_model_, st
 	{
 		// Safety check: Cache should match database
 		WidgetInstanceIdentifier vg(vg_uuid, "", "", 0);
-		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1,
-								  WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg));
+		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg));
 		bool exists_in_cache = (found != identifiers.cend());
-
 		if (exists != exists_in_cache)
 		{
 			boost::format msg("Cache of VGs is out-of-sync.");
@@ -459,26 +417,21 @@ bool Table_VG_CATEGORY::ExistsByCode(sqlite3 * db, InputModel & input_model_, st
 	sql += vg_code;
 	sql += "'";
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
 	if (stmt == NULL)
 	{
 		boost::format msg("Unable to prepare SELECT statement to search for an existing VG.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
-
 	int step_result = 0;
 	bool exists = false;
-
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
 	{
 		int existing_vg_count = sqlite3_column_int(stmt, 0);
-
 		if (existing_vg_count == 1)
 		{
 			exists = true;
 		}
 	}
-
 	if (stmt)
 	{
 		sqlite3_finalize(stmt);
@@ -489,10 +442,8 @@ bool Table_VG_CATEGORY::ExistsByCode(sqlite3 * db, InputModel & input_model_, st
 	{
 		// Safety check: Cache should match database
 		WidgetInstanceIdentifier vg(vg_code);
-		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1,
-								  WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, vg));
+		auto found = std::find_if(identifiers.cbegin(), identifiers.cend(), std::bind(&WidgetInstanceIdentifier::IsEqual, std::placeholders::_1, WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, vg));
 		bool exists_in_cache = (found != identifiers.cend());
-
 		if (exists != exists_in_cache)
 		{
 			boost::format msg("Cache of VGs is out-of-sync.");
@@ -506,7 +457,7 @@ bool Table_VG_CATEGORY::ExistsByCode(sqlite3 * db, InputModel & input_model_, st
 
 std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const & vg)
 {
-
+	
 	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty() || !vg.identifier_parent)
 	{
 		boost::format msg("Bad VG in GetVgDisplayText().");
@@ -514,7 +465,6 @@ std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const &
 	}
 
 	bool has_description = false;
-
 	if (vg.longhand && !vg.longhand->empty())
 	{
 		has_description = true;
@@ -535,7 +485,6 @@ std::string Table_VG_CATEGORY::GetVgDisplayText(WidgetInstanceIdentifier const &
 	}
 
 	WidgetInstanceIdentifiers dmu_categories;
-
 	if ((*vg.identifier_parent).foreign_key_identifiers)
 	{
 		dmu_categories = *(*vg.identifier_parent).foreign_key_identifiers;
@@ -559,12 +508,10 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 	sqlite3_stmt * stmt = NULL;
 	std::string sql("SELECT * FROM VG_SET_MEMBER");
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
 	if (stmt == NULL)
 	{
 		return;
 	}
-
 	int step_result = 0;
 
 	while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
@@ -578,12 +525,10 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 		char const * notes3 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_NOTES3));
 		char const * fk_vg_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_FK_VG_CATEGORY_UUID));
 		char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_SET_MEMBER_FLAGS));
-
-		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand) && fk_vg_uuid /* && strlen(fk_vg_uuid) == UUID_LENGTH */)
+		if (uuid && /* strlen(uuid) == UUID_LENGTH && */ code && strlen(code) && longhand && strlen(longhand) && fk_vg_uuid /* && strlen(fk_vg_uuid) == UUID_LENGTH */ )
 		{
 			WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(fk_vg_uuid);
-			identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, vg_category_identifier, code, longhand, seqnumber, flags, vg_category_identifier.time_granularity,
-												  MakeNotes(notes1, notes2, notes3)));
+			identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, vg_category_identifier, code, longhand, seqnumber, flags, vg_category_identifier.time_granularity, MakeNotes(notes1, notes2, notes3)));
 		}
 	}
 
@@ -594,12 +539,12 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 	}
 }
 
-bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition, std::string & errorMsg)
+bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition)
 {
 
 	int sequence_number = 0;
 	std::for_each(import_definition.output_schema.schema.cbegin(),
-				  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & table_schema_entry)
+		import_definition.output_schema.schema.cend(), [&](SchemaEntry const & table_schema_entry)
 	{
 
 		std::string sql;
@@ -621,52 +566,52 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 
 		switch (table_schema_entry.field_type)
 		{
-			case FIELD_TYPE_INT32:
-			case FIELD_TYPE_UINT32:
-				{
-					sql += "INT32";
-				}
-				break;
+		case FIELD_TYPE_INT32:
+		case FIELD_TYPE_UINT32:
+		{
+								  sql += "INT32";
+		}
+			break;
 
-			case FIELD_TYPE_INT64:
-			case FIELD_TYPE_UINT64:
-				{
-					sql += "INT64";
-				}
-				break;
+		case FIELD_TYPE_INT64:
+		case FIELD_TYPE_UINT64:
+		{
+								  sql += "INT64";
+		}
+			break;
 
-			case FIELD_TYPE_STRING_FIXED:
-			case FIELD_TYPE_STRING_VAR:
-			case FIELD_TYPE_UUID:
-			case FIELD_TYPE_UUID_FOREIGN:
-			case FIELD_TYPE_STRING_CODE:
-			case FIELD_TYPE_STRING_LONGHAND:
-			case FIELD_TYPE_TIME_RANGE:
-			case FIELD_TYPE_NOTES_1:
-			case FIELD_TYPE_NOTES_2:
-			case FIELD_TYPE_NOTES_3:
-				{
-					sql += "STRING";
-				}
-				break;
+		case FIELD_TYPE_STRING_FIXED:
+		case FIELD_TYPE_STRING_VAR:
+		case FIELD_TYPE_UUID:
+		case FIELD_TYPE_UUID_FOREIGN:
+		case FIELD_TYPE_STRING_CODE:
+		case FIELD_TYPE_STRING_LONGHAND:
+		case FIELD_TYPE_TIME_RANGE:
+		case FIELD_TYPE_NOTES_1:
+		case FIELD_TYPE_NOTES_2:
+		case FIELD_TYPE_NOTES_3:
+		{
+								   sql += "STRING";
+		}
+			break;
 
-			case FIELD_TYPE_TIMESTAMP:
-				{
-					sql += "INT64";
-				}
-				break;
+		case FIELD_TYPE_TIMESTAMP:
+		{
+									 sql += "INT64";
+		}
+			break;
 
-			case FIELD_TYPE_FLOAT:
-				{
-					sql += "FLOAT";
-				}
-				break;
+		case FIELD_TYPE_FLOAT:
+		{
+								 sql += "FLOAT";
+		}
+			break;
 
-			default:
-				{
-					sql += "STRING";
-				}
-				break;
+		default:
+		{
+				   sql += "STRING";
+		}
+			break;
 		}
 
 		sql += "')";
@@ -697,8 +642,6 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 
 		++sequence_number;
 	});
-
-	return true;
 
 }
 

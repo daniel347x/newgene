@@ -20,7 +20,7 @@ std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_TABLE_DAT
 std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_TABLE_DATETIME_END_COLUMN_NAME = "VG_DATETIME_END_COLUMN_NAME";
 std::string const Table_VariableGroupMetadata_DateTimeColumns::VG_DATA_FK_VG_CATEGORY_UUID = "VG_DATA_FK_VG_CATEGORY_UUID";
 
-bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier const & identifier, ImportDefinition const & import_definition, OutputModel * output_model_,
+bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition, OutputModel * output_model_,
 		InputModel * input_model_)
 {
 
@@ -34,13 +34,13 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 
 	Executor executor(db);
 
-	if (!identifier.code || identifier.code->empty() || !identifier.uuid || identifier.uuid->empty())
+	if (!variable_group.code || variable_group.code->empty() || !variable_group.uuid || variable_group.uuid->empty())
 	{
-		boost::format msg("Invalid variable group identifier in import routine.");
+		boost::format msg("Invalid variable group variable_group in import routine.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	if (!tableManager().TableExists(db, TableNameFromVGCode(*identifier.code)))
+	if (!tableManager().TableExists(db, TableNameFromVGCode(*variable_group.code)))
 	{
 
 
@@ -135,113 +135,6 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 			sqlite3_finalize(stmt);
 			stmt = nullptr;
 		}
-
-
-
-
-
-
-		// Add the data columns of the table to the VG_SET_MEMBER table
-		int sequence_number = 0;
-		std::for_each(import_definition.output_schema.schema.cbegin(),
-					  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & table_schema_entry)
-		{
-
-			std::string sql;
-			std::string new_uuid(boost::to_upper_copy(newUUID(false)));
-			sql += "INSERT INTO VG_SET_MEMBER (VG_SET_MEMBER_UUID, VG_SET_MEMBER_STRING_CODE, VG_SET_MEMBER_STRING_LONGHAND, VG_SET_MEMBER_SEQUENCE_NUMBER, VG_SET_MEMBER_NOTES1, VG_SET_MEMBER_NOTES2, VG_SET_MEMBER_NOTES3, VG_SET_MEMBER_FK_VG_CATEGORY_UUID, VG_SET_MEMBER_FLAGS, VG_SET_MEMBER_DATA_TYPE)";
-			sql += " VALUES ('";
-			sql += new_uuid;
-			sql += "', '";
-			sql += table_schema_entry.field_name;
-			sql += "', '";
-			// TODO: the following line
-			//sql += table_schema_entry.field_description;
-			sql += table_schema_entry.field_name;
-			sql += "', ";
-			sql += boost::lexical_cast<std::string>(sequence_number);
-			sql += ", '', '', '', '";
-			sql += *identifier.uuid;
-			sql += "', '', '";
-
-			switch (table_schema_entry.field_type)
-			{
-				case FIELD_TYPE_INT32:
-				case FIELD_TYPE_UINT32:
-					{
-						sql += "INT32";
-					}
-					break;
-
-				case FIELD_TYPE_INT64:
-				case FIELD_TYPE_UINT64:
-					{
-						sql += "INT64";
-					}
-					break;
-
-				case FIELD_TYPE_STRING_FIXED:
-				case FIELD_TYPE_STRING_VAR:
-				case FIELD_TYPE_UUID:
-				case FIELD_TYPE_UUID_FOREIGN:
-				case FIELD_TYPE_STRING_CODE:
-				case FIELD_TYPE_STRING_LONGHAND:
-				case FIELD_TYPE_TIME_RANGE:
-				case FIELD_TYPE_NOTES_1:
-				case FIELD_TYPE_NOTES_2:
-				case FIELD_TYPE_NOTES_3:
-					{
-						sql += "STRING";
-					}
-					break;
-
-				case FIELD_TYPE_TIMESTAMP:
-					{
-						sql += "INT64";
-					}
-					break;
-
-				case FIELD_TYPE_FLOAT:
-					{
-						sql += "FLOAT";
-					}
-					break;
-
-				default:
-					{
-						sql += "STRING";
-					}
-					break;
-			}
-
-			sql += "')";
-			sqlite3_stmt * stmt = NULL;
-			int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
-
-			if (stmt == NULL)
-			{
-				boost::format msg("Cannot create SQL \"%1%\" in VG import: %2%");
-				msg % sql % sqlite3_errstr(err);
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
-
-			int step_result = 0;
-
-			if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
-			{
-				boost::format msg("Cannot execute SQL \"%1%\" in VG import: %2%");
-				msg % sql % sqlite3_errstr(step_result);
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
-
-			if (stmt)
-			{
-				sqlite3_finalize(stmt);
-				stmt = nullptr;
-			}
-
-			++sequence_number;
-		});
 
 	}
 

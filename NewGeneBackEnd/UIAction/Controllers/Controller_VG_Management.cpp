@@ -372,6 +372,25 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						return;
 					}
 
+					// Add the data columns of the table to the VG_SET_MEMBER table
+					errorMsg.clear();
+					success = input_model.t_vgp_setmembers.AddNewVGTableEntries(input_model.getDb(), &input_model, variable_group, import_definition, errorMsg);
+					if (!success)
+					{
+						new_table->DeleteDataTable(input_model.getDb(), &input_model);
+						boost::format msg("%1%");
+						if (errorMsg.empty())
+						{
+							msg % errorMsg;
+						}
+						else
+						{
+							msg % "Unable to create metadata entries describing the columns for the variable group.";
+						}
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+
 					// Add the metadata for the new table to the VG_DATA_METADATA__DATETIME_COLUMNS table
 					errorMsg.clear();
 					success = input_model.t_vgp_data_metadata__datetime_columns.AddDataTable(input_model.getDb(), &input_model, variable_group, errorMsg);
