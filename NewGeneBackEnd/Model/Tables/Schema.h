@@ -40,6 +40,7 @@ class SchemaEntry
 		SchemaEntry(SchemaEntry const & rhs)
 			: field_type(rhs.field_type)
 			, field_name(rhs.field_name)
+			, field_description(rhs.field_description)
 			, dmu_category_string_code(rhs.dmu_category_string_code)
             , required(rhs.required)
         {

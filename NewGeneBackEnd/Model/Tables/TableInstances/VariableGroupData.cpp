@@ -1060,6 +1060,13 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 
 	std::string new_table_name = Table_VariableGroupData::TableNameFromVGCode(*vg.code);
 
+	// For now - do a quick-and-dirty test for the presence of the fields
+	// Later, we can make this granular
+	if (!identifiers_map[new_table_name].empty())
+	{
+		return true;
+	}
+
 	errorMsg.clear();
 	int sequence = 1;
 	std::for_each(primary_keys_info.cbegin(), primary_keys_info.cend(), [&](std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE> const & primary_key_info)
@@ -1136,8 +1143,6 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 		// In the WidgetInstanceIdentifier, the CODE is set to the DMU category code,
 		// the LONGHAND is set to the column name corresponding to this DMU in the variable group data table,
 		// and the SEQUENCE NUMBER is set to the sequence number of the primary key in this variable group.
-
-		identifiers_map[new_table_name].clear();
 		identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(std::string(*dmu.code), column_name, sequence, flags.c_str()));
 
 		++sequence;
@@ -1292,6 +1297,13 @@ bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, Inp
 
 	std::string new_table_name = Table_VariableGroupData::TableNameFromVGCode(*vg.code);
 
+	// For now - do a quick-and-dirty test for the presence of the fields
+	// Later, we can make this granular
+	if (!identifiers_map[new_table_name].empty())
+	{
+		return true;
+	}
+
 	boost::format
 	add_stmt("INSERT INTO VG_DATA_METADATA__DATETIME_COLUMNS (VG_DATA_TABLE_NAME, VG_DATETIME_START_COLUMN_NAME, VG_DATETIME_END_COLUMN_NAME, VG_DATA_FK_VG_CATEGORY_UUID) VALUES ('%1%', '%2%', '%3%', '%4%')");
 	add_stmt % new_table_name;
@@ -1314,7 +1326,6 @@ bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, Inp
 	// vg_data_table_name =>
 	// a pair of datetime keys stuck into a vector (the first for the start datetime; the second for the end datetime)
 	// In the WidgetInstanceIdentifier, the CODE is set to the column name
-	identifiers_map[new_table_name].clear();
 	identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(DefaultDatetimeStartColumnName));
 	identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(DefaultDatetimeEndColumnName));
 

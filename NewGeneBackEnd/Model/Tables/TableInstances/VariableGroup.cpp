@@ -603,8 +603,12 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	// remove from cache before refilling cache
-	identifiers_map[*variable_group.uuid].clear();
+	// For now - do a quick-and-dirty test for the presence of the fields
+	// Later, we can make this granular
+	if (!identifiers_map[*variable_group.uuid].empty())
+	{
+		return true;
+	}
 
 	int sequence_number = 0;
 	std::for_each(import_definition.output_schema.schema.cbegin(),
