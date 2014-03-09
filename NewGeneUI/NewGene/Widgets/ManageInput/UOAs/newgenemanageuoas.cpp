@@ -539,6 +539,14 @@ void NewGeneManageUOAs::HandleChanges(DataChangeMessage const & change_message)
 								item->setData(v);
 								itemModel->appendRow( item );
 
+								QItemSelectionModel * selectionModel = ui->listViewManageUOAs->selectionModel();
+								if (selectionModel != nullptr)
+								{
+									selectionModel->clearSelection();
+									QModelIndex itemIndex = itemModel->indexFromItem(item);
+									selectionModel->select(itemIndex, QItemSelectionModel::SelectCurrent);
+								}
+
 							}
 							break;
 
