@@ -1096,6 +1096,7 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 					add_stmt % "INT";
 					flags = "n";
 				}
+				break;
 
 				// Default to int
 			default:

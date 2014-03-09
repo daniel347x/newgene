@@ -687,7 +687,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	form.addRow(checkboxIncludeColumnDescriptions);
 	fieldsCheckboxes << checkboxIncludeColumnDescriptions;
 
-	QString labelIncludeDataTypes = QString("Data file includes a row with the column data types");
+	QString labelIncludeDataTypes = QString("Data file includes a row with column data types");
 	QCheckBox * checkboxIncludeDataTypes = new QCheckBox(labelIncludeDataTypes, &dialog);
 	form.addRow(checkboxIncludeDataTypes);
 	fieldsCheckboxes << checkboxIncludeDataTypes;
