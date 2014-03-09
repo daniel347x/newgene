@@ -508,6 +508,16 @@ bool Table_VariableGroupData::BuildImportDefinition
 			return false;
 		}
 
+		int colseq = 0;
+		std::for_each(coldescriptions.begin(), coldescriptions.end(), [&](std::string & coldescription)
+		{
+			if (coldescription.empty())
+			{
+				coldescription = colnames[colseq];
+			}
+			++colseq;
+		});
+
 
 
 		// handle the column data types

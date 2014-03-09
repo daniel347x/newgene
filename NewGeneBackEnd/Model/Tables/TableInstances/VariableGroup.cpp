@@ -619,19 +619,7 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 		sql += "', '";
 		sql += table_schema_entry.field_name;
 		sql += "', '";
-		if (!table_schema_entry.field_description.empty())
-		{
-			sql += table_schema_entry.field_description;
-		}
-		else if (!table_schema_entry.field_name.empty())
-		{
-			sql += table_schema_entry.field_name;
-		}
-		else
-		{
-			boost::format msg("Neither a column name or description is present when populating metadata for a variable group.");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
+		sql += table_schema_entry.field_description;
 		sql += "', ";
 		sql += boost::lexical_cast<std::string>(sequence_number);
 		sql += ", '', '', '', '";
