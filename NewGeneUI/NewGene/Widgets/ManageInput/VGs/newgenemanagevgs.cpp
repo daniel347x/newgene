@@ -482,7 +482,15 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 			vg_description = vg_description_field->text().toStdString();
 			if (proposed_vg_code.empty())
 			{
-				boost::format msg("The VG must have an identifying code (typically, a short, all-caps string).");
+				boost::format msg("The variable group must have an identifying code (an all-caps, typically short, string).");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+			if (vg_description.empty())
+			{
+				boost::format msg("You must provide a description for the variable group.");
 				QMessageBox msgBox;
 				msgBox.setText( msg.str().c_str() );
 				msgBox.exec();
@@ -608,6 +616,26 @@ void NewGeneManageVGs::on_pushButton_remove_vg_clicked()
 		return;
 	}
 
+	if (!vg.code || vg.code->empty())
+	{
+		boost::format msg("Invalid variable group being deleted.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QMessageBox::StandardButton reply;
+	boost::format msg("Are you certain you wish to delete the variable group \"%1%\"?");
+	msg % *vg.code;
+	boost::format msgTitle("Delete variable group \"%1%\"?");
+	msgTitle % *vg.code;
+	reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+	if (reply == QMessageBox::No)
+	{
+		return;
+	}
+
 	InstanceActionItems actionItems;
 	actionItems.push_back(std::make_pair(vg, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem()))));
 	WidgetActionItemRequest_ACTION_DELETE_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
@@ -678,6 +706,8 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	});
 
+	// Add space - stupid Qt won't provide "addSpacing()" function for form layouts
+	form.addRow(new QLabel(" "));
 
 	// Add rows that allow the user to state whether the input file has rows containing the column descriptions, or describing the column data types
 	QList<QCheckBox *> fieldsCheckboxes;

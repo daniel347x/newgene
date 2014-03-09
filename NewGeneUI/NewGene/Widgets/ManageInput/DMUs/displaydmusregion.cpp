@@ -426,6 +426,26 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 		return;
 	}
 
+	if (!dmu.code || dmu.code->empty())
+	{
+		boost::format msg("Invalid DMU being deleted.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
+	}
+
+	QMessageBox::StandardButton reply;
+	boost::format msg("Are you certain you wish to delete the DMU \"%1%\"?  This will permanently delete all associated units of analysis and variable groups.  Proceed with deletion?");
+	msg % *dmu.code;
+	boost::format msgTitle("Delete DMU \"%1%\"?");
+	msgTitle % *dmu.code;
+	reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+	if (reply == QMessageBox::No)
+	{
+		return;
+	}
+
 	InstanceActionItems actionItems;
 	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(dmu), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifier(dmu)))));
 	WidgetActionItemRequest_ACTION_DELETE_DMU action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);
@@ -733,6 +753,15 @@ void DisplayDMUsRegion::on_pushButton_delete_selected_dmu_members_clicked()
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
+		return;
+	}
+
+	QMessageBox::StandardButton reply;
+	boost::format msg("Are you certain you wish to delete the selected DMU members?  This will permanently delete all data rows tied to the given DMU members.  Proceed with deletion?");
+	boost::format msgTitle("Delete DMU members?");
+	reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+	if (reply == QMessageBox::No)
+	{
 		return;
 	}
 

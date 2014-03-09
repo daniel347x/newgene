@@ -228,6 +228,17 @@ void NewGeneManageUOAs::on_pushButton_deleteUOA_clicked()
 		return;
 	}
 
+	QMessageBox::StandardButton reply;
+	boost::format msg("Are you certain you wish to delete the unit of analysis \"%1%\"?  This will permanently delete all associated variable groups.  Proceed with deletion?");
+	msg % *uoa_category.code;
+	boost::format msgTitle("Delete UOA \"%1%\"?");
+	msgTitle % *uoa_category.code;
+	reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+	if (reply == QMessageBox::No)
+	{
+		return;
+	}
+
 	InstanceActionItems actionItems;
 	actionItems.push_back(std::make_pair(uoa_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__WidgetInstanceIdentifiers(uoa_dmu_categories)))));
 	WidgetActionItemRequest_ACTION_DELETE_UOA action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__REMOVE_ITEMS, actionItems);

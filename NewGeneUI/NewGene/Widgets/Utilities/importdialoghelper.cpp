@@ -32,6 +32,8 @@ void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & for
 	QLineEdit *lineEditFilePathName = new QLineEdit(&FileChooserWidget);
 	QPushButton *buttonFilePathName = new QPushButton("...", &FileChooserWidget);
 
+	lineEditFilePathName->setMinimumWidth(300);
+
 	formFileSelection.addWidget(lineEditFilePathName);
 	formFileSelection.addWidget(buttonFilePathName);
 
