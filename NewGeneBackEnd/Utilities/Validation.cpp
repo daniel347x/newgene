@@ -8,6 +8,7 @@
 #	include "boost/date_time/gregorian/gregorian.hpp"
 #endif
 
+// TODO: test for numeric when necessary
 bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, std::string & errorMsg)
 {
 
@@ -15,7 +16,7 @@ bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, s
 
 	if (proposed_dmu_member_uuid.empty())
 	{
-		boost::format msg("The DMU member you entered is empty.");
+		boost::format msg("The DMU member code is empty.");
 		errorMsg = msg.str();
 		return false;
 	}
@@ -51,10 +52,14 @@ bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, s
 
 		}
 	}
+	else
+	{
+		invalid_string = ".  It must contain only letters, numbers, and underscores.";
+	}
 
 	if (!valid)
 	{
-		boost::format msg("The DMU member code you entered is invalid%1%");
+		boost::format msg("The DMU member code is invalid%1%");
 		msg % invalid_string;
 		errorMsg = msg.str();
 	}
@@ -66,52 +71,79 @@ bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, s
 bool Validation::ValidateDmuMemberCode(std::string & proposed_dmu_member_code, std::string & errorMsg)
 {
 
+	bool valid = true;
+
 	boost::trim(proposed_dmu_member_code);
 
-	std::string regex_string_code("([a-zA-Z_0-9]*)");
-	boost::regex regex_code(regex_string_code);
-	boost::cmatch matches_code;
-
-	bool valid = true;
-	if (valid && boost::regex_match(proposed_dmu_member_code.c_str(), matches_code, regex_code))
+	if (valid)
 	{
-		// matches[0] contains the original string.  matches[n]
-		// contains a sub_match object for each matching
-		// subexpression
-		// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
-		// for an example usage
-		if (valid && matches_code.size() == 2)
+		// For now (i.e., MID), empty string is allowed for DMU member code
+		// (Example: some MID's have only a number (UUID), but no code or description, in the input file & data)
+		if (false)
 		{
-			std::string the_dmu_member_code_match(matches_code[1].first, matches_code[1].second);
-
-			if (valid && the_dmu_member_code_match == proposed_dmu_member_code)
+			if (proposed_dmu_member_code.empty())
 			{
-				 // no-op
-			}
-			else
-			{
-				boost::format msg("The abbreviation is invalid.");
+				boost::format msg("The DMU abbreviation is empty.");
 				errorMsg = msg.str();
 				valid = false;
 			}
-
-		}
-		else
-		{
-			boost::format msg("The abbreviation is invalid.");
-			errorMsg = msg.str();
-			valid = false;
 		}
 	}
 
 	if (valid)
 	{
-		if (valid && proposed_dmu_member_code.size() > 128)
+
+		std::string regex_string_code("([a-zA-Z_0-9]*)");
+		boost::regex regex_code(regex_string_code);
+		boost::cmatch matches_code;
+
+		if (valid && boost::regex_match(proposed_dmu_member_code.c_str(), matches_code, regex_code))
 		{
-			boost::format msg("The abbreviation is too long (maximum length: 128).");
+			// matches[0] contains the original string.  matches[n]
+			// contains a sub_match object for each matching
+			// subexpression
+			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+			// for an example usage
+			if (valid && matches_code.size() == 2)
+			{
+				std::string the_dmu_member_code_match(matches_code[1].first, matches_code[1].second);
+
+				if (valid && the_dmu_member_code_match == proposed_dmu_member_code)
+				{
+					// no-op
+				}
+				else
+				{
+					boost::format msg("The DMU abbreviation is invalid.  It can contain only letters, numbers, and underscores.");
+					errorMsg = msg.str();
+					valid = false;
+				}
+
+			}
+			else
+			{
+				boost::format msg("The DMU abbreviation is invalid.  It can contain only letters, numbers, and underscores.");
+				errorMsg = msg.str();
+				valid = false;
+			}
+		}
+		else
+		{
+			boost::format msg("The DMU abbreviation is invalid.  It can contain only letters, numbers, and underscores.");
 			errorMsg = msg.str();
 			valid = false;
 		}
+
+		if (valid)
+		{
+			if (valid && proposed_dmu_member_code.size() > 128)
+			{
+				boost::format msg("The DMU abbreviation is too long (maximum length: 128).");
+				errorMsg = msg.str();
+				valid = false;
+			}
+		}
+
 	}
 
 	return valid;
@@ -209,7 +241,7 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 				}
 				else
 				{
-					boost::format msg("The '%1%' column name is invalid.");
+					boost::format msg("The '%1%' column name is invalid.  It can contain only letters, numbers, and underscores.");
 					msg % column_description_for_invalid_message;
 					errorMsg = msg.str();
 					valid = false;
@@ -218,11 +250,18 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 			}
 			else
 			{
-				boost::format msg("The '%1%' column name is invalid.");
+				boost::format msg("The '%1%' column name is invalid.  It can contain only letters, numbers, and underscores.");
 				msg % column_description_for_invalid_message;
 				errorMsg = msg.str();
 				valid = false;
 			}
+		}
+		else
+		{
+			boost::format msg("The '%1%' column name is invalid.  It can contain only letters, numbers, and underscores.");
+			msg % column_description_for_invalid_message;
+			errorMsg = msg.str();
+			valid = false;
 		}
 
 	}
@@ -283,7 +322,7 @@ bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & 
 				}
 				else
 				{
-					boost::format msg("The DMU code is invalid.  Only letters are allowed.");
+					boost::format msg("The DMU code is invalid.  Only letters and underscores are allowed.");
 					errorMsg = msg.str();
 					valid = false;
 				}
@@ -291,10 +330,16 @@ bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & 
 			}
 			else
 			{
-				boost::format msg("The DMU code is invalid.");
+				boost::format msg("The DMU code is invalid.  Only letters and underscores are allowed.");
 				errorMsg = msg.str();
 				valid = false;
 			}
+		}
+		else
+		{
+			boost::format msg("The DMU code is invalid.  Only letters and underscores are allowed.");
+			errorMsg = msg.str();
+			valid = false;
 		}
 
 	}
@@ -355,7 +400,7 @@ bool Validation::ValidateUoaCode(std::string & proposed_uoa_code, std::string & 
 				}
 				else
 				{
-					boost::format msg("The UOA code is invalid.  Only letters are allowed.");
+					boost::format msg("The UOA code is invalid.  Only letters and underscores are allowed.");
 					errorMsg = msg.str();
 					valid = false;
 				}
@@ -363,10 +408,16 @@ bool Validation::ValidateUoaCode(std::string & proposed_uoa_code, std::string & 
 			}
 			else
 			{
-				boost::format msg("The UOA code is invalid.");
+				boost::format msg("The UOA code is invalid.  Only letters and underscores are allowed.");
 				errorMsg = msg.str();
 				valid = false;
 			}
+		}
+		else
+		{
+			boost::format msg("The UOA code is invalid.  Only letters and underscores are allowed.");
+			errorMsg = msg.str();
+			valid = false;
 		}
 
 	}
@@ -417,7 +468,6 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 			errorMsg = msg.str();
 			valid = false;
 		}
-
 	}
 
 	if (valid)
@@ -444,7 +494,7 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 				}
 				else
 				{
-					boost::format msg("The VG code is invalid.  Only letters are allowed.");
+					boost::format msg("The VG code is invalid.  Only letters and underscores are allowed.");
 					errorMsg = msg.str();
 					valid = false;
 				}
@@ -452,10 +502,16 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 			}
 			else
 			{
-				boost::format msg("The VG code is invalid.");
+				boost::format msg("The VG code is invalid.  Only letters and underscores are allowed.");
 				errorMsg = msg.str();
 				valid = false;
 			}
+		}
+		else
+		{
+			boost::format msg("The VG code is invalid.  Only letters and underscores are allowed.");
+			errorMsg = msg.str();
+			valid = false;
 		}
 
 	}
@@ -470,9 +526,20 @@ bool Validation::ValidateVgDescription(std::string & proposed_vg_description, st
 	boost::trim(proposed_vg_description);
 
 	bool valid = true;
+
+	if (valid)
+	{
+		if (proposed_vg_description.empty())
+		{
+			boost::format msg("The variable group description cannot be empty.");
+			errorMsg = msg.str();
+			valid = false;
+		}
+	}
+
 	if (proposed_vg_description.size() > 4096)
 	{
-		boost::format msg("The description is too long (maximum length: 4096).");
+		boost::format msg("The variable group description is too long (maximum length: 4096).");
 		errorMsg = msg.str();
 		valid = false;
 	}
@@ -552,10 +619,16 @@ bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short 
 			}
 			else
 			{
-				boost::format msg("The '%1%' column name is invalid.");
+				boost::format msg("The '%1%' is invalid.  It must be an integer between 1752 and 3000.");
 				msg % column_description_for_invalid_message;
 				errorMsg = msg.str();
 			}
+		}
+		else
+		{
+			boost::format msg("The '%1%' is invalid.  It must be an integer between 1752 and 3000.");
+			msg % column_description_for_invalid_message;
+			errorMsg = msg.str();
 		}
 
 	}
@@ -637,6 +710,12 @@ bool Validation::ValidateMonthInteger(std::string & proposed_month_integer, shor
 				msg % column_description_for_invalid_message;
 				errorMsg = msg.str();
 			}
+		}
+		else
+		{
+			boost::format msg("The '%1%' column name is invalid.");
+			msg % column_description_for_invalid_message;
+			errorMsg = msg.str();
 		}
 
 	}
@@ -739,6 +818,12 @@ bool Validation::ValidateDayInteger(short const theYear, short const theMonth, s
 				msg % column_description_for_invalid_message;
 				errorMsg = msg.str();
 			}
+		}
+		if (!valid)
+		{
+			boost::format msg("The '%1%' is invalid.");
+			msg % column_description_for_invalid_message;
+			errorMsg = msg.str();
 		}
 
 	}
