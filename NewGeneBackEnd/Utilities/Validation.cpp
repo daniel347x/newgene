@@ -904,7 +904,7 @@ bool Validation::ValidateDate1beforeDate2(short const y1, short const m1, short 
 	}
 
 	boost::format msg("The start date is later than the end date.");
-	errMsg = msg.str();
+	errorMsg = msg.str();
 
 	return false;
 

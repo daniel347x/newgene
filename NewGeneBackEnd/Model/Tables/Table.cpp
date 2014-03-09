@@ -168,140 +168,34 @@ bool Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 
 void Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field_data, std::string & sql_insert)
 {
-	switch (field_data->GetType())
+
+	FIELD_TYPE const field_type = field_data->GetType();
+
+	if (IsFieldTypeInt32(field_type))
 	{
-		case FIELD_TYPE_INT32:
-			{
-				Field<FIELD_TYPE_INT32> const & field = static_cast<Field<FIELD_TYPE_INT32> const &>(*field_data);
-				sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
-			}
-			break;
-
-		case FIELD_TYPE_INT64:
-			{
-				Field<FIELD_TYPE_INT64> const & field = static_cast<Field<FIELD_TYPE_INT64> const &>(*field_data);
-				sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
-			}
-			break;
-
-		case FIELD_TYPE_UINT32:
-			{
-				Field<FIELD_TYPE_UINT32> const & field = static_cast<Field<FIELD_TYPE_UINT32> const &>(*field_data);
-				sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
-			}
-			break;
-
-		case FIELD_TYPE_UINT64:
-			{
-				Field<FIELD_TYPE_UINT64> const & field = static_cast<Field<FIELD_TYPE_UINT64> const &>(*field_data);
-				sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
-			}
-			break;
-
-		case FIELD_TYPE_FLOAT:
-			{
-				Field<FIELD_TYPE_FLOAT> const & field = static_cast<Field<FIELD_TYPE_FLOAT> const &>(*field_data);
-				sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
-			}
-			break;
-
-		case FIELD_TYPE_STRING_FIXED:
-			{
-				Field<FIELD_TYPE_STRING_FIXED> const & field = static_cast<Field<FIELD_TYPE_STRING_FIXED> const &>(*field_data);
-				sql_insert += '\'';
-				sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
-				sql_insert += '\'';
-			}
-			break;
-
-		case FIELD_TYPE_STRING_VAR:
-			{
-				Field<FIELD_TYPE_STRING_VAR> const & field = static_cast<Field<FIELD_TYPE_STRING_VAR> const &>(*field_data);
-				sql_insert += '\'';
-				sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
-				sql_insert += '\'';
-			}
-			break;
-
-		case FIELD_TYPE_TIMESTAMP:
-			{
-				Field<FIELD_TYPE_TIMESTAMP> const & field = static_cast<Field<FIELD_TYPE_TIMESTAMP> const &>(*field_data);
-				sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
-			}
-			break;
-
-		case FIELD_TYPE_UUID:
-			{
-				Field<FIELD_TYPE_UUID> const & field = static_cast<Field<FIELD_TYPE_UUID> const &>(*field_data);
-				sql_insert += '\'';
-				sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
-				sql_insert += '\'';
-			}
-			break;
-
-		case FIELD_TYPE_UUID_FOREIGN:
-			{
-				Field<FIELD_TYPE_UUID_FOREIGN> const & field = static_cast<Field<FIELD_TYPE_UUID_FOREIGN> const &>(*field_data);
-				sql_insert += '\'';
-				sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
-				sql_insert += '\'';
-			}
-			break;
-
-		case FIELD_TYPE_STRING_CODE:
-			{
-				Field<FIELD_TYPE_STRING_CODE> const & field = static_cast<Field<FIELD_TYPE_STRING_CODE> const &>(*field_data);
-				sql_insert += '\'';
-				sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
-				sql_insert += '\'';
-			}
-			break;
-
-		case FIELD_TYPE_STRING_LONGHAND:
-			{
-				Field<FIELD_TYPE_STRING_LONGHAND> const & field = static_cast<Field<FIELD_TYPE_STRING_LONGHAND> const &>(*field_data);
-				sql_insert += '\'';
-				sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
-				sql_insert += '\'';
-			}
-			break;
-
-		case FIELD_TYPE_TIME_RANGE:
-			{
-				Field<FIELD_TYPE_TIME_RANGE> const & field = static_cast<Field<FIELD_TYPE_TIME_RANGE> const &>(*field_data);
-				sql_insert += boost::lexical_cast<std::string>(field.GetValueReference());
-			}
-			break;
-
-		case FIELD_TYPE_NOTES_1:
-			{
-				Field<FIELD_TYPE_NOTES_1> const & field = static_cast<Field<FIELD_TYPE_NOTES_1> const &>(*field_data);
-				sql_insert += '\'';
-				sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
-				sql_insert += '\'';
-			}
-			break;
-
-		case FIELD_TYPE_NOTES_2:
-			{
-				Field<FIELD_TYPE_NOTES_2> const & field = static_cast<Field<FIELD_TYPE_NOTES_2> const &>(*field_data);
-				sql_insert += '\'';
-				sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
-				sql_insert += '\'';
-			}
-			break;
-
-		case FIELD_TYPE_NOTES_3:
-			{
-				Field<FIELD_TYPE_NOTES_3> const & field = static_cast<Field<FIELD_TYPE_NOTES_3> const &>(*field_data);
-				sql_insert += '\'';
-				sql_insert += Table_basemost::EscapeTicks(boost::lexical_cast<std::string>(field.GetValueReference()));
-				sql_insert += '\'';
-			}
-			break;
-
-		default:
-			break;
+		sql_insert += boost::lexical_cast<std::string>(field_data->GetInt32Ref());
+	}
+	else
+	if (IsFieldTypeInt64(field_type))
+	{
+		sql_insert += boost::lexical_cast<std::string>(field_data->GetInt64Ref());
+	}
+	else
+	if (IsFieldTypeFloat(field_type))
+	{
+		sql_insert += boost::lexical_cast<std::string>(field_data->GetDoubleRef());
+	}
+	else
+	if (IsFieldTypeString(field_type))
+	{
+		sql_insert += '\'';
+		sql_insert += Table_basemost::EscapeTicks(field_data->GetString());
+		sql_insert += '\'';
+	}
+	else
+	{
+		boost::format msg("Invalid data type when obtaining raw data for field!");
+		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
 }

@@ -47,7 +47,7 @@ enum FIELD_TYPE
 
 };
 
-bool IsFieldTypeInt(FIELD_TYPE const & field_type)
+bool IsFieldTypeInt32(FIELD_TYPE const & field_type)
 {
 
 	bool returnVal = false;
@@ -56,9 +56,7 @@ bool IsFieldTypeInt(FIELD_TYPE const & field_type)
 	{
 
 		case FIELD_TYPE_INT32:
-		case FIELD_TYPE_INT64:
 		case FIELD_TYPE_UINT32:
-		case FIELD_TYPE_UINT64:
 		case FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC:
 		{
 			returnVal = true;
@@ -71,6 +69,52 @@ bool IsFieldTypeInt(FIELD_TYPE const & field_type)
 		}
 		break;
 
+	}
+
+	return returnVal;
+
+}
+
+bool IsFieldTypeInt64(FIELD_TYPE const & field_type)
+{
+
+	bool returnVal = false;
+
+	switch (field_type)
+	{
+
+		case FIELD_TYPE_INT64:
+		case FIELD_TYPE_UINT64:
+		{
+			returnVal = true;
+		}
+		break;
+
+		default:
+		{
+			returnVal = false;
+		}
+		break;
+
+	}
+
+	return returnVal;
+
+}
+
+bool IsFieldTypeInt(FIELD_TYPE const & field_type)
+{
+
+	bool returnVal = false;
+
+	if (IsFieldTypeInt32(field_type))
+	{
+		returnVal = true;
+	}
+
+	if (IsFieldTypeInt64(field_type))
+	{
+		returnVal = true;
 	}
 
 	return returnVal;
@@ -248,6 +292,69 @@ struct FieldTypeTraits<FIELD_TYPE_FIELD_TYPE>
 {
 	typedef FIELD_TYPE type;
 	static type const default_ = FIELD_TYPE_UNKNOWN;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_UUID>
+{
+	typedef std::string type;
+	static type const default_;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC>
+{
+	typedef int type;
+	static type const default_ = 0;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_UUID_STRING>
+{
+	typedef std::string type;
+	static type const default_;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_CODE>
+{
+	typedef std::string type;
+	static type const default_;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_DESCRIPTION>
+{
+	typedef std::string type;
+	static type const default_;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID>
+{
+	typedef std::string type;
+	static type const default_;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_DAY>
+{
+	typedef int type;
+	static type const default_ = 0;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_MONTH>
+{
+	typedef int type;
+	static type const default_ = 0;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_YEAR>
+{
+	typedef int type;
+	static type const default_ = 0;
 };
 
 #endif
