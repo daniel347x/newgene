@@ -1,5 +1,9 @@
 #include "newgeneapplication.h"
 
+QEvent::Type QEVENT_NONE = QEvent::None;
+QEvent::Type QEVENT_PROMPT_FOR_VG_REFRESH = QEvent::None;
+QEvent::Type QEVENT_CLICK_VG_REFRESH = QEvent::None;
+
 NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QApplication( argc, argv )
 {
@@ -58,9 +62,9 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_VG>("WidgetActionItemRequest_ACTION_DELETE_VG");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_REFRESH_VG>("WidgetActionItemRequest_ACTION_REFRESH_VG");
 
-	QEVENT_NONE                            = QEvent::registerEventType(QEVENT_NONE_HINT);
-	QEVENT_PROMPT_FOR_VG_REFRESH           = QEvent::registerEventType(QEVENT_PROMPT_FOR_VG_REFRESH_HINT);
-	QEVENT_CLICK_VG_REFRESH                = QEvent::registerEventType(QEVENT_CLICK_VG_REFRESH_HINT);
+	QEVENT_NONE                            = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_NONE_HINT));
+	QEVENT_PROMPT_FOR_VG_REFRESH           = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_PROMPT_FOR_VG_REFRESH_HINT));
+	QEVENT_CLICK_VG_REFRESH                = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_CLICK_VG_REFRESH_HINT));
 
 }
 
