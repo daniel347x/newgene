@@ -44,10 +44,6 @@ void UIMessager::ShowMessageBox(std::string msg, bool block)
 	{
 		emit DisplayMessageBox(msg);
 	}
-	else
-	{
-		QMetaObject::invokeMethod(get(), "SignalMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( ), Q_ARG( STD_STRING, msg ));
-	}
 }
 
 void UIMessager::displayStatusMessages()
@@ -194,6 +190,18 @@ void UIMessagerOutputProject::set(UIOutputProject * outp_)
 	}
 }
 
+void UIMessagerInputProject::ShowMessageBox(std::string msg, bool block)
+{
+	if (block)
+	{
+		QMetaObject::invokeMethod(get(), "SignalMessageBox", Qt::BlockingQueuedConnection, Q_ARG( STD_STRING, msg ));
+	}
+	else
+	{
+		UIMessager::ShowMessageBox(msg, block);
+	}
+}
+
 bool UIMessagerInputProject::ShowQuestionMessageBox(std::string msg_title, std::string msg_text)
 {
 	bool yes = false;
@@ -224,6 +232,18 @@ void UIMessagerInputProject::UpdateStatusBarText(std::string const & the_text, v
 void UIMessagerInputProject::EmitInputProjectChangeMessage(DataChangeMessage & changes)
 {
 	get()->getQueueManager()->HandleChanges(changes);
+}
+
+void UIMessagerOutputProject::ShowMessageBox(std::string msg, bool block)
+{
+	if (block)
+	{
+		QMetaObject::invokeMethod(get(), "SignalMessageBox", Qt::BlockingQueuedConnection, Q_ARG( STD_STRING, msg ));
+	}
+	else
+	{
+		UIMessager::ShowMessageBox(msg, block);
+	}
 }
 
 bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg_title, std::string msg_text)
