@@ -20,6 +20,8 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 		explicit NewGeneManageVGs( QWidget * parent = 0 );
 		~NewGeneManageVGs();
 
+		bool QObject::event ( QEvent * e );
+
 		void HandleChanges(DataChangeMessage const &);
 
 	protected:

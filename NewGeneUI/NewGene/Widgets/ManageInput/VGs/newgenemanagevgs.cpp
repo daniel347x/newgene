@@ -281,15 +281,8 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 									selectionModel->select(itemIndex, QItemSelectionModel::SelectCurrent);
 								}
 
-								QMessageBox::StandardButton reply;
-								boost::format msg("Would you like to import data for the new variable group \"%1%\" now?");
-								msg % *vg.code;
-								boost::format msgTitle("Import data?");
-								reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-								if (reply == QMessageBox::Yes)
-								{
-									ui->pushButton_refresh_vg->click();
-								}
+								QEvent event(QEVENT_PROMPT_FOR_VG_REFRESH);
+								QApplication::postEvent(this, &event);
 
 							}
 							break;
@@ -886,3 +879,53 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	emit RefreshVG(action_request);
 
 }
+
+bool QObject::event ( QEvent * e )
+{
+
+	switch (e->type())
+	{
+
+		case QEVENT_PROMPT_FOR_VG_REFRESH:
+			{
+
+				WidgetInstanceIdentifier vg;
+				WidgetInstanceIdentifier uoa;
+				bool is_selected = GetSelectedVG(vg, uoa);
+				if (!is_selected)
+				{
+					return true; // Even though no VG is selected, we have recognized and processed our own custom event
+				}
+
+				QMessageBox::StandardButton reply;
+				boost::format msg("Would you like to import data for the new variable group \"%1%\" now?");
+				msg % *vg.code;
+				boost::format msgTitle("Import data?");
+				reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+				if (reply == QMessageBox::Yes)
+				{
+					QEvent event(QEVENT_CLICK_VG_REFRESH);
+					QApplication::postEvent(this, &event);
+				}
+
+			}
+			break;
+
+		case QEVENT_CLICK_VG_REFRESH:
+			{
+				ui->pushButton_refresh_vg->click();
+			}
+			break;
+
+		default:
+			{
+				return QWidget::event(e);
+			}
+			break;
+
+	}
+
+	return true;
+
+}
+

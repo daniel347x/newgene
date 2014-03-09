@@ -61,7 +61,7 @@
             <item>
              <widget class="QPushButton" name="pushButton_add_vg">
               <property name="text">
-               <string> Add new empty Variable Group </string>
+               <string> Add new Variable Group </string>
               </property>
              </widget>
             </item>
