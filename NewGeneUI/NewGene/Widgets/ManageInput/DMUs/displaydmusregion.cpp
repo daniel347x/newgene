@@ -945,9 +945,8 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								QItemSelectionModel * selectionModel = ui->listView_dmus->selectionModel();
 								if (selectionModel != nullptr)
 								{
-									selectionModel->clearSelection();
 									QModelIndex itemIndex = itemModel->indexFromItem(item);
-									selectionModel->select(itemIndex, QItemSelectionModel::SelectCurrent);
+									ui->listView_dmus->setCurrentIndex(itemIndex);
 								}
 
 							}

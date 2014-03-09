@@ -276,9 +276,8 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 								QItemSelectionModel * selectionModel = ui->listViewManageVGs->selectionModel();
 								if (selectionModel != nullptr)
 								{
-									selectionModel->clearSelection();
 									QModelIndex itemIndex = itemModel->indexFromItem(item);
-									selectionModel->select(itemIndex, QItemSelectionModel::SelectCurrent);
+									ui->listViewManageVGs->setCurrentIndex(itemIndex);
 								}
 
 								QEvent * event = new QEvent(QEVENT_PROMPT_FOR_VG_REFRESH);
@@ -892,6 +891,9 @@ bool NewGeneManageVGs::event ( QEvent * e )
 		bool is_selected = GetSelectedVG(vg, uoa);
 		if (!is_selected)
 		{
+			QMessageBox msgBox;
+			msgBox.setText("Nothing selected!");
+			msgBox.exec();
 			return true; // Even though no VG is selected, we have recognized and processed our own custom event
 		}
 
