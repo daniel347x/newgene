@@ -97,7 +97,7 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 					boost::format msg("Variable group '%1%' successfully created.\n\nTo import data into this variable group, click \"Refresh selected Variable Group from file\".");
 					msg % boost::to_upper_copy(new_vg_code);
-					messager.ShowMessageBox(msg.str());
+					messager.ShowMessageBox(msg.str(), true);
 
 					// ***************************************** //
 					// Prepare data to send back to user interface

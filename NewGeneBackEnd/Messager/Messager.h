@@ -149,7 +149,7 @@ class Messager
 
         virtual void EmitChangeMessage(DataChangeMessage &) {}
 
-		virtual void ShowMessageBox(std::string) {}
+		virtual void ShowMessageBox(std::string, bool block = true) {}
 		virtual bool ShowQuestionMessageBox(std::string, std::string) { return false; } // title, question text
         virtual void StartProgressBar(std::int64_t const, std::int64_t const) {}
 		virtual void EndProgressBar() {}

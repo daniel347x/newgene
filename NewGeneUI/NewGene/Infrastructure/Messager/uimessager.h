@@ -94,7 +94,7 @@ class UIMessager : public QObject, public Messager
 		virtual void EmitInputProjectChangeMessage(DataChangeMessage &) {}
 		virtual void EmitOutputProjectChangeMessage(DataChangeMessage &) {}
 
-		void ShowMessageBox(std::string);
+		void ShowMessageBox(std::string, bool block = false);
 
 	signals:
 

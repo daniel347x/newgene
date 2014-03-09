@@ -38,9 +38,16 @@ UIMessager::~UIMessager()
 	}
 }
 
-void UIMessager::ShowMessageBox(std::string msg)
+void UIMessager::ShowMessageBox(std::string msg, bool block)
 {
-	emit DisplayMessageBox(msg);
+	if (!block)
+	{
+		emit DisplayMessageBox(msg);
+	}
+	else
+	{
+		QMetaObject::invokeMethod(get(), "SignalMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( ), Q_ARG( STD_STRING, msg ));
+	}
 }
 
 void UIMessager::displayStatusMessages()
