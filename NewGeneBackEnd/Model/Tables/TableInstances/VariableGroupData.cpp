@@ -845,6 +845,16 @@ bool Table_VariableGroupData::BuildImportDefinition
 			}
 		}
 
+		// Prepare the output time range columns, in case they're needed
+		std::string timeRangeStartFieldNameAndDescription = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName;
+		std::string timeRangeEndFieldNameAndDescription = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
+		SchemaEntry outputTimeRangeStartEntry(FIELD_TYPE_INT64, timeRangeStartFieldNameAndDescription, true);
+		SchemaEntry outputTimeRangeEndEntry(FIELD_TYPE_INT64, timeRangeEndFieldNameAndDescription, true);
+		outputTimeRangeStartEntry.field_description = timeRangeStartFieldNameAndDescription;
+		outputTimeRangeEndEntry.field_description = timeRangeEndFieldNameAndDescription;
+		outputTimeRangeStartEntry.SetIsTimeRange(true);
+		outputTimeRangeEndEntry.SetIsTimeRange(true);
+
 		// First, the time range mapping
 		switch (the_time_granularity)
 		{
@@ -858,8 +868,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 						return false;
 					}
 
-					output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName, true));
-					output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName, true));
+					output_schema_vector.push_back(outputTimeRangeStartEntry);
+					output_schema_vector.push_back(outputTimeRangeEndEntry);
 
 					std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
 							(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
@@ -897,8 +907,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 						return false;
 					}
 
-					output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName, true));
-					output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName, true));
+					output_schema_vector.push_back(outputTimeRangeStartEntry);
+					output_schema_vector.push_back(outputTimeRangeEndEntry);
 
 					if (boost::trim_copy(timeRangeCols[1]).empty())
 					{
