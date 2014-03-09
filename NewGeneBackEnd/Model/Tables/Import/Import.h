@@ -396,15 +396,17 @@ class Importer
 		bool ValidateMapping();
 		void InitializeFields();
 		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline);
-		void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop);
 		void ReadFieldFromFile(char * & current_line_ptr, int & current_lines_read, int const & current_column_index, char * & parsed_line_ptr, bool & stop, SchemaEntry const & column);
-		void SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop);
-		void ReadOneDataField(SchemaEntry const &column, BaseField & theField, char * & current_line_ptr, char * & parsed_line_ptr, bool & stop);
-		void EatWhitespace(char * & current_line_ptr);
-		void EatSeparator(char * & current_line_ptr);
 
 	public:
-		
+
+		static void ReadFieldFromFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition);
+		static void ReadOneDataField(SchemaEntry const &column, BaseField & theField, char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition);
+		static void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition);
+		static void SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition);
+		static void EatWhitespace(char * & current_line_ptr, ImportDefinition const & import_definition);
+		static void EatSeparator(char * & current_line_ptr, ImportDefinition const & import_definition);
+
 		Mode mode;
 
 };

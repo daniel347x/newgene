@@ -867,7 +867,7 @@ bool Importer::ValidateMapping()
 
 }
 
-void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop)
+void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition)
 {
 	bool is_quoted_field = false;
 	char * starting_parsed_pointer = parsed_line_ptr;
@@ -1102,7 +1102,7 @@ void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_r
 
 	BaseField & theField = *field_entry;
 
-	EatWhitespace(current_line_ptr);
+	EatWhitespace(current_line_ptr, import_definition);
 
 	if (*current_line_ptr == '\0')
 	{
@@ -1111,22 +1111,46 @@ void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_r
 		return;
 	}
 
-	ReadOneDataField(column, theField, current_line_ptr, parsed_line_ptr, stop);
+	ReadOneDataField(column, theField, current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 	if (stop)
 	{
 		return;
 	}
 
-	EatWhitespace(current_line_ptr);
-	EatSeparator(current_line_ptr);
+	EatWhitespace(current_line_ptr, import_definition);
+	EatSeparator(current_line_ptr, import_definition);
 
 }
 
-void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop)
+void Importer::ReadFieldFromFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition)
 {
 
-	EatWhitespace(current_line_ptr);
+	EatWhitespace(current_line_ptr, import_definition);
+
+	if (*current_line_ptr == '\0')
+	{
+		// Todo: warning
+		stop = true;
+		return;
+	}
+
+	ReadOneDataField(column, theField, current_line_ptr, parsed_line_ptr, stop, import_definition);
+
+	if (stop)
+	{
+		return;
+	}
+
+	EatWhitespace(current_line_ptr, import_definition);
+	EatSeparator(current_line_ptr, import_definition);
+
+}
+
+void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition)
+{
+
+	EatWhitespace(current_line_ptr, import_definition);
 
 	if (*current_line_ptr == '\0')
 	{
@@ -1136,15 +1160,15 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 	}
 
 	// read it, and do nothing with it
-	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 	if (stop)
 	{
 		return;
 	}
 
-	EatWhitespace(current_line_ptr);
-	EatSeparator(current_line_ptr);
+	EatWhitespace(current_line_ptr, import_definition);
+	EatSeparator(current_line_ptr, import_definition);
 
 }
 
@@ -1177,7 +1201,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 			}
 			else
 			{
-				SkipFieldInFile(current_line_ptr, parsed_line_ptr, stop);
+				SkipFieldInFile(current_line_ptr, parsed_line_ptr, stop, import_definition);
 			}
 		}
 
@@ -1775,7 +1799,7 @@ bool Importer::DoImport()
 
 }
 
-void Importer::EatWhitespace(char *& current_line_ptr)
+void Importer::EatWhitespace(char *& current_line_ptr, ImportDefinition const & import_definition)
 {
 	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
 	{
@@ -1787,7 +1811,7 @@ void Importer::EatWhitespace(char *& current_line_ptr)
 	}
 }
 
-void Importer::EatSeparator(char *& current_line_ptr)
+void Importer::EatSeparator(char *& current_line_ptr, ImportDefinition const & import_definition)
 {
 	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
 	{
@@ -1799,7 +1823,7 @@ void Importer::EatSeparator(char *& current_line_ptr)
 	}
 }
 
-void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField, char *& current_line_ptr, char *& parsed_line_ptr, bool & stop)
+void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField, char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition)
 {
 	try
 	{
@@ -1842,7 +1866,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 			case FIELD_TYPE_STRING_FIXED:
 				{
 					Field<FIELD_TYPE_STRING_FIXED> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 					if (stop)
 					{
@@ -1856,7 +1880,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 			case FIELD_TYPE_STRING_VAR:
 				{
 					Field<FIELD_TYPE_STRING_VAR> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 					if (stop)
 					{
@@ -1888,7 +1912,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 			case FIELD_TYPE_UUID:
 				{
 					Field<FIELD_TYPE_UUID> & data_entry = dynamic_cast<Field<FIELD_TYPE_UUID>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 					if (stop)
 					{
@@ -1902,7 +1926,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 			case FIELD_TYPE_UUID_FOREIGN:
 				{
 					Field<FIELD_TYPE_UUID_FOREIGN> & data_entry = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 					if (stop)
 					{
@@ -1916,7 +1940,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 			case FIELD_TYPE_STRING_CODE:
 				{
 					Field<FIELD_TYPE_STRING_CODE> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 					if (stop)
 					{
@@ -1930,7 +1954,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 			case FIELD_TYPE_STRING_LONGHAND:
 				{
 					Field<FIELD_TYPE_STRING_LONGHAND> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 					if (stop)
 					{
@@ -1951,7 +1975,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 			case FIELD_TYPE_NOTES_1:
 				{
 					Field<FIELD_TYPE_NOTES_1> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 					if (stop)
 					{
@@ -1965,7 +1989,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 			case FIELD_TYPE_NOTES_2:
 				{
 					Field<FIELD_TYPE_NOTES_2> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 					if (stop)
 					{
@@ -1979,7 +2003,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 			case FIELD_TYPE_NOTES_3:
 				{
 					Field<FIELD_TYPE_NOTES_3> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop);
+					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
 
 					if (stop)
 					{

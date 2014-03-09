@@ -634,7 +634,7 @@ protected:
 	boost::filesystem::path filePathName;
 	TIME_GRANULARITY time_granularity;
 	bool inputFileContainsColumnDescriptions;
-	bool inputFileContainsColumnDataTypes
+	bool inputFileContainsColumnDataTypes;
 
 };
 
