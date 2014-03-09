@@ -329,7 +329,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 			return;
 		}
 
-		if (schema_entry.IsPrimaryKey())
+		if (schema_entry.IsPrimaryKey() || schema_entry.IsTimeRange())
 		{
 			++index;
 			return; // These are automatically covered by the "WHERE" clause
@@ -383,7 +383,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 			return;
 		}
 
-		if (schema_entry.IsPrimaryKey())
+		if (schema_entry.IsPrimaryKey() || schema_entry.IsTimeRange())
 		{
 
 			std::shared_ptr<BaseField> const & field_data = row_fields[index];

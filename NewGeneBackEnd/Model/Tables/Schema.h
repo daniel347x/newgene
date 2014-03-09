@@ -26,6 +26,7 @@ class SchemaEntry
 			: field_type(field_type_)
 			, field_name(field_name_)
 			, required(required_)
+			, isTimeRange(false)
 		{
 		}
 
@@ -34,7 +35,8 @@ class SchemaEntry
 			, field_name(field_name_)
 			, dmu_category_string_code(std::make_shared<std::string>(dmu_category_string_code_))
             , required(required_)
-        {
+			, isTimeRange(false)
+		{
 		}
 
 		SchemaEntry(SchemaEntry const & rhs)
@@ -43,7 +45,8 @@ class SchemaEntry
 			, field_description(rhs.field_description)
 			, dmu_category_string_code(rhs.dmu_category_string_code)
             , required(rhs.required)
-        {
+			, isTimeRange(rhs.isTimeRange)
+		{
 		}
 
 		bool IsPrimaryKey() const
@@ -55,12 +58,26 @@ class SchemaEntry
 			return true;
 		}
 
+		bool IsTimeRange() const
+		{
+			return isTimeRange;
+		}
+
+		void SetIsTimeRange(bool const isTimeRange_)
+		{
+			isTimeRange = isTimeRange_;
+		}
+
 		FIELD_TYPE field_type;
 		std::string field_name;
 		std::shared_ptr<std::string> dmu_category_string_code; // primary key field
 		//WidgetInstanceIdentifier dmu_category; // when needed, bring this in
 		std::string field_description;
 		bool required;
+
+	protected:
+
+		bool isTimeRange;
 
 };
 

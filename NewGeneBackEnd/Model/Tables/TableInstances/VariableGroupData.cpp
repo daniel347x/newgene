@@ -858,6 +858,9 @@ bool Table_VariableGroupData::BuildImportDefinition
 						return false;
 					}
 
+					output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName, true));
+					output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName, true));
+
 					std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
 							(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
 					FieldTypeEntries input_file_fields;
@@ -893,6 +896,9 @@ bool Table_VariableGroupData::BuildImportDefinition
 						errorMsg = msg.str();
 						return false;
 					}
+
+					output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName, true));
+					output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName, true));
 
 					if (boost::trim_copy(timeRangeCols[1]).empty())
 					{
