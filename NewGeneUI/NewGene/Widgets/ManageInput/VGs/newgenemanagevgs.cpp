@@ -880,7 +880,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 }
 
-bool QObject::event ( QEvent * e )
+bool NewGeneManageVGs::event ( QEvent * e )
 {
 
 	switch (e->type())
