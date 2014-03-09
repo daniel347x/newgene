@@ -281,8 +281,8 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 									selectionModel->select(itemIndex, QItemSelectionModel::SelectCurrent);
 								}
 
-								QEvent event(QEVENT_PROMPT_FOR_VG_REFRESH);
-								QApplication::postEvent(this, &event);
+								QEvent * event = new QEvent(QEVENT_PROMPT_FOR_VG_REFRESH);
+								QApplication::postEvent(this, event);
 
 							}
 							break;
@@ -902,8 +902,8 @@ bool NewGeneManageVGs::event ( QEvent * e )
 		reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 		if (reply == QMessageBox::Yes)
 		{
-			QEvent event(QEVENT_CLICK_VG_REFRESH);
-			QApplication::postEvent(this, &event);
+			QEvent * event = new QEvent(QEVENT_CLICK_VG_REFRESH);
+			QApplication::postEvent(this, event);
 		}
 		returnVal = true;
 	}
