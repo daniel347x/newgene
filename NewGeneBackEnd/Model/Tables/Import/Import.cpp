@@ -1100,30 +1100,11 @@ void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_r
 		return;
 	}
 
-	BaseField & theField = *field_entry;
-
-	EatWhitespace(current_line_ptr, import_definition);
-
-	if (*current_line_ptr == '\0')
-	{
-		// Todo: warning
-		stop = true;
-		return;
-	}
-
-	ReadOneDataField(column, theField, current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-	if (stop)
-	{
-		return;
-	}
-
-	EatWhitespace(current_line_ptr, import_definition);
-	EatSeparator(current_line_ptr, import_definition);
+	ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, column, *field_entry, import_definition);
 
 }
 
-void Importer::ReadFieldFromFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition)
+void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition)
 {
 
 	EatWhitespace(current_line_ptr, import_definition);

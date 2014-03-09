@@ -400,7 +400,7 @@ class Importer
 
 	public:
 
-		static void ReadFieldFromFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition);
+		static void ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition);
 		static void ReadOneDataField(SchemaEntry const &column, BaseField & theField, char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition);
 		static void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition);
 		static void SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition);
