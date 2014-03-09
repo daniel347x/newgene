@@ -3,10 +3,9 @@
 NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QApplication( argc, argv )
 {
+
 	qRegisterMetaType<STD_STRING>("STD_STRING");
 	qRegisterMetaType<STD_INT64>("STD_INT64");
-
-	//qRegisterMetaType<QVector<int>>();
 
 	qRegisterMetaType<WidgetChangeMessage>("WidgetChangeMessage");
 	qRegisterMetaType<WidgetChangeMessages>("WidgetChangeMessages");
@@ -58,6 +57,11 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_CREATE_VG>("WidgetActionItemRequest_ACTION_CREATE_VG");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_DELETE_VG>("WidgetActionItemRequest_ACTION_DELETE_VG");
 	qRegisterMetaType<WidgetActionItemRequest_ACTION_REFRESH_VG>("WidgetActionItemRequest_ACTION_REFRESH_VG");
+
+	QEVENT_NONE                            = QEvent::registerEventType(QEVENT_NONE_HINT);
+	QEVENT_PROMPT_FOR_VG_REFRESH           = QEvent::registerEventType(QEVENT_PROMPT_FOR_VG_REFRESH_HINT);
+	QEVENT_CLICK_VG_REFRESH                = QEvent::registerEventType(QEVENT_CLICK_VG_REFRESH_HINT);
+
 }
 
 bool NewGeneApplication::notify( QObject * receiver, QEvent * e )
