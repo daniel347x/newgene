@@ -891,9 +891,6 @@ bool NewGeneManageVGs::event ( QEvent * e )
 		bool is_selected = GetSelectedVG(vg, uoa);
 		if (!is_selected)
 		{
-			QMessageBox msgBox;
-			msgBox.setText("Nothing selected!");
-			msgBox.exec();
 			return true; // Even though no VG is selected, we have recognized and processed our own custom event
 		}
 
