@@ -597,6 +597,15 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition, std::string & errorMsg)
 {
 
+	if (!variable_group.uuid || variable_group.uuid->empty())
+	{
+		boost::format msg("Bad VG entry being added to the VG_SET_MEMBER table.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	// remove from cache before refilling cache
+	identifiers_map[*variable_group.uuid].clear();
+
 	int sequence_number = 0;
 	std::for_each(import_definition.output_schema.schema.cbegin(),
 				  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & table_schema_entry)
@@ -692,6 +701,11 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 			sqlite3_finalize(stmt);
 			stmt = nullptr;
 		}
+
+		// Add to cache
+		WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(*variable_group.uuid);
+		std::string flags;
+		identifiers_map[*variable_group.uuid].push_back(WidgetInstanceIdentifier(new_uuid, vg_category_identifier, table_schema_entry.field_name, table_schema_entry.field_description, sequence_number, flags.c_str(), vg_category_identifier.time_granularity));
 
 		++sequence_number;
 	});
