@@ -98,8 +98,8 @@ ImportDefinition Development__CreateImportDefinition_CINC()
 		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "tpop", true));
 		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "upop", true));
 		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_FLOAT, "cinc", true));
-		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_START", true));
-		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_END", true));
+		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName, true));
+		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName, true));
 
 		ImportDefinition::ImportMappings mappings;
 
@@ -109,8 +109,8 @@ ImportDefinition Development__CreateImportDefinition_CINC()
 		FieldTypeEntries output_table_fields;
 		FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "year"), FIELD_TYPE_INT32);
 		input_file_fields.push_back(input_time_field__Year);
-		FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-		FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+		FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
+		FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
 		output_table_fields.push_back(output_time_field__YearStart);
 		output_table_fields.push_back(output_time_field__YearEnd);
 		time_range_mapping->input_file_fields = input_file_fields;
@@ -183,8 +183,8 @@ ImportDefinition Development__CreateImportDefinition_CINC()
 		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "tpop", true));
 		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "upop", true));
 		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_FLOAT, "cinc", true));
-		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_START", true));
-		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_END", true));
+		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName, true));
+		output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName, true));
 
 		ImportDefinition::ImportMappings mappings;
 
@@ -196,8 +196,8 @@ ImportDefinition Development__CreateImportDefinition_CINC()
 		FieldTypeEntry input_time_field__datetime_end = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_END_OUTPUTROW"), FIELD_TYPE_STRING_FIXED);
 		input_file_fields.push_back(input_time_field__datetime_start);
 		input_file_fields.push_back(input_time_field__datetime_end);
-		FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-		FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+		FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
+		FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
 		output_table_fields.push_back(output_time_field__YearStart);
 		output_table_fields.push_back(output_time_field__YearEnd);
 		time_range_mapping->input_file_fields = input_file_fields;
@@ -274,8 +274,8 @@ ImportDefinition Development__CreateImportDefinition_COW()
 	//output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_STRING_FIXED, "ccode", true));
 	output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_INT32, "ccode", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "stabb", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_START", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_END", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName, true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName, true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "stday", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "stmon", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "styear", true));
@@ -310,8 +310,8 @@ ImportDefinition Development__CreateImportDefinition_COW()
 	input_file_fields.push_back(input_time_field__DayEnd);
 	input_file_fields.push_back(input_time_field__MonthEnd);
 	input_file_fields.push_back(input_time_field__YearEnd);
-	FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-	FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+	FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
+	FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
 	output_table_fields.push_back(output_time_field__DayStart);
 	output_table_fields.push_back(output_time_field__DayEnd);
 	time_range_mapping->input_file_fields = input_file_fields;
@@ -435,8 +435,8 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTDAY", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTMNTH", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "STRTYR", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_START", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_END", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName, true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName, true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "ENDDAY", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "ENDMNTH", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "ENDYEAR", true));
@@ -503,8 +503,8 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 		input_file_fields.push_back(input_time_field__DayEnd);
 		input_file_fields.push_back(input_time_field__MonthEnd);
 		input_file_fields.push_back(input_time_field__YearEnd);
-		FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-		FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+		FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
+		FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
 		output_table_fields.push_back(output_time_field__DayStart);
 		output_table_fields.push_back(output_time_field__DayEnd);
 		time_range_mapping->input_file_fields = input_file_fields;
@@ -519,8 +519,8 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 		FieldTypeEntries output_table_fields;
 		FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32);
 		input_file_fields.push_back(input_time_field__Year);
-		FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-		FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+		FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
+		FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
 		output_table_fields.push_back(output_time_field__YearStart);
 		output_table_fields.push_back(output_time_field__YearEnd);
 		time_range_mapping->input_file_fields = input_file_fields;
@@ -630,8 +630,8 @@ ImportDefinition Development__CreateImportDefinition_Cty()
 	output_schema_vector.push_back(SchemaEntry("CTY", FIELD_TYPE_INT32, "CCode", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "StateAbb", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_STRING_FIXED, "StateName", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_START", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_END", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName, true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName, true));
 
 	ImportDefinition::ImportMappings mappings;
 	// Time-range mapping
@@ -650,8 +650,8 @@ ImportDefinition Development__CreateImportDefinition_Cty()
 	input_file_fields.push_back(input_time_field__DayEnd);
 	input_file_fields.push_back(input_time_field__MonthEnd);
 	input_file_fields.push_back(input_time_field__YearEnd);
-	FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-	FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+	FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
+	FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
 	output_table_fields.push_back(output_time_field__DayStart);
 	output_table_fields.push_back(output_time_field__DayEnd);
 	time_range_mapping->input_file_fields = input_file_fields;
@@ -731,8 +731,8 @@ ImportDefinition Development__CreateImportDefinition_Mid()
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "MIDRecip", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "MIDNumA", true));
 	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT32, "MIDNumB", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_START", true));
-	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, "DATETIME_ROW_END", true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName, true));
+	output_schema_vector.push_back(SchemaEntry(FIELD_TYPE_INT64, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName, true));
 
 	ImportDefinition::ImportMappings mappings;
 
@@ -752,8 +752,8 @@ ImportDefinition Development__CreateImportDefinition_Mid()
 	input_file_fields.push_back(input_time_field__DayEnd);
 	input_file_fields.push_back(input_time_field__MonthEnd);
 	input_file_fields.push_back(input_time_field__YearEnd);
-	FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-	FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+	FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
+	FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
 	output_table_fields.push_back(output_time_field__DayStart);
 	output_table_fields.push_back(output_time_field__DayEnd);
 	time_range_mapping->input_file_fields = input_file_fields;

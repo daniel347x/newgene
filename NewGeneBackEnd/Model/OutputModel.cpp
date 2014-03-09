@@ -7285,7 +7285,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL, ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL);
 
-			std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
+			std::string datetime_start_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName;
 			std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
 			datetime_start_col_name += "_";
 			datetime_start_col_name += newUUID(true);
@@ -7320,7 +7320,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
 			datetime_start_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 
-			std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
+			std::string datetime_end_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
 			std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
 			datetime_end_col_name += "_";
 			datetime_end_col_name += newUUID(true);
@@ -8427,7 +8427,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
 	if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
-		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
+		std::string datetime_start_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName;
 		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
 		datetime_start_col_name += "_";
 		datetime_start_col_name += newUUID(true);
@@ -8462,7 +8462,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = primary_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
 		datetime_start_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 
-		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
+		std::string datetime_end_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
 		datetime_end_col_name += "_";
 		datetime_end_col_name += newUUID(true);
@@ -10394,7 +10394,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
 	if (child_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
-		std::string datetime_start_col_name_no_uuid = "DATETIME_ROW_START";
+		std::string datetime_start_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName;
 		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
 		datetime_start_col_name += "_";
 		datetime_start_col_name += newUUID(true);
@@ -10429,7 +10429,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = child_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
 		datetime_start_column.number_inner_tables_in_set = child_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
 
-		std::string datetime_end_col_name_no_uuid = "DATETIME_ROW_END";
+		std::string datetime_end_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
 		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
 		datetime_end_col_name += "_";
 		datetime_end_col_name += newUUID(true);

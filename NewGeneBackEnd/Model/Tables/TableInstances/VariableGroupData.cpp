@@ -864,8 +864,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 					input_file_fields.push_back(input_time_field__YearEnd);
 					input_file_fields.push_back(input_time_field__MonthEnd);
 					input_file_fields.push_back(input_time_field__DayEnd);
-					FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-					FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+					FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
+					FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
 					output_table_fields.push_back(output_time_field__DayStart);
 					output_table_fields.push_back(output_time_field__DayEnd);
 					time_range_mapping->input_file_fields = input_file_fields;
@@ -891,8 +891,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 						FieldTypeEntries output_table_fields;
 						FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_INT32);
 						input_file_fields.push_back(input_time_field__Year);
-						FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-						FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+						FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
+						FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
 						output_table_fields.push_back(output_time_field__YearStart);
 						output_table_fields.push_back(output_time_field__YearEnd);
 						time_range_mapping->input_file_fields = input_file_fields;
@@ -909,8 +909,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 						FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_INT32);
 						input_file_fields.push_back(input_time_field__YearStart);
 						input_file_fields.push_back(input_time_field__YearEnd);
-						FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_START"), FIELD_TYPE_INT64);
-						FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, "DATETIME_ROW_END"), FIELD_TYPE_INT64);
+						FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
+						FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
 						output_table_fields.push_back(output_time_field__YearStart);
 						output_table_fields.push_back(output_time_field__YearEnd);
 						time_range_mapping->input_file_fields = input_file_fields;
