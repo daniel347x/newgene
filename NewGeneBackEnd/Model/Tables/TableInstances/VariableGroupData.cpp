@@ -9,6 +9,8 @@
 
 #include <set>
 
+#include "../../../Utilities/Validation.h"
+
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_NAME = "VG_DATA_TABLE_NAME";
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME = "VG_DATA_TABLE_PRIMARY_KEY_COLUMN_NAME";
 std::string const Table_VariableGroupMetadata_PrimaryKeys::VG_DATA_TABLE_FK_DMU_CATEGORY_CODE = "VG_DATA_TABLE_FK_DMU_CATEGORY_CODE";
@@ -461,6 +463,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 					break;
 				}
 
+				// Create temporary SchemaEntry just for the purpose of parsing the column description
+				// the same way it's done in the main import routine
 				DataFields fields;
 				FIELD_TYPE field_type = FIELD_TYPE_STRING_FIXED; // This is a column description field - it's a string
 				std::string field_name = colnames[ncol];
@@ -673,8 +677,24 @@ bool Table_VariableGroupData::BuildImportDefinition
 		int number_primary_key_cols = 0;
 		int number_time_range_cols = 0;
 		int colindex = 0;
+		std::string errorMsg;
+		std::map<std::string, int> timeRangeColName_To_Index;
 		std::for_each(colnames.cbegin(), colnames.cend(), [&](std::string const & colname)
 		{
+
+			std::string test_col_name(colname);
+			if (!Validation::ValidateColumnName(test_col_name, std::string("variable group"), true, errorMsg))
+			{
+				boost::format msg("%1%");
+				msg % errorMsg.c_str();
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+			if (test_col_name != colname)
+			{
+				boost::format msg("Invalid column name");
+				msg % errorMsg.c_str();
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
 
 			// In this block, determine if this is a primary key field
 			bool primary_key_col = true;
@@ -706,10 +726,27 @@ bool Table_VariableGroupData::BuildImportDefinition
 			if (primary_key_col)
 			{
 
-				if (!the_dmu.code || the_dmu.code->empty())
+				if (!the_dmu.code)
 				{
 					boost::format msg("The DMU associated with a primary key column specifications is invalid in the variable group import.");
 					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				if (!Validation::ValidateDmuCode(*the_dmu.code, errorMsg))
+				{
+					boost::format msg("%1%");
+					msg % errorMsg.c_str();
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				if (the_dmu.longhand)
+				{
+					if (!Validation::ValidateDmuDescription(*the_dmu.longhand, errorMsg))
+					{
+						boost::format msg("%1%");
+						msg % errorMsg.c_str();
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
 				}
 
 				if (fieldtypes[colindex] == FIELD_TYPE_FLOAT)
@@ -740,6 +777,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 			if (time_range_col)
 			{
 
+				timeRangeColName_To_Index[colname] = colindex;
+
 				// Check validity of the type of the time range column
 
 				switch (the_time_granularity)
@@ -747,7 +786,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 					case TIME_GRANULARITY__DAY:
 					{
-						if (fieldtypes[colindex] != FIELD_TYPE_INT32 && fieldtypes[colindex] != FIELD_TYPE_INT64 && fieldtypes[colindex] != FIELD_TYPE_UINT32 && fieldtypes[colindex] != FIELD_TYPE_UINT64)
+						if (!IsFieldTypeInt(fieldtypes[colindex]))
 						{
 							boost::format msg("The time range columns must be an integral type.");
 							throw NewGeneException() << newgene_error_description(msg.str());
@@ -757,7 +796,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 					case TIME_GRANULARITY__YEAR:
 					{
-						if (fieldtypes[colindex] != FIELD_TYPE_INT32 && fieldtypes[colindex] != FIELD_TYPE_INT64 && fieldtypes[colindex] != FIELD_TYPE_UINT32 && fieldtypes[colindex] != FIELD_TYPE_UINT64)
+						if (!IsFieldTypeInt(fieldtypes[colindex]))
 						{
 							boost::format msg("The time range columns must be an integral type.");
 							throw NewGeneException() << newgene_error_description(msg.str());
@@ -778,10 +817,34 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			if (primary_key_col)
 			{
-				if (fieldtypes[colindex] == FIELD_TYPE_FLOAT)
+
+				if (IsFieldTypeFloat(fieldtypes[colindex]))
 				{
 					boost::format msg("A primary key column cannot be defined as a floating-point value type.");
 					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				if (IsFieldTypeInt(fieldtypes[colindex]))
+				{
+					fieldtypes[colindex] = FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC;
+				}
+
+				if (IsFieldTypeString(fieldtypes[colindex]))
+				{
+					fieldtypes[colindex] = FIELD_TYPE_DMU_MEMBER_UUID_STRING;
+				}
+
+				if (time_range_col)
+				{
+					// Time range column data type overrides primary key
+
+					// no-op here
+					
+					// **************************************************************************** //
+					// Note! The field type, in the schema entry, will be set BELOW,
+					// where the time range columns are further validated and parsed,
+					// overriding the field type being set here
+					// **************************************************************************** //
 				}
 
 				SchemaEntry inputSchemaEntry(*the_dmu.code, fieldtypes[colindex], colname);
@@ -795,6 +858,19 @@ bool Table_VariableGroupData::BuildImportDefinition
 			}
 			else
 			{
+				if (time_range_col)
+				{
+					// Time range column data type overrides primary key
+
+					// no-op here
+
+					// **************************************************************************** //
+					// Note! The field type, in the schema entry, will be set BELOW,
+					// where the time range columns are further validated and parsed,
+					// overriding the field type being set here
+					// **************************************************************************** //
+				}
+
 				SchemaEntry inputSchemaEntry(fieldtypes[colindex], colname);
 				SchemaEntry outputSchemaEntry(fieldtypes[colindex], colname, true);
 				inputSchemaEntry.field_description = coldescriptions[colindex];
@@ -845,7 +921,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 			}
 		}
 
-		// Prepare the output time range columns, in case they're needed
+		// Prepare output time range columns, in case they're needed
+		// (The code below also prepares input time range columns for the mapping)
 		std::string timeRangeStartFieldNameAndDescription = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName;
 		std::string timeRangeEndFieldNameAndDescription = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
 		SchemaEntry outputTimeRangeStartEntry(FIELD_TYPE_INT64, timeRangeStartFieldNameAndDescription, true);
@@ -868,9 +945,19 @@ bool Table_VariableGroupData::BuildImportDefinition
 						return false;
 					}
 
+					if (timeRangeColName_To_Index.size() != timeRangeCols.size())
+					{
+						boost::format msg("There should be 6 time mapping columns.");
+						errorMsg = msg.str();
+						return false;
+					}
+
+					// First, add the output time range columns to the schema
 					output_schema_vector.push_back(outputTimeRangeStartEntry);
 					output_schema_vector.push_back(outputTimeRangeEndEntry);
 
+					// Now add the input time range columns to the mapping
+					// (they have already been added to the schema, because they are just regular input columns)
 					std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
 							(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
 					FieldTypeEntries input_file_fields;
@@ -894,6 +981,22 @@ bool Table_VariableGroupData::BuildImportDefinition
 					time_range_mapping->input_file_fields = input_file_fields;
 					time_range_mapping->output_table_fields = output_table_fields;
 					mappings.push_back(time_range_mapping);
+
+					// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+					int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
+					int colindex_monthStart = timeRangeColName_To_Index[timeRangeCols[1]];
+					int colindex_dayStart = timeRangeColName_To_Index[timeRangeCols[2]];
+					int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[3]];
+					int colindex_monthEnd = timeRangeColName_To_Index[timeRangeCols[4]];
+					int colindex_dayEnd = timeRangeColName_To_Index[timeRangeCols[5]];
+
+					input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+					input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
+					input_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DAY;
+					input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+					input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
+					input_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DAY;
+
 				}
 				break;
 
@@ -907,11 +1010,22 @@ bool Table_VariableGroupData::BuildImportDefinition
 						return false;
 					}
 
+					if (timeRangeColName_To_Index.size() != timeRangeCols.size())
+					{
+						boost::format msg("There should be 2 time mapping columns.");
+						errorMsg = msg.str();
+						return false;
+					}
+
+					// First, add the output time range columns to the schema
 					output_schema_vector.push_back(outputTimeRangeStartEntry);
 					output_schema_vector.push_back(outputTimeRangeEndEntry);
 
+					// Now add the input time range columns to the mapping
+					// (they have already been added to the schema, because they are just regular input columns)
 					if (boost::trim_copy(timeRangeCols[1]).empty())
 					{
+
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
@@ -924,9 +1038,15 @@ bool Table_VariableGroupData::BuildImportDefinition
 						time_range_mapping->input_file_fields = input_file_fields;
 						time_range_mapping->output_table_fields = output_table_fields;
 						mappings.push_back(time_range_mapping);
+
+						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+						int colindex_year = timeRangeColName_To_Index[timeRangeCols[0]];
+						input_schema_vector[colindex_year].field_type = FIELD_TYPE_YEAR;
+
 					}
 					else
 					{
+
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
 								(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR);
 						FieldTypeEntries input_file_fields;
@@ -942,7 +1062,15 @@ bool Table_VariableGroupData::BuildImportDefinition
 						time_range_mapping->input_file_fields = input_file_fields;
 						time_range_mapping->output_table_fields = output_table_fields;
 						mappings.push_back(time_range_mapping);
+
+						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+						int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
+						int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[1]];
+						input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+						input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+
 					}
+
 				}
 				break;
 

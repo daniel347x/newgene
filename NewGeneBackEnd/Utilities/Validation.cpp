@@ -9,8 +9,10 @@
 #endif
 
 // TODO: test for numeric when necessary
-bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, std::string & errorMsg)
+bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, bool const isIntegerType, std::string & errorMsg)
 {
+
+	errorMsg.clear();
 
 	boost::trim(proposed_dmu_member_uuid);
 
@@ -22,6 +24,10 @@ bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, s
 	}
 
 	std::string regex_string_uuid("([a-zA-Z_0-9]*)");
+	if (isIntegerType)
+	{
+		std::string regex_string_uuid("([0-9]*)");
+	}
 	boost::regex regex_uuid(regex_string_uuid);
 	boost::cmatch matches_uuid;
 
@@ -54,7 +60,14 @@ bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, s
 	}
 	else
 	{
-		invalid_string = ".  It must contain only letters, numbers, and underscores.";
+		if (isIntegerType)
+		{
+			invalid_string = ".  It must contain only numbers.";
+		}
+		else
+		{
+			invalid_string = ".  It must contain only letters, numbers, and underscores.";
+		}
 	}
 
 	if (!valid)
@@ -70,6 +83,8 @@ bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, s
 
 bool Validation::ValidateDmuMemberCode(std::string & proposed_dmu_member_code, std::string & errorMsg)
 {
+
+	errorMsg.clear();
 
 	bool valid = true;
 
@@ -153,6 +168,8 @@ bool Validation::ValidateDmuMemberCode(std::string & proposed_dmu_member_code, s
 bool Validation::ValidateDmuMemberDescription(std::string & proposed_dmu_member_description, std::string & errorMsg)
 {
 
+	errorMsg.clear();
+
 	boost::trim(proposed_dmu_member_description);
 
 	bool valid = true;
@@ -170,6 +187,8 @@ bool Validation::ValidateDmuMemberDescription(std::string & proposed_dmu_member_
 bool Validation::ValidateDmuDescription(std::string & proposed_dmu_description, std::string & errorMsg)
 {
 
+	errorMsg.clear();
+
 	boost::trim(proposed_dmu_description);
 
 	bool valid = true;
@@ -186,6 +205,8 @@ bool Validation::ValidateDmuDescription(std::string & proposed_dmu_description, 
 
 bool Validation::ValidateColumnName(std::string & proposed_column_name, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
 {
+
+	errorMsg.clear();
 
 	boost::trim(proposed_column_name);
 
@@ -273,6 +294,8 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & errorMsg)
 {
 
+	errorMsg.clear();
+
 	boost::trim(proposed_dmu_code);
 
 	bool valid = true;
@@ -350,6 +373,8 @@ bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & 
 
 bool Validation::ValidateUoaCode(std::string & proposed_uoa_code, std::string & errorMsg)
 {
+
+	errorMsg.clear();
 
 	boost::trim(proposed_uoa_code);
 
@@ -429,6 +454,8 @@ bool Validation::ValidateUoaCode(std::string & proposed_uoa_code, std::string & 
 bool Validation::ValidateUoaDescription(std::string & proposed_uoa_description, std::string & errorMsg)
 {
 
+	errorMsg.clear();
+
 	boost::trim(proposed_uoa_description);
 
 	bool valid = true;
@@ -445,6 +472,8 @@ bool Validation::ValidateUoaDescription(std::string & proposed_uoa_description, 
 
 bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & errorMsg)
 {
+
+	errorMsg.clear();
 
 	boost::trim(proposed_vg_code);
 
@@ -523,6 +552,8 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 bool Validation::ValidateVgDescription(std::string & proposed_vg_description, std::string & errorMsg)
 {
 
+	errorMsg.clear();
+
 	boost::trim(proposed_vg_description);
 
 	bool valid = true;
@@ -550,6 +581,8 @@ bool Validation::ValidateVgDescription(std::string & proposed_vg_description, st
 
 bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short & theYear, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
 {
+
+	errorMsg.clear();
 
 	boost::trim(proposed_year_integer);
 
@@ -640,6 +673,8 @@ bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short 
 bool Validation::ValidateMonthInteger(std::string & proposed_month_integer, short & theMonth, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
 {
 
+	errorMsg.clear();
+
 	boost::trim(proposed_month_integer);
 
 	bool valid = true;
@@ -726,6 +761,8 @@ bool Validation::ValidateMonthInteger(std::string & proposed_month_integer, shor
 
 bool Validation::ValidateDayInteger(short const theYear, short const theMonth, std::string & proposed_day_integer, short & theDay, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
 {
+
+	errorMsg.clear();
 
 	boost::trim(proposed_day_integer);
 
@@ -832,8 +869,11 @@ bool Validation::ValidateDayInteger(short const theYear, short const theMonth, s
 
 }
 
-bool Validation::ValidateDate1beforeDate2(short const y1, short const m1, short const d1, short const y2, short const m2, short const d2, std::string & errMsg)
+bool Validation::ValidateDate1beforeDate2(short const y1, short const m1, short const d1, short const y2, short const m2, short const d2, std::string & errorMsg)
 {
+
+	errorMsg.clear();
+
 	try
 	{
 
@@ -872,6 +912,8 @@ bool Validation::ValidateDate1beforeDate2(short const y1, short const m1, short 
 
 bool Validation::ValidateDatePair(std::string & y1, std::string & m1, std::string & d1, std::string & y2, std::string & m2, std::string & d2, std::string & errorMsg)
 {
+
+	errorMsg.clear();
 
 	bool valid = false;
 

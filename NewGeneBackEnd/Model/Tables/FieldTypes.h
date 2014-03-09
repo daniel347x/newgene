@@ -32,7 +32,94 @@ enum FIELD_TYPE
 	, FIELD_TYPE_NOTES_3
 	, FIELD_TYPE_FIELD_TYPE // Yes, a field type defined to represent a field type (must not itself be "FIELD_TYPE_FIELD_TYPE" or that would be circular)
 
+	// DMU's
+	, FIELD_TYPE_DMU_MEMBER_UUID
+	, FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC
+	, FIELD_TYPE_DMU_MEMBER_UUID_STRING
+	, FIELD_TYPE_DMU_MEMBER_CODE
+	, FIELD_TYPE_DMU_MEMBER_DESCRIPTION
+	, FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID
+
+	// Time range
+	, FIELD_TYPE_DAY
+	, FIELD_TYPE_MONTH
+	, FIELD_TYPE_YEAR
+
 };
+
+bool IsFieldTypeInt(FIELD_TYPE const & field_type)
+{
+
+	bool returnVal = false;
+
+	switch (field_type)
+	{
+
+		case FIELD_TYPE_INT32:
+		case FIELD_TYPE_INT64:
+		case FIELD_TYPE_UINT32:
+		case FIELD_TYPE_UINT64:
+		case FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC:
+		{
+			returnVal = true;
+		}
+		break;
+
+		default:
+		{
+			returnVal = false;
+		}
+		break;
+
+	}
+
+	return returnVal;
+
+}
+
+bool IsFieldTypeFloat(FIELD_TYPE const & field_type)
+{
+
+	bool returnVal = false;
+
+	switch (field_type)
+	{
+
+		case FIELD_TYPE_FLOAT:
+		{
+			returnVal = true;
+		}
+		break;
+
+		default:
+		{
+			returnVal = false;
+		}
+		break;
+
+	}
+
+	return returnVal;
+
+}
+
+bool IsFieldTypeString(FIELD_TYPE const & field_type)
+{
+
+	bool returnVal = true;
+
+	if (IsFieldTypeInt(field_type))
+	{
+		returnVal = false;
+	}
+	if (IsFieldTypeFloat(field_type))
+	{
+		returnVal = false;
+	}
+
+	return returnVal;
+
+}
 
 template<FIELD_TYPE THE_FIELD_TYPE>
 struct FieldTypeTraits
