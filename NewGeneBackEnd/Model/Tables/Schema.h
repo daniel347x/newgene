@@ -58,6 +58,7 @@ class SchemaEntry
 		std::string field_name;
 		std::shared_ptr<std::string> dmu_category_string_code; // primary key field
 		//WidgetInstanceIdentifier dmu_category; // when needed, bring this in
+		std::string field_description;
 		bool required;
 
 };

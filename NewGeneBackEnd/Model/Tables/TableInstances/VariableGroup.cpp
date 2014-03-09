@@ -610,9 +610,7 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 		sql += "', '";
 		sql += table_schema_entry.field_name;
 		sql += "', '";
-		// TODO: the following line
-		//sql += table_schema_entry.field_description;
-		sql += table_schema_entry.field_name;
+		sql += table_schema_entry.field_description;
 		sql += "', ";
 		sql += boost::lexical_cast<std::string>(sequence_number);
 		sql += ", '', '', '', '";

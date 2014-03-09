@@ -381,7 +381,18 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 
 
-		char line[MAX_LINE_SIZE];
+		char line[MAX_LINE_SIZE]; // Input data
+		char parsedline[MAX_LINE_SIZE]; // A place to store a copy of the input data, but with NULL's separating the fields
+
+
+
+		if (!definition.first_row_is_header_row)
+		{
+			data_file.close();
+			boost::format msg("The first row in the input file must contain the column names.");
+			errorMsg = msg.str();
+			return false;
+		}
 
 
 
@@ -398,7 +409,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 				boost::format msg("Cannot read column names from the data file \"%1%\"");
 				msg % definition.input_file.c_str();
 				errorMsg = msg.str();
-				return true;
+				return false;
 			}
 
 			boost::split(colnames, line, boost::is_any_of(","));
@@ -417,8 +428,12 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 
 
+		int nCols = colnames.size();
+
+
+
 		// handle the column descriptions row
-		std::vector<std::string> coldescriptions;
+		std::vector<std::string> coldescriptions(nCols);
 		if (definition.second_row_is_column_description_row && data_file.good())
 		{
 
@@ -430,10 +445,52 @@ bool Table_VariableGroupData::BuildImportDefinition
 				boost::format msg("Cannot read column descriptions from the data file \"%1%\"");
 				msg % definition.input_file.c_str();
 				errorMsg = msg.str();
-				return true;
+				return false;
 			}
 
-			boost::split(coldescriptions, line, boost::is_any_of(","));
+			char * current_line_ptr = line;
+			char * parsed_line_ptr = parsedline;
+			*parsed_line_ptr = '\0';
+			bool stop = false;
+
+			for (int ncol = 0; ncol < nCols; ++ncol)
+			{
+
+				if (stop)
+				{
+					break;
+				}
+
+				DataFields fields;
+				FIELD_TYPE field_type = FIELD_TYPE_STRING_FIXED; // This is a column description field - it's a string
+				std::string field_name = colnames[ncol];
+				Importer::InstantiateDataFieldInstance(field_type, field_name, fields);
+				BaseField & dataField = *fields[0];
+				SchemaEntry entry(field_type, colnames[ncol]);
+				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition);
+				Field<FIELD_TYPE_STRING_FIXED> * the_data_entry = nullptr;
+				try
+				{
+					Field<FIELD_TYPE_STRING_FIXED> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(dataField);
+					the_data_entry = &data_entry;
+				}
+				catch (std::bad_cast &)
+				{
+					data_file.close();
+					boost::format msg("Cannot read column descriptions from the data file \"%1%\"");
+					msg % definition.input_file.c_str();
+					errorMsg = msg.str();
+					return false;
+				}
+				coldescriptions[ncol] = (the_data_entry->GetValue());
+
+			}
+
+			if (stop)
+			{
+				return false;
+			}
+
 			std::for_each(coldescriptions.begin(), coldescriptions.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
 
 		}
@@ -441,7 +498,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		if (!data_file.good())
 		{
 			data_file.close();
-			return true;
+			return false;
 		}
 
 		if (coldescriptions.size() != colnames.size())
@@ -454,7 +511,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 
 		// handle the column data types
-		std::vector<std::string> coltypes;
+		bool badColTypes = false;
+		std::vector<std::string> coltypes(nCols);
 		if (definition.third_row_is_data_type_row && data_file.good())
 		{
 
@@ -466,18 +524,21 @@ bool Table_VariableGroupData::BuildImportDefinition
 				boost::format msg("Cannot read column data types from the data file \"%1%\"");
 				msg % definition.input_file.c_str();
 				errorMsg = msg.str();
-				return true;
+				return false;
 			}
 
 			boost::split(coltypes, line, boost::is_any_of(","));
 			std::for_each(coltypes.begin(), coltypes.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
 
-		}
+			std::for_each(coltypes.begin(), coltypes.end(), [&](std::string & coltype)
+			{
+				boost::to_lower(coltype);
+				if (coltype != "int" && coltype != "int64" && coltype != "string" && coltype != "float")
+				{
+					badColTypes = true;
+				}
+			});
 
-		if (!data_file.good())
-		{
-			data_file.close();
-			return true;
 		}
 
 		if (coltypes.size() != colnames.size())
@@ -487,20 +548,16 @@ bool Table_VariableGroupData::BuildImportDefinition
 			return false;
 		}
 
+		if (badColTypes)
+		{
+			boost::format msg("Data types must be one of \"int\", \"int64\", \"float\" and \"string\".");
+			errorMsg = msg.str();
+			return false;
+		}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+		// Convert from text representation of field type, to a vector of FIELD_TYPE
 		std::vector<FIELD_TYPE> fieldtypes;
 		bool validtype = true;
 		std::for_each(coltypes.cbegin(), coltypes.cend(), [&](std::string coltype)
@@ -529,6 +586,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 			{
 				fieldtypes.push_back(FIELD_TYPE_FLOAT);
 			}
+			else if (coltype.empty())
+			{
+				// Default to int
+				fieldtypes.push_back(FIELD_TYPE_INT32);
+			}
 			else
 			{
 				validtype = false;
@@ -537,7 +599,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		if (!validtype)
 		{
-			boost::format msg("The column type specifications on the second line are invalid.");
+			boost::format msg("Data types must be one of \"int\", \"int64\", \"float\" and \"string\".");
 			errorMsg = msg.str();
 			return false;
 		}
@@ -592,18 +654,28 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		}
 
+
+
+		// ************************************************************************************************* //
+		// Create the import definition itself, field-by-field
+		// ************************************************************************************************* //
+
 		int number_primary_key_cols = 0;
 		int number_time_range_cols = 0;
 		int colindex = 0;
 		std::for_each(colnames.cbegin(), colnames.cend(), [&](std::string const & colname)
 		{
-			// Determine if this is a primary key field
+
+			// In this block, determine if this is a primary key field
 			bool primary_key_col = true;
+
+			// Also in this block, determine if this is a time range column
+			bool time_range_col = true;
 
 			WidgetInstanceIdentifier the_dmu;
 
 			if (std::find_if(dmusAndCols.cbegin(), dmusAndCols.cend(), [&](std::pair<WidgetInstanceIdentifier, std::string> const & dmuAndCol) -> bool
-		{
+			{
 			if (dmuAndCol.second == colname)
 				{
 					the_dmu = dmuAndCol.first;
@@ -622,37 +694,12 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			if (primary_key_col)
 			{
+
 				if (!the_dmu.code || the_dmu.code->empty())
 				{
-					boost::format msg("The DMU associated with a primary key column specifications is invalid in the VG import.");
+					boost::format msg("The DMU associated with a primary key column specifications is invalid in the variable group import.");
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
-			}
-
-			// Determine if this is a time range column
-			bool time_range_col = true;
-
-			if (std::find_if(timeRangeCols.cbegin(), timeRangeCols.cend(), [&](std::string const & timeRangeCol) -> bool
-		{
-			if (timeRangeCol == colname)
-				{
-					return true;
-				}
-				return false;
-			}) == timeRangeCols.cend())
-			{
-				// Not a time range column
-				// no-op
-			}
-			else
-			{
-				++number_time_range_cols;
-			}
-
-			if (primary_key_col)
-			{
-				input_schema_vector.push_back(SchemaEntry(*the_dmu.code, fieldtypes[colindex], colname));
-				output_schema_vector.push_back(SchemaEntry(*the_dmu.code, fieldtypes[colindex], colname, true));
 
 				if (fieldtypes[colindex] == FIELD_TYPE_FLOAT)
 				{
@@ -660,15 +707,96 @@ bool Table_VariableGroupData::BuildImportDefinition
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
 
+			}
+
+			// Determine if this is a time range column
+			bool time_range_col = true;
+
+			if (std::find_if(timeRangeCols.cbegin(), timeRangeCols.cend(), [&](std::string const & timeRangeCol) -> bool
+			{
+			if (timeRangeCol == colname)
+				{
+					return true;
+				}
+				return false;
+			}) == timeRangeCols.cend())
+			{
+				time_range_col = false;
+			}
+			else
+			{
+				++number_time_range_cols;
+			}
+
+			if (time_range_col)
+			{
+
+				// Check valididy of the type of the time range column
+
+				switch (the_time_granularity)
+				{
+
+					case TIME_GRANULARITY__DAY:
+					{
+						if (fieldtypes[colindex] != FIELD_TYPE_INT32 && fieldtypes[colindex] != FIELD_TYPE_INT64 && fieldtypes[colindex] != FIELD_TYPE_UINT32 && fieldtypes[colindex] != FIELD_TYPE_UINT64)
+						{
+							boost::format msg("The time range columns must be an integral type.");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+					}
+					break;
+
+					case TIME_GRANULARITY__YEAR:
+					{
+						if (fieldtypes[colindex] != FIELD_TYPE_INT32 && fieldtypes[colindex] != FIELD_TYPE_INT64 && fieldtypes[colindex] != FIELD_TYPE_UINT32 && fieldtypes[colindex] != FIELD_TYPE_UINT64)
+						{
+							boost::format msg("The time range columns must be an integral type.");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+					}
+					break;
+
+					default:
+					{
+						boost::format msg("Invalid time range specification in determination of time range column data types during data import of variable group.");
+						errorMsg = msg.str();
+						return false;
+					}
+					break;
+
+				}
+
+			}
+
+			if (primary_key_col)
+			{
+				if (fieldtypes[colindex] == FIELD_TYPE_FLOAT)
+				{
+					boost::format msg("A primary key column cannot be defined as a floating-point value type.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				SchemaEntry inputSchemaEntry(*the_dmu.code, fieldtypes[colindex], colname);
+				SchemaEntry outputSchemaEntry(*the_dmu.code, fieldtypes[colindex], colname, true);
+				inputSchemaEntry.field_description = coldescriptions[colindex];
+				outputSchemaEntry.field_description = coldescriptions[colindex];
+				input_schema_vector.push_back(inputSchemaEntry);
+				output_schema_vector.push_back(outputSchemaEntry);
+
 				definition.primary_keys_info.push_back(std::make_tuple(the_dmu, colname, fieldtypes[colindex]));
 			}
 			else
 			{
-				input_schema_vector.push_back(SchemaEntry(fieldtypes[colindex], colname));
-				output_schema_vector.push_back(SchemaEntry(fieldtypes[colindex], colname, true));
+				SchemaEntry inputSchemaEntry(fieldtypes[colindex], colname);
+				SchemaEntry outputSchemaEntry(fieldtypes[colindex], colname, true);
+				inputSchemaEntry.field_description = coldescriptions[colindex];
+				outputSchemaEntry.field_description = coldescriptions[colindex];
+				input_schema_vector.push_back(inputSchemaEntry);
+				output_schema_vector.push_back(outputSchemaEntry);
 			}
 
 			++colindex;
+
 		});
 
 
@@ -688,6 +816,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		{
 			bool good = false;
 
+			// Special-case check for YEAR time granularity: One column allowed
 			if (the_time_granularity == TIME_GRANULARITY__YEAR)
 			{
 				if (timeRangeCols.size() == 2 && boost::trim_copy(timeRangeCols[1]).empty())
@@ -752,7 +881,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 					// Time-range mapping
 					if (timeRangeCols.size() != 2)
 					{
-						boost::format msg("There should be 2 time columns.");
+						boost::format msg("There should be 2 time columns (the end year can be empty).");
 						errorMsg = msg.str();
 						return false;
 					}
