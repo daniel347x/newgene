@@ -895,8 +895,8 @@ bool NewGeneManageVGs::event ( QEvent * e )
 		}
 
 		QMessageBox::StandardButton reply;
-		boost::format msg("Would you like to import data for the new variable group \"%1%\" now?");
-		msg % *vg.code;
+		boost::format msg("Variable group '%1%' successfully created.\n\n.Would you like to import data for the new variable group \"%1%\" now?");
+		msg % *vg.code % *vg.code;
 		boost::format msgTitle("Import data?");
 		reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 		if (reply == QMessageBox::Yes)
