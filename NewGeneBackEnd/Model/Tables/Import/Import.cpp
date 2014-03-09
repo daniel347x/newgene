@@ -1553,7 +1553,7 @@ bool Importer::DoImport()
 		}
 
 		// handle the column description row
-		if (import_definition.third_row_is_data_type_row && data_file.good())
+		if (import_definition.second_row_is_column_description_row && data_file.good())
 		{
 
 			data_file.getline(line, MAX_LINE_SIZE - 1);
