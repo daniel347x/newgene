@@ -674,6 +674,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			WidgetInstanceIdentifier the_dmu;
 
+			// Determine if this is a primary key column
 			if (std::find_if(dmusAndCols.cbegin(), dmusAndCols.cend(), [&](std::pair<WidgetInstanceIdentifier, std::string> const & dmuAndCol) -> bool
 			{
 			if (dmuAndCol.second == colname)
@@ -710,8 +711,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 			}
 
 			// Determine if this is a time range column
-			bool time_range_col = true;
-
 			if (std::find_if(timeRangeCols.cbegin(), timeRangeCols.cend(), [&](std::string const & timeRangeCol) -> bool
 			{
 			if (timeRangeCol == colname)
@@ -731,7 +730,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 			if (time_range_col)
 			{
 
-				// Check valididy of the type of the time range column
+				// Check validity of the type of the time range column
 
 				switch (the_time_granularity)
 				{
@@ -759,8 +758,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 					default:
 					{
 						boost::format msg("Invalid time range specification in determination of time range column data types during data import of variable group.");
-						errorMsg = msg.str();
-						return false;
+						throw NewGeneException() << newgene_error_description(msg.str());
 					}
 					break;
 

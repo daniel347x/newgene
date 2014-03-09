@@ -411,6 +411,8 @@ class Importer
 		static void EatWhitespace(char * & current_line_ptr, ImportDefinition const & import_definition);
 		static void EatSeparator(char * & current_line_ptr, ImportDefinition const & import_definition);
 
+	public:
+
 		Mode mode;
 
 };
