@@ -281,6 +281,16 @@ void NewGeneManageVGs::HandleChanges(DataChangeMessage const & change_message)
 									selectionModel->select(itemIndex, QItemSelectionModel::SelectCurrent);
 								}
 
+								QMessageBox::StandardButton reply;
+								boost::format msg("Would you like to import data for the new variable group \"%1%\" now?");
+								msg % *vg.code;
+								boost::format msgTitle("Import data?");
+								reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+								if (reply == QMessageBox::Yes)
+								{
+									ui->pushButton_refresh_vg->click();
+								}
+
 							}
 							break;
 
