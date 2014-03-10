@@ -624,7 +624,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 		int number_primary_key_cols = 0;
 		int number_time_range_cols = 0;
 		int colindex = 0;
-		std::string errorMsg;
 		std::map<std::string, int> timeRangeColName_To_Index;
 		std::for_each(colnames.cbegin(), colnames.cend(), [&](std::string const & colname)
 		{
