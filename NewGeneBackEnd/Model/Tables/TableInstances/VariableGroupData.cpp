@@ -841,11 +841,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 			return false;
 		}
 
+		bool timeRangeHasOnlyOneColumnSpecialCase = false;
+
 		// Time-range duplicates have also been screened
 		if (number_time_range_cols != timeRangeCols.size())
 		{
-			bool good = false;
-
 			// Special-case check for YEAR time granularity: One column allowed
 			if (the_time_granularity == TIME_GRANULARITY__YEAR)
 			{
@@ -854,12 +854,12 @@ bool Table_VariableGroupData::BuildImportDefinition
 					if (number_time_range_cols == 1)
 					{
 						// special case: this is OK, just one column
-						good = true;
+						timeRangeHasOnlyOneColumnSpecialCase = true;
 					}
 				}
 			}
 
-			if (!good)
+			if (!timeRangeHasOnlyOneColumnSpecialCase)
 			{
 				boost::format msg("Not all specified time range columns could be found in the input file.");
 				errorMsg = msg.str();
@@ -1000,9 +1000,21 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 					if (timeRangeColName_To_Index.size() != timeRangeCols.size())
 					{
-						boost::format msg("There should be 2 time mapping columns.");
-						errorMsg = msg.str();
-						return false;
+						if (!timeRangeHasOnlyOneColumnSpecialCase)
+						{
+							boost::format msg("There should be 2 time mapping columns.");
+							errorMsg = msg.str();
+							return false;
+						}
+						else
+						{
+							if (timeRangeColName_To_Index.size() != 1)
+							{
+								boost::format msg("There should be 1 time mapping column.");
+								errorMsg = msg.str();
+								return false;
+							}
+						}
 					}
 
 					// First, add the output time range columns to the schema
