@@ -380,4 +380,77 @@ static void FieldFactory(FIELD_TYPE field_type, std::string field_name, std::sha
 
 }
 
+bool ValidateFieldData(BaseField & theField)
+{
+
+	static std::string errorMsg;
+
+	bool valid = true;
+
+	if (theField.GetType() == FIELD_TYPE_DMU_MEMBER_CODE)
+	{
+		std::string test_field = theField.GetStringRef();
+		valid = Validation::ValidateDmuCode(test_field, errorMsg);
+		if (valid && test_field != theField.GetStringRef())
+		{
+			theField.SetValueString(test_field);
+		}
+	}
+	else
+	if (theField.GetType() == FIELD_TYPE_DMU_MEMBER_DESCRIPTION)
+	{
+		std::string test_field = theField.GetStringRef();
+		valid = Validation::ValidateDmuMemberDescription(test_field, errorMsg);
+		if (valid && test_field != theField.GetStringRef())
+		{
+			theField.SetValueString(test_field);
+		}
+	}
+	else
+	if (theField.GetType() == FIELD_TYPE_DMU_MEMBER_UUID)
+	{
+		std::string test_field = theField.GetStringRef();
+		valid = Validation::ValidateDmuMemberUUID(test_field, false, errorMsg);
+		if (valid && test_field != theField.GetStringRef())
+		{
+			theField.SetValueString(test_field);
+		}
+	}
+	else
+	if (theField.GetType() == FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC)
+	{
+		std::string test_field = theField.GetStringRef();
+		valid = Validation::ValidateDmuMemberUUID(test_field, true, errorMsg);
+	}
+	else
+	if (theField.GetType() == FIELD_TYPE_DMU_MEMBER_UUID_STRING)
+	{
+		std::string test_field = theField.GetStringRef();
+		valid = Validation::ValidateDmuMemberUUID(test_field, false, errorMsg);
+		if (valid && test_field != theField.GetStringRef())
+		{
+			theField.SetValueString(test_field);
+		}
+	}
+	else
+	if (IsFieldTypeString(theField.GetType()))
+	{
+		// Perform validation on the field
+		std::string test_field_name = theField.GetStringRef();
+		valid = Validation::ValidateGenericStringField(test_field_name, errorMsg, false);
+		if (valid && test_field_name != theField.GetStringRef())
+		{
+			theField.SetValueString(test_field_name);
+		}
+	}
+
+	// Integers and floats have already been validated
+
+	// Note that time fields - year, month, day - will be validated by the time range mapper,
+	// which will throw an exception if they do not represent valid dates
+
+	return valid;
+
+}
+
 #endif

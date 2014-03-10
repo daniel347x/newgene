@@ -8,6 +8,8 @@
 #	include "boost/date_time/gregorian/gregorian.hpp"
 #endif
 
+#include <cstdint>
+
 // TODO: test for numeric when necessary
 bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, bool const isIntegerType, std::string & errorMsg)
 {
@@ -26,7 +28,7 @@ bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, b
 	std::string regex_string_uuid("([a-zA-Z_0-9]*)");
 	if (isIntegerType)
 	{
-		std::string regex_string_uuid("([0-9]*)");
+		std::string regex_string_uuid("([0-9\-]*)");
 	}
 	boost::regex regex_uuid(regex_string_uuid);
 	boost::cmatch matches_uuid;
@@ -285,6 +287,38 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 			valid = false;
 		}
 
+	}
+
+	return valid;
+
+}
+
+bool Validation::ValidateColumnDescription(std::string & proposed_column_description, std::string const & column_description_for_invalid_message, bool const required, std::string & errorMsg)
+{
+
+	errorMsg.clear();
+
+	boost::trim(proposed_column_description);
+
+	bool valid = true;
+
+	if (required)
+	{
+		if (proposed_column_description.empty())
+		{
+			boost::format msg("The description for %1% is missing.");
+			msg % column_description_for_invalid_message;
+			errorMsg = msg.str();
+			valid = false;
+		}
+	}
+
+	if (proposed_column_description.size() > 4096)
+	{
+		boost::format msg("The description for %1% is too long (maximum length: 4096).");
+		msg % column_description_for_invalid_message;
+		errorMsg = msg.str();
+		valid = false;
 	}
 
 	return valid;
@@ -957,6 +991,33 @@ bool Validation::ValidateDatePair(std::string & y1, std::string & m1, std::strin
 	if (valid)
 	{
 		valid = ValidateDate1beforeDate2(ymd_yStart, ymd_mStart, ymd_dStart, ymd_yEnd, ymd_mEnd, ymd_dEnd, errorMsg);
+	}
+
+	return valid;
+
+}
+
+bool Validation::ValidateGenericStringField(std::string & generic_field, std::string & errorMsg, bool required = true)
+{
+
+	errorMsg.clear();
+
+	boost::trim(generic_field);
+
+	bool valid = true;
+
+	if (required && generic_field.empty())
+	{
+		boost::format msg("The data field must not be empty.");
+		errorMsg = msg.str();
+		valid = false;
+	}
+
+	if (valid && generic_field.size() > 4096)
+	{
+		boost::format msg("The data field is too long (maximum length: 4096).");
+		errorMsg = msg.str();
+		valid = false;
 	}
 
 	return valid;

@@ -70,6 +70,9 @@ bool IsFieldTypeInt32(FIELD_TYPE const & field_type)
 		case FIELD_TYPE_DAY:
 		case FIELD_TYPE_MONTH:
 		case FIELD_TYPE_YEAR:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR:
 		{
 			returnVal = true;
 		}
@@ -98,6 +101,8 @@ bool IsFieldTypeInt64(FIELD_TYPE const & field_type)
 		case FIELD_TYPE_INT64:
 		case FIELD_TYPE_UINT64:
 		case FIELD_TYPE_TIMESTAMP:
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME:
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME:
 		{
 			returnVal = true;
 		}
@@ -350,6 +355,20 @@ struct FieldTypeTraits<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID>
 };
 
 template<>
+struct FieldTypeTraits<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME>
+{
+	typedef std::int64_t type;
+	static type const default_ = 0;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME>
+{
+	typedef std::int64_t type;
+	static type const default_ = 0;
+};
+
+template<>
 struct FieldTypeTraits<FIELD_TYPE_DAY>
 {
 	typedef std::int32_t type;
@@ -367,6 +386,41 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_YEAR>
 {
 	typedef std::int32_t type;
+	static type const default_ = 0;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_TIMERANGE_STRING>
+{
+	typedef std::string type;
+	static type const default_ = 0;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY>
+{
+	typedef std::int32_t type;
+	static type const default_ = 0;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH>
+{
+	typedef std::int32_t type;
+	static type const default_ = 0;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR>
+{
+	typedef std::int32_t type;
+	static type const default_ = 0;
+};
+
+template<>
+struct FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING>
+{
+	typedef std::string type;
 	static type const default_ = 0;
 };
 

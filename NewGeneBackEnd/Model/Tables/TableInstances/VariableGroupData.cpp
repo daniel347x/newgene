@@ -342,8 +342,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		char line[MAX_LINE_SIZE]; // Input data
 		char parsedline[MAX_LINE_SIZE]; // A place to store a copy of the input data, but with NULL's separating the fields
-
-
+		long linenum = 0;
 
 		if (!definition.first_row_is_header_row)
 		{
@@ -359,6 +358,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		std::vector<std::string> colnames;
 		if (definition.first_row_is_header_row && data_file.good())
 		{
+			++linenum;
 
 			data_file.getline(line, MAX_LINE_SIZE - 1);
 
@@ -396,6 +396,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 		if (definition.second_row_is_column_description_row && data_file.good())
 		{
 
+			++linenum;
+
 			data_file.getline(line, MAX_LINE_SIZE - 1);
 
 			if (!data_file.good())
@@ -428,7 +430,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 				Importer::InstantiateDataFieldInstance(field_type, field_name, fields);
 				BaseField & dataField = *fields[0];
 				SchemaEntry entry(field_type, colnames[ncol]);
-				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition);
+				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition, linenum, ncol+1);
 				Field<FIELD_TYPE_STRING_FIXED> * the_data_entry = nullptr;
 				try
 				{
@@ -486,6 +488,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 		std::vector<std::string> coltypes(nCols);
 		if (definition.third_row_is_data_type_row && data_file.good())
 		{
+
+			++linenum;
 
 			data_file.getline(line, MAX_LINE_SIZE - 1);
 

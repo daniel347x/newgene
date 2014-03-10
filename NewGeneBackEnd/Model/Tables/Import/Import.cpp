@@ -9,6 +9,7 @@
 #include <cstdint>
 #include "../Table.h"
 #include "../../OutputModel.h"
+#include "../../../Utilities/Validation.h"
 
 void TimeRangeFieldMapping::ConvertStringToDate(int & year, int & month, int & day, std::string const & the_string)
 {
@@ -826,7 +827,7 @@ std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_e
 }
 
 void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_read, int const & current_column_index, char *& parsed_line_ptr, bool & stop,
-								 SchemaEntry const & column)
+								 SchemaEntry const & column, long const line)
 {
 
 	// use sscanf to read in the type, based on switch on "column"'s type type-traits... read it into input_block[current_lines_read]
@@ -839,12 +840,12 @@ void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_r
 		return;
 	}
 
-	ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, column, *field_entry, import_definition);
+	ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, column, *field_entry, import_definition, line, current_column_index+1);
 
 }
 
 void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField,
-									   ImportDefinition const & import_definition)
+									   ImportDefinition const & import_definition, long line, long col)
 {
 
 	EatWhitespace(current_line_ptr, import_definition);
@@ -856,7 +857,7 @@ void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_
 		return;
 	}
 
-	ReadOneDataField(column, theField, current_line_ptr, parsed_line_ptr, stop, import_definition);
+	ReadOneDataField(column, theField, current_line_ptr, parsed_line_ptr, stop, import_definition, line, col);
 
 	if (stop)
 	{
@@ -893,7 +894,7 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 
 }
 
-int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline)
+int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum)
 {
 	int current_lines_read = 0;
 
@@ -917,7 +918,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 			if (import_definition.input_schema.validcols[ncol])
 			{
-				ReadFieldFromFile(current_line_ptr, current_lines_read, nValColIdx, parsed_line_ptr, stop, import_definition.input_schema.schema[nValColIdx]);
+				ReadFieldFromFile(current_line_ptr, current_lines_read, nValColIdx, parsed_line_ptr, stop, import_definition.input_schema.schema[nValColIdx], linenum);
 				++nValColIdx;
 			}
 			else
@@ -1093,17 +1094,19 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 			}
 		});
 
+		++current_lines_read;
+		++linenum;
+
 		if (stop)
 		{
 			return -1;
 		}
 
-		++current_lines_read;
-
 		if (current_lines_read == block_size)
 		{
 			return current_lines_read;
 		}
+
 	}
 
 	return current_lines_read;
@@ -1163,6 +1166,7 @@ bool Importer::DoImport()
 
 		char line[MAX_LINE_SIZE];
 		char parsedline[MAX_LINE_SIZE];
+		long linenum = 0;
 
 		// handle the column names row
 		if (import_definition.first_row_is_header_row && data_file.good())
@@ -1183,6 +1187,44 @@ bool Importer::DoImport()
 			std::for_each(colnames.begin(), colnames.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
 			import_definition.input_schema.ReorderAccToColumnNames(colnames);
 
+			bool bad = false;
+			std::string errorMsg;
+			std::for_each(import_definition.input_schema.schema.cbegin(), import_definition.input_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
+			{
+				
+				// Validate column name
+				std::string test_col_name = schema_entry.field_name;
+				bool validated = Validation::ValidateColumnName(test_col_name, "variable group column", true, errorMsg);
+				if (test_col_name != schema_entry.field_name)
+				{
+					validated = false;
+				}
+				if (!validated)
+				{
+					bad = true;
+				}
+
+				// Validate column description
+				std::string test_col_description = schema_entry.field_description;
+				validated = Validation::ValidateColumnDescription(test_col_description, "variable group column", false, errorMsg);
+				if (test_col_description != schema_entry.field_description)
+				{
+					validated = false;
+				}
+				if (!validated)
+				{
+					bad = true;
+				}
+
+			});
+
+			if (bad)
+			{
+				return false;
+			}
+
+			++linenum;
+
 		}
 
 		// handle the column description row
@@ -1199,6 +1241,8 @@ bool Importer::DoImport()
 
 			// The column descriptions have already been read
 
+			++linenum;
+
 		}
 
 		// handle the column data types
@@ -1214,6 +1258,8 @@ bool Importer::DoImport()
 			}
 
 			// The data types have already been read
+
+			++linenum;
 
 		}
 
@@ -1239,7 +1285,7 @@ bool Importer::DoImport()
 
 		while (true)
 		{
-			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline);
+			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline, linenum);
 
 			if (currently_read_lines == -1)
 			{
@@ -1320,41 +1366,79 @@ void Importer::EatSeparator(char *& current_line_ptr, ImportDefinition const & i
 }
 
 void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField, char *& current_line_ptr, char *& parsed_line_ptr, bool & stop,
-	ImportDefinition const & import_definition)
+	ImportDefinition const & import_definition, long const line, int const col)
 {
 
 	int number_chars_read = 0;
 
+	// For all data types, retrieve the full field as a string, to start
+	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
+	if (stop)
+	{
+		boost::format msg("Cannot create data field from input file!  Line %1%, column %2%");
+		msg % line % col;
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
 	if (IsFieldTypeInt32(theField.GetType()))
 	{
-		sscanf(current_line_ptr, "%d%n", &theField.GetInt32Ref(), &number_chars_read);
-		current_line_ptr += number_chars_read;
+		// For performance reasons - no validation.
+		// TODO: allow option for end-user to validate, in which case we perform a
+		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
+		theField.SetValueInt32(0);
+		sscanf(parsed_line_ptr, "%d%n", &theField.GetInt32Ref(), &number_chars_read);
+		if (number_chars_read < strlen(parsed_line_ptr))
+		{
+			boost::format msg("Invalid data field from input file!  Line %1%, column %2%");
+			msg % line % col;
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
 	}
 	else
 	if (IsFieldTypeInt64(theField.GetType()))
 	{
-		sscanf(current_line_ptr, "%I64d%n", &theField.GetInt64Ref(), &number_chars_read);
-		current_line_ptr += number_chars_read;
+		// For performance reasons - no validation.
+		// TODO: allow option for end-user to validate, in which case we perform a
+		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
+		theField.SetValueInt64(0);
+		sscanf(parsed_line_ptr, "%I64d%n", &theField.GetInt64Ref(), &number_chars_read);
+		if (number_chars_read < strlen(parsed_line_ptr))
+		{
+			boost::format msg("Invalid data field from input file!  Line %1%, column %2%");
+			msg % line % col;
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
 	}
 	else
 	if (IsFieldTypeFloat(theField.GetType()))
 	{
+		// For performance reasons - no validation.
+		// TODO: allow option for end-user to validate, in which case we perform a
+		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
+		theField.SetValueDouble(0.0);
 		double temp;
-		sscanf(current_line_ptr, "%lf%n", &temp, &number_chars_read);
+		sscanf(parsed_line_ptr, "%lf%n", &temp, &number_chars_read);
 		theField.SetValueDouble(temp);
-		current_line_ptr += number_chars_read;
+		if (number_chars_read < strlen(parsed_line_ptr))
+		{
+			boost::format msg("Invalid data field from input file!  Line %1%, column %2%");
+			msg % line % col;
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
 	}
 	else
 	if (IsFieldTypeString(theField.GetType()))
 	{
-		RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-		if (stop)
-		{
-			return;
-		}
-
 		theField.SetValueString(parsed_line_ptr);
+	}
+
+	// Extra validation here
+	bool valid = ValidateFieldData(theField);
+	if (!valid)
+	{
+		boost::format msg("Invalid data field from input file!  Line %1%, column %2%");
+		msg % line % col;
+		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
 }

@@ -915,4 +915,3 @@ void BaseField::SetValueString(std::string const & val)
 	}
 
 }
-
