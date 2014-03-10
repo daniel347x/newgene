@@ -395,19 +395,19 @@ class Importer
 	
 		bool ValidateMapping();
 		void InitializeFields();
-		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum);
-		void ReadFieldFromFile(char * & current_line_ptr, int & current_lines_read, int const & current_column_index, char * & parsed_line_ptr, bool & stop, SchemaEntry const & column, long const line);
+		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg);
+		void ReadFieldFromFile(char * & current_line_ptr, int & current_lines_read, int const & current_column_index, char * & parsed_line_ptr, bool & stop, SchemaEntry const & column, long const line, std::string & errorMsg);
 
 	public:
 
 		static void InstantiateDataFieldInstance(FIELD_TYPE field_type, std::string field_name, DataFields &fields);
-		static void ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition, long const line, long const col);
-		static void SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition);
+		static void ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition, long const line, long const col, std::string & errorMsg);
+		static void SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg);
 
 	protected:
 
-		static void ReadOneDataField(SchemaEntry const &column, BaseField & theField, char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, long const line, int const col);
-		static void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition);
+		static void ReadOneDataField(SchemaEntry const &column, BaseField & theField, char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, long const line, int const col, std::string & errorMsg);
+		static void RetrieveStringField(char * & current_line_ptr, char * & parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg);
 		static void EatWhitespace(char * & current_line_ptr, ImportDefinition const & import_definition);
 		static void EatSeparator(char * & current_line_ptr, ImportDefinition const & import_definition);
 

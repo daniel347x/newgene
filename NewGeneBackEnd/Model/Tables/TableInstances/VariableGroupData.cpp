@@ -417,11 +417,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 			for (int ncol = 0; ncol < nCols; ++ncol)
 			{
 
-				if (stop)
-				{
-					break;
-				}
-
 				// Create temporary SchemaEntry just for the purpose of parsing the column description
 				// the same way it's done in the main import routine
 				DataFields fields;
@@ -430,7 +425,17 @@ bool Table_VariableGroupData::BuildImportDefinition
 				Importer::InstantiateDataFieldInstance(field_type, field_name, fields);
 				BaseField & dataField = *fields[0];
 				SchemaEntry entry(field_type, colnames[ncol]);
-				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition, linenum, ncol+1);
+				std::string fieldReadErrorMsg;
+				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition, linenum, ncol + 1, fieldReadErrorMsg);
+				
+				if (stop)
+				{
+					boost::format msg("Unable to read field in file: %1%");
+					msg % fieldReadErrorMsg;
+					errorMsg = msg.str();
+					break;
+				}
+
 				coldescriptions[ncol] = (dataField.GetStringRef());
 
 			}
@@ -442,12 +447,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			std::for_each(coldescriptions.begin(), coldescriptions.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
 
-		}
-
-		if (!data_file.good())
-		{
-			data_file.close();
-			return false;
 		}
 
 		if (coldescriptions.size() != colnames.size())

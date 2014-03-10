@@ -607,7 +607,7 @@ bool Importer::ValidateMapping()
 
 }
 
-void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition)
+void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg)
 {
 	bool is_quoted_field = false;
 	char * starting_parsed_pointer = parsed_line_ptr;
@@ -641,7 +641,8 @@ void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line
 
 	if (*current_line_ptr == '\0')
 	{
-		// Todo: warning
+		boost::format msg("NULL found in input.  Cannot continue.");
+		errorMsg = msg.str();
 		stop = true;
 		return;
 	}
@@ -827,7 +828,7 @@ std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_e
 }
 
 void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_read, int const & current_column_index, char *& parsed_line_ptr, bool & stop,
-								 SchemaEntry const & column, long const line)
+								 SchemaEntry const & column, long const line, std::string & errorMsg)
 {
 
 	// use sscanf to read in the type, based on switch on "column"'s type type-traits... read it into input_block[current_lines_read]
@@ -840,12 +841,12 @@ void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_r
 		return;
 	}
 
-	ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, column, *field_entry, import_definition, line, current_column_index+1);
+	ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, column, *field_entry, import_definition, line, current_column_index + 1, errorMsg);
 
 }
 
 void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField,
-									   ImportDefinition const & import_definition, long line, long col)
+									   ImportDefinition const & import_definition, long line, long col, std::string & errorMsg)
 {
 
 	EatWhitespace(current_line_ptr, import_definition);
@@ -857,7 +858,7 @@ void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_
 		return;
 	}
 
-	ReadOneDataField(column, theField, current_line_ptr, parsed_line_ptr, stop, import_definition, line, col);
+	ReadOneDataField(column, theField, current_line_ptr, parsed_line_ptr, stop, import_definition, line, col, errorMsg);
 
 	if (stop)
 	{
@@ -869,20 +870,21 @@ void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_
 
 }
 
-void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition)
+void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg)
 {
 
 	EatWhitespace(current_line_ptr, import_definition);
 
 	if (*current_line_ptr == '\0')
 	{
-		// Todo: warning
+		boost::format msg("End of input file was reached prematurely.");
+		errorMsg = msg.str();
 		stop = true;
 		return;
 	}
 
 	// read it, and do nothing with it
-	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
+	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition, errorMsg);
 
 	if (stop)
 	{
@@ -894,7 +896,7 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 
 }
 
-int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum)
+int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg)
 {
 	int current_lines_read = 0;
 
@@ -911,20 +913,22 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 		for (int ncol = 0; ncol < nCols; ++ncol)
 		{
+
+			if (import_definition.input_schema.validcols[ncol])
+			{
+				ReadFieldFromFile(current_line_ptr, current_lines_read, nValColIdx, parsed_line_ptr, stop, import_definition.input_schema.schema[nValColIdx], linenum, errorMsg);
+				++nValColIdx;
+			}
+			else
+			{
+				SkipFieldInFile(current_line_ptr, parsed_line_ptr, stop, import_definition, errorMsg);
+			}
+
 			if (stop)
 			{
 				break;
 			}
 
-			if (import_definition.input_schema.validcols[ncol])
-			{
-				ReadFieldFromFile(current_line_ptr, current_lines_read, nValColIdx, parsed_line_ptr, stop, import_definition.input_schema.schema[nValColIdx], linenum);
-				++nValColIdx;
-			}
-			else
-			{
-				SkipFieldInFile(current_line_ptr, parsed_line_ptr, stop, import_definition);
-			}
 		}
 
 		if (stop)
@@ -936,7 +940,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 		DataFields & input_data_fields = input_block[current_lines_read];
 		DataFields & output_data_fields = output_block[current_lines_read];
 		stop = false;
-		std::for_each(import_definition.mappings.begin(), import_definition.mappings.end(), [this, &input_data_fields, &output_data_fields, &stop](
+		std::for_each(import_definition.mappings.begin(), import_definition.mappings.end(), [this, &input_data_fields, &output_data_fields, &stop, &errorMsg](
 						  std::shared_ptr<FieldMapping> & field_mapping)
 		{
 			if (!field_mapping)
@@ -949,6 +953,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 			if (!field_mapping->Validate())
 			{
 				// TODO: Import problem warning
+				boost::format msg("Invalid field mapping in ReadBlockFromFile.");
+				errorMsg = msg.str();
 				stop = true;
 				return;
 			}
@@ -958,136 +964,109 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 				case FieldMapping::FIELD_MAPPING_TYPE__ONE_TO_ONE:
 					{
-						try
+
+						OneToOneFieldMapping const & the_mapping = dynamic_cast<OneToOneFieldMapping const &>(*field_mapping);
+						FieldTypeEntry const & input_entry = field_mapping->input_file_fields[0];
+						FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
+
+						if (input_entry.second != output_entry.second)
 						{
+							// Todo: log warning
+							boost::format msg("Invalid mapping object in ReadBlockFromFile.");
+							errorMsg = msg.str();
+							stop = true;
+							return;
+						}
 
-							OneToOneFieldMapping const & the_mapping = dynamic_cast<OneToOneFieldMapping const &>(*field_mapping);
-							FieldTypeEntry const & input_entry = field_mapping->input_file_fields[0];
-							FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
+						// perform the mapping here
 
-							if (input_entry.second != output_entry.second)
+						std::shared_ptr<BaseField> the_input_field = RetrieveDataField(input_entry, input_data_fields);
+						std::shared_ptr<BaseField> the_output_field = RetrieveDataField(output_entry, output_data_fields);;
+
+						if (the_input_field && the_output_field)
+						{
+							if (the_input_field->GetType() != the_output_field->GetType())
 							{
 								// Todo: log warning
+								boost::format msg("Mapping type mismatch in ReadBlockFromFile.");
+								errorMsg = msg.str();
 								stop = true;
 								return;
 							}
 
-							// perform the mapping here
-
-							std::shared_ptr<BaseField> the_input_field = RetrieveDataField(input_entry, input_data_fields);
-							std::shared_ptr<BaseField> the_output_field = RetrieveDataField(output_entry, output_data_fields);;
-
-							if (the_input_field && the_output_field)
+							if (IsFieldTypeInt32(the_input_field->GetType()))
 							{
-								if (the_input_field->GetType() != the_output_field->GetType())
-								{
-									// Todo: log warning
-									stop = true;
-									return;
-								}
-
-								if (IsFieldTypeInt32(the_input_field->GetType()))
-								{
-									the_output_field->SetValueInt32(the_input_field->GetInt32Ref());
-								}
-								else
-								if (IsFieldTypeInt64(the_input_field->GetType()))
-								{
-									the_output_field->SetValueInt64(the_input_field->GetInt64Ref());
-								}
-								else
-								if (IsFieldTypeFloat(the_input_field->GetType()))
-								{
-									the_output_field->SetValueDouble(the_input_field->GetDouble());
-								}
-								else
-								if (IsFieldTypeString(the_input_field->GetType()))
-								{
-									the_output_field->SetValueString(the_input_field->GetString());
-								}
-
+								the_output_field->SetValueInt32(the_input_field->GetInt32Ref());
+							}
+							else if (IsFieldTypeInt64(the_input_field->GetType()))
+							{
+								the_output_field->SetValueInt64(the_input_field->GetInt64Ref());
+							}
+							else if (IsFieldTypeFloat(the_input_field->GetType()))
+							{
+								the_output_field->SetValueDouble(the_input_field->GetDouble());
+							}
+							else if (IsFieldTypeString(the_input_field->GetType()))
+							{
+								the_output_field->SetValueString(the_input_field->GetString());
 							}
 
 						}
-						catch (std::bad_cast &)
-						{
-							// TODO: Import problem warning
-							stop = true;
-							return;
-						}
+
 					}
 					break;
 
 				case FieldMapping::FIELD_MAPPING_TYPE__HARD_CODED:
 					{
-						try
+
+						HardCodedFieldMapping const & the_mapping = dynamic_cast<HardCodedFieldMapping const &>(*field_mapping);
+						FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
+
+						// perform the mapping here
+
+						std::shared_ptr<BaseField> the_input_field = the_mapping.data;
+						std::shared_ptr<BaseField> the_output_field = RetrieveDataField(output_entry, output_data_fields);
+
+						if (the_input_field && the_output_field)
 						{
 
-							HardCodedFieldMapping const & the_mapping = dynamic_cast<HardCodedFieldMapping const &>(*field_mapping);
-							FieldTypeEntry const & output_entry = field_mapping->output_table_fields[0];
-
-							// perform the mapping here
-
-							std::shared_ptr<BaseField> the_input_field = the_mapping.data;
-							std::shared_ptr<BaseField> the_output_field = RetrieveDataField(output_entry, output_data_fields);
-
-							if (the_input_field && the_output_field)
+							if (the_input_field->GetType() != the_output_field->GetType())
 							{
+								// Todo: log warning
+								boost::format msg("Mapping type mismatch in ReadBlockFromFile.");
+								errorMsg = msg.str();
+								stop = true;
+								return;
+							}
 
-								if (the_input_field->GetType() != the_output_field->GetType())
-								{
-									// Todo: log warning
-									stop = true;
-									return;
-								}
-
-								if (IsFieldTypeInt32(the_input_field->GetType()))
-								{
-									the_output_field->SetValueInt32(the_input_field->GetInt32Ref());
-								}
-								else
-								if (IsFieldTypeInt64(the_input_field->GetType()))
-								{
-									the_output_field->SetValueInt64(the_input_field->GetInt64Ref());
-								}
-								else
-								if (IsFieldTypeFloat(the_input_field->GetType()))
-								{
-									the_output_field->SetValueDouble(the_input_field->GetDouble());
-								}
-								else
-								if (IsFieldTypeString(the_input_field->GetType()))
-								{
-									the_output_field->SetValueString(the_input_field->GetString());
-								}
-
+							if (IsFieldTypeInt32(the_input_field->GetType()))
+							{
+								the_output_field->SetValueInt32(the_input_field->GetInt32Ref());
+							}
+							else if (IsFieldTypeInt64(the_input_field->GetType()))
+							{
+								the_output_field->SetValueInt64(the_input_field->GetInt64Ref());
+							}
+							else if (IsFieldTypeFloat(the_input_field->GetType()))
+							{
+								the_output_field->SetValueDouble(the_input_field->GetDouble());
+							}
+							else if (IsFieldTypeString(the_input_field->GetType()))
+							{
+								the_output_field->SetValueString(the_input_field->GetString());
 							}
 
 						}
-						catch (std::bad_cast &)
-						{
-							// TODO: Import problem warning
-							stop = true;
-							return;
-						}
+
 					}
 					break;
 
 				case FieldMapping::FIELD_MAPPING_TYPE__TIME_RANGE:
 					{
-						try
-						{
 
-							TimeRangeFieldMapping & the_mapping = dynamic_cast<TimeRangeFieldMapping &>(*field_mapping);
-							the_mapping.PerformMapping(input_data_fields, output_data_fields);
+						TimeRangeFieldMapping & the_mapping = dynamic_cast<TimeRangeFieldMapping &>(*field_mapping);
+						the_mapping.PerformMapping(input_data_fields, output_data_fields);
 
-						}
-						catch (std::bad_cast &)
-						{
-							// TODO: Import problem warning
-							stop = true;
-							return;
-						}
 					}
 					break;
 
@@ -1205,14 +1184,16 @@ bool Importer::DoImport(std::string & errorMsg)
 				{
 					return;
 				}
-				
+
 				// Validate column name
 				std::string test_col_name = schema_entry.field_name;
 				bool validated = Validation::ValidateColumnName(test_col_name, "variable group column", true, errorMsg);
+
 				if (test_col_name != schema_entry.field_name)
 				{
 					validated = false;
 				}
+
 				if (!validated)
 				{
 					boost::format msg("Bad column name in input file.");
@@ -1223,10 +1204,12 @@ bool Importer::DoImport(std::string & errorMsg)
 				// Validate column description
 				std::string test_col_description = schema_entry.field_description;
 				validated = Validation::ValidateColumnDescription(test_col_description, "variable group column", false, errorMsg);
+
 				if (test_col_description != schema_entry.field_description)
 				{
 					validated = false;
 				}
+
 				if (!validated)
 				{
 					boost::format msg("Bad column description in input file.");
@@ -1303,11 +1286,15 @@ bool Importer::DoImport(std::string & errorMsg)
 
 		while (true)
 		{
-			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline, linenum);
+
+
+			std::string blockErrorMsg;
+			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline, linenum, blockErrorMsg);
 
 			if (currently_read_lines == -1)
 			{
-				boost::format msg("Failed to read block of data from input file.");
+				boost::format msg("Failed to read block of data from input file: %1%");
+				msg % blockErrorMsg;
 				errorMsg = msg.str();
 				return false;
 			}
@@ -1328,6 +1315,7 @@ bool Importer::DoImport(std::string & errorMsg)
 					return false;
 				}
 			}
+
 		}
 
 		data_file.close();
@@ -1389,18 +1377,21 @@ void Importer::EatSeparator(char *& current_line_ptr, ImportDefinition const & i
 }
 
 void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField, char *& current_line_ptr, char *& parsed_line_ptr, bool & stop,
-	ImportDefinition const & import_definition, long const line, int const col)
+								ImportDefinition const & import_definition, long const line, int const col, std::string & errorMsg)
 {
 
 	size_t number_chars_read = 0;
 
 	// For all data types, retrieve the full field as a string, to start
-	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
+	std::string stringFieldErrorMsg;
+	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition, stringFieldErrorMsg);
+
 	if (stop)
 	{
-		boost::format msg("Cannot create data field from input file!  Line %1%, column %2%");
-		msg % line % col;
-		throw NewGeneException() << newgene_error_description(msg.str());
+		boost::format msg("Cannot read data field from input file!  Line %1%, column %2%: %3%");
+		msg % line % col % stringFieldErrorMsg;
+		errorMsg = msg.str();
+		return;
 	}
 
 	if (IsFieldTypeInt32(theField.GetType()))
@@ -1410,30 +1401,34 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueInt32(0);
 		sscanf(parsed_line_ptr, "%d%n", &theField.GetInt32Ref(), &number_chars_read);
+
 		if (number_chars_read < strlen(parsed_line_ptr))
 		{
-			boost::format msg("Invalid data field from input file!  Line %1%, column %2%");
+			boost::format msg("Invalid int32 data field from input file!  Line %1%, column %2%");
 			msg % line % col;
-			throw NewGeneException() << newgene_error_description(msg.str());
+			errorMsg = msg.str();
+			stop = true;
+			return;
 		}
 	}
-	else
-	if (IsFieldTypeInt64(theField.GetType()))
+	else if (IsFieldTypeInt64(theField.GetType()))
 	{
 		// For performance reasons - no validation.
 		// TODO: allow option for end-user to validate, in which case we perform a
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueInt64(0);
 		sscanf(parsed_line_ptr, "%I64d%n", &theField.GetInt64Ref(), &number_chars_read);
+
 		if (number_chars_read < strlen(parsed_line_ptr))
 		{
-			boost::format msg("Invalid data field from input file!  Line %1%, column %2%");
+			boost::format msg("Invalid int64 data field from input file!  Line %1%, column %2%");
 			msg % line % col;
-			throw NewGeneException() << newgene_error_description(msg.str());
+			errorMsg = msg.str();
+			stop = true;
+			return;
 		}
 	}
-	else
-	if (IsFieldTypeFloat(theField.GetType()))
+	else if (IsFieldTypeFloat(theField.GetType()))
 	{
 		// For performance reasons - no validation.
 		// TODO: allow option for end-user to validate, in which case we perform a
@@ -1442,26 +1437,31 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		double temp;
 		sscanf(parsed_line_ptr, "%lf%n", &temp, &number_chars_read);
 		theField.SetValueDouble(temp);
+
 		if (number_chars_read < strlen(parsed_line_ptr))
 		{
-			boost::format msg("Invalid data field from input file!  Line %1%, column %2%");
+			boost::format msg("Invalid floating-point data field from input file!  Line %1%, column %2%");
 			msg % line % col;
-			throw NewGeneException() << newgene_error_description(msg.str());
+			errorMsg = msg.str();
+			stop = true;
+			return;
 		}
 	}
-	else
-	if (IsFieldTypeString(theField.GetType()))
+	else if (IsFieldTypeString(theField.GetType()))
 	{
 		theField.SetValueString(parsed_line_ptr);
 	}
 
 	// Extra validation here
 	bool valid = ValidateFieldData(theField);
+
 	if (!valid)
 	{
 		boost::format msg("Invalid data field from input file!  Line %1%, column %2%");
 		msg % line % col;
-		throw NewGeneException() << newgene_error_description(msg.str());
+		errorMsg = msg.str();
+		stop = true;
+		return;
 	}
 
 }
