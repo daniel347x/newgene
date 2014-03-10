@@ -4,6 +4,7 @@
 #	include <boost/algorithm/string.hpp>
 #	include <boost/date_time/local_time/local_time.hpp>
 #	include <boost/tokenizer.hpp>
+#	include <boost/scope_exit.hpp>
 #endif
 #include <fstream>
 #include <cstdint>
@@ -896,7 +897,7 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 
 }
 
-int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg)
+int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg, Messager & messager)
 {
 	int current_lines_read = 0;
 
@@ -1076,6 +1077,11 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 		++current_lines_read;
 		++linenum;
 
+		if (linenum % 100 == 0)
+		{
+			messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SET_VALUE, 0, 0, linenum);
+		}
+
 		if (stop)
 		{
 			return -1;
@@ -1091,8 +1097,13 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 	return current_lines_read;
 }
 
-bool Importer::DoImport(std::string & errorMsg)
+bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 {
+
+	BOOST_SCOPE_EXIT(&messager)
+	{
+		messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__HIDE, 0, 0, 0);
+	} BOOST_SCOPE_EXIT_END
 
 	InputModel * inputModel = nullptr;
 	OutputModel * outputModel = nullptr;
@@ -1140,6 +1151,27 @@ bool Importer::DoImport(std::string & errorMsg)
 			errorMsg = msg.str();
 			return false;
 		}
+	}
+
+	// Count lines in file
+	std::fstream data_file_count_lines;
+	data_file_count_lines.open(import_definition.input_file.c_str(), std::ios::in);
+	if (data_file_count_lines.is_open())
+	{
+		char line[MAX_LINE_SIZE];
+		long linenum = 0;
+		while (data_file_count_lines.getline(line, MAX_LINE_SIZE - 1) && data_file_count_lines.good())
+		{
+			++linenum;
+		}
+		messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SHOW, 0, 0, 0);
+		messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SET_LIMITS, 0, linenum, 0);
+	}
+	else
+	{
+		boost::format msg("Failed to open input file.");
+		errorMsg = msg.str();
+		return false;
 	}
 
 	// TODO: try/finally or exit block
@@ -1289,7 +1321,7 @@ bool Importer::DoImport(std::string & errorMsg)
 
 
 			std::string blockErrorMsg;
-			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline, linenum, blockErrorMsg);
+			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline, linenum, blockErrorMsg, messager);
 
 			if (currently_read_lines == -1)
 			{
@@ -1322,7 +1354,7 @@ bool Importer::DoImport(std::string & errorMsg)
 	}
 	else
 	{
-		boost::format msg("Failed open input file.");
+		boost::format msg("Failed to open input file.");
 		errorMsg = msg.str();
 		return false;
 	}

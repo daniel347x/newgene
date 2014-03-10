@@ -48,6 +48,7 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_VGS_WIDGET);
+		void UpdateVGImportProgressBar(int mode_, int min_, int max_, int val_);
 
 	protected:
 

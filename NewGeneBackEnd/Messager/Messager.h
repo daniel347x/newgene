@@ -176,6 +176,7 @@ class Messager
         virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET &) {}
 		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_UOAS_WIDGET &) {}
 		virtual void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_VGS_WIDGET &) {}
+		virtual void EmitSignalUpdateVGImportProgressBar(int, int, int, int) {}
 
 	protected:
 

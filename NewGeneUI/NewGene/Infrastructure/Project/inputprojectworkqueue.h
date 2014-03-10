@@ -36,6 +36,10 @@ class InputProjectWorkQueue : public WorkQueueManager<UI_INPUT_PROJECT>
 		{
 			emit WidgetDataRefresh(widgetData);
 		}
+		void EmitSignalUpdateVGImportProgressBar(int mode_, int min_, int max_, int val_)
+		{
+			emit SignalUpdateVGImportProgressBar(mode_, min_, max_, val_);
+		}
 
 	private:
 

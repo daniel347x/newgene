@@ -47,8 +47,12 @@ void InputModel::LoadTables()
 #				endif
 				if (!tableManager().TableExists(db, vg_instance_data->table_name))
 				{
+
+					// disable, now that real import is completed
+
 					if (false)
 					{
+
 						ImportDefinition new_definition = ImportDefinitions::CreateImportDefinition(*variable_group_identifier.code);
 						if (new_definition.IsEmpty())
 						{
@@ -57,14 +61,19 @@ void InputModel::LoadTables()
 						}
 						Importer table_importer(new_definition, this, vg_instance_data.get(), Importer::INSERT_OR_FAIL, variable_group_identifier, InputModelImportTableFn);
 						std::string errorMsg;
-						bool success = table_importer.DoImport(errorMsg);
-						if (!success)
-						{
-							boost::format msg("Unable to refresh the DMU list from the file: %1%");
-							msg % errorMsg;
-							throw NewGeneException() << newgene_error_description(msg.str());
-						}
+
+						// disable, now that real import is completed
+
+						//bool success = table_importer.DoImport(errorMsg, messager);
+						//if (!success)
+						//{
+						//	boost::format msg("Unable to refresh the DMU list from the file: %1%");
+						//	msg % errorMsg;
+						//	throw NewGeneException() << newgene_error_description(msg.str());
+						//}
+
 					}
+
 				}
 				else
 				{

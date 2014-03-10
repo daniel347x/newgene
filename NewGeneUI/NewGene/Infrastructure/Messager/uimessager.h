@@ -153,6 +153,7 @@ class UIMessagerInputProject : public UIMessager
 		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_DMUS_WIDGET & widgetData);
 		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_UOAS_WIDGET & widgetData);
 		void EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_VGS_WIDGET & widgetData);
+		void EmitSignalUpdateVGImportProgressBar(int, int, int, int);
 
 	protected:
 

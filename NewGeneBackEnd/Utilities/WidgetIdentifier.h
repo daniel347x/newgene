@@ -21,6 +21,14 @@ typedef std::vector<UUID> UUIDVector;
 
 int const UUID_LENGTH = 36;
 
+enum PROGRESS_UPDATE_MODE
+{
+	  PROGRESS_UPDATE_MODE__SHOW = 0
+	, PROGRESS_UPDATE_MODE__SET_LIMITS
+	, PROGRESS_UPDATE_MODE__SET_VALUE
+	, PROGRESS_UPDATE_MODE__HIDE
+};
+
 class WidgetInstanceIdentifier
 {
 

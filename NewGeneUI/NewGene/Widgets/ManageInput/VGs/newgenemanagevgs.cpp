@@ -22,6 +22,8 @@ NewGeneManageVGs::NewGeneManageVGs( QWidget * parent ) :
 	ui( new Ui::NewGeneManageVGs )
 {
 	ui->setupUi( this );
+	ui->label_importProgress->hide();
+	ui->progressBar_importVG->hide();
 	PrepareInputWidget(true);
 }
 
@@ -57,6 +59,7 @@ void NewGeneManageVGs::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS_
 		connect(this, SIGNAL(CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG)), inp->getConnector(), SLOT(CreateVG(WidgetActionItemRequest_ACTION_CREATE_VG)));
 		connect(this, SIGNAL(DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG)), inp->getConnector(), SLOT(DeleteVG(WidgetActionItemRequest_ACTION_DELETE_VG)));
 		connect(this, SIGNAL(RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG)), inp->getConnector(), SLOT(RefreshVG(WidgetActionItemRequest_ACTION_REFRESH_VG)));
+		connect(project->getConnector(), SIGNAL(SignalUpdateVGImportProgressBar(int, int, int, int)), this, SLOT(UpdateVGImportProgressBar(int, int, int, int)));
 
 		if (project)
 		{
@@ -936,3 +939,47 @@ bool NewGeneManageVGs::event ( QEvent * e )
 
 }
 
+void NewGeneManageVGs::UpdateVGImportProgressBar(int mode_, int min_, int max_, int val_)
+{
+
+	PROGRESS_UPDATE_MODE mode = (PROGRESS_UPDATE_MODE)(mode_);
+
+	switch (mode)
+	{
+
+		case PROGRESS_UPDATE_MODE__SHOW:
+			{
+				ui->label_importProgress->show();
+				ui->progressBar_importVG->setTextVisible(true);
+				ui->progressBar_importVG->show();
+			}
+			break;
+
+		case PROGRESS_UPDATE_MODE__SET_LIMITS:
+			{
+				ui->progressBar_importVG->setRange(min_, max_);
+				ui->progressBar_importVG->setValue(min_);
+			}
+			break;
+
+		case PROGRESS_UPDATE_MODE__SET_VALUE:
+			{
+				ui->progressBar_importVG->setValue(val_);
+			}
+			break;
+
+		case PROGRESS_UPDATE_MODE__HIDE:
+			{
+				ui->label_importProgress->hide();
+				ui->progressBar_importVG->hide();
+			}
+			break;
+
+		default:
+			{
+				// no-op
+			}
+			break;
+
+	}
+}

@@ -98,6 +98,20 @@
         </layout>
        </widget>
       </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Import progress</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="progressBar_importVG">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

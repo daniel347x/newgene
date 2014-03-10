@@ -435,7 +435,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn);
 					errorMsg.clear();
-					success = table_importer.DoImport(errorMsg);
+					success = table_importer.DoImport(errorMsg, messager);
 					if (!success)
 					{
 						new_table->DeleteDataTable(input_model.getDb(), &input_model);

@@ -354,3 +354,8 @@ void UIMessagerInputProject::EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_VG
 {
 	get()->getQueueManager()->EmitInputWidgetDataRefresh(widgetData);
 }
+
+void UIMessagerInputProject::EmitSignalUpdateVGImportProgressBar(int mode_, int min_, int max_, int val_)
+{
+	get()->getQueueManager()->EmitSignalUpdateVGImportProgressBar(mode_, min_, max_, val_);
+}

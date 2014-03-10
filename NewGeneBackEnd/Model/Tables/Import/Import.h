@@ -379,7 +379,7 @@ class Importer
 
 		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_);
 
-		bool DoImport(std::string & errorMsg);
+		bool DoImport(std::string & errorMsg, Messager & messager);
 
 	protected:
 	
@@ -395,7 +395,7 @@ class Importer
 	
 		bool ValidateMapping();
 		void InitializeFields();
-		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg);
+		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg, Messager & messager);
 		void ReadFieldFromFile(char * & current_line_ptr, int & current_lines_read, int const & current_column_index, char * & parsed_line_ptr, bool & stop, SchemaEntry const & column, long const line, std::string & errorMsg);
 
 	public:

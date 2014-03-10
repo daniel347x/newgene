@@ -540,7 +540,7 @@ bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_
 
 }
 
-bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::vector<std::string> const & dmu_column_labels)
+bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::vector<std::string> const & dmu_column_labels, Messager & messager)
 {
 
 	if (!dmu_category.code || dmu_category.code->empty() || dmu_category.uuid->empty())
@@ -603,7 +603,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn);
 
 	std::string errorMsg;
-	bool success = table_importer.DoImport(errorMsg);
+	bool success = table_importer.DoImport(errorMsg, messager);
 	if (!success)
 	{
 		boost::format msg("Unable to refresh the DMU list from the file: %1%");
