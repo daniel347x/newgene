@@ -943,7 +943,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 					else
 					{
 						input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
-						ouput_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+						output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
 					}
 					if (input_schema_vector[colindex_monthStart].IsPrimaryKey())
 					{
