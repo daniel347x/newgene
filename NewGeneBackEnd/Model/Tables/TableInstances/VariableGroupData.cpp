@@ -208,10 +208,13 @@ bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_m
 		return false;
 	}
 
+	WidgetInstanceIdentifier vg;
+	input_model_->t_vgp_identifiers.getIdentifierFromStringCode(vg_category_string_code, vg);
 	bool dropped_primary_key_metadata = input_model_->t_vgp_data_metadata__primary_keys.DeleteDataTable(db, input_model_, table_name);
 	bool dropped_datetime_metadata = input_model_->t_vgp_data_metadata__datetime_columns.DeleteDataTable(db, input_model_, table_name);
+	bool dropped_vg_setmember_metadata = input_model_->t_vgp_setmembers.DeleteVG(db, input_model_, vg);
 
-	if (!dropped_primary_key_metadata || !dropped_datetime_metadata)
+	if (!dropped_primary_key_metadata || !dropped_datetime_metadata || !dropped_vg_setmember_metadata)
 	{
 		boost::format msg("Unable to delete metadata for variable group");
 		throw NewGeneException() << newgene_error_description(msg.str());
@@ -576,7 +579,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 			if (existing_column_identifiers.size() != colnames.size())
 			{
 				boost::format msg("The number of columns in the input file does not match the number of columns in the existing data.");
-				msg % definition.input_file.c_str();
 				errorMsg = msg.str();
 				return false;
 			}
@@ -610,7 +612,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 			if (mismatch)
 			{
 				boost::format msg("The column names in the input file do not match the column names for the existing data.");
-				msg % definition.input_file.c_str();
 				errorMsg = msg.str();
 				return false;
 			}
@@ -640,7 +641,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 			if (test_col_name != colname)
 			{
 				boost::format msg("Invalid column name");
-				msg % errorMsg.c_str();
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 
@@ -1303,6 +1303,10 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 		{
 			add_stmt % "STRING";
 			flags = "s";
+		}
+		else
+		{
+			add_stmt % "";
 		}
 
 		char * errmsg = nullptr;
