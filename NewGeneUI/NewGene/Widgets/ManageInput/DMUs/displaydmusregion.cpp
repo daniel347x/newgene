@@ -674,7 +674,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 
 		if (valid)
 		{
-			valid = Validation::ValidateDmuMemberUUID(proposed_dmu_member_uuid, errorMsg);
+			valid = Validation::ValidateDmuMemberUUID(proposed_dmu_member_uuid, false, errorMsg);
 		}
 
 		if (valid)
