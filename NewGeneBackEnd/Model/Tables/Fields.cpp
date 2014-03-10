@@ -33,6 +33,20 @@ std::int64_t const & BaseField::GetInt64Ref() const
 			}
 			break;
 
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME:
+			{
+				Field<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME> const & myself = static_cast<Field<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME> const &>(*this);
+				return static_cast<std::int64_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME:
+			{
+				Field<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME> const & myself = static_cast<Field<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME> const &>(*this);
+				return static_cast<std::int64_t const &>(myself.GetValueReference());
+			}
+			break;
+
 		default:
 			{
 				boost::format msg("Unknown field data type.");
@@ -76,6 +90,48 @@ std::int32_t const & BaseField::GetInt32Ref() const
 		case FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC:
 			{
 				Field<FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC> const & myself = static_cast<Field<FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC> const &>(*this);
+				return static_cast<std::int32_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_DAY:
+			{
+				Field<FIELD_TYPE_DAY> const & myself = static_cast<Field<FIELD_TYPE_DAY> const &>(*this);
+				return static_cast<std::int32_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_MONTH:
+			{
+				Field<FIELD_TYPE_MONTH> const & myself = static_cast<Field<FIELD_TYPE_MONTH> const &>(*this);
+				return static_cast<std::int32_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_YEAR:
+			{
+				Field<FIELD_TYPE_YEAR> const & myself = static_cast<Field<FIELD_TYPE_YEAR> const &>(*this);
+				return static_cast<std::int32_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY> const &>(*this);
+				return static_cast<std::int32_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH> const &>(*this);
+				return static_cast<std::int32_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR> const &>(*this);
 				return static_cast<std::int32_t const &>(myself.GetValueReference());
 			}
 			break;
@@ -204,6 +260,20 @@ std::string const & BaseField::GetStringRef() const
 			}
 			break;
 
+		case FIELD_TYPE_TIMERANGE_STRING:
+			{
+				Field<FIELD_TYPE_TIMERANGE_STRING> const & myself = static_cast<Field<FIELD_TYPE_TIMERANGE_STRING> const &>(*this);
+				return myself.GetValueReference();
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> const &>(*this);
+				return myself.GetValueReference();
+			}
+			break;
+
 		default:
 			{
 				boost::format msg("Unknown field data type.");
@@ -247,6 +317,20 @@ std::int64_t BaseField::GetInt64() const
 		case FIELD_TYPE_TIMESTAMP:
 			{
 				Field<FIELD_TYPE_TIMESTAMP> const & myself = static_cast<Field<FIELD_TYPE_TIMESTAMP> const &>(*this);
+				return static_cast<std::int64_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME:
+			{
+				Field<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME> const & myself = static_cast<Field<FIELD_TYPE_TIMESFIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIMETAMP> const &>(*this);
+				return static_cast<std::int64_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME:
+			{
+				Field<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME> const & myself = static_cast<Field<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME> const &>(*this);
 				return static_cast<std::int64_t const &>(myself.GetValueReference());
 			}
 			break;
@@ -314,6 +398,27 @@ std::int32_t BaseField::GetInt32() const
 		case FIELD_TYPE_YEAR:
 			{
 				Field<FIELD_TYPE_YEAR> const & myself = static_cast<Field<FIELD_TYPE_YEAR> const &>(*this);
+				return static_cast<std::int32_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY> const &>(*this);
+				return static_cast<std::int32_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH> const &>(*this);
+				return static_cast<std::int32_t const &>(myself.GetValueReference());
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR> const &>(*this);
 				return static_cast<std::int32_t const &>(myself.GetValueReference());
 			}
 			break;
@@ -473,6 +578,20 @@ std::string BaseField::GetString() const
 			}
 			break;
 
+		case FIELD_TYPE_TIMERANGE_STRING:
+			{
+				Field<FIELD_TYPE_TIMERANGE_STRING> const & myself = static_cast<Field<FIELD_TYPE_TIMERANGE_STRING> const &>(*this);
+				return myself.GetValueReference();
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> const &>(*this);
+				return myself.GetValueReference();
+			}
+			break;
+
 		default:
 			{
 				boost::format msg("Unknown field data type.");
@@ -515,6 +634,20 @@ void BaseField::SetValueInt64(std::int64_t const & val)
 		case FIELD_TYPE_TIMESTAMP:
 			{
 				Field<FIELD_TYPE_TIMESTAMP> & myself = static_cast<Field<FIELD_TYPE_TIMESTAMP> &>(*this);
+				myself.SetValue(val);
+			}
+			break;
+
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME:
+			{
+				Field<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME> & myself = static_cast<Field<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME> &>(*this);
+				myself.SetValue(val);
+			}
+			break;
+
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME:
+			{
+				Field<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME> & myself = static_cast<Field<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME> &>(*this);
 				myself.SetValue(val);
 			}
 			break;
@@ -582,6 +715,27 @@ void BaseField::SetValueInt32(std::int32_t const & val)
 		case FIELD_TYPE_YEAR:
 			{
 				Field<FIELD_TYPE_YEAR> & myself = static_cast<Field<FIELD_TYPE_YEAR> &>(*this);
+				myself.SetValue(val);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY> & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY> &>(*this);
+				myself.SetValue(val);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH> & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH> &>(*this);
+				myself.SetValue(val);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR> & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR> &>(*this);
 				myself.SetValue(val);
 			}
 			break;
@@ -733,6 +887,20 @@ void BaseField::SetValueString(std::string const & val)
 		case FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID:
 			{
 				Field<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID> & myself = static_cast<Field<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID> &>(*this);
+				myself.SetValue(val);
+			}
+			break;
+
+		case FIELD_TYPE_TIMERANGE_STRING:
+			{
+				Field<FIELD_TYPE_TIMERANGE_STRING> & myself = static_cast<Field<FIELD_TYPE_TIMERANGE_STRING> &>(*this);
+				myself.SetValue(val);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING:
+			{
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> &>(*this);
 				myself.SetValue(val);
 			}
 			break;

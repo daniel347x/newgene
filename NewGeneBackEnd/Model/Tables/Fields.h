@@ -119,56 +119,29 @@ static std::string GetFieldDataTypeAsString(FIELD_TYPE const & field_type)
 
 	std::string retStr;
 
-	switch (field_type)
+	if (IsFieldTypeInt32(field_type))
 	{
-		case FIELD_TYPE_INT32:
-		case FIELD_TYPE_UINT32:
-			{
-				retStr = "INT32";
-			}
-			break;
-
-		case FIELD_TYPE_INT64:
-		case FIELD_TYPE_UINT64:
-			{
-				retStr = "INT64";
-			}
-			break;
-
-		case FIELD_TYPE_STRING_FIXED:
-		case FIELD_TYPE_STRING_VAR:
-		case FIELD_TYPE_UUID:
-		case FIELD_TYPE_UUID_FOREIGN:
-		case FIELD_TYPE_STRING_CODE:
-		case FIELD_TYPE_STRING_LONGHAND:
-		case FIELD_TYPE_TIME_RANGE:
-		case FIELD_TYPE_NOTES_1:
-		case FIELD_TYPE_NOTES_2:
-		case FIELD_TYPE_NOTES_3:
-			{
-				retStr = "STRING";
-			}
-			break;
-
-		case FIELD_TYPE_TIMESTAMP:
-			{
-				retStr = "INT64";
-			}
-			break;
-
-		case FIELD_TYPE_FLOAT:
-			{
-				retStr = "FLOAT";
-			}
-			break;
-
-		default:
-			{
-				retStr = "STRING";
-			}
-			break;
+		retStr = "INT32";
+	}
+	else if (IsFieldTypeInt64(field_type))
+	{
+		retStr = "INT64";
+	}
+	else if (IsFieldTypeFloat(field_type))
+	{
+		retStr = "FLOAT";
+	}
+	else if (IsFieldTypeString(field_type))
+	{
+		retStr = "STRING";
+	}
+	else
+	{
+		boost::format msg("Invalid field type in GetFieldDataTypeAsString");
+		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
+	return retStr;
 
 }
 
@@ -177,50 +150,25 @@ static std::string GetSqlLiteFieldDataTypeAsString(FIELD_TYPE const & field_type
 
 	std::string retStr;
 
-	switch (field_type)
+	if (IsFieldTypeInt(field_type))
 	{
-		case FIELD_TYPE_INT32:
-		case FIELD_TYPE_INT64:
-		case FIELD_TYPE_UINT32:
-		case FIELD_TYPE_UINT64:
-			{
-				retStr = "INTEGER";
-			}
-			break;
-
-		case FIELD_TYPE_STRING_FIXED:
-		case FIELD_TYPE_STRING_VAR:
-		case FIELD_TYPE_UUID:
-		case FIELD_TYPE_UUID_FOREIGN:
-		case FIELD_TYPE_STRING_CODE:
-		case FIELD_TYPE_STRING_LONGHAND:
-		case FIELD_TYPE_TIME_RANGE:
-		case FIELD_TYPE_NOTES_1:
-		case FIELD_TYPE_NOTES_2:
-		case FIELD_TYPE_NOTES_3:
-			{
-				retStr = "TEXT";
-			}
-			break;
-
-		case FIELD_TYPE_TIMESTAMP:
-			{
-				retStr = "INTEGER";
-			}
-			break;
-
-		case FIELD_TYPE_FLOAT:
-			{
-				retStr = "REAL";
-			}
-			break;
-
-		default:
-			{
-				retStr = "TEXT";
-			}
-			break;
+		retStr = "INTEGER";
 	}
+	else if (IsFieldTypeFloat(field_type))
+	{
+		retStr = "REAL";
+	}
+	else if (IsFieldTypeString(field_type))
+	{
+		retStr = "TEXT";
+	}
+	else
+	{
+		boost::format msg("Invalid field type in GetSqlLiteFieldDataTypeAsString");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	return retStr;
 
 }
 
@@ -324,6 +272,110 @@ static void FieldFactory(FIELD_TYPE field_type, std::string field_name, std::sha
 				field = std::make_shared<Field<FIELD_TYPE_NOTES_3>>(field_name);
 			}
 			break;
+
+		case FIELD_TYPE_DMU_MEMBER_UUID:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_DMU_MEMBER_UUID>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_MEMBER_UUID_STRING:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_DMU_MEMBER_UUID_STRING>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_MEMBER_CODE:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_DMU_MEMBER_CODE>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_MEMBER_DESCRIPTION:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_DMU_MEMBER_DESCRIPTION>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_DAY:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_DAY>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_MONTH:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_MONTH>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_YEAR:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_YEAR>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_TIMERANGE_STRING:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_TIMERANGE_STRING>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING>>(field_name);
+			}
+			break;
+
+		default:
+			{
+				boost::format msg("Invalid data type in FieldFactory.");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+			break;
+
 	}
 
 }
