@@ -64,51 +64,8 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 			first = false;
 			sql_create += table_schema_entry.field_name;
 			sql_create += " ";
+			sql_create += GetSqlLiteFieldDataTypeAsString(table_schema_entry.field_type);
 
-			switch (table_schema_entry.field_type)
-			{
-				case FIELD_TYPE_INT32:
-				case FIELD_TYPE_INT64:
-				case FIELD_TYPE_UINT32:
-				case FIELD_TYPE_UINT64:
-					{
-						sql_create += "INTEGER";
-					}
-					break;
-
-				case FIELD_TYPE_STRING_FIXED:
-				case FIELD_TYPE_STRING_VAR:
-				case FIELD_TYPE_UUID:
-				case FIELD_TYPE_UUID_FOREIGN:
-				case FIELD_TYPE_STRING_CODE:
-				case FIELD_TYPE_STRING_LONGHAND:
-				case FIELD_TYPE_TIME_RANGE:
-				case FIELD_TYPE_NOTES_1:
-				case FIELD_TYPE_NOTES_2:
-				case FIELD_TYPE_NOTES_3:
-					{
-						sql_create += "TEXT";
-					}
-					break;
-
-				case FIELD_TYPE_TIMESTAMP:
-					{
-						sql_create += "INTEGER";
-					}
-					break;
-
-				case FIELD_TYPE_FLOAT:
-					{
-						sql_create += "REAL";
-					}
-					break;
-
-				default:
-					{
-						sql_create += "TEXT";
-					}
-					break;
-			}
 		});
 
 		sql_create += ")";
@@ -925,8 +882,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 		// (The code below also prepares input time range columns for the mapping)
 		std::string timeRangeStartFieldNameAndDescription = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName;
 		std::string timeRangeEndFieldNameAndDescription = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
-		SchemaEntry outputTimeRangeStartEntry(FIELD_TYPE_INT64, timeRangeStartFieldNameAndDescription, true);
-		SchemaEntry outputTimeRangeEndEntry(FIELD_TYPE_INT64, timeRangeEndFieldNameAndDescription, true);
+		SchemaEntry outputTimeRangeStartEntry(FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME, timeRangeStartFieldNameAndDescription, true);
+		SchemaEntry outputTimeRangeEndEntry(FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME, timeRangeEndFieldNameAndDescription, true);
 		outputTimeRangeStartEntry.field_description = timeRangeStartFieldNameAndDescription;
 		outputTimeRangeEndEntry.field_description = timeRangeEndFieldNameAndDescription;
 		outputTimeRangeStartEntry.SetIsTimeRange(true);
@@ -962,20 +919,20 @@ bool Table_VariableGroupData::BuildImportDefinition
 							(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
 					FieldTypeEntries input_file_fields;
 					FieldTypeEntries output_table_fields;
-					FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_INT32);
-					FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_INT32);
-					FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[2]), FIELD_TYPE_INT32);
-					FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[3]), FIELD_TYPE_INT32);
-					FieldTypeEntry input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[4]), FIELD_TYPE_INT32);
-					FieldTypeEntry input_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[5]), FIELD_TYPE_INT32);
+					FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
+					FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_MONTH);
+					FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[2]), FIELD_TYPE_DAY);
+					FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[3]), FIELD_TYPE_YEAR);
+					FieldTypeEntry input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[4]), FIELD_TYPE_MONTH);
+					FieldTypeEntry input_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[5]), FIELD_TYPE_DAY);
 					input_file_fields.push_back(input_time_field__YearStart);
 					input_file_fields.push_back(input_time_field__MonthStart);
 					input_file_fields.push_back(input_time_field__DayStart);
 					input_file_fields.push_back(input_time_field__YearEnd);
 					input_file_fields.push_back(input_time_field__MonthEnd);
 					input_file_fields.push_back(input_time_field__DayEnd);
-					FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
-					FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
+					FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+					FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
 					output_table_fields.push_back(output_time_field__DayStart);
 					output_table_fields.push_back(output_time_field__DayEnd);
 					time_range_mapping->input_file_fields = input_file_fields;
@@ -990,12 +947,54 @@ bool Table_VariableGroupData::BuildImportDefinition
 					int colindex_monthEnd = timeRangeColName_To_Index[timeRangeCols[4]];
 					int colindex_dayEnd = timeRangeColName_To_Index[timeRangeCols[5]];
 
-					input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
-					input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
-					input_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DAY;
-					input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
-					input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
-					input_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DAY;
+					if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
+					{
+						input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+					}
+					else
+					{
+						input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+					}
+					if (input_schema_vector[colindex_monthStart].IsPrimaryKey())
+					{
+						input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+					}
+					else
+					{
+						input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
+					}
+					if (input_schema_vector[colindex_dayStart].IsPrimaryKey())
+					{
+						input_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
+					}
+					else
+					{
+						input_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DAY;
+					}
+					if (input_schema_vector[colindex_yearEnd].IsPrimaryKey())
+					{
+						input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+					}
+					else
+					{
+						input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+					}
+					if (input_schema_vector[colindex_monthEnd].IsPrimaryKey())
+					{
+						input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+					}
+					else
+					{
+						input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
+					}
+					if (input_schema_vector[colindex_dayEnd].IsPrimaryKey())
+					{
+						input_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
+					}
+					else
+					{
+						input_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DAY;
+					}
 
 				}
 				break;
@@ -1029,10 +1028,10 @@ bool Table_VariableGroupData::BuildImportDefinition
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
-						FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_INT32);
+						FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
 						input_file_fields.push_back(input_time_field__Year);
-						FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
-						FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
+						FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+						FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
 						output_table_fields.push_back(output_time_field__YearStart);
 						output_table_fields.push_back(output_time_field__YearEnd);
 						time_range_mapping->input_file_fields = input_file_fields;
@@ -1041,7 +1040,14 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
 						int colindex_year = timeRangeColName_To_Index[timeRangeCols[0]];
-						input_schema_vector[colindex_year].field_type = FIELD_TYPE_YEAR;
+						if (input_schema_vector[colindex_year].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_year].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						}
+						else
+						{
+							input_schema_vector[colindex_year].field_type = FIELD_TYPE_YEAR;
+						}
 
 					}
 					else
@@ -1051,12 +1057,12 @@ bool Table_VariableGroupData::BuildImportDefinition
 								(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR);
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
-						FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_INT32);
-						FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_INT32);
+						FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
+						FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_YEAR);
 						input_file_fields.push_back(input_time_field__YearStart);
 						input_file_fields.push_back(input_time_field__YearEnd);
-						FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_INT64);
-						FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_INT64);
+						FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+						FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
 						output_table_fields.push_back(output_time_field__YearStart);
 						output_table_fields.push_back(output_time_field__YearEnd);
 						time_range_mapping->input_file_fields = input_file_fields;
@@ -1066,8 +1072,22 @@ bool Table_VariableGroupData::BuildImportDefinition
 						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
 						int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
 						int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[1]];
-						input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
-						input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+						if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						}
+						else
+						{
+							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+						}
+						if (input_schema_vector[colindex_yearEnd].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						}
+						else
+						{
+							input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+						}
 
 					}
 
@@ -1240,33 +1260,29 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 
 		std::string flags;
 
-		switch (field_type)
+		if (IsFieldTypeInt32(field_type))
 		{
-
-			case FIELD_TYPE_STRING_FIXED:
-			case FIELD_TYPE_STRING_VAR:
-				{
-					add_stmt % "STRING";
-					flags = "s";
-				}
-				break;
-
-			case FIELD_TYPE_INT32:
-			case FIELD_TYPE_INT64:
-				{
-					add_stmt % "INT";
-					flags = "n";
-				}
-				break;
-
-				// Default to int
-			default:
-				{
-					add_stmt % "INT";
-					flags = "n";
-				}
-				break;
-
+			add_stmt % "INT";
+			flags = "n";
+		}
+		else
+		if (IsFieldTypeInt64(field_type))
+		{
+			add_stmt % "INT";
+			flags = "n";
+		}
+		else
+		if (IsFieldTypeFloat(field_type))
+		{
+			boost::format msg("Floating-point value not allowed as primary key field.");
+			sqlite3_free(errmsg);
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		else
+		if (IsFieldTypeString(field_type))
+		{
+			add_stmt % "STRING";
+			flags = "s";
 		}
 
 		char * errmsg = nullptr;

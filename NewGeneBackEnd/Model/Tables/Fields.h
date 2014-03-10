@@ -172,6 +172,58 @@ static std::string GetFieldDataTypeAsString(FIELD_TYPE const & field_type)
 
 }
 
+static std::string GetSqlLiteFieldDataTypeAsString(FIELD_TYPE const & field_type)
+{
+
+	std::string retStr;
+
+	switch (field_type)
+	{
+		case FIELD_TYPE_INT32:
+		case FIELD_TYPE_INT64:
+		case FIELD_TYPE_UINT32:
+		case FIELD_TYPE_UINT64:
+			{
+				retStr = "INTEGER";
+			}
+			break;
+
+		case FIELD_TYPE_STRING_FIXED:
+		case FIELD_TYPE_STRING_VAR:
+		case FIELD_TYPE_UUID:
+		case FIELD_TYPE_UUID_FOREIGN:
+		case FIELD_TYPE_STRING_CODE:
+		case FIELD_TYPE_STRING_LONGHAND:
+		case FIELD_TYPE_TIME_RANGE:
+		case FIELD_TYPE_NOTES_1:
+		case FIELD_TYPE_NOTES_2:
+		case FIELD_TYPE_NOTES_3:
+			{
+				retStr = "TEXT";
+			}
+			break;
+
+		case FIELD_TYPE_TIMESTAMP:
+			{
+				retStr = "INTEGER";
+			}
+			break;
+
+		case FIELD_TYPE_FLOAT:
+			{
+				retStr = "REAL";
+			}
+			break;
+
+		default:
+			{
+				retStr = "TEXT";
+			}
+			break;
+	}
+
+}
+
 static void FieldFactory(FIELD_TYPE field_type, std::string field_name, std::shared_ptr<BaseField> & field)
 {
 
