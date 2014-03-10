@@ -1219,8 +1219,7 @@ bool ValidateFieldData(BaseField & theField)
 	}
 	else if (theField.GetType() == FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC)
 	{
-		std::string test_field = theField.GetStringRef();
-		valid = Validation::ValidateDmuMemberUUID(test_field, true, errorMsg);
+		// no-op - integers already validated
 	}
 	else if (theField.GetType() == FIELD_TYPE_DMU_MEMBER_UUID_STRING)
 	{
