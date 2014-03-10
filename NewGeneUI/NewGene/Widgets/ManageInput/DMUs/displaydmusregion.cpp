@@ -964,7 +964,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 									ui->listView_dmus->setCurrentIndex(itemIndex);
 								}
 
-								QEvent * event = new QEvent(QEVENT_PROMPT_FOR_VG_REFRESH);
+								QEvent * event = new QEvent(QEVENT_PROMPT_FOR_DMU_REFRESH);
 								QApplication::postEvent(this, event);
 
 							}
