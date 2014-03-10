@@ -576,11 +576,25 @@ bool Table_VariableGroupData::BuildImportDefinition
 		if (!existing_column_identifiers.empty())
 		{
 
-			if (existing_column_identifiers.size() != colnames.size())
+			if (vg.time_granularity != TIME_GRANULARITY__NONE)
 			{
-				boost::format msg("The number of columns in the input file does not match the number of columns in the existing data.");
-				errorMsg = msg.str();
-				return false;
+				// Account for the two internal time range columns
+				if (existing_column_identifiers.size() - 2 != colnames.size())
+				{
+					boost::format msg("The number of columns in the input file does not match the number of columns in the existing data.");
+					errorMsg = msg.str();
+					return false;
+				}
+			}
+			else
+			{
+				if (existing_column_identifiers.size() != colnames.size())
+				{
+					boost::format msg("The number of columns in the input file does not match the number of columns in the existing data.");
+					errorMsg = msg.str();
+					return false;
+				}
+
 			}
 
 			bool mismatch = false;
