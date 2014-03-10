@@ -58,6 +58,9 @@ bool IsFieldTypeInt32(FIELD_TYPE const & field_type)
 		case FIELD_TYPE_INT32:
 		case FIELD_TYPE_UINT32:
 		case FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC:
+		case FIELD_TYPE_DAY:
+		case FIELD_TYPE_MONTH:
+		case FIELD_TYPE_YEAR:
 		{
 			returnVal = true;
 		}
@@ -85,6 +88,7 @@ bool IsFieldTypeInt64(FIELD_TYPE const & field_type)
 
 		case FIELD_TYPE_INT64:
 		case FIELD_TYPE_UINT64:
+		case FIELD_TYPE_TIMESTAMP:
 		{
 			returnVal = true;
 		}
@@ -220,7 +224,7 @@ struct FieldTypeTraits<FIELD_TYPE_STRING_VAR>
 template<>
 struct FieldTypeTraits<FIELD_TYPE_FLOAT>
 {
-	typedef long double type;
+	typedef double type;
 	static type const default_;
 };
 
@@ -304,7 +308,7 @@ struct FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_UUID>
 template<>
 struct FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC>
 {
-	typedef int type;
+	typedef std::int32_t type;
 	static type const default_ = 0;
 };
 
@@ -339,21 +343,21 @@ struct FieldTypeTraits<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID>
 template<>
 struct FieldTypeTraits<FIELD_TYPE_DAY>
 {
-	typedef int type;
+	typedef std::int32_t type;
 	static type const default_ = 0;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_MONTH>
 {
-	typedef int type;
+	typedef std::int32_t type;
 	static type const default_ = 0;
 };
 
 template<>
 struct FieldTypeTraits<FIELD_TYPE_YEAR>
 {
-	typedef int type;
+	typedef std::int32_t type;
 	static type const default_ = 0;
 };
 

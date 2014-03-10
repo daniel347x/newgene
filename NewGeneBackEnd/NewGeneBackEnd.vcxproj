@@ -163,6 +163,7 @@
     <ClCompile Include="Model\ModelManager.cpp" />
     <ClCompile Include="Model\OutputModel.cpp" />
     <ClCompile Include="Model\OutputModelDdlSql.cpp" />
+    <ClCompile Include="Model\Tables\Fields.cpp" />
     <ClCompile Include="Model\Tables\FieldTypes.cpp" />
     <ClCompile Include="Model\Tables\Import\Import.cpp" />
     <ClCompile Include="Model\Tables\Import\ImportDefinitions.cpp" />

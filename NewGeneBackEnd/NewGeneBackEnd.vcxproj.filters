@@ -572,5 +572,8 @@
     <ClCompile Include="UIAction\Controllers\Controller_VG_Management.cpp">
       <Filter>Source Files\UIAction\Controllers</Filter>
     </ClCompile>
+    <ClCompile Include="Model\Tables\Fields.cpp">
+      <Filter>Source Files\Model\Tables</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
