@@ -1332,8 +1332,8 @@ bool DisplayDMUsRegion::event ( QEvent * e )
 	if (e->type() == QEVENT_PROMPT_FOR_DMU_REFRESH)
 	{
 		WidgetInstanceIdentifier dmu_category;
-		WidgetInstanceIdentifiers dmu_category;
-		bool is_selected = GetSelectedDmuCategory(dmu_category, dmu_category);
+		WidgetInstanceIdentifiers dmu_members;
+		bool is_selected = GetSelectedDmuCategory(dmu_category, dmu_members);
 		if (!is_selected)
 		{
 			return true; // Even though no DMU is selected, we have recognized and processed our own custom event
