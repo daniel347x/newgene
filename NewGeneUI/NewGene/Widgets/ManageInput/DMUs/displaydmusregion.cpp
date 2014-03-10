@@ -308,6 +308,9 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
 
+		proposed_dmu_name.clear();
+		dmu_description.clear();
+
 		std::string errorMsg;
 
 		QLineEdit * proposed_dmu_name_field = fields[0];
@@ -516,6 +519,14 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
+
+		data_column_name_uuid.clear();
+		data_column_name_code.clear();
+		data_column_name_description.clear();
+
+		dataFileChooser.clear();
+		dataTimeRange.clear();
+
 		// data validation here
 		bool valid = true;
 
@@ -647,6 +658,10 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_member_by_hand_clicked()
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
+
+		proposed_dmu_member_uuid.clear();
+		proposed_dmu_member_code.clear();
+		proposed_dmu_member_description.clear();
 
 		bool valid = true;
 		std::string errorMsg;

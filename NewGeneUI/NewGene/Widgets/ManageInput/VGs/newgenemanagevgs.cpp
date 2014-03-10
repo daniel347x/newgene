@@ -482,6 +482,9 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
 
+		proposed_vg_code.clear();
+		vg_description.clear();
+
 		std::string errorMsg;
 
 		QLineEdit * proposed_vg_code_field = fields[0];
@@ -751,6 +754,18 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
+
+		data_column_name_uuid.clear();
+		data_column_name_code.clear();
+		data_column_name_description.clear();
+
+		dataFileChooser.clear();
+		dataTimeRange.clear();
+		dataDmuColNames.clear();
+
+		inputFileContainsColumnDescriptions = false;
+		inputFileContainsColumnDataTypes = false;
+
 		// data validation here
 		bool valid = true;
 

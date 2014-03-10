@@ -314,6 +314,9 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
 	{
 
+		proposed_uoa_code.clear();
+		uoa_description.clear();
+
 		std::string errorMsg;
 
 		QLineEdit * proposed_uoa_code_field = fields[0];

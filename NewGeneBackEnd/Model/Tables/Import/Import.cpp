@@ -841,12 +841,12 @@ void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_r
 		return;
 	}
 
-	ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, column, *field_entry, import_definition, line, current_column_index + 1, errorMsg);
+	ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, column, *field_entry, import_definition, line + 1, current_column_index + 1, errorMsg);
 
 }
 
 void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField,
-									   ImportDefinition const & import_definition, long line, long col, std::string & errorMsg)
+									   ImportDefinition const & import_definition, long line, int col, std::string & errorMsg)
 {
 
 	EatWhitespace(current_line_ptr, import_definition);

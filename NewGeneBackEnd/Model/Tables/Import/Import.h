@@ -401,7 +401,7 @@ class Importer
 	public:
 
 		static void InstantiateDataFieldInstance(FIELD_TYPE field_type, std::string field_name, DataFields &fields);
-		static void ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition, long const line, long const col, std::string & errorMsg);
+		static void ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField, ImportDefinition const & import_definition, long const line, int const col, std::string & errorMsg);
 		static void SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg);
 
 	protected:
