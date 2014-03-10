@@ -56,11 +56,13 @@ void InputModel::LoadTables()
 							return; // from lambda
 						}
 						Importer table_importer(new_definition, this, vg_instance_data.get(), Importer::INSERT_OR_FAIL, variable_group_identifier, InputModelImportTableFn);
-						bool success = table_importer.DoImport();
+						std::string errorMsg;
+						bool success = table_importer.DoImport(errorMsg);
 						if (!success)
 						{
-							// Todo: log warning
-							return; // from lambda
+							boost::format msg("Unable to refresh the DMU list from the file: %1%");
+							msg % errorMsg;
+							throw NewGeneException() << newgene_error_description(msg.str());
 						}
 					}
 				}
