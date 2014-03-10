@@ -102,9 +102,10 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 
 				std::string new_dmu(proposed_new_dmu);
 
-				boost::format msg("DMU category '%1%' successfully created.");
-				msg % boost::to_upper_copy(proposed_new_dmu);
-				messager.ShowMessageBox(msg.str());
+				// UI will provide dialog confirmation
+				//boost::format msg("DMU category '%1%' successfully created.");
+				//msg % boost::to_upper_copy(proposed_new_dmu);
+				//messager.ShowMessageBox(msg.str());
 
 				// ***************************************** //
 				// Prepare data to send back to user interface

@@ -20,6 +20,8 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 		explicit DisplayDMUsRegion(QWidget *parent = 0);
 		~DisplayDMUsRegion();
 
+		bool event ( QEvent * e );
+
 		void HandleChanges(DataChangeMessage const &);
 
 	protected:

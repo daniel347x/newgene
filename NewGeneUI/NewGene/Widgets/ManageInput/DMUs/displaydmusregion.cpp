@@ -964,6 +964,9 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 									ui->listView_dmus->setCurrentIndex(itemIndex);
 								}
 
+								QEvent * event = new QEvent(QEVENT_PROMPT_FOR_VG_REFRESH);
+								QApplication::postEvent(this, event);
+
 							}
 							break;
 
@@ -1318,5 +1321,47 @@ void DisplayDMUsRegion::ResetDmuMembersPane(WidgetInstanceIdentifier const & dmu
 	proxyModel->sort(0);
 	ui->listView_dmu_members->setModel(proxyModel);
 	if (oldSelectionModel) delete oldSelectionModel;
+
+}
+
+bool DisplayDMUsRegion::event ( QEvent * e )
+{
+
+	bool returnVal = false;
+
+	if (e->type() == QEVENT_PROMPT_FOR_DMU_REFRESH)
+	{
+		WidgetInstanceIdentifier dmu_category;
+		WidgetInstanceIdentifiers dmu_category;
+		bool is_selected = GetSelectedDmuCategory(dmu_category, dmu_category);
+		if (!is_selected)
+		{
+			return true; // Even though no DMU is selected, we have recognized and processed our own custom event
+		}
+
+		QMessageBox::StandardButton reply;
+		boost::format msg("DMU '%1%' successfully created.\n\nWould you like to import members for the new DMU \"%1%\" now?");
+		msg % *dmu_category.code;
+		boost::format msgTitle("Import data?");
+		reply = QMessageBox::question(nullptr, QString(msgTitle.str().c_str()), QString(msg.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+		if (reply == QMessageBox::Yes)
+		{
+			QEvent * event = new QEvent(QEVENT_CLICK_DMU_REFRESH);
+			QApplication::postEvent(this, event);
+		}
+		returnVal = true;
+	}
+	else
+	if (e->type() == QEVENT_CLICK_DMU_REFRESH)
+	{
+		ui->pushButton_refresh_dmu_members_from_file->click();
+		returnVal = true;
+	}
+	else
+	{
+		returnVal = QWidget::event(e);
+	}
+
+	return returnVal;
 
 }

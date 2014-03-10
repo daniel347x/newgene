@@ -3,6 +3,8 @@
 QEvent::Type QEVENT_NONE = QEvent::None;
 QEvent::Type QEVENT_PROMPT_FOR_VG_REFRESH = QEvent::None;
 QEvent::Type QEVENT_CLICK_VG_REFRESH = QEvent::None;
+QEvent::Type QEVENT_PROMPT_FOR_DMU_REFRESH = QEvent::None;
+QEvent::Type QEVENT_CLICK_DMU_REFRESH = QEvent::None;
 
 NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QApplication( argc, argv )
@@ -65,6 +67,8 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	QEVENT_NONE                            = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_NONE_HINT));
 	QEVENT_PROMPT_FOR_VG_REFRESH           = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_PROMPT_FOR_VG_REFRESH_HINT));
 	QEVENT_CLICK_VG_REFRESH                = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_CLICK_VG_REFRESH_HINT));
+	QEVENT_PROMPT_FOR_DMU_REFRESH          = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_PROMPT_FOR_DMU_REFRESH_HINT));
+	QEVENT_CLICK_DMU_REFRESH               = static_cast<QEvent::Type>(QEvent::registerEventType(QEVENT_CLICK_DMU_REFRESH_HINT));
 
 }
 

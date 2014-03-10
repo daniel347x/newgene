@@ -8,10 +8,14 @@
 #define QEVENT_NONE_HINT                                           (QEvent::User)
 #define QEVENT_PROMPT_FOR_VG_REFRESH_HINT                          (QEvent::User + 1)
 #define QEVENT_CLICK_VG_REFRESH_HINT                               (QEvent::User + 2)
+#define QEVENT_PROMPT_FOR_DMU_REFRESH_HINT                          (QEvent::User + 3)
+#define QEVENT_CLICK_DMU_REFRESH_HINT                               (QEvent::User + 4)
 
 extern QEvent::Type QEVENT_NONE;
 extern QEvent::Type QEVENT_PROMPT_FOR_VG_REFRESH;
 extern QEvent::Type QEVENT_CLICK_VG_REFRESH;
+extern QEvent::Type QEVENT_PROMPT_FOR_DMU_REFRESH;
+extern QEvent::Type QEVENT_CLICK_DMU_REFRESH;
 
 typedef std::pair<NewGeneWidget *, DataChangeMessage> WidgetChangeMessage;
 typedef std::vector<WidgetChangeMessage> WidgetChangeMessages;
