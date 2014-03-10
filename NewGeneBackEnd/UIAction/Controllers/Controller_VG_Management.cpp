@@ -365,6 +365,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						return;
 					}
 					ImportDefinition import_definition;
+					errorMsg.clear();
 					bool success = new_table->BuildImportDefinition(input_model.getDb(), &input_model, variable_group, timeRangeColumnNames, dmusAndColumnNames, filePathName, time_granularity, inputFileContainsColumnDescriptions, inputFileContainsColumnDataTypes, import_definition, errorMsg);
 					if (!success)
 					{
@@ -433,7 +434,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					}
 
 					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn);
-					std::string errorMsg;
+					errorMsg.clear();
 					success = table_importer.DoImport(errorMsg);
 					if (!success)
 					{
