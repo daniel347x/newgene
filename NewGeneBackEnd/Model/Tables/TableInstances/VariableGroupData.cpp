@@ -938,50 +938,62 @@ bool Table_VariableGroupData::BuildImportDefinition
 					if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
 					{
 						input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
 					}
 					else
 					{
 						input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+						ouput_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
 					}
 					if (input_schema_vector[colindex_monthStart].IsPrimaryKey())
 					{
 						input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+						output_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
 					}
 					else
 					{
 						input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
+						output_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
 					}
 					if (input_schema_vector[colindex_dayStart].IsPrimaryKey())
 					{
 						input_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
+						output_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
 					}
 					else
 					{
 						input_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DAY;
+						output_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DAY;
 					}
 					if (input_schema_vector[colindex_yearEnd].IsPrimaryKey())
 					{
 						input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
 					}
 					else
 					{
 						input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+						output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
 					}
 					if (input_schema_vector[colindex_monthEnd].IsPrimaryKey())
 					{
 						input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+						output_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
 					}
 					else
 					{
 						input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
+						output_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
 					}
 					if (input_schema_vector[colindex_dayEnd].IsPrimaryKey())
 					{
 						input_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
+						output_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
 					}
 					else
 					{
 						input_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DAY;
+						output_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DAY;
 					}
 
 				}
@@ -1043,10 +1055,12 @@ bool Table_VariableGroupData::BuildImportDefinition
 						if (input_schema_vector[colindex_year].IsPrimaryKey())
 						{
 							input_schema_vector[colindex_year].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							output_schema_vector[colindex_year].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
 						}
 						else
 						{
 							input_schema_vector[colindex_year].field_type = FIELD_TYPE_YEAR;
+							output_schema_vector[colindex_year].field_type = FIELD_TYPE_YEAR;
 						}
 
 					}
@@ -1075,18 +1089,22 @@ bool Table_VariableGroupData::BuildImportDefinition
 						if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
 						{
 							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
 						}
 						else
 						{
 							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+							output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
 						}
 						if (input_schema_vector[colindex_yearEnd].IsPrimaryKey())
 						{
 							input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
 						}
 						else
 						{
 							input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+							output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
 						}
 
 					}
