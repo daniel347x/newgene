@@ -58,7 +58,7 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 {
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 	
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [&db, &input_model_, this](DataChange const & change)
 	{
@@ -147,9 +147,10 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 		}
 	});
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 

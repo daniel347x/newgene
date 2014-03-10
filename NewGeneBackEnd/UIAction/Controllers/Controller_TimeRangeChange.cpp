@@ -51,6 +51,9 @@ void UIActionManager::DoTimeRangeChange(Messager & messager, WidgetActionItemReq
 
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
+
+				Executor executor(input_model.getDb());
+
 				if (!instanceActionItem.second)
 				{
 					return;
@@ -86,6 +89,8 @@ void UIActionManager::DoTimeRangeChange(Messager & messager, WidgetActionItemReq
 				// Update database and cache
 				// ***************************************** //
 				output_model.t_time_range.Update(output_model.getDb(), output_model, input_model, change_response);
+
+				executor.success();
 
 			});
 

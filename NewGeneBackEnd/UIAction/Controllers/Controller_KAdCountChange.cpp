@@ -51,10 +51,14 @@ void UIActionManager::DoKAdCountChange(Messager & messager, WidgetActionItemRequ
 
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
+
+				Executor executor(input_model.getDb());
+
 				if (!instanceActionItem.second)
 				{
 					return;
 				}
+
 				WidgetInstanceIdentifier const & identifier = instanceActionItem.first;
 				if (!identifier.uuid)
 				{
@@ -82,6 +86,8 @@ void UIActionManager::DoKAdCountChange(Messager & messager, WidgetActionItemRequ
 				// Update database and cache
 				// ***************************************** //
 				output_model.t_kad_count.Update(output_model.getDb(), output_model, input_model, change_response);
+
+				executor.success();
 
 			});
 

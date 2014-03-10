@@ -53,6 +53,9 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
+
+					Executor executor(input_model.getDb());
+
 					if (!instanceActionItem.second)
 					{
 						boost::format msg("Missing the new UOA to create.");
@@ -119,6 +122,8 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 
 					change_response.changes.push_back(change);
 
+					executor.success();
+
 				});
 
 				messager.EmitChangeMessage(change_response);
@@ -163,6 +168,8 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
+
+					Executor executor(input_model.getDb());
 
 					if (!instanceActionItem.second)
 					{
@@ -210,6 +217,8 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 					msg % boost::to_upper_copy(uoa_to_delete_display_text);
 					messager.ShowMessageBox(msg.str());
 
+					executor.success();
+
 				});
 
 				messager.EmitChangeMessage(change_response);
@@ -256,6 +265,8 @@ void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemReque
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&output_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
+					Executor executor(input_model.getDb());
+
 					WidgetInstanceIdentifier dmu = instanceActionItem.first;
 
 					if (!dmu.code || !dmu.uuid)
@@ -292,6 +303,8 @@ void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemReque
 							});
 						}
 					});
+
+					executor.success();
 
 				});
 

@@ -42,7 +42,7 @@ bool Table_GENERAL_OPTIONS::UpdateDoRandomSampling(sqlite3 * db, OutputModel & o
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [&db, &input_model_, this](DataChange const & change)
 	{
@@ -82,9 +82,10 @@ bool Table_GENERAL_OPTIONS::UpdateDoRandomSampling(sqlite3 * db, OutputModel & o
 		}
 	});
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
@@ -93,7 +94,7 @@ bool Table_GENERAL_OPTIONS::UpdateRandomSamplingCountPerStage(sqlite3 * db, Outp
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [&db, &input_model_, this](DataChange const & change)
 	{
@@ -133,9 +134,10 @@ bool Table_GENERAL_OPTIONS::UpdateRandomSamplingCountPerStage(sqlite3 * db, Outp
 		}
 	});
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 

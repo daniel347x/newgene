@@ -51,6 +51,9 @@ void UIActionManager::DoDoRandomSamplingChange(Messager & messager, WidgetAction
 
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
+
+					Executor executor(input_model.getDb());
+
 					if (!instanceActionItem.second)
 					{
 						return;
@@ -75,6 +78,8 @@ void UIActionManager::DoDoRandomSamplingChange(Messager & messager, WidgetAction
 					// Update database and cache
 					// ***************************************** //
 					output_model.t_general_options.UpdateDoRandomSampling(output_model.getDb(), output_model, input_model, change_response);
+
+					executor.success();
 
 				});
 
@@ -129,6 +134,9 @@ void UIActionManager::DoRandomSamplingCountPerStageChange(Messager & messager, W
 
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
+
+					Executor executor(input_model.getDb());
+
 					if (!instanceActionItem.second)
 					{
 						return;
@@ -153,6 +161,8 @@ void UIActionManager::DoRandomSamplingCountPerStageChange(Messager & messager, W
 					// Update database and cache
 					// ***************************************** //
 					output_model.t_general_options.UpdateRandomSamplingCountPerStage(output_model.getDb(), output_model, input_model, change_response);
+
+					executor.success();
 
 				});
 

@@ -51,6 +51,9 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
+
+				Executor executor(input_model.getDb());
+
 				if (!instanceActionItem.second)
 				{
 					return;
@@ -98,6 +101,8 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 				// ***************************************** //
 				std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
 				change_response.changes.back().set_of_identifiers = active_dmus;
+
+				executor.success();
 
 			});
 

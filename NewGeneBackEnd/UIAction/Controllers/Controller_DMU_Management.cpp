@@ -56,6 +56,9 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
+
+				Executor executor(input_model.getDb());
+
 				if (!instanceActionItem.second)
 				{
 					boost::format msg("Missing a new DMU category.");
@@ -123,6 +126,8 @@ void UIActionManager::AddDMU(Messager & messager, WidgetActionItemRequest_ACTION
 
 				change_response.changes.push_back(change);
 
+				executor.success();
+
 			});
 
 			messager.EmitChangeMessage(change_response);
@@ -168,6 +173,8 @@ void UIActionManager::DeleteDMU(Messager & messager, WidgetActionItemRequest_ACT
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
+				Executor executor(input_model.getDb());
+
 				WidgetInstanceIdentifier dmu = instanceActionItem.first;
 
 				if (!dmu.code || !dmu.uuid)
@@ -203,6 +210,8 @@ void UIActionManager::DeleteDMU(Messager & messager, WidgetActionItemRequest_ACT
 				boost::format msg("DMU category '%1%' successfully deleted.");
 				msg % boost::to_upper_copy(dmu_to_delete_code);
 				messager.ShowMessageBox(msg.str());
+
+				executor.success();
 
 			});
 
@@ -251,6 +260,8 @@ void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemReque
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&output_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
+				Executor executor(input_model.getDb());
+
 				WidgetInstanceIdentifier dmu = instanceActionItem.first;
 
 				if (!dmu.code || !dmu.uuid)
@@ -287,6 +298,8 @@ void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemReque
 						});
 					}
 				});
+
+				executor.success();
 
 			});
 
@@ -334,6 +347,8 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
+
+				Executor executor(input_model.getDb());
 
 				WidgetInstanceIdentifier dmu_category = instanceActionItem.first;
 				if (!dmu_category.uuid || dmu_category.uuid->empty())
@@ -400,6 +415,8 @@ void UIActionManager::AddDMUMembers(Messager & messager, WidgetActionItemRequest
 
 				change_response.changes.push_back(change);
 
+				executor.success();
+
 			});
 
 			boost::format msg("%1%");
@@ -452,6 +469,8 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&result_msg, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
+				Executor executor(input_model.getDb());
+
 				WidgetInstanceIdentifier const & dmu_member = instanceActionItem.first;
 
 				if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent)
@@ -477,6 +496,8 @@ void UIActionManager::DeleteDMUMembers(Messager & messager, WidgetActionItemRequ
 				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__REMOVE;
 				DataChange change(type, intention, dmu_member, WidgetInstanceIdentifiers());
 				change_response.changes.push_back(change);
+
+				executor.success();
 
 			});
 
@@ -527,6 +548,8 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
+				Executor executor(input_model.getDb());
+
 				WidgetInstanceIdentifier dmu_category = instanceActionItem.first;
 
 				if (!dmu_category.code || !dmu_category.uuid || dmu_category.code->empty() || dmu_category.uuid->empty())
@@ -575,6 +598,8 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 				DataChange change(type, intention, dmu_category, dmu_members);
 
 				change_response.changes.push_back(change);
+
+				executor.success();
 
 			});
 

@@ -74,7 +74,7 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, DataChangeMessage & change_message)
 {
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!db)
 	{
@@ -196,9 +196,10 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 	DataChange change(type, intention, vg, WidgetInstanceIdentifiers());
 	change_message.changes.push_back(change);
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
@@ -261,7 +262,7 @@ bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std:
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!uoa_to_use.uuid)
 	{
@@ -320,9 +321,10 @@ bool Table_VG_CATEGORY::CreateNewVG(sqlite3 * db, InputModel & input_model, std:
 
 	// Do not create the table here.  Wait for them to import data, and create the table then.
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 

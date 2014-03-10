@@ -54,6 +54,9 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
+
+					Executor executor(input_model.getDb());
+
 					if (!instanceActionItem.second)
 					{
 						boost::format msg("Missing the new VG to create.");
@@ -119,6 +122,8 @@ void UIActionManager::CreateVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 					change_response.changes.push_back(change);
 
+					executor.success();
+
 				});
 
 				messager.EmitChangeMessage(change_response);
@@ -164,6 +169,8 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
+					Executor executor(input_model.getDb());
+
 					WidgetInstanceIdentifier vg = instanceActionItem.first;
 
 					if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
@@ -199,6 +206,8 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 					boost::format msg("VG '%1%' successfully deleted.");
 					msg % Table_VG_CATEGORY::GetVgDisplayText(vg);
 					messager.ShowMessageBox(msg.str());
+
+					executor.success();
 
 				});
 
@@ -246,6 +255,8 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&output_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
+					Executor executor(input_model.getDb());
+
 					WidgetInstanceIdentifier dmu = instanceActionItem.first;
 
 					if (!dmu.code || !dmu.uuid)
@@ -283,10 +294,12 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 						}
 					});
 
+					executor.success();
+
 				});
 
 				messager.EmitChangeMessage(change_response);
-
+		
 			}
 			break;
 
@@ -327,6 +340,8 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
+
+					Executor executor(input_model.getDb());
 
 					if (!instanceActionItem.second)
 					{
@@ -462,6 +477,8 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
 					DataChange change(type, intention, variable_group, vg_members);
 					change_response.changes.push_back(change);
+
+					executor.success();
 
 				});
 

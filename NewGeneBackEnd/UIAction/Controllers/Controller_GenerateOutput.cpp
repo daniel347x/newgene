@@ -47,6 +47,7 @@ void UIActionManager::DoGenerateOutput(Messager & messager, WidgetActionItemRequ
 
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &output_model, &messager, &project, &change_response](InstanceActionItem const & instanceActionItem)
 			{
+
 				if (!instanceActionItem.second)
 				{
 					return;

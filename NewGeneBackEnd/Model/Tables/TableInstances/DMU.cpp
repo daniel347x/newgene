@@ -124,7 +124,7 @@ bool Table_DMU_Identifier::CreateNewDMU(sqlite3 * db, InputModel & input_model_,
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	bool already_exists = Exists(db, input_model_, dmu);
 	if (already_exists)
@@ -165,9 +165,10 @@ bool Table_DMU_Identifier::CreateNewDMU(sqlite3 * db, InputModel & input_model_,
 	identifiers.push_back(DMU_category_identifier);
 	Sort();
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
@@ -176,7 +177,7 @@ bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, Wi
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!dmu.code || !dmu.uuid)
 	{
@@ -233,9 +234,10 @@ bool Table_DMU_Identifier::DeleteDMU(sqlite3 * db, InputModel & input_model_, Wi
 	DataChange change(type, intention, dmu, WidgetInstanceIdentifiers());
 	change_message.changes.push_back(change);
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
@@ -397,7 +399,7 @@ WidgetInstanceIdentifier Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, In
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	bool already_exists = Exists(db, input_model_, dmu_category, dmu_member_uuid);
 	if (already_exists)
@@ -439,7 +441,7 @@ WidgetInstanceIdentifier Table_DMU_Instance::CreateNewDmuMember(sqlite3 * db, In
 	WidgetInstanceIdentifier dmu_member(dmu_member_uuid, dmu_category, dmu_member_code.c_str(), dmu_member_description.c_str(), 0);
 	identifiers_map[*dmu_category.uuid].push_back(dmu_member);
 
-	theExecutor.success();
+	//theExecutor.success();
 
 	return dmu_member;
 
@@ -450,7 +452,7 @@ bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent || !dmu_member.identifier_parent->code || !dmu_member.identifier_parent->uuid)
 	{
@@ -534,9 +536,10 @@ bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_
 		return false;
 	}), identifiers_map[*dmu_category.uuid].end());
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 

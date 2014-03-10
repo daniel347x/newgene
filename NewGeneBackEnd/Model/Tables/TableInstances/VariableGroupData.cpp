@@ -34,7 +34,7 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	Executor executor(db);
+	//Executor executor(db);
 
 	if (!variable_group.code || variable_group.code->empty() || !variable_group.uuid || variable_group.uuid->empty())
 	{
@@ -97,9 +97,10 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 
 	}
 
-	executor.success();
+	//executor.success();
 
-	return executor.succeeded();
+	//return executor.succeeded();
+	return true;
 
 }
 
@@ -195,7 +196,7 @@ Table_VariableGroupData * Table_VariableGroupData::GetInstanceTableFromTableName
 bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_)
 {
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!db)
 	{
@@ -229,9 +230,10 @@ bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_m
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
@@ -240,7 +242,7 @@ bool Table_VariableGroupData::DeleteDmuMemberRows(sqlite3 * db, InputModel * inp
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!dmu_member.uuid || dmu_member.uuid->empty() || !dmu_member.identifier_parent || !dmu_member.identifier_parent->code || !dmu_member.identifier_parent->uuid)
 	{
@@ -277,9 +279,10 @@ bool Table_VariableGroupData::DeleteDmuMemberRows(sqlite3 * db, InputModel * inp
 		stmt = nullptr;
 	}
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
@@ -1223,7 +1226,7 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 		std::vector<std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE>> const & primary_keys_info, std::string errorMsg)
 {
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!db)
 	{
@@ -1326,16 +1329,17 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 
 	});
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
 bool Table_VariableGroupMetadata_PrimaryKeys::DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
 {
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!db)
 	{
@@ -1363,9 +1367,10 @@ bool Table_VariableGroupMetadata_PrimaryKeys::DeleteDataTable(sqlite3 * db, Inpu
 	// delete from cache
 	identifiers_map.erase(table_name);
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
@@ -1455,7 +1460,7 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string errorMsg)
 {
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!db)
 	{
@@ -1506,16 +1511,17 @@ bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, Inp
 	identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(DefaultDatetimeStartColumnName));
 	identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(DefaultDatetimeEndColumnName));
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
 bool Table_VariableGroupMetadata_DateTimeColumns::DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
 {
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!db)
 	{
@@ -1543,8 +1549,9 @@ bool Table_VariableGroupMetadata_DateTimeColumns::DeleteDataTable(sqlite3 * db, 
 	// delete from cache
 	identifiers_map.erase(table_name);
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }

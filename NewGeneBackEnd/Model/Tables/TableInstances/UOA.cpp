@@ -249,7 +249,7 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	if (!uoa.uuid)
 	{
@@ -316,9 +316,10 @@ bool Table_UOA_Identifier::DeleteUOA(sqlite3 * db, InputModel & input_model_, Wi
 	DataChange change(type, intention, uoa, WidgetInstanceIdentifiers());
 	change_message.changes.push_back(change);
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
@@ -327,7 +328,7 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	std::string uoa_code = boost::trim_copy(new_uoa_code);
 
@@ -379,9 +380,10 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
 
@@ -575,7 +577,7 @@ bool Table_UOA_Member::CreateNewUOA(sqlite3 * db, InputModel & input_model, std:
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	Executor theExecutor(db);
+	//Executor theExecutor(db);
 
 	int sequence_number = 0;
 	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
@@ -618,8 +620,9 @@ bool Table_UOA_Member::CreateNewUOA(sqlite3 * db, InputModel & input_model, std:
 		}
 	});
 
-	theExecutor.success();
+	//theExecutor.success();
 
-	return theExecutor.succeeded();
+	//return theExecutor.succeeded();
+	return true;
 
 }
