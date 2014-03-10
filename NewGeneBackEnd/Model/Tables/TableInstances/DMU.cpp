@@ -546,7 +546,7 @@ bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_
 bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::vector<std::string> const & dmu_column_labels, Messager & messager)
 {
 
-	if (!dmu_category.code || dmu_category.code->empty() || dmu_category.uuid->empty())
+	if (!dmu_category.code || dmu_category.code->empty() || !dmu_category.uuid || dmu_category.uuid->empty())
 	{
 		boost::format msg("Invalid DMU category in refresh function.");
 		throw NewGeneException() << newgene_error_description(msg.str());
@@ -605,6 +605,29 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 
 	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn);
 
+	{
+
+		std::string sql = "DELETE FROM DMU_SET_MEMBER WHERE DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID = '";
+		sql += *dmu_category.uuid;
+		sql += "'";
+		sqlite3_stmt * stmt = NULL;
+		int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+		if (stmt == NULL)
+		{
+			boost::format msg("Cannot create SQL \"%1%\" in DMU member import: %2%");
+			msg % sql % sqlite3_errstr(err);
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		int step_result = 0;
+		if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
+		{
+			boost::format msg("Cannot execute SQL \"%1%\" in DMU member import: %2%");
+			msg % sql % sqlite3_errstr(err);
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+	}
+
 	std::string errorMsg;
 	bool success = table_importer.DoImport(errorMsg, messager);
 	if (!success)
@@ -612,6 +635,74 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 		boost::format msg("Unable to refresh the DMU list from the file: %1%");
 		msg % errorMsg;
 		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	{
+
+		std::string sql = "SELECT * FROM DMU_SET_MEMBER WHERE DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID = '";
+		sql += *dmu_category.uuid;
+		sql += "'";
+		sqlite3_stmt * stmt = NULL;
+		int err = sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt, NULL);
+		if (stmt == NULL)
+		{
+			boost::format msg("Cannot create SQL \"%1%\" in DMU member import: %2%");
+			msg % sql % sqlite3_errstr(err);
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		int step_result = 0;
+		while ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
+		{
+			// Append to cache
+			char const * uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_UUID));
+			char const * code = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_STRING_CODE));
+			char const * longhand = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_STRING_LONGHAND));
+			char const * notes1 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_NOTES1));
+			char const * notes2 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_NOTES2));
+			char const * notes3 = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_NOTES3));
+			char const * fk_DMU_uuid = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID));
+			char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__DMU_SET_MEMBER_FLAGS));
+			if (uuid && fk_DMU_uuid)
+			{
+				std::string code_string;
+				if (code)
+				{
+					code_string = code;
+				}
+				std::string longhand_string;
+				if (longhand)
+				{
+					longhand_string = longhand;
+				}
+				std::string flags_string;
+				if (flags)
+				{
+					flags_string = flags;
+				}
+				std::string notes_string_1;
+				if (notes1)
+				{
+					notes_string_1 = notes1;
+				}
+				std::string notes_string_2;
+				if (notes2)
+				{
+					notes_string_2 = notes2;
+				}
+				std::string notes_string_3;
+				if (notes3)
+				{
+					notes_string_3 = notes3;
+				}
+				identifiers_map[*dmu_category.uuid].push_back(WidgetInstanceIdentifier(uuid, input_model_.t_dmu_category.getIdentifier(fk_DMU_uuid), code_string.c_str(), longhand_string.c_str(), 0, flags_string.c_str(), TIME_GRANULARITY__NONE, MakeNotes(notes_string_1.c_str(), notes_string_2.c_str(), notes_string_3.c_str())));
+			}
+		}
+		if (stmt)
+		{
+			sqlite3_finalize(stmt);
+			stmt = nullptr;
+		}
+
 	}
 
 	return true;
