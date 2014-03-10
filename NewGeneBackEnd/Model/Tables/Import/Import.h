@@ -11,6 +11,7 @@
 #endif
 
 #include "../../../Utilities/WidgetIdentifier.h"
+#include "../../../Messager/Messager.h"
 
 class NameOrIndex
 {
