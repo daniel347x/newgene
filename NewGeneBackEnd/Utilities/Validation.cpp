@@ -536,7 +536,7 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 	if (valid)
 	{
 
-		std::string regex_string("([a-zA-Z_]+)");
+		std::string regex_string("([a-zA-Z0-9_]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
@@ -557,7 +557,7 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 				}
 				else
 				{
-					boost::format msg("The VG code is invalid.  Only letters and underscores are allowed.");
+					boost::format msg("The VG code is invalid.  Only letters, numbers, and underscores are allowed.");
 					errorMsg = msg.str();
 					valid = false;
 				}
@@ -565,14 +565,14 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 			}
 			else
 			{
-				boost::format msg("The VG code is invalid.  Only letters and underscores are allowed.");
+				boost::format msg("The VG code is invalid.  Only letters, numbers, and underscores are allowed.");
 				errorMsg = msg.str();
 				valid = false;
 			}
 		}
 		else
 		{
-			boost::format msg("The VG code is invalid.  Only letters and underscores are allowed.");
+			boost::format msg("The VG code is invalid.  Only letters, numbers, and underscores are allowed.");
 			errorMsg = msg.str();
 			valid = false;
 		}
