@@ -1369,7 +1369,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 	ImportDefinition const & import_definition, long const line, int const col)
 {
 
-	int number_chars_read = 0;
+	size_t number_chars_read = 0;
 
 	// For all data types, retrieve the full field as a string, to start
 	RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);

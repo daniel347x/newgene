@@ -8,9 +8,9 @@
 enum FIELD_TYPE
 {
 
-	  FIELD_TYPE_UNKNOWN = 0
+	FIELD_TYPE_UNKNOWN = 0
 
-	, FIELD_TYPE_INT32
+						 , FIELD_TYPE_INT32
 	, FIELD_TYPE_INT64
 	, FIELD_TYPE_UINT32
 	, FIELD_TYPE_UINT64
@@ -56,132 +56,11 @@ enum FIELD_TYPE
 
 };
 
-bool IsFieldTypeInt32(FIELD_TYPE const & field_type)
-{
-
-	bool returnVal = false;
-
-	switch (field_type)
-	{
-
-		case FIELD_TYPE_INT32:
-		case FIELD_TYPE_UINT32:
-		case FIELD_TYPE_DMU_MEMBER_UUID_NUMERIC:
-		case FIELD_TYPE_DAY:
-		case FIELD_TYPE_MONTH:
-		case FIELD_TYPE_YEAR:
-		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY:
-		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH:
-		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR:
-		{
-			returnVal = true;
-		}
-		break;
-
-		default:
-		{
-			returnVal = false;
-		}
-		break;
-
-	}
-
-	return returnVal;
-
-}
-
-bool IsFieldTypeInt64(FIELD_TYPE const & field_type)
-{
-
-	bool returnVal = false;
-
-	switch (field_type)
-	{
-
-		case FIELD_TYPE_INT64:
-		case FIELD_TYPE_UINT64:
-		case FIELD_TYPE_TIMESTAMP:
-		case FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME:
-		case FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME:
-		{
-			returnVal = true;
-		}
-		break;
-
-		default:
-		{
-			returnVal = false;
-		}
-		break;
-
-	}
-
-	return returnVal;
-
-}
-
-bool IsFieldTypeInt(FIELD_TYPE const & field_type)
-{
-
-	bool returnVal = false;
-
-	if (IsFieldTypeInt32(field_type))
-	{
-		returnVal = true;
-	}
-
-	if (IsFieldTypeInt64(field_type))
-	{
-		returnVal = true;
-	}
-
-	return returnVal;
-
-}
-
-bool IsFieldTypeFloat(FIELD_TYPE const & field_type)
-{
-
-	bool returnVal = false;
-
-	switch (field_type)
-	{
-
-		case FIELD_TYPE_FLOAT:
-		{
-			returnVal = true;
-		}
-		break;
-
-		default:
-		{
-			returnVal = false;
-		}
-		break;
-
-	}
-
-	return returnVal;
-
-}
-
-bool IsFieldTypeString(FIELD_TYPE const & field_type)
-{
-
-	bool returnVal = true;
-
-	if (IsFieldTypeInt(field_type))
-	{
-		returnVal = false;
-	}
-	if (IsFieldTypeFloat(field_type))
-	{
-		returnVal = false;
-	}
-
-	return returnVal;
-
-}
+bool IsFieldTypeInt32(FIELD_TYPE const & field_type);
+bool IsFieldTypeInt64(FIELD_TYPE const & field_type);
+bool IsFieldTypeInt(FIELD_TYPE const & field_type);
+bool IsFieldTypeFloat(FIELD_TYPE const & field_type);
+bool IsFieldTypeString(FIELD_TYPE const & field_type);
 
 template<FIELD_TYPE THE_FIELD_TYPE>
 struct FieldTypeTraits
