@@ -1112,7 +1112,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 	return current_lines_read;
 }
 
-bool Importer::DoImport()
+bool Importer::DoImport(std::string & errorMsg)
 {
 
 	InputModel * inputModel = nullptr;
@@ -1126,12 +1126,16 @@ bool Importer::DoImport()
 		}
 		catch (std::bad_cast &)
 		{
+			boost::format msg("Bad input mode in DoImport.");
+			errorMsg = msg.str();
 			return false;
 		}
 
 		if (!table->ImportStart(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
 		{
-			// Todo: log warning
+			boost::format msg("Failed to start input data import.");
+			errorMsg = msg.str();
+			return false;
 			return false;
 		}
 	}
@@ -1144,6 +1148,8 @@ bool Importer::DoImport()
 		}
 		catch (std::bad_cast &)
 		{
+			boost::format msg("Bad output mode in DoImport.");
+			errorMsg = msg.str();
 			return false;
 		}
 
@@ -1151,7 +1157,8 @@ bool Importer::DoImport()
 
 		if (!table->ImportStart(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
 		{
-			// Todo: log warning
+			boost::format msg("Failed to start output data import.");
+			errorMsg = msg.str();
 			return false;
 		}
 	}
@@ -1177,6 +1184,8 @@ bool Importer::DoImport()
 			if (!data_file.good())
 			{
 				data_file.close();
+				boost::format msg("Failed to read column names row from the input file.");
+				errorMsg = msg.str();
 				return true;
 			}
 
@@ -1191,6 +1200,11 @@ bool Importer::DoImport()
 			std::string errorMsg;
 			std::for_each(import_definition.input_schema.schema.cbegin(), import_definition.input_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
 			{
+
+				if (bad)
+				{
+					return;
+				}
 				
 				// Validate column name
 				std::string test_col_name = schema_entry.field_name;
@@ -1201,6 +1215,8 @@ bool Importer::DoImport()
 				}
 				if (!validated)
 				{
+					boost::format msg("Bad column name in input file.");
+					errorMsg = msg.str();
 					bad = true;
 				}
 
@@ -1213,6 +1229,8 @@ bool Importer::DoImport()
 				}
 				if (!validated)
 				{
+					boost::format msg("Bad column description in input file.");
+					errorMsg = msg.str();
 					bad = true;
 				}
 
@@ -1236,6 +1254,8 @@ bool Importer::DoImport()
 			if (!data_file.good())
 			{
 				data_file.close();
+				boost::format msg("Failed to read the column description row in the input file.");
+				errorMsg = msg.str();
 				return true;
 			}
 
@@ -1254,6 +1274,8 @@ bool Importer::DoImport()
 			if (!data_file.good())
 			{
 				data_file.close();
+				boost::format msg("Failed to read the data type row in the input file.");
+				errorMsg = msg.str();
 				return true;
 			}
 
@@ -1263,12 +1285,6 @@ bool Importer::DoImport()
 
 		}
 
-		if (!data_file.good())
-		{
-			data_file.close();
-			return true;
-		}
-
 		InitializeFields();
 
 		// validate
@@ -1276,6 +1292,8 @@ bool Importer::DoImport()
 		{
 			// TODO: Error logging
 			data_file.close();
+			boost::format msg("Bad mapping of input to output columns.");
+			errorMsg = msg.str();
 			return false;
 		}
 
@@ -1289,7 +1307,8 @@ bool Importer::DoImport()
 
 			if (currently_read_lines == -1)
 			{
-				// Todo: log warning
+				boost::format msg("Failed to read block of data from input file.");
+				errorMsg = msg.str();
 				return false;
 			}
 			else if (currently_read_lines == 0)
@@ -1304,7 +1323,8 @@ bool Importer::DoImport()
 
 				if (!write_succeeded)
 				{
-					// Todo: log warning
+					boost::format msg("Failed to write block of data to the database.");
+					errorMsg = msg.str();
 					return false;
 				}
 			}
@@ -1314,7 +1334,8 @@ bool Importer::DoImport()
 	}
 	else
 	{
-		// Todo: log file open failure warning
+		boost::format msg("Failed open input file.");
+		errorMsg = msg.str();
 		return false;
 	}
 
@@ -1322,7 +1343,8 @@ bool Importer::DoImport()
 	{
 		if (!table->ImportEnd(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
 		{
-			// Todo: log warning
+			boost::format msg("Failed to end input data import.");
+			errorMsg = msg.str();
 			return false;
 		}
 
@@ -1332,7 +1354,8 @@ bool Importer::DoImport()
 	{
 		if (!table->ImportEnd(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
 		{
-			// Todo: log warning
+			boost::format msg("Failed to end output data import.");
+			errorMsg = msg.str();
 			return false;
 		}
 	}

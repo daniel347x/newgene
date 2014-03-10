@@ -379,7 +379,7 @@ class Importer
 
 		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_);
 
-		bool DoImport();
+		bool DoImport(std::string & errorMsg);
 
 	protected:
 	

@@ -433,11 +433,13 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					}
 
 					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn);
-					success = table_importer.DoImport();
+					std::string errorMsg;
+					success = table_importer.DoImport(errorMsg);
 					if (!success)
 					{
 						new_table->DeleteDataTable(input_model.getDb(), &input_model);
-						boost::format msg("Unable to import or refresh the variable group from the file.");
+						boost::format msg("Unable to import or refresh the variable group from the file: %1%");
+						msg % errorMsg;
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
