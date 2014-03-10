@@ -585,6 +585,9 @@ bool Table_VariableGroupData::BuildImportDefinition
 					errorMsg = msg.str();
 					return false;
 				}
+				// ... and remove them for the following test
+				existing_column_identifiers.pop_back();
+				existing_column_identifiers.pop_back();
 			}
 			else
 			{
