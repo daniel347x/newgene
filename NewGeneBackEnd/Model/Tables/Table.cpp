@@ -183,7 +183,7 @@ void Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field
 	else
 	if (IsFieldTypeFloat(field_type))
 	{
-		sql_insert += boost::lexical_cast<std::string>(field_data->GetDoubleRef());
+		sql_insert += boost::lexical_cast<std::string>(field_data->GetDouble());
 	}
 	else
 	if (IsFieldTypeString(field_type))

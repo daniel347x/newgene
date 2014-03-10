@@ -58,6 +58,11 @@ class BaseField
 		double GetDouble() const;
 		std::string GetString() const;
 
+		void SetValueInt64(std::int64_t const & val);
+		void SetValueInt32(std::int32_t const & val);
+		void SetValueDouble(double const & val);
+		void SetValueString(std::string const & val);
+
 	protected:
 
 		BaseField(BaseField const &) : field_type(FIELD_TYPE_UNKNOWN), field_name(std::string()) {}
@@ -99,6 +104,7 @@ class Field : public BaseField
 			std::get<2>(data).value = value_;
 		}
 
+
 		typename FieldData<THE_FIELD_TYPE>::type data;
 
 
@@ -107,5 +113,109 @@ class Field : public BaseField
 		Field<THE_FIELD_TYPE>(Field<THE_FIELD_TYPE> const &) {}
 
 };
+
+static void FieldFactory(FIELD_TYPE field_type, std::string field_name, std::shared_ptr<BaseField> & field)
+{
+
+	switch (field_type)
+	{
+		case FIELD_TYPE_INT32:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_INT32>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_INT64:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_INT64>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_UINT32:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_UINT32>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_UINT64:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_UINT64>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_STRING_FIXED:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_STRING_FIXED>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_STRING_VAR:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_STRING_VAR>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_FLOAT:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_FLOAT>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_TIMESTAMP:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_TIMESTAMP>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_UUID:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_UUID>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_UUID_FOREIGN:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_UUID_FOREIGN>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_STRING_CODE:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_STRING_CODE>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_STRING_LONGHAND:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_STRING_LONGHAND>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_TIME_RANGE:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_TIME_RANGE>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_NOTES_1:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_NOTES_1>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_NOTES_2:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_NOTES_2>>(field_name);
+			}
+			break;
+
+		case FIELD_TYPE_NOTES_3:
+			{
+				field = std::make_shared<Field<FIELD_TYPE_NOTES_3>>(field_name);
+			}
+			break;
+	}
+
+}
 
 #endif

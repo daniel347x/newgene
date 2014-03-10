@@ -1295,138 +1295,26 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 									return;
 								}
 
-								// map them
-								try
+								if (IsFieldTypeInt32(the_input_field->GetType()))
 								{
-									switch (the_input_field->GetType())
-									{
-										case FIELD_TYPE_INT32:
-											{
-												Field<FIELD_TYPE_INT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_input_field);
-												Field<FIELD_TYPE_INT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_INT64:
-											{
-												Field<FIELD_TYPE_INT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_input_field);
-												Field<FIELD_TYPE_INT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_UINT32:
-											{
-												Field<FIELD_TYPE_UINT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_input_field);
-												Field<FIELD_TYPE_UINT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_UINT64:
-											{
-												Field<FIELD_TYPE_UINT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_input_field);
-												Field<FIELD_TYPE_UINT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_STRING_FIXED:
-											{
-												Field<FIELD_TYPE_STRING_FIXED> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_input_field);
-												Field<FIELD_TYPE_STRING_FIXED> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_STRING_VAR:
-											{
-												Field<FIELD_TYPE_STRING_VAR> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_input_field);
-												Field<FIELD_TYPE_STRING_VAR> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_TIMESTAMP:
-											{
-												Field<FIELD_TYPE_TIMESTAMP> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_input_field);
-												Field<FIELD_TYPE_TIMESTAMP> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_UUID:
-											{
-												Field<FIELD_TYPE_UUID> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_input_field);
-												Field<FIELD_TYPE_UUID> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_UUID_FOREIGN:
-											{
-												Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_input_field);
-												Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_STRING_CODE:
-											{
-												Field<FIELD_TYPE_STRING_CODE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_input_field);
-												Field<FIELD_TYPE_STRING_CODE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_STRING_LONGHAND:
-											{
-												Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_input_field);
-												Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_TIME_RANGE:
-											{
-												Field<FIELD_TYPE_TIME_RANGE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_input_field);
-												Field<FIELD_TYPE_TIME_RANGE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_NOTES_1:
-											{
-												Field<FIELD_TYPE_NOTES_1> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_input_field);
-												Field<FIELD_TYPE_NOTES_1> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_NOTES_2:
-											{
-												Field<FIELD_TYPE_NOTES_2> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_input_field);
-												Field<FIELD_TYPE_NOTES_2> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_NOTES_3:
-											{
-												Field<FIELD_TYPE_NOTES_3> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_input_field);
-												Field<FIELD_TYPE_NOTES_3> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-									}
+									the_output_field->SetValueInt32(the_input_field->GetInt32Ref());
 								}
-								catch (std::bad_cast &)
+								else
+								if (IsFieldTypeInt64(the_input_field->GetType()))
 								{
-									// Todo: log warning
-									stop = true;
-									return;
+									the_output_field->SetValueInt64(the_input_field->GetInt64Ref());
 								}
+								else
+								if (IsFieldTypeFloat(the_input_field->GetType()))
+								{
+									the_output_field->SetValueDouble(the_input_field->GetDouble());
+								}
+								else
+								if (IsFieldTypeString(the_input_field->GetType()))
+								{
+									the_output_field->SetValueString(the_input_field->GetString());
+								}
+
 							}
 
 						}
@@ -1687,320 +1575,49 @@ void Importer::EatSeparator(char *& current_line_ptr, ImportDefinition const & i
 }
 
 void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField, char *& current_line_ptr, char *& parsed_line_ptr, bool & stop,
-								ImportDefinition const & import_definition)
+	ImportDefinition const & import_definition)
 {
-	try
-	{
-		int number_chars_read = 0;
 
-		switch (column.field_type)
+	int number_chars_read = 0;
+
+	if (IsFieldTypeInt32(theField.GetType()))
+	{
+		sscanf(current_line_ptr, "%d%n", &theField.GetInt32Ref(), &number_chars_read);
+		current_line_ptr += number_chars_read;
+	}
+	else
+	if (IsFieldTypeInt64(theField.GetType()))
+	{
+		sscanf(current_line_ptr, "%I64d%n", &theField.GetInt64Ref(), &number_chars_read);
+		current_line_ptr += number_chars_read;
+	}
+	else
+	if (IsFieldTypeFloat(theField.GetType()))
+	{
+		double temp;
+		sscanf(current_line_ptr, "%lf%n", &temp, &number_chars_read);
+		theField.SetValueDouble(temp);
+		current_line_ptr += number_chars_read;
+	}
+	else
+	if (IsFieldTypeString(theField.GetType()))
+	{
+		RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
+
+		if (stop)
 		{
-			case FIELD_TYPE_INT32:
-				{
-					Field<FIELD_TYPE_INT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT32>&>(theField);
-					sscanf(current_line_ptr, "%d%n", &data_entry.GetValueReference(), &number_chars_read);
-					current_line_ptr += number_chars_read;
-				}
-				break;
-
-			case FIELD_TYPE_INT64:
-				{
-					Field<FIELD_TYPE_INT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_INT64>&>(theField);
-					sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
-					current_line_ptr += number_chars_read;
-				}
-				break;
-
-			case FIELD_TYPE_UINT32:
-				{
-					Field<FIELD_TYPE_UINT32> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(theField);
-					sscanf(current_line_ptr, "%d%n", &data_entry.GetValueReference(), &number_chars_read);
-					current_line_ptr += number_chars_read;
-				}
-				break;
-
-			case FIELD_TYPE_UINT64:
-				{
-					Field<FIELD_TYPE_UINT64> & data_entry = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(theField);
-					sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
-					current_line_ptr += number_chars_read;
-				}
-				break;
-
-			case FIELD_TYPE_STRING_FIXED:
-				{
-					Field<FIELD_TYPE_STRING_FIXED> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-					if (stop)
-					{
-						return;
-					}
-
-					data_entry.SetValue(parsed_line_ptr);
-				}
-				break;
-
-			case FIELD_TYPE_STRING_VAR:
-				{
-					Field<FIELD_TYPE_STRING_VAR> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-					if (stop)
-					{
-						return;
-					}
-
-					data_entry.SetValue(parsed_line_ptr);
-				}
-				break;
-
-			case FIELD_TYPE_FLOAT:
-				{
-					Field<FIELD_TYPE_FLOAT> & data_entry = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(theField);
-					float temp;
-					sscanf(current_line_ptr, "%f%n", &temp, &number_chars_read);
-					data_entry.GetValueReference() = temp;
-					current_line_ptr += number_chars_read;
-				}
-				break;
-
-			case FIELD_TYPE_TIMESTAMP:
-				{
-					Field<FIELD_TYPE_TIMESTAMP> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(theField);
-					sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference());
-					current_line_ptr += number_chars_read;
-				}
-				break;
-
-			case FIELD_TYPE_UUID:
-				{
-					Field<FIELD_TYPE_UUID> & data_entry = dynamic_cast<Field<FIELD_TYPE_UUID>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-					if (stop)
-					{
-						return;
-					}
-
-					data_entry.SetValue(parsed_line_ptr);
-				}
-				break;
-
-			case FIELD_TYPE_UUID_FOREIGN:
-				{
-					Field<FIELD_TYPE_UUID_FOREIGN> & data_entry = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-					if (stop)
-					{
-						return;
-					}
-
-					data_entry.SetValue(parsed_line_ptr);
-				}
-				break;
-
-			case FIELD_TYPE_STRING_CODE:
-				{
-					Field<FIELD_TYPE_STRING_CODE> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-					if (stop)
-					{
-						return;
-					}
-
-					data_entry.SetValue(parsed_line_ptr);
-				}
-				break;
-
-			case FIELD_TYPE_STRING_LONGHAND:
-				{
-					Field<FIELD_TYPE_STRING_LONGHAND> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-					if (stop)
-					{
-						return;
-					}
-
-					data_entry.SetValue(parsed_line_ptr);
-				}
-				break;
-
-			case FIELD_TYPE_TIME_RANGE:
-				{
-					Field<FIELD_TYPE_TIME_RANGE> & data_entry = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(theField);
-					sscanf(current_line_ptr, "%I64d%n", &data_entry.GetValueReference(), &number_chars_read);
-				}
-				break;
-
-			case FIELD_TYPE_NOTES_1:
-				{
-					Field<FIELD_TYPE_NOTES_1> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-					if (stop)
-					{
-						return;
-					}
-
-					data_entry.SetValue(parsed_line_ptr);
-				}
-				break;
-
-			case FIELD_TYPE_NOTES_2:
-				{
-					Field<FIELD_TYPE_NOTES_2> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-					if (stop)
-					{
-						return;
-					}
-
-					data_entry.SetValue(parsed_line_ptr);
-				}
-				break;
-
-			case FIELD_TYPE_NOTES_3:
-				{
-					Field<FIELD_TYPE_NOTES_3> & data_entry = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(theField);
-					RetrieveStringField(current_line_ptr, parsed_line_ptr, stop, import_definition);
-
-					if (stop)
-					{
-						return;
-					}
-
-					data_entry.SetValue(parsed_line_ptr);
-				}
-				break;
+			return;
 		}
+
+		theField.SetValueString(parsed_line_ptr);
 	}
-	catch (std::bad_cast &)
-	{
-		// Todo: log warning here
-		stop = true;
-		return;
-	}
+
 }
 
 void Importer::InstantiateDataFieldInstance(FIELD_TYPE field_type, std::string field_name, DataFields & fields)
 {
-	switch (field_type)
-	{
-		case FIELD_TYPE_INT32:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_INT32>> field = std::make_shared<Field<FIELD_TYPE_INT32>>(field_name);
-				fields.push_back(field);
-			}
-			break;
 
-		case FIELD_TYPE_INT64:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_INT64>> field = std::make_shared<Field<FIELD_TYPE_INT64>>(field_name);
-				fields.push_back(field);
-			}
-			break;
+	std::shared_ptr<BaseField> field;
+	FieldFactory(field_type, field_name, field);
 
-		case FIELD_TYPE_UINT32:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_UINT32>> field = std::make_shared<Field<FIELD_TYPE_UINT32>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_UINT64:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_UINT64>> field = std::make_shared<Field<FIELD_TYPE_UINT64>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_STRING_FIXED:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_STRING_FIXED>> field = std::make_shared<Field<FIELD_TYPE_STRING_FIXED>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_STRING_VAR:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_STRING_VAR>> field = std::make_shared<Field<FIELD_TYPE_STRING_VAR>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_FLOAT:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_FLOAT>> field = std::make_shared<Field<FIELD_TYPE_FLOAT>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_TIMESTAMP:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_TIMESTAMP>> field = std::make_shared<Field<FIELD_TYPE_TIMESTAMP>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_UUID:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_UUID>> field = std::make_shared<Field<FIELD_TYPE_UUID>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_UUID_FOREIGN:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_UUID_FOREIGN>> field = std::make_shared<Field<FIELD_TYPE_UUID_FOREIGN>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_STRING_CODE:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_STRING_CODE>> field = std::make_shared<Field<FIELD_TYPE_STRING_CODE>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_STRING_LONGHAND:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_STRING_LONGHAND>> field = std::make_shared<Field<FIELD_TYPE_STRING_LONGHAND>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_TIME_RANGE:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_TIME_RANGE>> field = std::make_shared<Field<FIELD_TYPE_TIME_RANGE>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_NOTES_1:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_NOTES_1>> field = std::make_shared<Field<FIELD_TYPE_NOTES_1>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_NOTES_2:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_NOTES_2>> field = std::make_shared<Field<FIELD_TYPE_NOTES_2>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-
-		case FIELD_TYPE_NOTES_3:
-			{
-				std::shared_ptr<Field<FIELD_TYPE_NOTES_3>> field = std::make_shared<Field<FIELD_TYPE_NOTES_3>>(field_name);
-				fields.push_back(field);
-			}
-			break;
-	}
 }
