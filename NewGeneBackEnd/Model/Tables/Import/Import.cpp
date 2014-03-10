@@ -1166,6 +1166,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 		}
 		messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SHOW, 0, 0, 0);
 		messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SET_LIMITS, 0, linenum, 0);
+		data_file_count_lines.close();
 	}
 	else
 	{

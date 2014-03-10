@@ -99,7 +99,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="label_importProgress">
         <property name="text">
          <string>Import progress</string>
         </property>
