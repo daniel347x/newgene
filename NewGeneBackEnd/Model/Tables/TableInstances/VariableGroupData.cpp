@@ -307,9 +307,9 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 	definition.primary_keys_info.clear();
 
-	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty() || !vg.identifier_parent || !vg.identifier_parent->uuid || vg.identifier_parent->uuid->empty())
 	{
-		boost::format msg("Missing the VG to refresh in the model.");
+		boost::format msg("Missing the VG or its associated UOA to refresh in the model.");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
@@ -576,7 +576,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		if (!existing_column_identifiers.empty())
 		{
 
-			if (vg.time_granularity != TIME_GRANULARITY__NONE)
+			if (vg.identifier_parent->time_granularity != TIME_GRANULARITY__NONE)
 			{
 				// Account for the two internal time range columns
 				if (existing_column_identifiers.size() - 2 != colnames.size())
