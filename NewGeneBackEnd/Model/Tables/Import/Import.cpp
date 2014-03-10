@@ -114,26 +114,21 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				Field<FIELD_TYPE_STRING_FIXED> const & the_input_field_start_string = static_cast<Field<FIELD_TYPE_STRING_FIXED> const &>(*the_input_field_datetime_start);
-				Field<FIELD_TYPE_STRING_FIXED> const & the_input_field_end_string = static_cast<Field<FIELD_TYPE_STRING_FIXED> const &>(*the_input_field_datetime_end);
-				Field<FIELD_TYPE_INT64> & the_output_field_start_int = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_datetime_start);
-				Field<FIELD_TYPE_INT64> & the_output_field_end_int = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_datetime_end);
-
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
 				int year = 0, month = 0, day = 0;
-				ConvertStringToDate(year, month, day, the_input_field_start_string.GetValueReference());
+				ConvertStringToDate(year, month, day, the_input_field_datetime_start->GetStringRef());
 				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year, month, day));
 
 				year = 0; month = 0; day = 0;
-				ConvertStringToDate(year, month, day, the_input_field_end_string.GetValueReference());
+				ConvertStringToDate(year, month, day, the_input_field_datetime_end->GetStringRef());
 				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year, month, day));
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-				the_output_field_start_int.SetValue(diff_start_from_1970.total_milliseconds());
-				the_output_field_end_int.SetValue(diff_end_from_1970.total_milliseconds());
+				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
 			}
 			break;
@@ -151,20 +146,16 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				Field<FIELD_TYPE_INT32> const & the_input_field_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field);
-				Field<FIELD_TYPE_INT64> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_start);
-				Field<FIELD_TYPE_INT64> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_end);
-
 				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field_int32.GetValueReference(), 1, 1));
-				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field_int32.GetValueReference() + 1, 1, 1));
+				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field->GetInt32Ref(), 1, 1));
+				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field->GetInt32Ref() + 1, 1, 1));
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-				the_output_field_year_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
-				the_output_field_year_end_int64.SetValue(diff_end_from_1970.total_milliseconds());
+				the_output_field_year_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_year_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
 			}
 			break;
@@ -183,23 +174,18 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				Field<FIELD_TYPE_INT32> const & the_input_field_day_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_day);
-				Field<FIELD_TYPE_INT32> const & the_input_field_month_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_month);
-				Field<FIELD_TYPE_INT32> const & the_input_field_year_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_year);
-				Field<FIELD_TYPE_INT64> & the_output_field_day_start_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_day_start);
-
 				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				boost::gregorian::date row_start_date(the_input_field_year_int32.GetValueReference(),
-													  the_input_field_month_int32.GetValueReference() > 0 ? the_input_field_month_int32.GetValueReference() : 12,
-													  the_input_field_day_int32.GetValueReference() > 0 ? the_input_field_day_int32.GetValueReference() : 1);
+				boost::gregorian::date row_start_date(the_input_field_day->GetInt32Ref(),
+													  the_input_field_month->GetInt32Ref() > 0 ? the_input_field_month->GetInt32Ref() : 12,
+													  the_input_field_year->GetInt32Ref() > 0 ? the_input_field_year->GetInt32Ref() : 1970);
 
 				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 
-				the_output_field_day_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
+				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 
 			}
 			break;
@@ -223,25 +209,16 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				Field<FIELD_TYPE_INT32> const & the_input_field_day_start_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_day_start);
-				Field<FIELD_TYPE_INT32> const & the_input_field_month_start_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_month_start);
-				Field<FIELD_TYPE_INT32> const & the_input_field_year_start_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_year_start);
-				Field<FIELD_TYPE_INT32> const & the_input_field_day_end_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_day_end);
-				Field<FIELD_TYPE_INT32> const & the_input_field_month_end_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_month_end);
-				Field<FIELD_TYPE_INT32> const & the_input_field_year_end_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_year_end);
-				Field<FIELD_TYPE_INT64> & the_output_field_day_start_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_day_start);
-				Field<FIELD_TYPE_INT64> & the_output_field_day_end_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_day_end);
-
 				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
 
-				int year_start = the_input_field_year_start_int32.GetValueReference();
-				int year_end = the_input_field_year_end_int32.GetValueReference();
-				int month_start = the_input_field_month_start_int32.GetValueReference();
-				int month_end = the_input_field_month_end_int32.GetValueReference();
-				int day_start = the_input_field_day_start_int32.GetValueReference();
-				int day_end = the_input_field_day_end_int32.GetValueReference();
+				int year_start = the_input_field_year_start->GetInt32Ref();
+				int year_end = the_input_field_year_end->GetInt32Ref();
+				int month_start = the_input_field_month_start->GetInt32Ref();
+				int month_end = the_input_field_month_end->GetInt32Ref();
+				int day_start = the_input_field_day_start->GetInt32Ref();
+				int day_end = the_input_field_day_end->GetInt32Ref();
 
 				bool start_month_valid = month_start > 0;
 				bool end_month_valid = month_end > 0;
@@ -308,8 +285,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-				the_output_field_day_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
-				the_output_field_day_end_int64.SetValue(diff_end_from_1970.total_milliseconds());
+				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_day_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
 			}
 			break;
@@ -333,27 +310,18 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				Field<FIELD_TYPE_INT32> const & the_input_field_day_start_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_day_start);
-				Field<FIELD_TYPE_INT32> const & the_input_field_month_start_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_month_start);
-				Field<FIELD_TYPE_INT32> const & the_input_field_year_start_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_year_start);
-				Field<FIELD_TYPE_INT32> const & the_input_field_day_end_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_day_end);
-				Field<FIELD_TYPE_INT32> const & the_input_field_month_end_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_month_end);
-				Field<FIELD_TYPE_INT32> const & the_input_field_year_end_int32 = static_cast<Field<FIELD_TYPE_INT32> const &>(*the_input_field_year_end);
-				Field<FIELD_TYPE_INT64> & the_output_field_year_start_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_start);
-				Field<FIELD_TYPE_INT64> & the_output_field_year_end_int64 = static_cast<Field<FIELD_TYPE_INT64> &>(*the_output_field_year_end);
-
 				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-				boost::gregorian::date row_start_date(the_input_field_year_start_int32.GetValueReference(), 1, 1);
+				boost::gregorian::date row_start_date(the_input_field_year_start->GetInt32Ref(), 1, 1);
 				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
-				boost::gregorian::date row_end_date(the_input_field_year_end_int32.GetValueReference() + 1, 1, 1);
+				boost::gregorian::date row_end_date(the_input_field_year_end->GetInt32Ref() + 1, 1, 1);
 				boost::posix_time::ptime time_t_epoch__rowdateend(row_end_date);
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-				the_output_field_year_start_int64.SetValue(diff_start_from_1970.total_milliseconds());
-				the_output_field_year_end_int64.SetValue(diff_end_from_1970.total_milliseconds());
+				the_output_field_year_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_year_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
 			}
 			break;
@@ -427,120 +395,10 @@ void Importer::InitializeFields()
 			FIELD_TYPE field_type = column.field_type;
 			std::string field_name = column.field_name;
 
-			switch (field_type)
-			{
-				case FIELD_TYPE_INT32:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_INT32>> field = std::make_shared<Field<FIELD_TYPE_INT32>>(field_name);
-						fields.push_back(field);
-					}
-					break;
+			std::shared_ptr<BaseField> field;
+			FieldFactory(field_type, field_name, field);
+			fields.push_back(field);
 
-				case FIELD_TYPE_INT64:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_INT64>> field = std::make_shared<Field<FIELD_TYPE_INT64>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_UINT32:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_UINT32>> field = std::make_shared<Field<FIELD_TYPE_UINT32>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_UINT64:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_UINT64>> field = std::make_shared<Field<FIELD_TYPE_UINT64>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_STRING_FIXED:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_STRING_FIXED>> field = std::make_shared<Field<FIELD_TYPE_STRING_FIXED>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_STRING_VAR:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_STRING_VAR>> field = std::make_shared<Field<FIELD_TYPE_STRING_VAR>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_FLOAT:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_FLOAT>> field = std::make_shared<Field<FIELD_TYPE_FLOAT>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_TIMESTAMP:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_TIMESTAMP>> field = std::make_shared<Field<FIELD_TYPE_TIMESTAMP>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_UUID:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_UUID>> field = std::make_shared<Field<FIELD_TYPE_UUID>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_UUID_FOREIGN:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_UUID_FOREIGN>> field = std::make_shared<Field<FIELD_TYPE_UUID_FOREIGN>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_STRING_CODE:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_STRING_CODE>> field = std::make_shared<Field<FIELD_TYPE_STRING_CODE>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_STRING_LONGHAND:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_STRING_LONGHAND>> field = std::make_shared<Field<FIELD_TYPE_STRING_LONGHAND>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_TIME_RANGE:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_TIME_RANGE>> field = std::make_shared<Field<FIELD_TYPE_TIME_RANGE>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_NOTES_1:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_NOTES_1>> field = std::make_shared<Field<FIELD_TYPE_NOTES_1>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_NOTES_2:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_NOTES_2>> field = std::make_shared<Field<FIELD_TYPE_NOTES_2>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-
-				case FIELD_TYPE_NOTES_3:
-					{
-						std::shared_ptr<Field<FIELD_TYPE_NOTES_3>> field = std::make_shared<Field<FIELD_TYPE_NOTES_3>>(field_name);
-						fields.push_back(field);
-					}
-					break;
-			}
 		});
 
 		output_block.push_back(fields);
@@ -1120,146 +978,33 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 							if (the_input_field && the_output_field)
 							{
-								// map them
-								try
-								{
-									switch (the_input_field->GetType())
-									{
-										case FIELD_TYPE_INT32:
-											{
-												Field<FIELD_TYPE_INT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_input_field);
-												Field<FIELD_TYPE_INT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT32>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_INT64:
-											{
-												Field<FIELD_TYPE_INT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_input_field);
-												Field<FIELD_TYPE_INT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_INT64>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_UINT32:
-											{
-												Field<FIELD_TYPE_UINT32> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_input_field);
-												Field<FIELD_TYPE_UINT32> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT32>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_UINT64:
-											{
-												Field<FIELD_TYPE_UINT64> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_input_field);
-												Field<FIELD_TYPE_UINT64> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UINT64>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_STRING_FIXED:
-											{
-												Field<FIELD_TYPE_STRING_FIXED> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_input_field);
-												Field<FIELD_TYPE_STRING_FIXED> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_STRING_VAR:
-											{
-												Field<FIELD_TYPE_STRING_VAR> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_input_field);
-												Field<FIELD_TYPE_STRING_VAR> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_VAR>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_FLOAT:
-											{
-												Field<FIELD_TYPE_FLOAT> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(*the_input_field);
-												Field<FIELD_TYPE_FLOAT> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_FLOAT>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_TIMESTAMP:
-											{
-												Field<FIELD_TYPE_TIMESTAMP> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_input_field);
-												Field<FIELD_TYPE_TIMESTAMP> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIMESTAMP>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_UUID:
-											{
-												Field<FIELD_TYPE_UUID> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_input_field);
-												Field<FIELD_TYPE_UUID> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_UUID_FOREIGN:
-											{
-												Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_input_field);
-												Field<FIELD_TYPE_UUID_FOREIGN> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_UUID_FOREIGN>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_STRING_CODE:
-											{
-												Field<FIELD_TYPE_STRING_CODE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_input_field);
-												Field<FIELD_TYPE_STRING_CODE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_CODE>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_STRING_LONGHAND:
-											{
-												Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_input_field);
-												Field<FIELD_TYPE_STRING_LONGHAND> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_STRING_LONGHAND>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_TIME_RANGE:
-											{
-												Field<FIELD_TYPE_TIME_RANGE> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_input_field);
-												Field<FIELD_TYPE_TIME_RANGE> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_TIME_RANGE>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_NOTES_1:
-											{
-												Field<FIELD_TYPE_NOTES_1> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_input_field);
-												Field<FIELD_TYPE_NOTES_1> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_1>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_NOTES_2:
-											{
-												Field<FIELD_TYPE_NOTES_2> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_input_field);
-												Field<FIELD_TYPE_NOTES_2> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_2>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-
-										case FIELD_TYPE_NOTES_3:
-											{
-												Field<FIELD_TYPE_NOTES_3> & data_entry_input = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_input_field);
-												Field<FIELD_TYPE_NOTES_3> & data_entry_output = dynamic_cast<Field<FIELD_TYPE_NOTES_3>&>(*the_output_field);
-												data_entry_output.SetValue(data_entry_input.GetValueReference());
-											}
-											break;
-									}
-								}
-								catch (std::bad_cast &)
+								if (the_input_field->GetType() != the_output_field->GetType())
 								{
 									// Todo: log warning
 									stop = true;
 									return;
 								}
+
+								if (IsFieldTypeInt32(the_input_field->GetType()))
+								{
+									the_output_field->SetValueInt32(the_input_field->GetInt32Ref());
+								}
+								else
+								if (IsFieldTypeInt64(the_input_field->GetType()))
+								{
+									the_output_field->SetValueInt64(the_input_field->GetInt64Ref());
+								}
+								else
+								if (IsFieldTypeFloat(the_input_field->GetType()))
+								{
+									the_output_field->SetValueDouble(the_input_field->GetDouble());
+								}
+								else
+								if (IsFieldTypeString(the_input_field->GetType()))
+								{
+									the_output_field->SetValueString(the_input_field->GetString());
+								}
+
 							}
 
 						}
@@ -1619,5 +1364,6 @@ void Importer::InstantiateDataFieldInstance(FIELD_TYPE field_type, std::string f
 
 	std::shared_ptr<BaseField> field;
 	FieldFactory(field_type, field_name, field);
+	fields.push_back(field);
 
 }

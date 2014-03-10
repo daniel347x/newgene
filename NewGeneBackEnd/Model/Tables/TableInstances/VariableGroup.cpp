@@ -629,56 +629,7 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 		sql += ", '', '', '', '";
 		sql += *variable_group.uuid;
 		sql += "', '', '";
-
-		switch (table_schema_entry.field_type)
-		{
-			case FIELD_TYPE_INT32:
-			case FIELD_TYPE_UINT32:
-				{
-					sql += "INT32";
-				}
-				break;
-
-			case FIELD_TYPE_INT64:
-			case FIELD_TYPE_UINT64:
-				{
-					sql += "INT64";
-				}
-				break;
-
-			case FIELD_TYPE_STRING_FIXED:
-			case FIELD_TYPE_STRING_VAR:
-			case FIELD_TYPE_UUID:
-			case FIELD_TYPE_UUID_FOREIGN:
-			case FIELD_TYPE_STRING_CODE:
-			case FIELD_TYPE_STRING_LONGHAND:
-			case FIELD_TYPE_TIME_RANGE:
-			case FIELD_TYPE_NOTES_1:
-			case FIELD_TYPE_NOTES_2:
-			case FIELD_TYPE_NOTES_3:
-				{
-					sql += "STRING";
-				}
-				break;
-
-			case FIELD_TYPE_TIMESTAMP:
-				{
-					sql += "INT64";
-				}
-				break;
-
-			case FIELD_TYPE_FLOAT:
-				{
-					sql += "FLOAT";
-				}
-				break;
-
-			default:
-				{
-					sql += "STRING";
-				}
-				break;
-		}
+		sql += GetFieldDataTypeAsString(table_schema_entry.field_type);
 
 		sql += "')";
 		sqlite3_stmt * stmt = NULL;
