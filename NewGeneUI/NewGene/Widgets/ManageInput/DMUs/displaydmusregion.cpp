@@ -1193,7 +1193,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								WidgetInstanceIdentifiers const & dmu_members = change.child_identifiers;
 
 								std::string text = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
-								QList<QStandardItem *> theItems = itemModel->findItems(text);
+								QList<QStandardItem *> theItems = itemModel->findItems(text.c_str());
 								if (theItems.size() != 1)
 								{
 									boost::format msg("Cannot find DMU in the list.");
@@ -1206,7 +1206,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 								QStandardItem * theItem = theItems[0];
 								QVariant v;
 								v.setValue(std::make_pair(dmu_category, dmu_members));
-								item->setData(v);
+								theItem->setData(v);
 
 								ResetDmuMembersPane(dmu_category, dmu_members);
 
