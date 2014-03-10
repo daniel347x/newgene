@@ -393,7 +393,7 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_TIMERANGE_STRING>
 {
 	typedef std::string type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 template<>
@@ -421,7 +421,7 @@ template<>
 struct FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING>
 {
 	typedef std::string type;
-	static type const default_ = 0;
+	static type const default_;
 };
 
 #endif

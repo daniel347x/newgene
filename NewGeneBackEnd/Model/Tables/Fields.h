@@ -12,6 +12,7 @@
 #endif
 
 #include "../../Utilities/NewGeneException.h"
+#include "../../Utilities/Validation.h"
 
 template<FIELD_TYPE THE_FIELD_TYPE>
 class FieldValue

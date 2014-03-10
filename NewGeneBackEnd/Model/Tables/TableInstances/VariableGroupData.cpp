@@ -431,21 +431,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 				BaseField & dataField = *fields[0];
 				SchemaEntry entry(field_type, colnames[ncol]);
 				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition, linenum, ncol+1);
-				Field<FIELD_TYPE_STRING_FIXED> * the_data_entry = nullptr;
-				try
-				{
-					Field<FIELD_TYPE_STRING_FIXED> & data_entry = dynamic_cast<Field<FIELD_TYPE_STRING_FIXED>&>(dataField);
-					the_data_entry = &data_entry;
-				}
-				catch (std::bad_cast &)
-				{
-					data_file.close();
-					boost::format msg("Cannot read column descriptions from the data file \"%1%\"");
-					msg % definition.input_file.c_str();
-					errorMsg = msg.str();
-					return false;
-				}
-				coldescriptions[ncol] = (the_data_entry->GetValue());
+				coldescriptions[ncol] = (dataField.GetStringRef());
 
 			}
 
@@ -1279,7 +1265,6 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 		if (IsFieldTypeFloat(field_type))
 		{
 			boost::format msg("Floating-point value not allowed as primary key field.");
-			sqlite3_free(errmsg);
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 		else

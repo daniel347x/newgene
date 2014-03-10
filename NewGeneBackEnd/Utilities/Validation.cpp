@@ -28,7 +28,7 @@ bool Validation::ValidateDmuMemberUUID(std::string & proposed_dmu_member_uuid, b
 	std::string regex_string_uuid("([a-zA-Z_0-9]*)");
 	if (isIntegerType)
 	{
-		std::string regex_string_uuid("([0-9\-]*)");
+		std::string regex_string_uuid("([0-9-]*)");
 	}
 	boost::regex regex_uuid(regex_string_uuid);
 	boost::cmatch matches_uuid;
@@ -997,7 +997,7 @@ bool Validation::ValidateDatePair(std::string & y1, std::string & m1, std::strin
 
 }
 
-bool Validation::ValidateGenericStringField(std::string & generic_field, std::string & errorMsg, bool required = true)
+bool Validation::ValidateGenericStringField(std::string & generic_field, std::string & errorMsg, bool required)
 {
 
 	errorMsg.clear();

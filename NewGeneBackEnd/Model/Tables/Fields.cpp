@@ -323,7 +323,7 @@ std::int64_t BaseField::GetInt64() const
 
 		case FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME:
 			{
-				Field<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME> const & myself = static_cast<Field<FIELD_TYPE_TIMESFIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIMETAMP> const &>(*this);
+				Field<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME> const & myself = static_cast<Field<FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME> const &>(*this);
 				return static_cast<std::int64_t const &>(myself.GetValueReference());
 			}
 			break;
@@ -660,8 +660,6 @@ void BaseField::SetValueInt64(std::int64_t const & val)
 			break;
 
 	}
-
-	return 0;
 
 }
 
