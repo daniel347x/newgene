@@ -367,11 +367,7 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 		stmt = nullptr;
 	}
 
-	std::string flags;
-	WidgetInstanceIdentifier UOA_category_identifier(new_uuid, new_uoa, uoa_description, 0, flags.c_str(), TIME_GRANULARITY__NONE, MakeNotes(std::string(), std::string(), std::string()));
-	identifiers.push_back(UOA_category_identifier);
-	Sort();
-
+	// Create entries in the UOA/DMU lookup table UOA_CATEGORY_LOOKUP
 	bool added_dmu_category_lookups = input_model.t_uoa_setmemberlookup.CreateNewUOA(db, input_model, new_uuid, dmu_categories);
 	if (!added_dmu_category_lookups)
 	{
@@ -379,6 +375,12 @@ bool Table_UOA_Identifier::CreateNewUOA(sqlite3 * db, InputModel & input_model, 
 		msg % sqlite3_errstr(step_result);
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
+	std::string flags;
+	WidgetInstanceIdentifier UOA_category_identifier(new_uuid, new_uoa, uoa_description, 0, flags.c_str(), time_granularity, MakeNotes(std::string(), std::string(), std::string()));
+	UOA_category_identifier.foreign_key_identifiers = std::make_shared<WidgetInstanceIdentifiers>(dmu_categories);
+	identifiers.push_back(UOA_category_identifier);
+	Sort();
 
 	//theExecutor.success();
 
