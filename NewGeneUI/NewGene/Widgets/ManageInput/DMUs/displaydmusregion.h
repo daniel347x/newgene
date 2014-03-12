@@ -47,6 +47,7 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 		void UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYPE connection_type, UIOutputProject * project);
 		void RefreshAllWidgets();
 		void WidgetDataRefreshReceive(WidgetDataItem_MANAGE_DMUS_WIDGET);
+		void UpdateDMUImportProgressBar(int mode_, int min_, int max_, int val_);
 
 	private slots:
 		void ReceiveDMUSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);

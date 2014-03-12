@@ -358,13 +358,14 @@ bool ImportDefinition::IsEmpty()
 }
 
 Importer::Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_,
-				   TableImportCallbackFn table_write_callback_)
+	TableImportCallbackFn table_write_callback_, WHICH_IMPORT const & which_import_)
 	: import_definition(import_definition_)
 	, table_write_callback(table_write_callback_)
 	, model(model_)
 	, table(table_)
 	, identifier(identifier_)
 	, mode(mode_)
+	, which_import(which_import_)
 {
 }
 
@@ -394,6 +395,7 @@ void Importer::InitializeFields()
 
 		std::for_each(import_definition.output_schema.schema.cbegin(), import_definition.output_schema.schema.cend(), [&fields](SchemaEntry const & column)
 		{
+
 			FIELD_TYPE field_type = column.field_type;
 			std::string field_name = column.field_name;
 
@@ -1079,7 +1081,14 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 		if (linenum % 100 == 0)
 		{
-			messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SET_VALUE, 0, 0, linenum);
+			if (which_import == IMPORT_DMU_SET_MEMBER)
+			{
+				messager.EmitSignalUpdateDMUImportProgressBar(PROGRESS_UPDATE_MODE__SET_VALUE, 0, 0, linenum);
+			}
+			else if (which_import == IMPORT_VG_INSTANCE_DATA)
+			{
+				messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SET_VALUE, 0, 0, linenum);
+			}
 		}
 
 		if (stop)
@@ -1100,9 +1109,16 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 {
 
-	BOOST_SCOPE_EXIT(&messager)
+	BOOST_SCOPE_EXIT(&messager, this_)
 	{
-		messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__HIDE, 0, 0, 0);
+		if (this_->which_import == IMPORT_DMU_SET_MEMBER)
+		{
+			messager.EmitSignalUpdateDMUImportProgressBar(PROGRESS_UPDATE_MODE__HIDE, 0, 0, 0);
+		}
+		else if (this_->which_import == IMPORT_VG_INSTANCE_DATA)
+		{
+			messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__HIDE, 0, 0, 0);
+		}
 	} BOOST_SCOPE_EXIT_END
 
 	InputModel * inputModel = nullptr;
@@ -1164,8 +1180,16 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 		{
 			++linenum;
 		}
-		messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SHOW, 0, 0, 0);
-		messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SET_LIMITS, 0, linenum, 0);
+		if (which_import == IMPORT_DMU_SET_MEMBER)
+		{
+			messager.EmitSignalUpdateDMUImportProgressBar(PROGRESS_UPDATE_MODE__SHOW, 0, 0, 0);
+			messager.EmitSignalUpdateDMUImportProgressBar(PROGRESS_UPDATE_MODE__SET_LIMITS, 0, linenum, 0);
+		}
+		else if (which_import == IMPORT_VG_INSTANCE_DATA)
+		{
+			messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SHOW, 0, 0, 0);
+			messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__SET_LIMITS, 0, linenum, 0);
+		}
 		data_file_count_lines.close();
 	}
 	else

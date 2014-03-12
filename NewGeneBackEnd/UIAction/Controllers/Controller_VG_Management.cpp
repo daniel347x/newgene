@@ -448,7 +448,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						return;
 					}
 
-					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn);
+					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA);
 					errorMsg.clear();
 					success = table_importer.DoImport(errorMsg, messager);
 					if (!success)

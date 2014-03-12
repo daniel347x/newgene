@@ -603,7 +603,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 
 	import_definition.mappings = mappings;
 
-	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn);
+	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn, Importer::IMPORT_DMU_SET_MEMBER);
 
 	{
 

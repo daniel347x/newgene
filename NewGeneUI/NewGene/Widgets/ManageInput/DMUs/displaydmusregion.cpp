@@ -35,7 +35,8 @@ DisplayDMUsRegion::DisplayDMUsRegion(QWidget *parent) :
 {
 
 	ui->setupUi(this);
-
+	ui->label_importProgress->hide();
+	ui->progressBar_importDMU->hide();
 	PrepareInputWidget(true);
 
 }
@@ -74,6 +75,7 @@ void DisplayDMUsRegion::UpdateInputConnections(NewGeneWidget::UPDATE_CONNECTIONS
 		connect(this, SIGNAL(AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS)), inp->getConnector(), SLOT(AddDMUMembers(WidgetActionItemRequest_ACTION_ADD_DMU_MEMBERS)));
 		connect(this, SIGNAL(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)), inp->getConnector(), SLOT(DeleteDMUMembers(WidgetActionItemRequest_ACTION_DELETE_DMU_MEMBERS)));
 		connect(this, SIGNAL(RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE)), inp->getConnector(), SLOT(RefreshDMUsFromFile(WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE)));
+		connect(project->getConnector(), SIGNAL(SignalUpdateDMUImportProgressBar(int, int, int, int)), this, SLOT(UpdateDMUImportProgressBar(int, int, int, int)));
 
 		if (project)
 		{
@@ -1364,4 +1366,49 @@ bool DisplayDMUsRegion::event ( QEvent * e )
 
 	return returnVal;
 
+}
+
+void DisplayDMUsRegion::UpdateDMUImportProgressBar(int mode_, int min_, int max_, int val_)
+{
+
+	PROGRESS_UPDATE_MODE mode = (PROGRESS_UPDATE_MODE)(mode_);
+
+	switch (mode)
+	{
+
+		case PROGRESS_UPDATE_MODE__SHOW:
+			{
+				ui->label_importProgress->show();
+				ui->progressBar_importDMU->setTextVisible(true);
+				ui->progressBar_importDMU->show();
+			}
+			break;
+
+		case PROGRESS_UPDATE_MODE__SET_LIMITS:
+			{
+				ui->progressBar_importDMU->setRange(min_, max_);
+				ui->progressBar_importDMU->setValue(min_);
+			}
+			break;
+
+		case PROGRESS_UPDATE_MODE__SET_VALUE:
+			{
+				ui->progressBar_importDMU->setValue(val_);
+			}
+			break;
+
+		case PROGRESS_UPDATE_MODE__HIDE:
+			{
+				ui->label_importProgress->hide();
+				ui->progressBar_importDMU->hide();
+			}
+			break;
+
+		default:
+			{
+				// no-op
+			}
+			break;
+
+	}
 }

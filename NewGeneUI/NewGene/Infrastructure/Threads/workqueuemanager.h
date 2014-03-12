@@ -57,6 +57,7 @@ class WorkQueueManagerBase : public QObject
 		// and are NOT (and don't need to be) defined as virtual
 		void SignalMessageBox(STD_STRING);
 		void SignalUpdateVGImportProgressBar(int, int, int, int);
+		void SignalUpdateDMUImportProgressBar(int, int, int, int);
 		void DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR, QObject *);
 		void DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR, QObject *);
 		void DataChangeMessageSignal(WidgetChangeMessages);

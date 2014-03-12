@@ -17,7 +17,7 @@ bool UIMessager::ManagersInitialized = false;
 int UIMessager::next_messager_id = 1;
 
 UIMessager::UIMessager(QObject *parent) :
-	QObject(parent)
+    QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , mode(NORMAL)
   , singleShotActive(false)
@@ -358,4 +358,9 @@ void UIMessagerInputProject::EmitInputWidgetDataRefresh(WidgetDataItem_MANAGE_VG
 void UIMessagerInputProject::EmitSignalUpdateVGImportProgressBar(int mode_, int min_, int max_, int val_)
 {
 	get()->getQueueManager()->SignalUpdateVGImportProgressBar(mode_, min_, max_, val_);
+}
+
+void UIMessagerInputProject::EmitSignalUpdateDMUImportProgressBar(int mode_, int min_, int max_, int val_)
+{
+	get()->getQueueManager()->SignalUpdateDMUImportProgressBar(mode_, min_, max_, val_);
 }

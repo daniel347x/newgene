@@ -374,11 +374,19 @@ class Importer
 
 	public:
 
+		enum WHICH_IMPORT
+		{
+			  IMPORT_DMU_SET_MEMBER = 0
+			, IMPORT_VG_INSTANCE_DATA
+		};
+
+	public:
+
 		typedef bool(*TableImportCallbackFn)(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, std::string & errorMsg);
 
 		static int const block_size = 500; // Maximum number of rows supported for block insert by SQLite
 
-		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_);
+		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_, WHICH_IMPORT const & which_import_);
 
 		bool DoImport(std::string & errorMsg, Messager & messager);
 
@@ -415,6 +423,7 @@ class Importer
 	public:
 
 		Mode mode;
+		WHICH_IMPORT which_import;
 
 };
 
