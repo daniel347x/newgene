@@ -297,7 +297,7 @@ bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifi
 			if (*identifier.longhand == Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName || *identifier.longhand == Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName)
 			{
 				// Do not display the DATETIME_ROW_START/END columns
-				continue;
+				return;
 			}
 
 			QStandardItem * item = new QStandardItem();
