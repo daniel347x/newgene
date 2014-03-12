@@ -579,7 +579,14 @@ bool Table_VariableGroupData::BuildImportDefinition
 			if (vg.identifier_parent->time_granularity != TIME_GRANULARITY__NONE)
 			{
 				// Account for the two internal time range columns
-				if (existing_column_identifiers.size() - 2 != colnames.size())
+
+				// ************************************************************************************************************ //
+				// DN: DATETIME_ROW_START_TODO - set this to the following line (include the "- 2")
+				// if ever setting option to display DATETIME_ROW_START/END columns as variable possibilities to end user
+				// if (existing_column_identifiers.size() -2 != colnames.size())
+				// ************************************************************************************************************ //
+
+				if (existing_column_identifiers.size() != colnames.size())
 				{
 					boost::format msg("The number of columns in the input file does not match the number of columns in the existing data.");
 					errorMsg = msg.str();
