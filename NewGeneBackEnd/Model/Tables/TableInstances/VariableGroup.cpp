@@ -589,12 +589,12 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 			// as options in the variable selection panes, please do a search for the text "DATETIME_ROW_START_TODO"
 			// for one other place this needs to be handled
 			// ************************************************************************************************************ //
-			if (std::string(code) != "DATETIME_ROW_START" && std::string(code) != "DATETIME_ROW_END")
-			{
+			//if (std::string(code) != "DATETIME_ROW_START" && std::string(code) != "DATETIME_ROW_END")
+			//{
 				WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(fk_vg_uuid);
 				identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, vg_category_identifier, code, longhand, seqnumber, flags, vg_category_identifier.time_granularity,
 					MakeNotes(notes1, notes2, notes3)));
-			}
+			//}
 		}
 	}
 
@@ -669,13 +669,18 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 		}
 
 		// Add to cache
-		if (table_schema_entry.field_name != "DATETIME_ROW_START" && table_schema_entry.field_name != "DATETIME_ROW_END")
-		{
+		// ************************************************************************************************************ //
+		// CRITICAL: If you ever enable the ability of the user to see the following two columns
+		// as options in the variable selection panes, please do a search for the text "DATETIME_ROW_START_TODO"
+		// for one other place this needs to be handled
+		// ************************************************************************************************************ //
+		//if (table_schema_entry.field_name != "DATETIME_ROW_START" && table_schema_entry.field_name != "DATETIME_ROW_END")
+		//{
 			WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(*variable_group.uuid);
 			std::string flags;
 			identifiers_map[*variable_group.uuid].push_back(WidgetInstanceIdentifier(new_uuid, vg_category_identifier, table_schema_entry.field_name, table_schema_entry.field_description, sequence_number, flags.c_str(), vg_category_identifier.time_granularity));
 			++sequence_number;
-		}
+		//}
 
 	});
 

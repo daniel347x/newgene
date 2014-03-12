@@ -289,6 +289,17 @@ bool NewGeneVariableGroup::ResetAll(std::vector<std::pair<WidgetInstanceIdentifi
 		if (identifier.longhand && !identifier.longhand->empty())
 		{
 
+			// ************************************************************************************************************ //
+			// CRITICAL: If you ever enable the ability of the user to see the following two columns
+			// as options in the variable selection panes, please do a search for the text "DATETIME_ROW_START_TODO"
+			// for one other place this needs to be handled
+			// ************************************************************************************************************ //
+			if (*identifier.longhand == Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName || *identifier.longhand == Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName)
+			{
+				// Do not display the DATETIME_ROW_START/END columns
+				continue;
+			}
+
 			QStandardItem * item = new QStandardItem();
 			item->setText(QString(identifier.longhand->c_str()));
 			item->setEditable(false);
