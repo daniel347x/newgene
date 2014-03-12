@@ -155,7 +155,7 @@
    <item>
     <widget class="QLabel" name="label_importProgress">
      <property name="text">
-      <string>TextLabel</string>
+      <string>Import progress</string>
      </property>
     </widget>
    </item>
