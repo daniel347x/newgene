@@ -669,11 +669,14 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 		}
 
 		// Add to cache
-		WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(*variable_group.uuid);
-		std::string flags;
-		identifiers_map[*variable_group.uuid].push_back(WidgetInstanceIdentifier(new_uuid, vg_category_identifier, table_schema_entry.field_name, table_schema_entry.field_description, sequence_number, flags.c_str(), vg_category_identifier.time_granularity));
+		if (table_schema_entry.field_name != "DATETIME_ROW_START" && table_schema_entry.field_name != "DATETIME_ROW_END")
+		{
+			WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(*variable_group.uuid);
+			std::string flags;
+			identifiers_map[*variable_group.uuid].push_back(WidgetInstanceIdentifier(new_uuid, vg_category_identifier, table_schema_entry.field_name, table_schema_entry.field_description, sequence_number, flags.c_str(), vg_category_identifier.time_granularity));
+			++sequence_number;
+		}
 
-		++sequence_number;
 	});
 
 	return true;
