@@ -563,12 +563,12 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 
 		});
 
-		QObject::connect(lhs, &QListView::doubleClicked, [&](const QModelIndex & index)
+		QObject::connect(lhs, &QListView::doubleClicked, [=](const QModelIndex & index)
 		{
 			add->click();
 		});
 
-		QObject::connect(rhs, &QListView::doubleClicked, [&](const QModelIndex & index)
+		QObject::connect(rhs, &QListView::doubleClicked, [=](const QModelIndex & index)
 		{
 			remove->click();
 		});
