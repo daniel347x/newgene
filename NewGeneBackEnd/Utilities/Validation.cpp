@@ -346,9 +346,10 @@ bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & 
 
 	if (valid)
 	{
-		if (proposed_dmu_code.size() > 128)
+		//if (proposed_dmu_code.size() > 128)
+		if (proposed_dmu_code.size() > 12)
 		{
-			boost::format msg("The DMU code is too long (maximum length: 128).");
+			boost::format msg("The DMU code is too long (maximum length: 12).");
 			errorMsg = msg.str();
 			valid = false;
 		}

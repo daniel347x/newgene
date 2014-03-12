@@ -274,7 +274,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	fields << lineEditCode;
 
 	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
-	QString labelDescription = QString("Description:");
+	QString labelDescription = QString("Short description (max 12 characters):");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
 
@@ -382,7 +382,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 			}
 
 			int index_time_granularity = 0;
-			foreach(QRadioButton * rb, radioButtonsTimeRangeGranularity)
+			for(int rbidx = 0; rbidx < radioButtonsTimeRangeGranularity.size(); ++rbidx)
 			{
 				if (rb->isChecked())
 				{
