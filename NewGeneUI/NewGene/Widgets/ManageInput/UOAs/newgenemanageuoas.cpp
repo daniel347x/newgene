@@ -274,7 +274,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	fields << lineEditCode;
 
 	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
-	QString labelDescription = QString("Short description (max 12 characters):");
+	QString labelDescription = QString("Description:");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
 

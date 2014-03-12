@@ -293,7 +293,7 @@ void DisplayDMUsRegion::on_pushButton_add_dmu_clicked()
 	form.addRow(labelName, lineEditName);
 	fields << lineEditName;
 	QLineEdit *lineEditDescription = new QLineEdit(&dialog);
-	QString labelDescription = QString("Description:");
+	QString labelDescription = QString("Short description (max 12 characters):");
 	form.addRow(labelDescription, lineEditDescription);
 	fields << lineEditDescription;
 
