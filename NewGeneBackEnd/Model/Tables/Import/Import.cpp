@@ -1339,11 +1339,13 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			else
 			{
 				// Write rows to database here
-				bool write_succeeded = table_write_callback(this, model, import_definition, table, output_block, currently_read_lines);
+				blockErrorMsg.clear();
+				bool write_succeeded = table_write_callback(this, model, import_definition, table, output_block, currently_read_lines, blockErrorMsg);
 
-				if (!write_succeeded)
+				if (!write_succeeded || !blockErrorMsg.empty())
 				{
-					boost::format msg("Failed to write block of data to the database.");
+					boost::format msg("Failed to write block of data to the database: %1%");
+					msg % blockErrorMsg;
 					errorMsg = msg.str();
 					return false;
 				}

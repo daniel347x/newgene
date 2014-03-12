@@ -1,7 +1,7 @@
 #include "table.h"
 
 bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-									 int const number_rows_in_block)
+	int const number_rows_in_block, std::string & errorMsg)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -123,7 +123,7 @@ bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 }
 
 bool Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-									   int const number_rows_in_block)
+	int const number_rows_in_block, std::string & errorMsg)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -135,30 +135,32 @@ bool Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 	for (int row = 0; row < number_rows_in_block; ++row)
 	{
 
-		int changes = TryUpdateRow(block, row, failed, import_definition, db);
+		errorMsg.clear();
+		int changes = TryUpdateRow(block, row, failed, import_definition, db, errorMsg);
 
-		if (failed)
+		if (failed || !errorMsg.empty())
 		{
-			continue;
+			boost::format msg("Unable to update row during import: %1%");
+			msg % errorMsg;
+			errorMsg = msg.str();
+			return false;
 		}
 
 		if (changes == 0)
 		{
 			// Update did not affect any row.  Insert a new row
-			TryInsertRow(block, row, failed, import_definition, db);
+			TryInsertRow(block, row, failed, import_definition, db, errorMsg);
 		}
 
-		if (failed)
+		if (failed || !errorMsg.empty())
 		{
-			continue;
+			boost::format msg("Unable to insert row during import: %1%");
+			msg % errorMsg;
+			errorMsg = msg.str();
+			return false;
 		}
 
 	}
-
-	//if (failed)
-	//{
-	//	return false;
-	//}
 
 	//executor.success();
 
@@ -200,15 +202,15 @@ void Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field
 
 }
 
-int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const & import_definition, sqlite3 * db)
+int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const & import_definition, sqlite3 * db, std::string & errorMsg)
 {
-	std::string sql_insert;
+	std::string sql_update;
 
 	DataFields const & row_fields = block[row];
 
-	sql_insert += "UPDATE ";
-	sql_insert += GetTableName();
-	sql_insert += " SET ";
+	sql_update += "UPDATE ";
+	sql_update += GetTableName();
+	sql_update += " SET ";
 
 	bool first = true;
 	int index = 0;
@@ -223,7 +225,11 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 			return;
 		}
 
-		if (schema_entry.IsPrimaryKey() || schema_entry.IsTimeRange())
+		// Disable skipping primary key and time range fields.
+		// Instead, overwrite them even if it's known they will have the same values.
+		// This way, if there ARE no other fields, we will nonetheless have something in the 
+		// SET clause, which is required for valid SQL
+		if (false && schema_entry.IsPrimaryKey() || schema_entry.IsTimeRange())
 		{
 			++index;
 			return; // These are automatically covered by the "WHERE" clause
@@ -234,6 +240,8 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 		if (!field_data)
 		{
 			// Todo: log error
+			boost::format msg("Unable to obtain BaseField in TryUpdateRow.");
+			errorMsg = msg.str();
 			++index;
 			innerFailed = true;
 			return;
@@ -241,16 +249,16 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 		if (!first)
 		{
-			sql_insert += ", ";
+			sql_update += ", ";
 		}
 
 		first = false;
 
-		sql_insert += schema_entry.field_name;
+		sql_update += schema_entry.field_name;
 
-		sql_insert += " = ";
+		sql_update += " = ";
 
-		FieldDataAsSqlText(field_data, sql_insert);
+		FieldDataAsSqlText(field_data, sql_update);
 
 		++index;
 
@@ -262,7 +270,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 		return 0;
 	}
 
-	sql_insert += " WHERE ";
+	sql_update += " WHERE ";
 
 	first = true;
 	index = 0;
@@ -292,16 +300,16 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 			if (!first)
 			{
-				sql_insert += " AND ";
+				sql_update += " AND ";
 			}
 
 			first = false;
 
-			sql_insert += schema_entry.field_name;
+			sql_update += schema_entry.field_name;
 
-			sql_insert += " = ";
+			sql_update += " = ";
 
-			FieldDataAsSqlText(field_data, sql_insert);
+			FieldDataAsSqlText(field_data, sql_update);
 
 		}
 
@@ -316,11 +324,14 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 	}
 
 	sqlite3_stmt * stmt = nullptr;
-	sqlite3_prepare_v2(db, sql_insert.c_str(), static_cast<int>(sql_insert.size()) + 1, &stmt, NULL);
+	sqlite3_prepare_v2(db, sql_update.c_str(), static_cast<int>(sql_update.size()) + 1, &stmt, NULL);
 
 	if (stmt == NULL)
 	{
 		// TODO: Log error
+		boost::format msg("Unable to prepare SQL query in TryUpdateRow: %1%");
+		msg % sql_update;
+		errorMsg = msg.str();
 		failed = true;
 		return 0;
 	}
@@ -336,6 +347,9 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 			stmt = nullptr;
 		}
 
+		boost::format msg("Unable to execute SQL query in TryUpdateRow: %1%");
+		msg % sql_update;
+		errorMsg = msg.str();
 		failed = true;
 		return 0;
 	}
@@ -350,7 +364,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 }
 
-void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const & import_definition, sqlite3 * db)
+void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const & import_definition, sqlite3 * db, std::string & errorMsg)
 {
 
 	std::string sql_insert;
@@ -404,6 +418,8 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 		if (!field_data)
 		{
 			// Todo: log error
+			boost::format msg("Unable to retrieve base field in TryInsertRow");
+			errorMsg = msg.str();
 			++index;
 			innerFailed = true;
 			return;
@@ -436,6 +452,9 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 	if (stmt == NULL)
 	{
 		// TODO: Log error
+		boost::format msg("Unable to prepare SQL query in TryInsertRow: %1%");
+		msg % sql_insert;
+		errorMsg = msg.str();
 		failed = true;
 		return;
 	}
@@ -451,6 +470,9 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 			stmt = nullptr;
 		}
 
+		boost::format msg("Unable to execute SQL query in TryInsertRow: %1%");
+		msg % sql_insert;
+		errorMsg = msg.str();
 		failed = true;
 		return;
 	}

@@ -91,7 +91,7 @@ void InputModel::LoadTables()
 
 }
 
-bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows)
+bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, std::string & errorMsg)
 {
 
 	try
@@ -102,31 +102,53 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 			InputModel * input_model = dynamic_cast<InputModel*>(model_);
 			if (!input_model)
 			{
-				// Todo: log warning
+				boost::format msg("Bad input model in InputModelImportTableFn");
+				errorMsg = msg.str();
 				return false;
 			}
 			if (input_model->getDb() == nullptr)
 			{
-				// Todo: log warning
+				boost::format msg("Bad input model db in InputModelImportTableFn");
+				errorMsg = msg.str();
 				return false;
 			}
 
+			errorMsg.clear();
 			switch (importer->mode)
 			{
 
 				case Importer::INSERT_OR_FAIL:
 				{
-					table_->ImportBlockBulk(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows);
+					table_->ImportBlockBulk(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, errorMsg);
+					if (!errorMsg.empty())
+					{
+						boost::format msg("Cannot import block of data in bulk: %1%");
+						msg % errorMsg;
+						errorMsg = msg.str();
+						return false;
+					}
 				}
 					break;
 
 				case Importer::INSERT_OR_UPDATE:
 				{
-					table_->ImportBlockUpdate(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows);
+					table_->ImportBlockUpdate(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, errorMsg);
+					if (!errorMsg.empty())
+					{
+						boost::format msg("Cannot import block of data: %1%");
+						msg % errorMsg;
+						errorMsg = msg.str();
+						return false;
+					}
 				}
 					break;
 
 				default:
+				{
+					boost::format msg("Incorrect import mode attempting to call block update function.");
+					errorMsg = msg.str();
+					return false;
+				}
 					break;
 
 			}
@@ -134,15 +156,18 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 		}
 		else
 		{
-			// Todo: log warning
+			boost::format msg("Incorrect model type in block update function.");
+			errorMsg = msg.str();
 			return false;
 		}
 	}
 	catch (std::bad_cast &)
 	{
-		// Todo: log warning
+		boost::format msg("Unable to cast to input model in block update function.");
+		errorMsg = msg.str();
 		return false;
 	}
+
 	return true;
 
 }

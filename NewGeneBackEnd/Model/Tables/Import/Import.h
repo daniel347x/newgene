@@ -374,7 +374,7 @@ class Importer
 
 	public:
 
-		typedef bool (*TableImportCallbackFn)(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows);
+		typedef bool(*TableImportCallbackFn)(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, std::string & errorMsg);
 
 		static int const block_size = 500; // Maximum number of rows supported for block insert by SQLite
 
