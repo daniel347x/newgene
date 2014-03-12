@@ -66,6 +66,8 @@ void Table_UOA_Identifier::Load(sqlite3 * db, InputModel * input_model_)
 WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 const * db, InputModel * input_model_, UUID const & uuid)
 {
 
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	if (!db)
 	{
 		return WidgetInstanceIdentifiers();
@@ -90,6 +92,8 @@ WidgetInstanceIdentifiers Table_UOA_Identifier::RetrieveDMUCategories(sqlite3 co
 
 Table_UOA_Identifier::DMU_Counts Table_UOA_Identifier::RetrieveDMUCounts(sqlite3 const * db, InputModel * input_model_, UUID const & uuid)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	if (!db)
 	{
@@ -526,6 +530,8 @@ void Table_UOA_Member::Load(sqlite3 * db, InputModel * input_model_)
 WidgetInstanceIdentifiers Table_UOA_Member::RetrieveUOAsGivenDMU(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & dmu)
 {
 
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	if (!db)
 	{
 		return WidgetInstanceIdentifiers();
@@ -561,6 +567,8 @@ WidgetInstanceIdentifiers Table_UOA_Member::RetrieveUOAsGivenDMU(sqlite3 * db, I
 
 bool Table_UOA_Member::DeleteUOA(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & uoa)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	if (!uoa.uuid || uoa.uuid->empty())
 	{

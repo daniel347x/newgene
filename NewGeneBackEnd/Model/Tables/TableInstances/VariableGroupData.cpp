@@ -161,6 +161,8 @@ std::string Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(int con
 Table_VariableGroupData * Table_VariableGroupData::GetInstanceTableFromTableName(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
 {
 
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	if (!db)
 	{
 		return false;
@@ -195,6 +197,8 @@ Table_VariableGroupData * Table_VariableGroupData::GetInstanceTableFromTableName
 
 bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_model_)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	//Executor theExecutor(db);
 
@@ -1250,6 +1254,8 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 		std::vector<std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE>> const & primary_keys_info, std::string errorMsg)
 {
 
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	//Executor theExecutor(db);
 
 	if (!db)
@@ -1366,6 +1372,8 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 
 bool Table_VariableGroupMetadata_PrimaryKeys::DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	//Executor theExecutor(db);
 
@@ -1488,6 +1496,8 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string errorMsg)
 {
 
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	//Executor theExecutor(db);
 
 	if (!db)
@@ -1548,6 +1558,8 @@ bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, Inp
 
 bool Table_VariableGroupMetadata_DateTimeColumns::DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	//Executor theExecutor(db);
 

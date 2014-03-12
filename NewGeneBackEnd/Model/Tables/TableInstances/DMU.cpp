@@ -546,6 +546,8 @@ bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_
 bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::vector<std::string> const & dmu_column_labels, Messager & messager)
 {
 
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	if (!dmu_category.code || dmu_category.code->empty() || !dmu_category.uuid || dmu_category.uuid->empty())
 	{
 		boost::format msg("Invalid DMU category in refresh function.");

@@ -143,6 +143,9 @@ bool Table_GENERAL_OPTIONS::UpdateRandomSamplingCountPerStage(sqlite3 * db, Outp
 
 void Table_GENERAL_OPTIONS::ModifyDoRandomSampling(sqlite3 * db)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	std::string sqlAdd("UPDATE GENERAL_OPTIONS SET ");
 	sqlAdd += GENERAL_OPTIONS__DO_RANDOM_SAMPLING;
 	sqlAdd += "=";
@@ -159,10 +162,14 @@ void Table_GENERAL_OPTIONS::ModifyDoRandomSampling(sqlite3 * db)
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
 }
 
 void Table_GENERAL_OPTIONS::ModifyRandomSamplingCountPerStage(sqlite3 * db)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	std::string sqlAdd("UPDATE GENERAL_OPTIONS SET ");
 	sqlAdd += GENERAL_OPTIONS__RANDOM_SAMPLING_COUNT_PER_STAGE;
 	sqlAdd += "=";
@@ -179,6 +186,7 @@ void Table_GENERAL_OPTIONS::ModifyRandomSamplingCountPerStage(sqlite3 * db)
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
 }
 
 std::pair<bool, std::int64_t> Table_GENERAL_OPTIONS::getRandomSamplingInfo(sqlite3 * db)

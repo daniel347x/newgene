@@ -74,6 +74,8 @@ void Table_VG_CATEGORY::Load(sqlite3 * db, InputModel * input_model_)
 bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, DataChangeMessage & change_message)
 {
 
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	//Executor theExecutor(db);
 
 	if (!db)
@@ -205,6 +207,8 @@ bool Table_VG_CATEGORY::DeleteVG(sqlite3 * db, InputModel * input_model_, Widget
 
 WidgetInstanceIdentifiers Table_VG_CATEGORY::RetrieveVGsFromUOA(sqlite3 * db, InputModel * input_model_, UUID const & uuid)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	if (!db)
 	{
@@ -608,6 +612,8 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & variable_group, ImportDefinition const & import_definition, std::string & errorMsg)
 {
 
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	if (!variable_group.uuid || variable_group.uuid->empty())
 	{
 		boost::format msg("Bad VG entry being added to the VG_SET_MEMBER table.");
@@ -690,6 +696,8 @@ bool Table_VG_SET_MEMBER::AddNewVGTableEntries(sqlite3 * db, InputModel * input_
 
 bool Table_VG_SET_MEMBER::DeleteVG(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	if (!vg.uuid || vg.uuid->empty())
 	{

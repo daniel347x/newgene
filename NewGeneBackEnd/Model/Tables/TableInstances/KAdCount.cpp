@@ -56,6 +56,7 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 
 bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
 {
+
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	//Executor theExecutor(db);
@@ -156,6 +157,9 @@ bool Table_KAD_COUNT::Update(sqlite3 * db, OutputModel & output_model_, InputMod
 
 void Table_KAD_COUNT::Add(sqlite3 * db, std::string const & dmu_category_code, int const value_)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	std::string sqlAdd("INSERT INTO KAD_COUNT (");
 	sqlAdd += KAD_COUNT__DMU_CATEGORY_STRING_CODE;
 	sqlAdd += ",";
@@ -174,10 +178,14 @@ void Table_KAD_COUNT::Add(sqlite3 * db, std::string const & dmu_category_code, i
 		return;
 	}
 	sqlite3_step(stmt);
+
 }
 
 void Table_KAD_COUNT::Remove(sqlite3 * db, std::string const & dmu_category_code)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	std::string sqlRemove("DELETE FROM KAD_COUNT WHERE ");
 	sqlRemove += KAD_COUNT__DMU_CATEGORY_STRING_CODE;
 	sqlRemove += "='";
@@ -195,10 +203,14 @@ void Table_KAD_COUNT::Remove(sqlite3 * db, std::string const & dmu_category_code
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
 }
 
 void Table_KAD_COUNT::Modify(sqlite3 * db, std::string const & dmu_category_code, int const value_)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	std::string sqlAdd("UPDATE KAD_COUNT SET ");
 	sqlAdd += KAD_COUNT__COUNT;
 	sqlAdd += "=";
@@ -220,4 +232,5 @@ void Table_KAD_COUNT::Modify(sqlite3 * db, std::string const & dmu_category_code
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
 }

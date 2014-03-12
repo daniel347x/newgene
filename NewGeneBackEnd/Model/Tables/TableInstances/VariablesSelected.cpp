@@ -189,6 +189,9 @@ bool Table_VARIABLES_SELECTED::Update(sqlite3 * db, OutputModel & output_model_,
 
 void Table_VARIABLES_SELECTED::Add(sqlite3 * db, std::string const & vg_set_member_code, std::string const & vg_category_code)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	std::string sqlAdd("INSERT INTO VG_SET_MEMBERS_SELECTED (");
 	sqlAdd += VG_SET_MEMBER_STRING_CODE;
 	sqlAdd += ",";
@@ -210,10 +213,14 @@ void Table_VARIABLES_SELECTED::Add(sqlite3 * db, std::string const & vg_set_memb
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
 }
 
 void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_member_code, std::string const & vg_category_code)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	std::string sqlRemove("DELETE FROM VG_SET_MEMBERS_SELECTED WHERE ");
 	sqlRemove += VG_SET_MEMBER_STRING_CODE;
 	sqlRemove += "='";
@@ -235,10 +242,14 @@ void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_m
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
 }
 
 void Table_VARIABLES_SELECTED::RemoveAllfromVG(sqlite3 * db, std::string const & vg_category_code)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	std::string sqlRemove("DELETE FROM VG_SET_MEMBERS_SELECTED WHERE ");
 	sqlRemove += VG_CATEGORY_STRING_CODE;
 	sqlRemove += "='";
@@ -256,6 +267,7 @@ void Table_VARIABLES_SELECTED::RemoveAllfromVG(sqlite3 * db, std::string const &
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
 }
 
 Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSelectedVariablesByUOA(sqlite3 * db, OutputModel * output_model_, InputModel * input_model_)
@@ -323,6 +335,9 @@ Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSele
 
 std::set<WidgetInstanceIdentifier> Table_VARIABLES_SELECTED::GetActiveDMUs(OutputModel * output_model_, InputModel * input_model_)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
 	if (output_model_ == nullptr || input_model_ == nullptr)
 	{
 		return std::set<WidgetInstanceIdentifier>();
@@ -338,4 +353,5 @@ std::set<WidgetInstanceIdentifier> Table_VARIABLES_SELECTED::GetActiveDMUs(Outpu
 		});
 	});
 	return active_dmus;
+
 }

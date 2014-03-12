@@ -54,6 +54,7 @@ void Table_TIME_RANGE::Load(sqlite3 * db, OutputModel * output_model_, InputMode
 
 bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
 {
+
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	//Executor theExecutor(db);
@@ -155,6 +156,8 @@ bool Table_TIME_RANGE::Update(sqlite3 * db, OutputModel & output_model_, InputMo
 
 void Table_TIME_RANGE::Modify(sqlite3 * db)
 {
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	if (this->identifiers.size() != 2)
 	{
