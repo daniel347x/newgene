@@ -581,6 +581,8 @@ bool Table_UOA_Member::CreateNewUOA(sqlite3 * db, InputModel & input_model, std:
 
 	//Executor theExecutor(db);
 
+	identifiers_map[uoa_uuid].clear();
+
 	int sequence_number = 0;
 	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu_category)
 	{
@@ -620,6 +622,12 @@ bool Table_UOA_Member::CreateNewUOA(sqlite3 * db, InputModel & input_model, std:
 			sqlite3_finalize(stmt);
 			stmt = nullptr;
 		}
+
+		// Add to cache
+		WidgetInstanceIdentifier the_new_dmu(dmu_category);
+		the_new_dmu.sequence_number_or_count = sequence_number;
+		identifiers_map[uoa_uuid].push_back(dmu_category);
+
 	});
 
 	//theExecutor.success();
