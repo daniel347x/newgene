@@ -161,7 +161,8 @@ std::string Table_VariableGroupData::JoinViewNameWithTimeRangesFromCount(int con
 Table_VariableGroupData * Table_VariableGroupData::GetInstanceTableFromTableName(sqlite3 * db, InputModel * input_model_, std::string const & table_name)
 {
 
-	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+	// TODO: add mutex to model to handle this scenario
+	//std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	if (!db)
 	{
