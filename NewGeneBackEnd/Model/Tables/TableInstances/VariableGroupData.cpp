@@ -583,7 +583,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 				// ************************************************************************************************************ //
 				// DN: DATETIME_ROW_START_TODO - set this to the following line (include the "- 2")
 				// if ever setting option to display DATETIME_ROW_START/END columns as variable possibilities to end user
-				// if (existing_column_identifiers.size() -2 != colnames.size())
+				// if (existing_column_identifiers.size() - 2 != colnames.size())
 				// ************************************************************************************************************ //
 
 				if (existing_column_identifiers.size() != colnames.size())

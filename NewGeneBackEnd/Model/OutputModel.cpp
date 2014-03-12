@@ -1029,6 +1029,26 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			}
 		}
 
+
+		// ************************************************************************************************************ //
+		// DN: DATETIME_ROW_START_TODO - remove the following block, so that COLUMN_TYPE__DATETIMESTART/END_TEXT
+		// passes through and is accepted,
+		// if ever setting option to display DATETIME_ROW_START/END columns as variable possibilities to end user
+		// ************************************************************************************************************ //
+		switch (unformatted_column.column_type)
+		{
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_TEXT:
+			case ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_TEXT:
+			{
+				++column_index;
+				return;
+			}
+				break;
+			default:
+				break;
+		}
+
+
 		result_columns.columns_in_view.push_back(unformatted_column);
 		ColumnsInTempView::ColumnInTempView & formatted_column = result_columns.columns_in_view.back();
 
