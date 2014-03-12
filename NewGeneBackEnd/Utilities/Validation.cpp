@@ -194,9 +194,12 @@ bool Validation::ValidateDmuDescription(std::string & proposed_dmu_description, 
 	boost::trim(proposed_dmu_description);
 
 	bool valid = true;
-	if (proposed_dmu_description.size() > 4096)
+	//if (proposed_dmu_description.size() > 4096)
+
+	// So that the description does not run over the available space in the spin control
+	if (proposed_dmu_description.size() > 12)
 	{
-		boost::format msg("The description is too long (maximum length: 4096).");
+		boost::format msg("The description is too long (maximum length: 12).");
 		errorMsg = msg.str();
 		valid = false;
 	}
@@ -346,10 +349,9 @@ bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & 
 
 	if (valid)
 	{
-		//if (proposed_dmu_code.size() > 128)
-		if (proposed_dmu_code.size() > 12)
+		if (proposed_dmu_code.size() > 128)
 		{
-			boost::format msg("The DMU code is too long (maximum length: 12).");
+			boost::format msg("The DMU code is too long (maximum length: 128).");
 			errorMsg = msg.str();
 			valid = false;
 		}
