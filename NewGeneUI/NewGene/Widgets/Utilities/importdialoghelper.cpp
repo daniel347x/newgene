@@ -241,9 +241,16 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 
 
 	YMDIntButton->setChecked(true);
-	YearMonthDayWidget_ints.show();
+	if (YMDIntButton->isChecked())
+	{
+		YearMonthDayWidget_ints.show();
+	}
+	if (YMDStringButton->isChecked())
+	{
+		YearMonthDayWidget_strings.show();
+	}
 
-	QObject::connect(YMDIntButton, &QRadioButton::toggled, [&]()
+	QObject::connect(YMDIntButton, &QRadioButton::toggled, [=]()
 	{
 		YearMonthDayWidget_ints.hide();
 		YearMonthDayWidget_strings.hide();
@@ -257,7 +264,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 		}
 	});
 
-	QObject::connect(YMDStringButton, &QRadioButton::toggled, [&]()
+	QObject::connect(YMDStringButton, &QRadioButton::toggled, [=]()
 	{
 		YearMonthDayWidget_ints.hide();
 		YearMonthDayWidget_strings.hide();
