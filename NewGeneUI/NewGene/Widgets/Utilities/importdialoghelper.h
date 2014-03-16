@@ -30,6 +30,8 @@ namespace ImportDialogHelper
 								   QFormLayout & formYearOptions,
 								   QWidget & YearMonthDayWidget,
 								   QFormLayout & formYearMonthDayOptions,
+								   QWidget & MonthWidget,
+								   QFormLayout & formMonthOptions,
 								   TIME_GRANULARITY const & time_range_granularity
 			);
 	bool ValidateTimeRangeBlock(
@@ -41,6 +43,8 @@ namespace ImportDialogHelper
 								   QFormLayout & formYearOptions,
 								   QWidget & YearMonthDayWidget,
 								   QFormLayout & formYearMonthDayOptions,
+								   QWidget & YearMonthWidget,
+								   QFormLayout & formYearMonthOptions,
 								   TIME_GRANULARITY const & time_range_granularity,
 								   std::vector<std::string> & dataTimeRange,
 								   std::string & errorMsg

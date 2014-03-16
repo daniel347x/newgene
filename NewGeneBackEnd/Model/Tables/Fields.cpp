@@ -260,16 +260,16 @@ std::string const & BaseField::GetStringRef() const
 			}
 			break;
 
-		case FIELD_TYPE_TIMERANGE_STRING:
+		case FIELD_TYPE_DATETIME_STRING:
 			{
-				Field<FIELD_TYPE_TIMERANGE_STRING> const & myself = static_cast<Field<FIELD_TYPE_TIMERANGE_STRING> const &>(*this);
+				Field<FIELD_TYPE_DATETIME_STRING> const & myself = static_cast<Field<FIELD_TYPE_DATETIME_STRING> const &>(*this);
 				return myself.GetValueReference();
 			}
 			break;
 
-		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING:
 			{
-				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> const &>(*this);
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING> const &>(*this);
 				return myself.GetValueReference();
 			}
 			break;
@@ -578,16 +578,16 @@ std::string BaseField::GetString() const
 			}
 			break;
 
-		case FIELD_TYPE_TIMERANGE_STRING:
+		case FIELD_TYPE_DATETIME_STRING:
 			{
-				Field<FIELD_TYPE_TIMERANGE_STRING> const & myself = static_cast<Field<FIELD_TYPE_TIMERANGE_STRING> const &>(*this);
+				Field<FIELD_TYPE_DATETIME_STRING> const & myself = static_cast<Field<FIELD_TYPE_DATETIME_STRING> const &>(*this);
 				return myself.GetValueReference();
 			}
 			break;
 
-		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING:
 			{
-				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> const &>(*this);
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING> const & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING> const &>(*this);
 				return myself.GetValueReference();
 			}
 			break;
@@ -889,16 +889,16 @@ void BaseField::SetValueString(std::string const & val)
 			}
 			break;
 
-		case FIELD_TYPE_TIMERANGE_STRING:
+		case FIELD_TYPE_DATETIME_STRING:
 			{
-				Field<FIELD_TYPE_TIMERANGE_STRING> & myself = static_cast<Field<FIELD_TYPE_TIMERANGE_STRING> &>(*this);
+				Field<FIELD_TYPE_DATETIME_STRING> & myself = static_cast<Field<FIELD_TYPE_DATETIME_STRING> &>(*this);
 				myself.SetValue(val);
 			}
 			break;
 
-		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING:
 			{
-				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING> &>(*this);
+				Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING> & myself = static_cast<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING> &>(*this);
 				myself.SetValue(val);
 			}
 			break;
@@ -1139,9 +1139,9 @@ void FieldFactory(FIELD_TYPE field_type, std::string field_name, std::shared_ptr
 			}
 			break;
 
-		case FIELD_TYPE_TIMERANGE_STRING:
+		case FIELD_TYPE_DATETIME_STRING:
 			{
-				field = std::make_shared<Field<FIELD_TYPE_TIMERANGE_STRING>>(field_name);
+				field = std::make_shared<Field<FIELD_TYPE_DATETIME_STRING>>(field_name);
 			}
 			break;
 
@@ -1163,9 +1163,9 @@ void FieldFactory(FIELD_TYPE field_type, std::string field_name, std::shared_ptr
 			}
 			break;
 
-		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING:
 			{
-				field = std::make_shared<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING>>(field_name);
+				field = std::make_shared<Field<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING>>(field_name);
 			}
 			break;
 

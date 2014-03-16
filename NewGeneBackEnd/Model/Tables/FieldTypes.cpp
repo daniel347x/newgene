@@ -16,8 +16,8 @@ FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_UUID_STRING>::type const FieldTypeTraits<F
 FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_CODE>::type const FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_CODE>::default_;
 FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_DESCRIPTION>::type const FieldTypeTraits<FIELD_TYPE_DMU_MEMBER_DESCRIPTION>::default_;
 FieldTypeTraits<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID>::type const FieldTypeTraits<FIELD_TYPE_FK_TO_DMU_CATEGORY_UUID>::default_;
-FieldTypeTraits<FIELD_TYPE_TIMERANGE_STRING>::type const FieldTypeTraits<FIELD_TYPE_TIMERANGE_STRING>::default_;
-FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING>::type const FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_TIMERANGE_STRING>::default_;
+FieldTypeTraits<FIELD_TYPE_DATETIME_STRING>::type const FieldTypeTraits<FIELD_TYPE_DATETIME_STRING>::default_;
+FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING>::type const FieldTypeTraits<FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING>::default_;
 
 bool IsFieldTypeInt32(FIELD_TYPE const & field_type)
 {

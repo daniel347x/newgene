@@ -411,6 +411,12 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 					}
 					break;
 
+				case 3:
+					{
+						time_granularity = TIME_GRANULARITY__MONTH;
+					}
+					break;
+
 				default:
 					{
 						boost::format msg("Invalid time range granularity selected.");

@@ -703,9 +703,11 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	QFormLayout formYearOptions(&YearWidget);
 	QWidget YearMonthDayWidget;
 	QFormLayout formYearMonthDayOptions(&YearMonthDayWidget);
+	QWidget MonthWidget;
+	QFormLayout formMonthOptions(&MonthWidget);
 	if (uoa.time_granularity != TIME_GRANULARITY__NONE)
 	{
-		ImportDialogHelper::AddTimeRangeSelectorBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, formTimeRangeSelection, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, uoa.time_granularity);
+		ImportDialogHelper::AddTimeRangeSelectorBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, formTimeRangeSelection, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, MonthWidget, formMonthOptions, uoa.time_granularity);
 	}
 
 	QList<QLineEdit *> fieldsDMU;
@@ -849,7 +851,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		{
 			if (uoa.time_granularity != TIME_GRANULARITY__NONE)
 			{
-				valid = ImportDialogHelper::ValidateTimeRangeBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, uoa.time_granularity, dataTimeRange, errorMsg);
+				valid = ImportDialogHelper::ValidateTimeRangeBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, MonthWidget, formMonthOptions, uoa.time_granularity, dataTimeRange, errorMsg);
 			}
 		}
 

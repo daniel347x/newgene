@@ -367,6 +367,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		// handle the column names row
 		std::vector<std::string> colnames;
+
 		if (definition.first_row_is_header_row && data_file.good())
 		{
 			++linenum;
@@ -404,6 +405,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		// handle the column descriptions row
 		std::vector<std::string> coldescriptions(nCols);
+
 		if (definition.second_row_is_column_description_row && data_file.good())
 		{
 
@@ -438,7 +440,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 				SchemaEntry entry(field_type, colnames[ncol]);
 				std::string fieldReadErrorMsg;
 				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition, linenum, ncol + 1, fieldReadErrorMsg);
-				
+
 				if (stop)
 				{
 					boost::format msg("Unable to read field in file: %1%");
@@ -474,6 +476,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 			{
 				coldescription = colnames[colseq];
 			}
+
 			++colseq;
 		});
 
@@ -482,6 +485,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		// handle the column data types
 		bool badColTypes = false;
 		std::vector<std::string> coltypes(nCols);
+
 		if (definition.third_row_is_data_type_row && data_file.good())
 		{
 
@@ -504,6 +508,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 			std::for_each(coltypes.begin(), coltypes.end(), [&](std::string & coltype)
 			{
 				boost::to_lower(coltype);
+
 				if (coltype != "int" && coltype != "int64" && coltype != "string" && coltype != "float")
 				{
 					badColTypes = true;
@@ -597,6 +602,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 					errorMsg = msg.str();
 					return false;
 				}
+
 				// ... and remove them for the following test
 				existing_column_identifiers.pop_back();
 				existing_column_identifiers.pop_back();
@@ -661,12 +667,14 @@ bool Table_VariableGroupData::BuildImportDefinition
 		{
 
 			std::string test_col_name(colname);
+
 			if (!Validation::ValidateColumnName(test_col_name, std::string("variable group"), true, errorMsg))
 			{
 				boost::format msg("%1%");
 				msg % errorMsg.c_str();
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 			if (test_col_name != colname)
 			{
 				boost::format msg("Invalid column name");
@@ -683,7 +691,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			// Determine if this is a primary key column
 			if (std::find_if(dmusAndCols.cbegin(), dmusAndCols.cend(), [&](std::pair<WidgetInstanceIdentifier, std::string> const & dmuAndCol) -> bool
-			{
+		{
 			if (dmuAndCol.second == colname)
 				{
 					the_dmu = dmuAndCol.first;
@@ -736,7 +744,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			// Determine if this is a time range column
 			if (std::find_if(timeRangeCols.cbegin(), timeRangeCols.cend(), [&](std::string const & timeRangeCol) -> bool
-			{
+		{
 			if (timeRangeCol == colname)
 				{
 					return true;
@@ -762,31 +770,41 @@ bool Table_VariableGroupData::BuildImportDefinition
 				{
 
 					case TIME_GRANULARITY__DAY:
-					{
-						if (!IsFieldTypeInt(fieldtypes[colindex]))
 						{
-							boost::format msg("The time range columns must be an integral type.");
-							throw NewGeneException() << newgene_error_description(msg.str());
+							if (!IsFieldTypeInt(fieldtypes[colindex]))
+							{
+								boost::format msg("The time range columns must be an integral type.");
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
 						}
-					}
-					break;
+						break;
 
 					case TIME_GRANULARITY__YEAR:
-					{
-						if (!IsFieldTypeInt(fieldtypes[colindex]))
 						{
-							boost::format msg("The time range columns must be an integral type.");
-							throw NewGeneException() << newgene_error_description(msg.str());
+							if (!IsFieldTypeInt(fieldtypes[colindex]))
+							{
+								boost::format msg("The time range columns must be an integral type.");
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
 						}
-					}
-					break;
+						break;
+
+					case TIME_GRANULARITY__MONTH:
+						{
+							if (!IsFieldTypeInt(fieldtypes[colindex]))
+							{
+								boost::format msg("The time range columns must be an integral type.");
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
+						}
+						break;
 
 					default:
-					{
-						boost::format msg("Invalid time range specification in determination of time range column data types during data import of variable group.");
-						throw NewGeneException() << newgene_error_description(msg.str());
-					}
-					break;
+						{
+							boost::format msg("Invalid time range specification in determination of time range column data types during data import of variable group.");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+						break;
 
 				}
 
@@ -816,7 +834,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 					// Time range column data type overrides primary key
 
 					// no-op here
-					
+
 					// **************************************************************************** //
 					// Note! The field type, in the schema entry, will be set BELOW,
 					// where the time range columns are further validated and parsed,
@@ -889,6 +907,17 @@ bool Table_VariableGroupData::BuildImportDefinition
 					}
 				}
 			}
+			else if (the_time_granularity == TIME_GRANULARITY__MONTH)
+			{
+				if (timeRangeCols.size() == 4 && boost::trim_copy(timeRangeCols[2]).empty() && boost::trim_copy(timeRangeCols[3]).empty())
+				{
+					if (number_time_range_cols == 2)
+					{
+						// special case: this is OK, just one column
+						timeRangeHasOnlyOneColumnSpecialCase = true;
+					}
+				}
+			}
 
 			if (!timeRangeHasOnlyOneColumnSpecialCase)
 			{
@@ -915,9 +944,9 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			case TIME_GRANULARITY__DAY:
 				{
-					if (timeRangeCols.size() != 6)
+					if (timeRangeCols.size() != 6 || timeRangeCols.size() != 2)
 					{
-						boost::format msg("There should be 6 time columns.");
+						boost::format msg("Incorrect number of time columns.");
 						errorMsg = msg.str();
 						return false;
 					}
@@ -933,101 +962,335 @@ bool Table_VariableGroupData::BuildImportDefinition
 					output_schema_vector.push_back(outputTimeRangeStartEntry);
 					output_schema_vector.push_back(outputTimeRangeEndEntry);
 
-					// Now add the input time range columns to the mapping
-					// (they have already been added to the schema, because they are just regular input columns)
-					std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
+					if (timeRangeCols.size() == 6)
+					{
+
+						// Integer data from user:
+						// One column for YEAR
+						// One column for MONTH
+						// One column for DAY
+						// ... for both start & end dates
+
+						// Now add the input time range columns to the mapping
+						// (they have already been added to the schema, because they are just regular input columns)
+						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
 							(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
-					FieldTypeEntries input_file_fields;
-					FieldTypeEntries output_table_fields;
-					FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
-					FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_MONTH);
-					FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[2]), FIELD_TYPE_DAY);
-					FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[3]), FIELD_TYPE_YEAR);
-					FieldTypeEntry input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[4]), FIELD_TYPE_MONTH);
-					FieldTypeEntry input_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[5]), FIELD_TYPE_DAY);
-					input_file_fields.push_back(input_time_field__YearStart);
-					input_file_fields.push_back(input_time_field__MonthStart);
-					input_file_fields.push_back(input_time_field__DayStart);
-					input_file_fields.push_back(input_time_field__YearEnd);
-					input_file_fields.push_back(input_time_field__MonthEnd);
-					input_file_fields.push_back(input_time_field__DayEnd);
-					FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
-					FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
-					output_table_fields.push_back(output_time_field__DayStart);
-					output_table_fields.push_back(output_time_field__DayEnd);
-					time_range_mapping->input_file_fields = input_file_fields;
-					time_range_mapping->output_table_fields = output_table_fields;
-					mappings.push_back(time_range_mapping);
+						FieldTypeEntries input_file_fields;
+						FieldTypeEntries output_table_fields;
+						FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
+						FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_MONTH);
+						FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[2]), FIELD_TYPE_DAY);
+						FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[3]), FIELD_TYPE_YEAR);
+						FieldTypeEntry input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[4]), FIELD_TYPE_MONTH);
+						FieldTypeEntry input_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[5]), FIELD_TYPE_DAY);
+						input_file_fields.push_back(input_time_field__YearStart);
+						input_file_fields.push_back(input_time_field__MonthStart);
+						input_file_fields.push_back(input_time_field__DayStart);
+						input_file_fields.push_back(input_time_field__YearEnd);
+						input_file_fields.push_back(input_time_field__MonthEnd);
+						input_file_fields.push_back(input_time_field__DayEnd);
+						FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
+							FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+						FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName),
+							FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
+						output_table_fields.push_back(output_time_field__DayStart);
+						output_table_fields.push_back(output_time_field__DayEnd);
+						time_range_mapping->input_file_fields = input_file_fields;
+						time_range_mapping->output_table_fields = output_table_fields;
+						mappings.push_back(time_range_mapping);
 
-					// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-					int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
-					int colindex_monthStart = timeRangeColName_To_Index[timeRangeCols[1]];
-					int colindex_dayStart = timeRangeColName_To_Index[timeRangeCols[2]];
-					int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[3]];
-					int colindex_monthEnd = timeRangeColName_To_Index[timeRangeCols[4]];
-					int colindex_dayEnd = timeRangeColName_To_Index[timeRangeCols[5]];
+						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+						int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
+						int colindex_monthStart = timeRangeColName_To_Index[timeRangeCols[1]];
+						int colindex_dayStart = timeRangeColName_To_Index[timeRangeCols[2]];
+						int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[3]];
+						int colindex_monthEnd = timeRangeColName_To_Index[timeRangeCols[4]];
+						int colindex_dayEnd = timeRangeColName_To_Index[timeRangeCols[5]];
 
-					if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
-					{
-						input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
-						output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						}
+						else
+						{
+							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+							output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+						}
+
+						if (input_schema_vector[colindex_monthStart].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+							output_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+						}
+						else
+						{
+							input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
+							output_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
+						}
+
+						if (input_schema_vector[colindex_dayStart].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
+							output_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
+						}
+						else
+						{
+							input_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DAY;
+							output_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DAY;
+						}
+
+						if (input_schema_vector[colindex_yearEnd].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						}
+						else
+						{
+							input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+							output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+						}
+
+						if (input_schema_vector[colindex_monthEnd].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+							output_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+						}
+						else
+						{
+							input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
+							output_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
+						}
+
+						if (input_schema_vector[colindex_dayEnd].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
+							output_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
+						}
+						else
+						{
+							input_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DAY;
+							output_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DAY;
+						}
 					}
 					else
 					{
-						input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
-						output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
-					}
-					if (input_schema_vector[colindex_monthStart].IsPrimaryKey())
-					{
-						input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
-						output_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
-					}
-					else
-					{
-						input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
-						output_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
-					}
-					if (input_schema_vector[colindex_dayStart].IsPrimaryKey())
-					{
-						input_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
-						output_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
-					}
-					else
-					{
-						input_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DAY;
-						output_schema_vector[colindex_dayStart].field_type = FIELD_TYPE_DAY;
-					}
-					if (input_schema_vector[colindex_yearEnd].IsPrimaryKey())
-					{
-						input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
-						output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
-					}
-					else
-					{
-						input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
-						output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
-					}
-					if (input_schema_vector[colindex_monthEnd].IsPrimaryKey())
-					{
-						input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
-						output_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
-					}
-					else
-					{
-						input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
-						output_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
-					}
-					if (input_schema_vector[colindex_dayEnd].IsPrimaryKey())
-					{
-						input_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
-						output_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY;
-					}
-					else
-					{
-						input_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DAY;
-						output_schema_vector[colindex_dayEnd].field_type = FIELD_TYPE_DAY;
+
+						// String text from user.
+						// One for start date and one for end date.
+
+						// Now add the input time range columns to the mapping
+						// (they have already been added to the schema, because they are just regular input columns)
+						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
+							(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_DAY);
+						FieldTypeEntries input_file_fields;
+						FieldTypeEntries output_table_fields;
+						FieldTypeEntry input_time_field__Start = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
+						FieldTypeEntry input_time_field__End = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_MONTH);
+						input_file_fields.push_back(input_time_field__Start);
+						input_file_fields.push_back(input_time_field__End);
+						FieldTypeEntry output_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
+							FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+						FieldTypeEntry output_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName),
+							FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
+						output_table_fields.push_back(output_time_field__DayStart);
+						output_table_fields.push_back(output_time_field__DayEnd);
+						time_range_mapping->input_file_fields = input_file_fields;
+						time_range_mapping->output_table_fields = output_table_fields;
+						mappings.push_back(time_range_mapping);
+
+						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+						int colindex_Start = timeRangeColName_To_Index[timeRangeCols[0]];
+						int colindex_End = timeRangeColName_To_Index[timeRangeCols[1]];
+
+						if (input_schema_vector[colindex_Start].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_Start].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING;
+							output_schema_vector[colindex_Start].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING;
+						}
+						else
+						{
+							input_schema_vector[colindex_Start].field_type = FIELD_TYPE_DATETIME_STRING;
+							output_schema_vector[colindex_Start].field_type = FIELD_TYPE_DATETIME_STRING;
+						}
+
+						if (input_schema_vector[colindex_End].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_End].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING;
+							output_schema_vector[colindex_End].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING;
+						}
+						else
+						{
+							input_schema_vector[colindex_End].field_type = FIELD_TYPE_DATETIME_STRING;
+							output_schema_vector[colindex_End].field_type = FIELD_TYPE_DATETIME_STRING;
+						}
+
 					}
 
+
+				}
+				break;
+
+			case TIME_GRANULARITY__MONTH:
+				{
+					if (timeRangeCols.size() != 4)
+					{
+						boost::format msg("There should be 4 time columns.");
+						errorMsg = msg.str();
+						return false;
+					}
+
+					if (timeRangeColName_To_Index.size() != timeRangeCols.size())
+					{
+						if (!timeRangeHasOnlyOneColumnSpecialCase)
+						{
+							boost::format msg("There should be 4 time mapping columns.");
+							errorMsg = msg.str();
+							return false;
+						}
+						else
+						{
+							if (timeRangeColName_To_Index.size() != 2)
+							{
+								boost::format msg("There should be 2 time mapping column.");
+								errorMsg = msg.str();
+								return false;
+							}
+						}
+					}
+
+					// First, add the output time range columns to the schema
+					output_schema_vector.push_back(outputTimeRangeStartEntry);
+					output_schema_vector.push_back(outputTimeRangeEndEntry);
+
+					if (boost::trim_copy(timeRangeCols[2]).empty() && boost::trim_copy(timeRangeCols[3]).empty())
+					{
+
+						// Now add the input time range columns to the mapping
+						// (they have already been added to the schema, becTIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__YR_MNTH_DAYause they are just regular input columns)
+						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
+							(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__MONTH);
+						FieldTypeEntries input_file_fields;
+						FieldTypeEntries output_table_fields;
+						FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
+						FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_MONTH);
+						input_file_fields.push_back(input_time_field__YearStart);
+						input_file_fields.push_back(input_time_field__MonthStart);
+						FieldTypeEntry output_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
+							FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+						FieldTypeEntry output_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName),
+							FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
+						output_table_fields.push_back(output_time_field__MonthStart);
+						output_table_fields.push_back(output_time_field__MonthEnd);
+						time_range_mapping->input_file_fields = input_file_fields;
+						time_range_mapping->output_table_fields = output_table_fields;
+						mappings.push_back(time_range_mapping);
+
+						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+						int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
+						int colindex_monthStart = timeRangeColName_To_Index[timeRangeCols[1]];
+
+						if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						}
+						else
+						{
+							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+							output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+						}
+
+						if (input_schema_vector[colindex_monthStart].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+							output_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+						}
+						else
+						{
+							input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
+							output_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
+						}
+
+					}
+					else
+					{
+						// Now add the input time range columns to the mapping
+						// (they have already been added to the schema, because they are just regular input columns)
+						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
+							(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__FROM__START_MONTH__TO__END_MONTH);
+						FieldTypeEntries input_file_fields;
+						FieldTypeEntries output_table_fields;
+						FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
+						FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_MONTH);
+						FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[3]), FIELD_TYPE_YEAR);
+						FieldTypeEntry input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[4]), FIELD_TYPE_MONTH);
+						input_file_fields.push_back(input_time_field__YearStart);
+						input_file_fields.push_back(input_time_field__MonthStart);
+						input_file_fields.push_back(input_time_field__YearEnd);
+						input_file_fields.push_back(input_time_field__MonthEnd);
+						FieldTypeEntry output_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
+							FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+						FieldTypeEntry output_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName),
+							FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
+						output_table_fields.push_back(output_time_field__MonthStart);
+						output_table_fields.push_back(output_time_field__MonthEnd);
+						time_range_mapping->input_file_fields = input_file_fields;
+						time_range_mapping->output_table_fields = output_table_fields;
+						mappings.push_back(time_range_mapping);
+
+						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+						int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
+						int colindex_monthStart = timeRangeColName_To_Index[timeRangeCols[1]];
+						int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[3]];
+						int colindex_monthEnd = timeRangeColName_To_Index[timeRangeCols[4]];
+
+						if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						}
+						else
+						{
+							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+							output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+						}
+
+						if (input_schema_vector[colindex_monthStart].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+							output_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+						}
+						else
+						{
+							input_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
+							output_schema_vector[colindex_monthStart].field_type = FIELD_TYPE_MONTH;
+						}
+
+						if (input_schema_vector[colindex_yearEnd].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+						}
+						else
+						{
+							input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+							output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+						}
+
+						if (input_schema_vector[colindex_monthEnd].IsPrimaryKey())
+						{
+							input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+							output_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH;
+						}
+						else
+						{
+							input_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
+							output_schema_vector[colindex_monthEnd].field_type = FIELD_TYPE_MONTH;
+						}
+
+					}
+					
 				}
 				break;
 
@@ -1069,74 +1332,129 @@ bool Table_VariableGroupData::BuildImportDefinition
 					if (boost::trim_copy(timeRangeCols[1]).empty())
 					{
 
-						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
-						FieldTypeEntries input_file_fields;
-						FieldTypeEntries output_table_fields;
-						FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
-						input_file_fields.push_back(input_time_field__Year);
-						FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
-						FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
-						output_table_fields.push_back(output_time_field__YearStart);
-						output_table_fields.push_back(output_time_field__YearEnd);
-						time_range_mapping->input_file_fields = input_file_fields;
-						time_range_mapping->output_table_fields = output_table_fields;
-						mappings.push_back(time_range_mapping);
-
-						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-						int colindex_year = timeRangeColName_To_Index[timeRangeCols[0]];
-						if (input_schema_vector[colindex_year].IsPrimaryKey())
+						std::string startdate = timeRangeCols[0];
+						if (!Validation::ValidateInteger(startdate))
 						{
-							input_schema_vector[colindex_year].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
-							output_schema_vector[colindex_year].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							// Treat as text string
+
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR);
+							FieldTypeEntries input_file_fields;
+							FieldTypeEntries output_table_fields;
+							FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_DATETIME_STRING);
+							input_file_fields.push_back(input_time_field__Year);
+							FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
+								FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+							FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName),
+								FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
+							output_table_fields.push_back(output_time_field__YearStart);
+							output_table_fields.push_back(output_time_field__YearEnd);
+							time_range_mapping->input_file_fields = input_file_fields;
+							time_range_mapping->output_table_fields = output_table_fields;
+							mappings.push_back(time_range_mapping);
+
+							// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+							int colindex_year = timeRangeColName_To_Index[timeRangeCols[0]];
+
+							if (input_schema_vector[colindex_year].IsPrimaryKey())
+							{
+								input_schema_vector[colindex_year].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING;
+								output_schema_vector[colindex_year].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING;
+							}
+							else
+							{
+								input_schema_vector[colindex_year].field_type = FIELD_TYPE_DATETIME_STRING;
+								output_schema_vector[colindex_year].field_type = FIELD_TYPE_DATETIME_STRING;
+							}
 						}
 						else
 						{
-							input_schema_vector[colindex_year].field_type = FIELD_TYPE_YEAR;
-							output_schema_vector[colindex_year].field_type = FIELD_TYPE_YEAR;
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
+							FieldTypeEntries input_file_fields;
+							FieldTypeEntries output_table_fields;
+							FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
+							input_file_fields.push_back(input_time_field__Year);
+							FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
+								FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+							FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName),
+								FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
+							output_table_fields.push_back(output_time_field__YearStart);
+							output_table_fields.push_back(output_time_field__YearEnd);
+							time_range_mapping->input_file_fields = input_file_fields;
+							time_range_mapping->output_table_fields = output_table_fields;
+							mappings.push_back(time_range_mapping);
+
+							// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+							int colindex_year = timeRangeColName_To_Index[timeRangeCols[0]];
+
+							if (input_schema_vector[colindex_year].IsPrimaryKey())
+							{
+								input_schema_vector[colindex_year].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+								output_schema_vector[colindex_year].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							}
+							else
+							{
+								input_schema_vector[colindex_year].field_type = FIELD_TYPE_YEAR;
+								output_schema_vector[colindex_year].field_type = FIELD_TYPE_YEAR;
+							}
 						}
 
 					}
 					else
 					{
 
-						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
-								(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR);
-						FieldTypeEntries input_file_fields;
-						FieldTypeEntries output_table_fields;
-						FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
-						FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_YEAR);
-						input_file_fields.push_back(input_time_field__YearStart);
-						input_file_fields.push_back(input_time_field__YearEnd);
-						FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
-						FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName), FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
-						output_table_fields.push_back(output_time_field__YearStart);
-						output_table_fields.push_back(output_time_field__YearEnd);
-						time_range_mapping->input_file_fields = input_file_fields;
-						time_range_mapping->output_table_fields = output_table_fields;
-						mappings.push_back(time_range_mapping);
+						std::string startdate = timeRangeCols[0];
+						std::string enddate = timeRangeCols[1];
+						if (!Validation::ValidateInteger(startdate) || !Validation::ValidateInteger(enddate))
+						{
+							// Treat as text string
 
-						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-						int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
-						int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[1]];
-						if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
-						{
-							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
-							output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
+								(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_YEAR);
+							FieldTypeEntries input_file_fields;
+							FieldTypeEntries output_table_fields;
+							FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_DATETIME_STRING);
+							FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_DATETIME_STRING);
+							input_file_fields.push_back(input_time_field__YearStart);
+							input_file_fields.push_back(input_time_field__YearEnd);
+							FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
+								FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+							FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName),
+								FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
+							output_table_fields.push_back(output_time_field__YearStart);
+							output_table_fields.push_back(output_time_field__YearEnd);
+							time_range_mapping->input_file_fields = input_file_fields;
+							time_range_mapping->output_table_fields = output_table_fields;
+							mappings.push_back(time_range_mapping);
+
+							// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+							int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
+							int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[1]];
+
+							if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
+							{
+								input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING;
+								output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING;
+							}
+							else
+							{
+								input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DATETIME_STRING;
+								output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DATETIME_STRING;
+							}
+
+							if (input_schema_vector[colindex_yearEnd].IsPrimaryKey())
+							{
+								input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING;
+								output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING;
+							}
+							else
+							{
+								input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DATETIME_STRING;
+								output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DATETIME_STRING;
+							}
 						}
 						else
 						{
-							input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
-							output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
-						}
-						if (input_schema_vector[colindex_yearEnd].IsPrimaryKey())
-						{
-							input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
-							output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
-						}
-						else
-						{
-							input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
-							output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+
 						}
 
 					}
@@ -1317,20 +1635,17 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 			add_stmt % "INT";
 			flags = "n";
 		}
-		else
-		if (IsFieldTypeInt64(field_type))
+		else if (IsFieldTypeInt64(field_type))
 		{
 			add_stmt % "INT";
 			flags = "n";
 		}
-		else
-		if (IsFieldTypeFloat(field_type))
+		else if (IsFieldTypeFloat(field_type))
 		{
 			boost::format msg("Floating-point value not allowed as primary key field.");
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
-		else
-		if (IsFieldTypeString(field_type))
+		else if (IsFieldTypeString(field_type))
 		{
 			add_stmt % "STRING";
 			flags = "s";

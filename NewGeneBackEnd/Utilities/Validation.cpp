@@ -1026,3 +1026,54 @@ bool Validation::ValidateGenericStringField(std::string & generic_field, std::st
 	return valid;
 
 }
+
+bool Validation::ValidateInteger(std::string & possible_integer)
+{
+
+	boost::trim(possible_integer);
+
+	bool valid = true;
+
+	if (valid)
+	{
+
+		std::string regex_string("([0-9]+)");
+		boost::regex regex(regex_string);
+		boost::cmatch matches;
+
+		if (boost::regex_match(possible_integer.c_str(), matches, regex))
+		{
+			// matches[0] contains the original string.  matches[n]
+			// contains a sub_match object for each matching
+			// subexpression
+			// ... see http://www.onlamp.com/pub/a/onlamp/2006/04/06/boostregex.html?page=3
+			// for an example usage
+			if (valid && matches.size() == 2)
+			{
+				std::string the_match(matches[1].first, matches[1].second);
+
+				if (valid && the_match == possible_integer)
+				{
+					// no-op
+				}
+				else
+				{
+					valid = false;
+				}
+
+			}
+			else
+			{
+				valid = false;
+			}
+		}
+		else
+		{
+			valid = false;
+		}
+
+	}
+
+	return valid;
+
+}

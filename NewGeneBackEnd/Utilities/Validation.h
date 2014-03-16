@@ -32,6 +32,8 @@ namespace Validation
 
 	bool ValidateGenericStringField(std::string & generic_field, std::string & errorMsg, bool required = true);
 
+	bool ValidateInteger(std::string & possible_integer);
+
 }
 
 #endif
