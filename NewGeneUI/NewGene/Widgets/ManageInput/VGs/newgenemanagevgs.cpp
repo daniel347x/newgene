@@ -5,6 +5,7 @@
 #include <QListView>
 #include <QDialogButtonBox>
 #include <QCheckBox>
+#include <QGroupBox>
 
 #include "../Project/uiprojectmanager.h"
 #include "../Project/uiinputproject.h"
@@ -727,6 +728,33 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	ImportDialogHelper::AddFileChooserBlock(dialog, form, formFileSelection, FileChooserWidget, fieldsFileChooser, fileChooserStrings);
 
 
+
+
+	// ********************************************************************************************************************** //
+	// DMU column choosers
+	// ********************************************************************************************************************** //
+
+	QList<QLineEdit *> fieldsDMU;
+	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu)
+	{
+
+		std::string dmu_description = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu);
+		boost::format msg("Enter the column name for \"%1%\":");
+		msg % dmu_description;
+		QString labelDmu = QString(msg.str().c_str());
+		QLineEdit * lineEditDMU = new QLineEdit(&dialog);
+		form.addRow(labelDmu, lineEditDMU);
+		fieldsDMU << lineEditDMU;
+
+	});
+
+
+	// Add space - stupid Qt won't provide "addSpacing()" function for form layouts
+	form.addRow(new QLabel(" "));
+
+
+
+
 	// ********************************************************************************************************************** //
 	// Time range block
 	// ********************************************************************************************************************** //
@@ -743,9 +771,9 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	// Pair: "year-month-day" widget and its layout
 	QWidget YearMonthDayWidget;
 	QFormLayout formYearMonthDayOptions(&YearMonthDayWidget);
-	QWidget YearMonthDayWidget_ints;
+	QGroupBox YearMonthDayWidget_ints("Time range columns");
 	QFormLayout formYearMonthDayOptions_ints(&YearMonthDayWidget_ints);
-	QWidget YearMonthDayWidget_strings;
+	QGroupBox YearMonthDayWidget_strings("Time range columns");
 	QFormLayout formYearMonthDayOptions_strings(&YearMonthDayWidget_strings);
 	QVBoxLayout formYMDTimeRange_StringVsInt;
 	QList<QRadioButton *> radioButtonsYMD_StringVsInt_TimeRange;
@@ -783,25 +811,6 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 													  );
 	}
-
-
-	// ********************************************************************************************************************** //
-	// DMU column chooser
-	// ********************************************************************************************************************** //
-
-	QList<QLineEdit *> fieldsDMU;
-	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu)
-	{
-
-		std::string dmu_description = Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu);
-		boost::format msg("Enter the column name for \"%1%\":");
-		msg % dmu_description;
-		QString labelDmu = QString(msg.str().c_str());
-		QLineEdit * lineEditDMU = new QLineEdit(&dialog);
-		form.addRow(labelDmu, lineEditDMU);
-		fieldsDMU << lineEditDMU;
-
-	});
 
 
 	// Add space - stupid Qt won't provide "addSpacing()" function for form layouts
