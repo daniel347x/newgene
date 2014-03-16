@@ -747,6 +747,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	QFormLayout formYearMonthDayOptions_ints(&YearMonthDayWidget_ints);
 	QWidget YearMonthDayWidget_strings;
 	QFormLayout formYearMonthDayOptions_strings(&YearMonthDayWidget_strings);
+	QBoxLayout formYMDTimeRange_StringVsInt(QBoxLayout::LeftToRight);
 	QList<QRadioButton *> radioButtonsYMD_StringVsInt_TimeRange;
 
 	// Pair: "year-month" widget and its layout
@@ -772,6 +773,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 													  formYearMonthDayOptions_ints,
 													  YearMonthDayWidget_strings,
 													  formYearMonthDayOptions_strings,
+													  formYMDTimeRange_StringVsInt,
 													  radioButtonsYMD_StringVsInt_TimeRange,
 
 													  YearMonthWidget,

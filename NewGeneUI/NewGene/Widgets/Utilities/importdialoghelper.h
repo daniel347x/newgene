@@ -37,6 +37,7 @@ namespace ImportDialogHelper
 			QFormLayout & formYearMonthDayOptions_ints,
 			QWidget & YearMonthDayWidget_strings,
 			QFormLayout & formYearMonthDayOptions_strings,
+			QBoxLayout & formYMDTimeRange_StringVsInt,
 			QList<QRadioButton *> & radioButtonsYMD_StringVsInt_TimeRange,
 
 			QWidget & YearMonthWidget,
