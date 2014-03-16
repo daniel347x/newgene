@@ -188,7 +188,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	QRadioButton * YMDStringButton = new QRadioButton("Single columns containing text such as \"11/12/1992\"", &YearMonthDayWidget);
 	formYMDTimeRange_StringVsInt.addWidget(YMDIntButton);
 	formYMDTimeRange_StringVsInt.addWidget(YMDStringButton);
-	formYearMonthDayOptions.addRow(formYMDTimeRange_StringVsInt);
+	formYearMonthDayOptions.addRow(&formYMDTimeRange_StringVsInt);
 	radioButtonsYMD_StringVsInt_TimeRange << YMDStringButton << YMDIntButton;
 
 	// year
