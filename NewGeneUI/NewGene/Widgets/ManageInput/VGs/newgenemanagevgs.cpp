@@ -685,8 +685,38 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	WidgetInstanceIdentifiers dmu_categories = *(uoa.foreign_key_identifiers);
 
+
+
+	// ********************************************************************************************************************** //
+	// Variable Group import dialog
+	// ********************************************************************************************************************** //
+
+	// Widget and layout form a pair.
+	//
+	// Or, you can just have a layout by itself
+	//
+	// Widget needs no parent
+	// Layout constructs with widget as parent, or no parent
+	// OR Widget sets layout
+	// ... You can even do both (redundantly) - have the form set the widget as its parent and have the parent add the layout as its layout
+	//
+	// Layout "adds row" or "adds widget", adding EITHER widget OR layout
+	// ... if a layout has no widget, it can still add widgets or other layouts as rows
+	//
+	// If a layout has no widget, it will be added as a "row" to another layout
+	//
+	// You would use a WIDGET, with its layout, rather than just the layout, in order to HIDE the widget, use the widget on other forms, etc.
+
+	// Pair: dialog (a widget) and its layout
 	QDialog dialog(this);
 	QFormLayout form(&dialog);
+
+
+	// ********************************************************************************************************************** //
+	// File chooser block
+	// ********************************************************************************************************************** //
+
+	// Pair: file chooser widget and its layout (added as layout in ImportDialogHelper::AddFileChooserBlock(), below)
 	QWidget FileChooserWidget;
 	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
 
@@ -696,19 +726,66 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited data file", "Choose comma-delimited data file location", "", "" };
 	ImportDialogHelper::AddFileChooserBlock(dialog, form, formFileSelection, FileChooserWidget, fieldsFileChooser, fileChooserStrings);
 
+
+	// ********************************************************************************************************************** //
+	// Time range block
+	// ********************************************************************************************************************** //
+
 	QList<QLineEdit *> fieldsTimeRange;
 	QList<QRadioButton *> radioButtonsTimeRange;
+
 	QBoxLayout formTimeRangeSelection(QBoxLayout::LeftToRight);
+
+	// Pair: "year" widget and its layout
 	QWidget YearWidget;
 	QFormLayout formYearOptions(&YearWidget);
+
+	// Pair: "year-month-day" widget and its layout
 	QWidget YearMonthDayWidget;
 	QFormLayout formYearMonthDayOptions(&YearMonthDayWidget);
-	QWidget MonthWidget;
-	QFormLayout formMonthOptions(&MonthWidget);
+	QWidget YearMonthDayWidget_ints;
+	QFormLayout formYearMonthDayOptions_ints(&YearMonthDayWidget);
+	QWidget YearMonthDayWidget_strings;
+	QFormLayout formYearMonthDayOptions_strings(&YearMonthDayWidget);
+	QList<QRadioButton *> radioButtonsYMD_StringVsInt_TimeRange;
+
+	// Pair: "year-month" widget and its layout
+	QWidget YearMonthWidget;
+	QFormLayout formYearMonthOptions(&YearMonthWidget);
+
 	if (uoa.time_granularity != TIME_GRANULARITY__NONE)
 	{
-		ImportDialogHelper::AddTimeRangeSelectorBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, formTimeRangeSelection, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, MonthWidget, formMonthOptions, uoa.time_granularity);
+		ImportDialogHelper::AddTimeRangeSelectorBlock(
+
+													  dialog,
+													  form,
+													  fieldsTimeRange,
+													  radioButtonsTimeRange,
+													  formTimeRangeSelection,
+
+													  YearWidget,
+													  formYearOptions,
+
+													  YearMonthDayWidget,
+													  formYearMonthDayOptions,
+													  YearMonthDayWidget_ints,
+													  formYearMonthDayOptions_ints,
+													  YearMonthDayWidget_strings,
+													  formYearMonthDayOptions_strings,
+													  radioButtonsYMD_StringVsInt_TimeRange,
+
+													  YearMonthWidget,
+													  formYearMonthOptions,
+
+													  uoa.time_granularity
+
+													  );
 	}
+
+
+	// ********************************************************************************************************************** //
+	// DMU column chooser
+	// ********************************************************************************************************************** //
 
 	QList<QLineEdit *> fieldsDMU;
 	std::for_each(dmu_categories.cbegin(), dmu_categories.cend(), [&](WidgetInstanceIdentifier const & dmu)
@@ -723,6 +800,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		fieldsDMU << lineEditDMU;
 
 	});
+
 
 	// Add space - stupid Qt won't provide "addSpacing()" function for form layouts
 	form.addRow(new QLabel(" "));
@@ -851,7 +929,32 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		{
 			if (uoa.time_granularity != TIME_GRANULARITY__NONE)
 			{
-				valid = ImportDialogHelper::ValidateTimeRangeBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange, YearWidget, formYearOptions, YearMonthDayWidget, formYearMonthDayOptions, MonthWidget, formMonthOptions, uoa.time_granularity, dataTimeRange, errorMsg);
+				valid = ImportDialogHelper::ValidateTimeRangeBlock(
+
+																   dialog,
+																   form,
+																   fieldsTimeRange,
+																   radioButtonsTimeRange,
+
+																   YearWidget,
+																   formYearOptions,
+
+																   YearMonthDayWidget,
+																   formYearMonthDayOptions,
+																   YearMonthDayWidget_ints,
+																   formYearMonthDayOptions_ints,
+																   YearMonthDayWidget_strings,
+																   formYearMonthDayOptions_strings,
+																   radioButtonsYMD_StringVsInt_TimeRange,
+
+																   YearMonthWidget,
+																   formYearMonthOptions,
+
+																   uoa.time_granularity,
+																   dataTimeRange,
+																   errorMsg
+
+																   );
 			}
 		}
 

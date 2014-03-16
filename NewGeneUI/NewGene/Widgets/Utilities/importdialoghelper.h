@@ -21,33 +21,56 @@ namespace ImportDialogHelper
 	void AddTimeRangeGranularitySelectionBlock(QDialog & dialog, QFormLayout & form, QVBoxLayout & formTimeRangeGranularitySelection, QList<QRadioButton *> & radioButtonsTimeRangeGranularity);
 
 	void AddTimeRangeSelectorBlock(
-								   QDialog & dialog,
-								   QFormLayout & form,
-								   QList<QLineEdit *> & fieldsTimeRange,
-								   QList<QRadioButton *> & radioButtonsTimeRange,
-								   QBoxLayout & formTimeRangeSelection,
-								   QWidget & YearWidget,
-								   QFormLayout & formYearOptions,
-								   QWidget & YearMonthDayWidget,
-								   QFormLayout & formYearMonthDayOptions,
-								   QWidget & MonthWidget,
-								   QFormLayout & formMonthOptions,
-								   TIME_GRANULARITY const & time_range_granularity
+
+			QDialog & dialog,
+			QFormLayout & form,
+			QList<QLineEdit *> & fieldsTimeRange,
+			QList<QRadioButton *> & radioButtonsTimeRange,
+			QBoxLayout & formTimeRangeSelection,
+
+			QWidget & YearWidget,
+			QFormLayout & formYearOptions,
+
+			QWidget & YearMonthDayWidget,
+			QFormLayout & formYearMonthDayOptions,
+			QWidget & YearMonthDayWidget_ints,
+			QFormLayout & formYearMonthDayOptions_ints,
+			QWidget & YearMonthDayWidget_strings,
+			QFormLayout & formYearMonthDayOptions_strings,
+			QList<QRadioButton *> & radioButtonsYMD_StringVsInt_TimeRange,
+
+			QWidget & YearMonthWidget,
+			QFormLayout & formYearMonthOptions,
+
+			TIME_GRANULARITY const & time_range_granularity
+
 			);
+
 	bool ValidateTimeRangeBlock(
-								   QDialog & dialog,
-								   QFormLayout & form,
-								   QList<QLineEdit *> & fieldsTimeRange,
-								   QList<QRadioButton *> & radioButtonsTimeRange,
-								   QWidget & YearWidget,
-								   QFormLayout & formYearOptions,
-								   QWidget & YearMonthDayWidget,
-								   QFormLayout & formYearMonthDayOptions,
-								   QWidget & YearMonthWidget,
-								   QFormLayout & formYearMonthOptions,
-								   TIME_GRANULARITY const & time_range_granularity,
-								   std::vector<std::string> & dataTimeRange,
-								   std::string & errorMsg
+
+			QDialog & dialog,
+			QFormLayout & form,
+			QList<QLineEdit *> & fieldsTimeRange,
+			QList<QRadioButton *> & radioButtonsTimeRange,
+
+			QWidget & YearWidget,
+			QFormLayout & formYearOptions,
+
+			QWidget & YearMonthDayWidget,
+			QFormLayout & formYearMonthDayOptions,
+			QWidget & YearMonthDayWidget_ints,
+			QFormLayout & formYearMonthDayOptions_ints,
+			QWidget & YearMonthDayWidget_strings,
+			QFormLayout & formYearMonthDayOptions_strings,
+			QList<QRadioButton *> & radioButtonsYMD_StringVsInt_TimeRange,
+
+			QWidget & YearMonthWidget,
+			QFormLayout & formYearMonthOptions,
+
+			TIME_GRANULARITY const & time_range_granularity,
+			std::vector<std::string> & dataTimeRange,
+			std::string & errorMsg
+
 			);
 
 	void AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories);
