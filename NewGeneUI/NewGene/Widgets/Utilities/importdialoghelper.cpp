@@ -182,6 +182,8 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 
 	// Time range OPTIONS - Year, Month, Day
 	YearMonthDayWidget.setLayout(&formYearMonthDayOptions);
+	YearMonthDayWidget_ints.setLayout(&formYearMonthDayOptions_ints);
+	YearMonthDayWidget_strings.setLayout(&formYearMonthDayOptions_strings);
 
 	QRadioButton * YMDIntButton = new QRadioButton("Multiple columns - one for year, one for month, and one for day", &YearMonthDayWidget);
 	QRadioButton * YMDStringButton = new QRadioButton("Single columns containing text such as \"11/12/1992\"", &YearMonthDayWidget);
