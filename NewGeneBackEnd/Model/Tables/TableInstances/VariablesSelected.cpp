@@ -193,12 +193,16 @@ void Table_VARIABLES_SELECTED::Add(sqlite3 * db, std::string const & vg_set_memb
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	std::string sqlAdd("INSERT INTO VG_SET_MEMBERS_SELECTED (");
+	sqlAdd += "`";
 	sqlAdd += VG_SET_MEMBER_STRING_CODE;
-	sqlAdd += ",";
+	sqlAdd += "`";
+	sqlAdd += ", ";
+	sqlAdd += "`";
 	sqlAdd += VG_CATEGORY_STRING_CODE;
+	sqlAdd += "`";
 	sqlAdd += ") VALUES ('";
 	sqlAdd += vg_set_member_code;
-	sqlAdd += "','";
+	sqlAdd += "', '";
 	sqlAdd += vg_category_code;
 	sqlAdd += "')";
 	sqlite3_stmt * stmt = NULL;
@@ -222,12 +226,16 @@ void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_m
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	std::string sqlRemove("DELETE FROM VG_SET_MEMBERS_SELECTED WHERE ");
+	sqlRemove += "`";
 	sqlRemove += VG_SET_MEMBER_STRING_CODE;
-	sqlRemove += "='";
+	sqlRemove += "`";
+	sqlRemove += " = '";
 	sqlRemove += vg_set_member_code;
 	sqlRemove += "' AND ";
+	sqlRemove += "`";
 	sqlRemove += VG_CATEGORY_STRING_CODE;
-	sqlRemove += "='";
+	sqlRemove += "`";
+	sqlRemove += " = '";
 	sqlRemove += vg_category_code;
 	sqlRemove += "'";
 	sqlite3_stmt * stmt = NULL;
@@ -251,8 +259,10 @@ void Table_VARIABLES_SELECTED::RemoveAllfromVG(sqlite3 * db, std::string const &
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	std::string sqlRemove("DELETE FROM VG_SET_MEMBERS_SELECTED WHERE ");
+	sqlRemove += "`";
 	sqlRemove += VG_CATEGORY_STRING_CODE;
-	sqlRemove += "='";
+	sqlRemove += "`";
+	sqlRemove += " = '";
 	sqlRemove += vg_category_code;
 	sqlRemove += "'";
 	sqlite3_stmt * stmt = NULL;
