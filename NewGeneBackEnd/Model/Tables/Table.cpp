@@ -18,6 +18,7 @@ bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 	std::for_each(import_definition.output_schema.schema.cbegin(),
 				  import_definition.output_schema.schema.cend(), [&import_definition, &sql_insert, &first](SchemaEntry const & schema_entry)
 	{
+
 		if (!first)
 		{
 			sql_insert += ", ";
@@ -25,7 +26,10 @@ bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 		first = false;
 
+		sql_insert += "`";
 		sql_insert += schema_entry.field_name;
+		sql_insert += "`";
+
 	});
 
 	sql_insert += ") VALUES ";
@@ -254,7 +258,9 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 		first = false;
 
+		sql_update += "`";
 		sql_update += schema_entry.field_name;
+		sql_update += "`";
 
 		sql_update += " = ";
 
@@ -305,7 +311,9 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 			first = false;
 
+			sql_update += "`";
 			sql_update += schema_entry.field_name;
+			sql_update += "`";
 
 			sql_update += " = ";
 
@@ -388,7 +396,9 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 
 		first = false;
 
+		sql_insert += "`";
 		sql_insert += schema_entry.field_name;
+		sql_insert += "`";
 
 		++index;
 
