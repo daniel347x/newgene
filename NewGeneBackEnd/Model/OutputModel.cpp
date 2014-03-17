@@ -6044,7 +6044,9 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 				}
 				first_column_name = false;
 
+				sql_add_xr_row += "`";
 				sql_add_xr_row += column_in_view.column_name_in_temporary_table;
+				sql_add_xr_row += "`";
 
 			});
 
@@ -6058,9 +6060,13 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 						sql_add_xr_row += ", ";
 					}
 					first_column_name = false;
+					sql_add_xr_row += "`";
 					sql_add_xr_row += datetimestart_text_colname;
+					sql_add_xr_row += "`";
 					sql_add_xr_row += ", ";
+					sql_add_xr_row += "`";
 					sql_add_xr_row += datetimeend_text_colname;
+					sql_add_xr_row += "`";
 				}
 			}
 
@@ -6072,9 +6078,13 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 					sql_add_xr_row += ", ";
 				}
 				first_column_name = false;
+				sql_add_xr_row += "`";
 				sql_add_xr_row += datetime_start_col_name;
+				sql_add_xr_row += "`";
 				sql_add_xr_row += ", ";
+				sql_add_xr_row += "`";
 				sql_add_xr_row += datetime_end_col_name;
+				sql_add_xr_row += "`";
 			}
 
 			sql_add_xr_row += ") VALUES (";
@@ -8686,7 +8696,9 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 			}
 			first_column_name = false;
 
+			sql_add_xr_row += "`";
 			sql_add_xr_row += current_xr_or_completemerge_columns.columns_in_view[the_index].column_name_in_temporary_table;
+			sql_add_xr_row += "`";
 
 			++the_index;
 
@@ -8700,9 +8712,13 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 				sql_add_xr_row += ", ";
 			}
 			first_column_name = false;
+			sql_add_xr_row += "`";
 			sql_add_xr_row += datetime_start_col_name;
+			sql_add_xr_row += "`";
 			sql_add_xr_row += ", ";
+			sql_add_xr_row += "`";
 			sql_add_xr_row += datetime_end_col_name;
+			sql_add_xr_row += "`";
 		}
 
 		sql_add_xr_row += ") VALUES (";
