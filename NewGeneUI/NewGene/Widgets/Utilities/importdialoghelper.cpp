@@ -525,6 +525,16 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 		return false;
 	}
 
+	QRadioButton * YMStringButton = radioButtonsYM_StringVsInt_TimeRange[0];
+	QRadioButton * YMIntButton = radioButtonsYM_StringVsInt_TimeRange[1];
+
+	if (!YMStringButton || !YMIntButton)
+	{
+		boost::format msg("Invalid time range (text vs. int) radio buttons");
+		errorMsg = msg.str();
+		return false;
+	}
+
 	int currentIndex = 0;
 	QLineEdit * timeRange_y_yearStart = fieldsTimeRange[currentIndex++];
 	QLineEdit * timeRange_y_yearEnd = fieldsTimeRange[currentIndex++];
@@ -703,6 +713,8 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 		std::string ym_monthEnd(timeRange_ym_monthEnd->text().toStdString());
 		std::string ym_Start(timeRange_ym_Start->text().toStdString());
 		std::string ym_End(timeRange_ym_End->text().toStdString());
+
+		bool valid = true;
 
 		bool using_string_fields = false;
 		if (YMStringButton->isChecked())
