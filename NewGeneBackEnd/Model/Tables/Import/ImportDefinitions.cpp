@@ -104,7 +104,7 @@ ImportDefinition Development__CreateImportDefinition_CINC()
 		ImportDefinition::ImportMappings mappings;
 
 		// Time-range mapping
-		std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
+		std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__START_YEAR_ONLY);
 		FieldTypeEntries input_file_fields;
 		FieldTypeEntries output_table_fields;
 		FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "year"), FIELD_TYPE_INT32);
@@ -295,7 +295,7 @@ ImportDefinition Development__CreateImportDefinition_COW()
 	ImportDefinition::ImportMappings mappings;
 
 	// Time-range mapping
-	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
+	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__START_DAY__TO__END_DAY);
 	FieldTypeEntries input_file_fields;
 	FieldTypeEntries output_table_fields;
 	FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "stday"), FIELD_TYPE_INT32);
@@ -488,7 +488,7 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	if (false)
 	{
 		// Time-range mapping
-		std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
+		std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__START_DAY__TO__END_DAY);
 		FieldTypeEntries input_file_fields;
 		FieldTypeEntries output_table_fields;
 		FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "STRTDAY"), FIELD_TYPE_INT32);
@@ -514,7 +514,7 @@ ImportDefinition Development__CreateImportDefinition_Maoz()
 	else
 	{
 		// Time-range mapping
-		std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
+		std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__START_YEAR_ONLY);
 		FieldTypeEntries input_file_fields;
 		FieldTypeEntries output_table_fields;
 		FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, "YEAR"), FIELD_TYPE_INT32);
@@ -635,7 +635,7 @@ ImportDefinition Development__CreateImportDefinition_Cty()
 
 	ImportDefinition::ImportMappings mappings;
 	// Time-range mapping
-	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
+	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__START_DAY__TO__END_DAY);
 	FieldTypeEntries input_file_fields;
 	FieldTypeEntries output_table_fields;
 	FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "StYear"), FIELD_TYPE_INT32);
@@ -737,7 +737,7 @@ ImportDefinition Development__CreateImportDefinition_Mid()
 	ImportDefinition::ImportMappings mappings;
 
 	// Time-range mapping
-	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
+	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__START_DAY__TO__END_DAY);
 	FieldTypeEntries input_file_fields;
 	FieldTypeEntries output_table_fields;
 	FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, "StDay"), FIELD_TYPE_INT32);
@@ -761,7 +761,7 @@ ImportDefinition Development__CreateImportDefinition_Mid()
 	mappings.push_back(time_range_mapping);
 
 	// Time-range mapping
-	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping_onset = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__YR_MNTH_DAY);
+	std::shared_ptr<TimeRangeFieldMapping> time_range_mapping_onset = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__START_DAY_ONLY);
 	input_file_fields.clear();
 	output_table_fields.clear();
 	FieldTypeEntry input_time_field__Day = std::make_pair(NameOrIndex(NameOrIndex::NAME, "StDay"), FIELD_TYPE_INT32);

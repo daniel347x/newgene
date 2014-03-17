@@ -1009,25 +1009,27 @@ bool Table_VariableGroupData::BuildImportDefinition
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
 						if (!timeRangeHasOnlyStartDate)
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__START_DAY__TO__END_DAY);
 						}
 						else
 						{
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__START_DAY_ONLY);
 						}
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
-						FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
-						FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_MONTH);
-						FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[2]), FIELD_TYPE_DAY);
+						int colindex = 0;
+						FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_YEAR);
+						FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_MONTH);
+						FieldTypeEntry input_time_field__DayStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_DAY);
 						FieldTypeEntry input_time_field__YearEnd;
 						FieldTypeEntry input_time_field__MonthEnd;
 						FieldTypeEntry input_time_field__DayEnd;
 
 						if (!timeRangeHasOnlyStartDate)
 						{
-							input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[3]), FIELD_TYPE_YEAR);
-							input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[4]), FIELD_TYPE_MONTH);
-							input_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[5]), FIELD_TYPE_DAY);
+							input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_YEAR);
+							input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_MONTH);
+							input_time_field__DayEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_DAY);
 						}
 
 						input_file_fields.push_back(input_time_field__YearStart);
@@ -1052,18 +1054,19 @@ bool Table_VariableGroupData::BuildImportDefinition
 						mappings.push_back(time_range_mapping);
 
 						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-						int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
-						int colindex_monthStart = timeRangeColName_To_Index[timeRangeCols[1]];
-						int colindex_dayStart = timeRangeColName_To_Index[timeRangeCols[2]];
+						colindex = 0;
+						int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[colindex++]];
+						int colindex_monthStart = timeRangeColName_To_Index[timeRangeCols[colindex++]];
+						int colindex_dayStart = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 						int colindex_yearEnd = 0;
 						int colindex_monthEnd = 0;
 						int colindex_dayEnd = 0;
 
 						if (!timeRangeHasOnlyStartDate)
 						{
-							colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[3]];
-							colindex_monthEnd = timeRangeColName_To_Index[timeRangeCols[4]];
-							colindex_dayEnd = timeRangeColName_To_Index[timeRangeCols[5]];
+							colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[colindex++]];
+							colindex_monthEnd = timeRangeColName_To_Index[timeRangeCols[colindex++]];
+							colindex_dayEnd = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 						}
 
 						if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
@@ -1146,19 +1149,21 @@ bool Table_VariableGroupData::BuildImportDefinition
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
 						if (!timeRangeHasOnlyStartDate)
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_DAY);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__FROM__START_DAY__TO__END_DAY);
 						}
 						else
 						{
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__START_DAY_ONLY);
 						}
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
-						FieldTypeEntry input_time_field__Start = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_DATETIME_STRING);
+						int colindex = 0;
+						FieldTypeEntry input_time_field__Start = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_DATETIME_STRING);
 						FieldTypeEntry input_time_field__End;
 
 						if (!timeRangeHasOnlyStartDate)
 						{
-							input_time_field__End = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_DATETIME_STRING);
+							input_time_field__End = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_DATETIME_STRING);
 						}
 
 						input_file_fields.push_back(input_time_field__Start);
@@ -1179,12 +1184,13 @@ bool Table_VariableGroupData::BuildImportDefinition
 						mappings.push_back(time_range_mapping);
 
 						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-						int colindex_Start = timeRangeColName_To_Index[timeRangeCols[0]];
+						colindex = 0;
 						int colindex_End = 0;
+						int colindex_Start = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 
 						if (!timeRangeHasOnlyStartDate)
 						{
-							colindex_End = timeRangeColName_To_Index[timeRangeCols[1]];
+							colindex_End = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 						}
 
 						if (input_schema_vector[colindex_Start].IsPrimaryKey())
@@ -1251,22 +1257,24 @@ bool Table_VariableGroupData::BuildImportDefinition
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
 						if (!timeRangeHasOnlyStartDate)
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__FROM__START_MONTH__TO__END_MONTH);
 						}
 						else
 						{
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__START_MONTH_ONLY);
 						}
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
-						FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
-						FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_MONTH);
+						int colindex = 0;
+						FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_YEAR);
+						FieldTypeEntry input_time_field__MonthStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_MONTH);
 						FieldTypeEntry input_time_field__YearEnd;
 						FieldTypeEntry input_time_field__MonthEnd;
 
 						if (!timeRangeHasOnlyStartDate)
 						{
-							input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[2]), FIELD_TYPE_YEAR);
-							input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[3]), FIELD_TYPE_MONTH);
+							input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_YEAR);
+							input_time_field__MonthEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_MONTH);
 						}
 
 						input_file_fields.push_back(input_time_field__YearStart);
@@ -1289,15 +1297,16 @@ bool Table_VariableGroupData::BuildImportDefinition
 						mappings.push_back(time_range_mapping);
 
 						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-						int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
-						int colindex_monthStart = timeRangeColName_To_Index[timeRangeCols[1]];
+						colindex = 0;
+						int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[colindex++]];
+						int colindex_monthStart = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 						int colindex_yearEnd = 0;
 						int colindex_monthEnd = 0;
 
 						if (!timeRangeHasOnlyStartDate)
 						{
-							colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[2]];
-							colindex_monthEnd = timeRangeColName_To_Index[timeRangeCols[3]];
+							colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[colindex++]];
+							colindex_monthEnd = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 						}
 
 						if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
@@ -1358,19 +1367,21 @@ bool Table_VariableGroupData::BuildImportDefinition
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
 						if (!timeRangeHasOnlyStartDate)
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_DAY);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_MONTH__FROM__START_MONTH__TO__END_MONTH);
 						}
 						else
 						{
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_MONTH__START_MONTH_ONLY);
 						}
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
-						FieldTypeEntry input_time_field__Start = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_DATETIME_STRING);
+						int colindex = 0;
+						FieldTypeEntry input_time_field__Start = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_DATETIME_STRING);
 						FieldTypeEntry input_time_field__End;
 
 						if (!timeRangeHasOnlyStartDate)
 						{
-							input_time_field__End = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_DATETIME_STRING);
+							input_time_field__End = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_DATETIME_STRING);
 						}
 
 						input_file_fields.push_back(input_time_field__Start);
@@ -1391,12 +1402,13 @@ bool Table_VariableGroupData::BuildImportDefinition
 						mappings.push_back(time_range_mapping);
 
 						// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-						int colindex_Start = timeRangeColName_To_Index[timeRangeCols[0]];
+						colindex = 0;
+						int colindex_Start = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 						int colindex_End = 0;
 
 						if (!timeRangeHasOnlyStartDate)
 						{
-							colindex_End = timeRangeColName_To_Index[timeRangeCols[1]];
+							colindex_End = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 						}
 
 						if (input_schema_vector[colindex_Start].IsPrimaryKey())
@@ -1473,10 +1485,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							// Treat as text string
 
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__START_YEAR_ONLY);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
-							FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_DATETIME_STRING);
+							int colindex = 0;
+							FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_DATETIME_STRING);
 							input_file_fields.push_back(input_time_field__Year);
 							FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
 									FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
@@ -1489,7 +1502,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 							mappings.push_back(time_range_mapping);
 
 							// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-							int colindex_year = timeRangeColName_To_Index[timeRangeCols[0]];
+							colindex = 0;
+							int colindex_year = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 
 							if (input_schema_vector[colindex_year].IsPrimaryKey())
 							{
@@ -1504,10 +1518,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 						}
 						else
 						{
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__START_YEAR_ONLY);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
-							FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
+							int colindex = 0;
+							FieldTypeEntry input_time_field__Year = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_YEAR);
 							input_file_fields.push_back(input_time_field__Year);
 							FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
 									FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
@@ -1520,7 +1535,8 @@ bool Table_VariableGroupData::BuildImportDefinition
 							mappings.push_back(time_range_mapping);
 
 							// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-							int colindex_year = timeRangeColName_To_Index[timeRangeCols[0]];
+							colindex = 0;
+							int colindex_year = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 
 							if (input_schema_vector[colindex_year].IsPrimaryKey())
 							{
@@ -1545,11 +1561,12 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							// Treat as text string
 
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_YEAR);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__FROM__START_YEAR__TO__END_YEAR);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
-							FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_DATETIME_STRING);
-							FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_DATETIME_STRING);
+							int colindex = 0;
+							FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_DATETIME_STRING);
+							FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_DATETIME_STRING);
 							input_file_fields.push_back(input_time_field__YearStart);
 							input_file_fields.push_back(input_time_field__YearEnd);
 							FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
@@ -1563,8 +1580,9 @@ bool Table_VariableGroupData::BuildImportDefinition
 							mappings.push_back(time_range_mapping);
 
 							// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-							int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
-							int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[1]];
+							colindex = 0;
+							int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[colindex++]];
+							int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 
 							if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
 							{
@@ -1594,8 +1612,9 @@ bool Table_VariableGroupData::BuildImportDefinition
 							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
-							FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
-							FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_YEAR);
+							int colindex = 0;
+							FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_YEAR);
+							FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[colindex++]), FIELD_TYPE_YEAR);
 							input_file_fields.push_back(input_time_field__YearStart);
 							input_file_fields.push_back(input_time_field__YearEnd);
 							FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
@@ -1609,8 +1628,9 @@ bool Table_VariableGroupData::BuildImportDefinition
 							mappings.push_back(time_range_mapping);
 
 							// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
-							int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
-							int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[1]];
+							colindex = 0;
+							int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[colindex++]];
+							int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[colindex++]];
 
 							if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
 							{

@@ -161,7 +161,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 	switch (time_range_type)
 	{
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_DAY:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__FROM__START_DAY__TO__END_DAY:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
@@ -213,7 +213,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_YEAR:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__FROM__START_YEAR__TO__END_YEAR:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
@@ -265,7 +265,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__START_YEAR_ONLY:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_datetime_year = RetrieveDataField(input_file_fields[0], input_data_fields);
@@ -344,7 +344,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__START_YEAR_ONLY:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field = RetrieveDataField(input_file_fields[0], input_data_fields);
@@ -371,7 +371,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__YR_MNTH_DAY:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__START_DAY_ONLY:
 			{
 
 				// **************************************************************************************************************** //
@@ -407,7 +407,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__MONTH:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__START_MONTH_ONLY:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
@@ -520,7 +520,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__START_DAY__TO__END_DAY:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[0], input_data_fields);
