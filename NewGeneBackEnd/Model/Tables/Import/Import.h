@@ -264,17 +264,33 @@ class TimeRangeFieldMapping : public RowFieldMapping
 
 		enum TIME_RANGE_FIELD_MAPPING_TYPE
 		{
+
 			  TIME_RANGE_FIELD_MAPPING_TYPE__YEAR
 			, TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR
 			, TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__RANGE__FROM__YR_MNTH_DAY
+
 			, TIME_RANGE_FIELD_MAPPING_TYPE__MONTH
 			, TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__FROM__START_MONTH__TO__END_MONTH
+
 			, TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__YR_MNTH_DAY
 			, TIME_RANGE_FIELD_MAPPING_TYPE__DAY__RANGE__FROM__YR_MNTH_DAY
+
 			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE      // accepts only one format
+
 			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_DAY  // accepts a variety of formats
+
+			// A single string field is provided, containing a single date string,
+			// that is used for both the starting YEAR and ending YEAR
+			// (rounded to year, with the ending year being set to the
+			// zeroeth second of the year AFTER the specified ending year)
 			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR       // accepts a variety of formats
+
+			// Two string fields are provided, each containing a date string,
+			// one used for the starting YEAR and the other used for the ending YEAR
+			// (both rounded to year, with the ending year being set to the zeroeth
+			// second of the year AFTER the specified ending year)
 			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_YEAR // accepts a variety of formats
+
 		};
 
 		TimeRangeFieldMapping(TIME_RANGE_FIELD_MAPPING_TYPE const time_range_type_, FIELD_MAPPING_TYPE const field_mapping_type_)

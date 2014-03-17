@@ -42,6 +42,12 @@ namespace ImportDialogHelper
 
 			QWidget & YearMonthWidget,
 			QFormLayout & formYearMonthOptions,
+			QWidget & YearMonthWidget_ints,
+			QFormLayout & formYearMonthOptions_ints,
+			QWidget & YearMonthWidget_strings,
+			QFormLayout & formYearMonthOptions_strings,
+			QBoxLayout & formYMTimeRange_StringVsInt,
+			QList<QRadioButton *> & radioButtonsYM_StringVsInt_TimeRange,
 
 			TIME_GRANULARITY const & time_range_granularity
 
@@ -67,6 +73,11 @@ namespace ImportDialogHelper
 
 			QWidget & YearMonthWidget,
 			QFormLayout & formYearMonthOptions,
+			QWidget & YearMonthWidget_ints,
+			QFormLayout & formYearMonthOptions_ints,
+			QWidget & YearMonthWidget_strings,
+			QFormLayout & formYearMonthOptions_strings,
+			QList<QRadioButton *> & radioButtonsYM_StringVsInt_TimeRange,
 
 			TIME_GRANULARITY const & time_range_granularity,
 			std::vector<std::string> & dataTimeRange,

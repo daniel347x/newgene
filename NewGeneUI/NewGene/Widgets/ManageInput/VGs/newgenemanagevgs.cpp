@@ -781,6 +781,12 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	// Pair: "year-month" widget and its layout
 	QWidget YearMonthWidget;
 	QFormLayout formYearMonthOptions(&YearMonthWidget);
+	QGroupBox YearMonthWidget_ints("Time range columns (as year, month, and day)");
+	QFormLayout formYearMonthOptions_ints(&YearMonthWidget_ints);
+	QGroupBox YearMonthWidget_strings("Time range columns (as text)");
+	QFormLayout formYearMonthOptions_strings(&YearMonthWidget_strings);
+	QVBoxLayout formYMTimeRange_StringVsInt;
+	QList<QRadioButton *> radioButtonsYM_StringVsInt_TimeRange;
 
 	if (uoa.time_granularity != TIME_GRANULARITY__NONE)
 	{
@@ -806,6 +812,12 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 													  YearMonthWidget,
 													  formYearMonthOptions,
+													  YearMonthWidget_ints,
+													  formYearMonthOptions_ints,
+													  YearMonthWidget_strings,
+													  formYearMonthOptions_strings,
+													  formYMTimeRange_StringVsInt,
+													  radioButtonsYM_StringVsInt_TimeRange,
 
 													  uoa.time_granularity
 
@@ -960,6 +972,11 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 																   YearMonthWidget,
 																   formYearMonthOptions,
+																   YearMonthWidget_ints,
+																   formYearMonthOptions_ints,
+																   YearMonthWidget_strings,
+																   formYearMonthOptions_strings,
+																   radioButtonsYM_StringVsInt_TimeRange,
 
 																   uoa.time_granularity,
 																   dataTimeRange,

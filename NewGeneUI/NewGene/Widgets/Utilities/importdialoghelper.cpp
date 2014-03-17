@@ -134,6 +134,12 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 
 												   QWidget & YearMonthWidget,
 												   QFormLayout & formYearMonthOptions,
+												   QWidget & YearMonthWidget_ints,
+												   QFormLayout & formYearMonthOptions_ints,
+												   QWidget & YearMonthWidget_strings,
+												   QFormLayout & formYearMonthOptions_strings,
+												   QBoxLayout & formYMTimeRange_StringVsInt,
+												   QList<QRadioButton *> & radioButtonsYM_StringVsInt_TimeRange,
 
 												   TIME_GRANULARITY const & time_range_granularity
 
@@ -186,7 +192,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	YearMonthDayWidget.setLayout(&formYearMonthDayOptions);
 
 	QRadioButton * YMDIntButton = new QRadioButton("Time range columns are split: one for year, one for month, and one for day", &YearMonthDayWidget);
-	QRadioButton * YMDStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes, such as \"11/12/1992\"", &YearMonthDayWidget);
+	QRadioButton * YMDStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes, such as \"11/12/1992\", \"1992\\11\\12\" or \"1992-11-12\"", &YearMonthDayWidget);
 	formYMDTimeRange_StringVsInt.addWidget(YMDIntButton);
 	formYMDTimeRange_StringVsInt.addWidget(YMDStringButton);
 	formYearMonthDayOptions.addRow(&formYMDTimeRange_StringVsInt);
@@ -225,6 +231,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	formYearMonthDayOptions.addRow(&YearMonthDayWidget_ints);
 	YearMonthDayWidget_ints.hide();
 
+	// string form of dates
 	QString labelymdStart = QString("'Starting Day' (text) column name:");
 	QLineEdit * lineEditymdStart = new QLineEdit(&YearMonthDayWidget_strings);
 	formYearMonthDayOptions_strings.addRow(labelymdStart, lineEditymdStart);
@@ -239,7 +246,6 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 
 	YearMonthDayWidget.hide();
 	form.addRow(&YearMonthDayWidget);
-
 
 	YMDIntButton->setChecked(true);
 	if (YMDIntButton->isChecked())
@@ -286,29 +292,89 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	// Time range OPTIONS - Month
 	YearMonthWidget.setLayout(&formYearMonthOptions);
 
+	QRadioButton * YMIntButton = new QRadioButton("Time range columns are split: one for year and one for month", &YearMonthDayWidget);
+	QRadioButton * YMStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes, such as \"11/1992\", \"1992\\11\" or \"1992-11\"", &YearMonthDayWidget);
+	formYMTimeRange_StringVsInt.addWidget(YMIntButton);
+	formYMTimeRange_StringVsInt.addWidget(YMStringButton);
+	formYearMonthOptions.addRow(&formYMTimeRange_StringVsInt);
+	radioButtonsYM_StringVsInt_TimeRange << YMStringButton << YMIntButton;
+
 	// year
 	QString labelymYearStart = QString("'Year Start' column name:");
-	QLineEdit * lineEditymYearStart = new QLineEdit(&YearMonthWidget);
-	formYearMonthOptions.addRow(labelymYearStart, lineEditymYearStart);
+	QLineEdit * lineEditymYearStart = new QLineEdit(&YearMonthWidget_ints);
+	formYearMonthOptions_ints.addRow(labelymYearStart, lineEditymYearStart);
 	fieldsTimeRange << lineEditymYearStart;                                // 11
 	QString labelymYearEnd = QString("'Year End' column name:");
-	QLineEdit * lineEditymYearEnd = new QLineEdit(&YearMonthWidget);
-	formYearMonthOptions.addRow(labelymYearEnd, lineEditymYearEnd);
+	QLineEdit * lineEditymYearEnd = new QLineEdit(&YearMonthWidget_ints);
+	formYearMonthOptions_ints.addRow(labelymYearEnd, lineEditymYearEnd);
 	fieldsTimeRange << lineEditymYearEnd;                                  // 12
 
 	// month
 	QString labelymMonthStart = QString("'Month Start' column name:");
-	QLineEdit * lineEditymMonthStart = new QLineEdit(&YearMonthWidget);
-	formYearMonthOptions.addRow(labelymMonthStart, lineEditymMonthStart);
+	QLineEdit * lineEditymMonthStart = new QLineEdit(&YearMonthWidget_ints);
+	formYearMonthOptions_ints.addRow(labelymMonthStart, lineEditymMonthStart);
 	fieldsTimeRange << lineEditymMonthStart;                               // 13
 	QString labelymMonthEnd = QString("'Month End' column name:");
-	QLineEdit * lineEditymMonthEnd = new QLineEdit(&YearMonthWidget);
-	formYearMonthOptions.addRow(labelymMonthEnd, lineEditymMonthEnd);
+	QLineEdit * lineEditymMonthEnd = new QLineEdit(&YearMonthWidget_ints);
+	formYearMonthOptions_ints.addRow(labelymMonthEnd, lineEditymMonthEnd);
 	fieldsTimeRange << lineEditymMonthEnd;                                 // 14
+
+	formYearMonthOptions.addRow(&YearMonthWidget_ints);
+	YearMonthWidget_ints.hide();
+
+	// string form of dates
+	QString labelymStart = QString("'Starting Day' (text) column name:");
+	QLineEdit * lineEditymStart = new QLineEdit(&YearMonthWidget_strings);
+	formYearMonthOptions_strings.addRow(labelymStart, lineEditymStart);
+	fieldsTimeRange << lineEditymStart;                                    // 9
+	QString labelymEnd = QString("'Ending Day' (text) column name:");
+	QLineEdit * lineEditymEnd = new QLineEdit(&YearMonthWidget_strings);
+	formYearMonthOptions_strings.addRow(labelymEnd, lineEditymEnd);
+	fieldsTimeRange << lineEditymEnd;                                      // 10
+
+	formYearMonthDayOptions.addRow(&YearMonthDayWidget_strings);
+	YearMonthDayWidget_strings.hide();
 
 	YearMonthWidget.hide();
 	form.addRow(&YearMonthWidget);
 
+	YMIntButton->setChecked(true);
+	if (YMIntButton->isChecked())
+	{
+		YearMonthWidget_ints.show();
+	}
+	if (YMStringButton->isChecked())
+	{
+		YearMonthWidget_strings.show();
+	}
+
+	QObject::connect(YMIntButton, &QRadioButton::toggled, [=, &YearMonthWidget_ints, &YearMonthWidget_strings]()
+	{
+		YearMonthWidget_ints.hide();
+		YearMonthWidget_strings.hide();
+		if (YMIntButton->isChecked())
+		{
+			YearMonthWidget_ints.show();
+		}
+		if (YMStringButton->isChecked())
+		{
+			YearMonthWidget_strings.show();
+		}
+	});
+
+	QObject::connect(YMStringButton, &QRadioButton::toggled, [=, &YearMonthWidget_ints, &YearMonthWidget_strings]()
+	{
+		YearMonthWidget_ints.hide();
+		YearMonthWidget_strings.hide();
+		if (YMIntButton->isChecked())
+		{
+			YearMonthWidget_ints.show();
+		}
+		if (YMStringButton->isChecked())
+		{
+			YearMonthWidget_strings.show();
+		}
+	});
 
 
 
@@ -424,6 +490,11 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 
 		QWidget & YearMonthWidget,
 		QFormLayout & formYearMonthOptions,
+		QWidget & YearMonthWidget_ints,
+		QFormLayout & formYearMonthOptions_ints,
+		QWidget & YearMonthWidget_strings,
+		QFormLayout & formYearMonthOptions_strings,
+		QList<QRadioButton *> & radioButtonsYM_StringVsInt_TimeRange,
 
 		TIME_GRANULARITY const & time_range_granularity,
 		std::vector<std::string> & dataTimeRange,
@@ -454,12 +525,11 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 		return false;
 	}
 
+	int currentIndex = 0;
+	QLineEdit * timeRange_y_yearStart = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_y_yearEnd = fieldsTimeRange[currentIndex++];
 	if (YButton->isChecked())
 	{
-
-		int currentIndex = 0;
-		QLineEdit * timeRange_y_yearStart = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_y_yearEnd = fieldsTimeRange[currentIndex++];
 
 		if (!timeRange_y_yearStart || !timeRange_y_yearEnd)
 		{
@@ -496,18 +566,16 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 
 	}
 
-	else if (YMDButton->isChecked())
+	QLineEdit * timeRange_ymd_yearStart = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ymd_yearEnd = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ymd_monthStart = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ymd_monthEnd = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ymd_dayStart = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ymd_dayEnd = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ymd_Start = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ymd_End = fieldsTimeRange[currentIndex++];
+	if (YMDButton->isChecked())
 	{
-
-		int currentIndex = 2;
-		QLineEdit * timeRange_ymd_yearStart = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_ymd_yearEnd = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_ymd_monthStart = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_ymd_monthEnd = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_ymd_dayStart = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_ymd_dayEnd = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_ymd_Start = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_ymd_End = fieldsTimeRange[currentIndex++];
 
 		if (!timeRange_ymd_yearStart || !timeRange_ymd_yearEnd || !timeRange_ymd_monthStart || !timeRange_ymd_monthEnd || !timeRange_ymd_dayStart || !timeRange_ymd_dayEnd || !timeRange_ymd_Start || !timeRange_ymd_End)
 		{
@@ -613,16 +681,16 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 
 	}
 
-	else if (YMButton->isChecked())
+	QLineEdit * timeRange_ym_yearStart = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ym_yearEnd = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ym_monthStart = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ym_monthEnd = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ym_Start = fieldsTimeRange[currentIndex++];
+	QLineEdit * timeRange_ym_End = fieldsTimeRange[currentIndex++];
+	if (YMButton->isChecked())
 	{
 
-		int currentIndex = 8;
-		QLineEdit * timeRange_ym_yearStart = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_ym_yearEnd = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_ym_monthStart = fieldsTimeRange[currentIndex++];
-		QLineEdit * timeRange_ym_monthEnd = fieldsTimeRange[currentIndex++];
-
-		if (!timeRange_ym_yearStart || !timeRange_ym_yearEnd || !timeRange_ym_monthStart || !timeRange_ym_monthEnd)
+		if (!timeRange_ym_yearStart || !timeRange_ym_yearEnd || !timeRange_ym_monthStart || !timeRange_ym_monthEnd || !timeRange_ym_Start || !timeRange_ym_End)
 		{
 			boost::format msg("Invalid date fields");
 			errorMsg = msg.str();
@@ -633,30 +701,60 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 		std::string ym_yearEnd(timeRange_ym_yearEnd->text().toStdString());
 		std::string ym_monthStart(timeRange_ym_monthStart->text().toStdString());
 		std::string ym_monthEnd(timeRange_ym_monthEnd->text().toStdString());
+		std::string ym_Start(timeRange_ym_Start->text().toStdString());
+		std::string ym_End(timeRange_ym_End->text().toStdString());
 
-		bool valid = true;
-
-		if (valid)
+		bool using_string_fields = false;
+		if (YMStringButton->isChecked())
 		{
-			valid = Validation::ValidateColumnName(ym_yearStart, "Start Year", true, errorMsg);
+			using_string_fields = true;
 		}
 
-		if (valid)
+		if (using_string_fields)
 		{
-			valid = Validation::ValidateColumnName(ym_monthStart, "Start Month", true, errorMsg);
+
+			if (valid)
+			{
+				valid = Validation::ValidateColumnName(ym_Start, "Starting Month", true, errorMsg);
+			}
+
+			if (valid)
+			{
+				valid = Validation::ValidateColumnName(ym_End, "Ending Month", true, errorMsg);
+			}
+
+		}
+		else
+		{
+
+			if (valid)
+			{
+				valid = Validation::ValidateColumnName(ym_yearStart, "Start Year", true, errorMsg);
+			}
+
+			if (valid)
+			{
+				valid = Validation::ValidateColumnName(ym_monthStart, "Start Month", true, errorMsg);
+			}
+
+			if (valid)
+			{
+				valid = Validation::ValidateColumnName(ym_yearEnd, "End Year", true, errorMsg);
+			}
+
+			if (valid)
+			{
+				valid = Validation::ValidateColumnName(ym_monthEnd, "End Month", true, errorMsg);
+			}
+
 		}
 
-		if (valid)
+		if (valid && using_string_fields)
 		{
-			valid = Validation::ValidateColumnName(ym_yearEnd, "End Year", true, errorMsg);
+			dataTimeRange.push_back(ym_Start);
+			dataTimeRange.push_back(ym_End);
 		}
-
-		if (valid)
-		{
-			valid = Validation::ValidateColumnName(ym_monthEnd, "End Month", true, errorMsg);
-		}
-
-		if (valid)
+		else if (valid)
 		{
 			dataTimeRange.push_back(ym_yearStart);
 			dataTimeRange.push_back(ym_monthStart);
