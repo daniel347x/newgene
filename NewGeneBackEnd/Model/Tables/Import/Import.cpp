@@ -427,12 +427,96 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__START_MONTH_ONLY:
 			{
 
+				std::shared_ptr<BaseField> const the_input_field_datetime_month = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field_datetime_month || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+
+				int conversion_index = the_input_field_datetime_month->GetDateFormatIndex();
+
+				boost::posix_time::ptime the_month_start;
+				conversion_index = ConvertStringToDateFancy(the_month_start, the_input_field_datetime_month->GetStringRef(), conversion_index);
+
+				the_input_field_datetime_month->SetDateFormatIndex(conversion_index);
+
+				if (conversion_index < 0)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// Round down to month
+				the_month_start = boost::posix_time::ptime(boost::gregorian::date(the_month_start.date().year(), the_month_start.date().month(), 1));
+
+				boost::posix_time::ptime the_month_end = boost::posix_time::ptime(boost::gregorian::date(the_month_start.date().year(), the_month_start.date().month(), 1) + boost::gregorian::months(1));
+
+				boost::posix_time::time_duration diff_start_from_1970 = the_month_start - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = the_month_end - time_t_epoch__1970;
+
+				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+
 			}
 			break;
 
 		case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__FROM__START_MONTH__TO__END_MONTH:
 			{
 
+				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+
+				int conversion_index = the_input_field_datetime_start->GetDateFormatIndex();
+
+				boost::posix_time::ptime the_time_start;
+				conversion_index = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef(), conversion_index);
+
+				the_input_field_datetime_start->SetDateFormatIndex(conversion_index);
+
+				if (conversion_index < 0)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// Round down to month
+				the_time_start = boost::posix_time::ptime(boost::gregorian::date(the_time_start.date().year(), the_time_start.date().month(), 1));
+
+				boost::posix_time::ptime the_time_end;
+				conversion_index = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef(), conversion_index);
+
+				if (conversion_index < 0)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// Round down to month
+				// Then add 1 month so that the full year is included (days start at midnight, so no seconds of the next year are included)
+				the_time_end = boost::posix_time::ptime(boost::gregorian::date(the_time_end.date().year(), the_time_end.date().month(), 1) + boost::gregorian::months(1));
+
+				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
+
+				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+		
 			}
 			break;
 
@@ -580,6 +664,42 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__START_DAY_ONLY:
 			{
 
+				std::shared_ptr<BaseField> const the_input_field_datetime_day = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field_datetime_day || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+
+				int conversion_index = the_input_field_datetime_day->GetDateFormatIndex();
+
+				boost::posix_time::ptime the_day_start;
+				conversion_index = ConvertStringToDateFancy(the_day_start, the_input_field_datetime_day->GetStringRef(), conversion_index);
+
+				the_input_field_datetime_day->SetDateFormatIndex(conversion_index);
+
+				if (conversion_index < 0)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// Round down to month
+				the_day_start = boost::posix_time::ptime(boost::gregorian::date(the_day_start.date().year(), the_day_start.date().month(), the_day_start.date().day()));
+
+				boost::posix_time::ptime the_day_end = boost::posix_time::ptime(boost::gregorian::date(the_day_start.date().year(), the_day_start.date().month(), the_day_start.date().day()) + boost::gregorian::days(1));
+
+				boost::posix_time::time_duration diff_start_from_1970 = the_month_start - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = the_month_end - time_t_epoch__1970;
+
+				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+		
 			}
 			break;
 
