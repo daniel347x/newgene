@@ -91,6 +91,7 @@ int TimeRangeFieldMapping::ConvertStringToDateFancy(boost::posix_time::ptime & t
 	};
 
 	static int number_formats = 0;
+
 	if (index_to_use < 0)
 	{
 		const size_t formats = sizeof(inputs) / sizeof(inputs[0]);
@@ -145,7 +146,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 	switch (time_range_type)
 	{
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__START_YEAR_ONLY:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__START_YEAR_ONLY:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field = RetrieveDataField(input_file_fields[0], input_data_fields);
@@ -172,13 +173,35 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR:
+		case TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__FROM__START_YEAR__TO__END_YEAR:
 			{
+
+				std::shared_ptr<BaseField> const the_input_field_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_year_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_year_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field_start || !the_input_field_end || !the_output_field_year_start || !the_output_field_year_end)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// convert year to ms since jan 1, 1970 00:00:00.000
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field_start->GetInt32Ref(), 1, 1));
+				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(the_input_field_end->GetInt32Ref() + 1, 1, 1));
+
+				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+
+				the_output_field_year_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_year_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__START_YEAR_ONLY:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__START_YEAR_ONLY:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_datetime_year = RetrieveDataField(input_file_fields[0], input_data_fields);
@@ -220,7 +243,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__FROM__START_YEAR__TO__END_YEAR:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__FROM__START_YEAR__TO__END_YEAR:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
@@ -274,7 +297,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__START_MONTH_ONLY:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__START_MONTH_ONLY:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
@@ -322,7 +345,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__FROM__START_MONTH__TO__END_MONTH:
+		case TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__FROM__START_MONTH__TO__END_MONTH:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
@@ -387,19 +410,19 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TIME_RANGE_FIELD_MAPPING_TYPE__STRING_MONTH__START_MONTH_ONLY:
+		case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__START_MONTH_ONLY:
 			{
 
 			}
 			break;
 
-		case TIME_RANGE_FIELD_MAPPING_TYPE__STRING_MONTH__FROM__START_MONTH__TO__END_MONTH:
+		case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__FROM__START_MONTH__TO__END_MONTH:
 			{
 
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__START_DAY_ONLY:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__START_DAY_ONLY:
 			{
 
 				// **************************************************************************************************************** //
@@ -435,7 +458,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__START_DAY__TO__END_DAY:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__FROM__START_DAY__TO__END_DAY:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[0], input_data_fields);
@@ -536,13 +559,13 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__START_DAY_ONLY:
+		case TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__START_DAY_ONLY:
 			{
 
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__FROM__START_DAY__TO__END_DAY:
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__FROM__START_DAY__TO__END_DAY:
 			{
 
 				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
@@ -1885,75 +1908,75 @@ void TimeRangeFieldMapping::ConvertStringToDate(int & year, int & month, int & d
 	{
 		switch (count)
 		{
-		case 0:
-		{
-				  std::string test = *it;
-				  year = boost::lexical_cast<int>(*it);
-		}
-			break;
+			case 0:
+				{
+					std::string test = *it;
+					year = boost::lexical_cast<int>(*it);
+				}
+				break;
 
-		case 1:
-		{
-				  std::string test = *it;
-				  std::string the_month = *it;
+			case 1:
+				{
+					std::string test = *it;
+					std::string the_month = *it;
 
-				  if (boost::iequals(*it, "jan"))
-				  {
-					  month = 1;
-				  }
-				  else if (boost::iequals(*it, "feb"))
-				  {
-					  month = 2;
-				  }
-				  else if (boost::iequals(*it, "mar"))
-				  {
-					  month = 3;
-				  }
-				  else if (boost::iequals(*it, "apr"))
-				  {
-					  month = 4;
-				  }
-				  else if (boost::iequals(*it, "may"))
-				  {
-					  month = 5;
-				  }
-				  else if (boost::iequals(*it, "jun"))
-				  {
-					  month = 6;
-				  }
-				  else if (boost::iequals(*it, "jul"))
-				  {
-					  month = 7;
-				  }
-				  else if (boost::iequals(*it, "aug"))
-				  {
-					  month = 8;
-				  }
-				  else if (boost::iequals(*it, "sep"))
-				  {
-					  month = 9;
-				  }
-				  else if (boost::iequals(*it, "oct"))
-				  {
-					  month = 10;
-				  }
-				  else if (boost::iequals(*it, "nov"))
-				  {
-					  month = 11;
-				  }
-				  else if (boost::iequals(*it, "dec"))
-				  {
-					  month = 12;
-				  }
-		}
-			break;
+					if (boost::iequals(*it, "jan"))
+					{
+						month = 1;
+					}
+					else if (boost::iequals(*it, "feb"))
+					{
+						month = 2;
+					}
+					else if (boost::iequals(*it, "mar"))
+					{
+						month = 3;
+					}
+					else if (boost::iequals(*it, "apr"))
+					{
+						month = 4;
+					}
+					else if (boost::iequals(*it, "may"))
+					{
+						month = 5;
+					}
+					else if (boost::iequals(*it, "jun"))
+					{
+						month = 6;
+					}
+					else if (boost::iequals(*it, "jul"))
+					{
+						month = 7;
+					}
+					else if (boost::iequals(*it, "aug"))
+					{
+						month = 8;
+					}
+					else if (boost::iequals(*it, "sep"))
+					{
+						month = 9;
+					}
+					else if (boost::iequals(*it, "oct"))
+					{
+						month = 10;
+					}
+					else if (boost::iequals(*it, "nov"))
+					{
+						month = 11;
+					}
+					else if (boost::iequals(*it, "dec"))
+					{
+						month = 12;
+					}
+				}
+				break;
 
-		case 2:
-		{
-				  std::string test = *it;
-				  day = boost::lexical_cast<int>(*it);
-		}
-			break;
+			case 2:
+				{
+					std::string test = *it;
+					day = boost::lexical_cast<int>(*it);
+				}
+				break;
 		}
 
 		++count;

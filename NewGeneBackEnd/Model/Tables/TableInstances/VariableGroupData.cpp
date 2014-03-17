@@ -1009,11 +1009,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
 						if (!timeRangeHasOnlyStartDate)
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__START_DAY__TO__END_DAY);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__FROM__START_DAY__TO__END_DAY);
 						}
 						else
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__START_DAY_ONLY);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__START_DAY_ONLY);
 						}
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
@@ -1149,11 +1149,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
 						if (!timeRangeHasOnlyStartDate)
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__FROM__START_DAY__TO__END_DAY);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__FROM__START_DAY__TO__END_DAY);
 						}
 						else
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__START_DAY_ONLY);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__START_DAY_ONLY);
 						}
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
@@ -1257,11 +1257,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
 						if (!timeRangeHasOnlyStartDate)
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__FROM__START_MONTH__TO__END_MONTH);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__FROM__START_MONTH__TO__END_MONTH);
 						}
 						else
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__START_MONTH_ONLY);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__START_MONTH_ONLY);
 						}
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
@@ -1367,11 +1367,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 						std::shared_ptr<TimeRangeFieldMapping> time_range_mapping;
 						if (!timeRangeHasOnlyStartDate)
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_MONTH__FROM__START_MONTH__TO__END_MONTH);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__FROM__START_MONTH__TO__END_MONTH);
 						}
 						else
 						{
-							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_MONTH__START_MONTH_ONLY);
+							time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__START_MONTH_ONLY);
 						}
 						FieldTypeEntries input_file_fields;
 						FieldTypeEntries output_table_fields;
@@ -1485,7 +1485,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							// Treat as text string
 
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__START_YEAR_ONLY);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__START_YEAR_ONLY);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
 							int colindex = 0;
@@ -1518,7 +1518,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						}
 						else
 						{
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__START_YEAR_ONLY);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__START_YEAR_ONLY);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
 							int colindex = 0;
@@ -1561,7 +1561,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							// Treat as text string
 
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__FROM__START_YEAR__TO__END_YEAR);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__FROM__START_YEAR__TO__END_YEAR);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
 							int colindex = 0;
@@ -1609,7 +1609,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						else
 						{
 
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__FROM__START_YEAR__TO__END_YEAR);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
 							int colindex = 0;

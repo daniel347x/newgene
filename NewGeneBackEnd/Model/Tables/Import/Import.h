@@ -292,25 +292,25 @@ class TimeRangeFieldMapping : public RowFieldMapping
 			// that is used for both the starting YEAR and ending YEAR
 			// (with the ending year being set to the
 			// zeroeth second of the year AFTER the specified ending year)
-			, TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__START_YEAR_ONLY
+			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__START_YEAR_ONLY
 
 			// Two integer fields are provided,
 			// one used for the starting YEAR and the other used for the ending YEAR
 			// (with the ending year being set to the zeroeth
 			// second of the year AFTER the specified ending year)
-			, TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR
+			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__YEAR__FROM__START_YEAR__TO__END_YEAR
 
 			// A single string field is provided, containing a single date string,
 			// that is used for both the starting YEAR and ending YEAR
 			// (rounded to year, with the ending year being set to the
 			// zeroeth second of the year AFTER the specified ending year)
-			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__START_YEAR_ONLY
+			, TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__START_YEAR_ONLY
 
 			// Two string fields are provided, each containing a date string,
 			// one used for the starting YEAR and the other used for the ending YEAR
 			// (both rounded to year, with the ending year being set to the zeroeth
 			// second of the year AFTER the specified ending year)
-			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__FROM__START_YEAR__TO__END_YEAR
+			, TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__FROM__START_YEAR__TO__END_YEAR
 
 
 
@@ -322,10 +322,10 @@ class TimeRangeFieldMapping : public RowFieldMapping
 			// Month mappings
 			// *************************************************************************************** //  
 
-			, TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__START_MONTH_ONLY
-			, TIME_RANGE_FIELD_MAPPING_TYPE__MONTH__FROM__START_MONTH__TO__END_MONTH
-			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_MONTH__START_MONTH_ONLY
-			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_MONTH__FROM__START_MONTH__TO__END_MONTH
+			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__START_MONTH_ONLY
+			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__FROM__START_MONTH__TO__END_MONTH
+			, TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__START_MONTH_ONLY
+			, TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__MONTH__FROM__START_MONTH__TO__END_MONTH
 
 
 
@@ -335,10 +335,10 @@ class TimeRangeFieldMapping : public RowFieldMapping
 			// Day mappings
 			// *************************************************************************************** //  
 
-			, TIME_RANGE_FIELD_MAPPING_TYPE__DAY__START_DAY_ONLY
-			, TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__START_DAY__TO__END_DAY
-			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__START_DAY_ONLY
-			, TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__FROM__START_DAY__TO__END_DAY
+			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__START_DAY_ONLY
+			, TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__FROM__START_DAY__TO__END_DAY
+			, TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__START_DAY_ONLY
+			, TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__DAY__FROM__START_DAY__TO__END_DAY
 
 
 
