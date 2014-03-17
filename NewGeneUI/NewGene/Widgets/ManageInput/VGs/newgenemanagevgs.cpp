@@ -723,7 +723,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	boost::format msg_import_header("Variable Group data refresh details: %1%");
 	msg_import_header % Table_VG_CATEGORY::GetVgDisplayText(vg);
-	form.addRow(new QLabel());
+	form.addRow(new QLabel(msg_import_header.str().c_str()));
 
 	QList<QLineEdit *> fieldsFileChooser;
 	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited data file", "Choose comma-delimited data file location", "", "" };

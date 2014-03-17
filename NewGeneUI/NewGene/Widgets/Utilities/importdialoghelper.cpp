@@ -192,9 +192,10 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	YearMonthDayWidget.setLayout(&formYearMonthDayOptions);
 
 	QRadioButton * YMDIntButton = new QRadioButton("Time range columns are split: one for year, one for month, and one for day", &YearMonthDayWidget);
-	QRadioButton * YMDStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes, such as \"11/12/1992\", \"1992\\11\\12\" or \"1992-11-12\"", &YearMonthDayWidget);
+	QRadioButton * YMDStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes", &YearMonthDayWidget);
 	formYMDTimeRange_StringVsInt.addWidget(YMDIntButton);
 	formYMDTimeRange_StringVsInt.addWidget(YMDStringButton);
+	formYMDTimeRange_StringVsInt.addWidget(new QLabel("    Examples are \"11/1992\", \"1992/11\", \"1992\\11\" and \"1992-11\"\nYou may also include the day (which will be ignored), such as \"11/12/1992\"."));
 	formYearMonthDayOptions.addRow(&formYMDTimeRange_StringVsInt);
 	radioButtonsYMD_StringVsInt_TimeRange << YMDStringButton << YMDIntButton;
 
@@ -293,9 +294,10 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	YearMonthWidget.setLayout(&formYearMonthOptions);
 
 	QRadioButton * YMIntButton = new QRadioButton("Time range columns are split: one for year and one for month", &YearMonthDayWidget);
-	QRadioButton * YMStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes.\nExamples are \"11/1992\", \"1992/11\", \"1992\\11\" and \"1992-11\"\nYou may also include the day (which will be ignored), such as \"11/12/1992\".", &YearMonthDayWidget);
+	QRadioButton * YMStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes", &YearMonthDayWidget);
 	formYMTimeRange_StringVsInt.addWidget(YMIntButton);
 	formYMTimeRange_StringVsInt.addWidget(YMStringButton);
+	formYMTimeRange_StringVsInt.addWidget(new QLabel("    Examples are \"11/1992\", \"1992/11\", \"1992\\11\" and \"1992-11\"\nYou may also include the day (which will be ignored), such as \"11/12/1992\"."));
 	formYearMonthOptions.addRow(&formYMTimeRange_StringVsInt);
 	radioButtonsYM_StringVsInt_TimeRange << YMStringButton << YMIntButton;
 
