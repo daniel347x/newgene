@@ -26,6 +26,21 @@ class NameOrIndex
 			, INDEX
 		};
 
+		NameOrIndex()
+			: name_or_index(NAME)
+			, index(0)
+		{
+
+		}
+
+		NameOrIndex(NameOrIndex const & rhs)
+			: name_or_index(rhs.name_or_index)
+			, index(rhs.index)
+			, name(rhs.name)
+		{
+
+		}
+
 		NameOrIndex(NAME_OR_INDEX const name_or_index_, int const index_)
 			: name_or_index(name_or_index_)
 			, index(index_)

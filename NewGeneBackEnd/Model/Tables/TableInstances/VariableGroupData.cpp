@@ -931,7 +931,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 			}
 			else if (the_time_granularity == TIME_GRANULARITY__DAY)
 			{
-				if (timeRangeCols.size() == 6 && boost::trim_copy(timeRangeCols[3]).empty() && boost::trim_copy(timeRangeCols[4]).empty() && timeRangeCols[5]).empty())
+				if (timeRangeCols.size() == 6 && boost::trim_copy(timeRangeCols[3]).empty() && boost::trim_copy(timeRangeCols[4]).empty() && boost::trim_copy(timeRangeCols[5]).empty())
 				{
 					// ints provided, such as one column with "11", another column with "12", and another column with "1990"
 					if (number_time_range_cols == 3)
