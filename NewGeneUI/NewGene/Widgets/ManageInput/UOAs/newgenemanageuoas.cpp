@@ -407,13 +407,13 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 
 				case 2:
 					{
-						time_granularity = TIME_GRANULARITY__DAY;
+						time_granularity = TIME_GRANULARITY__MONTH;
 					}
 					break;
 
 				case 3:
 					{
-						time_granularity = TIME_GRANULARITY__MONTH;
+						time_granularity = TIME_GRANULARITY__DAY;
 					}
 					break;
 
