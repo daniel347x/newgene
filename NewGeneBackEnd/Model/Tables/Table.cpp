@@ -10,9 +10,9 @@ bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 	std::string sql_insert;
 
-	sql_insert += "INSERT OR FAIL INTO ";
+	sql_insert += "INSERT OR FAIL INTO \"";
 	sql_insert += GetTableName();
-	sql_insert += " (";
+	sql_insert += "\" (";
 
 	bool first = true;
 	std::for_each(import_definition.output_schema.schema.cbegin(),
@@ -212,9 +212,9 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 	DataFields const & row_fields = block[row];
 
-	sql_update += "UPDATE ";
+	sql_update += "UPDATE \"";
 	sql_update += GetTableName();
-	sql_update += " SET ";
+	sql_update += "\" SET ";
 
 	bool first = true;
 	int index = 0;
@@ -379,9 +379,9 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 
 	DataFields const & row_fields = block[row];
 
-	sql_insert += "INSERT INTO ";
+	sql_insert += "INSERT INTO \"";
 	sql_insert += GetTableName();
-	sql_insert += " ( ";
+	sql_insert += "\" ( ";
 
 	bool first = true;
 	int index = 0;

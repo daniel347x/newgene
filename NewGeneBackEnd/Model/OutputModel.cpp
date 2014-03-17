@@ -18,6 +18,28 @@
 
 #include "OutputModelDdlSql.h"
 
+
+// Table name SQL tokens
+// (to search for quotes around table names)
+// CREATE
+// UPDATE
+// INSERT
+// JOIN
+// FROM
+// ALTER
+
+// Field name SQL tokens
+// (to search for back ticks around field names)
+// ON
+// WHERE
+// SELECT
+// SET
+// ORDER
+// GROUP
+// AS
+
+
+
 std::recursive_mutex OutputModel::OutputGenerator::is_generating_output_mutex;
 std::atomic<bool> OutputModel::OutputGenerator::is_generating_output(false);
 bool OutputModel::OutputGenerator::cancelled = false;
@@ -822,9 +844,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 	sql_strings.push_back(SQLExecutor(this, db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	sql_string = "CREATE TABLE ";
+	sql_string = "CREATE TABLE \"";
 	sql_string += result_columns.view_name;
-	sql_string += " AS SELECT ";
+	sql_string += "\" AS SELECT ";
 
 	WidgetInstanceIdentifier first_variable_group;
 
@@ -938,7 +960,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			sql_string += "CAST (";
 		}
 
+		sql_string += "`";
 		sql_string += unformatted_column.column_name_in_temporary_table;
+		sql_string += "`";
 
 		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
@@ -946,7 +970,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		}
 
 		sql_string += " AS ";
+		sql_string += "`";
 		sql_string += formatted_column.column_name_in_temporary_table;
+		sql_string += "`";
 
 		++column_index;
 
@@ -1089,7 +1115,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 			sql_string += "CAST (";
 		}
 
+		sql_string += "`";
 		sql_string += unformatted_column.column_name_in_temporary_table;
+		sql_string += "`";
 
 		if (unformatted_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && unformatted_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
@@ -1097,7 +1125,9 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		}
 
 		sql_string += " AS ";
+		sql_string += "`";
 		sql_string += formatted_column.column_name_in_temporary_table;
+		sql_string += "`";
 
 		++column_index;
 
@@ -1162,9 +1192,13 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		}
 		first = false;
 
+		sql_string += "`";
 		sql_string += unformatted_column.column_name_in_temporary_table;
+		sql_string += "`";
 		sql_string += " AS ";
+		sql_string += "`";
 		sql_string += formatted_column.column_name_in_temporary_table;
+		sql_string += "`";
 
 		++column_index;
 
@@ -1204,16 +1238,21 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		}
 		first = false;
 
+		sql_string += "`";
 		sql_string += unformatted_column.column_name_in_temporary_table;
+		sql_string += "`";
 		sql_string += " AS ";
+		sql_string += "`";
 		sql_string += formatted_column.column_name_in_temporary_table;
+		sql_string += "`";
 
 		++column_index;
 
 	});
 
-	sql_string += " FROM ";
+	sql_string += " FROM \"";
 	sql_string += all_merged_results_unformatted.second.view_name;
+	sql_string += "\"";
 
 	first = true;
 	SortOrderByMultiplicityOnes(all_merged_results_unformatted.second, XR_TABLE_CATEGORY::KAD_RESULTS, first_variable_group, sql_string, first);
@@ -1226,9 +1265,13 @@ void OutputModel::OutputGenerator::FormatResultsForOutput()
 		sql_string += ", ";
 	}
 	first = false;
+	sql_string += "`";
 	sql_string += datetimestart_timestamp_colname;
+	sql_string += "`";
 	sql_string += ", ";
+	sql_string += "`";
 	sql_string += datetimeend_timestamp_colname;
+	sql_string += "`";
 	SortOrderByMultiplicityGreaterThanOnes(all_merged_results_unformatted.second, XR_TABLE_CATEGORY::KAD_RESULTS, first_variable_group, sql_string, first);
 
 	final_result.second.most_recent_sql_statement_executed__index = -1;
@@ -1590,17 +1633,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 				}
 				if (handled)
 				{
-					sql_select_left += "CASE WHEN t1.";
+					sql_select_left += "CASE WHEN \"t1\".`";
 					sql_select_left += previous_column_names[column_count];
-					sql_select_left += " IS NOT NULL THEN ";
+					sql_select_left += "` IS NOT NULL THEN ";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_left += "CAST (";
 					}
-					sql_select_left += "t1.";
+					sql_select_left += "\"t1\".`";
 					sql_select_left += previous_column_names[column_count];
+					sql_select_left += "`";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1615,8 +1659,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					{
 						sql_select_left += "CAST (";
 					}
-					sql_select_left += "t2.";
+					sql_select_left += "\"t2\".`";
 					sql_select_left += previous_column_names[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first]];
+					sql_select_left += "`";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1624,20 +1669,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 						sql_select_left += " AS INTEGER)";
 					}
 
-					sql_select_left += " END AS ";
+					sql_select_left += " END AS `";
 					sql_select_left += new_column.column_name_in_temporary_table;
+					sql_select_left += "`";
 
-					sql_select_right += "CASE WHEN t2.";
+					sql_select_right += "CASE WHEN \"t2\".`";
 					sql_select_right += previous_column_names[column_count];
-					sql_select_right += " IS NOT NULL THEN ";
+					sql_select_right += "` IS NOT NULL THEN ";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_right += "CAST (";
 					}
-					sql_select_right += "t2.";
+					sql_select_right += "\"t2\".`";
 					sql_select_right += previous_column_names[column_count];
+					sql_select_right += "`";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1652,8 +1699,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					{
 						sql_select_right += "CAST (";
 					}
-					sql_select_right += "t1.";
+					sql_select_right += "\"t1\".`";
 					sql_select_right += previous_column_names[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[rhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
+					sql_select_right += "`";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1661,8 +1709,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 						sql_select_right += " AS INTEGER)";
 					}
 
-					sql_select_right += " END AS ";
+					sql_select_right += " END AS `";
 					sql_select_right += new_column.column_name_in_temporary_table;
+					sql_select_right += "`";
 				}
 			}
 		}
@@ -1683,17 +1732,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 				}
 				if (handled)
 				{
-					sql_select_right += "CASE WHEN t1.";
+					sql_select_right += "CASE WHEN \"t1\".`";
 					sql_select_right += previous_column_names[column_count];
-					sql_select_right += " IS NOT NULL THEN ";
+					sql_select_right += "` IS NOT NULL THEN ";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_right += "CAST (";
 					}
-					sql_select_right += "t1.";
+					sql_select_right += "\"t1\".`";
 					sql_select_right += previous_column_names[column_count];
+					sql_select_right += "`";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1708,8 +1758,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					{
 						sql_select_right += "CAST (";
 					}
-					sql_select_right += "t2.";
+					sql_select_right += "\"t2\".`";
 					sql_select_right += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first]];
+					sql_select_right += "`";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1717,20 +1768,22 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 						sql_select_right += " AS INTEGER)";
 					}
 
-					sql_select_right += " END AS ";
+					sql_select_right += " END AS `";
 					sql_select_right += new_column.column_name_in_temporary_table;
+					sql_select_right += "`";
 
-					sql_select_left += "CASE WHEN t2.";
+					sql_select_left += "CASE WHEN \"t2\".`";
 					sql_select_left += previous_column_names[column_count];
-					sql_select_left += " IS NOT NULL THEN ";
+					sql_select_left += "` IS NOT NULL THEN ";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 					{
 						sql_select_left += "CAST (";
 					}
-					sql_select_left += "t2.";
+					sql_select_left += "\"t2\".`";
 					sql_select_left += previous_column_names[column_count];
+					sql_select_left += "`";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1745,8 +1798,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					{
 						sql_select_left += "CAST (";
 					}
-					sql_select_left += "t1.";
+					sql_select_left += "\"t1\".`";
 					sql_select_left += previous_column_names[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].second[lhs_primary_keys[new_column.primary_key_dmu_category_identifier].first++]];
+					sql_select_left += "`";
 
 					// Not legal for outer joins - but child table should already have proper column type
 					if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1754,8 +1808,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 						sql_select_left += " AS INTEGER)";
 					}
 
-					sql_select_left += " END AS ";
+					sql_select_left += " END AS `";
 					sql_select_left += new_column.column_name_in_temporary_table;
+					sql_select_left += "`";
 				}
 			}
 		}
@@ -1771,16 +1826,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 			if (column_count < first_full_table_column_count)
 			{
-				sql_select_left += "t1.";
-				sql_select_right += "t2.";
+				sql_select_left  += "\"t1\".";
+				sql_select_right += "\"t2\".";
 			}
 			else
 			{
-				sql_select_left += "t2.";
-				sql_select_right += "t1.";
+				sql_select_left  += "\"t2\".";
+				sql_select_right += "\"t1\".";
 			}
 
+			sql_select_left += "`";
 			sql_select_left += previous_column_names[column_count];
+			sql_select_left += "`";
 
 			// Not legal for outer joins - but child table should already have proper column type
 			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1789,7 +1846,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			}
 
 			sql_select_left += " AS ";
+			sql_select_left += "`";
 			sql_select_left += new_column.column_name_in_temporary_table;
+			sql_select_left += "`";
 
 			// Not legal for outer joins - but child table should already have proper column type
 			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1797,7 +1856,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 				sql_select_right += "CAST (";
 			}
 
+			sql_select_right += "`";
 			sql_select_right += previous_column_names[column_count];
+			sql_select_right += "`";
 
 			// Not legal for outer joins - but child table should already have proper column type
 			if (false && new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -1806,7 +1867,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 			}
 
 			sql_select_right += " AS ";
+			sql_select_right += "`";
 			sql_select_right += new_column.column_name_in_temporary_table;
+			sql_select_right += "`";
 		}
 
 		++column_count;
@@ -1947,25 +2010,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	{
 		if (and_)
 		{
-			sql_join_on_left += " AND ";
+			sql_join_on_left  += " AND ";
 			sql_join_on_right += " AND ";
-			sql_null_clause += " AND ";
+			sql_null_clause   += " AND ";
 		}
 		and_ = true;
 
-		sql_null_clause += "t2.";
+		sql_null_clause += "\"t2\".`";
 		sql_null_clause += join_column_name_lhs;
-		sql_null_clause += " IS NULL";
+		sql_null_clause += "` IS NULL";
 
-		sql_join_on_left += "t1.";
+		sql_join_on_left += "\"t1\".`";
 		sql_join_on_left += join_column_name_lhs;
-		sql_join_on_left += " = t2.";
+		sql_join_on_left += "` = \"t2\".`";
 		sql_join_on_left += join_column_names_rhs[join_index];
+		sql_join_on_left += "`";
 
-		sql_join_on_right += "t1.";
+		sql_join_on_right += "\"t1\".`";
 		sql_join_on_right += join_column_names_rhs[join_index];
-		sql_join_on_right += " = t2.";
+		sql_join_on_right += "` = \"t2\".`";
 		sql_join_on_right += join_column_name_lhs;
+		sql_join_on_right += "`";
 
 		++join_index;
 	});
@@ -2072,7 +2137,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 								{
 									sql_order_by += "CAST (";
 								}
+								sql_order_by += "`";
 								sql_order_by += view_column.column_name_in_temporary_table;
+								sql_order_by += "`";
 
 								// Not legal for outer joins - but child table should already have proper column type
 								if (false && view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -2126,7 +2193,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 												{
 													sql_order_by += "CAST (";
 												}
+												sql_order_by += "`";
 												sql_order_by += view_column.column_name_in_temporary_table;
+												sql_order_by += "`";
 
 												// Not legal for outer joins - but child table should already have proper column type
 												if (false && view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -2152,17 +2221,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 	sql_strings.push_back(SQLExecutor(this, db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	sql_string = "CREATE TABLE ";
+	sql_string = "CREATE TABLE \"";
 	sql_string += result_columns.view_name;
-	sql_string += " AS SELECT ";
+	sql_string += "\" AS SELECT ";
 	sql_string += sql_select_left;
 
-	sql_string += " FROM ";
-
+	sql_string += " FROM \"";
 	sql_string += previous_merged_primary_variable_groups_table.second.view_name;
-	sql_string += " t1 LEFT OUTER JOIN ";
+	sql_string += "\" t1 ";
+
+	sql_string += "LEFT OUTER JOIN \"";
 	sql_string += primary_variable_group_final_result.view_name;
-	sql_string += " t2 ON ";
+	sql_string += "\" t2 ON ";
 
 	sql_string += sql_join_on_left;
 
@@ -2174,11 +2244,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 
 	sql_string += sql_select_right;
 
-	sql_string += " FROM ";
+	sql_string += " FROM \"";
 	sql_string += primary_variable_group_final_result.view_name;
-	sql_string += " t1 LEFT OUTER JOIN ";
+	sql_string += "\" t1 ";
+	
+	sql_string += "LEFT OUTER JOIN \"";
 	sql_string += previous_merged_primary_variable_groups_table.second.view_name;
-	sql_string += " t2 ON ";
+	sql_string += "\" t2 ON ";
 
 	sql_string += sql_join_on_right;
 
@@ -3125,11 +3197,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	result_columns.has_no_datetime_columns = false;
 
 	std::string sql_create_empty_table;
-	sql_create_empty_table += "CREATE TABLE ";
+	sql_create_empty_table += "CREATE TABLE \"";
 	sql_create_empty_table += result_columns.view_name;
-	sql_create_empty_table += " AS SELECT * FROM ";
+	sql_create_empty_table += "\" AS SELECT * FROM \"";
 	sql_create_empty_table += previous_result_columns.view_name;
-	sql_create_empty_table += " WHERE 0";
+	sql_create_empty_table += "\" WHERE 0";
 	sql_strings.push_back(SQLExecutor(this, db, sql_create_empty_table));
 	if (failed)
 	{
@@ -3164,9 +3236,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		datetime_start_col_name_text += newUUID(true);
 
 		std::string alter_string;
-		alter_string += "ALTER TABLE ";
+		alter_string += "ALTER TABLE \"";
 		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
+		alter_string += "\" ADD COLUMN ";
 		alter_string += datetime_start_col_name_text;
 		alter_string += " TEXT";
 
@@ -3202,9 +3274,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 		datetime_end_col_name_text += newUUID(true);
 
 		alter_string.clear();
-		alter_string += "ALTER TABLE ";
+		alter_string += "ALTER TABLE \"";
 		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
+		alter_string += "\" ADD COLUMN ";
 		alter_string += datetime_end_col_name_text;
 		alter_string += " TEXT";
 
@@ -3263,9 +3335,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	datetime_start_col_name += newUUID(true);
 
 	std::string alter_string;
-	alter_string += "ALTER TABLE ";
+	alter_string += "ALTER TABLE \"";
 	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
+	alter_string += "\" ADD COLUMN ";
 	alter_string += datetime_start_col_name;
 
 	switch (xr_table_category)
@@ -3379,9 +3451,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 	datetime_end_col_name += newUUID(true);
 
 	alter_string.clear();
-	alter_string += "ALTER TABLE ";
+	alter_string += "ALTER TABLE \"";
 	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
+	alter_string += "\" ADD COLUMN ";
 	alter_string += datetime_end_col_name;
 
 	switch (xr_table_category)
@@ -5958,9 +6030,9 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 			sql_add_xr_row.clear();
 
-			sql_add_xr_row += "INSERT OR FAIL INTO ";
+			sql_add_xr_row += "INSERT OR FAIL INTO \"";
 			sql_add_xr_row += result_columns_view_name;
-			sql_add_xr_row += "(";
+			sql_add_xr_row += "\" (";
 
 			bool first_column_name = true;
 			std::for_each(preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.cbegin(), preliminary_sorted_top_level_variable_group_result_columns.columns_in_view.cend(), [&first_column_name, &sql_add_xr_row, &bound_parameter_strings, &bound_parameter_ints, &bound_parameter_which_binding_to_use](ColumnsInTempView::ColumnInTempView const & column_in_view)
@@ -6291,10 +6363,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns.has_no_datetime_columns = false;
 
 	std::string sql_create_final_primary_group_table;
-	sql_create_final_primary_group_table += "CREATE TABLE ";
+	sql_create_final_primary_group_table += "CREATE TABLE \"";
 	sql_create_final_primary_group_table += result_columns.view_name;
-	sql_create_final_primary_group_table += " AS SELECT * FROM ";
+	sql_create_final_primary_group_table += "\" AS SELECT * FROM \"";
 	sql_create_final_primary_group_table += final_xr_or_xrmfxr_columns.view_name;
+	sql_create_final_primary_group_table += "\"";
 
 	WidgetInstanceIdentifier first_variable_group;
 
@@ -6365,8 +6438,9 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_s
 	CloseObtainData();
 
 	std::string sql;
-	sql += "SELECT * FROM ";
+	sql += "SELECT * FROM \"";
 	sql += column_set.view_name;
+	sql += "\"";
 
 	if (debug_sql_file.is_open())
 	{
@@ -6405,8 +6479,9 @@ std::int64_t OutputModel::OutputGenerator::ObtainCount(ColumnsInTempView const &
 	} BOOST_SCOPE_EXIT_END
 
 	std::string sql;
-	sql += "SELECT COUNT (*) FROM ";
+	sql += "SELECT COUNT (*) FROM \"";
 	sql += column_set.view_name;
+	sql += "\"";
 
 	sqlite3_prepare_v2(db, sql.c_str(), static_cast<int>(sql.size()) + 1, &stmt_result, NULL);
 	if (stmt_result == NULL)
@@ -6542,58 +6617,6 @@ OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(OutputModel::OutputGenera
 }
 
 sqlite3_stmt * OutputModel::OutputGenerator::SQLExecutor::stmt_insert = nullptr;
-
-//void OutputModel::OutputGenerator::SQLExecutor::Execute(OutputModel::OutputGenerator * generator, sqlite3 * db, std::string const & sql, std::vector<std::string> const & bound_parameter_strings, std::vector<std::int64_t> const & bound_parameter_ints, std::vector<long double> const & bound_parameter_floats, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use, std::shared_ptr<bool> & statement_is_prepared, sqlite3_stmt * stmt, bool const prepare_statement_if_null)
-//OutputModel::OutputGenerator::SQLExecutor::SQLExecutor(OutputModel::OutputGenerator * generator_, sqlite3 * db_, std::string const & sql_, std::vector<std::string> const & bound_parameter_strings_, std::vector<std::int64_t> const & bound_parameter_ints_, std::vector<long double> const & bound_parameter_floats_, std::vector<SQLExecutor::WHICH_BINDING> & bound_parameter_which_binding_to_use_, std::shared_ptr<bool> & statement_is_prepared_, sqlite3_stmt * stmt_to_use, bool const prepare_statement_if_null)
-	//: sql(sql_)
-	//, generator(generator_)
-	//, statement_type(DOES_NOT_RETURN_ROWS)
-	//, db(db_)
-	//, stmt(stmt_to_use)
-	//, failed(false)
-	//, statement_is_owned(false)
-	//, statement_is_prepared(statement_is_prepared_)
-	//, bound_parameter_strings(bound_parameter_strings_)
-	//, bound_parameter_ints(bound_parameter_ints_)
-	//, bound_parameter_floats(bound_parameter_floats_)
-	//, bound_parameter_which_binding_to_use(bound_parameter_which_binding_to_use_)
-	//, statement_is_shared(true)
-//{
-
-	//if (!failed && prepare_statement_if_null && stmt == nullptr)
-	//if (prepare_statement_if_null && stmt == nullptr)
-	//{
-	//	if (!(*statement_is_prepared))
-	//	{
-	//		if (generator && generator->debug_sql_file.is_open() && !boost::iequals(sql.substr(0, strlen("INSERT")), std::string("INSERT")))
-	//		{
-	//			generator->debug_sql_file << sql << std::endl << std::endl;
-	//		}
-	//		sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
-	//		if (stmt == NULL)
-	//		{
-	//			//sql_error = sqlite3_errmsg(db);
-	//			std::string sql_error = sqlite3_errmsg(db);
-	//			boost::format msg("Unable to prepare SQL query \"%1%\": %2%");
-	//			msg % sql % sql_error;
-	//			//error_message = msg.str();
-	//			std::string error_message = msg.str();
-	//			generator->failed = true;
-	//			generator->sql_error = error_message;
-	//			//failed = true;
-	//			return;
-	//		}
-	//		++number_statement_prepares;
-	//		//statement_is_owned = true;
-	//		*statement_is_prepared = true;
-	//	}
-	//}
-
-#	if 1
-
-#	endif
-
-//}
 
 OutputModel::OutputGenerator::SQLExecutor::~SQLExecutor()
 {
@@ -7075,9 +7098,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	if (!count_only)
 	{
-		sql_string = "CREATE TABLE ";
+		sql_string = "CREATE TABLE \"";
 		sql_string += result_columns.view_name;
-		sql_string += " AS ";
+		sql_string += "\" AS ";
 	}
 	else
 	{
@@ -7104,7 +7127,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				sql_string += "CAST (";
 			}
 
+			sql_string += "`";
 			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
+			sql_string += "`";
 
 			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 			{
@@ -7112,65 +7137,68 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 
 			sql_string += " AS ";
+			sql_string += "`";
 			sql_string += new_column.column_name_in_temporary_table;
+			sql_string += "`";
 		});
 	}
 
-	sql_string += " FROM ";
+	sql_string += " FROM \"";
 	sql_string += result_columns.original_table_names[0];
+	sql_string += "\"";
 
 	if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 		if (count_only)
 		{
-			sql_string += " WHERE CASE WHEN ";
+			sql_string += " WHERE CASE WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid;
-			sql_string += " = 0 AND ";
+			sql_string += "` = 0 AND `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid;
-			sql_string += " = 0 ";
+			sql_string += "` = 0 ";
 			sql_string += " THEN 1 ";
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
 			sql_string += " ELSE 0";
 			sql_string += " END";
 		}
 		else
 		{
-			sql_string += " WHERE CASE WHEN ";
+			sql_string += " WHERE CASE WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " = 0 AND ";
+			sql_string += "` = 0 AND `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " = 0 ";
+			sql_string += "` = 0 ";
 			sql_string += " THEN 1 ";
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
 			sql_string += " ELSE 0";
 			sql_string += " END";
@@ -7229,7 +7257,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								{
 									sql_string += "CAST (";
 								}
+								sql_string += "`";
 								sql_string += view_column.column_name_in_temporary_table;
+								sql_string += "`";
 								if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_string += " AS INTEGER)";
@@ -7287,7 +7317,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 									{
 										sql_string += "CAST (";
 									}
+									sql_string += "`";
 									sql_string += view_column.column_name_in_temporary_table;
+									sql_string += "`";
 									if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 									{
 										sql_string += " AS INTEGER)";
@@ -7313,9 +7345,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				sql_string += " ORDER BY ";
 			}
 			first = false;
+			sql_string += "`";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid; // final merged datetime start column
+			sql_string += "`";
 			sql_string += ", ";
+			sql_string += "`";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid; // final merged datetime end column
+			sql_string += "`";
 		}
  
 	}
@@ -7334,9 +7370,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			datetime_start_col_name += newUUID(true);
 
 			std::string alter_string;
-			alter_string += "ALTER TABLE ";
+			alter_string += "ALTER TABLE \"";
 			alter_string += result_columns.view_name;
-			alter_string += " ADD COLUMN ";
+			alter_string += "\" ADD COLUMN ";
 			alter_string += datetime_start_col_name;
 			alter_string += " INTEGER DEFAULT 0";
 			sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -7369,9 +7405,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			datetime_end_col_name += newUUID(true);
 
 			alter_string.clear();
-			alter_string += "ALTER TABLE ";
+			alter_string += "ALTER TABLE \"";
 			alter_string += result_columns.view_name;
-			alter_string += " ADD COLUMN ";
+			alter_string += "\" ADD COLUMN ";
 			alter_string += datetime_end_col_name;
 			alter_string += " INTEGER DEFAULT 0";
 			sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -7462,9 +7498,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_strings.push_back(SQLExecutor(this, db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	sql_string = "CREATE TABLE ";
+	sql_string = "CREATE TABLE \"";
 	sql_string += result_columns.view_name;
-	sql_string += " AS SELECT ";
+	sql_string += "\" AS SELECT ";
 	first = true;
 	int the_index = 0;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &the_index, &primary_variable_group_x1_columns, &first](ColumnsInTempView::ColumnInTempView & new_column)
@@ -7480,7 +7516,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += "CAST (";
 		}
 
+		sql_string += "`";
 		sql_string += primary_variable_group_x1_columns.columns_in_view[the_index].column_name_in_temporary_table; // This is the original column name
+		sql_string += "`";
 
 		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
@@ -7488,11 +7526,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 
 		sql_string += " AS ";
+		sql_string += "`";
 		sql_string += new_column.column_name_in_temporary_table;
+		sql_string += "`";
 		++the_index;
 	});
-	sql_string += " FROM ";
+	sql_string += " FROM \"";
 	sql_string += primary_variable_group_x1_columns.view_name;
+	sql_string += "\"";
 
 
 	// Add the "merged" time range columns
@@ -7503,9 +7544,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_col_name += newUUID(true);
 
 	std::string alter_string;
-	alter_string += "ALTER TABLE ";
+	alter_string += "ALTER TABLE \"";
 	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
+	alter_string += "\" ADD COLUMN ";
 	alter_string += datetime_start_col_name;
 	alter_string += " INTEGER DEFAULT 0";
 	sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -7538,9 +7579,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_col_name += newUUID(true);
 
 	alter_string.clear();
-	alter_string += "ALTER TABLE ";
+	alter_string += "ALTER TABLE \"";
 	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
+	alter_string += "\" ADD COLUMN ";
 	alter_string += datetime_end_col_name;
 	alter_string += " INTEGER DEFAULT 0";
 	sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -7570,14 +7611,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	// Set the "merged" time range columns to be equal to the original time range columns
 	std::string sql_time_range;
-	sql_time_range += "UPDATE OR FAIL ";
+	sql_time_range += "UPDATE OR FAIL \"";
 	sql_time_range += result_columns.view_name;
-	sql_time_range += " SET ";
+	sql_time_range += "\" SET ";
+	sql_time_range += "`";
 	sql_time_range += datetime_start_col_name;
+	sql_time_range += "`";
 	sql_time_range += " = ";
 	sql_time_range += result_columns.columns_in_view[x1_datetime_start_column_index].column_name_in_temporary_table;
 	sql_time_range += ", ";
+	sql_time_range += "`";
 	sql_time_range += datetime_end_col_name;
+	sql_time_range += "`";
 	sql_time_range += " = ";
 	sql_time_range += result_columns.columns_in_view[x1_datetime_end_column_index].column_name_in_temporary_table;
 	sql_strings.push_back(SQLExecutor(this, db, sql_time_range));
@@ -7637,9 +7682,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_strings.push_back(SQLExecutor(this, db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	sql_string = "CREATE TABLE ";
+	sql_string = "CREATE TABLE \"";
 	sql_string += result_columns.view_name;
-	sql_string += " AS SELECT ";
+	sql_string += "\" AS SELECT ";
 	first = true;
 	int the_index = 0;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &the_index, &first_final_primary_variable_group_columns, &first](ColumnsInTempView::ColumnInTempView & new_column)
@@ -7655,7 +7700,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_string += "CAST (";
 		}
 
+		sql_string += "`";
 		sql_string += first_final_primary_variable_group_columns.columns_in_view[the_index].column_name_in_temporary_table; // This is the original column name
+		sql_string += "`";
 
 		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
@@ -7663,11 +7710,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 
 		sql_string += " AS ";
+		sql_string += "`";
 		sql_string += new_column.column_name_in_temporary_table;
+		sql_string += "`";
 		++the_index;
 	});
-	sql_string += " FROM ";
+	sql_string += " FROM \"";
 	sql_string += first_final_primary_variable_group_columns.view_name;
+	sql_string += "\"";
 
 
 	// Add the "merged" time range columns
@@ -7678,9 +7728,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_col_name += newUUID(true);
 
 	std::string alter_string;
-	alter_string += "ALTER TABLE ";
+	alter_string += "ALTER TABLE \"";
 	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
+	alter_string += "\" ADD COLUMN ";
 	alter_string += datetime_start_col_name;
 	alter_string += " INTEGER DEFAULT 0";
 	sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -7714,9 +7764,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_col_name += newUUID(true);
 
 	alter_string.clear();
-	alter_string += "ALTER TABLE ";
+	alter_string += "ALTER TABLE \"";
 	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
+	alter_string += "\" ADD COLUMN ";
 	alter_string += datetime_end_col_name;
 	alter_string += " INTEGER DEFAULT 0";
 	sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -7746,14 +7796,18 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	// Set the "merged" time range columns to be equal to the original time range columns
 	std::string sql_time_range;
-	sql_time_range += "UPDATE OR FAIL ";
+	sql_time_range += "UPDATE OR FAIL \"";
 	sql_time_range += result_columns.view_name;
-	sql_time_range += " SET ";
+	sql_time_range += "\" SET ";
+	sql_time_range += "`";
 	sql_time_range += datetime_start_col_name;
+	sql_time_range += "`";
 	sql_time_range += " = ";
-	sql_time_range += result_columns.columns_in_view[result_columns.columns_in_view.size()-4].column_name_in_temporary_table;
+	sql_time_range += result_columns.columns_in_view[result_columns.columns_in_view.size() - 4].column_name_in_temporary_table;
 	sql_time_range += ", ";
+	sql_time_range += "`";
 	sql_time_range += datetime_end_col_name;
+	sql_time_range += "`";
 	sql_time_range += " = ";
 	sql_time_range += result_columns.columns_in_view[result_columns.columns_in_view.size()-3].column_name_in_temporary_table;
 	sql_strings.push_back(SQLExecutor(this, db, sql_time_range));
@@ -7990,9 +8044,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_strings.push_back(SQLExecutor(this, db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	sql_string = "CREATE TABLE ";
+	sql_string = "CREATE TABLE \"";
 	sql_string += result_columns.view_name;
-	sql_string += " AS SELECT ";
+	sql_string += "\" AS SELECT ";
 	first = true;
 	int column_count = 0;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first, &column_count, &first_full_table_column_count, &second_table_column_count, &previous_column_names_first_table](ColumnsInTempView::ColumnInTempView & new_column)
@@ -8010,13 +8064,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (column_count < first_full_table_column_count)
 		{
-			sql_string += "t1.";
+			sql_string += "\"t1\".";
+			sql_string += "`";
 			sql_string += previous_column_names_first_table[column_count];
+			sql_string += "`";
 		}
 		else
 		{
-			sql_string += "t2.";
+			sql_string += "\"t2\".";
+			sql_string += "`";
 			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
+			sql_string += "`";
 		}
 
 		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
@@ -8025,14 +8083,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 
 		sql_string += " AS ";
+		sql_string += "`";
 		sql_string += new_column.column_name_in_temporary_table;
+		sql_string += "`";
 		++column_count;
 	});
-	sql_string += " FROM ";
+	sql_string += " FROM \"";
 	sql_string += previous_xr_columns.view_name;
-	sql_string += " t1 LEFT OUTER JOIN ";
+	sql_string += "\" t1 LEFT OUTER JOIN \"";
 	sql_string += primary_variable_group_raw_data_columns.original_table_names[0];
-	sql_string += " t2 ";
+	sql_string += "\" t2 ";
 	bool and_ = false;
 
 
@@ -8075,10 +8135,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 										sql_string += " ON ";
 									}
 									and_ = true;
-									sql_string += "t1.";
+									sql_string += "\"t1\".`";
 									sql_string += previous_column_names_first_table[column_count];
-									sql_string += " = t2.";
+									sql_string += "` = \"t2\".`";
 									sql_string += new_column.column_name_in_original_data_table;
+									sql_string += "`";
 								}
 							}
 						}
@@ -8174,27 +8235,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 			and_ = true;
 
-			sql_string += " CASE WHEN ";
+			sql_string += " CASE WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " = 0 AND ";
+			sql_string += "` = 0 AND `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " = 0 ";
+			sql_string += "` = 0 ";
 			sql_string += " THEN 1 ";
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
 			sql_string += " ELSE 0";
 			sql_string += " END";
@@ -8218,27 +8279,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 			and_ = true;
 
-			sql_string += " CASE WHEN ";
+			sql_string += " CASE WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " = 0 AND ";
+			sql_string += "` = 0 AND `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " = 0 ";
+			sql_string += "` = 0 ";
 			sql_string += " THEN 1 ";
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
 			sql_string += " ELSE 0";
 			sql_string += " END";
@@ -8270,9 +8331,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					sql_string += " OR ";
 				}
 				second_and = true;
-				sql_string += "t1.";
+				sql_string += "\"t1\".`";
 				sql_string += previous_column_names_first_table[column_index_test];
-				sql_string += " IS NULL ";
+				sql_string += "` IS NULL ";
 			});
 			sql_string += " THEN 0 ELSE ";
 			second_and = false;
@@ -8287,12 +8348,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				// 
 				// ************************************************************************************************** //
 				// ************************************************************************************************** //
-				sql_string += " WHEN t1.";
+				sql_string += " WHEN \"t1\".`";
 				sql_string += previous_column_names_first_table[column_index_test];
-				sql_string += " < ";
-				sql_string += " t2.";
+				sql_string += "` < ";
+				sql_string += " \"t2\".`";
 				sql_string += result_columns.columns_in_view[column_indices_current_inner_table_primary_keys_multiplicity_greater_than_1[current_inner_multiplicity_count]].column_name_in_original_data_table;
-				sql_string += " THEN 1 ";
+				sql_string += "` THEN 1 ";
 				++current_inner_multiplicity_count;
 				// ************************************************************************************************** //
 				// ************************************************************************************************** //
@@ -8309,27 +8370,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 		if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 		{
-			sql_string += " WHERE CASE WHEN ";
+			sql_string += " WHERE CASE WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " = 0 AND ";
+			sql_string += "` = 0 AND `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " = 0 ";
+			sql_string += "` = 0 ";
 			sql_string += " THEN 1 ";
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
 			sql_string += " ELSE 0";
 			sql_string += " END";
@@ -8403,7 +8464,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								{
 									sql_string += "CAST (";
 								}
+								sql_string += "`";
 								sql_string += view_column.column_name_in_temporary_table;
+								sql_string += "`";
 								if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_string += " AS INTEGER)";
@@ -8449,7 +8512,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 											{
 												sql_string += "CAST (";
 											}
+											sql_string += "`";
 											sql_string += view_column.column_name_in_temporary_table;
+											sql_string += "`";
 											if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 											{
 												sql_string += " AS INTEGER)";
@@ -8476,9 +8541,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_col_name += newUUID(true);
 
 		std::string alter_string;
-		alter_string += "ALTER TABLE ";
+		alter_string += "ALTER TABLE \"";
 		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
+		alter_string += "\" ADD COLUMN ";
 		alter_string += datetime_start_col_name;
 		alter_string += " INTEGER DEFAULT 0";
 		sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -8511,9 +8576,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_col_name += newUUID(true);
 
 		alter_string.clear();
-		alter_string += "ALTER TABLE ";
+		alter_string += "ALTER TABLE \"";
 		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
+		alter_string += "\" ADD COLUMN ";
 		alter_string += datetime_end_col_name;
 		alter_string += " INTEGER DEFAULT 0";
 		sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -8606,9 +8671,9 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 
 		sql_add_xr_row.clear();
 
-		sql_add_xr_row += "INSERT OR FAIL INTO ";
+		sql_add_xr_row += "INSERT OR FAIL INTO \"";
 		sql_add_xr_row += xr_view_name;
-		sql_add_xr_row += "(";
+		sql_add_xr_row += "\" (";
 
 		bool first_column_name = true;
 		int the_index = 0;
@@ -9954,9 +10019,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_strings.push_back(SQLExecutor(this, db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	sql_string = "CREATE TABLE ";
+	sql_string = "CREATE TABLE \"";
 	sql_string += result_columns.view_name;
-	sql_string += " AS SELECT ";
+	sql_string += "\" AS SELECT ";
 	first = true;
 	int column_count = 0;
 	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first, &column_count, &first_full_table_column_count, &second_table_column_count, &previous_column_names_first_table](ColumnsInTempView::ColumnInTempView & new_column)
@@ -9975,13 +10040,17 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (column_count < first_full_table_column_count)
 		{
-			sql_string += "t1.";
+			sql_string += "\"t1\".";
+			sql_string += "`";
 			sql_string += previous_column_names_first_table[column_count];
+			sql_string += "`";
 		}
 		else
 		{
-			sql_string += "t2.";
+			sql_string += "\"t2\".";
+			sql_string += "`";
 			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
+			sql_string += "`";
 		}
 
 		// Not legal for outer joins - but child table should already have proper column type
@@ -9991,14 +10060,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 
 		sql_string += " AS ";
+		sql_string += "`";
 		sql_string += new_column.column_name_in_temporary_table;
+		sql_string += "`";
 		++column_count;
 	});
-	sql_string += " FROM ";
+	sql_string += " FROM \"";
 	sql_string += previous_xr_columns.view_name;
-	sql_string += " t1 LEFT OUTER JOIN ";
+	sql_string += "\" t1 LEFT OUTER JOIN \"";
 	sql_string += child_variable_group_raw_data_columns.original_table_names[0];
-	sql_string += " t2 ON ";
+	sql_string += "\" t2 ON ";
 	bool and_ = false;
 	std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [this, &current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group, &sql_string, &variable_group_child, &result_columns, &first_full_table_column_count, &top_level_inner_table_column_count, &second_table_column_count, &previous_column_names_first_table, &and_](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
 	{
@@ -10137,10 +10208,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 										sql_string += " AND ";
 									}
 									and_ = true;
-									sql_string += "t1.";
+									sql_string += "\"t1\".`";
 									sql_string += previous_column_names_first_table[column_count];
-									sql_string += " = t2.";
+									sql_string += "` = \"t2\".`";
 									sql_string += primary_key_info_this_variable_group.table_column_name;
+									sql_string += "`";
 								}
 							}
 
@@ -10165,27 +10237,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				and_ = true;
 
-				sql_string += " CASE WHEN ";
+				sql_string += " CASE WHEN `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-				sql_string += " = 0 AND ";
+				sql_string += "` = 0 AND `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-				sql_string += " = 0 ";
+				sql_string += "` = 0 ";
 				sql_string += " THEN 1 ";
-				sql_string += " WHEN ";
+				sql_string += " WHEN `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-				sql_string += " < ";
+				sql_string += "` < ";
 				sql_string += boost::lexical_cast<std::string>(timerange_end); // the cast isn't really necessary, because std::string knows how to append a number
-				sql_string += " THEN ";
+				sql_string += " THEN `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-				sql_string += " > ";
+				sql_string += "` > ";
 				sql_string += boost::lexical_cast<std::string>(timerange_start); // the cast isn't really necessary, because std::string knows how to append a number
-				sql_string += " WHEN ";
+				sql_string += " WHEN `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-				sql_string += " > ";
+				sql_string += "` > ";
 				sql_string += boost::lexical_cast<std::string>(timerange_start); // the cast isn't really necessary, because std::string knows how to append a number
-				sql_string += " THEN ";
+				sql_string += " THEN `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-				sql_string += " < ";
+				sql_string += "` < ";
 				sql_string += boost::lexical_cast<std::string>(timerange_end); // the cast isn't really necessary, because std::string knows how to append a number
 				sql_string += " ELSE 0";
 				sql_string += " END";
@@ -10196,29 +10268,29 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 				and_ = true;
 
-				sql_string += " CASE WHEN ";
+				sql_string += " CASE WHEN `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-				sql_string += " = 0 AND ";
+				sql_string += "` = 0 AND `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-				sql_string += " = 0 ";
+				sql_string += "` = 0 ";
 				sql_string += " THEN 1 ";
-				sql_string += " WHEN ";
+				sql_string += " WHEN `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-				sql_string += " < ";
+				sql_string += "` < `";
 				sql_string += result_columns.columns_in_view[previous_xr_columns.columns_in_view.size() - 1].column_name_in_temporary_table; // end date of previous columns
-				sql_string += " THEN ";
+				sql_string += "` THEN `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-				sql_string += " > ";
+				sql_string += "` > `";
 				sql_string += result_columns.columns_in_view[previous_xr_columns.columns_in_view.size() - 2].column_name_in_temporary_table; // start date of previous columns
-				sql_string += " WHEN ";
+				sql_string += "` WHEN `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-				sql_string += " > ";
+				sql_string += "` > `";
 				sql_string += result_columns.columns_in_view[previous_xr_columns.columns_in_view.size() - 2].column_name_in_temporary_table; // start date of previous columns
-				sql_string += " THEN ";
+				sql_string += "` THEN `";
 				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-				sql_string += " < ";
+				sql_string += "` < `";
 				sql_string += result_columns.columns_in_view[previous_xr_columns.columns_in_view.size() - 1].column_name_in_temporary_table; // end date of previous columns
-				sql_string += " ELSE 0";
+				sql_string += "` ELSE 0";
 				sql_string += " END";
 			}
 		}
@@ -10237,27 +10309,27 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	{
 		if (!child_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 		{
-			sql_string += " WHERE CASE WHEN ";
+			sql_string += " WHERE CASE WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " = 0 AND ";
+			sql_string += "` = 0 AND `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " = 0 ";
+			sql_string += "` = 0 ";
 			sql_string += " THEN 1 ";
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " WHEN ";
+			sql_string += " WHEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += " > ";
+			sql_string += "` > ";
 			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " THEN ";
+			sql_string += " THEN `";
 			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += " < ";
+			sql_string += "` < ";
 			sql_string += boost::lexical_cast<std::string>(timerange_end);
 			sql_string += " ELSE 0";
 			sql_string += " END";
@@ -10341,7 +10413,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 												{
 													sql_string += "CAST (";
 												}
+												sql_string += "`";
 												sql_string += view_column.column_name_in_temporary_table;
+												sql_string += "`";
 												if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 												{
 													sql_string += " AS INTEGER)";
@@ -10419,7 +10493,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								{
 									sql_string += "CAST (";
 								}
+								sql_string += "`";
 								sql_string += view_column.column_name_in_temporary_table;
+								sql_string += "`";
 								if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 								{
 									sql_string += " AS INTEGER)";
@@ -10443,9 +10519,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_col_name += newUUID(true);
 
 		std::string alter_string;
-		alter_string += "ALTER TABLE ";
+		alter_string += "ALTER TABLE \"";
 		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
+		alter_string += "\" ADD COLUMN ";
 		alter_string += datetime_start_col_name;
 		alter_string += " INTEGER DEFAULT 0";
 		sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -10478,9 +10554,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_col_name += newUUID(true);
 
 		alter_string.clear();
-		alter_string += "ALTER TABLE ";
+		alter_string += "ALTER TABLE \"";
 		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
+		alter_string += "\" ADD COLUMN ";
 		alter_string += datetime_end_col_name;
 		alter_string += " INTEGER DEFAULT 0";
 		sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -10576,9 +10652,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 
 	std::string sql_create_empty_table;
-	sql_create_empty_table += "CREATE TABLE ";
+	sql_create_empty_table += "CREATE TABLE \"";
 	sql_create_empty_table += result_columns.view_name;
-	sql_create_empty_table += " AS SELECT ";
+	sql_create_empty_table += "\" AS SELECT ";
 
 	bool first = true;
 	int the_index = 0;
@@ -10595,7 +10671,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			sql_create_empty_table += "CAST(";
 		}
 
+		sql_create_empty_table += "`";
 		sql_create_empty_table += previous_table_column_names[the_index];
+		sql_create_empty_table += "`";
 
 		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 		{
@@ -10603,13 +10681,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 
 		sql_create_empty_table += " AS ";
+		sql_create_empty_table += "`";
 		sql_create_empty_table += new_column.column_name_in_temporary_table;
+		sql_create_empty_table += "`";
 		++the_index;
 	});
 
-	sql_create_empty_table += " FROM ";
+	sql_create_empty_table += " FROM \"";
 	sql_create_empty_table += previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another.view_name;
-	sql_create_empty_table += " WHERE 0";
+	sql_create_empty_table += "\" WHERE 0";
 	sql_strings.push_back(SQLExecutor(this, db, sql_create_empty_table));
 	if (failed)
 	{
@@ -10653,9 +10733,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_col_name += newUUID(true);
 
 	std::string alter_string;
-	alter_string += "ALTER TABLE ";
+	alter_string += "ALTER TABLE \"";
 	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
+	alter_string += "\" ADD COLUMN ";
 	alter_string += datetime_start_col_name;
 	alter_string += " INTEGER DEFAULT 0";
 	sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -10747,9 +10827,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_col_name += newUUID(true);
 
 	alter_string.clear();
-	alter_string += "ALTER TABLE ";
+	alter_string += "ALTER TABLE \"";
 	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
+	alter_string += "\" ADD COLUMN ";
 	alter_string += datetime_end_col_name;
 	alter_string += " INTEGER DEFAULT 0";
 	sql_strings.push_back(SQLExecutor(this, db, alter_string));
@@ -14279,12 +14359,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 	std::string sql_string;
 
-	sql_string += "CREATE TABLE ";
+	sql_string += "CREATE TABLE \"";
 	sql_string += result_columns.view_name;
-	sql_string += " AS SELECT * FROM ";
-	sql_string += "(SELECT * FROM ";
+	sql_string += "\" AS SELECT * FROM ";
+	sql_string += "(SELECT * FROM \"";
 	sql_string += columns.view_name;
-	sql_string += " ORDER BY RANDOM() LIMIT ";
+	sql_string += "\" ORDER BY RANDOM() LIMIT ";
 	sql_string += boost::lexical_cast<std::string>(random_sampling_rows_per_stage);
 	sql_string += ") ";
 
@@ -14302,9 +14382,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 		sql_string += " ORDER BY ";
 	}
 	first = false;
+	sql_string += "`";
 	sql_string += result_columns.columns_in_view[columns.columns_in_view.size()-2].column_name_in_temporary_table; // final merged datetime start column
+	sql_string += "`";
 	sql_string += ", ";
-	sql_string += result_columns.columns_in_view[columns.columns_in_view.size()-1].column_name_in_temporary_table; // final merged datetime end column
+	sql_string += "`";
+	sql_string += result_columns.columns_in_view[columns.columns_in_view.size() - 1].column_name_in_temporary_table; // final merged datetime end column
+	sql_string += "`";
 
 	sql_strings.push_back(SQLExecutor(this, db, sql_string));
 	if (failed)
@@ -14350,11 +14434,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns.has_no_datetime_columns = false;
 
 	std::string sql_create_empty_table;
-	sql_create_empty_table += "CREATE TABLE ";
+	sql_create_empty_table += "CREATE TABLE \"";
 	sql_create_empty_table += result_columns.view_name;
-	sql_create_empty_table += " AS SELECT * FROM ";
+	sql_create_empty_table += "\" AS SELECT * FROM \"";
 	sql_create_empty_table += column_set.view_name;
-	sql_create_empty_table += " WHERE 0";
+	sql_create_empty_table += "\" WHERE 0";
 	sql_strings.push_back(SQLExecutor(this, db, sql_create_empty_table));
 	if (failed)
 	{
@@ -14388,9 +14472,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_col_name_text += newUUID(true);
 
 		std::string alter_string;
-		alter_string += "ALTER TABLE ";
+		alter_string += "ALTER TABLE \"";
 		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
+		alter_string += "\" ADD COLUMN ";
 		alter_string += datetime_start_col_name_text;
 		alter_string += " TEXT";
 
@@ -14426,9 +14510,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_col_name_text += newUUID(true);
 
 		alter_string.clear();
-		alter_string += "ALTER TABLE ";
+		alter_string += "ALTER TABLE \"";
 		alter_string += result_columns.view_name;
-		alter_string += " ADD COLUMN ";
+		alter_string += "\" ADD COLUMN ";
 		alter_string += datetime_end_col_name_text;
 		alter_string += " TEXT";
 
@@ -14464,9 +14548,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_col_name += newUUID(true);
 
 	std::string alter_string;
-	alter_string += "ALTER TABLE ";
+	alter_string += "ALTER TABLE \"";
 	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
+	alter_string += "\" ADD COLUMN ";
 	alter_string += datetime_start_col_name;
 	alter_string += " INTEGER DEFAULT 0";
 
@@ -14501,9 +14585,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_col_name += newUUID(true);
 
 	alter_string.clear();
-	alter_string += "ALTER TABLE ";
+	alter_string += "ALTER TABLE \"";
 	alter_string += result_columns.view_name;
-	alter_string += " ADD COLUMN ";
+	alter_string += "\" ADD COLUMN ";
 	alter_string += datetime_end_col_name;
 	alter_string += " INTEGER DEFAULT 0";
 
@@ -14739,7 +14823,9 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityOnes(ColumnsInTempView
 							{
 								sql_create_final_primary_group_table += "CAST (";
 							}
+							sql_create_final_primary_group_table += "`";
 							sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
+							sql_create_final_primary_group_table += "`";
 							if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 							{
 								sql_create_final_primary_group_table += " AS INTEGER)";
@@ -14816,7 +14902,9 @@ void OutputModel::OutputGenerator::SortOrderByMultiplicityGreaterThanOnes(Column
 										{
 											sql_create_final_primary_group_table += "CAST (";
 										}
+										sql_create_final_primary_group_table += "`";
 										sql_create_final_primary_group_table += view_column.column_name_in_temporary_table;
+										sql_create_final_primary_group_table += "`";
 										if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
 										{
 											sql_create_final_primary_group_table += " AS INTEGER)";

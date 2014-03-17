@@ -48,9 +48,9 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 
 		// Create the VG data table
 		std::string sql_create;
-		sql_create += "CREATE TABLE ";
+		sql_create += "CREATE TABLE \"";
 		sql_create += table_name;
-		sql_create += " (";
+		sql_create += "\" (";
 
 		bool first = true;
 		std::for_each(import_definition.output_schema.schema.cbegin(),
@@ -227,7 +227,7 @@ bool Table_VariableGroupData::DeleteDataTable(sqlite3 * db, InputModel * input_m
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	boost::format drop_stmt("DROP TABLE IF EXISTS %1%");
+	boost::format drop_stmt("DROP TABLE IF EXISTS \"%1%\"");
 	drop_stmt % table_name;
 	char * errmsg = nullptr;
 	sqlite3_exec(db, drop_stmt.str().c_str(), NULL, NULL, &errmsg);
@@ -262,7 +262,7 @@ bool Table_VariableGroupData::DeleteDmuMemberRows(sqlite3 * db, InputModel * inp
 	WidgetInstanceIdentifier dmu_category = *dmu_member.identifier_parent;
 
 	sqlite3_stmt * stmt = NULL;
-	boost::format sql("DELETE FROM %1% WHERE `%2%` = '%3%'");
+	boost::format sql("DELETE FROM \"%1%\" WHERE `%2%` = '%3%'");
 	sql % table_name % column_name % *dmu_member.uuid;
 	int err = sqlite3_prepare_v2(db, sql.str().c_str(), static_cast<int>(sql.str().size()) + 1, &stmt, NULL);
 
