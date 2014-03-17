@@ -539,7 +539,7 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 	if (valid)
 	{
 
-		std::string regex_string("([a-zA-Z0-9_-]+)");
+		std::string regex_string("([a-zA-Z0-9_]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
