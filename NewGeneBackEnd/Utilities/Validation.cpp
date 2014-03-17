@@ -110,7 +110,7 @@ bool Validation::ValidateDmuMemberCode(std::string & proposed_dmu_member_code, s
 	if (valid)
 	{
 
-		std::string regex_string_code("([a-zA-Z_0-9]*)");
+		std::string regex_string_code("([a-zA-Z_0-9-]*)");
 		boost::regex regex_code(regex_string_code);
 		boost::cmatch matches_code;
 
@@ -246,7 +246,7 @@ bool Validation::ValidateColumnName(std::string & proposed_column_name, std::str
 	if (valid)
 	{
 
-		std::string regex_string("([a-zA-Z_0-9]*)");
+		std::string regex_string("([a-zA-Z_0-9-]*)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
@@ -361,7 +361,7 @@ bool Validation::ValidateDmuCode(std::string & proposed_dmu_code, std::string & 
 	if (valid)
 	{
 
-		std::string regex_string("([a-zA-Z_]+)");
+		std::string regex_string("([a-zA-Z_-]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
@@ -441,7 +441,7 @@ bool Validation::ValidateUoaCode(std::string & proposed_uoa_code, std::string & 
 	if (valid)
 	{
 
-		std::string regex_string("([a-zA-Z_]+)");
+		std::string regex_string("([a-zA-Z_-]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
@@ -539,7 +539,7 @@ bool Validation::ValidateVgCode(std::string & proposed_vg_code, std::string & er
 	if (valid)
 	{
 
-		std::string regex_string("([a-zA-Z0-9_]+)");
+		std::string regex_string("([a-zA-Z0-9_-]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
@@ -642,7 +642,7 @@ bool Validation::ValidateYearInteger(std::string & proposed_year_integer, short 
 	if (valid)
 	{
 
-		std::string regex_string("([0-9]*)");
+		std::string regex_string("([0-9]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
@@ -733,7 +733,7 @@ bool Validation::ValidateMonthInteger(std::string & proposed_month_integer, shor
 	if (valid)
 	{
 
-		std::string regex_string("([0-9]*)");
+		std::string regex_string("([0-9]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
@@ -822,7 +822,7 @@ bool Validation::ValidateDayInteger(short const theYear, short const theMonth, s
 	if (valid)
 	{
 
-		std::string regex_string("([0-9]*)");
+		std::string regex_string("([0-9]+)");
 		boost::regex regex(regex_string);
 		boost::cmatch matches;
 
