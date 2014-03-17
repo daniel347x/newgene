@@ -721,7 +721,9 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	QWidget FileChooserWidget;
 	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
 
-	form.addRow(new QLabel("Variable Group data refresh details"));
+	boost::format msg_import_header("Variable Group data refresh details: %1%");
+	msg_import_header % Table_VG_CATEGORY::GetVgDisplayText(vg);
+	form.addRow(new QLabel());
 
 	QList<QLineEdit *> fieldsFileChooser;
 	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited data file", "Choose comma-delimited data file location", "", "" };

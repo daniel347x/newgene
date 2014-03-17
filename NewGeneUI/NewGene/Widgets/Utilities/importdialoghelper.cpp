@@ -293,7 +293,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	YearMonthWidget.setLayout(&formYearMonthOptions);
 
 	QRadioButton * YMIntButton = new QRadioButton("Time range columns are split: one for year and one for month", &YearMonthDayWidget);
-	QRadioButton * YMStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes, such as \"11/1992\", \"1992\\11\" or \"1992-11\"", &YearMonthDayWidget);
+	QRadioButton * YMStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes.\nExamples are \"11/1992\", \"1992/11\", \"1992\\11\" and \"1992-11\"\nYou may also include the day (which will be ignored), such as \"11/12/1992\".", &YearMonthDayWidget);
 	formYMTimeRange_StringVsInt.addWidget(YMIntButton);
 	formYMTimeRange_StringVsInt.addWidget(YMStringButton);
 	formYearMonthOptions.addRow(&formYMTimeRange_StringVsInt);
@@ -332,8 +332,8 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	formYearMonthOptions_strings.addRow(labelymEnd, lineEditymEnd);
 	fieldsTimeRange << lineEditymEnd;                                      // 16
 
-	formYearMonthDayOptions.addRow(&YearMonthDayWidget_strings);
-	YearMonthDayWidget_strings.hide();
+	formYearMonthOptions.addRow(&YearMonthWidget_strings);
+	YearMonthWidget_strings.hide();
 
 	YearMonthWidget.hide();
 	form.addRow(&YearMonthWidget);
