@@ -177,7 +177,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	QLineEdit * lineEdityYearStart = new QLineEdit(&YearWidget);
 	formYearOptions.addRow(labelyYearStart, lineEdityYearStart);
 	fieldsTimeRange << lineEdityYearStart;                                  // 1
-	QString labelyYearEnd = QString("'Year End' (integer or text) column name (leave blank if not present):");
+	QString labelyYearEnd = QString("'Year End' (integer or text) column name (optional):");
 	QLineEdit * lineEdityYearEnd = new QLineEdit(&YearWidget);
 	formYearOptions.addRow(labelyYearEnd, lineEdityYearEnd);
 	fieldsTimeRange << lineEdityYearEnd;                                    // 2
@@ -203,7 +203,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	QLineEdit * lineEditymdYearStart = new QLineEdit(&YearMonthDayWidget_ints);
 	formYearMonthDayOptions_ints.addRow(labelymdYearStart, lineEditymdYearStart);
 	fieldsTimeRange << lineEditymdYearStart;                                // 3
-	QString labelymdYearEnd = QString("'Year End' (integer) column name:");
+	QString labelymdYearEnd = QString("'Year End' (integer) column name (optional):");
 	QLineEdit * lineEditymdYearEnd = new QLineEdit(&YearMonthDayWidget_ints);
 	formYearMonthDayOptions_ints.addRow(labelymdYearEnd, lineEditymdYearEnd);
 	fieldsTimeRange << lineEditymdYearEnd;                                  // 4
@@ -213,7 +213,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	QLineEdit * lineEditymdMonthStart = new QLineEdit(&YearMonthDayWidget_ints);
 	formYearMonthDayOptions_ints.addRow(labelymdMonthStart, lineEditymdMonthStart);
 	fieldsTimeRange << lineEditymdMonthStart;                               // 5
-	QString labelymdMonthEnd = QString("'Month End' (integer) column name:");
+	QString labelymdMonthEnd = QString("'Month End' (integer) column name (optional):");
 	QLineEdit * lineEditymdMonthEnd = new QLineEdit(&YearMonthDayWidget_ints);
 	formYearMonthDayOptions_ints.addRow(labelymdMonthEnd, lineEditymdMonthEnd);
 	fieldsTimeRange << lineEditymdMonthEnd;                                 // 6
@@ -223,7 +223,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	QLineEdit * lineEditymdDayStart = new QLineEdit(&YearMonthDayWidget_ints);
 	formYearMonthDayOptions_ints.addRow(labelymdDayStart, lineEditymdDayStart);
 	fieldsTimeRange << lineEditymdDayStart;                                 // 7
-	QString labelymdDayEnd = QString("'Day End' (integer) column name:");
+	QString labelymdDayEnd = QString("'Day End' (integer) column name (optional):");
 	QLineEdit * lineEditymdDayEnd = new QLineEdit(&YearMonthDayWidget_ints);
 	formYearMonthDayOptions_ints.addRow(labelymdDayEnd, lineEditymdDayEnd);
 	fieldsTimeRange << lineEditymdDayEnd;                                   // 8
@@ -236,7 +236,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	QLineEdit * lineEditymdStart = new QLineEdit(&YearMonthDayWidget_strings);
 	formYearMonthDayOptions_strings.addRow(labelymdStart, lineEditymdStart);
 	fieldsTimeRange << lineEditymdStart;                                    // 9
-	QString labelymdEnd = QString("'Ending Day' (text) column name:");
+	QString labelymdEnd = QString("'Ending Day' (text) column name (optional):");
 	QLineEdit * lineEditymdEnd = new QLineEdit(&YearMonthDayWidget_strings);
 	formYearMonthDayOptions_strings.addRow(labelymdEnd, lineEditymdEnd);
 	fieldsTimeRange << lineEditymdEnd;                                      // 10
@@ -304,7 +304,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	QLineEdit * lineEditymYearStart = new QLineEdit(&YearMonthWidget_ints);
 	formYearMonthOptions_ints.addRow(labelymYearStart, lineEditymYearStart);
 	fieldsTimeRange << lineEditymYearStart;                                // 11
-	QString labelymYearEnd = QString("'Year End' column name:");
+	QString labelymYearEnd = QString("'Year End' column name (optional):");
 	QLineEdit * lineEditymYearEnd = new QLineEdit(&YearMonthWidget_ints);
 	formYearMonthOptions_ints.addRow(labelymYearEnd, lineEditymYearEnd);
 	fieldsTimeRange << lineEditymYearEnd;                                  // 12
@@ -314,7 +314,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	QLineEdit * lineEditymMonthStart = new QLineEdit(&YearMonthWidget_ints);
 	formYearMonthOptions_ints.addRow(labelymMonthStart, lineEditymMonthStart);
 	fieldsTimeRange << lineEditymMonthStart;                               // 13
-	QString labelymMonthEnd = QString("'Month End' column name:");
+	QString labelymMonthEnd = QString("'Month End' column name (optional):");
 	QLineEdit * lineEditymMonthEnd = new QLineEdit(&YearMonthWidget_ints);
 	formYearMonthOptions_ints.addRow(labelymMonthEnd, lineEditymMonthEnd);
 	fieldsTimeRange << lineEditymMonthEnd;                                 // 14
@@ -323,14 +323,14 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	YearMonthWidget_ints.hide();
 
 	// string form of dates
-	QString labelymStart = QString("'Starting Day' (text) column name:");
+	QString labelymStart = QString("'Starting Month' (text) column name:");
 	QLineEdit * lineEditymStart = new QLineEdit(&YearMonthWidget_strings);
 	formYearMonthOptions_strings.addRow(labelymStart, lineEditymStart);
-	fieldsTimeRange << lineEditymStart;                                    // 9
-	QString labelymEnd = QString("'Ending Day' (text) column name:");
+	fieldsTimeRange << lineEditymStart;                                    // 15
+	QString labelymEnd = QString("'Ending Month' (text) column name (optional):");
 	QLineEdit * lineEditymEnd = new QLineEdit(&YearMonthWidget_strings);
 	formYearMonthOptions_strings.addRow(labelymEnd, lineEditymEnd);
-	fieldsTimeRange << lineEditymEnd;                                      // 10
+	fieldsTimeRange << lineEditymEnd;                                      // 16
 
 	formYearMonthDayOptions.addRow(&YearMonthDayWidget_strings);
 	YearMonthDayWidget_strings.hide();
