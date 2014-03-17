@@ -1545,8 +1545,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 						{
 							// Treat as text string
 
-							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>
-									(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_YEAR);
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE_YEAR);
 							FieldTypeEntries input_file_fields;
 							FieldTypeEntries output_table_fields;
 							FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_DATETIME_STRING);
@@ -1591,6 +1590,49 @@ bool Table_VariableGroupData::BuildImportDefinition
 						}
 						else
 						{
+
+							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR);
+							FieldTypeEntries input_file_fields;
+							FieldTypeEntries output_table_fields;
+							FieldTypeEntry input_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[0]), FIELD_TYPE_YEAR);
+							FieldTypeEntry input_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, timeRangeCols[1]), FIELD_TYPE_YEAR);
+							input_file_fields.push_back(input_time_field__YearStart);
+							input_file_fields.push_back(input_time_field__YearEnd);
+							FieldTypeEntry output_time_field__YearStart = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName),
+								FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME);
+							FieldTypeEntry output_time_field__YearEnd = std::make_pair(NameOrIndex(NameOrIndex::NAME, Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName),
+								FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME);
+							output_table_fields.push_back(output_time_field__YearStart);
+							output_table_fields.push_back(output_time_field__YearEnd);
+							time_range_mapping->input_file_fields = input_file_fields;
+							time_range_mapping->output_table_fields = output_table_fields;
+							mappings.push_back(time_range_mapping);
+
+							// Now modify the field type of these time range columns in the schema (overriding the primary key field type, if applicable)
+							int colindex_yearStart = timeRangeColName_To_Index[timeRangeCols[0]];
+							int colindex_yearEnd = timeRangeColName_To_Index[timeRangeCols[1]];
+
+							if (input_schema_vector[colindex_yearStart].IsPrimaryKey())
+							{
+								input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+								output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							}
+							else
+							{
+								input_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+								output_schema_vector[colindex_yearStart].field_type = FIELD_TYPE_YEAR;
+							}
+
+							if (input_schema_vector[colindex_yearEnd].IsPrimaryKey())
+							{
+								input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+								output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR;
+							}
+							else
+							{
+								input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+								output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_YEAR;
+							}
 
 						}
 
