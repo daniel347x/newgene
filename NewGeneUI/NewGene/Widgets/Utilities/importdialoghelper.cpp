@@ -145,10 +145,10 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	// Always hidden - But used by validation routine
 	// to determine which time granularity is selected
 	// ************************************************************************************ //
-	form.addRow(new QLabel("Time range options:"));
 	QRadioButton * YButton = new QRadioButton("Year", &dialog);
 	QRadioButton * YMDButton = new QRadioButton("Year, Month, Day", &dialog);
 	QRadioButton * YMButton = new QRadioButton("Year, Month", &dialog);
+	formTimeRangeSelection.addWidget(new QLabel("Time range options:"));
 	formTimeRangeSelection.addWidget(YButton);
 	formTimeRangeSelection.addWidget(YMDButton);
 	formTimeRangeSelection.addWidget(YMButton);
