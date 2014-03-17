@@ -95,11 +95,11 @@ int TimeRangeFieldMapping::ConvertStringToDateFancy(boost::posix_time::ptime & t
 	if (index_to_use < 0)
 	{
 		const size_t formats = sizeof(inputs) / sizeof(inputs[0]);
-		number_formats = formats;
+		number_formats = static_cast<int>(formats);
 
 		the_time = boost::posix_time::not_a_date_time;
 
-		for (size_t i = 0; i < number_formats; ++i)
+		for (int i = 0; i < number_formats; ++i)
 		{
 			std::istringstream ss(the_string);
 			ss.imbue(inputs[i]);
@@ -694,8 +694,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				boost::posix_time::ptime the_day_end = boost::posix_time::ptime(boost::gregorian::date(the_day_start.date().year(), the_day_start.date().month(), the_day_start.date().day()) + boost::gregorian::days(1));
 
-				boost::posix_time::time_duration diff_start_from_1970 = the_month_start - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = the_month_end - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_start_from_1970 = the_day_start - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = the_day_end - time_t_epoch__1970;
 
 				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
