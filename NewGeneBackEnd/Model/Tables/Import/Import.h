@@ -408,7 +408,7 @@ class TimeRangeFieldMapping : public RowFieldMapping
 		void PerformMapping(DataFields const & input_data_fields, DataFields const & output_data_fields);
 
 		static void ConvertStringToDate(int & year, int & month, int & day, std::string const & the_string);
-		static bool ConvertStringToDateFancy(boost::posix_time::ptime & the_time, std::string const & the_string);
+		static int ConvertStringToDateFancy(boost::posix_time::ptime & the_time, std::string const & the_string, int const index_to_use);
 
 		TIME_RANGE_FIELD_MAPPING_TYPE time_range_type;
 

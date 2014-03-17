@@ -12,12 +12,20 @@
 #include "../../OutputModel.h"
 #include "../../../Utilities/Validation.h"
 
-bool TimeRangeFieldMapping::ConvertStringToDateFancy(boost::posix_time::ptime & the_time, std::string const & the_string)
+int TimeRangeFieldMapping::ConvertStringToDateFancy(boost::posix_time::ptime & the_time, std::string const & the_string, int const index_to_use)
 {
 
-	boost::locale::generator gen;
+	int index_used = -1;
+
+	static boost::locale::generator gen;
 	static const std::locale inputs[] =
 	{
+
+		// ********************************************************************************************* //
+		// year-month-day possibilities
+		// ********************************************************************************************* //
+
+		// numeric string for the month part; i.e. "11/12/1990"
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%Y/%m/%d")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%Y/%m/%d %H:%M:%S")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%Y\\%m\\%d")),
@@ -33,6 +41,7 @@ bool TimeRangeFieldMapping::ConvertStringToDateFancy(boost::posix_time::ptime & 
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%Y%m%d")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%Y%m%d %H:%M:%S")),
 
+		// text string abbreviation for the month part; i.e. "Feb 12, 1990"
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%b %d, %Y")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%b %d, %Y %H:%M:%S")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%b %d %Y")),
@@ -40,119 +49,94 @@ bool TimeRangeFieldMapping::ConvertStringToDateFancy(boost::posix_time::ptime & 
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%b-%d-%Y")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%b-%d-%Y %H:%M:%S")),
 
+		// full text string for for the month part; i.e. "February 12, 1990"
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%B %d, %Y")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%B %d, %Y %H:%M:%S")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%B %d %Y")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%B %d %Y %H:%M:%S")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%B-%d-%Y")),
 		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%B-%d-%Y %H:%M:%S")),
+
+
+		// ********************************************************************************************* //
+		// year-month possibilities
+		// ********************************************************************************************* //
+
+		// numeric string for the month part; i.e. "02/1990"
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%Y/%m")),
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%Y\\%m")),
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%Y-%m")),
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%m/%Y")),
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%m\\%Y")),
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%m-%Y")),
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%Y%m")),
+
+		// text string abbreviation for the month part; i.e. "Feb, 1990"
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%b, %Y")),
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%b %Y")),
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%b-%Y")),
+
+		// full text string for for the month part; i.e. "February, 1990"
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%B, %Y")),
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%B %Y")),
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%B-%Y")),
+
+
+		// ********************************************************************************************* //
+		// year possibilities
+		// ********************************************************************************************* //
+
+		std::locale(gen("en_US.UTF-8"), new boost::posix_time::time_input_facet("%Y")),
+
 	};
 
-	const size_t formats = sizeof(inputs) / sizeof(inputs[0]);
-
-	the_time = boost::posix_time::not_a_date_time;
-
-	for (size_t i = 0; i < formats; ++i)
+	static int number_formats = 0;
+	if (index_to_use < 0)
 	{
+		const size_t formats = sizeof(inputs) / sizeof(inputs[0]);
+		number_formats = formats;
+
+		the_time = boost::posix_time::not_a_date_time;
+
+		for (size_t i = 0; i < number_formats; ++i)
+		{
+			std::istringstream ss(the_string);
+			ss.imbue(inputs[i]);
+			boost::posix_time::ptime this_time;
+			ss >> this_time;
+
+			if (this_time != boost::posix_time::not_a_date_time)
+			{
+				the_time = this_time;
+				index_used = static_cast<int>(i);
+				break;
+			}
+		}
+	}
+	else if (index_to_use >= number_formats)
+	{
+		// Caller screwed up
+		return index_used;
+	}
+	else
+	{
+		index_used = index_to_use;
 		std::istringstream ss(the_string);
-		ss.imbue(inputs[i]);
+		ss.imbue(inputs[index_to_use]);
 		boost::posix_time::ptime this_time;
 		ss >> this_time;
 
 		if (this_time != boost::posix_time::not_a_date_time)
 		{
 			the_time = this_time;
-			return true;
 		}
-	}
-
-	return false;
-
-}
-
-void TimeRangeFieldMapping::ConvertStringToDate(int & year, int & month, int & day, std::string const & the_string)
-{
-
-	boost::tokenizer<> tok(the_string);
-	int count = 0;
-
-	for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
-	{
-		switch (count)
+		else
 		{
-			case 0:
-				{
-					std::string test = *it;
-					year = boost::lexical_cast<int>(*it);
-				}
-				break;
-
-			case 1:
-				{
-					std::string test = *it;
-					std::string the_month = *it;
-
-					if (boost::iequals(*it, "jan"))
-					{
-						month = 1;
-					}
-					else if (boost::iequals(*it, "feb"))
-					{
-						month = 2;
-					}
-					else if (boost::iequals(*it, "mar"))
-					{
-						month = 3;
-					}
-					else if (boost::iequals(*it, "apr"))
-					{
-						month = 4;
-					}
-					else if (boost::iequals(*it, "may"))
-					{
-						month = 5;
-					}
-					else if (boost::iequals(*it, "jun"))
-					{
-						month = 6;
-					}
-					else if (boost::iequals(*it, "jul"))
-					{
-						month = 7;
-					}
-					else if (boost::iequals(*it, "aug"))
-					{
-						month = 8;
-					}
-					else if (boost::iequals(*it, "sep"))
-					{
-						month = 9;
-					}
-					else if (boost::iequals(*it, "oct"))
-					{
-						month = 10;
-					}
-					else if (boost::iequals(*it, "nov"))
-					{
-						month = 11;
-					}
-					else if (boost::iequals(*it, "dec"))
-					{
-						month = 12;
-					}
-				}
-				break;
-
-			case 2:
-				{
-					std::string test = *it;
-					day = boost::lexical_cast<int>(*it);
-				}
-				break;
+			index_used = -1;
 		}
-
-		++count;
 	}
+
+	return index_used;
 
 }
 
@@ -160,189 +144,6 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 {
 	switch (time_range_type)
 	{
-
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__FROM__START_DAY__TO__END_DAY:
-			{
-
-				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
-
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-
-				bool successful_conversion = false;
-
-				boost::posix_time::ptime the_time_start;
-				successful_conversion = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef());
-
-				if (!successful_conversion)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				// Round down to day
-				the_time_start = boost::posix_time::ptime(the_time_start.date());
-
-				boost::posix_time::ptime the_time_end;
-				successful_conversion = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef());
-
-				if (!successful_conversion)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				// Round down to day
-				// Then add 1 day so that the full day is included (days start at midnight, so no seconds of the next day are included)
-				the_time_end = boost::posix_time::ptime(the_time_end.date() + boost::gregorian::days(1));
-
-				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
-
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
-
-			}
-			break;
-
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__FROM__START_YEAR__TO__END_YEAR:
-			{
-
-				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
-
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-
-				bool successful_conversion = false;
-
-				boost::posix_time::ptime the_time_start;
-				successful_conversion = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef());
-
-				if (!successful_conversion)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				// Round down to year
-				the_time_start = boost::posix_time::ptime(boost::gregorian::date(the_time_start.date().year(),boost::gregorian::Jan,1));
-
-				boost::posix_time::ptime the_time_end;
-				successful_conversion = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef());
-
-				if (!successful_conversion)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				// Round down to year
-				// Then add 1 year so that the full year is included (days start at midnight, so no seconds of the next year are included)
-				the_time_end = boost::posix_time::ptime(boost::gregorian::date(the_time_end.date().year(), boost::gregorian::Jan, 1) + boost::gregorian::years(1));
-
-				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
-
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
-
-			}
-			break;
-
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__START_YEAR_ONLY:
-			{
-
-				std::shared_ptr<BaseField> const the_input_field_datetime_year = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
-
-				if (!the_input_field_datetime_year || !the_output_field_datetime_start || !the_output_field_datetime_end)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-
-				bool successful_conversion = false;
-
-				boost::posix_time::ptime the_year_start;
-				successful_conversion = ConvertStringToDateFancy(the_year_start, the_input_field_datetime_year->GetStringRef());
-
-				if (!successful_conversion)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				// Round down to year
-				the_year_start = boost::posix_time::ptime(boost::gregorian::date(the_year_start.date().year(), boost::gregorian::Jan, 1));
-
-				boost::posix_time::ptime the_year_end = boost::posix_time::ptime(boost::gregorian::date(the_year_start.date().year(), boost::gregorian::Jan, 1) + boost::gregorian::years(1));
-
-				if (!successful_conversion)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				boost::posix_time::time_duration diff_start_from_1970 = the_year_start - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = the_year_end - time_t_epoch__1970;
-
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
-
-			}
-			break;
-
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE:
-			{
-
-				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
-
-				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
-				{
-					// Todo: log warning
-					return;
-				}
-
-				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-
-				int year = 0, month = 0, day = 0;
-				ConvertStringToDate(year, month, day, the_input_field_datetime_start->GetStringRef());
-				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year, month, day));
-
-				year = 0; month = 0; day = 0;
-				ConvertStringToDate(year, month, day, the_input_field_datetime_end->GetStringRef());
-				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year, month, day));
-
-				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
-				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
-
-				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
-
-			}
-			break;
 
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__START_YEAR_ONLY:
 			{
@@ -371,38 +172,104 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
-		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__START_DAY_ONLY:
+		case TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__FROM__START_YEAR__TO__END_YEAR:
 			{
 
-				// **************************************************************************************************************** //
-				// This mapping is NOT used to create the DATETIME_ROW_START/END fields,
-				// but is rather used to create an arbitrary dependent variable time range column
-				// (example: MidOnset, just a regular dependent variable, based on Y-M-D input fields)
-				// **************************************************************************************************************** //
+			}
+			break;
 
-				std::shared_ptr<BaseField> const the_input_field_day = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__START_YEAR_ONLY:
+			{
 
-				if (!the_input_field_day || !the_input_field_month || !the_input_field_year || !the_output_field_day_start)
+				std::shared_ptr<BaseField> const the_input_field_datetime_year = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field_datetime_year || !the_output_field_datetime_start || !the_output_field_datetime_end)
 				{
 					// Todo: log warning
 					return;
 				}
 
-				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				boost::gregorian::date row_start_date(the_input_field_day->GetInt32Ref(),
-													  the_input_field_month->GetInt32Ref() > 0 ? the_input_field_month->GetInt32Ref() : 12,
-													  the_input_field_year->GetInt32Ref() > 0 ? the_input_field_year->GetInt32Ref() : 1970);
+				int conversion_index = the_input_field_datetime_year->GetDateFormatIndex();
 
-				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
+				boost::posix_time::ptime the_year_start;
+				conversion_index = ConvertStringToDateFancy(the_year_start, the_input_field_datetime_year->GetStringRef(), conversion_index);
 
-				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+				the_input_field_datetime_year->SetDateFormatIndex(conversion_index);
 
-				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				if (conversion_index < 0)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// Round down to year
+				the_year_start = boost::posix_time::ptime(boost::gregorian::date(the_year_start.date().year(), boost::gregorian::Jan, 1));
+
+				boost::posix_time::ptime the_year_end = boost::posix_time::ptime(boost::gregorian::date(the_year_start.date().year(), boost::gregorian::Jan, 1) + boost::gregorian::years(1));
+
+				boost::posix_time::time_duration diff_start_from_1970 = the_year_start - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = the_year_end - time_t_epoch__1970;
+
+				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+
+			}
+			break;
+
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_YEAR__FROM__START_YEAR__TO__END_YEAR:
+			{
+
+				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+
+				int conversion_index = the_input_field_datetime_start->GetDateFormatIndex();
+
+				boost::posix_time::ptime the_time_start;
+				conversion_index = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef(), conversion_index);
+
+				the_input_field_datetime_start->SetDateFormatIndex(conversion_index);
+
+				if (conversion_index < 0)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// Round down to year
+				the_time_start = boost::posix_time::ptime(boost::gregorian::date(the_time_start.date().year(), boost::gregorian::Jan, 1));
+
+				boost::posix_time::ptime the_time_end;
+				conversion_index = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef(), conversion_index);
+
+				if (conversion_index < 0)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// Round down to year
+				// Then add 1 year so that the full year is included (days start at midnight, so no seconds of the next year are included)
+				the_time_end = boost::posix_time::ptime(boost::gregorian::date(the_time_end.date().year(), boost::gregorian::Jan, 1) + boost::gregorian::years(1));
+
+				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
+
+				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
 			}
 			break;
@@ -520,6 +387,54 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
+		case TIME_RANGE_FIELD_MAPPING_TYPE__STRING_MONTH__START_MONTH_ONLY:
+			{
+
+			}
+			break;
+
+		case TIME_RANGE_FIELD_MAPPING_TYPE__STRING_MONTH__FROM__START_MONTH__TO__END_MONTH:
+			{
+
+			}
+			break;
+
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__START_DAY_ONLY:
+			{
+
+				// **************************************************************************************************************** //
+				// This mapping is NOT used to create the DATETIME_ROW_START/END fields,
+				// but is rather used to create an arbitrary dependent variable time range column
+				// (example: MidOnset, just a regular dependent variable, based on Y-M-D input fields)
+				// **************************************************************************************************************** //
+
+				std::shared_ptr<BaseField> const the_input_field_day = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+
+				if (!the_input_field_day || !the_input_field_month || !the_input_field_year || !the_output_field_day_start)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// convert year to ms since jan 1, 1970 00:00:00.000
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+
+				boost::gregorian::date row_start_date(the_input_field_day->GetInt32Ref(),
+													  the_input_field_month->GetInt32Ref() > 0 ? the_input_field_month->GetInt32Ref() : 12,
+													  the_input_field_year->GetInt32Ref() > 0 ? the_input_field_year->GetInt32Ref() : 1970);
+
+				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
+
+				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+
+				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+
+			}
+			break;
+
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__DAY__FROM__START_DAY__TO__END_DAY:
 			{
 
@@ -621,6 +536,66 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
+		case TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__START_DAY_ONLY:
+			{
+
+			}
+			break;
+
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_DAY__FROM__START_DAY__TO__END_DAY:
+			{
+
+				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+
+				int conversion_index = the_input_field_datetime_start->GetDateFormatIndex();
+
+				boost::posix_time::ptime the_time_start;
+				conversion_index = ConvertStringToDateFancy(the_time_start, the_input_field_datetime_start->GetStringRef(), conversion_index);
+
+				the_input_field_datetime_start->SetDateFormatIndex(conversion_index);
+
+				if (conversion_index < 0)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// Round down to day
+				the_time_start = boost::posix_time::ptime(the_time_start.date());
+
+				boost::posix_time::ptime the_time_end;
+				conversion_index = ConvertStringToDateFancy(the_time_end, the_input_field_datetime_end->GetStringRef(), conversion_index);
+
+				if (conversion_index < 0)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				// Round down to day
+				// Then add 1 day so that the full day is included (days start at midnight, so no seconds of the next day are included)
+				the_time_end = boost::posix_time::ptime(the_time_end.date() + boost::gregorian::days(1));
+
+				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
+
+				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+
+			}
+			break;
+
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__RANGE__FROM__YR_MNTH_DAY:
 			{
 
@@ -655,6 +630,40 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 			}
 			break;
+
+		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE:
+			{
+
+				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_datetime_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+
+				if (!the_input_field_datetime_start || !the_input_field_datetime_end || !the_output_field_datetime_start || !the_output_field_datetime_end)
+				{
+					// Todo: log warning
+					return;
+				}
+
+				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+
+				int year = 0, month = 0, day = 0;
+				ConvertStringToDate(year, month, day, the_input_field_datetime_start->GetStringRef());
+				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year, month, day));
+
+				year = 0; month = 0; day = 0;
+				ConvertStringToDate(year, month, day, the_input_field_datetime_end->GetStringRef());
+				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year, month, day));
+
+				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+
+				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+
+			}
+			break;
+
 	}
 }
 
@@ -1863,5 +1872,91 @@ void Importer::InstantiateDataFieldInstance(FIELD_TYPE field_type, std::string f
 	std::shared_ptr<BaseField> field;
 	FieldFactory(field_type, field_name, field);
 	fields.push_back(field);
+
+}
+
+void TimeRangeFieldMapping::ConvertStringToDate(int & year, int & month, int & day, std::string const & the_string)
+{
+
+	boost::tokenizer<> tok(the_string);
+	int count = 0;
+
+	for (boost::tokenizer<>::iterator it = tok.begin(); it != tok.end(); ++it)
+	{
+		switch (count)
+		{
+		case 0:
+		{
+				  std::string test = *it;
+				  year = boost::lexical_cast<int>(*it);
+		}
+			break;
+
+		case 1:
+		{
+				  std::string test = *it;
+				  std::string the_month = *it;
+
+				  if (boost::iequals(*it, "jan"))
+				  {
+					  month = 1;
+				  }
+				  else if (boost::iequals(*it, "feb"))
+				  {
+					  month = 2;
+				  }
+				  else if (boost::iequals(*it, "mar"))
+				  {
+					  month = 3;
+				  }
+				  else if (boost::iequals(*it, "apr"))
+				  {
+					  month = 4;
+				  }
+				  else if (boost::iequals(*it, "may"))
+				  {
+					  month = 5;
+				  }
+				  else if (boost::iequals(*it, "jun"))
+				  {
+					  month = 6;
+				  }
+				  else if (boost::iequals(*it, "jul"))
+				  {
+					  month = 7;
+				  }
+				  else if (boost::iequals(*it, "aug"))
+				  {
+					  month = 8;
+				  }
+				  else if (boost::iequals(*it, "sep"))
+				  {
+					  month = 9;
+				  }
+				  else if (boost::iequals(*it, "oct"))
+				  {
+					  month = 10;
+				  }
+				  else if (boost::iequals(*it, "nov"))
+				  {
+					  month = 11;
+				  }
+				  else if (boost::iequals(*it, "dec"))
+				  {
+					  month = 12;
+				  }
+		}
+			break;
+
+		case 2:
+		{
+				  std::string test = *it;
+				  day = boost::lexical_cast<int>(*it);
+		}
+			break;
+		}
+
+		++count;
+	}
 
 }

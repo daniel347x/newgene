@@ -44,6 +44,7 @@ class BaseField
 		BaseField(FIELD_TYPE const the_field_type, std::string const & the_field_name)
 			: field_type(the_field_type)
 			, field_name(the_field_name)
+			, date_format_index(-1)
 		{
 		}
 
@@ -64,11 +65,18 @@ class BaseField
 		void SetValueDouble(double const & val);
 		void SetValueString(std::string const & val);
 
+		int  GetDateFormatIndex() const { return date_format_index; }
+		void SetDateFormatIndex(int const date_format_index_) { date_format_index = date_format_index_; }
+
 	protected:
 
 		BaseField(BaseField const &) : field_type(FIELD_TYPE_UNKNOWN), field_name(std::string()) {}
 		FIELD_TYPE const field_type;
 		std::string const field_name;
+
+	private:
+
+		int date_format_index;
 
 };
 
