@@ -314,6 +314,11 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				int year_start = the_input_field_year_start->GetInt32Ref();
 				int month_start = the_input_field_month_start->GetInt32Ref();
 
+				if (month_start > 12)
+				{
+					month_start = 1;
+				}
+
 				bool start_month_valid = month_start > 0;
 
 				if (!start_month_valid)
@@ -370,6 +375,15 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				int year_end = the_input_field_year_end->GetInt32Ref();
 				int month_start = the_input_field_month_start->GetInt32Ref();
 				int month_end = the_input_field_month_end->GetInt32Ref();
+
+				if (month_start > 12)
+				{
+					month_start = 1;
+				}
+				if (month_end > 12)
+				{
+					month_end = 1;
+				}
 
 				bool start_month_valid = month_start > 0;
 				bool end_month_valid = month_end > 0;
@@ -445,9 +459,13 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-				boost::gregorian::date row_start_date(the_input_field_day->GetInt32Ref(),
-													  the_input_field_month->GetInt32Ref() > 0 ? the_input_field_month->GetInt32Ref() : 12,
-													  the_input_field_year->GetInt32Ref() > 0 ? the_input_field_year->GetInt32Ref() : 1970);
+				// We could do full validation on the dates provided, but that is likely to
+				// significantly slow down the import.
+				// Therefore, we'll do some quick-and-dirty validation here.
+				boost::gregorian::date row_start_date(
+					the_input_field_day->GetInt32Ref() > 0 ? the_input_field_day->GetInt32Ref() <= 31 ? the_input_field_day->GetInt32Ref() : 1 : 1,
+					the_input_field_month->GetInt32Ref() > 0 ? the_input_field_month->GetInt32Ref() <= 12 ? the_input_field_month->GetInt32Ref() : 1 : 1,
+					the_input_field_year->GetInt32Ref() > 0 ? the_input_field_year->GetInt32Ref() : 1970);
 
 				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
 
@@ -488,10 +506,10 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				int day_start = the_input_field_day_start->GetInt32Ref();
 				int day_end = the_input_field_day_end->GetInt32Ref();
 
-				bool start_month_valid = month_start > 0;
-				bool end_month_valid = month_end > 0;
-				bool start_day_valid = day_start > 0;
-				bool end_day_valid = day_end > 0;
+				bool start_month_valid = (month_start > 0 && month_start <= 12);
+				bool end_month_valid = (month_end > 0 && month_end <= 12);
+				bool start_day_valid = (day_start > 0 && day_start <= 31);
+				bool end_day_valid = (day_end > 0 && day_end <= 31);
 
 				if (!start_day_valid && !start_month_valid)
 				{
@@ -619,8 +637,17 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
+
+		// **************************************************************************************************************** //
+		// The following is deprecated and unused
+		// **************************************************************************************************************** //
+
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__YEAR__RANGE__FROM__YR_MNTH_DAY:
 			{
+
+				// **************************************************************************************************************** //
+				// Deprecated and unused
+				// **************************************************************************************************************** //
 
 				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[0], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
@@ -654,8 +681,17 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 			}
 			break;
 
+
+		// **************************************************************************************************************** //
+		// The following is deprecated and unused
+		// **************************************************************************************************************** //
+
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRING_RANGE:
 			{
+
+				// **************************************************************************************************************** //
+				// Deprecated and unused
+				// **************************************************************************************************************** //
 
 				std::shared_ptr<BaseField> const the_input_field_datetime_start = RetrieveDataField(input_file_fields[0], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_datetime_end = RetrieveDataField(input_file_fields[1], input_data_fields);
