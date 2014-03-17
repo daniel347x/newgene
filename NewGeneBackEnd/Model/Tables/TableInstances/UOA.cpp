@@ -479,6 +479,9 @@ std::string Table_UOA_Identifier::GetUoaCategoryDisplayText(WidgetInstanceIdenti
 		case TIME_GRANULARITY__YEAR:
 			displayText += " (Year granularity)";
 			break;
+		case TIME_GRANULARITY__MONTH:
+			displayText += " (Month granularity)";
+			break;
 		case TIME_GRANULARITY__DAY:
 			displayText += " (Day granularity)";
 			break;
