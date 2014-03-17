@@ -195,7 +195,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	QRadioButton * YMDStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes", &YearMonthDayWidget);
 	formYMDTimeRange_StringVsInt.addWidget(YMDIntButton);
 	formYMDTimeRange_StringVsInt.addWidget(YMDStringButton);
-	formYMDTimeRange_StringVsInt.addWidget(new QLabel("        Examples are \"11/12/1992\", \"1992/11/12\", \"1992\\11\\12\" and \"1992-11-12\""));
+	formYMDTimeRange_StringVsInt.addWidget(new QLabel("        Examples are \"11/20/1992\", \"1992/11/20\", \"1992\\11\\20\" and \"1992-11-20\""));
 	formYearMonthDayOptions.addRow(&formYMDTimeRange_StringVsInt);
 	formYearMonthDayOptions.addRow(new QLabel());
 	radioButtonsYMD_StringVsInt_TimeRange << YMDStringButton << YMDIntButton;
@@ -298,7 +298,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 	QRadioButton * YMStringButton = new QRadioButton("Time range columns contain text dates separated by slashes or dashes", &YearMonthDayWidget);
 	formYMTimeRange_StringVsInt.addWidget(YMIntButton);
 	formYMTimeRange_StringVsInt.addWidget(YMStringButton);
-	formYMTimeRange_StringVsInt.addWidget(new QLabel("        Examples are \"11/1992\", \"1992/11\", \"1992\\11\" and \"1992-11\"\n        You may also include the day (which will be ignored), such as \"11/12/1992\""));
+	formYMTimeRange_StringVsInt.addWidget(new QLabel("        Examples are \"11/1992\", \"1992/11\", \"1992\\11\" and \"1992-11\"\n        You may also include the day (which will be ignored), such as \"11/20/1992\""));
 	formYearMonthOptions.addRow(&formYMTimeRange_StringVsInt);
 	formYearMonthOptions.addRow(new QLabel());
 	radioButtonsYM_StringVsInt_TimeRange << YMStringButton << YMIntButton;
