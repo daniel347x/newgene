@@ -310,8 +310,7 @@ void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemReque
 
 				if (!dmu.code || !dmu.uuid)
 				{
-					boost::format msg("Missing the DMU category to delete.");
-					messager.ShowMessageBox(msg.str());
+					// Error should already be handled in input model function
 					return;
 				}
 
@@ -342,6 +341,21 @@ void UIActionManager::DeleteDMUOutput(Messager & messager, WidgetActionItemReque
 						});
 					}
 				});
+
+				// ***************************************** //
+				// Prepare data to send back to user interface
+				// ***************************************** //
+				DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE;
+				DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
+				DataChange change(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
+				change_response.changes.push_back(change);
+
+				// ***************************************** //
+				// Use updated cache info to set further info
+				// in change_response
+				// ***************************************** //
+				std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
+				change_response.changes.back().set_of_identifiers = active_dmus;
 
 				executor.success();
 

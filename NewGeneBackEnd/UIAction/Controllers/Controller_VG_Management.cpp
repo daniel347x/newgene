@@ -300,42 +300,15 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 
 					Executor executor(input_model.getDb());
 
-					WidgetInstanceIdentifier dmu = instanceActionItem.first;
+					WidgetInstanceIdentifier vg = instanceActionItem.first;
 
-					if (!dmu.code || !dmu.uuid)
+					if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
 					{
-						boost::format msg("Missing the DMU to delete while attempting to delete a variable group.");
-						messager.ShowMessageBox(msg.str());
+						// Error should already be handled in input model function
 						return;
 					}
 
-					// ************************************* //
-					// Retrieve data sent by user interface
-					// ************************************* //
-					std::string dmu_to_delete_code = *dmu.code;
-					std::string dmu_to_delete_uuid = *dmu.uuid;
-
-					// The INPUT model does the bulk of the deleting,
-					// and informs the UI.
-					// Here, we just want to clear a couple things in the output database.
-
-					output_model.t_kad_count.Remove(output_model.getDb(), *dmu.code);
-
-					WidgetInstanceIdentifiers uoas = input_model.t_uoa_setmemberlookup.RetrieveUOAsGivenDMU(input_model.getDb(), &input_model, dmu);
-					std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
-					{
-						if (uoa.uuid)
-						{
-							WidgetInstanceIdentifiers vgs(input_model.t_vgp_identifiers.RetrieveVGsFromUOA(input_model.getDb(), &input_model, *uoa.uuid));
-							std::for_each(vgs.cbegin(), vgs.cend(), [&](WidgetInstanceIdentifier const & vg)
-							{
-								if (vg.code)
-								{
-									output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), *vg.code);
-								}
-							});
-						}
-					});
+					output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), *vg.code);
 
 					// ***************************************** //
 					// Prepare data to send back to user interface

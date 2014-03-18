@@ -310,42 +310,36 @@ void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemReque
 
 					Executor executor(input_model.getDb());
 
-					WidgetInstanceIdentifier dmu = instanceActionItem.first;
-
-					if (!dmu.code || !dmu.uuid)
+					WidgetInstanceIdentifier uoa_category = instanceActionItem.first;
+					if (!uoa_category.uuid || uoa_category.uuid->empty())
 					{
-						boost::format msg("Missing the UOA to delete.");
-						messager.ShowMessageBox(msg.str());
+						// Error should already be handled in input model function
 						return;
 					}
 
-					// ************************************* //
-					// Retrieve data sent by user interface
-					// ************************************* //
-					std::string dmu_to_delete_code = *dmu.code;
-					std::string dmu_to_delete_uuid = *dmu.uuid;
-
-					// The INPUT model does the bulk of the deleting,
-					// and informs the UI.
-					// Here, we just want to clear a couple things in the output database.
-
-					output_model.t_kad_count.Remove(output_model.getDb(), *dmu.code);
-
-					WidgetInstanceIdentifiers uoas = input_model.t_uoa_setmemberlookup.RetrieveUOAsGivenDMU(input_model.getDb(), &input_model, dmu);
-					std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
+					WidgetInstanceIdentifiers vgs(input_model.t_vgp_identifiers.RetrieveVGsFromUOA(input_model.getDb(), &input_model, *uoa_category.uuid));
+					std::for_each(vgs.cbegin(), vgs.cend(), [&](WidgetInstanceIdentifier const & vg)
 					{
-						if (uoa.uuid)
+						if (vg.code)
 						{
-							WidgetInstanceIdentifiers vgs(input_model.t_vgp_identifiers.RetrieveVGsFromUOA(input_model.getDb(), &input_model, *uoa.uuid));
-							std::for_each(vgs.cbegin(), vgs.cend(), [&](WidgetInstanceIdentifier const & vg)
-							{
-								if (vg.code)
-								{
-									output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), *vg.code);
-								}
-							});
+							output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), *vg.code);
 						}
 					});
+
+					// ***************************************** //
+					// Prepare data to send back to user interface
+					// ***************************************** //
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
+					DataChange change(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
+					change_response.changes.push_back(change);
+
+					// ***************************************** //
+					// Use updated cache info to set further info
+					// in change_response
+					// ***************************************** //
+					std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
+					change_response.changes.back().set_of_identifiers = active_dmus;
 
 					executor.success();
 
