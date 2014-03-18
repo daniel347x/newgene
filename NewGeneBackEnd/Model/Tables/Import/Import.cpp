@@ -300,8 +300,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__START_MONTH_ONLY:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_month_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_month_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
@@ -352,10 +352,10 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__FROM__START_MONTH__TO__END_MONTH:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month_end = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_end = RetrieveDataField(input_file_fields[3], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_end = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month_end = RetrieveDataField(input_file_fields[3], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
@@ -522,9 +522,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__START_DAY_ONLY:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[2], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_month_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_month_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
@@ -560,12 +560,12 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__FROM__START_DAY__TO__END_DAY:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_day_end = RetrieveDataField(input_file_fields[3], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_end = RetrieveDataField(input_file_fields[3], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_month_end = RetrieveDataField(input_file_fields[4], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_end = RetrieveDataField(input_file_fields[5], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_day_end = RetrieveDataField(input_file_fields[5], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
