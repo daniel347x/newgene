@@ -58,6 +58,9 @@ void UIActionManager::DoVariableGroupSetMemberSelectionChange(Messager & message
 				{
 					return;
 				}
+
+				// identifier is the VG_SET_MEMBER
+				// its parent is the VG_CATEGORY identifier
 				WidgetInstanceIdentifier const & identifier = instanceActionItem.first;
 				if (!identifier.uuid)
 				{

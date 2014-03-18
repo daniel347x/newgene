@@ -26,6 +26,7 @@ void KadWidgetsScrollArea::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECT
 	NewGeneWidget::UpdateOutputConnections(connection_type, project);
 	if (connection_type == NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT)
 	{
+
 		connect(this, SIGNAL(RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA)), outp->getConnector(), SLOT(RefreshWidget(WidgetDataItemRequest_KAD_SPIN_CONTROLS_AREA)));
 
 		// *** This is a parent (top-level) widget, so connect to refreshes here (... child widgets don't connect to refreshes) *** //
@@ -33,10 +34,14 @@ void KadWidgetsScrollArea::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECT
 
 		// *** Has child widgets, so refer refresh signals directed at child to be received by us, the parent *** //
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONTROL_WIDGET)));
+
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
+
+		project->UnregisterInterestInChanges(this);
 		Empty();
+
 	}
 }
 

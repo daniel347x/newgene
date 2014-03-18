@@ -29,6 +29,7 @@ KadSpinBox::KadSpinBox( QWidget * parent, WidgetInstanceIdentifier data_instance
 
 	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__KAD_COUNT_CHANGE, true, *data_instance.uuid);
 	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__VG_CATEGORY_SET_MEMBER_SELECTION, false, *data_instance.uuid);
+	   project->RegisterInterestInChange(this, DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE, false, *data_instance.uuid);
 
 	   UpdateOutputConnections(NewGeneWidget::ESTABLISH_CONNECTIONS_OUTPUT_PROJECT, project);
 	   WidgetDataItemRequest_KAD_SPIN_CONTROL_WIDGET request(0, WIDGET_DATA_ITEM_REQUEST_REASON__REFRESH_ALL_WIDGETS, data_instance);
@@ -174,22 +175,7 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 						case DATA_CHANGE_INTENTION__ADD:
 						case DATA_CHANGE_INTENTION__REMOVE:
 							{
-								bool not_me = true;
-								std::for_each(change.set_of_identifiers.cbegin(), change.set_of_identifiers.cend(), [&](WidgetInstanceIdentifier const & the_dmu)
-								{
-									if (data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu))
-									{
-										not_me = false;
-									}
-								});
-								if (not_me)
-								{
-									this->setVisible(false);
-								}
-								else
-								{
-									this->setVisible(true);
-								}
+								ShowHideFromActiveDMUs(change);
 							}
 							break;
 						case DATA_CHANGE_INTENTION__UPDATE:
@@ -204,10 +190,47 @@ void KadSpinBox::HandleChanges(DataChangeMessage const & change_message)
 					}
 				}
 				break;
+			case DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE:
+				{
+					switch (change.change_intention)
+					{
+						case DATA_CHANGE_INTENTION__UPDATE:
+							{
+								ShowHideFromActiveDMUs(change);
+							}
+							break;
+						default:
+							{
+
+							}
+							break;
+					}
+				}
+				break;
 			default:
 				{
 				}
 				break;
 		}
 	});
+}
+
+void KadSpinBox::ShowHideFromActiveDMUs(DataChange const & change)
+{
+	bool not_me = true;
+	std::for_each(change.set_of_identifiers.cbegin(), change.set_of_identifiers.cend(), [&](WidgetInstanceIdentifier const & the_dmu)
+	{
+		if (data_instance.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu))
+		{
+			not_me = false;
+		}
+	});
+	if (not_me)
+	{
+		this->setVisible(false);
+	}
+	else
+	{
+		this->setVisible(true);
+	}
 }

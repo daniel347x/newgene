@@ -33,6 +33,10 @@ class KadSpinBox : public QSpinBox, public NewGeneWidget // do not reorder base 
 		// *********************************//
 		void ReceiveVariableItemChanged(int);
 
+	private:
+
+		void ShowHideFromActiveDMUs(DataChange const & change);
+
 };
 
 #endif // KADSPINBOX_H

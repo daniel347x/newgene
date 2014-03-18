@@ -304,7 +304,7 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 
 					if (!dmu.code || !dmu.uuid)
 					{
-						boost::format msg("Missing the UOA to delete.");
+						boost::format msg("Missing the DMU to delete while attempting to delete a variable group.");
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
@@ -336,6 +336,21 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 							});
 						}
 					});
+
+					// ***************************************** //
+					// Prepare data to send back to user interface
+					// ***************************************** //
+					DATA_CHANGE_TYPE type = DATA_CHANGE_TYPE__OUTPUT_MODEL__ACTIVE_DMU_CHANGE;
+					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
+					DataChange change(type, intention, WidgetInstanceIdentifier(), WidgetInstanceIdentifiers());
+					change_response.changes.push_back(change);
+
+					// ***************************************** //
+					// Use updated cache info to set further info
+					// in change_response
+					// ***************************************** //
+					std::set<WidgetInstanceIdentifier> active_dmus = output_model.t_variables_selected_identifiers.GetActiveDMUs(&output_model, &input_model);
+					change_response.changes.back().set_of_identifiers = active_dmus;
 
 					executor.success();
 
