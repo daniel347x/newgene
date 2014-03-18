@@ -567,6 +567,13 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 			if (!boost::trim_copy(y_yearEnd).empty())
 			{
 				valid = Validation::ValidateColumnName(y_yearEnd, "End Year", false, errorMsg);
+
+				if (y_yearEnd == y_yearStart)
+				{
+					boost::format msg("Duplicate time range column names");
+					errorMsg = msg.str();
+					return false;
+				}
 			}
 		}
 
@@ -682,8 +689,11 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 		if (valid)
 		{
 			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
+			int nEmptyCols = 0;
+			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), [&](std::string & colname){ if (colname.empty()) { ++nEmptyCols; } });
+			if (nEmptyCols > 0) { --nEmptyCols; }
 			std::set<std::string> testtimerangecols(dataTimeRange.cbegin(), dataTimeRange.cend());
-			if (testtimerangecols.size() != dataTimeRange.size())
+			if (testtimerangecols.size() != dataTimeRange.size() - nEmptyCols)
 			{
 				boost::format msg("Duplicate time range column names");
 				errorMsg = msg.str();
@@ -781,8 +791,11 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 		if (valid)
 		{
 			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), std::bind(boost::trim<std::string>, std::placeholders::_1, std::locale()));
+			int nEmptyCols = 0;
+			std::for_each(dataTimeRange.begin(), dataTimeRange.end(), [&](std::string & colname){ if (colname.empty()) { ++nEmptyCols; } });
+			if (nEmptyCols > 0) { --nEmptyCols; }
 			std::set<std::string> testtimerangecols(dataTimeRange.cbegin(), dataTimeRange.cend());
-			if (testtimerangecols.size() != dataTimeRange.size())
+			if (testtimerangecols.size() != dataTimeRange.size() - nEmptyCols)
 			{
 				boost::format msg("Duplicate time range column names");
 				errorMsg = msg.str();
