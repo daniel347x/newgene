@@ -44,7 +44,7 @@ void Table_VARIABLES_SELECTED::Load(sqlite3 * db, OutputModel * output_model_, I
 				bool found = input_model_->t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(code_variable, *identifier_parent.uuid, identifier);
 				if (found && identifier.uuid && identifier.uuid->size())
 				{
-					// Variable group => Variable instance mapping
+					// Variable group => Variable group set member mapping
 					identifiers_map[*identifier_parent.uuid].push_back(identifier);
 				}
 			}
@@ -140,7 +140,7 @@ bool Table_VARIABLES_SELECTED::Update(sqlite3 * db, OutputModel & output_model_,
 											--n;
 											--number_variables;
 											found = true;
-											Remove(db, *child_identifier.code, *change.parent_identifier.code);
+											Remove(db, *child_identifier.code, change.parent_identifier);
 											continue;
 										}
 									}
@@ -220,10 +220,15 @@ void Table_VARIABLES_SELECTED::Add(sqlite3 * db, std::string const & vg_set_memb
 
 }
 
-void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_member_code, std::string const & vg_category_code)
+void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_member_code, WidgetInstanceIdentifier const & vg)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+	{
+		return;
+	}
 
 	std::string sqlRemove("DELETE FROM VG_SET_MEMBERS_SELECTED WHERE ");
 	sqlRemove += "`";
@@ -236,7 +241,7 @@ void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_m
 	sqlRemove += VG_CATEGORY_STRING_CODE;
 	sqlRemove += "`";
 	sqlRemove += " = '";
-	sqlRemove += vg_category_code;
+	sqlRemove += *vg.code;
 	sqlRemove += "'";
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sqlRemove.c_str(), static_cast<int>(sqlRemove.size()) + 1, &stmt, NULL);
@@ -251,19 +256,44 @@ void Table_VARIABLES_SELECTED::Remove(sqlite3 * db, std::string const & vg_set_m
 		stmt = nullptr;
 	}
 
+	// Remove from cache
+
+	WidgetInstanceIdentifiers currentSelected = identifiers_map[*vg.uuid];
+	size_t count = currentSelected.size();
+	int to_remove_index = -1;
+	for (size_t n = 0; n < count; ++n)
+	{
+		WidgetInstanceIdentifier const & test_vg_set_member = currentSelected[n];
+		if (test_vg_set_member.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID_PLUS_STRING_CODE, vg))
+		{
+			to_remove_index = n;
+			break;
+		}
+	}
+
+	if (to_remove_index != -1)
+	{
+		identifiers_map[*vg.uuid].erase(identifiers_map[*vg.uuid].begin() + to_remove_index);
+	}
+
 }
 
-void Table_VARIABLES_SELECTED::RemoveAllfromVG(sqlite3 * db, std::string const & vg_category_code)
+void Table_VARIABLES_SELECTED::RemoveAllfromVG(sqlite3 * db, WidgetInstanceIdentifier const & vg)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	if (!vg.uuid || vg.uuid->empty() || !vg.code || vg.code->empty())
+	{
+		return;
+	}
 
 	std::string sqlRemove("DELETE FROM VG_SET_MEMBERS_SELECTED WHERE ");
 	sqlRemove += "`";
 	sqlRemove += VG_CATEGORY_STRING_CODE;
 	sqlRemove += "`";
 	sqlRemove += " = '";
-	sqlRemove += vg_category_code;
+	sqlRemove += *vg.code;
 	sqlRemove += "'";
 	sqlite3_stmt * stmt = NULL;
 	sqlite3_prepare_v2(db, sqlRemove.c_str(), static_cast<int>(sqlRemove.size()) + 1, &stmt, NULL);
@@ -277,6 +307,10 @@ void Table_VARIABLES_SELECTED::RemoveAllfromVG(sqlite3 * db, std::string const &
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
 	}
+
+	// Remove from cache
+
+	identifiers_map.erase(*vg.uuid);
 
 }
 

@@ -322,7 +322,7 @@ void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemReque
 					{
 						if (vg.code)
 						{
-							output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), *vg.code);
+							output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), vg);
 						}
 					});
 

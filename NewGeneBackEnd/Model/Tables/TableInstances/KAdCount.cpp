@@ -38,7 +38,7 @@ void Table_KAD_COUNT::Load(sqlite3 * db, OutputModel * output_model_, InputModel
 		//char const * flags = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__KAD_COUNT__FLAGS));
 		if (code_dmu_category && strlen(code_dmu_category))
 		{
-			WidgetInstanceIdentifier identifier;
+			WidgetInstanceIdentifier identifier; // DMU
 			bool found_parent = input_model_->t_dmu_category.getIdentifierFromStringCode(code_dmu_category, identifier);
 			if (found_parent && identifier.uuid && identifier.uuid->size() > 0)
 			{
@@ -202,6 +202,25 @@ void Table_KAD_COUNT::Remove(sqlite3 * db, std::string const & dmu_category_code
 	{
 		sqlite3_finalize(stmt);
 		stmt = nullptr;
+	}
+
+	// Remove from cache
+
+	size_t count = identifiers.size();
+	int index_to_remove = -1;
+	for (size_t n = 0; n < count; ++n)
+	{
+		std::pair<WidgetInstanceIdentifier, int> const & test_pair = identifiers[n];
+		if (test_pair.first.code || boost::iequals(*test_pair.first.code, dmu_category_code))
+		{
+			index_to_remove = n;
+			break;
+		}
+	}
+
+	if (index_to_remove != -1)
+	{
+		identifiers.erase(identifiers.begin() + index_to_remove);
 	}
 
 }

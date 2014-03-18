@@ -42,8 +42,8 @@ public:
 	std::set<WidgetInstanceIdentifier> GetActiveDMUs(OutputModel * output_model_, InputModel * input_model_);
 
 	void Add(sqlite3 * db, std::string const & vg_set_member_code, std::string const & vg_category_code);
-	void Remove(sqlite3 * db, std::string const & vg_set_member_code, std::string const & vg_category_code);
-	void RemoveAllfromVG(sqlite3 * db, std::string const & vg_category_code);
+	void Remove(sqlite3 * db, std::string const & vg_set_member_code, WidgetInstanceIdentifier const & vg);
+	void RemoveAllfromVG(sqlite3 * db, WidgetInstanceIdentifier const & vg);
 
 };
 

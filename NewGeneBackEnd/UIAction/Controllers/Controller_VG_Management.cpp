@@ -308,7 +308,7 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 						return;
 					}
 
-					output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), *vg.code);
+					output_model.t_variables_selected_identifiers.RemoveAllfromVG(output_model.getDb(), vg);
 
 					// ***************************************** //
 					// Prepare data to send back to user interface
