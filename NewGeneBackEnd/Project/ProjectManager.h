@@ -529,13 +529,16 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__INPUT_REQUEST:
 								{
-									notify = true;
+									boost::format msg("Received input completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
 								}
 								break;
 
 							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__OUTPUT_REQUEST:
 								{
-									// no-op - handled in "LetMeRunTask"
+									task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__OUTPUT_REQUEST;
 								}
 								break;
 
@@ -568,6 +571,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED:
 								{
+									task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__OUTPUT_REQUEST_ACTIVE;
 									notify = true;
 								}
 								break;
@@ -593,6 +597,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__INPUT_REQUEST_ACTIVE:
 								{
 									// free semaphore
+									task.task_status = TASK_STATUS__COMPLETED;
 									free_semaphore = true;
 								}
 								break;
@@ -664,7 +669,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__INPUT_REQUEST:
 								{
-									// no-op
+									task.task_status = TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__INPUT_REQUEST;
 								}
 								break;
 
@@ -697,6 +702,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED:
 								{
+									task.task_status = TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__INPUT_REQUEST_ACTIVE;
 									notify = true;
 								}
 								break;
@@ -704,6 +710,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__OUTPUT_REQUEST_ACTIVE:
 								{
 									// free semaphore
+									task.task_status = TASK_STATUS__COMPLETED;
 									free_semaphore = true;
 								}
 								break;
@@ -758,7 +765,6 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 			if (free_semaphore)
 			{
 				task_info.task_semaphore = std::move(task.task_semaphore);
-				task.task_status = TASK_STATUS__COMPLETED;
 				task_instances.erase(task_identifier);
 			}
 
