@@ -300,8 +300,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__START_MONTH_ONLY:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[1], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_month_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_month_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
@@ -346,17 +346,16 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				the_output_field_month_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_month_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
-
 			}
 			break;
 
 		case TIME_RANGE_FIELD_MAPPING_TYPE__INTS__MONTH__FROM__START_MONTH__TO__END_MONTH:
 			{
 
-				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month_end = RetrieveDataField(input_file_fields[4], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year_end = RetrieveDataField(input_file_fields[5], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month_end = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_end = RetrieveDataField(input_file_fields[3], input_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
 				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
@@ -523,39 +522,37 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 		case TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__INTS__DAY__START_DAY_ONLY:
 			{
 
-				// **************************************************************************************************************** //
-				// This mapping is NOT used to create the DATETIME_ROW_START/END fields,
-				// but is rather used to create an arbitrary dependent variable time range column
-				// (example: MidOnset, just a regular dependent variable, based on Y-M-D input fields)
-				// **************************************************************************************************************** //
+				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[0], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
+				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[2], input_data_fields);
+				std::shared_ptr<BaseField> the_output_field_month_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_month_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				std::shared_ptr<BaseField> const the_input_field_day = RetrieveDataField(input_file_fields[0], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_month = RetrieveDataField(input_file_fields[1], input_data_fields);
-				std::shared_ptr<BaseField> const the_input_field_year = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-
-				if (!the_input_field_day || !the_input_field_month || !the_input_field_year || !the_output_field_day_start)
+				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start  || !the_output_field_month_start || !the_output_field_month_end)
 				{
 					// Todo: log warning
 					return;
 				}
 
+				int year_start = the_input_field_year_start->GetInt32Ref();
+				int month_start = the_input_field_month_start->GetInt32Ref();
+				int day_start = the_input_field_day_start->GetInt32Ref();
+
+				if (month_start > 12 || month_start < 1)
+				{
+					month_start = 1;
+				}
+
 				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
-
-				// We could do full validation on the dates provided, but that is likely to
-				// significantly slow down the import.
-				// Therefore, we'll do some quick-and-dirty validation here.
-				boost::gregorian::date row_start_date(
-					the_input_field_day->GetInt32Ref() > 0 ? the_input_field_day->GetInt32Ref() <= 31 ? the_input_field_day->GetInt32Ref() : 1 : 1,
-					the_input_field_month->GetInt32Ref() > 0 ? the_input_field_month->GetInt32Ref() <= 12 ? the_input_field_month->GetInt32Ref() : 1 : 1,
-					the_input_field_year->GetInt32Ref() > 0 ? the_input_field_year->GetInt32Ref() : 1970);
-
-				boost::posix_time::ptime time_t_epoch__rowdatestart(row_start_date);
+				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(year_start, month_start, day_start));
+				boost::posix_time::ptime time_t_epoch__rowdateend(boost::gregorian::date(year_start, month_start, day_start) + boost::gregorian::days(1));
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
+				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_month_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_month_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
 			}
 			break;
