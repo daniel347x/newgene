@@ -54,6 +54,7 @@ class WidgetActionItem
 	public:
 
 		WidgetActionItem()
+			: id(next_id++)
 		{
 
 		}
@@ -67,6 +68,12 @@ class WidgetActionItem
 		{
 
 		}
+
+	public:
+
+		long id;
+
+		static long next_id;
 
 };
 

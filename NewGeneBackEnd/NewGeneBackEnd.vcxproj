@@ -145,6 +145,7 @@
     <ClInclude Include="UIData\DataWidgets.h" />
     <ClInclude Include="UIData\UIDataManager.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
+    <ClInclude Include="Utilities\Semaphore.h" />
     <ClInclude Include="Utilities\TimeRangeHelper.h" />
     <ClInclude Include="Utilities\UUID.h" />
     <ClInclude Include="Utilities\Validation.h" />

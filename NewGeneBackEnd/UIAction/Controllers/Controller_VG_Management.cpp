@@ -8,6 +8,8 @@
 #	include <boost/scope_exit.hpp>
 #endif
 #include "../../Utilities/TimeRangeHelper.h"
+#include "../../Utilities/Semaphore.h"
+#include "../../Project/ProjectManager.h"
 
 /************************************************************************/
 // ACTION_CREATE_VG
@@ -146,10 +148,10 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 		return;
 	}
 
-	BOOST_SCOPE_EXIT(this_)
+	BOOST_SCOPE_EXIT_ALL(&, this)
 	{
-		this_->EndFailIfBusy();
-	} BOOST_SCOPE_EXIT_END
+		this->EndFailIfBusy();
+	};
 
 	if (!action_request.items)
 	{
@@ -166,8 +168,23 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 				DataChangeMessage change_response(&project);
 
-				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				std::for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
+
+					ProjectManager & project_manager = projectManager();
+					std::string errorMsg;
+					semaphore * the_semaphore = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
+					if (the_semaphore == nullptr)
+					{
+						boost::format msg("Error deleting variable group: %1%");
+						msg % errorMsg.c_str();
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+					BOOST_SCOPE_EXIT_ALL(&)
+					{
+						the_semaphore->notify();
+					};
 
 					Executor executor(input_model.getDb());
 
@@ -231,10 +248,10 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 		return;
 	}
 
-	BOOST_SCOPE_EXIT(this_)
+	BOOST_SCOPE_EXIT_ALL(&, this)
 	{
-		this_->EndFailIfBusy();
-	} BOOST_SCOPE_EXIT_END
+		this->EndFailIfBusy();
+	};
 
 	if (!action_request.items)
 	{
@@ -254,6 +271,21 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [&output_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
+
+					ProjectManager & project_manager = projectManager();
+					std::string errorMsg;
+					semaphore * the_semaphore = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
+					if (the_semaphore == nullptr)
+					{
+						boost::format msg("Error deleting variable group: %1%");
+						msg % errorMsg.c_str();
+						messager.ShowMessageBox(msg.str());
+						return;
+					}
+					BOOST_SCOPE_EXIT_ALL(&)
+					{
+						the_semaphore->notify();
+					};
 
 					Executor executor(input_model.getDb());
 
