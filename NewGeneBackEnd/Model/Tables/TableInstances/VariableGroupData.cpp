@@ -665,6 +665,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 		int number_time_range_cols = 0;
 		int colindex = 0;
 		std::map<std::string, int> timeRangeColName_To_Index;
+		bool time_ranges_are_strings = false;
 		std::for_each(colnames.cbegin(), colnames.cend(), [&](std::string const & colname)
 		{
 
@@ -693,7 +694,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			// Determine if this is a primary key column
 			if (std::find_if(dmusAndCols.cbegin(), dmusAndCols.cend(), [&](std::pair<WidgetInstanceIdentifier, std::string> const & dmuAndCol) -> bool
-		{
+			{
 			if (dmuAndCol.second == colname)
 				{
 					the_dmu = dmuAndCol.first;
@@ -746,7 +747,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			// Determine if this is a time range column
 			if (std::find_if(timeRangeCols.cbegin(), timeRangeCols.cend(), [&](std::string const & timeRangeCol) -> bool
-		{
+			{
 			if (timeRangeCol == colname)
 				{
 					return true;
@@ -773,30 +774,86 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 					case TIME_GRANULARITY__DAY:
 						{
-							if (!IsFieldTypeInt(fieldtypes[colindex]))
+							if (IsFieldTypeString(fieldtypes[colindex]))
 							{
-								boost::format msg("The time range columns must be an integral type.");
-								throw NewGeneException() << newgene_error_description(msg.str());
+								if (timeRangeCols.size() != 2 && timeRangeCols.size() != 1)
+								{
+									boost::format msg("There must be 1 or 2 string time range columns.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+								time_ranges_are_strings = true;
+							}
+							else
+							{
+								if (!IsFieldTypeInt(fieldtypes[colindex]))
+								{
+									boost::format msg("The time range columns must be an integral type.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+								if (timeRangeCols.size() != 6 && timeRangeCols.size() != 3)
+								{
+									boost::format msg("There must be 3 or 6 time range columns.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
 							}
 						}
 						break;
 
 					case TIME_GRANULARITY__YEAR:
 						{
-							if (!IsFieldTypeInt(fieldtypes[colindex]))
+							if (!IsFieldTypeInt(fieldtypes[colindex]) && !IsFieldTypeString(fieldtypes[colindex]))
 							{
-								boost::format msg("The time range columns must be an integral type.");
+								boost::format msg("The time range column/s must be either a string or an integral type.");
 								throw NewGeneException() << newgene_error_description(msg.str());
+							}
+							if (IsFieldTypeString(fieldtypes[colindex]))
+							{
+								if (timeRangeCols.size() != 2 && timeRangeCols.size() != 1)
+								{
+									boost::format msg("There must be 1 or 2 string time range columns.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+								time_ranges_are_strings = true;
+							}
+							else
+							{
+								if (!IsFieldTypeInt(fieldtypes[colindex]))
+								{
+									boost::format msg("The time range column/s must be an integral type.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+								if (timeRangeCols.size() != 2 && timeRangeCols.size() != 1)
+								{
+									boost::format msg("There must be 1 or 2 time range columns.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
 							}
 						}
 						break;
 
 					case TIME_GRANULARITY__MONTH:
 						{
-							if (!IsFieldTypeInt(fieldtypes[colindex]))
+							if (IsFieldTypeString(fieldtypes[colindex]))
 							{
-								boost::format msg("The time range columns must be an integral type.");
-								throw NewGeneException() << newgene_error_description(msg.str());
+								if (timeRangeCols.size() != 2 && timeRangeCols.size() != 1)
+								{
+									boost::format msg("There must be 1 or 2 string time range columns.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+								time_ranges_are_strings = true;
+							}
+							else
+							{
+								if (!IsFieldTypeInt(fieldtypes[colindex]))
+								{
+									boost::format msg("The time range columns must be an integral type.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
+								if (timeRangeCols.size() != 4 && timeRangeCols.size() != 2)
+								{
+									boost::format msg("There must be 2 or 4 time range columns.");
+									throw NewGeneException() << newgene_error_description(msg.str());
+								}
 							}
 						}
 						break;
@@ -900,28 +957,15 @@ bool Table_VariableGroupData::BuildImportDefinition
 			// Special-case check for YEAR time granularity: One column allowed
 			if (the_time_granularity == TIME_GRANULARITY__YEAR)
 			{
-				if (timeRangeCols.size() == 2 && boost::trim_copy(timeRangeCols[1]).empty())
+				if (number_time_range_cols == 1)
 				{
-					if (number_time_range_cols == 1)
-					{
-						// special case: this is OK, just one column
-						timeRangeHasOnlyStartDate = true;
-					}
+					// special case: this is OK, just one column
+					timeRangeHasOnlyStartDate = true;
 				}
 			}
 			else if (the_time_granularity == TIME_GRANULARITY__MONTH)
 			{
-				if (timeRangeCols.size() == 4 && boost::trim_copy(timeRangeCols[2]).empty() && boost::trim_copy(timeRangeCols[3]).empty())
-				{
-					// ints provided, such as one column with "11" and another column with "1990"
-					if (number_time_range_cols == 2)
-					{
-						// special case: this is OK, just one column
-						timeRangeHasOnlyStartDate = true;
-					}
-				}
-
-				if (timeRangeCols.size() == 2 && boost::trim_copy(timeRangeCols[1]).empty())
+				if (time_ranges_are_strings)
 				{
 					// strings provided in individual columns, such as "11/1990"
 					if (number_time_range_cols == 1)
@@ -930,23 +974,31 @@ bool Table_VariableGroupData::BuildImportDefinition
 						timeRangeHasOnlyStartDate = true;
 					}
 				}
-			}
-			else if (the_time_granularity == TIME_GRANULARITY__DAY)
-			{
-				if (timeRangeCols.size() == 6 && boost::trim_copy(timeRangeCols[3]).empty() && boost::trim_copy(timeRangeCols[4]).empty() && boost::trim_copy(timeRangeCols[5]).empty())
+				else
 				{
-					// ints provided, such as one column with "11", another column with "12", and another column with "1990"
-					if (number_time_range_cols == 3)
+					// ints provided, such as one column with "11" and another column with "1990"
+					if (number_time_range_cols == 2)
 					{
 						// special case: this is OK, just one column
 						timeRangeHasOnlyStartDate = true;
 					}
 				}
-
-				if (timeRangeCols.size() == 2 && boost::trim_copy(timeRangeCols[1]).empty())
+			}
+			else if (the_time_granularity == TIME_GRANULARITY__DAY)
+			{
+				if (time_ranges_are_strings)
 				{
 					// strings provided in individual columns, such as "11/12/1990"
 					if (number_time_range_cols == 1)
+					{
+						// special case: this is OK, just one column
+						timeRangeHasOnlyStartDate = true;
+					}
+				}
+				else
+				{
+					// ints provided, such as one column with "11", another column with "12", and another column with "1990"
+					if (number_time_range_cols == 3)
 					{
 						// special case: this is OK, just one column
 						timeRangeHasOnlyStartDate = true;
@@ -979,25 +1031,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			case TIME_GRANULARITY__DAY:
 				{
-					if (timeRangeCols.size() != 6 && timeRangeCols.size() != 2)
-					{
-						boost::format msg("Incorrect number of time columns.");
-						errorMsg = msg.str();
-						return false;
-					}
-
-					if (timeRangeColName_To_Index.size() != timeRangeCols.size())
-					{
-						boost::format msg("Incorrect number of time mapping columns.");
-						errorMsg = msg.str();
-						return false;
-					}
-
 					// First, add the output time range columns to the schema
 					output_schema_vector.push_back(outputTimeRangeStartEntry);
 					output_schema_vector.push_back(outputTimeRangeEndEntry);
 
-					if (timeRangeCols.size() == 6)
+					if (timeRangeCols.size() == 6 || timeRangeCols.size() == 3)
 					{
 
 						// Integer data from user:
@@ -1228,25 +1266,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 			case TIME_GRANULARITY__MONTH:
 				{
 
-					if (timeRangeCols.size() != 4 && timeRangeCols.size() != 2)
-					{
-						boost::format msg("Incorrect number of time columns.");
-						errorMsg = msg.str();
-						return false;
-					}
-
-					if (timeRangeColName_To_Index.size() != timeRangeCols.size())
-					{
-						boost::format msg("Incorrect number of time mapping columns.");
-						errorMsg = msg.str();
-						return false;
-					}
-
 					// First, add the output time range columns to the schema
 					output_schema_vector.push_back(outputTimeRangeStartEntry);
 					output_schema_vector.push_back(outputTimeRangeEndEntry);
 
-					if (timeRangeCols.size() == 4)
+					if (timeRangeCols.size() == 4 || (timeRangeCols.size() == 2 && !time_ranges_are_strings))
 					{
 
 						// Integer data from user:
@@ -1445,32 +1469,6 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			case TIME_GRANULARITY__YEAR:
 				{
-					// Time-range mapping
-					if (timeRangeCols.size() != 2)
-					{
-						boost::format msg("There should be 2 time columns (the end year can be empty).");
-						errorMsg = msg.str();
-						return false;
-					}
-
-					if (timeRangeColName_To_Index.size() != timeRangeCols.size())
-					{
-						if (!timeRangeHasOnlyStartDate)
-						{
-							boost::format msg("There should be 2 time mapping columns.");
-							errorMsg = msg.str();
-							return false;
-						}
-						else
-						{
-							if (timeRangeColName_To_Index.size() != 1)
-							{
-								boost::format msg("There should be 1 time mapping column.");
-								errorMsg = msg.str();
-								return false;
-							}
-						}
-					}
 
 					// First, add the output time range columns to the schema
 					output_schema_vector.push_back(outputTimeRangeStartEntry);
@@ -1478,7 +1476,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 					// Now add the input time range columns to the mapping
 					// (they have already been added to the schema, because they are just regular input columns)
-					if (boost::trim_copy(timeRangeCols[1]).empty())
+					if (timeRangeCols.size() == 1)
 					{
 
 						std::string startdate = timeRangeCols[0];
