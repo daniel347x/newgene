@@ -119,6 +119,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
+											task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__OUTPUT_REQUEST;
 											wait_on_semaphore = true;
 										}
 									}
@@ -271,6 +272,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 									{
 										if (task_order == TASK_ORDER__INPUT_THEN_OUTPUT)
 										{
+											task.task_status = TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__INPUT_REQUEST;
 											wait_on_semaphore = true;
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
@@ -292,7 +294,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
-											task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED;
+											task.task_status = TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED;
 											return true;
 										}
 									}
@@ -311,7 +313,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 									{
 										if (task_order == TASK_ORDER__INPUT_THEN_OUTPUT)
 										{
-											task.task_status = TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED;
+											task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED;
 											wait_on_semaphore = true;
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
