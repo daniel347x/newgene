@@ -951,66 +951,54 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 		bool timeRangeHasOnlyStartDate = false;
 
-		// Time-range duplicates have also been screened
-		if (number_time_range_cols != timeRangeCols.size())
+		if (the_time_granularity == TIME_GRANULARITY__YEAR)
 		{
-			// Special-case check for YEAR time granularity: One column allowed
-			if (the_time_granularity == TIME_GRANULARITY__YEAR)
+			if (number_time_range_cols == 1)
 			{
+				// special case: this is OK, just one column
+				timeRangeHasOnlyStartDate = true;
+			}
+		}
+		else if (the_time_granularity == TIME_GRANULARITY__MONTH)
+		{
+			if (time_ranges_are_strings)
+			{
+				// strings provided in individual columns, such as "11/1990"
 				if (number_time_range_cols == 1)
 				{
 					// special case: this is OK, just one column
 					timeRangeHasOnlyStartDate = true;
 				}
 			}
-			else if (the_time_granularity == TIME_GRANULARITY__MONTH)
+			else
 			{
-				if (time_ranges_are_strings)
+				// ints provided, such as one column with "11" and another column with "1990"
+				if (number_time_range_cols == 2)
 				{
-					// strings provided in individual columns, such as "11/1990"
-					if (number_time_range_cols == 1)
-					{
-						// special case: this is OK, just one column
-						timeRangeHasOnlyStartDate = true;
-					}
-				}
-				else
-				{
-					// ints provided, such as one column with "11" and another column with "1990"
-					if (number_time_range_cols == 2)
-					{
-						// special case: this is OK, just one column
-						timeRangeHasOnlyStartDate = true;
-					}
+					// special case: this is OK, just one column
+					timeRangeHasOnlyStartDate = true;
 				}
 			}
-			else if (the_time_granularity == TIME_GRANULARITY__DAY)
+		}
+		else if (the_time_granularity == TIME_GRANULARITY__DAY)
+		{
+			if (time_ranges_are_strings)
 			{
-				if (time_ranges_are_strings)
+				// strings provided in individual columns, such as "11/12/1990"
+				if (number_time_range_cols == 1)
 				{
-					// strings provided in individual columns, such as "11/12/1990"
-					if (number_time_range_cols == 1)
-					{
-						// special case: this is OK, just one column
-						timeRangeHasOnlyStartDate = true;
-					}
-				}
-				else
-				{
-					// ints provided, such as one column with "11", another column with "12", and another column with "1990"
-					if (number_time_range_cols == 3)
-					{
-						// special case: this is OK, just one column
-						timeRangeHasOnlyStartDate = true;
-					}
+					// special case: this is OK, just one column
+					timeRangeHasOnlyStartDate = true;
 				}
 			}
-
-			if (!timeRangeHasOnlyStartDate)
+			else
 			{
-				boost::format msg("Not all specified time range columns could be found in the input file.");
-				errorMsg = msg.str();
-				return false;
+				// ints provided, such as one column with "11", another column with "12", and another column with "1990"
+				if (number_time_range_cols == 3)
+				{
+					// special case: this is OK, just one column
+					timeRangeHasOnlyStartDate = true;
+				}
 			}
 		}
 
