@@ -580,7 +580,10 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 		if (valid)
 		{
 			dataTimeRange.push_back(y_yearStart);
-			dataTimeRange.push_back(y_yearEnd);
+			if (!y_yearEnd.empty())
+			{
+				dataTimeRange.push_back(y_yearEnd);
+			}
 		}
 
 		return valid;
@@ -674,16 +677,22 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 		if (valid && using_string_fields)
 		{
 			dataTimeRange.push_back(ymd_Start);
-			dataTimeRange.push_back(ymd_End);
+			if (!ymd_End.empty())
+			{
+				dataTimeRange.push_back(ymd_End);
+			}
 		}
 		else if (valid)
 		{
 			dataTimeRange.push_back(ymd_yearStart);
 			dataTimeRange.push_back(ymd_monthStart);
 			dataTimeRange.push_back(ymd_dayStart);
-			dataTimeRange.push_back(ymd_yearEnd);
-			dataTimeRange.push_back(ymd_monthEnd);
-			dataTimeRange.push_back(ymd_dayEnd);
+			if (!ymd_yearEnd.empty() || !ymd_monthEnd.empty() || !ymd_dayEnd.empty())
+			{
+				dataTimeRange.push_back(ymd_yearEnd);
+				dataTimeRange.push_back(ymd_monthEnd);
+				dataTimeRange.push_back(ymd_dayEnd);
+			}
 		}
 
 		if (valid)
@@ -778,14 +787,20 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 		if (valid && using_string_fields)
 		{
 			dataTimeRange.push_back(ym_Start);
-			dataTimeRange.push_back(ym_End);
+			if (!ym_End.empty())
+			{
+				dataTimeRange.push_back(ym_End);
+			}
 		}
 		else if (valid)
 		{
 			dataTimeRange.push_back(ym_yearStart);
 			dataTimeRange.push_back(ym_monthStart);
-			dataTimeRange.push_back(ym_yearEnd);
-			dataTimeRange.push_back(ym_monthEnd);
+			if (!ym_yearEnd.empty() || !ym_monthEnd.empty())
+			{
+				dataTimeRange.push_back(ym_yearEnd);
+				dataTimeRange.push_back(ym_monthEnd);
+			}
 		}
 
 		if (valid)
