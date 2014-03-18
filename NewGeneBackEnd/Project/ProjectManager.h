@@ -4,7 +4,6 @@
 #include "../Manager.h"
 #include <map>
 #include <string>
-#include <semaphore>
 #include <memory>
 #include "../Utilities/Semaphore.h"
 
@@ -16,7 +15,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 		enum PROJECT_TYPE
 		{
-			  PROJECT_TYPE__INPUT
+			PROJECT_TYPE__INPUT
 			, PROJECT_TYPE__OUTPUT
 		};
 
@@ -30,16 +29,25 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 			bool wait_on_semaphore = false;
 
+			task_class_info & task_info = task_class_infos[task_name];
+
+			if (task_info.task_name.empty())
+			{
+				boost::format msg("There is no task named %1%.");
+				msg % task_name;
+				errorMsg = msg.str();
+				return nullptr;
+			}
+
+			task_instance_identifier const task_identifier(task_name, widget_action_item_id);
+
+			// If it exists, the current one will be returned with its state unchanged.
+			// If it doesn't exist, a new one will be created, with state set to TASK_STATUS__PENDING_FIRST_REQUEST
+			task_instance & task = task_instances[task_identifier];
+
 			{
 
 				std::lock_guard<std::recursive_mutex> data_lock(task_retrieval_mutex);
-				task_class_info & task_info = task_class_infos[task_name];
-				task_instance_identifier const task_identifier(task_name, widget_action_item_id);
-
-				// If it exists, the current one will be returned with its state unchanged.
-				// If it doesn't exist, a new one will be created, with state set to TASK_STATUS__PENDING_FIRST_REQUEST
-				task_instance & task = task_instances[task_identifier];
-
 				if (!task_info.task_semaphore && !task.task_semaphore)
 				{
 					// the task is currently being processed by a different action, as indicated
@@ -63,7 +71,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 				if (semaphore_was_available)
 				{
 					// Transfer ownership of the semaphore to the task
-					*task.task_semaphore = std::move(*task_info.task_semaphore);
+					task.task_semaphore = std::move(task_info.task_semaphore);
 				}
 
 				TASK_ORDER const task_order = task_info.task_order;
@@ -391,131 +399,147 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 				}
 
-				if (!wait_on_semaphore)
-				{
-					boost::format msg("Logic error when receiving request to process task %1%");
-					msg % task_name;
-					errorMsg = msg.str();
-					return nullptr;
-				}
-
-				task.task_semaphore->wait();
-				return task.task_semaphore.get();
-
 			}
 
-		private:
-
-			enum TASK_ORDER
+			if (!wait_on_semaphore)
 			{
-				  TASK_ORDER__INPUT_THEN_OUTPUT = 0
+				boost::format msg("Logic error when receiving request to process task %1%");
+				msg % task_name;
+				errorMsg = msg.str();
+				return nullptr;
+			}
+
+			task.task_semaphore->wait();
+			return task.task_semaphore.get();
+
+		}
+
+	private:
+
+		enum TASK_ORDER
+		{
+			TASK_ORDER__UNDEFINED = 0
+			, TASK_ORDER__INPUT_THEN_OUTPUT
+			, TASK_ORDER__OUTPUT_THEN_INPUT
+		};
+
+		enum TASK_STATUS
+		{
+			TASK_STATUS__PENDING_FIRST_REQUEST
+			, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__OUTPUT_REQUEST
+			, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__INPUT_REQUEST
+			, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__OUTPUT_REQUEST
+			, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__INPUT_REQUEST
+			, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__OUTPUT_REQUEST
+			, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__INPUT_REQUEST
+			, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED
+			, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED
+			, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__OUTPUT_REQUEST_ACTIVE
+			, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__INPUT_REQUEST_ACTIVE
+			, TASK_STATUS__COMPLETED
+		};
+
+		struct task_instance_identifier
+		{
+
+			task_instance_identifier(std::string const & task_name_, long const task_id_)
+				: task_name(task_name_)
+				, task_id(task_id_)
+			{}
+
+			task_instance_identifier(task_instance_identifier const & rhs)
+				: task_name(rhs.task_name)
+				, task_id(rhs.task_id)
+			{}
+
+			bool operator<(task_instance_identifier const & rhs) const
+			{
+				if (task_name != rhs.task_name)
+				{
+					return task_name < rhs.task_name;
+				}
+				return task_id < rhs.task_id;
+			}
+
+			std::string const task_name;
+			long const task_id;
+
+		};
+
+		struct task_instance
+		{
+
+			task_instance()
+				: task_status(TASK_STATUS__PENDING_FIRST_REQUEST)
+			{}
+
+			// Owns the semaphore when active
+			std::unique_ptr<semaphore> task_semaphore;
+
+			TASK_STATUS task_status;
+
+		};
+
+		class task_class_info
+		{
+
+			public:
+
+				task_class_info()
+					: task_order(TASK_ORDER__UNDEFINED)
+				{}
+
+				task_class_info(std::string const & task_name_, TASK_ORDER const task_order_, semaphore * task_semaphore_)
+					: task_name(task_name_)
+					, task_order(task_order_)
+					, task_semaphore(task_semaphore_)
+				{}
+
+				std::string task_name;
+				TASK_ORDER task_order;
+
+				// Owns the semaphore when no task is active or pending
+				std::unique_ptr<semaphore> task_semaphore;
+
+		};
+
+		void InitializeTasks()
+		{
+
+			static char * task_names[]
+			{
+				"delete_dmu"
+				, "delete_uoa"
+				, "delete_vg"
+			};
+
+			static TASK_ORDER task_orders[]
+			{
+				TASK_ORDER__OUTPUT_THEN_INPUT
+				, TASK_ORDER__OUTPUT_THEN_INPUT
 				, TASK_ORDER__OUTPUT_THEN_INPUT
 			};
 
-			enum TASK_STATUS
+			static size_t number_tasks = sizeof(task_names) / sizeof(char *);
+
+			for (size_t task_number = 0; task_number < number_tasks; ++task_number)
 			{
-				TASK_STATUS__PENDING_FIRST_REQUEST
-				, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__OUTPUT_REQUEST
-				, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__INPUT_REQUEST
-				, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__OUTPUT_REQUEST
-				, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__INPUT_REQUEST
-				, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__OUTPUT_REQUEST
-				, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__INPUT_REQUEST
-				, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED
-				, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED
-				, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__OUTPUT_REQUEST_ACTIVE
-				, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__INPUT_REQUEST_ACTIVE
-				, TASK_STATUS__COMPLETED
-			};
-
-			struct task_instance_identifier
-			{
-
-				task_instance_identifier(std::string const & task_name_, long const task_id_)
-					: task_name(task_name_)
-					, task_id(task_id_)
-				{}
-
-				task_instance_identifier(task_instance_identifier const & rhs)
-					: task_name(rhs.task_name)
-					, task_id(rhs.task_id)
-				{}
-
-				std::string const task_name;
-				long const task_id;
-
-			};
-
-			struct task_instance
-			{
-
-				task_instance()
-					: task_status(TASK_STATUS__PENDING_FIRST_REQUEST)
-				{}
-
-				// Owns the semaphore when active
-				std::unique_ptr<semaphore> task_semaphore;
-
-				TASK_STATUS task_status;
-
-			};
-
-			class task_class_info
-			{
-
-				public:
-
-					task_class_info(std::string const & task_name_, TASK_ORDER const task_order_, semaphore * task_semaphore_)
-						: task_name(task_name_)
-						, task_order(task_order_)
-						, task_semaphore(task_semaphore_)
-					{}
-
-					std::string task_name;
-					TASK_ORDER task_order;
-
-					// Owns the semaphore when no task is active or pending
-					std::unique_ptr<semaphore> task_semaphore;
-
-			};
-
-			void InitializeTasks()
-			{
-
-				static char * task_names[]
-				{
-					  "delete_dmu"
-					, "delete_uoa"
-					, "delete_vg"
-				};
-
-				static TASK_ORDER task_orders[]
-				{
-					  TASK_ORDER__OUTPUT_THEN_INPUT
-					, TASK_ORDER__OUTPUT_THEN_INPUT
-					, TASK_ORDER__OUTPUT_THEN_INPUT
-				};
-
-				static size_t number_tasks = sizeof(task_names) / sizeof(char *);
-
-				for (size_t task_number = 0; task_number < number_tasks; ++task_number)
-				{
-					char * task_name = task_names[task_number];
-					TASK_ORDER task_order = task_orders[task_number];
-					task_class_infos.emplace(std::piecewise_construct, std::forward_as_tuple(std::string(task_name)), std::forward_as_tuple(std::string(task_name), task_order,
-											 new semaphore));
-				}
-
+				char * task_name = task_names[task_number];
+				TASK_ORDER task_order = task_orders[task_number];
+				task_class_infos.emplace(std::piecewise_construct, std::forward_as_tuple(std::string(task_name)), std::forward_as_tuple(std::string(task_name), task_order,
+										 new semaphore));
 			}
 
-			// global info about the tasks
-			std::map<std::string, task_class_info> task_class_infos;
+		}
 
-			// a set of pending or active tasks - only one can own the corresponding semaphore at a time
-			std::map<task_instance_identifier, task_instance> task_instances;
+		// global info about the tasks
+		std::map<std::string, task_class_info> task_class_infos;
 
-			std::recursive_mutex task_retrieval_mutex;
+		// a set of pending or active tasks - only one can own the corresponding semaphore at a time
+		std::map<task_instance_identifier, task_instance> task_instances;
 
-		};
+		std::recursive_mutex task_retrieval_mutex;
+
+};
 
 #endif
