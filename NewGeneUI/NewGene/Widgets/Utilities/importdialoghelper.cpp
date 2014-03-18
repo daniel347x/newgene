@@ -566,7 +566,7 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 		{
 			if (!boost::trim_copy(y_yearEnd).empty())
 			{
-				valid = Validation::ValidateColumnName(y_yearEnd, "End Year", true, errorMsg);
+				valid = Validation::ValidateColumnName(y_yearEnd, "End Year", false, errorMsg);
 			}
 		}
 
@@ -625,7 +625,7 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 
 			if (valid)
 			{
-				valid = Validation::ValidateColumnName(ymd_End, "Ending Day", true, errorMsg);
+				valid = Validation::ValidateColumnName(ymd_End, "Ending Day", false, errorMsg);
 			}
 
 		}
@@ -649,17 +649,17 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 
 			if (valid)
 			{
-				valid = Validation::ValidateColumnName(ymd_yearEnd, "End Year", true, errorMsg);
+				valid = Validation::ValidateColumnName(ymd_yearEnd, "End Year", false, errorMsg);
 			}
 
 			if (valid)
 			{
-				valid = Validation::ValidateColumnName(ymd_monthEnd, "End Month", true, errorMsg);
+				valid = Validation::ValidateColumnName(ymd_monthEnd, "End Month", false, errorMsg);
 			}
 
 			if (valid)
 			{
-				valid = Validation::ValidateColumnName(ymd_dayEnd, "End Day", true, errorMsg);
+				valid = Validation::ValidateColumnName(ymd_dayEnd, "End Day", false, errorMsg);
 			}
 
 		}
@@ -736,7 +736,7 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 
 			if (valid)
 			{
-				valid = Validation::ValidateColumnName(ym_End, "Ending Month", true, errorMsg);
+				valid = Validation::ValidateColumnName(ym_End, "Ending Month", false, errorMsg);
 			}
 
 		}
@@ -755,12 +755,12 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 
 			if (valid)
 			{
-				valid = Validation::ValidateColumnName(ym_yearEnd, "End Year", true, errorMsg);
+				valid = Validation::ValidateColumnName(ym_yearEnd, "End Year", false, errorMsg);
 			}
 
 			if (valid)
 			{
-				valid = Validation::ValidateColumnName(ym_monthEnd, "End Month", true, errorMsg);
+				valid = Validation::ValidateColumnName(ym_monthEnd, "End Month", false, errorMsg);
 			}
 
 		}
