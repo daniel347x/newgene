@@ -183,7 +183,14 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 					}
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
+						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_uoa"), errorMsg);
 						the_semaphore->notify();
+						if (!success)
+						{
+							boost::format msg("Error deleting UOA: %1%. Please restart NewGene.");
+							msg % errorMsg.c_str();
+							messager.ShowMessageBox(msg.str());
+						}
 					};
 
 					Executor executor(input_model.getDb());
@@ -294,7 +301,14 @@ void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemReque
 					}
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
+						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_uoa"), errorMsg);
 						the_semaphore->notify();
+						if (!success)
+						{
+							boost::format msg("Error deleting UOA: %1%. Please restart NewGene.");
+							msg % errorMsg.c_str();
+							messager.ShowMessageBox(msg.str());
+						}
 					};
 
 					Executor executor(input_model.getDb());

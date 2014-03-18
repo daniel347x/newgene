@@ -183,7 +183,14 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 					}
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
+						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
 						the_semaphore->notify();
+						if (!success)
+						{
+							boost::format msg("Error deleting variable group: %1%. Please restart NewGene.");
+							msg % errorMsg.c_str();
+							messager.ShowMessageBox(msg.str());
+						}
 					};
 
 					Executor executor(input_model.getDb());
@@ -284,7 +291,14 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 					}
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
+						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
 						the_semaphore->notify();
+						if (!success)
+						{
+							boost::format msg("Error deleting variable group: %1%. Please restart NewGene.");
+							msg % errorMsg.c_str();
+							messager.ShowMessageBox(msg.str());
+						}
 					};
 
 					Executor executor(input_model.getDb());

@@ -395,6 +395,10 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 					default:
 						{
+							boost::format msg("Invalid logic in LetMeRunTask for task %1%");
+							msg % task_name;
+							errorMsg = msg.str();
+							return nullptr;
 						}
 						break;
 
@@ -415,7 +419,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 		}
 
-		void TaskCompleted(PROJECT_TYPE const project_type, long const widget_action_item_id, std::string const & task_name, std::string & errorMsg)
+		bool TaskCompleted(PROJECT_TYPE const project_type, long const widget_action_item_id, std::string const & task_name, std::string & errorMsg)
 		{
 
 			bool wait_on_semaphore = false;
@@ -427,7 +431,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 				boost::format msg("There is no task named %1%.");
 				msg % task_name;
 				errorMsg = msg.str();
-				return;
+				return false;
 			}
 
 			task_instance_identifier const task_identifier(task_name, widget_action_item_id);
@@ -450,7 +454,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 					boost::format msg("There is currently another identical %1% action being performed.");
 					msg % task_name;
 					errorMsg = msg.str();
-					return;
+					return false;
 				}
 
 				TASK_ORDER const task_order = task_info.task_order;
@@ -469,7 +473,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received input completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -478,7 +482,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received input completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -499,7 +503,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received input completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -508,7 +512,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received input completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -517,7 +521,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received input completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -532,7 +536,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received input completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -541,7 +545,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received input completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -557,7 +561,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received input completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -566,7 +570,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received input completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -586,7 +590,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received output completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -595,7 +599,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received output completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -604,7 +608,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received output completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -613,7 +617,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received output completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -628,7 +632,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received output completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -637,7 +641,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received output completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -646,7 +650,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received output completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -668,7 +672,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received output completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -677,7 +681,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received output completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -686,7 +690,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received output completed at invalid time for task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return;
+										return false;
 									}
 									break;
 
@@ -696,6 +700,10 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 					default:
 						{
+							boost::format msg("Invalid logic in TaskCompleted for task %1%");
+							msg % task_name;
+							errorMsg = msg.str();
+							return false;
 						}
 						break;
 
@@ -707,6 +715,8 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 			{
 				task_info.task_semaphore = std::move(task.task_semaphore);
 			}
+
+			return true;
 
 		}
 
