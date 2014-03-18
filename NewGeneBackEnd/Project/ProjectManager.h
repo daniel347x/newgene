@@ -32,27 +32,28 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 		bool LetMeRunTask(PROJECT_TYPE const project_type, long const widget_action_item_id, std::string const & task_name, std::string & errorMsg)
 		{
 
+			semaphore * the_semaphore = nullptr;
 			bool wait_on_semaphore = false;
-
-			task_class_info & task_info = task_class_infos[task_name];
-
-			if (task_info.task_name.empty())
-			{
-				boost::format msg("There is no task named %1%.");
-				msg % task_name;
-				errorMsg = msg.str();
-				return false;
-			}
-
-			task_instance_identifier const task_identifier(task_name, widget_action_item_id);
-
-			// If it exists, the current one will be returned with its state unchanged.
-			// If it doesn't exist, a new one will be created, with state set to TASK_STATUS__PENDING_FIRST_REQUEST
-			task_instance & task = task_instances[task_identifier];
 
 			{
 
 				std::lock_guard<std::recursive_mutex> data_lock(task_retrieval_mutex);
+
+				task_class_info & task_info = task_class_infos[task_name];
+
+				if (task_info.task_name.empty())
+				{
+					boost::format msg("There is no task named %1%.");
+					msg % task_name;
+					errorMsg = msg.str();
+					return false;
+				}
+
+				task_instance_identifier const task_identifier(task_name, widget_action_item_id);
+
+				// If it exists, the current one will be returned with its state unchanged.
+				// If it doesn't exist, a new one will be created, with state set to TASK_STATUS__PENDING_FIRST_REQUEST
+				task_instance & task = task_instances[task_identifier];
 
 				if (!task_info.task_semaphore && !task.task_semaphore)
 				{
@@ -79,6 +80,8 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 					// Transfer ownership of the semaphore to the task
 					task.task_semaphore = std::move(task_info.task_semaphore);
 				}
+
+				the_semaphore = task.task_semaphore.get();
 
 				// handle the case that either input or output project is not open
 				int number_projects_open = 0;
@@ -435,7 +438,8 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 				return false;
 			}
 
-			task.task_semaphore->wait();
+			the_semaphore->wait();
+
 			return true;
 
 		}
@@ -443,7 +447,10 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 		bool TaskCompleted(PROJECT_TYPE const project_type, long const widget_action_item_id, std::string const & task_name, std::string & errorMsg)
 		{
 
-			bool wait_on_semaphore = false;
+			bool free_semaphore = false;
+			bool notify = false;
+
+			std::lock_guard<std::recursive_mutex> data_lock(task_retrieval_mutex);
 
 			task_class_info & task_info = task_class_infos[task_name];
 
@@ -461,292 +468,283 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 			// If it doesn't exist, a new one will be created, with state set to TASK_STATUS__PENDING_FIRST_REQUEST
 			task_instance & task = task_instances[task_identifier];
 
-			bool free_semaphore = false;
-			bool notify = false;
+			if (!task_info.task_semaphore && !task.task_semaphore)
+			{
+				// the task is currently being processed by a different action, as indicated
+				// by the NULL semaphore pointer in both the task_info object, and the current task_instance object
+				// So, just return false...
+				boost::format msg("There is currently another identical %1% action being performed.");
+				msg % task_name;
+				errorMsg = msg.str();
+				return false;
+			}
 
+			// handle the case that either input or output project is not open
+			int number_projects_open = 0;
+			if (input_project_is_open)
+			{
+				++number_projects_open;
+			}
+			if (output_project_is_open)
+			{
+				++number_projects_open;
+			}
+			if (number_projects_open < 2)
+			{
+				task.task_status = TASK_STATUS__COMPLETED;
+				task_info.task_semaphore = std::move(task.task_semaphore);
+				return true;
+			}
+
+			TASK_ORDER const task_order = task_info.task_order;
+
+			switch (project_type)
 			{
 
-				std::lock_guard<std::recursive_mutex> data_lock(task_retrieval_mutex);
+				case PROJECT_TYPE__INPUT:
+					{
 
-				if (!task_info.task_semaphore && !task.task_semaphore)
-				{
-					// the task is currently being processed by a different action, as indicated
-					// by the NULL semaphore pointer in both the task_info object, and the current task_instance object
-					// So, just return false...
-					boost::format msg("There is currently another identical %1% action being performed.");
-					msg % task_name;
-					errorMsg = msg.str();
-					return false;
-				}
-
-				// handle the case that either input or output project is not open
-				int number_projects_open = 0;
-				if (input_project_is_open)
-				{
-					++number_projects_open;
-				}
-				if (output_project_is_open)
-				{
-					++number_projects_open;
-				}
-				if (number_projects_open < 2)
-				{
-					task.task_status = TASK_STATUS__COMPLETED;
-					task_info.task_semaphore = std::move(task.task_semaphore);
-					return true;
-				}
-
-				TASK_ORDER const task_order = task_info.task_order;
-
-				switch (project_type)
-				{
-
-					case PROJECT_TYPE__INPUT:
+						switch (task.task_status)
 						{
 
-							switch (task.task_status)
-							{
+							case TASK_STATUS__PENDING_FIRST_REQUEST:
+								{
+									boost::format msg("Received input completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__PENDING_FIRST_REQUEST:
-									{
-										boost::format msg("Received input completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__OUTPUT_REQUEST:
+								{
+									boost::format msg("Received input completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__OUTPUT_REQUEST:
-									{
-										boost::format msg("Received input completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__INPUT_REQUEST:
+								{
+									notify = true;
+								}
+								break;
 
-								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__INPUT_REQUEST:
-									{
-										notify = true;
-									}
-									break;
+							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__OUTPUT_REQUEST:
+								{
+									// no-op - handled in "LetMeRunTask"
+								}
+								break;
 
-								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__OUTPUT_REQUEST:
-									{
-										// no-op - handled in "LetMeRunTask"
-									}
-									break;
+							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__INPUT_REQUEST:
+								{
+									boost::format msg("Received input completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__INPUT_REQUEST:
-									{
-										boost::format msg("Received input completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__OUTPUT_REQUEST:
+								{
+									boost::format msg("Received input completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__OUTPUT_REQUEST:
-									{
-										boost::format msg("Received input completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__INPUT_REQUEST:
+								{
+									boost::format msg("Received input completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__INPUT_REQUEST:
-									{
-										boost::format msg("Received input completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED:
+								{
+									notify = true;
+								}
+								break;
 
-								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED:
-									{
-										notify = true;
-									}
-									break;
+							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED:
+								{
+									boost::format msg("Received input completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED:
-									{
-										boost::format msg("Received input completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__OUTPUT_REQUEST_ACTIVE:
+								{
+									boost::format msg("Received input completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__OUTPUT_REQUEST_ACTIVE:
-									{
-										boost::format msg("Received input completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__INPUT_REQUEST_ACTIVE:
+								{
+									// free semaphore
+									free_semaphore = true;
+								}
+								break;
 
-								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__INPUT_REQUEST_ACTIVE:
-									{
-										// free semaphore
-										free_semaphore = true;
-									}
-									break;
+							case TASK_STATUS__COMPLETED:
+								{
+									boost::format msg("Received input completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__COMPLETED:
-									{
-										boost::format msg("Received input completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
-
-								default:
-									{
-										boost::format msg("Received input completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
-
-							}
+							default:
+								{
+									boost::format msg("Received input completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
 						}
-						break;
 
-					case PROJECT_TYPE__OUTPUT:
+					}
+					break;
+
+				case PROJECT_TYPE__OUTPUT:
+					{
+
+						switch (task.task_status)
 						{
 
-							switch (task.task_status)
-							{
+							case TASK_STATUS__PENDING_FIRST_REQUEST:
+								{
+									boost::format msg("Received output completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__PENDING_FIRST_REQUEST:
-									{
-										boost::format msg("Received output completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__OUTPUT_REQUEST:
+								{
+									boost::format msg("Received output completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__OUTPUT_REQUEST:
-									{
-										boost::format msg("Received output completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__INPUT_REQUEST:
+								{
+									boost::format msg("Received output completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__INPUT_REQUEST:
-									{
-										boost::format msg("Received output completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__OUTPUT_REQUEST:
+								{
+									boost::format msg("Received output completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__OUTPUT_REQUEST:
-									{
-										boost::format msg("Received output completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__INPUT_REQUEST:
+								{
+									// no-op
+								}
+								break;
 
-								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__INPUT_REQUEST:
-									{
-										// no-op
-									}
-									break;
+							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__OUTPUT_REQUEST:
+								{
+									boost::format msg("Received output completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__OUTPUT_REQUEST:
-									{
-										boost::format msg("Received output completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__INPUT_REQUEST:
+								{
+									boost::format msg("Received output completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__WAITING_ON__INPUT_REQUEST:
-									{
-										boost::format msg("Received output completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED:
+								{
+									boost::format msg("Received output completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED:
-									{
-										boost::format msg("Received output completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED:
+								{
+									notify = true;
+								}
+								break;
 
-								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED:
-									{
-										notify = true;
-									}
-									break;
+							case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__OUTPUT_REQUEST_ACTIVE:
+								{
+									// free semaphore
+									free_semaphore = true;
+								}
+								break;
 
-								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__OUTPUT_REQUEST_ACTIVE:
-									{
-										// free semaphore
-										free_semaphore = true;
-									}
-									break;
+							case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__INPUT_REQUEST_ACTIVE:
+								{
+									boost::format msg("Received output completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__INPUT_REQUEST_ACTIVE:
-									{
-										boost::format msg("Received output completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							case TASK_STATUS__COMPLETED:
+								{
+									boost::format msg("Received output completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								case TASK_STATUS__COMPLETED:
-									{
-										boost::format msg("Received output completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
+							default:
+								{
+									boost::format msg("Received output completed at invalid time for task %1%");
+									msg % task_name;
+									errorMsg = msg.str();
+									return false;
+								}
+								break;
 
-								default:
-									{
-										boost::format msg("Received output completed at invalid time for task %1%");
-										msg % task_name;
-										errorMsg = msg.str();
-										return false;
-									}
-									break;
-
-							}
 						}
-						break;
+					}
+					break;
 
-					default:
-						{
-							boost::format msg("Invalid logic in TaskCompleted for task %1%");
-							msg % task_name;
-							errorMsg = msg.str();
-							return false;
-						}
-						break;
-
-				}
+				default:
+					{
+						boost::format msg("Invalid logic in TaskCompleted for task %1%");
+						msg % task_name;
+						errorMsg = msg.str();
+						return false;
+					}
+					break;
 
 			}
 
