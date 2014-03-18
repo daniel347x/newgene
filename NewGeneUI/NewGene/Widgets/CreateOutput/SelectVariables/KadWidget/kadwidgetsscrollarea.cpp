@@ -84,39 +84,8 @@ void KadWidgetsScrollArea::WidgetDataRefreshReceive(WidgetDataItem_KAD_SPIN_CONT
 	{
 		if (identifier.uuid && identifier.code && identifier.longhand)
 		{
-			WidgetInstanceIdentifier new_identifier(identifier);
-			QSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
-			newSpinBox->setFixedHeight(50);
-			newSpinBox->setFixedWidth(400);
-			QFont currFont = newSpinBox->font();
-			currFont.setPixelSize(24);
-			newSpinBox->setFont(currFont);
-			std::string stylesheet(" QSpinBox { color: #960488; font-weight: bold; } ");
-			newSpinBox->setStyleSheet(stylesheet.c_str());
-			if (identifier.longhand)
-			{
-				std::string prefixText(" #");
-				prefixText += *identifier.longhand;
-				prefixText += " columns:  ";
-				newSpinBox->setPrefix(prefixText.c_str());
-			}
-			bool not_me = true;
-			std::for_each(widget_data.active_dmus.cbegin(), widget_data.active_dmus.cend(), [&](WidgetInstanceIdentifier const & the_dmu)
-			{
-				if (identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu))
-				{
-					not_me = false;
-				}
-			});
-			if (not_me)
-			{
-				newSpinBox->setVisible(false);
-			}
-			else
-			{
-				newSpinBox->setVisible(true);
-			}
-			layout()->addWidget(newSpinBox);
+			WidgetInstanceIdentifiers active_dmus(widget_data.active_dmus.cbegin(), widget_data.active_dmus.cend());
+			AddKadSpinWidget(identifier, active_dmus);
 		}
 	});
 
@@ -165,7 +134,10 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 					{
 						case DATA_CHANGE_INTENTION__ADD:
 							{
-
+								if (change.parent_identifier.code && change.parent_identifier.uuid)
+								{
+									AddKadSpinWidget(change.parent_identifier, change.child_identifiers);
+								}
 							}
 							break;
 						case DATA_CHANGE_INTENTION__REMOVE:
@@ -238,5 +210,41 @@ void KadWidgetsScrollArea::HandleChanges(DataChangeMessage const & change_messag
 				break;
 		}
 	});
+
+}
+
+void KadWidgetsScrollArea::AddKadSpinWidget(WidgetInstanceIdentifier const & identifier, WidgetInstanceIdentifiers const & active_dmus)
+{
+
+	WidgetInstanceIdentifier new_identifier(identifier);
+	QSpinBox * newSpinBox = new KadSpinBox(this, new_identifier, outp);
+	newSpinBox->setFixedHeight(50);
+	newSpinBox->setFixedWidth(400);
+	QFont currFont = newSpinBox->font();
+	currFont.setPixelSize(20);
+	newSpinBox->setFont(currFont);
+	std::string stylesheet(" QSpinBox { color: #960488; font-weight: bold; } ");
+	newSpinBox->setStyleSheet(stylesheet.c_str());
+	std::string prefixText(" #");
+	prefixText += *identifier.longhand;
+	prefixText += " columns:  ";
+	newSpinBox->setPrefix(prefixText.c_str());
+	bool not_me = true;
+	std::for_each(active_dmus.cbegin(), active_dmus.cend(), [&](WidgetInstanceIdentifier const & the_dmu)
+	{
+		if (identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, the_dmu))
+		{
+			not_me = false;
+		}
+	});
+	if (not_me)
+	{
+		newSpinBox->setVisible(false);
+	}
+	else
+	{
+		newSpinBox->setVisible(true);
+	}
+	layout()->addWidget(newSpinBox);
 
 }

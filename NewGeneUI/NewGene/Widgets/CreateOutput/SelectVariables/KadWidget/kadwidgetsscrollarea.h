@@ -29,6 +29,7 @@ class KadWidgetsScrollArea : public QWidget, public NewGeneWidget
 
 	protected:
 
+		void AddKadSpinWidget(WidgetInstanceIdentifier const & identifier, WidgetInstanceIdentifiers const & active_dmus);
 		void Empty();
 
 };
