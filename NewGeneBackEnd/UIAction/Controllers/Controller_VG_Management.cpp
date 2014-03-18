@@ -8,7 +8,6 @@
 #	include <boost/scope_exit.hpp>
 #endif
 #include "../../Utilities/TimeRangeHelper.h"
-#include "../../Utilities/Semaphore.h"
 #include "../../Project/ProjectManager.h"
 
 /************************************************************************/
@@ -173,8 +172,8 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 
 					ProjectManager & project_manager = projectManager();
 					std::string errorMsg;
-					semaphore * the_semaphore = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
-					if (the_semaphore == nullptr)
+					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
+					if (!proceed)
 					{
 						boost::format msg("Error deleting variable group: %1%");
 						msg % errorMsg.c_str();
@@ -184,7 +183,6 @@ void UIActionManager::DeleteVG(Messager & messager, WidgetActionItemRequest_ACTI
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
 						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__INPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
-						the_semaphore->notify();
 						if (!success)
 						{
 							boost::format msg("Error deleting variable group: %1%. Please restart NewGene.");
@@ -281,8 +279,8 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 
 					ProjectManager & project_manager = projectManager();
 					std::string errorMsg;
-					semaphore * the_semaphore = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
-					if (the_semaphore == nullptr)
+					bool proceed = project_manager.LetMeRunTask(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
+					if (!proceed)
 					{
 						boost::format msg("Error deleting variable group: %1%");
 						msg % errorMsg.c_str();
@@ -292,7 +290,6 @@ void UIActionManager::DeleteVGOutput(Messager & messager, WidgetActionItemReques
 					BOOST_SCOPE_EXIT_ALL(&)
 					{
 						bool success = project_manager.TaskCompleted(ProjectManager::PROJECT_TYPE__OUTPUT, instanceActionItem.second->id, std::string("delete_vg"), errorMsg);
-						the_semaphore->notify();
 						if (!success)
 						{
 							boost::format msg("Error deleting variable group: %1%. Please restart NewGene.");

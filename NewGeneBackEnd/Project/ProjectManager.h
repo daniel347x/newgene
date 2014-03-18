@@ -29,7 +29,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 			InitializeTasks();
 		}
 
-		semaphore * LetMeRunTask(PROJECT_TYPE const project_type, long const widget_action_item_id, std::string const & task_name, std::string & errorMsg)
+		bool LetMeRunTask(PROJECT_TYPE const project_type, long const widget_action_item_id, std::string const & task_name, std::string & errorMsg)
 		{
 
 			bool wait_on_semaphore = false;
@@ -41,7 +41,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 				boost::format msg("There is no task named %1%.");
 				msg % task_name;
 				errorMsg = msg.str();
-				return nullptr;
+				return false;
 			}
 
 			task_instance_identifier const task_identifier(task_name, widget_action_item_id);
@@ -62,7 +62,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 					boost::format msg("There is currently another identical %1% action being performed.  Please try again.");
 					msg % task_name;
 					errorMsg = msg.str();
-					return nullptr;
+					return false;
 				}
 
 				bool semaphore_was_available = false;
@@ -93,7 +93,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 				if (number_projects_open < 2)
 				{
 					task.task_status = TASK_STATUS__ONLY_ONE_PROJECT_IS_OPEN;
-					return task.task_semaphore.get();
+					return true;
 				}
 
 				TASK_ORDER const task_order = task_info.task_order;
@@ -112,7 +112,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										if (task_order == TASK_ORDER__INPUT_THEN_OUTPUT)
 										{
 											task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__OUTPUT_REQUEST;
-											return task.task_semaphore.get();
+											return true;
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
@@ -126,7 +126,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple input requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -135,14 +135,14 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										if (task_order == TASK_ORDER__INPUT_THEN_OUTPUT)
 										{
 											task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED;
-											return task.task_semaphore.get();
+											return true;
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
 											boost::format msg("Output request should not be on hold when processing task %1%");
 											msg % task_name;
 											errorMsg = msg.str();
-											return nullptr;
+											return false;
 										}
 									}
 									break;
@@ -152,7 +152,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple input requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -163,7 +163,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 											boost::format msg("Incorrect order of processing: input request received while output project is processing task %1%");
 											msg % task_name;
 											errorMsg = msg.str();
-											return nullptr;
+											return false;
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
@@ -178,7 +178,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple input requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -189,12 +189,12 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 											boost::format msg("Incorrect order of processing: input request received after output project completed processing task %1%");
 											msg % task_name;
 											errorMsg = msg.str();
-											return nullptr;
+											return false;
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
 											task.task_status = TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__INPUT_REQUEST_ACTIVE;
-											return task.task_semaphore.get();
+											return true;
 										}
 									}
 									break;
@@ -204,7 +204,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple input requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -213,7 +213,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple input requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -222,7 +222,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple input requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -231,7 +231,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple input requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -240,7 +240,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple input requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -249,7 +249,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Unknown state when receiving input request to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -273,7 +273,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
 											task.task_status = TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__WAITING_ON__INPUT_REQUEST;
-											return task.task_semaphore.get();
+											return true;
 										}
 									}
 									break;
@@ -285,12 +285,12 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 											boost::format msg("Input request should not be on hold when processing task %1%");
 											msg % task_name;
 											errorMsg = msg.str();
-											return nullptr;
+											return false;
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
 											task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED;
-											return task.task_semaphore.get();
+											return true;
 										}
 									}
 									break;
@@ -300,7 +300,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple output requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -316,7 +316,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 											boost::format msg("Incorrect order of processing: output request received while input project is processing task %1%");
 											msg % task_name;
 											errorMsg = msg.str();
-											return nullptr;
+											return false;
 										}
 									}
 									break;
@@ -326,7 +326,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple output requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -335,14 +335,14 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										if (task_order == TASK_ORDER__INPUT_THEN_OUTPUT)
 										{
 											task.task_status = TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__OUTPUT_REQUEST_ACTIVE;
-											return task.task_semaphore.get();
+											return true;
 										}
 										else if (task_order == TASK_ORDER__OUTPUT_THEN_INPUT)
 										{
 											boost::format msg("Incorrect order of processing: output request received after input project completed processing task %1%");
 											msg % task_name;
 											errorMsg = msg.str();
-											return nullptr;
+											return false;
 										}
 									}
 									break;
@@ -352,7 +352,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple output requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -361,7 +361,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple output requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -370,7 +370,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple output requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -379,7 +379,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple output requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -388,7 +388,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple output requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -397,7 +397,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Received multiple output requests to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -406,7 +406,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 										boost::format msg("Unknown state when receiving output request to process task %1%");
 										msg % task_name;
 										errorMsg = msg.str();
-										return nullptr;
+										return false;
 									}
 									break;
 
@@ -419,7 +419,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 							boost::format msg("Invalid logic in LetMeRunTask for task %1%");
 							msg % task_name;
 							errorMsg = msg.str();
-							return nullptr;
+							return false;
 						}
 						break;
 
@@ -432,11 +432,11 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 				boost::format msg("Logic error when receiving request to process task %1%");
 				msg % task_name;
 				errorMsg = msg.str();
-				return nullptr;
+				return false;
 			}
 
 			task.task_semaphore->wait();
-			return task.task_semaphore.get();
+			return true;
 
 		}
 
@@ -461,24 +461,8 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 			// If it doesn't exist, a new one will be created, with state set to TASK_STATUS__PENDING_FIRST_REQUEST
 			task_instance & task = task_instances[task_identifier];
 
-			// handle the case that either input or output project is not open
-			int number_projects_open = 0;
-			if (input_project_is_open)
-			{
-				++number_projects_open;
-			}
-			if (output_project_is_open)
-			{
-				++number_projects_open;
-			}
-			if (number_projects_open < 2)
-			{
-				task.task_status = TASK_STATUS__COMPLETED;
-				task_info.task_semaphore = std::move(task.task_semaphore);
-				return true;
-			}
-
 			bool free_semaphore = false;
+			bool notify = false;
 
 			{
 
@@ -493,6 +477,23 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 					msg % task_name;
 					errorMsg = msg.str();
 					return false;
+				}
+
+				// handle the case that either input or output project is not open
+				int number_projects_open = 0;
+				if (input_project_is_open)
+				{
+					++number_projects_open;
+				}
+				if (output_project_is_open)
+				{
+					++number_projects_open;
+				}
+				if (number_projects_open < 2)
+				{
+					task.task_status = TASK_STATUS__COMPLETED;
+					task_info.task_semaphore = std::move(task.task_semaphore);
+					return true;
 				}
 
 				TASK_ORDER const task_order = task_info.task_order;
@@ -526,7 +527,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ON_HOLD__WAITING_ON__INPUT_REQUEST:
 									{
-										// no-op - handled in "LetMeRunTask"
+										notify = true;
 									}
 									break;
 
@@ -565,7 +566,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 								case TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_ACTIVE__OUTPUT_REQUEST_RECEIVED:
 									{
-										// no-op - handled in "LetMeRunTask"
+										notify = true;
 									}
 									break;
 
@@ -694,7 +695,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 								case TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_ACTIVE__INPUT_REQUEST_RECEIVED:
 									{
-										// no-op
+										notify = true;
 									}
 									break;
 
@@ -749,10 +750,16 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 
 			}
 
+			if (notify)
+			{
+				task.task_semaphore->notify();
+			}
+
 			if (free_semaphore)
 			{
 				task_info.task_semaphore = std::move(task.task_semaphore);
 				task.task_status = TASK_STATUS__COMPLETED;
+				task_instances.erase(task_identifier);
 			}
 
 			return true;
