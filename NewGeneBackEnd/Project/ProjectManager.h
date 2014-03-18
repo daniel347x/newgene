@@ -19,7 +19,12 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 			, PROJECT_TYPE__OUTPUT
 		};
 
+		bool input_project_is_open;
+		bool output_project_is_open;
+
 		ProjectManager(Messager & messager_) : Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESPACE::MANAGER_PROJECT>(messager_)
+			, input_project_is_open(false)
+			, output_project_is_open(false)
 		{
 			InitializeTasks();
 		}
@@ -73,6 +78,22 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 				{
 					// Transfer ownership of the semaphore to the task
 					task.task_semaphore = std::move(task_info.task_semaphore);
+				}
+
+				// handle the case that either input or output project is not open
+				int number_projects_open = 0;
+				if (input_project_is_open )
+				{
+					++number_projects_open;
+				}
+				if (output_project_is_open)
+				{
+					++number_projects_open;
+				}
+				if (number_projects_open < 2)
+				{
+					task.task_status = TASK_STATUS__ONLY_ONE_PROJECT_IS_OPEN;
+					return task.task_semaphore.get();
 				}
 
 				TASK_ORDER const task_order = task_info.task_order;
@@ -440,6 +461,23 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 			// If it doesn't exist, a new one will be created, with state set to TASK_STATUS__PENDING_FIRST_REQUEST
 			task_instance & task = task_instances[task_identifier];
 
+			// handle the case that either input or output project is not open
+			int number_projects_open = 0;
+			if (input_project_is_open)
+			{
+				++number_projects_open;
+			}
+			if (output_project_is_open)
+			{
+				++number_projects_open;
+			}
+			if (number_projects_open < 2)
+			{
+				task.task_status = TASK_STATUS__COMPLETED;
+				task_info.task_semaphore = std::move(task.task_semaphore);
+				return true;
+			}
+
 			bool free_semaphore = false;
 
 			{
@@ -714,6 +752,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 			if (free_semaphore)
 			{
 				task_info.task_semaphore = std::move(task.task_semaphore);
+				task.task_status = TASK_STATUS__COMPLETED;
 			}
 
 			return true;
@@ -743,6 +782,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 			, TASK_STATUS__INPUT_REQUEST_RECEIVED_AND_COMPLETED__OUTPUT_REQUEST_ACTIVE
 			, TASK_STATUS__OUTPUT_REQUEST_RECEIVED_AND_COMPLETED__INPUT_REQUEST_ACTIVE
 			, TASK_STATUS__COMPLETED
+			, TASK_STATUS__ONLY_ONE_PROJECT_IS_OPEN
 		};
 
 		struct task_instance_identifier

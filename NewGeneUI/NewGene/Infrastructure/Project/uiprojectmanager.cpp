@@ -239,6 +239,8 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_INPUT_MODEL_PTR model_, QObjec
 		return;
 	}
 
+	projectManager().input_project_is_open = true;
+
 	if (was_loading)
 	{
 
@@ -362,6 +364,8 @@ void UIProjectManager::DoneLoadingFromDatabase(UI_OUTPUT_MODEL_PTR model_, QObje
 	{
 		return;
 	}
+
+	projectManager().output_project_is_open = true;
 
 	settingsManagerUI().globalSettings().getUISettings().UpdateSetting(messager.get(), GLOBAL_SETTINGS_UI_NAMESPACE::OPEN_OUTPUT_PROJECTS_LIST, OutputProjectFilesList(messager.get(), output_project->projectSettings().getUISettings().GetSettingsPath().string()));
 
@@ -735,6 +739,8 @@ void UIProjectManager::RawCloseInputProject(UIInputProject * input_project)
 		return;
 	}
 
+	projectManager().input_project_is_open = false;
+
 	// blocks, because all connections are in NewGeneWidget which are all associated with the UI event loop
 	emit UpdateInputConnections(NewGeneWidget::RELEASE_CONNECTIONS_INPUT_PROJECT, input_project);
 
@@ -754,6 +760,8 @@ void UIProjectManager::RawCloseOutputProject(UIOutputProject * output_project)
 	{
 		return;
 	}
+
+	projectManager().output_project_is_open = false;
 
 	output_project->setUIInputProject(nullptr);
 
