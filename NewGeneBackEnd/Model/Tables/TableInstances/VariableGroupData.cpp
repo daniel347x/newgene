@@ -979,7 +979,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 			case TIME_GRANULARITY__DAY:
 				{
-					if (timeRangeCols.size() != 6 || timeRangeCols.size() != 2)
+					if (timeRangeCols.size() != 6 && timeRangeCols.size() != 2)
 					{
 						boost::format msg("Incorrect number of time columns.");
 						errorMsg = msg.str();
@@ -1228,7 +1228,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 			case TIME_GRANULARITY__MONTH:
 				{
 
-					if (timeRangeCols.size() != 4 || timeRangeCols.size() != 2)
+					if (timeRangeCols.size() != 4 && timeRangeCols.size() != 2)
 					{
 						boost::format msg("Incorrect number of time columns.");
 						errorMsg = msg.str();
