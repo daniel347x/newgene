@@ -142,16 +142,6 @@ void UIActionManager::AddUOA(Messager & messager, WidgetActionItemRequest_ACTION
 void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_UOA const & action_request, InputProject & project)
 {
 
-	if (FailIfBusy(messager))
-	{
-		return;
-	}
-
-	BOOST_SCOPE_EXIT_ALL(&, this)
-	{
-		this->EndFailIfBusy();
-	};
-
 	if (!action_request.items)
 	{
 		return;
@@ -167,7 +157,7 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 
 				DataChangeMessage change_response(&project);
 
-				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
 					ProjectManager & project_manager = projectManager();
@@ -189,6 +179,16 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 							msg % errorMsg.c_str();
 							messager.ShowMessageBox(msg.str());
 						}
+					};
+
+					if (this->FailIfBusy(messager))
+					{
+						return;
+					}
+
+					BOOST_SCOPE_EXIT_ALL(&, this)
+					{
+						this->EndFailIfBusy();
 					};
 
 					Executor executor(input_model.getDb());
@@ -258,16 +258,6 @@ void UIActionManager::DeleteUOA(Messager & messager, WidgetActionItemRequest_ACT
 void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemRequest_ACTION_DELETE_UOA const & action_request, OutputProject & project)
 {
 
-	if (FailIfBusy(messager))
-	{
-		return;
-	}
-
-	BOOST_SCOPE_EXIT_ALL(&, this)
-	{
-		this->EndFailIfBusy();
-	};
-
 	if (!action_request.items)
 	{
 		return;
@@ -284,7 +274,7 @@ void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemReque
 
 				DataChangeMessage change_response(&project);
 
-				std::for_each(action_request.items->cbegin(), action_request.items->cend(), [&output_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				std::for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &output_model, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
 					ProjectManager & project_manager = projectManager();
@@ -306,6 +296,16 @@ void UIActionManager::DeleteUOAOutput(Messager & messager, WidgetActionItemReque
 							msg % errorMsg.c_str();
 							messager.ShowMessageBox(msg.str());
 						}
+					};
+
+					if (this->FailIfBusy(messager))
+					{
+						return;
+					}
+
+					BOOST_SCOPE_EXIT_ALL(&, this)
+					{
+						this->EndFailIfBusy();
 					};
 
 					Executor executor(input_model.getDb());
