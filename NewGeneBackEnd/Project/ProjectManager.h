@@ -764,7 +764,7 @@ class ProjectManager : public Manager<ProjectManager, MANAGER_DESCRIPTION_NAMESP
 		enum TASK_ORDER
 		{
 			TASK_ORDER__UNDEFINED = 0
-									, TASK_ORDER__INPUT_THEN_OUTPUT
+			, TASK_ORDER__INPUT_THEN_OUTPUT
 			, TASK_ORDER__OUTPUT_THEN_INPUT
 		};
 
