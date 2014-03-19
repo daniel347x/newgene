@@ -633,6 +633,18 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	std::string errorMsg;
 	table_importer.errors.clear();
 	bool success = table_importer.DoImport(errorMsg, messager);
+	if (table_importer.badreadlines > 0)
+	{
+		boost::format msg("Number rows of data failed to read from import file: %1%");
+		msg % boost::lexical_cast<std::string>(table_importer.badreadlines);
+		table_importer.errors.push_back(msg.str());
+	}
+	if (table_importer.badwritelines > 0)
+	{
+		boost::format msg("Number rows of data failed to write to databae: %1%");
+		msg % boost::lexical_cast<std::string>(table_importer.badwritelines);
+		table_importer.errors.push_back(msg.str());
+	}
 	std::string allErrors;
 	if (!success)
 	{

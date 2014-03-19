@@ -1,7 +1,7 @@
 #include "table.h"
 
-bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-	int const number_rows_in_block, std::string & errorMsg)
+void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
+	int const number_rows_in_block, long & linenum, long & badwritelines, std::vector<std::string> & errors)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -54,14 +54,15 @@ bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 		std::for_each(row_fields.cbegin(), row_fields.cend(), [&](std::shared_ptr<BaseField> const & field_data)
 		{
 
-			//if (failed)
-			//{
-			//	return; // from lambda
-			//}
+			if (failed)
+			{
+				return; // from lambda
+			}
 
 			if (!field_data)
 			{
-				// Todo: log error
+				boost::format msg("Bad row/col in block cache");
+				errors.push_back(msg.str());
 				failed = true;
 				return; // from lambda
 			}
@@ -84,6 +85,8 @@ bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 		sql_insert += ")";
 
+		++linenum;
+
 	}
 
 	//if (failed)
@@ -96,22 +99,26 @@ bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 	if (stmt == NULL)
 	{
-		// TODO: Log error
-		return false;
+		boost::format msg("Unable to prepare SQL query: %1%");
+		msg % sql_insert.c_str();
+		errors.push_back(msg.str());
+		return;
 	}
 
 	int step_result = 0;
 
 	if ((step_result = sqlite3_step(stmt)) != SQLITE_DONE)
 	{
-		// TODO: Log error
+		boost::format msg("Unable to execute SQL query: %1%");
+		msg % sql_insert.c_str();
+		errors.push_back(msg.str());
 		if (stmt)
 		{
 			sqlite3_finalize(stmt);
 			stmt = nullptr;
 		}
 
-		return false;
+		return;
 	}
 
 	//executor.success();
@@ -122,20 +129,17 @@ bool Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 		stmt = nullptr;
 	}
 
-	return true;
-
 }
 
-bool Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-	int const number_rows_in_block, std::string & errorMsg)
+void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
+	int const number_rows_in_block, long & linenum, long & badwritelines, std::vector<std::string> & errors)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	//Executor executor(db);
 
-	bool failed = false;
-
+	std::string errorMsg;
 	for (int row = 0; row < number_rows_in_block; ++row)
 	{
 
@@ -144,10 +148,14 @@ bool Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 
 		if (failed || !errorMsg.empty())
 		{
-			boost::format msg("Unable to update row during import: %1%");
-			msg % errorMsg;
+			boost::format msg("Unable to update line %1 during import: %2%");
+			msg % boost::lexical_cast<std::string>(linenum) % errorMsg;
 			errorMsg = msg.str();
-			return false;
+			errors.push_back(errorMsg);
+			errorMsg.clear();
+			++linenum;
+			++badwritelines;
+			continue; // try some other rows
 		}
 
 		if (changes == 0)
@@ -158,17 +166,21 @@ bool Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 
 		if (failed || !errorMsg.empty())
 		{
-			boost::format msg("Unable to insert row during import: %1%");
-			msg % errorMsg;
+			boost::format msg("Unable to insert line %1% during import: %2%");
+			msg % boost::lexical_cast<std::string>(linenum) % errorMsg;
 			errorMsg = msg.str();
-			return false;
+			errors.push_back(errorMsg);
+			errorMsg.clear();
+			++linenum;
+			++badwritelines;
+			continue; // try some other rows
 		}
+
+		++linenum;
 
 	}
 
 	//executor.success();
-
-	return true;
 
 }
 

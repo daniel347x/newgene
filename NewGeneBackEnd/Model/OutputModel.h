@@ -1111,6 +1111,6 @@ class ModelFactory<OutputModel>
 
 };
 
-bool OutputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, std::string & errorMsg);
+bool OutputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, std::vector<std::string> errors);
 
 #endif

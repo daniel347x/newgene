@@ -92,9 +92,11 @@ void InputModel::LoadTables()
 
 }
 
-bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, std::string & errorMsg)
+bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, std::vector<std::string> errors)
 {
 
+	int number_errors_at_start = errors.size();
+	std::string errorMsg;
 	try
 	{
 		if (table_->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
@@ -105,12 +107,16 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 			{
 				boost::format msg("Bad input model in InputModelImportTableFn");
 				errorMsg = msg.str();
+				errors.push_back(errorMsg);
+				errorMsg.clear();
 				return false;
 			}
 			if (input_model->getDb() == nullptr)
 			{
 				boost::format msg("Bad input model db in InputModelImportTableFn");
 				errorMsg = msg.str();
+				errors.push_back(errorMsg);
+				errorMsg.clear();
 				return false;
 			}
 
@@ -120,12 +126,10 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 
 				case Importer::INSERT_OR_FAIL:
 				{
-					table_->ImportBlockBulk(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, errorMsg);
-					if (!errorMsg.empty())
+					table_->ImportBlockBulk(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, errors);
+					int number_errors_now = errors.size();
+					if (number_errors_now > number_errors_at_start)
 					{
-						boost::format msg("Cannot import block of data in bulk: %1%");
-						msg % errorMsg;
-						errorMsg = msg.str();
 						return false;
 					}
 				}
@@ -133,12 +137,10 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 
 				case Importer::INSERT_OR_UPDATE:
 				{
-					table_->ImportBlockUpdate(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, errorMsg);
-					if (!errorMsg.empty())
+					table_->ImportBlockUpdate(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, errors);
+					int number_errors_now = errors.size();
+					if (number_errors_now > number_errors_at_start)
 					{
-						boost::format msg("Cannot import block of data: %1%");
-						msg % errorMsg;
-						errorMsg = msg.str();
 						return false;
 					}
 				}
@@ -148,6 +150,8 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 				{
 					boost::format msg("Incorrect import mode attempting to call block update function.");
 					errorMsg = msg.str();
+					errors.push_back(errorMsg);
+					errorMsg.clear();
 					return false;
 				}
 					break;
@@ -159,6 +163,8 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 		{
 			boost::format msg("Incorrect model type in block update function.");
 			errorMsg = msg.str();
+			errors.push_back(errorMsg);
+			errorMsg.clear();
 			return false;
 		}
 	}
@@ -166,6 +172,8 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 	{
 		boost::format msg("Unable to cast to input model in block update function.");
 		errorMsg = msg.str();
+		errors.push_back(errorMsg);
+		errorMsg.clear();
 		return false;
 	}
 

@@ -67,8 +67,8 @@ class Table_basemost
 		virtual void Load(sqlite3 *, InputModel * = nullptr) { };
 		virtual void Load(sqlite3 *, OutputModel * = nullptr, InputModel * = nullptr) { };
 		virtual bool ImportStart(sqlite3 *, WidgetInstanceIdentifier const & identifier, ImportDefinition const &, OutputModel * = nullptr, InputModel * = nullptr) { return true; };
-		virtual bool ImportBlockBulk(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, std::string & errorMsg);
-		virtual bool ImportBlockUpdate(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, std::string & errorMsg);
+		virtual void ImportBlockBulk(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines, std::vector<std::string> & errors);
+		virtual void ImportBlockUpdate(sqlite3 *, ImportDefinition const &, OutputModel *, InputModel *, DataBlock const &, int const, long & linenum, long & badwritelines, std::vector<std::string> & errors);
 
 		int TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db, std::string & errorMsg);
 		void TryInsertRow(DataBlock const & block, int row, bool & failed, ImportDefinition const &import_definition, sqlite3 * db, std::string & errorMsg);

@@ -879,6 +879,8 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 	, identifier(identifier_)
 	, mode(mode_)
 	, which_import(which_import_)
+	, badreadlines(0)
+	, badwritelines(0)
 {
 }
 
@@ -1468,7 +1470,7 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 
 }
 
-int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg, Messager & messager)
+int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, long & badreadlines, std::string & errorMsg, Messager & messager)
 {
 	int current_lines_read = 0;
 
@@ -1510,6 +1512,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 		{
 			errors.push_back(errorMsg);
 			errorMsg.clear();
+			++linenum;
+			++badreadlines;
 			continue;
 		}
 
@@ -1930,9 +1934,10 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 		while (true)
 		{
 
+			long saved_linenum = linenum;
 
 			std::string blockErrorMsg;
-			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline, linenum, blockErrorMsg, messager);
+			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline, linenum, badreadlines, blockErrorMsg, messager);
 
 			if (currently_read_lines == -1)
 			{
@@ -1951,18 +1956,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			else
 			{
 				// Write rows to database here
-				blockErrorMsg.clear();
-				bool write_succeeded = table_write_callback(this, model, import_definition, table, output_block, currently_read_lines, blockErrorMsg);
-
-				if (!write_succeeded || !blockErrorMsg.empty())
-				{
-					boost::format msg("Errors writing block of data to the database: %1%");
-					msg % blockErrorMsg;
-					errorMsg = msg.str();
-					errors.push_back(errorMsg);
-					errorMsg.clear();
-					continue; // try some more rows
-				}
+				table_write_callback(this, model, import_definition, table, output_block, currently_read_lines, saved_linenum, badwritelines, errors);
 			}
 
 		}

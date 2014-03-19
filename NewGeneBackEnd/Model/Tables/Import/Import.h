@@ -481,7 +481,7 @@ class Importer
 
 	public:
 
-		typedef bool(*TableImportCallbackFn)(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, std::string & errorMsg);
+		typedef bool(*TableImportCallbackFn)(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, std::vector<std::string> & errors);
 
 		static int const block_size = 500; // Maximum number of rows supported for block insert by SQLite
 
@@ -503,7 +503,7 @@ class Importer
 	
 		bool ValidateMapping();
 		void InitializeFields();
-		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, std::string & errorMsg, Messager & messager);
+		int ReadBlockFromFile(std::fstream & data_file, char * line, char * parsedline, long & linenum, long & badreadlines, std::string & errorMsg, Messager & messager);
 		void ReadFieldFromFile(char * & current_line_ptr, int & current_lines_read, int const & current_column_index, char * & parsed_line_ptr, bool & stop, SchemaEntry const & column, long const line, std::string & errorMsg);
 
 	public:
@@ -524,6 +524,8 @@ class Importer
 		Mode mode;
 		WHICH_IMPORT which_import;
 		std::vector<std::string> errors;
+		long badreadlines;
+		long badwritelines;
 
 };
 
