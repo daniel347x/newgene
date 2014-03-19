@@ -652,9 +652,9 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	badwritelines = table_importer.badwritelines;
 
 	std::string allErrors;
+	boost::posix_time::ptime current_date_time = boost::posix_time::second_clock::local_time();
 	if (!success)
 	{
-		boost::posix_time::ptime current_date_time = boost::posix_time::second_clock::local_time();
 		boost::format msg("%1%: Unable to refresh the DMU list from the file: %2%");
 		msg % boost::posix_time::to_simple_string(current_date_time).c_str() % errorMsg;
 		msg % errorMsg;
@@ -663,7 +663,8 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	}
 	if (!table_importer.errors.empty())
 	{
-		boost::format msg("There were errors during import.  These will be appended to log \"newgene.import.log\"");
+		boost::format msg("%1%: There were errors during import.  These will be appended to log \"newgene.import.log\"");
+		msg % boost::posix_time::to_simple_string(current_date_time).c_str();
 		std::string errorMsg = msg.str();
 		table_importer.errors.push_back(errorMsg);
 		std::fstream importlog;
