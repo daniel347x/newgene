@@ -441,7 +441,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 				BaseField & dataField = *fields[0];
 				SchemaEntry entry(field_type, colnames[ncol]);
 				std::string fieldReadErrorMsg;
-				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition, linenum, ncol + 1, fieldReadErrorMsg);
+				Importer::ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, entry, dataField, definition, linenum, ncol + 1, ncol == nCols-1, fieldReadErrorMsg);
 
 				if (stop)
 				{

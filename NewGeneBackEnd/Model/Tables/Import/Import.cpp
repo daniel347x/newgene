@@ -1185,9 +1185,7 @@ void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line
 
 	if (*current_line_ptr == '\0')
 	{
-		boost::format msg("NULL found in input.  Cannot continue.");
-		errorMsg = msg.str();
-		stop = true;
+		// Empty field
 		return;
 	}
 
@@ -1392,7 +1390,7 @@ std::shared_ptr<BaseField> RetrieveDataField(FieldTypeEntry const & field_type_e
 }
 
 void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_read, int const & current_column_index, char *& parsed_line_ptr, bool & stop,
-								 SchemaEntry const & column, long const line, std::string & errorMsg)
+	SchemaEntry const & column, long const line, int const col, bool const is_final_col, std::string & errorMsg)
 {
 
 	// use sscanf to read in the type, based on switch on "column"'s type type-traits... read it into input_block[current_lines_read]
@@ -1400,30 +1398,35 @@ void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_r
 
 	if (!field_entry)
 	{
-		boost::format msg("Invalid block cache while retrieving line %1%");
-		msg % boost::lexical_cast<std::string>(line);
-		errorMsg = msg.str();
-		stop = true;
-		return;
-	}
-
-	ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, column, *field_entry, import_definition, line + 1, current_column_index + 1, errorMsg);
-
-}
-
-void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField,
-									   ImportDefinition const & import_definition, long line, int col, std::string & errorMsg)
-{
-
-	EatWhitespace(current_line_ptr, import_definition);
-
-	if (*current_line_ptr == '\0')
-	{
 		boost::format msg("Invalid block cache while retrieving line %1%, col %2%");
 		msg % boost::lexical_cast<std::string>(line) % boost::lexical_cast<std::string>(col);
 		errorMsg = msg.str();
 		stop = true;
 		return;
+	}
+
+	ReadFieldFromFileStatic(current_line_ptr, parsed_line_ptr, stop, column, *field_entry, import_definition, line + 1, col + 1, is_final_col, errorMsg);
+
+}
+
+void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, SchemaEntry const & column, BaseField & theField,
+									   ImportDefinition const & import_definition, long line, int col, bool const is_final_col, std::string & errorMsg)
+{
+
+	EatWhitespace(current_line_ptr, import_definition);
+
+	if (!is_final_col && *current_line_ptr == '\0')
+	{
+		boost::format msg("End of row was reached prematurely when attempting to read the column from the input file at row %1%, column %2%");
+		msg % boost::lexical_cast<std::string>(line) % boost::lexical_cast<std::string>(col);
+		errorMsg = msg.str();
+		stop = true;
+		return;
+	}
+
+	if (*current_line_ptr == '\0')
+	{
+		// final column is empty
 	}
 
 	ReadOneDataField(column, theField, current_line_ptr, parsed_line_ptr, stop, import_definition, line, col, errorMsg);
@@ -1441,7 +1444,7 @@ void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_
 
 }
 
-void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg)
+void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, long line, int col, bool const is_final_col, std::string & errorMsg)
 {
 
 	EatWhitespace(current_line_ptr, import_definition);
@@ -1459,8 +1462,8 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 
 	if (stop)
 	{
-		boost::format msg("Error reading data field: %1%");
-		msg % errorMsg.c_str();
+		boost::format msg("Error reading data field for line %1%, column %2%: %3%");
+		msg % line % col % errorMsg.c_str();
 		errorMsg = msg.str();
 		return;
 	}
@@ -1490,12 +1493,12 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 			if (import_definition.input_schema.validcols[ncol])
 			{
-				ReadFieldFromFile(current_line_ptr, current_lines_read, nValColIdx, parsed_line_ptr, stop, import_definition.input_schema.schema[nValColIdx], linenum, errorMsg);
+				ReadFieldFromFile(current_line_ptr, current_lines_read, nValColIdx, parsed_line_ptr, stop, import_definition.input_schema.schema[nValColIdx], linenum, ncol, ncol == nCols-1, errorMsg);
 				++nValColIdx;
 			}
 			else
 			{
-				SkipFieldInFile(current_line_ptr, parsed_line_ptr, stop, import_definition, errorMsg);
+				SkipFieldInFile(current_line_ptr, parsed_line_ptr, stop, import_definition, linenum, ncol, ncol == nCols-1, errorMsg);
 			}
 
 			if (stop)
@@ -2052,15 +2055,17 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		// TODO: allow option for end-user to validate, in which case we perform a
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueInt32(0);
-		sscanf(parsed_line_ptr, "%d%n", &theField.GetInt32Ref(), &number_chars_read);
-
-		if (number_chars_read < strlen(parsed_line_ptr))
+		if (strlen(parsed_line_ptr) > 0)
 		{
-			boost::format msg("Invalid int32 data field from input file!  Line %1%, column %2%");
-			msg % line % col;
-			errorMsg = msg.str();
-			stop = true;
-			return;
+			sscanf(parsed_line_ptr, "%d%n", &theField.GetInt32Ref(), &number_chars_read);
+			if (number_chars_read < strlen(parsed_line_ptr))
+			{
+				boost::format msg("Invalid int32 data field from input file!  Line %1%, column %2%");
+				msg % line % col;
+				errorMsg = msg.str();
+				stop = true;
+				return;
+			}
 		}
 	}
 	else if (IsFieldTypeInt64(theField.GetType()))
@@ -2069,15 +2074,17 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		// TODO: allow option for end-user to validate, in which case we perform a
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueInt64(0);
-		sscanf(parsed_line_ptr, "%I64d%n", &theField.GetInt64Ref(), &number_chars_read);
-
-		if (number_chars_read < strlen(parsed_line_ptr))
+		if (strlen(parsed_line_ptr) > 0)
 		{
-			boost::format msg("Invalid int64 data field from input file!  Line %1%, column %2%");
-			msg % line % col;
-			errorMsg = msg.str();
-			stop = true;
-			return;
+			sscanf(parsed_line_ptr, "%I64d%n", &theField.GetInt64Ref(), &number_chars_read);
+			if (number_chars_read < strlen(parsed_line_ptr))
+			{
+				boost::format msg("Invalid int64 data field from input file!  Line %1%, column %2%");
+				msg % line % col;
+				errorMsg = msg.str();
+				stop = true;
+				return;
+			}
 		}
 	}
 	else if (IsFieldTypeFloat(theField.GetType()))
@@ -2086,17 +2093,19 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		// TODO: allow option for end-user to validate, in which case we perform a
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueDouble(0.0);
-		double temp;
-		sscanf(parsed_line_ptr, "%lf%n", &temp, &number_chars_read);
-		theField.SetValueDouble(temp);
-
-		if (number_chars_read < strlen(parsed_line_ptr))
+		if (strlen(parsed_line_ptr) > 0)
 		{
-			boost::format msg("Invalid floating-point data field from input file!  Line %1%, column %2%");
-			msg % line % col;
-			errorMsg = msg.str();
-			stop = true;
-			return;
+			double temp;
+			sscanf(parsed_line_ptr, "%lf%n", &temp, &number_chars_read);
+			theField.SetValueDouble(temp);
+			if (number_chars_read < strlen(parsed_line_ptr))
+			{
+				boost::format msg("Invalid floating-point data field from input file!  Line %1%, column %2%");
+				msg % line % col;
+				errorMsg = msg.str();
+				stop = true;
+				return;
+			}
 		}
 	}
 	else if (IsFieldTypeString(theField.GetType()))
