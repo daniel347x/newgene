@@ -150,7 +150,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 		if (failed || !errorMsg.empty())
 		{
 			boost::format msg("Unable to update line %1 during import: %2%");
-			msg % boost::lexical_cast<std::string>(linenum) % errorMsg;
+			msg % boost::lexical_cast<std::string>(linenum + 1) % errorMsg;
 			errorMsg = msg.str();
 			errors.push_back(errorMsg);
 			errorMsg.clear();
@@ -168,7 +168,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 		if (failed || !errorMsg.empty())
 		{
 			boost::format msg("Unable to insert line %1% during import: %2%");
-			msg % boost::lexical_cast<std::string>(linenum) % errorMsg;
+			msg % boost::lexical_cast<std::string>(linenum + 1) % errorMsg;
 			errorMsg = msg.str();
 			errors.push_back(errorMsg);
 			errorMsg.clear();

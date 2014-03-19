@@ -1399,7 +1399,7 @@ void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_r
 	if (!field_entry)
 	{
 		boost::format msg("Invalid block cache while retrieving line %1%, col %2%");
-		msg % boost::lexical_cast<std::string>(line) % boost::lexical_cast<std::string>(col);
+		msg % boost::lexical_cast<std::string>(line + 1) % boost::lexical_cast<std::string>(col + 1);
 		errorMsg = msg.str();
 		stop = true;
 		return;
@@ -1418,7 +1418,7 @@ void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_
 	if (!is_final_col && *current_line_ptr == '\0')
 	{
 		boost::format msg("End of row was reached prematurely when attempting to read the column from the input file at row %1%, column %2%");
-		msg % boost::lexical_cast<std::string>(line) % boost::lexical_cast<std::string>(col);
+		msg % boost::lexical_cast<std::string>(line+1) % boost::lexical_cast<std::string>(col+1);
 		errorMsg = msg.str();
 		stop = true;
 		return;
@@ -1449,12 +1449,18 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 
 	EatWhitespace(current_line_ptr, import_definition);
 
-	if (*current_line_ptr == '\0')
+	if (!is_final_col && *current_line_ptr == '\0')
 	{
-		boost::format msg("End of row was reached prematurely.");
+		boost::format msg("End of row was reached prematurely when attempting to read the column from the input file at row %1%, column %2%");
+		msg % boost::lexical_cast<std::string>(line+1) % boost::lexical_cast<std::string>(col+1);
 		errorMsg = msg.str();
 		stop = true;
 		return;
+	}
+
+	if (*current_line_ptr == '\0')
+	{
+		// final column is empty
 	}
 
 	// read it, and do nothing with it
