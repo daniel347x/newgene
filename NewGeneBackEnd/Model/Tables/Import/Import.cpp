@@ -1126,11 +1126,15 @@ bool Importer::ValidateMapping()
 void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line_ptr, bool & stop, ImportDefinition const & import_definition, std::string & errorMsg)
 {
 	bool is_quoted_field = false;
+	bool quote_type_is_single = false;
 	char * starting_parsed_pointer = parsed_line_ptr;
+
+	// Note: Whitespace has already been stripped
 
 	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_SINGLEQUOTED)
 	{
 		is_quoted_field = true;
+		quote_type_is_single = true;
 
 		if (*current_line_ptr != '\'')
 		{
@@ -1144,6 +1148,7 @@ void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line
 	else if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_DOUBLEQUOTED)
 	{
 		is_quoted_field = true;
+		quote_type_is_single = false;
 
 		if (*current_line_ptr != '"')
 		{
@@ -1151,6 +1156,27 @@ void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line
 		}
 		else
 		{
+			++current_line_ptr;
+		}
+	}
+	else if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_EITHER_DOUBLEQUOTED_OR_SINGLEQUOTED)
+	{
+		is_quoted_field = true;
+
+		if (*current_line_ptr != '"' && *current_line_ptr != '\'')
+		{
+			is_quoted_field = false;
+		}
+		else
+		{
+			if (*current_line_ptr == '"')
+			{
+				quote_type_is_single = false;
+			}
+			else if (*current_line_ptr == '\'')
+			{
+				quote_type_is_single = true;
+			}
 			++current_line_ptr;
 		}
 	}
@@ -1243,6 +1269,23 @@ void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line
 					done = true;
 				}
 			}
+			else if (is_quoted_field && import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__STRINGS_ARE_EITHER_DOUBLEQUOTED_OR_SINGLEQUOTED)
+			{
+				if (quote_type_is_single)
+				{
+					if (*current_line_ptr == '\'')
+					{
+						done = true;
+					}
+				}
+				else
+				{
+					if (*current_line_ptr == '"')
+					{
+						done = true;
+					}
+				}
+			}
 			else
 			{
 				if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
@@ -1269,7 +1312,10 @@ void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line
 			}
 		}
 
-		++current_line_ptr;
+		if (!done)
+		{
+			++current_line_ptr;
+		}
 
 		if (done)
 		{
@@ -1942,12 +1988,15 @@ void Importer::EatWhitespace(char *& current_line_ptr, ImportDefinition const & 
 
 void Importer::EatSeparator(char *& current_line_ptr, ImportDefinition const & import_definition)
 {
+	// For quoted fields, if the closing quote occurs early, just eat the remaining text up to the next separator
 	if (import_definition.format_qualifiers & ImportDefinition::FORMAT_QUALIFIERS__TAB_DELIMITED)
 	{
+		while (*current_line_ptr != '\t' && *current_line_ptr != '\0') { ++current_line_ptr; }
 		if (*current_line_ptr == '\t') { ++current_line_ptr; }
 	}
 	else
 	{
+		while (*current_line_ptr != ',' && *current_line_ptr != '\0') { ++current_line_ptr; }
 		if (*current_line_ptr == ',') { ++current_line_ptr; }
 	}
 }
