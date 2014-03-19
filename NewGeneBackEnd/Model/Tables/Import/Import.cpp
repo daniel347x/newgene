@@ -1497,6 +1497,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 		for (int ncol = 0; ncol < nCols; ++ncol)
 		{
 
+			parsed_line_ptr = parsedline;
+			*parsed_line_ptr = '\0';
 			if (import_definition.input_schema.validcols[ncol])
 			{
 				ReadFieldFromFile(current_line_ptr, current_lines_read, nValColIdx, parsed_line_ptr, stop, import_definition.input_schema.schema[nValColIdx], linenum, ncol, ncol == nCols-1, errorMsg);
