@@ -1398,7 +1398,9 @@ void Importer::ReadFieldFromFile(char *& current_line_ptr, int & current_lines_r
 
 	if (!field_entry)
 	{
-		// Todo: warning log here
+		boost::format msg("Invalid block cache while retrieving line %1%");
+		msg % boost::lexical_cast<std::string>(line);
+		errorMsg = msg.str();
 		stop = true;
 		return;
 	}
@@ -1415,7 +1417,9 @@ void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_
 
 	if (*current_line_ptr == '\0')
 	{
-		// Todo: warning
+		boost::format msg("Invalid block cache while retrieving line %1%, col %2%");
+		msg % boost::lexical_cast<std::string>(line) % boost::lexical_cast<std::string>(col);
+		errorMsg = msg.str();
 		stop = true;
 		return;
 	}
@@ -1424,6 +1428,9 @@ void Importer::ReadFieldFromFileStatic(char *& current_line_ptr, char *& parsed_
 
 	if (stop)
 	{
+		boost::format msg("Error reading data field for line %1%, column %2%: %3%");
+		msg % line % col % errorMsg.c_str();
+		errorMsg = msg.str();
 		return;
 	}
 
@@ -1439,7 +1446,7 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 
 	if (*current_line_ptr == '\0')
 	{
-		boost::format msg("End of input file was reached prematurely.");
+		boost::format msg("End of row was reached prematurely.");
 		errorMsg = msg.str();
 		stop = true;
 		return;
@@ -1450,6 +1457,9 @@ void Importer::SkipFieldInFile(char *& current_line_ptr, char *& parsed_line_ptr
 
 	if (stop)
 	{
+		boost::format msg("Error reading data field: %1%");
+		msg % errorMsg.c_str();
+		errorMsg = msg.str();
 		return;
 	}
 
@@ -1488,6 +1498,9 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 			if (stop)
 			{
+				boost::format msg("Skipping row %1%: %2%");
+				msg % line % errorMsg.c_str();
+				errorMsg = msg.str();
 				break;
 			}
 
@@ -1495,27 +1508,32 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 		if (stop)
 		{
-			return -1;
+			errors.push_back(errorMsg);
+			errorMsg.clear();
+			continue;
 		}
 
 		// loop through mappings to generate output
 		DataFields & input_data_fields = input_block[current_lines_read];
 		DataFields & output_data_fields = output_block[current_lines_read];
 		stop = false;
-		std::for_each(import_definition.mappings.begin(), import_definition.mappings.end(), [this, &input_data_fields, &output_data_fields, &stop, &errorMsg](
+		std::for_each(import_definition.mappings.begin(), import_definition.mappings.end(), [this, &input_data_fields, &output_data_fields, &stop, &linenum, &errorMsg](
 						  std::shared_ptr<FieldMapping> & field_mapping)
 		{
 			if (!field_mapping)
 			{
-				// TODO: Import problem warning
+				boost::format msg("Invalid mapping cache while constructing data fields to pass to database from the file being imported for line %1%");
+				msg % boost::lexical_cast<std::string>(linenum);
+				errorMsg = msg.str();
 				stop = true;
 				return;
 			}
 
+			// This is where more complex validation would go
 			if (!field_mapping->Validate())
 			{
-				// TODO: Import problem warning
-				boost::format msg("Invalid field mapping in ReadBlockFromFile.");
+				boost::format msg("Invalid field mapping while constructing data fields to pass to database from the file being imported for line %1%.");
+				msg % boost::lexical_cast<std::string>(linenum);
 				errorMsg = msg.str();
 				stop = true;
 				return;
@@ -1533,8 +1551,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 						if (input_entry.second != output_entry.second)
 						{
-							// Todo: log warning
-							boost::format msg("Invalid mapping object in ReadBlockFromFile.");
+							boost::format msg("Invalid field mapping object while constructing data fields to pass to database from the file being imported for line %1%.");
+							msg % boost::lexical_cast<std::string>(linenum);
 							errorMsg = msg.str();
 							stop = true;
 							return;
@@ -1549,8 +1567,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 						{
 							if (the_input_field->GetType() != the_output_field->GetType())
 							{
-								// Todo: log warning
-								boost::format msg("Mapping type mismatch in ReadBlockFromFile.");
+								boost::format msg("Mapping type mismatch for one-to-one mapping while constructing data fields to pass to database from the file being imported for line %1%.");
+								msg % boost::lexical_cast<std::string>(linenum);
 								errorMsg = msg.str();
 								stop = true;
 								return;
@@ -1594,8 +1612,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 							if (the_input_field->GetType() != the_output_field->GetType())
 							{
-								// Todo: log warning
-								boost::format msg("Mapping type mismatch in ReadBlockFromFile.");
+								boost::format msg("Mapping type mismatch for hard-coded mapping while constructing data fields to pass to database from the file being imported for line %1%.");
+								msg % boost::lexical_cast<std::string>(linenum);
 								errorMsg = msg.str();
 								stop = true;
 								return;
@@ -1700,7 +1718,6 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 		{
 			boost::format msg("Failed to start input data import.");
 			errorMsg = msg.str();
-			return false;
 			return false;
 		}
 	}
@@ -1859,7 +1876,9 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 				data_file.close();
 				boost::format msg("Failed to read the column description row in the input file.");
 				errorMsg = msg.str();
-				return true;
+				errors.push_back(errorMsg);
+				errorMsg.clear();
+				import_definition.second_row_is_column_description_row = false;
 			}
 
 			// The column descriptions have already been read
@@ -1879,7 +1898,9 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 				data_file.close();
 				boost::format msg("Failed to read the data type row in the input file.");
 				errorMsg = msg.str();
-				return true;
+				errors.push_back(errorMsg);
+				errorMsg.clear();
+				return false;
 			}
 
 			// The data types have already been read
@@ -1897,6 +1918,8 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			data_file.close();
 			boost::format msg("Bad mapping of input to output columns.");
 			errorMsg = msg.str();
+			errors.push_back(errorMsg);
+			errorMsg.clear();
 			return false;
 		}
 
@@ -1913,9 +1936,11 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 
 			if (currently_read_lines == -1)
 			{
-				boost::format msg("Failed to read block of data from input file: %1%");
+				boost::format msg("Irrecoverable error: %1%");
 				msg % blockErrorMsg;
 				errorMsg = msg.str();
+				errors.push_back(errorMsg);
+				errorMsg.clear();
 				return false;
 			}
 			else if (currently_read_lines == 0)
@@ -1931,10 +1956,12 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 
 				if (!write_succeeded || !blockErrorMsg.empty())
 				{
-					boost::format msg("Failed to write block of data to the database: %1%");
+					boost::format msg("Errors writing block of data to the database: %1%");
 					msg % blockErrorMsg;
 					errorMsg = msg.str();
-					return false;
+					errors.push_back(errorMsg);
+					errorMsg.clear();
+					continue; // try some more rows
 				}
 			}
 
@@ -1946,6 +1973,8 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 	{
 		boost::format msg("Failed to open input file.");
 		errorMsg = msg.str();
+		errors.push_back(errorMsg);
+		errorMsg.clear();
 		return false;
 	}
 
@@ -1955,6 +1984,8 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 		{
 			boost::format msg("Failed to end input data import.");
 			errorMsg = msg.str();
+			errors.push_back(errorMsg);
+			errorMsg.clear();
 			return false;
 		}
 
@@ -1966,6 +1997,8 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 		{
 			boost::format msg("Failed to end output data import.");
 			errorMsg = msg.str();
+			errors.push_back(errorMsg);
+			errorMsg.clear();
 			return false;
 		}
 	}

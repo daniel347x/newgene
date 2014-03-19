@@ -523,6 +523,7 @@ class Importer
 
 		Mode mode;
 		WHICH_IMPORT which_import;
+		std::vector<std::string> errors;
 
 };
 

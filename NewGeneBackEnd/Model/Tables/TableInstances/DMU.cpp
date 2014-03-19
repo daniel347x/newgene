@@ -631,11 +631,41 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	}
 
 	std::string errorMsg;
+	table_importer.errors.clear();
 	bool success = table_importer.DoImport(errorMsg, messager);
+	std::string allErrors;
 	if (!success)
 	{
-		boost::format msg("Unable to refresh the DMU list from the file: %1%");
+		boost::posix_time::ptime current_date_time = boost::posix_time::second_clock::local_time();
+		boost::format msg("%1%: Unable to refresh the DMU list from the file: %2%");
+		msg % boost::posix_time::to_simple_string(current_date_time).c_str() % errorMsg;
 		msg % errorMsg;
+		std::string new_error(msg.str());
+		table_importer.errors.push_back(new_error);
+	}
+	if (!table_importer.errors.empty())
+	{
+		boost::format msg("There were errors during import.  These will be appended to log \"newgene.import.log\"");
+		std::string errorMsg = msg.str();
+		table_importer.errors.push_back(errorMsg);
+		std::fstream importlog;
+		importlog.open("newgene.import.log", std::ios::out | std::ios::app);
+		std::for_each(table_importer.errors.crbegin(), table_importer.errors.crend(), [&](std::string const & the_error)
+		{
+			if (importlog.is_open())
+			{
+				importlog << the_error << std::endl;
+			}
+			allErrors += the_error;
+			allErrors += "\n";
+		});
+		importlog.close();
+		messager.ShowMessageBox(allErrors);
+	}
+	if (!success)
+	{
+		boost::format msg("%1%");
+		msg % allErrors;
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
