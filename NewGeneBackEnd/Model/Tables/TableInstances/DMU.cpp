@@ -628,8 +628,8 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 
 	}
 
-	number_read_errors = 0;
-	number_write_errors = 0;
+	badreadlines = 0;
+	badwritelines = 0;
 
 	std::string errorMsg;
 	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn, Importer::IMPORT_DMU_SET_MEMBER);
@@ -648,8 +648,8 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 		table_importer.errors.push_back(msg.str());
 	}
 
-	number_read_errors = table_importer.badreadlines;
-	number_write_errors = table_importer.badwritelines;
+	badreadlines = table_importer.badreadlines;
+	badwritelines = table_importer.badwritelines;
 
 	std::string allErrors;
 	if (!success)
