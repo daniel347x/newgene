@@ -482,6 +482,18 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA);
 					errorMsg.clear();
 					success = table_importer.DoImport(errorMsg, messager);
+					if (table_importer.badreadlines > 0)
+					{
+						boost::format msg("Number rows of data failed to read from import file: %1%");
+						msg % boost::lexical_cast<std::string>(table_importer.badreadlines);
+						table_importer.errors.push_back(msg.str());
+					}
+					if (table_importer.badwritelines > 0)
+					{
+						boost::format msg("Number rows of data failed to write to databae: %1%");
+						msg % boost::lexical_cast<std::string>(table_importer.badwritelines);
+						table_importer.errors.push_back(msg.str());
+					}
 					std::string allErrors;
 					if (!success)
 					{

@@ -451,7 +451,7 @@ class ImportDefinition
 		bool third_row_is_data_type_row;
 		Schema input_schema;
 		Schema output_schema;
-		int format_qualifiers;
+		int format_qualifiers; // must be int in order to OR them together
 		IMPORT_TYPE import_type;
 		std::vector<std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE>> primary_keys_info;
 

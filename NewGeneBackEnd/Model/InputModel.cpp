@@ -92,7 +92,7 @@ void InputModel::LoadTables()
 
 }
 
-bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, std::vector<std::string> errors)
+bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, std::vector<std::string> & errors)
 {
 
 	int number_errors_at_start = errors.size();

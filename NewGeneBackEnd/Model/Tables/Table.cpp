@@ -144,6 +144,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 	{
 
 		errorMsg.clear();
+		bool failed = false;
 		int changes = TryUpdateRow(block, row, failed, import_definition, db, errorMsg);
 
 		if (failed || !errorMsg.empty())

@@ -77,7 +77,7 @@ void OutputModel::LoadTables()
 
 }
 
-bool OutputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, std::vector<std::string> errors)
+bool OutputModelImportTableFn(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, std::vector<std::string> & errors)
 {
 	int number_errors_at_start = errors.size();
 	std::string errorMsg;
