@@ -369,7 +369,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 				DataChangeMessage change_response(&project);
 
-				for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
+				for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
 					Executor executor(input_model.getDb());
@@ -533,9 +533,35 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					// Success!  Turn the pointer over to the input model
 					input_model.t_vgp_data_vector.push_back(std::move(new_table));
 
-					boost::format msg("VG '%1%' successfully refreshed from file.");
-					msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group);
-					messager.ShowMessageBox(msg.str());
+					if (table_importer.badreadlines > 0 || table_importer.badwritelines > 0)
+					{
+						if (table_importer.badreadlines > 0 && table_importer.badwritelines > 0)
+						{
+							boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badreadlines) % boost::lexical_cast<std::string>(table_importer.badwritelines);
+							messager.ShowMessageBox(msg.str());
+						}
+						else
+						if (table_importer.badreadlines == 0 && table_importer.badwritelines > 0)
+						{
+							boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badwritelines);
+							messager.ShowMessageBox(msg.str());
+						}
+						else
+						if (table_importer.badreadlines > 0 && table_importer.badwritelines == 0)
+						{
+							boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badreadlines);
+							messager.ShowMessageBox(msg.str());
+						}
+					}
+					else
+					{
+						boost::format msg("Variable group '%1%' successfully refreshed from file.");
+						msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group);
+						messager.ShowMessageBox(msg.str());
+					}
 
 					// ***************************************** //
 					// Prepare data to send back to user interface

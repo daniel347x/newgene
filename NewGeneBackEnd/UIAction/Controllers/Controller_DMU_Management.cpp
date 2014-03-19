@@ -641,9 +641,36 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 					return;
 				}
 
-				boost::format msg("DMU category '%1%' successfully refreshed from file.");
-				msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
-				messager.ShowMessageBox(msg.str());
+
+				if (input_model.t_dmu_setmembers.badreadlines > 0 || input_model.t_dmu_setmembers.badwritelines > 0)
+				{
+					if (input_model.t_dmu_setmembers.badreadlines > 0 && input_model.t_dmu_setmembers.badwritelines > 0)
+					{
+						boost::format msg("DMU category '%1%' refreshed from file, but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+						msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category) % boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines) % boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines);
+						messager.ShowMessageBox(msg.str());
+					}
+					else
+					if (input_model.t_dmu_setmembers.badreadlines == 0 && input_model.t_dmu_setmembers.badwritelines > 0)
+					{
+						boost::format msg("DMU category '%1%' refreshed from file, but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+						msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category) % boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badwritelines);
+						messager.ShowMessageBox(msg.str());
+					}
+					else
+					if (input_model.t_dmu_setmembers.badreadlines > 0 && input_model.t_dmu_setmembers.badwritelines == 0)
+					{
+						boost::format msg("DMU category '%1%' refreshed from file, but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+						msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category) % boost::lexical_cast<std::string>(input_model.t_dmu_setmembers.badreadlines);
+						messager.ShowMessageBox(msg.str());
+					}
+				}
+				else
+				{
+					boost::format msg("Variable group '%1%' successfully refreshed from file.");
+					msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
+					messager.ShowMessageBox(msg.str());
+				}
 
 				// ***************************************** //
 				// Prepare data to send back to user interface

@@ -1500,8 +1500,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 
 			if (stop)
 			{
-				boost::format msg("Skipping row %1%: %2%");
-				msg % line % errorMsg.c_str();
+				boost::format msg("Skipping row number %1% in the input file (\"%2%\"): %3%");
+				msg % linenum % line % errorMsg.c_str();
 				errorMsg = msg.str();
 				break;
 			}

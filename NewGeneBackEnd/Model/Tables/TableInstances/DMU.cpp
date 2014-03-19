@@ -605,8 +605,6 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 
 	import_definition.mappings = mappings;
 
-	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn, Importer::IMPORT_DMU_SET_MEMBER);
-
 	{
 
 		std::string sql = "DELETE FROM DMU_SET_MEMBER WHERE DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID = '";
@@ -630,7 +628,11 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 
 	}
 
+	number_read_errors = 0;
+	number_write_errors = 0;
+
 	std::string errorMsg;
+	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn, Importer::IMPORT_DMU_SET_MEMBER);
 	table_importer.errors.clear();
 	bool success = table_importer.DoImport(errorMsg, messager);
 	if (table_importer.badreadlines > 0)
@@ -645,6 +647,10 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 		msg % boost::lexical_cast<std::string>(table_importer.badwritelines);
 		table_importer.errors.push_back(msg.str());
 	}
+
+	number_read_errors = table_importer.badreadlines;
+	number_write_errors = table_importer.badwritelines;
+
 	std::string allErrors;
 	if (!success)
 	{
