@@ -442,22 +442,26 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					}
 
 					// Add the metadata for the new table to the VG_DATA_METADATA__DATETIME_COLUMNS table
-					errorMsg.clear();
-					success = input_model.t_vgp_data_metadata__datetime_columns.AddDataTable(input_model.getDb(), &input_model, variable_group, errorMsg);
-					if (!success)
+					// ... but only if it has time granularity
+					if (time_granularity != TIME_GRANULARITY::TIME_GRANULARITY__NONE)
 					{
-						new_table->DeleteDataTable(input_model.getDb(), &input_model);
-						boost::format msg("%1%");
-						if (errorMsg.empty())
+						errorMsg.clear();
+						success = input_model.t_vgp_data_metadata__datetime_columns.AddDataTable(input_model.getDb(), &input_model, variable_group, errorMsg);
+						if (!success)
 						{
-							msg % errorMsg;
+							new_table->DeleteDataTable(input_model.getDb(), &input_model);
+							boost::format msg("%1%");
+							if (errorMsg.empty())
+							{
+								msg % errorMsg;
+							}
+							else
+							{
+								msg % "Unable to create date/time column entries for the variable group.";
+							}
+							messager.ShowMessageBox(msg.str());
+							return;
 						}
-						else
-						{
-							msg % "Unable to create date/time column entries for the variable group.";
-						}
-						messager.ShowMessageBox(msg.str());
-						return;
 					}
 
 					// Add the metadata for the new table to the VG_DATA_METADATA__PRIMARY_KEYS table

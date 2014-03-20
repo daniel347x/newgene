@@ -1185,8 +1185,10 @@ void Importer::RetrieveStringField(char *& current_line_ptr, char *& parsed_line
 
 	if (*current_line_ptr == '\0')
 	{
+		
 		// Empty field
 		return;
+	
 	}
 
 	bool escapemode = false;
@@ -2057,13 +2059,45 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		return;
 	}
 
+	bool empty_field(std::string(parsed_line_ptr).empty());
+
+	if (empty_field)
+	{
+
+		// Check if this is a required field -
+		// either a primary key field,
+		// or a time field
+
+		bool field_is_required = false;
+
+		if (IsFieldTypeTimeRange(theField.GetType()))
+		{
+			field_is_required = true;
+		}
+
+		if (column.IsPrimaryKey())
+		{
+			field_is_required = true;
+		}
+
+		if (field_is_required)
+		{
+			boost::format msg("A required field is missing!  Row %1%, col %2%");
+			msg % line % col;
+			errorMsg = msg.str();
+			stop = true;
+			return;
+		}
+
+	}
+
 	if (IsFieldTypeInt32(theField.GetType()))
 	{
 		// For performance reasons - no validation.
 		// TODO: allow option for end-user to validate, in which case we perform a
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueInt32(0);
-		if (strlen(parsed_line_ptr) > 0)
+		if (!empty_field)
 		{
 			sscanf(parsed_line_ptr, "%d%n", &theField.GetInt32Ref(), &number_chars_read);
 			if (number_chars_read < strlen(parsed_line_ptr))
@@ -2082,7 +2116,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		// TODO: allow option for end-user to validate, in which case we perform a
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueInt64(0);
-		if (strlen(parsed_line_ptr) > 0)
+		if (!empty_field)
 		{
 			sscanf(parsed_line_ptr, "%I64d%n", &theField.GetInt64Ref(), &number_chars_read);
 			if (number_chars_read < strlen(parsed_line_ptr))
@@ -2101,7 +2135,7 @@ void Importer::ReadOneDataField(SchemaEntry const & column, BaseField & theField
 		// TODO: allow option for end-user to validate, in which case we perform a
 		// boost::lexical_cast<> via the Validation helper class and if it throws, we throw
 		theField.SetValueDouble(0.0);
-		if (strlen(parsed_line_ptr) > 0)
+		if (!empty_field)
 		{
 			double temp;
 			sscanf(parsed_line_ptr, "%lf%n", &temp, &number_chars_read);

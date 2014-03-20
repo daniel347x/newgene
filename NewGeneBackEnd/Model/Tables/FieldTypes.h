@@ -10,7 +10,7 @@ enum FIELD_TYPE
 
 	FIELD_TYPE_UNKNOWN = 0
 
-						 , FIELD_TYPE_INT32
+	, FIELD_TYPE_INT32
 	, FIELD_TYPE_INT64
 	, FIELD_TYPE_UINT32
 	, FIELD_TYPE_UINT64
@@ -61,6 +61,7 @@ bool IsFieldTypeInt64(FIELD_TYPE const & field_type);
 bool IsFieldTypeInt(FIELD_TYPE const & field_type);
 bool IsFieldTypeFloat(FIELD_TYPE const & field_type);
 bool IsFieldTypeString(FIELD_TYPE const & field_type);
+bool IsFieldTypeTimeRange(FIELD_TYPE const & field_type);
 
 template<FIELD_TYPE THE_FIELD_TYPE>
 struct FieldTypeTraits

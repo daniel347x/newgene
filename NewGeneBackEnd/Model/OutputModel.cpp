@@ -434,6 +434,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	// RANDOM_SAMPLING: Update DetermineNumberStages() to account for new random sampling algorithm
 	DetermineNumberStages();
 
 	if (failed || CheckCancelled())
@@ -603,6 +604,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 				% current_multiplicity % number_of_rows;
 			UpdateProgressBarToNextStage(msg_2.str(), "");
 
+			// DETAILED_COMMENTING: To see purpose of CreateXRTable(), search for DESCRIPTION_OF_XR_ALGORITHM
 			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, 0, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, child_set_number, current_child_view_name_index);
 			ClearTable(x_table_result);
 			merging_of_children_column_sets.push_back(xr_table_result);
@@ -613,6 +615,7 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 
             std::string sorting_rows_text("Sorting rows");
             std::string removing_duplicates_text("Removing duplicates");
+			// DETAILED_COMMENTING: To see purpose of SortAndOrRemoveDuplicates(), search for DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM
 			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, child_variable_group_raw_data_columns.variable_groups[0], sorting_rows_text, removing_duplicates_text, current_multiplicity, child_set_number, merging_of_children_column_sets, true, OutputModel::OutputGenerator::CHILD_VARIABLE_GROUP, true);
 			if (failed || CheckCancelled())
 			{
@@ -1312,6 +1315,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 		: primary_group_final_results[0].second.variable_groups[0].code ? *primary_group_final_results[0].second.variable_groups[0].code : std::string()) % number_of_rows_to_sort;
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
 
+	// DETAILED_COMMENTING: Add details about CreateInitialPrimaryMergeXRTable
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryMergeXRTable(intermediate_merging_of_primary_groups_column_sets.back().second);
 	if (failed || CheckCancelled())
 	{
@@ -1372,6 +1376,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 			UpdateProgressBarToNextStage(msg_.str(), std::string());
 
 			messager.SetPerformanceLabel("Performing a database join; please be patient...");
+			// DETAILED_COMMENTING: Describe MergeIndividualTopLevelGroupIntoPrevious()
 			intermediate_merge_of_top_level_primary_group_results = MergeIndividualTopLevelGroupIntoPrevious(primary_variable_group_final_result.second, duplicates_removed, count);
 			if (failed || CheckCancelled())
 			{
@@ -1395,6 +1400,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 				: primary_variable_group_final_result.second.variable_groups[0].code ? *primary_variable_group_final_result.second.variable_groups[0].code : std::string()) % number_of_rows;
 			UpdateProgressBarToNextStage(msg_2.str(), std::string());
 
+			// DETAILED_COMMENTING: To see purpose of CreateXRTable(), search for DESCRIPTION_OF_XR_ALGORITHM
 			xr_table_result = CreateXRTable(intermediate_merge_of_top_level_primary_group_results.second, count, 0, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, count, count);
 			ClearTable(intermediate_merging_of_primary_groups_column_sets.back());
 			intermediate_merging_of_primary_groups_column_sets.push_back(xr_table_result);
@@ -1405,6 +1411,7 @@ void OutputModel::OutputGenerator::MergeHighLevelGroupResults()
 
             std::string sorting_rows_text("Sorting rows");
             std::string removing_duplicates_text("Removing duplicates");
+			// DETAILED_COMMENTING: To see purpose of SortAndOrRemoveDuplicates(), search for DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM
 			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_final_result.second.variable_groups[0], sorting_rows_text, removing_duplicates_text, -1, count, intermediate_merging_of_primary_groups_column_sets, true, OutputModel::OutputGenerator::FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP, true);
 
 			if (failed || CheckCancelled())
@@ -2455,6 +2462,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string());
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
 
+	// Just pull raw data, making sure only to pull rows that overlap the time range selected by the end user,
+	// and ordering the rows first by primary keys, then by time range
 	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, primary_group_number, false);
 	x_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(x_table_result);
@@ -2464,6 +2473,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
+	// The only purpose of CreateInitialPrimaryXRTable() is to modify the schema
+	// to add an additional pair of time range columns so that the schema is a proper "XR" schema.
+	// Nothing more.
 	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(x_table_result.second, primary_group_number);
 	xr_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(xr_table_result);
@@ -2479,6 +2491,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = static_cast<int>(xr_table_result.second.columns_in_view.size()); // This class-global variable must be set
     std::string sorting_results_text("Sorting results");
     std::string removing_duplicates_text("Removing duplicates");
+	// DETAILED_COMMENTING: To see purpose of SortAndOrRemoveDuplicates(), search for DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM.
+	// But it just does what it says: sorts the rows by primary key, and removes duplicates
 	SqlAndColumnSet duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], sorting_results_text, removing_duplicates_text, 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP);
 
 	if (failed || CheckCancelled())
@@ -2544,33 +2558,43 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 		// ******************************************************************************************************************* //
+		// DESCRIPTION_OF_XR_ALGORITHM
 		// Merge identical rows, while keeping track of time ranges to handle them properly during the merge.
 		// This stage is the most complex.
 		// It takes advantage of the fact that the rows are both ordered within themselves
-		//    (inner tables from left to right within each row are sorted)
+		//    (inner tables from left to right within each row are sorted -
+		//     each inner table consisting of a SINGLE multiplicity of the DMU
+		//     which has multiplicity greater than 1, along with its
+		//     selected secondary key data)
 		// and sorted within the table (rows are sorted in ascending order).
 		//
 		// The merging of rows also splits rows to handle the time range overlap of the new data being joined.
 		//
 		// Finally, this stage also tracks all rows with the new data being NULL due to either:
 		// ... The reordering inside of individual rows of inner tables (from the last step)
-		//    that may have caused (potentailly double) rows to appear, one of which has NULL in the final inner table,
-		// ... Or the merging/splitting of MULTIPLE rows together in this stage due to time range handling.
+		//    that may have caused (potentially double) rows to appear, one of which has NULL in the final inner table,
+		// ... Or the merging/splitting of MULTIPLE rows together or apart in this stage due to time range handling.
 		//
 		// (Note that there are, therefore, TWO stages of the splitting and creation of multiple rows
 		// due to time range handling: One resulting from the joining of new data and the splitting of individual rows
 		// to handle time range overlap of each individual joined row (the prior stage),
-		// and the other to handle time range overlap of adjacent joined rows (in this stage).
+		// and the other to handle time range overlap of adjacent joined rows (in this stage).)
 		//
-		// Finally, this stage carefully tracks all rows with NULL and not NULL in the final inner table along with their time ranges,
+		// Finally, this stage carefully tracks all rows with NULL and NOT NULL in the final inner table along with their time ranges,
 		// and when all rows with non-NULL in the final inner table that match on all other primary keys have completed processing,
 		// the algorithm does a special step of processing where it checks each tracked NULL row (including time range)
 		// against the non-NULL entries over the same time range that match on the keys, and if there is a match
 		// found it EXCLUDES the NULL row from the result set; otherwise it INCLUDES it.
-		// This is how NewGene handles displaying K-ads that have a smaller maximum count than the K-value selected by the user
-		// (i.e., K=6 but there are only 4 countries in the dispute).  (In the latter case, a row with all 4 countries
+		// This is how NewGene handles displaying K-ads that have, in the final output,
+		// a smaller maximum count than the K-value selected by the user
+		// (i.e., K=6 but there are only 4 countries in the dispute over the time range).
+		// (In the latter case, a row with all 4 countries
 		// and 2 NULLs should appear; whereas if 5 or more countries are available over the same time range, a row
-		// with 4 countries should NOT appear).
+		// with 4 countries should NOT appear - such a scenario could arise if the new inner table being merged in
+		// first adds a 5th country, but then this row gets split by time range such that the 5th country only
+		// partially overlaps the previous 4 countries, so the row gets split into two rows, one of which has
+		// the NULL in the fifth inner table - this row would then need to possibly be merged with ANOTHER
+		// row over the same time range as the NULL row that DOES have a country in the 5th slot).
 		// ******************************************************************************************************************* //
 
 		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
@@ -2587,6 +2611,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 
 		// ******************************************************************************************************************* //
+		// DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM
 		// The previous stage handled merging and splitting of rows to handle time range overlap and NULLs.
 		// However, it leaves some duplicate rows in its wake and it does not place rows into its result set in sorted order.
 		// Perform a final pass, this time once again sorting the rows in the table in ascending order,
@@ -2598,6 +2623,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		// ******************************************************************************************************************* //
         std::string sorting_rows_text("Sorting rows");
         std::string removing_duplicates_text("Removing duplicates");
+		// DETAILED_COMMENTING: To see purpose of SortAndOrRemoveDuplicates(), search for DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM
 		duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], sorting_rows_text, removing_duplicates_text, current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
 
 		if (failed || CheckCancelled())
@@ -7163,6 +7189,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_string += result_columns.original_table_names[0];
 	sql_string += "\"";
 
+	// Only include rows in raw data that overlap the time range selected
+	// by the user, or that have no time range granularity (represented by 0
+	// in the time range fields)
 	if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 		if (count_only)
@@ -7464,6 +7493,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number)
 {
+
+	// ************************************************************************************************ //
+	// This function doesn't do anything complicated because it is creating the INITIAL "XR" table.
+	// ... So this function just copies the data from the initial "X" table, and adds
+	// ... the required additional time range columns so that the schema becomes correct
+	// ... for an "XR" table, as expected by the following stage of the algorithm.
+	// ************************************************************************************************ //
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
@@ -10617,6 +10653,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
+// DETAILED_COMMENTING: To see purpose of CreateXRTable(), search for DESCRIPTION_OF_XR_ALGORITHM
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateXRTable(ColumnsInTempView const & previous_full_table__each_row_containing_two_sets_of_data_being_cleaned_against_one_another, int const current_multiplicity, int const primary_group_number, XR_TABLE_CATEGORY const xr_table_category, int const current_set_number, int const current_view_name_index)
 {
 
@@ -10947,6 +10984,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 
 	// ***************************************************************************************************************************************** //
+	// DESCRIPTION_OF_XR_ALGORITHM
 	// Now step through every row to merge the first set of columns (at the left of each row)
 	// with the new set of columns (at the right of each row).
 	// Specifically check for TIME RANGE OVERLAP - that is the entire purpose of this loop.
@@ -14228,6 +14266,7 @@ void OutputModel::OutputGenerator::UpdateProgressBarValue(Messager & messager, s
 
 }
 
+// DETAILED_COMMENTING: To see purpose of SortAndOrRemoveDuplicates(), search for DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::SortAndOrRemoveDuplicates(ColumnsInTempView const & column_set, WidgetInstanceIdentifier const & variable_group, std::string & msg_sort_preface, std::string & msg_remove_duplicates_preface, int const current_multiplicity, int const primary_group_number, SqlAndColumnSets & sql_and_column_sets, bool const do_clear_table, XR_TABLE_CATEGORY const xr_table_category, bool const consider_merging_timerange_adjacent_identical_rows)
 {
 

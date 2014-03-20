@@ -1593,6 +1593,7 @@ bool Table_VariableGroupData::BuildImportDefinition
 								input_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DATETIME_STRING;
 								output_schema_vector[colindex_yearEnd].field_type = FIELD_TYPE_DATETIME_STRING;
 							}
+
 						}
 						else
 						{
@@ -1646,6 +1647,12 @@ bool Table_VariableGroupData::BuildImportDefinition
 
 					}
 
+				}
+				break;
+
+				case TIME_GRANULARITY__NONE:
+				{
+					// no-op: no time range columns appear in the variable group instance table when the time granularity is none
 				}
 				break;
 

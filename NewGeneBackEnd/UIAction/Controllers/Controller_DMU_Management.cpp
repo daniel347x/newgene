@@ -667,7 +667,7 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 				}
 				else
 				{
-					boost::format msg("Variable group '%1%' successfully refreshed from file.");
+					boost::format msg("DMU '%1%' successfully refreshed from file.");
 					msg % Table_DMU_Identifier::GetDmuCategoryDisplayText(dmu_category);
 					messager.ShowMessageBox(msg.str());
 				}

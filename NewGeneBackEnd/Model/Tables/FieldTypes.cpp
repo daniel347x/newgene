@@ -146,3 +146,38 @@ bool IsFieldTypeString(FIELD_TYPE const & field_type)
 	return returnVal;
 
 }
+
+bool IsFieldTypeTimeRange(FIELD_TYPE const & field_type)
+{
+
+	bool returnVal = false;
+
+	switch (field_type)
+	{
+
+		case FIELD_TYPE_DAY:
+		case FIELD_TYPE_MONTH:
+		case FIELD_TYPE_YEAR:
+		case FIELD_TYPE_DATETIME_STRING:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DAY:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_MONTH:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_YEAR:
+		case FIELD_TYPE_DMU_PRIMARY_KEY_AND_DATETIME_STRING:
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_START_DATETIME:
+		case FIELD_TYPE_TIME_RANGE_OUTPUT_END_DATETIME:
+		{
+			returnVal = true;
+		}
+		break;
+
+		default:
+		{
+			returnVal = false;
+		}
+		break;
+
+	}
+
+	return returnVal;
+
+}
