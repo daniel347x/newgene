@@ -6,7 +6,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	//Executor executor(db);
+	Executor executor(db);
 
 	std::string sql_insert;
 
@@ -121,7 +121,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 		return;
 	}
 
-	//executor.success();
+	executor.success();
 
 	if (stmt)
 	{
@@ -137,7 +137,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
-	//Executor executor(db);
+	Executor executor(db);
 
 	std::string errorMsg;
 	for (int row = 0; row < number_rows_in_block; ++row)
@@ -181,7 +181,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 
 	}
 
-	//executor.success();
+	executor.success();
 
 }
 
