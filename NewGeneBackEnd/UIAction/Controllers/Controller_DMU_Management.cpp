@@ -606,8 +606,6 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 			for_each(action_request.items->cbegin(), action_request.items->cend(), [&input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 			{
 
-				Executor executor(input_model.getDb());
-
 				WidgetInstanceIdentifier dmu_category = instanceActionItem.first;
 
 				if (!dmu_category.code || !dmu_category.uuid || dmu_category.code->empty() || dmu_category.uuid->empty())
@@ -640,7 +638,6 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 				{
 					return;
 				}
-
 
 				if (input_model.t_dmu_setmembers.badreadlines > 0 || input_model.t_dmu_setmembers.badwritelines > 0)
 				{
@@ -683,8 +680,6 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 				DataChange change(type, intention, dmu_category, dmu_members);
 
 				change_response.changes.push_back(change);
-
-				executor.success();
 
 			});
 

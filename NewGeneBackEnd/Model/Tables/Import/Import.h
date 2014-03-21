@@ -485,7 +485,8 @@ class Importer
 
 		static int const block_size = 500; // Maximum number of rows supported for block insert by SQLite
 
-		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_, WHICH_IMPORT const & which_import_);
+		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_, WHICH_IMPORT const & which_import_, std::string & errorMsg);
+		virtual ~Importer();
 
 		bool DoImport(std::string & errorMsg, Messager & messager);
 

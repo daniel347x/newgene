@@ -871,7 +871,7 @@ bool ImportDefinition::IsEmpty()
 }
 
 Importer::Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_,
-				   TableImportCallbackFn table_write_callback_, WHICH_IMPORT const & which_import_)
+				   TableImportCallbackFn table_write_callback_, WHICH_IMPORT const & which_import_, std::string & errorMsg)
 	: import_definition(import_definition_)
 	, table_write_callback(table_write_callback_)
 	, model(model_)
@@ -882,6 +882,113 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 	, badreadlines(0)
 	, badwritelines(0)
 {
+
+	InputModel * inputModel = nullptr;
+	OutputModel * outputModel = nullptr;
+
+	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
+	{
+
+		try
+		{
+			inputModel = dynamic_cast<InputModel *>(model);
+		}
+		catch (std::bad_cast &)
+		{
+			boost::format msg("Bad input mode in DoImport.");
+			errorMsg = msg.str();
+			return;
+		}
+
+		{
+			Executor executor(inputModel->getDb());
+
+			if (!table->ImportStart(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
+			{
+				boost::format msg("Failed to start input data import.");
+				errorMsg = msg.str();
+				return;
+			}
+		}
+
+	}
+
+	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__OUTPUT_MODEL)
+	{
+
+		try
+		{
+			outputModel = dynamic_cast<OutputModel *>(model);
+		}
+		catch (std::bad_cast &)
+		{
+			boost::format msg("Bad output mode in DoImport.");
+			errorMsg = msg.str();
+			return;
+		}
+
+		inputModel = &outputModel->getInputModel();
+
+		{
+
+			Executor executor(outputModel->getDb());
+
+			if (!table->ImportStart(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
+			{
+				boost::format msg("Failed to start output data import.");
+				errorMsg = msg.str();
+				return;
+			}
+
+		}
+
+	}
+
+}
+
+Importer::~Importer()
+{
+
+	InputModel * inputModel = nullptr;
+	OutputModel * outputModel = nullptr;
+
+	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
+	{
+		try
+		{
+			inputModel = dynamic_cast<InputModel *>(model);
+		}
+		catch (std::bad_cast &)
+		{
+			// no throws in ctor
+			return;
+		}
+
+		if (!table->ImportEnd(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
+		{
+			// no throws in ctor
+			return;
+		}
+	}
+
+	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__OUTPUT_MODEL)
+	{
+		try
+		{
+			outputModel = dynamic_cast<OutputModel *>(model);
+		}
+		catch (std::bad_cast &)
+		{
+			// no throws in ctor
+			return;
+		}
+		if (!table->ImportEnd(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
+		{
+			// no throws in ctor
+			return;
+		}
+	}
+
 }
 
 void Importer::InitializeFields()
@@ -1715,53 +1822,6 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 		}
 	} BOOST_SCOPE_EXIT_END
 
-	InputModel * inputModel = nullptr;
-	OutputModel * outputModel = nullptr;
-
-	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
-	{
-		try
-		{
-			inputModel = dynamic_cast<InputModel *>(model);
-		}
-		catch (std::bad_cast &)
-		{
-			boost::format msg("Bad input mode in DoImport.");
-			errorMsg = msg.str();
-			return false;
-		}
-
-		if (!table->ImportStart(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
-		{
-			boost::format msg("Failed to start input data import.");
-			errorMsg = msg.str();
-			return false;
-		}
-	}
-
-	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__OUTPUT_MODEL)
-	{
-		try
-		{
-			outputModel = dynamic_cast<OutputModel *>(model);
-		}
-		catch (std::bad_cast &)
-		{
-			boost::format msg("Bad output mode in DoImport.");
-			errorMsg = msg.str();
-			return false;
-		}
-
-		inputModel = &outputModel->getInputModel();
-
-		if (!table->ImportStart(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
-		{
-			boost::format msg("Failed to start output data import.");
-			errorMsg = msg.str();
-			return false;
-		}
-	}
-
 	// Count lines in file
 	std::fstream data_file_count_lines;
 	data_file_count_lines.open(import_definition.input_file.c_str(), std::ios::in);
@@ -1983,31 +2043,6 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 		errors.push_back(errorMsg);
 		errorMsg.clear();
 		return false;
-	}
-
-	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
-	{
-		if (!table->ImportEnd(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
-		{
-			boost::format msg("Failed to end input data import.");
-			errorMsg = msg.str();
-			errors.push_back(errorMsg);
-			errorMsg.clear();
-			return false;
-		}
-
-	}
-
-	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__OUTPUT_MODEL)
-	{
-		if (!table->ImportEnd(outputModel->getDb(), identifier, import_definition, outputModel, inputModel))
-		{
-			boost::format msg("Failed to end output data import.");
-			errorMsg = msg.str();
-			errors.push_back(errorMsg);
-			errorMsg.clear();
-			return false;
-		}
 	}
 
 	return true;

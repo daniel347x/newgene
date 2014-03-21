@@ -372,8 +372,6 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 				for_each(action_request.items->cbegin(), action_request.items->cend(), [this, &input_model, &messager, &change_response](InstanceActionItem const & instanceActionItem)
 				{
 
-					Executor executor(input_model.getDb());
-
 					if (!instanceActionItem.second)
 					{
 						boost::format msg("Missing VG refresh information.");
@@ -422,31 +420,24 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						return;
 					}
 
-					// Add the data columns of the table to the VG_SET_MEMBER table
+					// Create the table importer
 					errorMsg.clear();
-					success = input_model.t_vgp_setmembers.AddNewVGTableEntries(input_model.getDb(), &input_model, variable_group, import_definition, errorMsg);
-					if (!success)
+					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
+					if (!errorMsg.empty())
 					{
-						new_table->DeleteDataTable(input_model.getDb(), &input_model);
-						boost::format msg("%1%");
-						if (!errorMsg.empty())
-						{
-							msg % errorMsg;
-						}
-						else
-						{
-							msg % "Unable to create metadata entries describing the columns for the variable group.";
-						}
+						boost::format msg("Unable to create data table: %1%");
+						msg % errorMsg;
 						messager.ShowMessageBox(msg.str());
 						return;
 					}
 
-					// Add the metadata for the new table to the VG_DATA_METADATA__DATETIME_COLUMNS table
-					// ... but only if it has time granularity
-					if (time_granularity != TIME_GRANULARITY::TIME_GRANULARITY__NONE)
 					{
+
+						Executor executor(input_model.getDb());
+
+						// Add the data columns of the table to the VG_SET_MEMBER table
 						errorMsg.clear();
-						success = input_model.t_vgp_data_metadata__datetime_columns.AddDataTable(input_model.getDb(), &input_model, variable_group, errorMsg);
+						success = input_model.t_vgp_setmembers.AddNewVGTableEntries(input_model.getDb(), &input_model, variable_group, import_definition, errorMsg);
 						if (!success)
 						{
 							new_table->DeleteDataTable(input_model.getDb(), &input_model);
@@ -457,119 +448,148 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 							}
 							else
 							{
-								msg % "Unable to create date/time column entries for the variable group.";
+								msg % "Unable to create metadata entries describing the columns for the variable group.";
 							}
 							messager.ShowMessageBox(msg.str());
 							return;
 						}
-					}
 
-					// Add the metadata for the new table to the VG_DATA_METADATA__PRIMARY_KEYS table
-					errorMsg.clear();
-					success = input_model.t_vgp_data_metadata__primary_keys.AddDataTable(input_model.getDb(), &input_model, variable_group, import_definition.primary_keys_info, errorMsg);
-					if (!success)
-					{
-						new_table->DeleteDataTable(input_model.getDb(), &input_model);
-						if (!errorMsg.empty())
+						// Add the metadata for the new table to the VG_DATA_METADATA__DATETIME_COLUMNS table
+						// ... but only if it has time granularity
+						if (time_granularity != TIME_GRANULARITY::TIME_GRANULARITY__NONE)
 						{
-							boost::format msg("%1%: %2%");
-							msg % "Unable to create primary key metadata column entries for the variable group.";
-							msg % errorMsg;
-							messager.ShowMessageBox(msg.str());
-						}
-						else
-						{
-							boost::format msg("%1%");
-							msg % "Unable to create primary key metadata column entries for the variable group.";
-							messager.ShowMessageBox(msg.str());
-						}
-						return;
-					}
-
-					// Now add raw data to the table
-					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA);
-					errorMsg.clear();
-					success = table_importer.DoImport(errorMsg, messager);
-					if (table_importer.badreadlines > 0)
-					{
-						boost::format msg("Number rows of data failed to read from import file: %1%");
-						msg % boost::lexical_cast<std::string>(table_importer.badreadlines);
-						table_importer.errors.push_back(msg.str());
-					}
-					if (table_importer.badwritelines > 0)
-					{
-						boost::format msg("Number rows of data failed to write to database: %1%");
-						msg % boost::lexical_cast<std::string>(table_importer.badwritelines);
-						table_importer.errors.push_back(msg.str());
-					}
-					std::string allErrors;
-					boost::posix_time::ptime current_date_time = boost::posix_time::second_clock::local_time();
-					if (!success)
-					{
-						boost::format msg("%1%: Unable to import or refresh the variable group from the file: %2%");
-						msg % boost::posix_time::to_simple_string(current_date_time).c_str() % errorMsg;
-						std::string new_error(msg.str());
-						table_importer.errors.push_back(new_error);
-					}
-					if (!table_importer.errors.empty())
-					{
-						boost::format msg("%1%: There were errors during import.  These will be appended to log \"newgene.import.log\"");
-						msg % boost::posix_time::to_simple_string(current_date_time).c_str();
-						std::string errorMsg = msg.str();
-						table_importer.errors.push_back(errorMsg);
-						std::fstream importlog;
-						importlog.open("newgene.import.log", std::ios::out | std::ios::app);
-						std::for_each(table_importer.errors.crbegin(), table_importer.errors.crend(), [&](std::string const & the_error)
-						{
-							if (importlog.is_open())
+							errorMsg.clear();
+							success = input_model.t_vgp_data_metadata__datetime_columns.AddDataTable(input_model.getDb(), &input_model, variable_group, errorMsg);
+							if (!success)
 							{
-								importlog << the_error << std::endl;
+								new_table->DeleteDataTable(input_model.getDb(), &input_model);
+								boost::format msg("%1%");
+								if (!errorMsg.empty())
+								{
+									msg % errorMsg;
+								}
+								else
+								{
+									msg % "Unable to create date/time column entries for the variable group.";
+								}
+								messager.ShowMessageBox(msg.str());
+								return;
 							}
-							allErrors += the_error;
-							allErrors += "\n";
-						});
-						importlog.close();
-						messager.ShowMessageBox(allErrors);
-					}
-					if (!success)
-					{
-						new_table->DeleteDataTable(input_model.getDb(), &input_model);
-						boost::format msg("%1%");
-						msg % allErrors;
-						throw NewGeneException() << newgene_error_description(msg.str());
+						}
+
+						// Add the metadata for the new table to the VG_DATA_METADATA__PRIMARY_KEYS table
+						errorMsg.clear();
+						success = input_model.t_vgp_data_metadata__primary_keys.AddDataTable(input_model.getDb(), &input_model, variable_group, import_definition.primary_keys_info, errorMsg);
+						if (!success)
+						{
+							new_table->DeleteDataTable(input_model.getDb(), &input_model);
+							if (!errorMsg.empty())
+							{
+								boost::format msg("%1%: %2%");
+								msg % "Unable to create primary key metadata column entries for the variable group.";
+								msg % errorMsg;
+								messager.ShowMessageBox(msg.str());
+							}
+							else
+							{
+								boost::format msg("%1%");
+								msg % "Unable to create primary key metadata column entries for the variable group.";
+								messager.ShowMessageBox(msg.str());
+							}
+							return;
+						}
+
+						executor.success();
+
 					}
 
-					// Success!  Turn the pointer over to the input model
-					input_model.t_vgp_data_vector.push_back(std::move(new_table));
+					{
 
-					if (table_importer.badreadlines > 0 || table_importer.badwritelines > 0)
-					{
-						if (table_importer.badreadlines > 0 && table_importer.badwritelines > 0)
+						// Now add raw data to the table
+						errorMsg.clear();
+						success = table_importer.DoImport(errorMsg, messager);
+						if (table_importer.badreadlines > 0)
 						{
-							boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
-							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badreadlines) % boost::lexical_cast<std::string>(table_importer.badwritelines);
-							messager.ShowMessageBox(msg.str());
+							boost::format msg("Number rows of data failed to read from import file: %1%");
+							msg % boost::lexical_cast<std::string>(table_importer.badreadlines);
+							table_importer.errors.push_back(msg.str());
+						}
+						if (table_importer.badwritelines > 0)
+						{
+							boost::format msg("Number rows of data failed to write to database: %1%");
+							msg % boost::lexical_cast<std::string>(table_importer.badwritelines);
+							table_importer.errors.push_back(msg.str());
+						}
+						std::string allErrors;
+						boost::posix_time::ptime current_date_time = boost::posix_time::second_clock::local_time();
+						if (!success)
+						{
+							boost::format msg("%1%: Unable to import or refresh the variable group from the file: %2%");
+							msg % boost::posix_time::to_simple_string(current_date_time).c_str() % errorMsg;
+							std::string new_error(msg.str());
+							table_importer.errors.push_back(new_error);
+						}
+						if (!table_importer.errors.empty())
+						{
+							boost::format msg("%1%: There were errors during import.  These will be appended to log \"newgene.import.log\"");
+							msg % boost::posix_time::to_simple_string(current_date_time).c_str();
+							std::string errorMsg = msg.str();
+							table_importer.errors.push_back(errorMsg);
+							std::fstream importlog;
+							importlog.open("newgene.import.log", std::ios::out | std::ios::app);
+							std::for_each(table_importer.errors.crbegin(), table_importer.errors.crend(), [&](std::string const & the_error)
+							{
+								if (importlog.is_open())
+								{
+									importlog << the_error << std::endl;
+								}
+								allErrors += the_error;
+								allErrors += "\n";
+							});
+							importlog.close();
+							messager.ShowMessageBox(allErrors);
+						}
+						if (!success)
+						{
+							new_table->DeleteDataTable(input_model.getDb(), &input_model);
+							boost::format msg("%1%");
+							msg % allErrors;
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+
+						// Success!  Turn the pointer over to the input model
+						input_model.t_vgp_data_vector.push_back(std::move(new_table));
+
+						if (table_importer.badreadlines > 0 || table_importer.badwritelines > 0)
+						{
+							if (table_importer.badreadlines > 0 && table_importer.badwritelines > 0)
+							{
+								boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badreadlines) % boost::lexical_cast<std::string>(table_importer.badwritelines);
+								messager.ShowMessageBox(msg.str());
+							}
+							else
+							if (table_importer.badreadlines == 0 && table_importer.badwritelines > 0)
+							{
+								boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badwritelines);
+								messager.ShowMessageBox(msg.str());
+							}
+							else
+							if (table_importer.badreadlines > 0 && table_importer.badwritelines == 0)
+							{
+								boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badreadlines);
+								messager.ShowMessageBox(msg.str());
+							}
 						}
 						else
-						if (table_importer.badreadlines == 0 && table_importer.badwritelines > 0)
 						{
-							boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
-							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badwritelines);
+							boost::format msg("Variable group '%1%' successfully refreshed from file.");
+							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group);
 							messager.ShowMessageBox(msg.str());
 						}
-						else
-						if (table_importer.badreadlines > 0 && table_importer.badwritelines == 0)
-						{
-							boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
-							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badreadlines);
-							messager.ShowMessageBox(msg.str());
-						}
-					}
-					else
-					{
-						boost::format msg("Variable group '%1%' successfully refreshed from file.");
-						msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group);
-						messager.ShowMessageBox(msg.str());
+
 					}
 
 					// ***************************************** //
@@ -582,8 +602,6 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					DATA_CHANGE_INTENTION intention = DATA_CHANGE_INTENTION__UPDATE;
 					DataChange change(type, intention, variable_group, vg_members);
 					change_response.changes.push_back(change);
-
-					executor.success();
 
 				});
 

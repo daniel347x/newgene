@@ -45,7 +45,6 @@ bool Table_VariableGroupData::ImportStart(sqlite3 * db, WidgetInstanceIdentifier
 	if (!tableManager().TableExists(db, TableNameFromVGCode(*variable_group.code)))
 	{
 
-
 		// Create the VG data table
 		std::string sql_create;
 		sql_create += "CREATE TABLE \"";

@@ -607,6 +607,8 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 
 	{
 
+		Executor executor(input_model_.getDb());
+
 		std::string sql = "DELETE FROM DMU_SET_MEMBER WHERE DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID = '";
 		sql += *dmu_category.uuid;
 		sql += "'";
@@ -626,13 +628,22 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 
+		executor.success();
+
 	}
 
 	badreadlines = 0;
 	badwritelines = 0;
 
 	std::string errorMsg;
-	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn, Importer::IMPORT_DMU_SET_MEMBER);
+	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn, Importer::IMPORT_DMU_SET_MEMBER, errorMsg);
+	if (!errorMsg.empty())
+	{
+		boost::format msg("Unable to begin DMU import process.");
+		messager.ShowMessageBox(msg.str());
+		return false;
+	}
+
 	table_importer.errors.clear();
 	bool success = table_importer.DoImport(errorMsg, messager);
 	if (table_importer.badreadlines > 0)
@@ -643,7 +654,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	}
 	if (table_importer.badwritelines > 0)
 	{
-		boost::format msg("Number rows of data failed to write to databae: %1%");
+		boost::format msg("Number rows of data failed to write to database: %1%");
 		msg % boost::lexical_cast<std::string>(table_importer.badwritelines);
 		table_importer.errors.push_back(msg.str());
 	}
@@ -689,6 +700,8 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	}
 
 	{
+
+		Executor executor(input_model_.getDb());
 
 		std::string sql = "SELECT * FROM DMU_SET_MEMBER WHERE DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID = '";
 		sql += *dmu_category.uuid;
@@ -753,6 +766,8 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 			sqlite3_finalize(stmt);
 			stmt = nullptr;
 		}
+
+		executor.success();
 
 	}
 

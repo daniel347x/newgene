@@ -60,8 +60,8 @@ void InputModel::LoadTables()
 							return; // from lambda
 						}
 
-						Importer table_importer(new_definition, this, vg_instance_data.get(), Importer::INSERT_OR_FAIL, variable_group_identifier, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA);
 						std::string errorMsg;
+						Importer table_importer(new_definition, this, vg_instance_data.get(), Importer::INSERT_OR_FAIL, variable_group_identifier, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
 
 						// disable, now that real import is completed
 
