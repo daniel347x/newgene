@@ -1027,10 +1027,21 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 	, which_import(which_import_)
 	, badreadlines(0)
 	, badwritelines(0)
+	, block_size(0)
 {
 
 	InputModel * inputModel = nullptr;
 	OutputModel * outputModel = nullptr;
+
+	if (mode == INSERT_OR_UPDATE)
+	{
+		// The SQLite limit of 500 does not apply here
+		block_size = block_size_no_sqlite_limit;
+	}
+	else
+	{
+		block_size = block_size_sqlite_limit;
+	}
 
 	if (table->table_model_type == Table_basemost::TABLE_MODEL_TYPE__INPUT_MODEL)
 	{
