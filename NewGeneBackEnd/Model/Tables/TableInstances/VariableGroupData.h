@@ -103,7 +103,7 @@ public:
 
 	void Load(sqlite3 * db, InputModel * input_model_);
 
-	bool AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string & errorMsg);
+	bool AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string & errorMsg, TIME_GRANULARITY const time_granularity);
 	bool DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name);
 
 	static std::string DefaultDatetimeStartColumnName;

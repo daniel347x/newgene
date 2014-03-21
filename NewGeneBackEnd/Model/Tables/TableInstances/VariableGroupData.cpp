@@ -1991,12 +1991,20 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 		char const * vg_data_table_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_NAME));
 		char const * vg_data_datetime_start_column_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_DATETIME_START_COLUMN_NAME));
 		char const * vg_data_datetime_end_column_name = reinterpret_cast<char const *>(sqlite3_column_text(stmt, INDEX__VG_DATA_TABLE_DATETIME_END_COLUMN_NAME));
-		// maps:
-		// vg_data_table_name =>
-		// a pair of datetime keys stuck into a vector (the first for the start datetime; the second for the end datetime)
-		// In the WidgetInstanceIdentifier, the CODE is set to the column name
-		identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_datetime_start_column_name)));
-		identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_datetime_end_column_name)));
+
+		// Only add to cache if we have a time granularity.
+		// Note: The entry must be in the table even with no time granularity
+		// in order to allow a FK relationship with the "primary key" table
+		// to support automatic cascading deletes, which are tied to this table through this FK relationship.
+		if (!boost::trim_copy(std::string(vg_data_datetime_start_column_name)).empty() && !boost::trim_copy(std::string(vg_data_datetime_end_column_name)).empty())
+		{
+			// maps:
+			// vg_data_table_name =>
+			// a pair of datetime keys stuck into a vector (the first for the start datetime; the second for the end datetime)
+			// In the WidgetInstanceIdentifier, the CODE is set to the column name
+			identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_datetime_start_column_name)));
+			identifiers_map[vg_data_table_name].push_back(WidgetInstanceIdentifier(std::string(vg_data_datetime_end_column_name)));
+		}
 	}
 
 	if (stmt)
@@ -2007,7 +2015,7 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 
 }
 
-bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string & errorMsg)
+bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string & errorMsg, TIME_GRANULARITY const time_granularity)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -2041,7 +2049,14 @@ bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, Inp
 	boost::format
 	add_stmt("INSERT INTO VG_DATA_METADATA__DATETIME_COLUMNS (VG_DATA_TABLE_NAME, VG_DATETIME_START_COLUMN_NAME, VG_DATETIME_END_COLUMN_NAME, VG_DATA_FK_VG_CATEGORY_UUID) VALUES ('%1%', '%2%', '%3%', '%4%')");
 	add_stmt % new_table_name;
-	add_stmt % DefaultDatetimeStartColumnName % DefaultDatetimeEndColumnName;
+	if (time_granularity != TIME_GRANULARITY__NONE)
+	{
+		add_stmt % DefaultDatetimeStartColumnName % DefaultDatetimeEndColumnName;
+	}
+	else
+	{
+		add_stmt % std::string() % std::string();
+	}
 	add_stmt % *vg.uuid;
 	char * errmsg = nullptr;
 	sqlite3_exec(db, add_stmt.str().c_str(), NULL, NULL, &errmsg);
