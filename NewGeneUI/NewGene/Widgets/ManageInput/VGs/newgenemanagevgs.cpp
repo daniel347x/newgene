@@ -942,7 +942,6 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 			{
 				valid = false;
 				errorMsg = "Duplicate column names detected for DMU primary key columns.";
-				return;
 			}
 		}
 
