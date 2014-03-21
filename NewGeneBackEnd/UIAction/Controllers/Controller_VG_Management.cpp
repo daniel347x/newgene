@@ -470,16 +470,19 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					if (!success)
 					{
 						new_table->DeleteDataTable(input_model.getDb(), &input_model);
-						boost::format msg("%1%");
 						if (!errorMsg.empty())
 						{
+							boost::format msg("%1%: %2%");
+							msg % "Unable to create primary key metadata column entries for the variable group.";
 							msg % errorMsg;
+							messager.ShowMessageBox(msg.str());
 						}
 						else
 						{
+							boost::format msg("%1%");
 							msg % "Unable to create primary key metadata column entries for the variable group.";
+							messager.ShowMessageBox(msg.str());
 						}
-						messager.ShowMessageBox(msg.str());
 						return;
 					}
 
