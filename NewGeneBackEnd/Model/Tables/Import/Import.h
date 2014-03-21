@@ -274,7 +274,23 @@ public:
 
 class TimeRangeFieldMapping : public RowFieldMapping
 {
-	
+
+	public:
+
+		// caches for time ranges
+		std::map<std::tuple<int, int, int, int, int, int>, std::pair<long, long>> ymd_ymd_int_mappings;
+		std::map<std::tuple<int, int, int>, std::pair<long, long>>                ymd_int_mappings;
+		std::map<std::tuple<int, int, int, int>, std::pair<long, long>>           ym_ym_int_mappings;
+		std::map<std::pair<int, int>, std::pair<long, long>>                      ym_int_mappings;
+		std::map<std::pair<int, int>, std::pair<long, long>>                      y_y_int_mappings;
+		std::map<int, std::pair<long, long>>                                      y_int_mappings;
+		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      ymd_ymd_string_mappings;
+		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      ymd_string_mappings;
+		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      ym_ym_string_mappings;
+		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      ym_string_mappings;
+		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      y_y_string_mappings;
+		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      y_string_mappings;
+
 	public:
 
 		enum TIME_RANGE_FIELD_MAPPING_TYPE

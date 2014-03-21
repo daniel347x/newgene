@@ -14192,7 +14192,7 @@ std::string OutputModel::OutputGenerator::CheckOutputFileExists()
 		{
 			if (!overwrite_if_output_file_already_exists)
 			{
-				boost::format overwrite_msg("The file %1% does already exists.  Overwrite this file?");
+				boost::format overwrite_msg("The file %1% already exists.  Overwrite this file?");
 				overwrite_msg % setting_path_to_kad_output->ToString();
 				bool overwrite_file = messager.ShowQuestionMessageBox("Overwrite file?", overwrite_msg.str());
 				if (!overwrite_file)

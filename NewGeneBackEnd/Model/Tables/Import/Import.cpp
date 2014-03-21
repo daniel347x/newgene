@@ -159,6 +159,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
+				std::pair<long, long> & cached_times = y_int_mappings[the_input_field->GetInt32Ref()];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_year_start->SetValueInt64(cached_times.first);
+					the_output_field_year_end->SetValueInt64(cached_times.second);
+					break;
+				}
+
 				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field->GetInt32Ref(), 1, 1));
@@ -166,6 +174,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
 
 				the_output_field_year_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_year_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
@@ -187,6 +198,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
+				std::pair<long, long> & cached_times = y_y_int_mappings[std::make_pair(the_input_field_start->GetInt32Ref(), the_input_field_end->GetInt32Ref())];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_year_start->SetValueInt64(cached_times.first);
+					the_output_field_year_end->SetValueInt64(cached_times.second);
+					break;
+				}
+
 				// convert year to ms since jan 1, 1970 00:00:00.000
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 				boost::posix_time::ptime time_t_epoch__rowdatestart(boost::gregorian::date(the_input_field_start->GetInt32Ref(), 1, 1));
@@ -194,6 +213,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
+
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
 
 				the_output_field_year_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_year_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
@@ -212,6 +234,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				{
 					// Todo: log warning
 					return;
+				}
+
+				std::pair<long, long> & cached_times = y_string_mappings[the_input_field_datetime_year->GetStringRef()];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_datetime_start->SetValueInt64(cached_times.first);
+					the_output_field_datetime_end->SetValueInt64(cached_times.second);
+					break;
 				}
 
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
@@ -237,6 +267,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = the_year_start - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = the_year_end - time_t_epoch__1970;
 
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
+
 				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
@@ -255,6 +288,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				{
 					// Todo: log warning
 					return;
+				}
+
+				std::pair<long, long> & cached_times = y_y_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_datetime_start->SetValueInt64(cached_times.first);
+					the_output_field_datetime_end->SetValueInt64(cached_times.second);
+					break;
 				}
 
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
@@ -291,6 +332,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
 
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
+
 				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
@@ -309,6 +353,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				{
 					// Todo: log warning
 					return;
+				}
+
+				std::pair<long, long> & cached_times = ym_int_mappings[std::make_pair(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref())];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_month_start->SetValueInt64(cached_times.first);
+					the_output_field_month_end->SetValueInt64(cached_times.second);
+					break;
 				}
 
 				int year_start = the_input_field_year_start->GetInt32Ref();
@@ -343,6 +395,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
+
 				the_output_field_month_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_month_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
@@ -364,6 +419,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				{
 					// Todo: log warning
 					return;
+				}
+
+				std::pair<long, long> & cached_times = ym_ym_int_mappings[std::tuple<int, int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref())];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_day_start->SetValueInt64(cached_times.first);
+					the_output_field_day_end->SetValueInt64(cached_times.second);
+					break;
 				}
 
 				// convert year to ms since jan 1, 1970 00:00:00.000
@@ -417,6 +480,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
+
 				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_day_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
@@ -434,6 +500,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				{
 					// Todo: log warning
 					return;
+				}
+
+				std::pair<long, long> & cached_times = ym_string_mappings[the_input_field_datetime_month->GetStringRef()];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_datetime_start->SetValueInt64(cached_times.first);
+					the_output_field_datetime_end->SetValueInt64(cached_times.second);
+					break;
 				}
 
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
@@ -459,6 +533,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = the_month_start - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = the_month_end - time_t_epoch__1970;
 
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
+
 				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
@@ -477,6 +554,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				{
 					// Todo: log warning
 					return;
+				}
+
+				std::pair<long, long> & cached_times = ym_ym_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_datetime_start->SetValueInt64(cached_times.first);
+					the_output_field_datetime_end->SetValueInt64(cached_times.second);
+					break;
 				}
 
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
@@ -513,6 +598,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
 
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
+
 				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 		
@@ -525,13 +613,21 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				std::shared_ptr<BaseField> const the_input_field_year_start = RetrieveDataField(input_file_fields[0], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_month_start = RetrieveDataField(input_file_fields[1], input_data_fields);
 				std::shared_ptr<BaseField> const the_input_field_day_start = RetrieveDataField(input_file_fields[2], input_data_fields);
-				std::shared_ptr<BaseField> the_output_field_month_start = RetrieveDataField(output_table_fields[0], output_data_fields);
-				std::shared_ptr<BaseField> the_output_field_month_end = RetrieveDataField(output_table_fields[1], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_day_start = RetrieveDataField(output_table_fields[0], output_data_fields);
+				std::shared_ptr<BaseField> the_output_field_day_end = RetrieveDataField(output_table_fields[1], output_data_fields);
 
-				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start  || !the_output_field_month_start || !the_output_field_month_end)
+				if (!the_input_field_day_start || !the_input_field_month_start || !the_input_field_year_start  || !the_output_field_day_start || !the_output_field_day_end)
 				{
 					// Todo: log warning
 					return;
+				}
+
+				std::pair<long, long> & cached_times = ymd_int_mappings[std::tuple<int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref())];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_day_start->SetValueInt64(cached_times.first);
+					the_output_field_day_end->SetValueInt64(cached_times.second);
+					break;
 				}
 
 				int year_start = the_input_field_year_start->GetInt32Ref();
@@ -551,8 +647,11 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
-				the_output_field_month_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
-				the_output_field_month_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
+
+				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
+				the_output_field_day_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
 			}
 			break;
@@ -574,6 +673,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				{
 					// Todo: log warning
 					return;
+				}
+
+				std::pair<long, long> & cached_times = ymd_ymd_int_mappings[std::tuple<int, int, int, int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref(), the_input_field_day_end->GetInt32Ref())];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_day_start->SetValueInt64(cached_times.first);
+					the_output_field_day_end->SetValueInt64(cached_times.second);
+					break;
 				}
 
 				// convert year to ms since jan 1, 1970 00:00:00.000
@@ -652,6 +759,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = time_t_epoch__rowdatestart - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = time_t_epoch__rowdateend - time_t_epoch__1970;
 
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
+
 				the_output_field_day_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_day_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 
@@ -669,6 +779,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				{
 					// Todo: log warning
 					return;
+				}
+
+				std::pair<long, long> & cached_times = ymd_string_mappings[the_input_field_datetime_day->GetStringRef()];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_datetime_start->SetValueInt64(cached_times.first);
+					the_output_field_datetime_end->SetValueInt64(cached_times.second);
+					break;
 				}
 
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
@@ -694,6 +812,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				boost::posix_time::time_duration diff_start_from_1970 = the_day_start - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = the_day_end - time_t_epoch__1970;
 
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
+
 				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
 		
@@ -712,6 +833,14 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 				{
 					// Todo: log warning
 					return;
+				}
+
+				std::pair<long, long> & cached_times = ymd_ymd_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
+				if (cached_times.first != 0 && cached_times.second != 0)
+				{
+					the_output_field_datetime_start->SetValueInt64(cached_times.first);
+					the_output_field_datetime_end->SetValueInt64(cached_times.second);
+					break;
 				}
 
 				boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
@@ -747,6 +876,9 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 
 				boost::posix_time::time_duration diff_start_from_1970 = the_time_start - time_t_epoch__1970;
 				boost::posix_time::time_duration diff_end_from_1970 = the_time_end - time_t_epoch__1970;
+
+				cached_times.first = diff_start_from_1970.total_milliseconds();
+				cached_times.second = diff_end_from_1970.total_milliseconds();
 
 				the_output_field_datetime_start->SetValueInt64(diff_start_from_1970.total_milliseconds());
 				the_output_field_datetime_end->SetValueInt64(diff_end_from_1970.total_milliseconds());
