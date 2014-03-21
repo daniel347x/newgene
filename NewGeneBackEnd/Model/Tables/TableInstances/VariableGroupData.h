@@ -66,7 +66,7 @@ public:
 
 	void Load(sqlite3 * db, InputModel * input_model_);
 
-	bool AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::vector<std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE>> const & primary_keys_info, std::string errorMsg);
+	bool AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::vector<std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE>> const & primary_keys_info, std::string & errorMsg);
 	bool DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name);
 
 	// The first element of the pair is the WidgetInstanceIdentifier corresponding to the DMU category associated with the primary key column
@@ -103,7 +103,7 @@ public:
 
 	void Load(sqlite3 * db, InputModel * input_model_);
 
-	bool AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string errorMsg);
+	bool AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string & errorMsg);
 	bool DeleteDataTable(sqlite3 * db, InputModel * input_model_, std::string const & table_name);
 
 	static std::string DefaultDatetimeStartColumnName;

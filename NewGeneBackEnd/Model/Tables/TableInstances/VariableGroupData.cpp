@@ -1764,7 +1764,7 @@ void Table_VariableGroupMetadata_PrimaryKeys::Load(sqlite3 * db, InputModel * in
 }
 
 bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg,
-		std::vector<std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE>> const & primary_keys_info, std::string errorMsg)
+		std::vector<std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE>> const & primary_keys_info, std::string & errorMsg)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -1876,6 +1876,11 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 	//theExecutor.success();
 
 	//return theExecutor.succeeded();
+	if (!errorMsg.empty())
+	{
+		return false;
+	}
+
 	return true;
 
 }
@@ -2003,7 +2008,7 @@ void Table_VariableGroupMetadata_DateTimeColumns::Load(sqlite3 * db, InputModel 
 
 }
 
-bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string errorMsg)
+bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, InputModel * input_model_, WidgetInstanceIdentifier const & vg, std::string & errorMsg)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);

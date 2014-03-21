@@ -429,7 +429,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					{
 						new_table->DeleteDataTable(input_model.getDb(), &input_model);
 						boost::format msg("%1%");
-						if (errorMsg.empty())
+						if (!errorMsg.empty())
 						{
 							msg % errorMsg;
 						}
@@ -451,7 +451,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						{
 							new_table->DeleteDataTable(input_model.getDb(), &input_model);
 							boost::format msg("%1%");
-							if (errorMsg.empty())
+							if (!errorMsg.empty())
 							{
 								msg % errorMsg;
 							}
@@ -471,7 +471,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					{
 						new_table->DeleteDataTable(input_model.getDb(), &input_model);
 						boost::format msg("%1%");
-						if (errorMsg.empty())
+						if (!errorMsg.empty())
 						{
 							msg % errorMsg;
 						}
@@ -494,7 +494,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					}
 					if (table_importer.badwritelines > 0)
 					{
-						boost::format msg("Number rows of data failed to write to databae: %1%");
+						boost::format msg("Number rows of data failed to write to database: %1%");
 						msg % boost::lexical_cast<std::string>(table_importer.badwritelines);
 						table_importer.errors.push_back(msg.str());
 					}
