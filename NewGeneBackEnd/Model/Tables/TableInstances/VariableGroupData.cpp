@@ -2070,13 +2070,16 @@ bool Table_VariableGroupMetadata_DateTimeColumns::AddDataTable(sqlite3 * db, Inp
 		return false;
 	}
 
-	// add to cache
-	// maps:
-	// vg_data_table_name =>
-	// a pair of datetime keys stuck into a vector (the first for the start datetime; the second for the end datetime)
-	// In the WidgetInstanceIdentifier, the CODE is set to the column name
-	identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(DefaultDatetimeStartColumnName));
-	identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(DefaultDatetimeEndColumnName));
+	if (time_granularity != TIME_GRANULARITY__NONE)
+	{
+		// add to cache
+		// maps:
+		// vg_data_table_name =>
+		// a pair of datetime keys stuck into a vector (the first for the start datetime; the second for the end datetime)
+		// In the WidgetInstanceIdentifier, the CODE is set to the column name
+		identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(DefaultDatetimeStartColumnName));
+		identifiers_map[new_table_name].push_back(WidgetInstanceIdentifier(DefaultDatetimeEndColumnName));
+	}
 
 	//theExecutor.success();
 
