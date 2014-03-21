@@ -12,6 +12,20 @@
 #include "../../OutputModel.h"
 #include "../../../Utilities/Validation.h"
 
+// caches for time ranges
+std::map<std::tuple<int, int, int, int, int, int>, std::pair<std::int64_t, std::int64_t>> TimeRangeFieldMapping::ymd_ymd_int_mappings;
+std::map<std::tuple<int, int, int>, std::pair<std::int64_t, std::int64_t>>                TimeRangeFieldMapping::ymd_int_mappings;
+std::map<std::tuple<int, int, int, int>, std::pair<std::int64_t, std::int64_t>>           TimeRangeFieldMapping::ym_ym_int_mappings;
+std::map<std::pair<int, int>, std::pair<std::int64_t, std::int64_t>>                      TimeRangeFieldMapping::ym_int_mappings;
+std::map<std::pair<int, int>, std::pair<std::int64_t, std::int64_t>>                      TimeRangeFieldMapping::y_y_int_mappings;
+std::map<int, std::pair<std::int64_t, std::int64_t>>                                      TimeRangeFieldMapping::y_int_mappings;
+std::map<std::pair<std::string, std::string>, std::pair<std::int64_t, std::int64_t>>      TimeRangeFieldMapping::ymd_ymd_string_mappings;
+std::map<std::string, std::pair<std::int64_t, std::int64_t>>                              TimeRangeFieldMapping::ymd_string_mappings;
+std::map<std::pair<std::string, std::string>, std::pair<std::int64_t, std::int64_t>>      TimeRangeFieldMapping::ym_ym_string_mappings;
+std::map<std::string, std::pair<std::int64_t, std::int64_t>>                              TimeRangeFieldMapping::ym_string_mappings;
+std::map<std::pair<std::string, std::string>, std::pair<std::int64_t, std::int64_t>>      TimeRangeFieldMapping::y_y_string_mappings;
+std::map<std::string, std::pair<std::int64_t, std::int64_t>>                              TimeRangeFieldMapping::y_string_mappings;
+
 int TimeRangeFieldMapping::ConvertStringToDateFancy(boost::posix_time::ptime & the_time, std::string const & the_string, int const index_to_use)
 {
 
@@ -159,7 +173,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = y_int_mappings[the_input_field->GetInt32Ref()];
+				std::pair<std::int64_t, std::int64_t> & cached_times = y_int_mappings[the_input_field->GetInt32Ref()];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_year_start->SetValueInt64(cached_times.first);
@@ -198,7 +212,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = y_y_int_mappings[std::make_pair(the_input_field_start->GetInt32Ref(), the_input_field_end->GetInt32Ref())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = y_y_int_mappings[std::make_pair(the_input_field_start->GetInt32Ref(), the_input_field_end->GetInt32Ref())];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_year_start->SetValueInt64(cached_times.first);
@@ -236,7 +250,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = y_string_mappings[the_input_field_datetime_year->GetStringRef()];
+				std::pair<std::int64_t, std::int64_t> & cached_times = y_string_mappings[the_input_field_datetime_year->GetStringRef()];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -290,7 +304,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = y_y_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = y_y_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -355,7 +369,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = ym_int_mappings[std::make_pair(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ym_int_mappings[std::make_pair(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref())];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_month_start->SetValueInt64(cached_times.first);
@@ -421,7 +435,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = ym_ym_int_mappings[std::tuple<int, int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_int_mappings[std::tuple<int, int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref())];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_day_start->SetValueInt64(cached_times.first);
@@ -502,7 +516,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = ym_string_mappings[the_input_field_datetime_month->GetStringRef()];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ym_string_mappings[the_input_field_datetime_month->GetStringRef()];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -556,7 +570,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = ym_ym_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ym_ym_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -622,7 +636,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = ymd_int_mappings[std::tuple<int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_int_mappings[std::tuple<int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref())];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_day_start->SetValueInt64(cached_times.first);
@@ -675,7 +689,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = ymd_ymd_int_mappings[std::tuple<int, int, int, int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref(), the_input_field_day_end->GetInt32Ref())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_int_mappings[std::tuple<int, int, int, int, int, int>(the_input_field_year_start->GetInt32Ref(), the_input_field_month_start->GetInt32Ref(), the_input_field_day_start->GetInt32Ref(), the_input_field_year_end->GetInt32Ref(), the_input_field_month_end->GetInt32Ref(), the_input_field_day_end->GetInt32Ref())];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_day_start->SetValueInt64(cached_times.first);
@@ -781,7 +795,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = ymd_string_mappings[the_input_field_datetime_day->GetStringRef()];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_string_mappings[the_input_field_datetime_day->GetStringRef()];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);
@@ -835,7 +849,7 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 					return;
 				}
 
-				std::pair<long, long> & cached_times = ymd_ymd_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
+				std::pair<std::int64_t, std::int64_t> & cached_times = ymd_ymd_string_mappings[std::make_pair(the_input_field_datetime_start->GetStringRef(), the_input_field_datetime_end->GetStringRef())];
 				if (cached_times.first != 0 && cached_times.second != 0)
 				{
 					the_output_field_datetime_start->SetValueInt64(cached_times.first);

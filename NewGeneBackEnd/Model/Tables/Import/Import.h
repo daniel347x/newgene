@@ -278,18 +278,18 @@ class TimeRangeFieldMapping : public RowFieldMapping
 	public:
 
 		// caches for time ranges
-		std::map<std::tuple<int, int, int, int, int, int>, std::pair<long, long>> ymd_ymd_int_mappings;
-		std::map<std::tuple<int, int, int>, std::pair<long, long>>                ymd_int_mappings;
-		std::map<std::tuple<int, int, int, int>, std::pair<long, long>>           ym_ym_int_mappings;
-		std::map<std::pair<int, int>, std::pair<long, long>>                      ym_int_mappings;
-		std::map<std::pair<int, int>, std::pair<long, long>>                      y_y_int_mappings;
-		std::map<int, std::pair<long, long>>                                      y_int_mappings;
-		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      ymd_ymd_string_mappings;
-		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      ymd_string_mappings;
-		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      ym_ym_string_mappings;
-		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      ym_string_mappings;
-		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      y_y_string_mappings;
-		std::map<std::pair<std::string, std::string>, std::pair<long, long>>      y_string_mappings;
+		static std::map<std::tuple<int, int, int, int, int, int>, std::pair<std::int64_t, std::int64_t>> ymd_ymd_int_mappings;
+		static std::map<std::tuple<int, int, int>, std::pair<std::int64_t, std::int64_t>>                ymd_int_mappings;
+		static std::map<std::tuple<int, int, int, int>, std::pair<std::int64_t, std::int64_t>>           ym_ym_int_mappings;
+		static std::map<std::pair<int, int>, std::pair<std::int64_t, std::int64_t>>                      ym_int_mappings;
+		static std::map<std::pair<int, int>, std::pair<std::int64_t, std::int64_t>>                      y_y_int_mappings;
+		static std::map<int, std::pair<std::int64_t, std::int64_t>>                                      y_int_mappings;
+		static std::map<std::pair<std::string, std::string>, std::pair<std::int64_t, std::int64_t>>      ymd_ymd_string_mappings;
+		static std::map<std::string, std::pair<std::int64_t, std::int64_t>>                              ymd_string_mappings;
+		static std::map<std::pair<std::string, std::string>, std::pair<std::int64_t, std::int64_t>>      ym_ym_string_mappings;
+		static std::map<std::string, std::pair<std::int64_t, std::int64_t>>                              ym_string_mappings;
+		static std::map<std::pair<std::string, std::string>, std::pair<std::int64_t, std::int64_t>>      y_y_string_mappings;
+		static std::map<std::string, std::pair<std::int64_t, std::int64_t>>                              y_string_mappings;
 
 	public:
 
