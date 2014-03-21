@@ -422,8 +422,8 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 					// Create the table importer
 					errorMsg.clear();
-					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
-					//Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_FAIL, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
+					//Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
+					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_FAIL, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
 					if (!errorMsg.empty())
 					{
 						boost::format msg("Unable to create data table: %1%");
