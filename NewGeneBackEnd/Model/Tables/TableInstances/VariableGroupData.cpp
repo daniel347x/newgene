@@ -1854,8 +1854,8 @@ bool Table_VariableGroupMetadata_PrimaryKeys::AddDataTable(sqlite3 * db, InputMo
 
 		if (errmsg != nullptr)
 		{
-			boost::format msg("Unable to add primary key data for variable group into metadata table: %1%");
-			msg % errmsg;
+			boost::format msg("Unable to add primary key data for variable group into metadata table: %1% (%2%)");
+			msg % errmsg % add_stmt;
 			sqlite3_free(errmsg);
 			errorMsg = msg.str();
 			return;
