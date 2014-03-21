@@ -901,6 +901,7 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 		}
 
 		{
+
 			Executor executor(inputModel->getDb());
 
 			if (!table->ImportStart(inputModel->getDb(), identifier, import_definition, nullptr, inputModel))
@@ -909,6 +910,9 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 				errorMsg = msg.str();
 				return;
 			}
+
+			executor.success();
+
 		}
 
 	}
@@ -939,6 +943,8 @@ Importer::Importer(ImportDefinition const & import_definition_, Model_basemost *
 				errorMsg = msg.str();
 				return;
 			}
+
+			executor.success();
 
 		}
 
