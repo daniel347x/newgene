@@ -11,13 +11,14 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = NewGene
 TEMPLATE = app
 
-# QMAKE_CXXFLAGS_RELEASE += -Zi
+QMAKE_CXXFLAGS_RELEASE += -Zi
+QMAKE_LFLAGS_RELEASE   += /INCREMENTAL:NO /DEBUG
 
 QMAKE_CFLAGS_RELEASE -= -O
 QMAKE_CFLAGS_RELEASE -= -O1
 QMAKE_CFLAGS_RELEASE -= -O2
 # add the desired -O3 if not present
-QMAKE_CFLAGS_RELEASE *= -O3
+QMAKE_CFLAGS_RELEASE += -O3
 
 macx: QMAKE_CXXFLAGS += -x c++ -arch x86_64 -std=gnu++11 -stdlib=libc++
 macx: QMAKE_LFLAGS += -arch x86_64 -std=gnu++11 -stdlib=libc++
@@ -137,12 +138,12 @@ SOURCES += main.cpp\
 	Infrastructure/UIAction/generaloptions.cpp \
 	Widgets/ManageInput/newgenemanageinput.cpp \
 	Widgets/ManageInput/newgenetabwidgetmanageinput.cpp \
-    Widgets/ManageInput/DMUs/newgenemanagedmus.cpp \
-    Widgets/ManageInput/UOAs/newgenemanageuoas.cpp \
-    Widgets/ManageInput/VGs/newgenemanagevgs.cpp \
-    Widgets/ManageInput/DMUs/displaydmusregion.cpp \
-    Widgets/Utilities/qsortfilterproxymodel_numberslast.cpp \
-    Widgets/Utilities/importdialoghelper.cpp
+	Widgets/ManageInput/DMUs/newgenemanagedmus.cpp \
+	Widgets/ManageInput/UOAs/newgenemanageuoas.cpp \
+	Widgets/ManageInput/VGs/newgenemanagevgs.cpp \
+	Widgets/ManageInput/DMUs/displaydmusregion.cpp \
+	Widgets/Utilities/qsortfilterproxymodel_numberslast.cpp \
+	Widgets/Utilities/importdialoghelper.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -255,15 +256,15 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	q_declare_metatype.h \
 	Widgets/ManageInput/newgenemanageinput.h \
 	Widgets/ManageInput/newgenetabwidgetmanageinput.h \
-    Widgets/ManageInput/DMUs/newgenemanagedmus.h \
-    Widgets/ManageInput/UOAs/newgenemanageuoas.h \
-    Widgets/ManageInput/VGs/newgenemanagevgs.h \
-    Widgets/ManageInput/DMUs/displaydmusregion.h \
-    Infrastructure/UIAction/dmumanagement.h \
-    Widgets/Utilities/qsortfilterproxymodel_numberslast.h \
-    Widgets/Utilities/importdialoghelper.h \
-    Infrastructure/UIAction/uoamanagement.h \
-    Infrastructure/UIAction/vgmanagement.h
+	Widgets/ManageInput/DMUs/newgenemanagedmus.h \
+	Widgets/ManageInput/UOAs/newgenemanageuoas.h \
+	Widgets/ManageInput/VGs/newgenemanagevgs.h \
+	Widgets/ManageInput/DMUs/displaydmusregion.h \
+	Infrastructure/UIAction/dmumanagement.h \
+	Widgets/Utilities/qsortfilterproxymodel_numberslast.h \
+	Widgets/Utilities/importdialoghelper.h \
+	Infrastructure/UIAction/uoamanagement.h \
+	Infrastructure/UIAction/vgmanagement.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
@@ -281,7 +282,7 @@ FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/ManageInput/DMUs/newgenemanagedmus.ui \
 	Widgets/ManageInput/UOAs/newgenemanageuoas.ui \
 	Widgets/ManageInput/VGs/newgenemanagevgs.ui \
-    Widgets/ManageInput/DMUs/displaydmusregion.ui
+	Widgets/ManageInput/DMUs/displaydmusregion.ui
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../NewGeneBackEnd/release/ -lNewGeneBackEnd

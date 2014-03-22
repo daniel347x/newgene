@@ -990,6 +990,8 @@ void TimeRangeFieldMapping::PerformMapping(DataFields const & input_data_fields,
 }
 
 ImportDefinition::ImportDefinition()
+: stmt_insert(nullptr)
+, stmt_update(nullptr)
 {
 }
 
@@ -1003,7 +1005,26 @@ ImportDefinition::ImportDefinition(ImportDefinition const & rhs)
 	, output_schema(rhs.output_schema)
 	, format_qualifiers(rhs.format_qualifiers)
 	, import_type(rhs.import_type)
+	: stmt_insert(rhs.stmt_insert)
+	, stmt_update(rhs.stmt_update)
 {
+}
+
+ImportDefinition::~ImportDefinition()
+{
+
+	if (stmt_update)
+	{
+		sqlite3_finalize(stmt_update);
+		stmt_update = nullptr;
+	}
+
+	if (stmt_insert)
+	{
+		sqlite3_finalize(stmt_insert);
+		stmt_insert = nullptr;
+	}
+
 }
 
 bool ImportDefinition::IsEmpty()

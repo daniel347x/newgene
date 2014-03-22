@@ -106,7 +106,7 @@ bool OutputModelImportTableFn(Importer * importer, Model_basemost * model_, Impo
 			switch (importer->mode)
 			{
 
-				case Importer::INSERT_OR_FAIL:
+				case Importer::INSERT_IN_BULK:
 				{
 					table_->ImportBlockBulk(output_model->getDb(), import_definition, output_model, &output_model->getInputModel(), table_block, number_rows, linenum, badwritelines, errors);
 					int number_errors_now = errors.size();

@@ -61,7 +61,7 @@ void InputModel::LoadTables()
 						}
 
 						std::string errorMsg;
-						Importer table_importer(new_definition, this, vg_instance_data.get(), Importer::INSERT_OR_FAIL, variable_group_identifier, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
+						Importer table_importer(new_definition, this, vg_instance_data.get(), Importer::INSERT_IN_BULK, variable_group_identifier, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
 
 						// disable, now that real import is completed
 
@@ -124,7 +124,7 @@ bool InputModelImportTableFn(Importer * importer, Model_basemost * model_, Impor
 			switch (importer->mode)
 			{
 
-				case Importer::INSERT_OR_FAIL:
+				case Importer::INSERT_IN_BULK:
 				{
 					table_->ImportBlockBulk(input_model->getDb(), import_definition, nullptr, input_model, table_block, number_rows, linenum, badwritelines, errors);
 					int number_errors_now = errors.size();

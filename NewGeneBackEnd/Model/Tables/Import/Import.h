@@ -457,6 +457,7 @@ class ImportDefinition
 
 		ImportDefinition();
 		ImportDefinition(ImportDefinition const & rhs);
+		virtual ~ImportDefinition();
 
 		bool IsEmpty();
 
@@ -471,6 +472,9 @@ class ImportDefinition
 		IMPORT_TYPE import_type;
 		std::vector<std::tuple<WidgetInstanceIdentifier, std::string, FIELD_TYPE>> primary_keys_info;
 
+		mutable sqlite3_stmt * stmt_update;
+		mutable sqlite3_stmt * stmt_insert;
+
 };
 
 #define MAX_LINE_SIZE 32768
@@ -483,7 +487,7 @@ class Importer
 
 		enum Mode
 		{
-			  INSERT_OR_FAIL = 0
+			  INSERT_IN_BULK = 0
 			, INSERT_OR_UPDATE
 		};
 
@@ -500,7 +504,7 @@ class Importer
 		typedef bool(*TableImportCallbackFn)(Importer * importer, Model_basemost * model_, ImportDefinition & import_definition, Table_basemost * table_, DataBlock const & table_block, int const number_rows, long & linenum, long & badwritelines, std::vector<std::string> & errors);
 
 		static int const block_size_sqlite_limit = 500; // Maximum number of rows supported for block insert by SQLite
-		static int const block_size_no_sqlite_limit = 1000000;
+		static int const block_size_no_sqlite_limit = 1000; // It doesn't really help to increase this much
 		int block_size;
 
 		Importer(ImportDefinition const & import_definition_, Model_basemost * model_, Table_basemost * table_, Mode const mode_, WidgetInstanceIdentifier const & identifier_, TableImportCallbackFn table_write_callback_, WHICH_IMPORT const & which_import_, std::string & errorMsg);
