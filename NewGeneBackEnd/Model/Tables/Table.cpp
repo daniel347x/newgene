@@ -620,7 +620,7 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 	size_t numberFields = values.size();
 	for (size_t n = 0; n < numberFields; ++n)
 	{
-		sqlite3_bind_text(import_definition.stmt_update, n + 1, values[n].c_str(), static_cast<int>(values[n].size()), SQLITE_STATIC);
+		sqlite3_bind_text(import_definition.stmt_insert, n + 1, values[n].c_str(), static_cast<int>(values[n].size()), SQLITE_STATIC);
 	}
 
 	int step_result = 0;
