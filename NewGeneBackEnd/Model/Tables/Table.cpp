@@ -150,7 +150,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 		if (failed || !errorMsg.empty())
 		{
 			boost::format msg("Unable to update line %1 during import: %2%");
-			msg % boost::lexical_cast<std::string>(linenum + 1) % errorMsg;
+			msg % boost::lexical_cast<std::string>(linenum + 1) % errorMsg.c_str();
 			errorMsg = msg.str();
 			errors.push_back(errorMsg);
 			errorMsg.clear();
@@ -168,7 +168,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 		if (failed || !errorMsg.empty())
 		{
 			boost::format msg("Unable to insert line %1% during import: %2%");
-			msg % boost::lexical_cast<std::string>(linenum + 1) % errorMsg;
+			msg % boost::lexical_cast<std::string>(linenum + 1) % errorMsg.c_str();
 			errorMsg = msg.str();
 			errors.push_back(errorMsg);
 			errorMsg.clear();
@@ -342,7 +342,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 		if (stmt == NULL)
 		{
 			boost::format msg("Unable to prepare SQL query in TryUpdateRow: %1%");
-			msg % sql_update;
+			msg % sql_update.c_str();
 			errorMsg = msg.str();
 			failed = true;
 			return 0;
@@ -567,7 +567,7 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 		if (stmt == NULL)
 		{
 			boost::format msg("Unable to prepare SQL query in TryInsertRow: %1%");
-			msg % sql_insert;
+			msg % sql_insert.c_str();
 			errorMsg = msg.str();
 			failed = true;
 			return;
