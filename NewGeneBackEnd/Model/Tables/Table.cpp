@@ -132,7 +132,7 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 }
 
 void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & import_definition, OutputModel * output_model_, InputModel * input_model_, DataBlock const & block,
-	int const number_rows_in_block, long & linenum, long & badwritelines, std::vector<std::string> & errors)
+	int const number_rows_in_block, long & linenum, long & badwritelines, long & numlinesupdated, std::vector<std::string> & errors)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -149,7 +149,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 
 		if (failed || !errorMsg.empty())
 		{
-			boost::format msg("Unable to update line %1 during import: %2%");
+			boost::format msg("Unable to update line %1% during import: %2%");
 			msg % boost::lexical_cast<std::string>(linenum + 1) % errorMsg.c_str();
 			errorMsg = msg.str();
 			errors.push_back(errorMsg);
@@ -163,6 +163,9 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 		{
 			// Update did not affect any row.  Insert a new row
 			TryInsertRow(block, row, failed, import_definition, db, errorMsg);
+		}
+		{
+
 		}
 
 		if (failed || !errorMsg.empty())
