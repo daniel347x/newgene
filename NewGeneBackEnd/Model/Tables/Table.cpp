@@ -268,7 +268,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 			first = false;
 
 			sql_update += "`";
-			sql_update += "?";
+			sql_update += schema_entry.field_name;
 			sql_update += "`";
 
 			sql_update += " = ";
@@ -320,7 +320,7 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 				first = false;
 
 				sql_update += "`";
-				sql_update += "?";
+				sql_update += schema_entry.field_name;
 				sql_update += "`";
 
 				sql_update += " = ";
@@ -355,10 +355,8 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 	}
 
-	std::vector<std::string> fields;
 	std::vector<std::string> values;
-	std::vector<std::string> where_left;
-	std::vector<std::string> where_right;
+	std::vector<std::string> where_values;
 
 	bool first = true;
 	int index = 0;
@@ -384,7 +382,6 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 			return;
 		}
 
-		fields.push_back(schema_entry.field_name);
 		values.push_back(std::string());
 		FieldDataAsSqlText(field_data, values.back());
 
@@ -423,9 +420,8 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 				return;
 			}
 
-			where_left.push_back(schema_entry.field_name);
-			where_right.push_back(std::string());
-			FieldDataAsSqlText(field_data, where_right.back());
+			where_values.push_back(std::string());
+			FieldDataAsSqlText(field_data, where_values.back());
 
 		}
 
@@ -439,18 +435,10 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 		return 0;
 	}
 
-	size_t numberFields = fields.size();
-	for (size_t n = 0; n < numberFields; ++n)
-	{
-		sqlite3_bind_text(import_definition.stmt_update, n + 1, fields[n].c_str(), static_cast<int>(fields[n].size()), SQLITE_STATIC);
-		sqlite3_bind_text(import_definition.stmt_update, n + 1, values[n].c_str(), static_cast<int>(values[n].size()), SQLITE_STATIC);
-	}
-
-	size_t numberWheres = fields.size();
+	size_t numberWheres = values.size();
 	for (size_t n = 0; n < numberWheres; ++n)
 	{
-		sqlite3_bind_text(import_definition.stmt_update, n + 1, where_left[n].c_str(), static_cast<int>(where_left[n].size()), SQLITE_STATIC);
-		sqlite3_bind_text(import_definition.stmt_update, n + 1, where_right[n].c_str(), static_cast<int>(where_right[n].size()), SQLITE_STATIC);
+		sqlite3_bind_text(import_definition.stmt_update, n + 1, where_values[n].c_str(), static_cast<int>(where_values[n].size()), SQLITE_STATIC);
 	}
 
 	int step_result = 0;
@@ -506,7 +494,7 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 			first = false;
 
 			sql_insert += "`";
-			sql_insert += "?";
+			sql_insert += schema_entry.field_name;
 			sql_insert += "`";
 
 			++index;
@@ -580,7 +568,6 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 
 	}
 
-	std::vector<std::string> fields;
 	std::vector<std::string> values;
 
 	std::string sql_insert;
@@ -589,17 +576,6 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 
 	bool first = true;
 	int index = 0;
-	std::for_each(import_definition.output_schema.schema.cbegin(),
-				  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
-	{
-
-		fields.push_back(schema_entry.field_name);
-		++index;
-
-	});
-
-	first = true;
-	index = 0;
 	bool innerFailed = false;
 	std::for_each(import_definition.output_schema.schema.cbegin(),
 				  import_definition.output_schema.schema.cend(), [&](SchemaEntry const & schema_entry)
@@ -635,12 +611,7 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 		return;
 	}
 
-	size_t numberFields = fields.size();
-	for (size_t n = 0; n < numberFields; ++n)
-	{
-		sqlite3_bind_text(import_definition.stmt_update, n + 1, fields[n].c_str(), static_cast<int>(fields[n].size()), SQLITE_STATIC);
-	}
-
+	size_t numberFields = values.size();
 	for (size_t n = 0; n < numberFields; ++n)
 	{
 		sqlite3_bind_text(import_definition.stmt_update, n + 1, values[n].c_str(), static_cast<int>(values[n].size()), SQLITE_STATIC);
