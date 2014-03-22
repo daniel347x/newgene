@@ -1466,11 +1466,13 @@ bool Table_VariableGroupData::BuildImportDefinition
 					if (timeRangeCols.size() == 1)
 					{
 
-						std::string startdate = timeRangeCols[0];
-
-						if (!Validation::ValidateInteger(startdate))
+						// We do not have enough info yet to know if user intends to pull the year portion
+						// from a string such as "11/1/2000", or whether they intend just to enter an int such as "2000"
+						// ... until a checkbox is provided in the UI.
+						// So for now, assume int
+						if (false)
 						{
-							// Treat as text string
+							// Treat as text string if it doesn't validate as an integer
 
 							std::shared_ptr<TimeRangeFieldMapping> time_range_mapping = std::make_shared<TimeRangeFieldMapping>(TimeRangeFieldMapping::TIME_RANGE_FIELD_MAPPING_TYPE__STRINGS__YEAR__START_YEAR_ONLY);
 							FieldTypeEntries input_file_fields;
@@ -1541,10 +1543,11 @@ bool Table_VariableGroupData::BuildImportDefinition
 					else
 					{
 
-						std::string startdate = timeRangeCols[0];
-						std::string enddate = timeRangeCols[1];
-
-						if (!Validation::ValidateInteger(startdate) || !Validation::ValidateInteger(enddate))
+						// We do not have enough info yet to know if user intends to pull the year portion
+						// from a string such as "11/1/2000", or whether they intend just to enter an int such as "2000"
+						// ... until a checkbox is provided in the UI.
+						// So for now, assume int
+						if (false)
 						{
 							// Treat as text string
 

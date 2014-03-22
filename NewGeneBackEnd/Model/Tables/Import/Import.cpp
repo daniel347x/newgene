@@ -1976,6 +1976,8 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 			}
 		}
 
+		// This stop is a true error condition - do not continue
+		// (note it was reset to false above, before entering second loop above)
 		if (stop)
 		{
 			return -1;
