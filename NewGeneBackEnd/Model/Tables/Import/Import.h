@@ -14,6 +14,7 @@
 
 #include "../../../Utilities/WidgetIdentifier.h"
 #include "../../../Messager/Messager.h"
+#include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
 class NameOrIndex
 {

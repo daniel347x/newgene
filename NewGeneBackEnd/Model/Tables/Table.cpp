@@ -652,10 +652,10 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 	if ((step_result = sqlite3_step(import_definition.stmt_insert)) != SQLITE_DONE)
 	{
 		// TODO: Log error
-		if (stmt)
+		if (import_definition.stmt_insert)
 		{
-			sqlite3_finalize(stmt);
-			stmt = nullptr;
+			sqlite3_finalize(import_definition.stmt_insert);
+			import_definition.stmt_insert = nullptr;
 		}
 
 		boost::format msg("Unable to execute prepared query in TryInsertRow");
@@ -663,5 +663,8 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 		failed = true;
 		return;
 	}
+
+	sqlite3_clear_bindings(import_definition.stmt_insert);
+	sqlite3_reset(import_definition.stmt_insert);
 
 }
