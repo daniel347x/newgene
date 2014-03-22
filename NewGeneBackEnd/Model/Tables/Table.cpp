@@ -222,6 +222,8 @@ void Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field
 int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed, ImportDefinition const & import_definition, sqlite3 * db, std::string & errorMsg)
 {
 
+	DataFields const & row_fields = block[row];
+
 	if (import_definition.stmt_update == nullptr)
 	{
 
@@ -248,7 +250,6 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 			if (!field_data)
 			{
-				// Todo: log error
 				boost::format msg("Unable to obtain BaseField in TryUpdateRow.");
 				errorMsg = msg.str();
 				++index;
@@ -340,7 +341,6 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 		if (stmt == NULL)
 		{
-			// TODO: Log error
 			boost::format msg("Unable to prepare SQL query in TryUpdateRow: %1%");
 			msg % sql_update;
 			errorMsg = msg.str();
@@ -351,9 +351,6 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 		import_definition.stmt_update = stmt;
 
 	}
-
-
-	DataFields const & row_fields = block[row];
 
 	std::vector<std::string> fields;
 	std::vector<std::string> values;
@@ -440,14 +437,14 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 	}
 
 	size_t numberFields = fields.size();
-	for (int n = 0; n < numberFields; ++n)
+	for (size_t n = 0; n < numberFields; ++n)
 	{
 		sqlite3_bind_text(import_definition.stmt_update, n + 1, fields[n].c_str(), static_cast<int>(fields[n].size()), SQLITE_STATIC);
 		sqlite3_bind_text(import_definition.stmt_update, n + 1, values[n].c_str(), static_cast<int>(values[n].size()), SQLITE_STATIC);
 	}
 
 	size_t numberWheres = fields.size();
-	for (int n = 0; n < numberWheres; ++n)
+	for (size_t n = 0; n < numberWheres; ++n)
 	{
 		sqlite3_bind_text(import_definition.stmt_update, n + 1, where_left[n].c_str(), static_cast<int>(where_left[n].size()), SQLITE_STATIC);
 		sqlite3_bind_text(import_definition.stmt_update, n + 1, where_right[n].c_str(), static_cast<int>(where_right[n].size()), SQLITE_STATIC);
@@ -569,7 +566,6 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 
 		if (stmt == NULL)
 		{
-			// TODO: Log error
 			boost::format msg("Unable to prepare SQL query in TryInsertRow: %1%");
 			msg % sql_insert;
 			errorMsg = msg.str();
@@ -637,12 +633,12 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 	}
 
 	size_t numberFields = fields.size();
-	for (int n = 0; n < numberFields; ++n)
+	for (size_t n = 0; n < numberFields; ++n)
 	{
 		sqlite3_bind_text(import_definition.stmt_update, n + 1, fields[n].c_str(), static_cast<int>(fields[n].size()), SQLITE_STATIC);
 	}
 
-	for (int n = 0; n < numberFields; ++n)
+	for (size_t n = 0; n < numberFields; ++n)
 	{
 		sqlite3_bind_text(import_definition.stmt_update, n + 1, values[n].c_str(), static_cast<int>(values[n].size()), SQLITE_STATIC);
 	}
