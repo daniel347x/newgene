@@ -435,7 +435,13 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 		return 0;
 	}
 
-	size_t numberWheres = values.size();
+	size_t numberValues = values.size();
+	for (size_t n = 0; n < numberValues; ++n)
+	{
+		sqlite3_bind_text(import_definition.stmt_update, n + 1, values[n].c_str(), static_cast<int>(values[n].size()), SQLITE_STATIC);
+	}
+
+	size_t numberWheres = where_values.size();
 	for (size_t n = 0; n < numberWheres; ++n)
 	{
 		sqlite3_bind_text(import_definition.stmt_update, n + 1, where_values[n].c_str(), static_cast<int>(where_values[n].size()), SQLITE_STATIC);
