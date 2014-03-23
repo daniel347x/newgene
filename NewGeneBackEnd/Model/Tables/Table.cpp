@@ -188,7 +188,7 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 
 }
 
-void Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field_data, std::string & sql_insert)
+void Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field_data, std::string & sql_insert, bool const no_quotes)
 {
 
 	FIELD_TYPE const field_type = field_data->GetType();
@@ -210,9 +210,15 @@ void Table_basemost::FieldDataAsSqlText(std::shared_ptr<BaseField> const & field
 	else
 	if (IsFieldTypeString(field_type))
 	{
-		sql_insert += '\'';
+		if (!no_quotes)
+		{
+			sql_insert += '\'';
+		}
 		sql_insert += Table_basemost::EscapeTicks(field_data->GetString());
-		sql_insert += '\'';
+		if (!no_quotes)
+		{
+			sql_insert += '\'';
+		}
 	}
 	else
 	{
@@ -356,8 +362,8 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 	}
 
-	std::vector<std::string> values;
-	std::vector<std::string> where_values;
+	std::vector<std::pair<FIELD_TYPE, std::string>> values;
+	std::vector<std::pair<FIELD_TYPE, std::string>> where_values;
 
 	bool first = true;
 	int index = 0;
@@ -383,8 +389,8 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 			return;
 		}
 
-		values.push_back(std::string());
-		FieldDataAsSqlText(field_data, values.back());
+		values.push_back(std::make_pair(field_data->GetType(), std::string()));
+		FieldDataAsSqlText(field_data, values.back().second, true);
 
 		++index;
 
@@ -421,8 +427,8 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 				return;
 			}
 
-			where_values.push_back(std::string());
-			FieldDataAsSqlText(field_data, where_values.back());
+			where_values.push_back(std::make_pair(field_data->GetType(), std::string()));
+			FieldDataAsSqlText(field_data, where_values.back().second, true);
 
 		}
 
@@ -439,13 +445,13 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 	size_t numberValues = values.size();
 	for (size_t n = 0; n < numberValues; ++n)
 	{
-		sqlite3_bind_text(import_definition.stmt_update, bind_index++, values[n].c_str(), static_cast<int>(values[n].size()), SQLITE_STATIC);
+		BindSqlField(import_definition.stmt_update, bind_index, values[n]);
 	}
 
 	size_t numberWheres = where_values.size();
 	for (size_t n = 0; n < numberWheres; ++n)
 	{
-		sqlite3_bind_text(import_definition.stmt_update, bind_index++, where_values[n].c_str(), static_cast<int>(where_values[n].size()), SQLITE_STATIC);
+		BindSqlField(import_definition.stmt_update, bind_index, where_values[n]);
 	}
 
 	int step_result = 0;
@@ -577,7 +583,7 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 
 	}
 
-	std::vector<std::string> values;
+	std::vector<std::pair<FIELD_TYPE, std::string>> values;
 
 	std::string sql_insert;
 
@@ -607,8 +613,8 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 			return;
 		}
 
-		values.push_back(std::string());
-		FieldDataAsSqlText(field_data, values.back());
+		values.push_back(std::make_pair(field_data->GetType(), std::string()));
+		FieldDataAsSqlText(field_data, values.back().second, true);
 
 		++index;
 
@@ -623,7 +629,7 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 	size_t numberFields = values.size();
 	for (size_t n = 0; n < numberFields; ++n)
 	{
-		sqlite3_bind_text(import_definition.stmt_insert, bind_index++, values[n].c_str(), static_cast<int>(values[n].size()), SQLITE_STATIC);
+		BindSqlField(import_definition.stmt_insert, bind_index, values[n]);
 	}
 
 	int step_result = 0;

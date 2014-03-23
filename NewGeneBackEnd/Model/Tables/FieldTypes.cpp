@@ -1,6 +1,12 @@
 #include "FieldTypes.h"
 
-// Handle string default initialziations
+#ifndef Q_MOC_RUN
+#	include <boost/lexical_cast.hpp>
+#	include <boost/format.hpp>
+#endif
+#include "../../Utilities/NewGeneException.h"
+
+// Handle string default initializiations
 FieldTypeTraits<FIELD_TYPE_STRING_FIXED>::type const FieldTypeTraits<FIELD_TYPE_STRING_FIXED>::default_;
 FieldTypeTraits<FIELD_TYPE_STRING_VAR>::type const FieldTypeTraits<FIELD_TYPE_STRING_VAR>::default_;
 FieldTypeTraits<FIELD_TYPE_FLOAT>::type const FieldTypeTraits<FIELD_TYPE_FLOAT>::default_ = 0.0;
@@ -179,5 +185,33 @@ bool IsFieldTypeTimeRange(FIELD_TYPE const & field_type)
 	}
 
 	return returnVal;
+
+}
+
+void BindSqlField(sqlite3_stmt * stmt, int & bind_index, std::pair<FIELD_TYPE, std::string> const & field)
+{
+
+	if (IsFieldTypeInt32(field.first))
+	{
+		sqlite3_bind_int(stmt, bind_index++, boost::lexical_cast<std::int32_t>(field.second.c_str()));
+	}
+	else
+	if (IsFieldTypeInt64(field.first))
+	{
+		sqlite3_bind_int64(stmt, bind_index++, boost::lexical_cast<std::int64_t>(field.second.c_str()));
+	}
+	else
+	if (IsFieldTypeFloat(field.first))
+	{
+		sqlite3_bind_double(stmt, bind_index++, boost::lexical_cast<double>(field.second.c_str()));
+	}
+	else
+	if (IsFieldTypeString(field.first))
+	{
+		sqlite3_bind_text(stmt, bind_index++, field.second.c_str(), static_cast<int>(field.second.size()), SQLITE_STATIC);
+	}
+
+	boost::format msg("Invalid field type when binding data for import");
+	throw NewGeneException() << newgene_error_description(msg.str());
 
 }

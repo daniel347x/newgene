@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
 enum FIELD_TYPE
 {
@@ -62,6 +63,7 @@ bool IsFieldTypeInt(FIELD_TYPE const & field_type);
 bool IsFieldTypeFloat(FIELD_TYPE const & field_type);
 bool IsFieldTypeString(FIELD_TYPE const & field_type);
 bool IsFieldTypeTimeRange(FIELD_TYPE const & field_type);
+void BindSqlField(sqlite3_stmt *, int &, std::pair<FIELD_TYPE, std::string> const &);
 
 template<FIELD_TYPE THE_FIELD_TYPE>
 struct FieldTypeTraits
