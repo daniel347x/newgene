@@ -711,7 +711,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 
 	{
 
-		Executor executor(input_model_.getDb());
+		identifiers_map.erase(*dmu_category.uuid);
 
 		std::string sql = "SELECT * FROM DMU_SET_MEMBER WHERE DMU_SET_MEMBER_FK_DMU_CATEGORY_UUID = '";
 		sql += *dmu_category.uuid;
@@ -776,8 +776,6 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 			sqlite3_finalize(stmt);
 			stmt = nullptr;
 		}
-
-		executor.success();
 
 	}
 
