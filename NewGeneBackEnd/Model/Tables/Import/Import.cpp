@@ -26,6 +26,10 @@ std::map<std::string, std::pair<std::int64_t, std::int64_t>>                    
 std::map<std::pair<std::string, std::string>, std::pair<std::int64_t, std::int64_t>>      TimeRangeFieldMapping::y_y_string_mappings;
 std::map<std::string, std::pair<std::int64_t, std::int64_t>>                              TimeRangeFieldMapping::y_string_mappings;
 
+std::recursive_mutex Importer::is_performing_import_mutex;
+std::atomic<bool> Importer::is_performing_import(false);
+bool Importer::cancelled = false;
+
 int TimeRangeFieldMapping::ConvertStringToDateFancy(boost::posix_time::ptime & the_time, std::string const & the_string, int const index_to_use)
 {
 
@@ -1996,8 +2000,19 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 {
 
-	BOOST_SCOPE_EXIT(&messager, this_)
 	{
+		std::lock_guard<std::recursive_mutex> guard(is_performing_import_mutex);
+		if (is_performing_import)
+		{
+			messager.ShowMessageBox("Another import operation is in progress.  Please wait for that operation to complete first.");
+			return;
+		}
+		is_performing_import = true;
+	}
+
+	BOOST_SCOPE_EXIT(&is_performing_import, &is_performing_import_mutex, &messager, this_)
+	{
+		is_performing_import = false;
 		if (this_->which_import == IMPORT_DMU_SET_MEMBER)
 		{
 			messager.EmitSignalUpdateDMUImportProgressBar(PROGRESS_UPDATE_MODE__HIDE, 0, 0, 0);
@@ -2007,7 +2022,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__HIDE, 0, 0, 0);
 		}
 	} BOOST_SCOPE_EXIT_END
-
+				
 	// Count lines in file
 	std::fstream data_file_count_lines;
 	data_file_count_lines.open(import_definition.input_file.c_str(), std::ios::in);

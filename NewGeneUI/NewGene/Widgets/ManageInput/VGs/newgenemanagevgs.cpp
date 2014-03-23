@@ -14,6 +14,7 @@
 #include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
 #include "../../../../NewGeneBackEnd/Model/InputModel.h"
 #include "../../../../NewGeneBackEnd/Model/TimeGranularity.h"
+#include "../../../../NewGeneBackEnd/Model/Tables/Import/Import.h"
 
 #include <set>
 
@@ -1135,5 +1136,22 @@ void NewGeneManageVGs::UpdateVGImportProgressBar(int mode_, int min_, int max_, 
 			}
 			break;
 
+	}
+}
+
+void NewGeneManageVGs::on_pushButton_cancel_clicked()
+{
+	{
+		std::lock_guard<std::recursive_mutex> guard(Importer::is_performing_import_mutex);
+		if (Importer::is_performing_import)
+		{
+			QMessageBox::StandardButton reply;
+			reply = QMessageBox::question(nullptr, QString("Cancel?"), QString("Are you sure you wish to cancel?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::Yes)
+			{
+				// No lock - not necessary for a boolean whose read/write is guaranteed to be in proper sequence
+				Importer::cancelled = true;
+			}
+		}
 	}
 }

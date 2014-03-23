@@ -61,6 +61,8 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 		void on_pushButton_deselect_all_dmu_members_clicked();
 		void on_pushButton_select_all_dmu_members_clicked();
 
+		void on_pushButton_cancel_clicked();
+
 	protected:
 		void Empty();
 

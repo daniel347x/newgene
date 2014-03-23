@@ -285,6 +285,25 @@ void NewGeneMainWindow::closeEvent(QCloseEvent *event)
 		}
 	}
 
+	{
+		std::lock_guard<std::recursive_mutex> guard(Importer::is_performing_import_mutex);
+		if (Importer::is_performing_import)
+		{
+			QMessageBox::StandardButton reply;
+			reply = QMessageBox::question(nullptr, QString("Exit?"), QString("An import is taking place.  Are you sure you wish to exit?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+			if (reply == QMessageBox::Yes)
+			{
+				// No lock - not necessary for a boolean sequenced properly
+				Importer:: is_performing_import = true;
+			}
+			else
+			{
+				event->ignore();
+				return;
+			}
+		}
+	}
+
 	event->accept();
 
 }

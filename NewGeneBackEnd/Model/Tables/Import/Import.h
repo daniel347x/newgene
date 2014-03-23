@@ -16,6 +16,9 @@
 #include "../../../Messager/Messager.h"
 #include "../../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
+#include <atomic>
+#include <mutex>
+
 class NameOrIndex
 {
 
@@ -550,6 +553,12 @@ class Importer
 		std::vector<std::string> errors;
 		long badreadlines;
 		long badwritelines;
+
+	public:
+
+		static std::recursive_mutex is_performing_import_mutex;
+		static std::atomic<bool> is_performing_import;
+		static bool cancelled;
 
 };
 

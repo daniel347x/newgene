@@ -193,7 +193,7 @@ void NewGeneGenerateOutput::on_pushButton_cancel_clicked()
 			reply = QMessageBox::question(nullptr, QString("Cancel?"), QString("Are you sure you wish to cancel?"), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 			if (reply == QMessageBox::Yes)
 			{
-				// No lock - not necessary for a boolean checked multiple times by back end and that will not cause an error if it is messed up in extraordinarily rare circumstances
+				// No lock - not necessary for a boolean whose read/write is guaranteed to be in proper sequence
 				OutputModel::OutputGenerator::cancelled = true;
 			}
 		}
