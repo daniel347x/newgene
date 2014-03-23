@@ -673,7 +673,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 		boost::format msg_title("Refreshing data can be slow");
 		boost::format msg_text("Warning: If there is a large amount of existing data AND a large amount of data being refreshed, it will be MUCH, MUCH faster to delete the existing variable group, and re-import from scratch.  Continue?");
 		QMessageBox::StandardButton reply;
-		reply = QMessageBox::question(nullptr, QString(msg_title.c_str()), QString(msg_text.c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+		reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 		if (reply == QMessageBox::No)
 		{
 			return;

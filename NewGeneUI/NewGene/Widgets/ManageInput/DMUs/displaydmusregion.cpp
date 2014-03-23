@@ -471,7 +471,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		boost::format msg_title("Refreshing data can be slow");
 		boost::format msg_text("Warning: If there is a large amount of existing data AND a large amount of data being refreshed, it will be MUCH, MUCH faster to delete the existing DMU, and re-import from scratch.  However, this will also delete all units of analysis and variable groups associated with this DMU - so it might be worth the wait.  Continue?");
 		QMessageBox::StandardButton reply;
-		reply = QMessageBox::question(nullptr, QString(msg_title.c_str()), QString(msg_text.c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+		reply = QMessageBox::question(nullptr, QString(msg_title.str().c_str()), QString(msg_text.str().c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 		if (reply == QMessageBox::No)
 		{
 			return;
