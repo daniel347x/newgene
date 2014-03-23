@@ -613,7 +613,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						}
 						else
 						{
-							boost::format msg("Variable group '%1%' successfully refreshed from file%3%.");
+							boost::format msg("Variable group '%1%' successfully refreshed from file%2%.");
 							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
 								% cancelAddendum;
 							messager.ShowMessageBox(msg.str());
