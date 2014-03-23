@@ -684,7 +684,7 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	}
 	if (!table_importer.errors.empty())
 	{
-		boost::format msg("%1%: There were errors during import.  These will be appended to log \"newgene.import.log\"");
+		boost::format msg("%1%: There were messages during import.  These will be appended to log \"newgene.import.log\"");
 		msg % boost::posix_time::to_simple_string(current_date_time).c_str();
 		std::string errorMsg = msg.str();
 		table_importer.errors.push_back(errorMsg);

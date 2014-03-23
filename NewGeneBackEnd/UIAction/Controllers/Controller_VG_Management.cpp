@@ -547,7 +547,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						}
 						if (!table_importer.errors.empty())
 						{
-							boost::format msg("%1%: There were errors during import.  These will be appended to log \"newgene.import.log\"");
+							boost::format msg("%1%: There were messages during import.  These will be appended to log \"newgene.import.log\"");
 							msg % boost::posix_time::to_simple_string(current_date_time).c_str();
 							std::string errorMsg = msg.str();
 							table_importer.errors.push_back(errorMsg);
@@ -576,33 +576,46 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 						// Success!  Turn the pointer over to the input model
 						input_model.t_vgp_data_vector.push_back(std::move(new_table));
 
+						std::string cancelAddendum;
+						if (Importer::cancelled)
+						{
+							cancelAddendum = " (until cancelled)";
+						}
 						if (table_importer.badreadlines > 0 || table_importer.badwritelines > 0)
 						{
 							if (table_importer.badreadlines > 0 && table_importer.badwritelines > 0)
 							{
-								boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
-								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badreadlines) % boost::lexical_cast<std::string>(table_importer.badwritelines);
+								boost::format msg("Variable group '%1%' refreshed from file%4%, but %2% rows failed when being read from the input file and %3% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
+									% boost::lexical_cast<std::string>(table_importer.badreadlines)
+									% boost::lexical_cast<std::string>(table_importer.badwritelines)
+									% cancelAddendum;
 								messager.ShowMessageBox(msg.str());
 							}
 							else
 							if (table_importer.badreadlines == 0 && table_importer.badwritelines > 0)
 							{
-								boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
-								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badwritelines);
+								boost::format msg("Variable group '%1%' refreshed from file%3%, but %2% rows failed to be written to the database.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
+									% boost::lexical_cast<std::string>(table_importer.badwritelines)
+									% cancelAddendum;
 								messager.ShowMessageBox(msg.str());
 							}
 							else
 							if (table_importer.badreadlines > 0 && table_importer.badwritelines == 0)
 							{
-								boost::format msg("Variable group '%1%' refreshed from file, but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
-								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group) % boost::lexical_cast<std::string>(table_importer.badreadlines);
+								boost::format msg("Variable group '%1%' refreshed from file%3%, but %2% rows failed when being read from the input file.  See the \"newgene.import.log\" file in the working directory for details.");
+								msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
+									% boost::lexical_cast<std::string>(table_importer.badreadlines)
+									% cancelAddendum;
 								messager.ShowMessageBox(msg.str());
 							}
 						}
 						else
 						{
-							boost::format msg("Variable group '%1%' successfully refreshed from file.");
-							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group);
+							boost::format msg("Variable group '%1%' successfully refreshed from file%3%.");
+							msg % Table_VG_CATEGORY::GetVgDisplayText(variable_group)
+								% cancelAddendum;
 							messager.ShowMessageBox(msg.str());
 						}
 

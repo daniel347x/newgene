@@ -1783,6 +1783,11 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 	while (data_file.getline(line, MAX_LINE_SIZE - 1) && data_file.good())
 	{
 
+		if (CheckCancelled())
+		{
+			return 0;
+		}
+
 		char * current_line_ptr = line;
 		char * parsed_line_ptr = parsedline;
 		*parsed_line_ptr = '\0';
@@ -2001,6 +2006,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 {
 
 	is_performing_import = true;
+	cancelled = false;
 
 	BOOST_SCOPE_EXIT(&is_performing_import, &is_performing_import_mutex, &messager, this_)
 	{
@@ -2014,7 +2020,7 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			messager.EmitSignalUpdateVGImportProgressBar(PROGRESS_UPDATE_MODE__HIDE, 0, 0, 0);
 		}
 	} BOOST_SCOPE_EXIT_END
-				
+	
 	// Count lines in file
 	std::fstream data_file_count_lines;
 	data_file_count_lines.open(import_definition.input_file.c_str(), std::ios::in);
@@ -2057,6 +2063,11 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 	if (data_file.is_open())
 	{
 
+		BOOST_SCOPE_EXIT(&data_file)
+		{
+			data_file.close();
+		} BOOST_SCOPE_EXIT_END
+
 		char line[MAX_LINE_SIZE];
 		char parsedline[MAX_LINE_SIZE];
 		long linenum = 0;
@@ -2069,7 +2080,6 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 
 			if (!data_file.good())
 			{
-				data_file.close();
 				boost::format msg("Failed to read column names row from the input file.");
 				errorMsg = msg.str();
 				return true;
@@ -2143,7 +2153,6 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 
 			if (!data_file.good())
 			{
-				data_file.close();
 				boost::format msg("Failed to read the column description row in the input file.");
 				errorMsg = msg.str();
 				errors.push_back(errorMsg);
@@ -2165,7 +2174,6 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 
 			if (!data_file.good())
 			{
-				data_file.close();
 				boost::format msg("Failed to read the data type row in the input file.");
 				errorMsg = msg.str();
 				errors.push_back(errorMsg);
@@ -2184,8 +2192,6 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 		// validate
 		if (!ValidateMapping())
 		{
-			// TODO: Error logging
-			data_file.close();
 			boost::format msg("Bad mapping of input to output columns.");
 			errorMsg = msg.str();
 			errors.push_back(errorMsg);
@@ -2199,11 +2205,16 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 
 		while (true)
 		{
-
+				
 			long saved_linenum = linenum;
 
 			std::string blockErrorMsg;
 			currently_read_lines = ReadBlockFromFile(data_file, line, parsedline, linenum, badreadlines, blockErrorMsg, messager);
+
+			if (CheckCancelled())
+			{
+				break;
+			}
 
 			if (currently_read_lines == -1)
 			{
@@ -2223,11 +2234,15 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 			{
 				// Write rows to database here
 				table_write_callback(this, model, import_definition, table, output_block, currently_read_lines, saved_linenum, badwritelines, errors);
+				if (CheckCancelled())
+				{
+					break;
+				}
+
 			}
 
 		}
 
-		data_file.close();
 	}
 	else
 	{
@@ -2238,6 +2253,13 @@ bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 		return false;
 	}
 
+	if (CheckCancelled())
+	{
+		boost::format msg("Import operation cancelled.");
+		errors.push_back(msg.str());
+	}
+
+	// Return true even if cancelled
 	return true;
 
 }

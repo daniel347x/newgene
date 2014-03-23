@@ -559,6 +559,11 @@ class Importer
 		static std::recursive_mutex is_performing_import_mutex;
 		static std::atomic<bool> is_performing_import;
 		static bool cancelled;
+		inline static bool CheckCancelled()
+		{
+			// No lock - not necessary for a boolean whose getting/setting is sequenced properly
+			return cancelled; // opportunity for further checking here
+		}
 
 };
 

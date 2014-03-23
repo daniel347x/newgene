@@ -40,6 +40,11 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 	for (int row = 0; row < number_rows_in_block; ++row)
 	{
 
+		if (Importer::cancelled)
+		{
+			return;
+		}
+
 		if (!first_row)
 		{
 			sql_insert += ", ";
@@ -143,6 +148,11 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 	for (int row = 0; row < number_rows_in_block; ++row)
 	{
 
+		if (Importer::cancelled)
+		{
+			return;
+		}
+
 		errorMsg.clear();
 		bool failed = false;
 		int changes = TryUpdateRow(block, row, failed, import_definition, db, errorMsg);
@@ -163,9 +173,6 @@ void Table_basemost::ImportBlockUpdate(sqlite3 * db, ImportDefinition const & im
 		{
 			// Update did not affect any row.  Insert a new row
 			TryInsertRow(block, row, failed, import_definition, db, errorMsg);
-		}
-		{
-
 		}
 
 		if (failed || !errorMsg.empty())
