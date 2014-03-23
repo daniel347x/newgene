@@ -593,6 +593,15 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 		return;
 	}
 
+	{
+		std::lock_guard<std::recursive_mutex> guard(Importer::is_performing_import_mutex);
+		if (Importer::is_performing_import)
+		{
+			boost::format msg("Another import operation is in progress.  Please wait for that operation to complete first.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+	}
+
 	InputModel & input_model = project.model();
 
 	switch (action_request.reason)

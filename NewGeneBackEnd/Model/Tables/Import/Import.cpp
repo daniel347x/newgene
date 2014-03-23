@@ -2000,15 +2000,7 @@ int Importer::ReadBlockFromFile(std::fstream & data_file, char * line, char * pa
 bool Importer::DoImport(std::string & errorMsg, Messager & messager)
 {
 
-	{
-		std::lock_guard<std::recursive_mutex> guard(is_performing_import_mutex);
-		if (is_performing_import)
-		{
-			boost::format msg("Another import operation is in progress.  Please wait for that operation to complete first.");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-		is_performing_import = true;
-	}
+	is_performing_import = true;
 
 	BOOST_SCOPE_EXIT(&is_performing_import, &is_performing_import_mutex, &messager, this_)
 	{
