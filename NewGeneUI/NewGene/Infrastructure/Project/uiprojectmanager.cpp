@@ -714,7 +714,7 @@ void UIProjectManager::RawOpenOutputProject(UIMessager & messager, boost::filesy
 		return;
 	}
 
-	project->InitializeEventLoop(project, 32000000); // cannot use 'this' in base class with multiple inheritance
+	project->InitializeEventLoop(project, 15000000); // cannot use 'this' in base class with multiple inheritance
 	project->model().InitializeEventLoop(&project->model()); // cannot use 'this' in base class with multiple inheritance
 	project->modelSettings().InitializeEventLoop(&project->modelSettings()); // cannot use 'this' in base class with multiple inheritance
 	project->projectSettings().InitializeEventLoop(&project->projectSettings()); // cannot use 'this' in base class with multiple inheritance

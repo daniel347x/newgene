@@ -24,7 +24,7 @@ class EventLoopThreadManager
 
 	public:
 
-		void InitializeEventLoop(void * me, int stackSize = 32000000)
+		void InitializeEventLoop(void * me, int stackSize = 0)
 		{
 			work_queue_manager.reset(InstantiateWorkQueue(me));
 			if (worker_pool_ui_2.isActive())
