@@ -998,7 +998,7 @@ void DisplayDMUsRegion::HandleChanges(DataChangeMessage const & change_message)
 										{
 
 											selectionModel->clearSelection();
-											EmptyDmuMemberPane();
+											EmptyDmuMembersPane();
 
 										}
 
@@ -1252,7 +1252,7 @@ bool DisplayDMUsRegion::GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_ca
 void DisplayDMUsRegion::ResetDmuMembersPane(WidgetInstanceIdentifier const & dmu_category, WidgetInstanceIdentifiers const & dmu_members)
 {
 
-	EmptyDmuMemberPane();
+	EmptyDmuMembersPane();
 
 	QItemSelectionModel * oldSelectionModel = ui->listView_dmu_members->selectionModel();
 	QStandardItemModel * model = new QStandardItemModel();
@@ -1376,10 +1376,10 @@ void DisplayDMUsRegion::UpdateDMUImportProgressBar(int mode_, int min_, int max_
 	}
 }
 
-void DisplayDMUsRegion::EmptyDmuMemberPane()
+void DisplayDMUsRegion::EmptyDmuMembersPane()
 {
 
-	oldSelectionModel = ui->listView_dmu_members->selectionModel();
+	QItemSelectionModel * oldSelectionModel = ui->listView_dmu_members->selectionModel();
 	if (oldSelectionModel != nullptr)
 	{
 		delete oldSelectionModel;
@@ -1390,12 +1390,12 @@ void DisplayDMUsRegion::EmptyDmuMemberPane()
 	if (dmuSetMembersProxyModel != nullptr)
 	{
 
-		QAbstractItemModel * dmuSetMembersSourceModel = dmuSetMembersModel->sourceModel();
+		QAbstractItemModel * dmuSetMembersSourceModel = dmuSetMembersProxyModel->sourceModel();
 		if (dmuSetMembersSourceModel != nullptr)
 		{
 
 			delete dmuSetMembersSourceModel;
-			dmuSetMembersStandardSourceModel = nullptr;
+			dmuSetMembersSourceModel = nullptr;
 
 		}
 

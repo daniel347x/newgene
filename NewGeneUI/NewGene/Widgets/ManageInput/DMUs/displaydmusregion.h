@@ -67,7 +67,7 @@ class DisplayDMUsRegion : public QWidget, public NewGeneWidget // do not reorder
 	private:
 		bool GetSelectedDmuCategory(WidgetInstanceIdentifier & dmu_category, WidgetInstanceIdentifiers & dmu_members);
 		void ResetDmuMembersPane(WidgetInstanceIdentifier const & dmu_category, WidgetInstanceIdentifiers const & dmu_members);
-		void EmptyDmuMemberPane();
+		void EmptyDmuMembersPane();
 
 	private:
 		bool refresh_dmu_called_after_create;
