@@ -626,13 +626,14 @@ void UIActionManager::RefreshDMUsFromFile(Messager & messager, WidgetActionItemR
 				// Retrieve data sent by user interface
 				// ************************************* //
 				WidgetActionItem const & actionItem = *instanceActionItem.second;
-				WidgetActionItem__StringVector const & actionItemString = static_cast<WidgetActionItem__StringVector const &>(actionItem);
-				std::vector<std::string> dmu_refresh_strings = actionItemString.getValue();
+				WidgetActionItem__StringVector_Plus_Int const & actionItemStringInt = static_cast<WidgetActionItem__StringVector_Plus_Int const &>(actionItem);
+				std::vector<std::string> dmu_refresh_strings = actionItemStringInt.getValue();
+				bool do_refresh_not_plain_insert = actionItemStringInt.getIntValue() > 0 ? true : false;
 
 				std::string dmu_refresh_file_pathname = dmu_refresh_strings[0];
 				std::vector<std::string> dmu_refresh_column_labels(dmu_refresh_strings.cbegin() + 1, dmu_refresh_strings.cend());
 
-				bool success = input_model.t_dmu_setmembers.RefreshFromFile(input_model.getDb(), input_model, dmu_category, boost::filesystem::path(dmu_refresh_file_pathname), dmu_refresh_column_labels, messager);
+				bool success = input_model.t_dmu_setmembers.RefreshFromFile(input_model.getDb(), input_model, dmu_category, boost::filesystem::path(dmu_refresh_file_pathname), dmu_refresh_column_labels, messager, do_refresh_not_plain_insert);
 
 				if (!success)
 				{

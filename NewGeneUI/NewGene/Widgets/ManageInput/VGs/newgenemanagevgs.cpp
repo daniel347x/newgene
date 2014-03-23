@@ -26,6 +26,8 @@ NewGeneManageVGs::NewGeneManageVGs( QWidget * parent ) :
 	ui->label_importProgress->hide();
 	ui->progressBar_importVG->hide();
 	PrepareInputWidget(true);
+
+	refresh_vg_called_after_create = false;
 }
 
 NewGeneManageVGs::~NewGeneManageVGs()
@@ -663,6 +665,23 @@ void NewGeneManageVGs::on_pushButton_remove_vg_clicked()
 void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 {
 
+	if (!refresh_vg_called_after_create)
+	{
+		// Refreshing data is VASTLY slower than simply inserting new data;
+		// give warning
+		refresh_vg_called_after_create = false;
+		boost::format msg_title("Refreshing data can be slow");
+		boost::format msg_text("Warning: If there is a large amount of existing data AND a large amount of data being refreshed, it will be MUCH, MUCH faster to delete the existing variable group, and re-import from scratch.  Continue?");
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(nullptr, QString(msg_title.c_str()), QString(msg_text.c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+		if (reply == QMessageBox::No)
+		{
+			return;
+		}
+	}
+	bool do_refresh_not_plain_insert = !refresh_vg_called_after_create;
+	refresh_vg_called_after_create = false;
+
 	WidgetInstanceIdentifier vg;
 	WidgetInstanceIdentifier uoa;
 	bool found = GetSelectedVG(vg, uoa);
@@ -1025,7 +1044,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	});
 
 	InstanceActionItems actionItems;
-	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__ImportVariableGroup(vg, dataTimeRange, dmusAndColumnNames, data_column_file_pathname, uoa.time_granularity, inputFileContainsColumnDescriptions, inputFileContainsColumnDataTypes)))));
+	actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__ImportVariableGroup(vg, dataTimeRange, dmusAndColumnNames, data_column_file_pathname, uoa.time_granularity, inputFileContainsColumnDescriptions, inputFileContainsColumnDataTypes, do_refresh_not_plain_insert)))));
 	WidgetActionItemRequest_ACTION_REFRESH_VG action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
 	emit RefreshVG(action_request);
 
@@ -1061,6 +1080,7 @@ bool NewGeneManageVGs::event ( QEvent * e )
 	else
 	if (e->type() == QEVENT_CLICK_VG_REFRESH)
 	{
+		refresh_vg_called_after_create = true;
 		ui->pushButton_refresh_vg->click();
 		returnVal = true;
 	}

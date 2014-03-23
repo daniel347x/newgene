@@ -567,7 +567,7 @@ class WidgetActionItem__ImportVariableGroup : public WidgetActionItem
 
 public:
 
-	WidgetActionItem__ImportVariableGroup(WidgetInstanceIdentifier const & vg, std::vector<std::string> const & timeRangeCols, std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, boost::filesystem::path const & filepathname, TIME_GRANULARITY const & the_time_granularity, bool const inputFileContainsColumnDescriptions_, bool const inputFileContainsColumnDataTypes_)
+	WidgetActionItem__ImportVariableGroup(WidgetInstanceIdentifier const & vg, std::vector<std::string> const & timeRangeCols, std::vector<std::pair<WidgetInstanceIdentifier, std::string>> const & dmusAndCols, boost::filesystem::path const & filepathname, TIME_GRANULARITY const & the_time_granularity, bool const inputFileContainsColumnDescriptions_, bool const inputFileContainsColumnDataTypes_, bool const do_refresh_not_plain_insert_)
 		: WidgetActionItem()
 		, variable_group(vg)
 		, timeRangeColumnNames(timeRangeCols)
@@ -576,6 +576,7 @@ public:
 		, time_granularity(the_time_granularity)
 		, inputFileContainsColumnDescriptions(inputFileContainsColumnDescriptions_)
 		, inputFileContainsColumnDataTypes(inputFileContainsColumnDataTypes_)
+		, do_refresh_not_plain_insert(do_refresh_not_plain_insert_)
 	{
 
 	}
@@ -589,6 +590,7 @@ public:
 		, time_granularity(rhs.time_granularity)
 		, inputFileContainsColumnDescriptions(rhs.inputFileContainsColumnDescriptions)
 		, inputFileContainsColumnDataTypes(rhs.inputFileContainsColumnDataTypes)
+		, do_refresh_not_plain_insert(rhs.do_refresh_not_plain_insert)
 	{
 
 	}
@@ -633,6 +635,11 @@ public:
 		return inputFileContainsColumnDataTypes;
 	}
 
+	bool doRefreshNotPlainInsert() const
+	{
+		return do_refresh_not_plain_insert;
+	}
+
 protected:
 
 	WidgetInstanceIdentifier variable_group;
@@ -642,6 +649,7 @@ protected:
 	TIME_GRANULARITY time_granularity;
 	bool inputFileContainsColumnDescriptions;
 	bool inputFileContainsColumnDataTypes;
+	bool do_refresh_not_plain_insert;
 
 };
 

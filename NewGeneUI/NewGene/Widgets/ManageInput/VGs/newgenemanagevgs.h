@@ -58,6 +58,10 @@ class NewGeneManageVGs : public QWidget, public NewGeneWidget // do not reorder 
 		void on_pushButton_add_vg_clicked();
 		void on_pushButton_remove_vg_clicked();
 		void on_pushButton_refresh_vg_clicked();
+
+	private:
+		bool refresh_vg_called_after_create;
+
 };
 
 #endif // NEWGENEMANAGEVGS_H

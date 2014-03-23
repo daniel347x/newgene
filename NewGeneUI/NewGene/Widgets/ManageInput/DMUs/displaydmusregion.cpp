@@ -39,6 +39,8 @@ DisplayDMUsRegion::DisplayDMUsRegion(QWidget *parent) :
 	ui->progressBar_importDMU->hide();
 	PrepareInputWidget(true);
 
+	refresh_dmu_called_after_create = false;
+
 }
 
 DisplayDMUsRegion::~DisplayDMUsRegion()
@@ -461,6 +463,23 @@ void DisplayDMUsRegion::on_pushButton_delete_dmu_clicked()
 void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 {
 
+	if (!refresh_dmu_called_after_create)
+	{
+		// Refreshing data is VASTLY slower than simply inserting new data;
+		// give warning
+		refresh_dmu_called_after_create = false;
+		boost::format msg_title("Refreshing data can be slow");
+		boost::format msg_text("Warning: If there is a large amount of existing data AND a large amount of data being refreshed, it will be MUCH, MUCH faster to delete the existing DMU, and re-import from scratch.  However, this will also delete all units of analysis and variable groups associated with this DMU - so it might be worth the wait.  Continue?");
+		QMessageBox::StandardButton reply;
+		reply = QMessageBox::question(nullptr, QString(msg_title.c_str()), QString(msg_text.c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+		if (reply == QMessageBox::No)
+		{
+			return;
+		}
+	}
+	bool do_refresh_not_plain_insert = !refresh_dmu_called_after_create;
+	refresh_dmu_called_after_create = false;
+
 	WidgetInstanceIdentifier dmu_category;
 	WidgetInstanceIdentifiers dmu_members;
 	bool found = GetSelectedDmuCategory(dmu_category, dmu_members);
@@ -610,8 +629,7 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 	InstanceActionItems actionItems;
 	std::vector<std::string> column_names{data_column_file_pathname.string(), data_column_name_uuid, data_column_name_code, data_column_name_description};
 	//column_names.insert(column_names.end(), dataTimeRange.begin(), dataTimeRange.end());
-	//actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector_Plus_Int(column_names, (int)timeRangeMode)))));
-	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector(column_names)))));
+	actionItems.push_back(std::make_pair(dmu_category, std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__StringVector_Plus_Int(column_names, do_refresh_not_plain_insert ? 1 : 0)))));
 	WidgetActionItemRequest_ACTION_REFRESH_DMUS_FROM_FILE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__DO_ACTION, actionItems);
 	emit RefreshDMUsFromFile(action_request);
 
@@ -1356,6 +1374,7 @@ bool DisplayDMUsRegion::event ( QEvent * e )
 	else
 	if (e->type() == QEVENT_CLICK_DMU_REFRESH)
 	{
+		refresh_dmu_called_after_create = true;
 		ui->pushButton_refresh_dmu_members_from_file->click();
 		returnVal = true;
 	}

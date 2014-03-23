@@ -543,7 +543,7 @@ bool Table_DMU_Instance::DeleteDmuMember(sqlite3 * db, InputModel & input_model_
 
 }
 
-bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::vector<std::string> const & dmu_column_labels, Messager & messager)
+bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_, WidgetInstanceIdentifier const & dmu_category, boost::filesystem::path const & dmu_refresh_file_pathname, std::vector<std::string> const & dmu_column_labels, Messager & messager, bool const do_refresh_not_plain_insert)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -636,8 +636,17 @@ bool Table_DMU_Instance::RefreshFromFile(sqlite3 * db, InputModel & input_model_
 	badwritelines = 0;
 
 	std::string errorMsg;
-	Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_OR_UPDATE, dmu_category, InputModelImportTableFn, Importer::IMPORT_DMU_SET_MEMBER, errorMsg);
-	//Importer table_importer(import_definition, &input_model_, this, Importer::INSERT_IN_BULK, dmu_category, InputModelImportTableFn, Importer::IMPORT_DMU_SET_MEMBER, errorMsg);
+
+	Importer::Mode import_mode;
+	if (do_refresh_not_plain_insert)
+	{
+		import_mode = Importer::INSERT_OR_UPDATE;
+	}
+	else
+	{
+		import_mode = Importer::INSERT_IN_BULK;
+	}
+	Importer table_importer(import_definition, &input_model_, this, import_mode, dmu_category, InputModelImportTableFn, Importer::IMPORT_DMU_SET_MEMBER, errorMsg);
 	if (!errorMsg.empty())
 	{
 		boost::format msg("Unable to begin DMU import process.");

@@ -392,6 +392,7 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 					TIME_GRANULARITY time_granularity = actionItemData.getTimeGranularity();
 					bool inputFileContainsColumnDescriptions = actionItemData.doesInputFileContainsColumnDescriptions();
 					bool inputFileContainsColumnDataTypes = actionItemData.doesInputFileContainsColumnDataTypes();
+					bool do_refresh_not_plain_insert = actionItemData.doRefreshNotPlainInsert();
 
 					if (!variable_group.uuid || variable_group.uuid->empty() || !variable_group.code || variable_group.code->empty())
 					{
@@ -422,8 +423,17 @@ void UIActionManager::RefreshVG(Messager & messager, WidgetActionItemRequest_ACT
 
 					// Create the table importer
 					errorMsg.clear();
-					//Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_OR_UPDATE, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
-					Importer table_importer(import_definition, &input_model, new_table.get(), Importer::INSERT_IN_BULK, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
+
+					Importer::Mode import_mode;
+					if (do_refresh_not_plain_insert)
+					{
+						import_mode = Importer::INSERT_OR_UPDATE;
+					}
+					else
+					{
+						import_mode = Importer::INSERT_IN_BULK;
+					}
+					Importer table_importer(import_definition, &input_model, new_table.get(), import_mode, variable_group, InputModelImportTableFn, Importer::IMPORT_VG_INSTANCE_DATA, errorMsg);
 					if (!errorMsg.empty())
 					{
 						boost::format msg("Unable to create data table: %1%");
