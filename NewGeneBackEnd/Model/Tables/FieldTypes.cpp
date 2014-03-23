@@ -191,27 +191,36 @@ bool IsFieldTypeTimeRange(FIELD_TYPE const & field_type)
 void BindSqlField(sqlite3_stmt * stmt, int & bind_index, std::pair<FIELD_TYPE, std::string> const & field)
 {
 
+	bool handled = false;
+
 	if (IsFieldTypeInt32(field.first))
 	{
 		sqlite3_bind_int(stmt, bind_index++, boost::lexical_cast<std::int32_t>(field.second.c_str()));
+		handled = true;
 	}
 	else
 	if (IsFieldTypeInt64(field.first))
 	{
 		sqlite3_bind_int64(stmt, bind_index++, boost::lexical_cast<std::int64_t>(field.second.c_str()));
+		handled = true;
 	}
 	else
 	if (IsFieldTypeFloat(field.first))
 	{
 		sqlite3_bind_double(stmt, bind_index++, boost::lexical_cast<double>(field.second.c_str()));
+		handled = true;
 	}
 	else
 	if (IsFieldTypeString(field.first))
 	{
 		sqlite3_bind_text(stmt, bind_index++, field.second.c_str(), static_cast<int>(field.second.size()), SQLITE_STATIC);
+		handled = true;
 	}
 
-	boost::format msg("Invalid field type when binding data for import");
-	throw NewGeneException() << newgene_error_description(msg.str());
+	if (!handled)
+	{
+		boost::format msg("Invalid field type when binding data for import");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
 
 }
