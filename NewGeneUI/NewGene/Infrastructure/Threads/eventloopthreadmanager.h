@@ -24,12 +24,17 @@ class EventLoopThreadManager
 
 	public:
 
-		void InitializeEventLoop(void * me)
+		void InitializeEventLoop(void * me, int stackSize = 32000000)
 		{
 			work_queue_manager.reset(InstantiateWorkQueue(me));
 			if (worker_pool_ui_2.isActive())
 			{
 				work_queue_manager_2.reset(InstantiateWorkQueue(me, true));
+			}
+
+			if (stackSize > 0)
+			{
+				work_queue_manager_thread.setStackSize(static_cast<uint>(stackSize));
 			}
 
 			work_queue_manager_thread.start();
@@ -87,9 +92,9 @@ class EventLoopThreadManager
 
 	protected:
 
-        virtual WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * InstantiateWorkQueue(void *, bool isPool2_ = false)
+		virtual WorkQueueManager<UI_THREAD_LOOP_CLASS_ENUM> * InstantiateWorkQueue(void *, bool isPool2_ = false)
 		{
-            Q_UNUSED(isPool2_);
+			Q_UNUSED(isPool2_);
 			return nullptr;
 		}
 
