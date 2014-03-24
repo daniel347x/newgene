@@ -42,7 +42,7 @@ class TimeSlice
 			return false;
 		}
 
-		inline bool Validate()
+		inline bool Validate() const
 		{
 			if (time_end <= time_start)
 			{
@@ -253,7 +253,7 @@ class AllWeightings
 		TimeSlices timeSlices;
 		Weighting weighting; // sum over all time slices
 
-		void AddLeafToTimeSlices(TimeSliceLeaf & timeSliceLeaf);
+		void AddLeafToTimeSlices(TimeSliceLeaf const & timeSliceLeaf);
 
 		void CalculateWeightings();
 
