@@ -252,13 +252,13 @@ bool AllWeightings::HandleTimeSliceNormalCase(TimeSliceLeaf & newTimeSliceLeaf, 
 }
 
 // breaks an existing map entry into two pieces and returns an iterator to both
-void AllWeightings::SliceMapEntry(std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr)
+void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr)
 {
 
 }
 
 // breaks an existing map entry into three pieces and returns an iterator to the middle piece
-void AllWeightings::SliceMapEntry(std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr)
+void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr)
 {
 
 }
