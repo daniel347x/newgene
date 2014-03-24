@@ -255,11 +255,48 @@ bool AllWeightings::HandleTimeSliceNormalCase(TimeSliceLeaf & newTimeSliceLeaf, 
 void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr)
 {
 
+	TimeSlice timeSlice = existingMapElementPtr->first;
+	VariableGroupTimeSliceData const timeSliceData = existingMapElementPtr->second;
+
+	std::int64_t left = timeSlice.time_start;
+	std::int64_t right = timeSlice.time_end;
+
+	timeSlices.erase(existingMapElementPtr);
+
+	timeSlice.Reshape(left, middle);
+	timeSlices[timeSlice] = timeSliceData;
+
+	newMapElementLeftPtr = timeSlices.find(timeSlice);
+
+	timeSlice.Reshape(middle, right);
+	timeSlices[timeSlice] = timeSliceData;
+
+	newMapElementRightPtr = timeSlices.find(timeSlice);
+
 }
 
 // breaks an existing map entry into three pieces and returns an iterator to the middle piece
 void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr)
 {
+
+	TimeSlice timeSlice = existingMapElementPtr->first;
+	VariableGroupTimeSliceData const timeSliceData = existingMapElementPtr->second;
+
+	std::int64_t leftedge = timeSlice.time_start;
+	std::int64_t rightedge = timeSlice.time_end;
+
+	timeSlices.erase(existingMapElementPtr);
+
+	timeSlice.Reshape(leftedge, left);
+	timeSlices[timeSlice] = timeSliceData;
+
+	timeSlice.Reshape(left, right);
+	timeSlices[timeSlice] = timeSliceData;
+
+	newMapElementMiddlePtr = timeSlices.find(timeSlice);
+
+	timeSlice.Reshape(right, rightedge);
+	timeSlices[timeSlice] = timeSliceData;
 
 }
 

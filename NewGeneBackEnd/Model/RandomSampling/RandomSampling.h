@@ -28,6 +28,12 @@ class TimeSlice
 			, time_end  { rhs.time_end }
 		{}
 
+		void Reshape(std::int64_t const & new_start, std::int64_t const & new_end)
+		{
+			time_start = new_start;
+			time_end = new_end;
+		}
+
 		bool operator<(TimeSlice const & rhs) const
 		{
 			if (time_start < rhs.time_start)
