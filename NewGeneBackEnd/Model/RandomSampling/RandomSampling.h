@@ -144,13 +144,7 @@ class PrimaryKeysGrouping
 
 };
 
-class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
-{
-
-	public:
-
-};
-
+// "Leaf"
 class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 {
 
@@ -170,8 +164,19 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 };
 
-typedef std::set<PrimaryKeysGroupingMultiplicityGreaterThanOne> Leaves;
-typedef std::map<PrimaryKeysGroupingMultiplicityOne, Leaves> Branches;
+// "Branch"
+class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
+{
+
+	public:
+		Weighting weighting; // Weighting for this branch: This is the lowest-level, calculated value
+
+};
+
+typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
+typedef std::set<Leaf> Leaves;
+typedef PrimaryKeysGroupingMultiplicityOne Branch;
+typedef std::map<Branch, Leaves> BranchesAndLeaves;
 
 class VariableGroupBranchesAndLeaves
 {
@@ -183,7 +188,8 @@ class VariableGroupBranchesAndLeaves
 		{}
 
 		std::string variable_group_name;
-		Branches branches;
+		BranchesAndLeaves branches_and_leaves;
+		Weighting weighting; // sum over all branches and leaves
 
 		bool operator==(VariableGroupBranchesAndLeaves const & rhs) const
 		{
@@ -204,9 +210,20 @@ class VariableGroupTimeSliceData
 	public:
 
 		VariableGroupBranchesAndLeavesVector branches_and_leaves;
+		Weighting weighting; // sum over all branches and leaves in all variable groups
 
 };
 
 typedef std::map<TimeSlice, VariableGroupTimeSliceData> TimeSlices;
+
+class AllWeightings
+{
+
+	public:
+
+		TimeSlices timeSlices;
+		Weighting weighting; // sum over all time slices
+
+};
 
 #endif
