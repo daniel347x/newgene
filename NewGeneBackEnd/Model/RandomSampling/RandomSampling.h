@@ -260,6 +260,10 @@ class AllWeightings
 	protected:
 
 		bool HandleTimeSliceNormalCase(TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr);
+		// breaks an existing map entry into two pieces and returns an iterator to both
+		void SliceMapEntry(std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr);
+		// breaks an existing map entry into three pieces and returns an iterator to the middle piece
+		void SliceMapEntry(std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr);
 
 		bool is_rhs_start_time_greater_than_lhs_end_time(TimeSlices::value_type const & lhs, TimeSliceLeaf const & rhs)
 		{

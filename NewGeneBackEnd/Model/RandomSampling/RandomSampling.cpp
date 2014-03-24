@@ -162,6 +162,8 @@ bool AllWeightings::HandleTimeSliceNormalCase(TimeSliceLeaf & newTimeSliceLeaf, 
 			// Merge the first piece with the new time slice.
 			// Leave the second piece unchanged.
 
+			// 
+
 			newTimeSliceEatenCompletelyUp = true;
 
 		}
@@ -246,6 +248,18 @@ bool AllWeightings::HandleTimeSliceNormalCase(TimeSliceLeaf & newTimeSliceLeaf, 
 
 
 	return false;
+
+}
+
+// breaks an existing map entry into two pieces and returns an iterator to both
+void AllWeightings::SliceMapEntry(std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr)
+{
+
+}
+
+// breaks an existing map entry into three pieces and returns an iterator to the middle piece
+void AllWeightings::SliceMapEntry(std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr)
+{
 
 }
 
