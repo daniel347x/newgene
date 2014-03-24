@@ -216,6 +216,8 @@ class VariableGroupTimeSliceData
 
 typedef std::map<TimeSlice, VariableGroupTimeSliceData> TimeSlices;
 
+typedef std::pair<TimeSlice, Leaf> TimeSliceLeaf;
+
 class AllWeightings
 {
 
@@ -223,6 +225,10 @@ class AllWeightings
 
 		TimeSlices timeSlices;
 		Weighting weighting; // sum over all time slices
+
+		void AddLeafToTimeSlices();
+
+		void CalculateWeightings();
 
 };
 
