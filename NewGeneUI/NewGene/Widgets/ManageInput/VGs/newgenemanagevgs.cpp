@@ -26,6 +26,7 @@ NewGeneManageVGs::NewGeneManageVGs( QWidget * parent ) :
 	ui->setupUi( this );
 	ui->label_importProgress->hide();
 	ui->progressBar_importVG->hide();
+	ui->pushButton_cancel->hide();
 	PrepareInputWidget(true);
 
 	refresh_vg_called_after_create = false;
@@ -1107,6 +1108,7 @@ void NewGeneManageVGs::UpdateVGImportProgressBar(int mode_, int min_, int max_, 
 				ui->label_importProgress->show();
 				ui->progressBar_importVG->setTextVisible(true);
 				ui->progressBar_importVG->show();
+				ui->pushButton_cancel->show();
 			}
 			break;
 
@@ -1127,6 +1129,7 @@ void NewGeneManageVGs::UpdateVGImportProgressBar(int mode_, int min_, int max_, 
 			{
 				ui->label_importProgress->hide();
 				ui->progressBar_importVG->hide();
+				ui->pushButton_cancel->hide();
 			}
 			break;
 

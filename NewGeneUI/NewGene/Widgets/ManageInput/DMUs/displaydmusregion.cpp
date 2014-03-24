@@ -38,6 +38,7 @@ DisplayDMUsRegion::DisplayDMUsRegion(QWidget *parent) :
 	ui->setupUi(this);
 	ui->label_importProgress->hide();
 	ui->progressBar_importDMU->hide();
+	ui->pushButton_cancel->hide();
 	PrepareInputWidget(true);
 
 	refresh_dmu_called_after_create = false;
@@ -1345,6 +1346,7 @@ void DisplayDMUsRegion::UpdateDMUImportProgressBar(int mode_, int min_, int max_
 				ui->label_importProgress->show();
 				ui->progressBar_importDMU->setTextVisible(true);
 				ui->progressBar_importDMU->show();
+				ui->pushButton_cancel->show();
 			}
 			break;
 
@@ -1365,6 +1367,7 @@ void DisplayDMUsRegion::UpdateDMUImportProgressBar(int mode_, int min_, int max_
 			{
 				ui->label_importProgress->hide();
 				ui->progressBar_importDMU->hide();
+				ui->pushButton_cancel->hide();
 			}
 			break;
 
