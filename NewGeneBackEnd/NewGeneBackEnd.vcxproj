@@ -92,6 +92,7 @@
     <ClInclude Include="Model\ModelManager.h" />
     <ClInclude Include="Model\OutputModelDdlSql.h" />
     <ClInclude Include="Model\OutputModel.h" />
+    <ClInclude Include="Model\RandomSampling\RandomSampling.h" />
     <ClInclude Include="Model\Tables\Executor.h" />
     <ClInclude Include="Model\Tables\Fields.h" />
     <ClInclude Include="Model\Tables\FieldTypes.h" />
@@ -165,6 +166,7 @@
     <ClCompile Include="Model\ModelManager.cpp" />
     <ClCompile Include="Model\OutputModel.cpp" />
     <ClCompile Include="Model\OutputModelDdlSql.cpp" />
+    <ClCompile Include="Model\RandomSampling\RandomSampling.cpp" />
     <ClCompile Include="Model\Tables\Fields.cpp" />
     <ClCompile Include="Model\Tables\FieldTypes.cpp" />
     <ClCompile Include="Model\Tables\Import\Import.cpp" />

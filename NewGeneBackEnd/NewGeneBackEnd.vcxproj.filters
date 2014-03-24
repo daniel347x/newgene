@@ -127,6 +127,12 @@
     <Filter Include="Source Files\Model\Tables\Import">
       <UniqueIdentifier>{d8e12115-5dbd-4a1b-bae8-c296c6f15123}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Model\RandomSampling">
+      <UniqueIdentifier>{e8d6a72d-93a2-485f-828b-84cd43a7f9b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model\RandomSampling">
+      <UniqueIdentifier>{6b4b4739-d7f6-429c-99e4-badc56b86329}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -344,6 +350,9 @@
     </ClInclude>
     <ClInclude Include="Utilities\Semaphore.h">
       <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Model\RandomSampling\RandomSampling.h">
+      <Filter>Header Files\Model\RandomSampling</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -577,6 +586,9 @@
     </ClCompile>
     <ClCompile Include="Model\Tables\Fields.cpp">
       <Filter>Source Files\Model\Tables</Filter>
+    </ClCompile>
+    <ClCompile Include="Model\RandomSampling\RandomSampling.cpp">
+      <Filter>Source Files\Model\RandomSampling</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

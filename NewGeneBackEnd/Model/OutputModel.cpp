@@ -443,6 +443,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	// RANDOM_SAMPLING: The work is all done here
 	messager.AppendKadStatusText("Looping through top-level variable groups...", this);
 	LoopThroughPrimaryVariableGroups();
 
@@ -451,6 +452,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	// RANDOM_SAMPLING: This stage should not be included
 	messager.AppendKadStatusText("Merging top-level variable groups...", this);
 	MergeHighLevelGroupResults();
 
@@ -459,6 +461,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	// RANDOM_SAMPLING: From here forward, this stage should be identical
 	messager.AppendKadStatusText("Merging child variable groups...", this);
 	MergeChildGroups();
 
@@ -2416,6 +2419,36 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 
 	// Two stages for construction of final K-ad results
 	//total_progress_stages += 2;
+
+}
+
+void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroupsRandomSampling()
+{
+
+	// RANDOM_SAMPLING: completely rework the following loop
+
+	int primary_group_number = 1;
+	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	{
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
+		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
+		SqlAndColumnSet primary_group_final_result = ConstructFullOutputForSinglePrimaryGroup(primary_variable_group_raw_data_columns, primary_group_column_sets, primary_group_number);
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
+		// EVERY inner table, including the LAST, has three pairs at its end:
+		// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
+		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
+		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
+		primary_group_final_results.push_back(primary_group_final_result);
+		++primary_group_number;
+	});
 
 }
 
