@@ -137,7 +137,7 @@ void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf con
 //   of the map entry
 // - An iterator to the map entry to the right of the slice, if there is one,
 //   or an iterator to one past the end of the map if there isn't one ("end()").
-bool AllWeightings::HandleTimeSliceNormalCase(TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator const & mapElementPtr)
+bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator const & mapElementPtr, std::string const & variable_group_name)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
@@ -166,6 +166,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(TimeSliceLeaf & newTimeSliceLeaf, 
 			// Leave the second piece unchanged.
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_end, newMapElementLeftPtr, newMapElementRightPtr);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_name);
 
 			newTimeSliceEatenCompletelyUp = true;
 
@@ -341,6 +342,7 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 		// *********************************************************************************** //
 		branchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if it doesn't already exist
 	}
+
 }
 
 void AllWeightings::CalculateWeightings()

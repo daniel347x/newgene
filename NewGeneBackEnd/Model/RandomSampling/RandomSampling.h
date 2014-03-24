@@ -280,7 +280,7 @@ class AllWeightings
 
 	protected:
 
-		bool HandleTimeSliceNormalCase(TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator const & mapElementPtr);
+		bool HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator const & mapElementPtr, std::string const & variable_group_name);
 
 		// Breaks an existing map entry into two pieces and returns an iterator to both.
 		void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr);
