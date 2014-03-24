@@ -1,6 +1,6 @@
 #include "RandomSampling.h"
 
-void AllWeightings::AddLeafToTimeSlices(TimeSliceLeaf const & newTimeSliceLeaf)
+void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf, std::string const & variable_group_name)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
@@ -111,38 +111,41 @@ void AllWeightings::AddLeafToTimeSlices(TimeSliceLeaf const & newTimeSliceLeaf)
 
 }
 
-bool AllWeightings::HandleTimeSliceNormalCase(TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr)
+// This function that takes the following arguments:
+// - A time slice
+// - An entry in the map
+// The time slice's left edge is guaranteed to be inside or at the left edge of
+// (not at the right edge of) an existing (non-"end()") entry of the map -
+// it is guaranteed not to be to the left of the left edge of the map entry.
+// This function does the following:
+// Processes the given entry in the map in relation to the time slice.
+//     This involves either merging the entire slice into some or all
+//     of the map entry (if the entire slice fits inside the map entry),
+//     or slicing off the left part of the slice and merging it with
+//     either the entire map entry (if it is a perfect overlap)
+//     or slicing the map entry and merging the left part of the slice
+//     with the right part of the map entry (if the left of the map entry
+//     extends to the left of the left edge of the slice).
+// The function returns the following information:
+// - Was the entire slice merged, or is there a part of the slice
+//   that extends beyond the right edge of the map entry?
+// The function returns the following data:
+// If the return value is TRUE:
+// - undefined values
+// If the return value is FALSE:
+// - The portion of the incoming slice that extends past the right edge
+//   of the map entry
+// - An iterator to the map entry to the right of the slice, if there is one,
+//   or an iterator to one past the end of the map if there isn't one ("end()").
+bool AllWeightings::HandleTimeSliceNormalCase(TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator const & mapElementPtr)
 {
-
-	// This function that takes the following arguments:
-	// - A time slice
-	// - An entry in the map
-	// The time slice's left edge is guaranteed to be inside or at the left edge of
-	// (not at the right edge of) an existing (non-"end()") entry of the map -
-	// it is guaranteed not to be to the left of the left edge of the map entry.
-	// This function does the following:
-	// Processes the given entry in the map in relation to the time slice.
-	//     This involves either merging the entire slice into some or all
-	//     of the map entry (if the entire slice fits inside the map entry),
-	//     or slicing off the left part of the slice and merging it with
-	//     either the entire map entry (if it is a perfect overlap)
-	//     or slicing the map entry and merging the left part of the slice
-	//     with the right part of the map entry (if the left of the map entry
-	//     extends to the left of the left edge of the slice).
-	// The function returns the following information:
-	// - Was the entire slice merged, or is there a part of the slice
-	//   that extends beyond the right edge of the map entry?
-	// The function returns the following data:
-	// If the return value is TRUE:
-	// - undefined values
-	// If the return value is FALSE:
-	// - The portion of the incoming slice that extends past the right edge
-	//   of the map entry
-	// - An iterator to the map entry to the right of the slice, if there is one,
-	//   or an iterator to one past the end of the map if there isn't one ("end()").
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
 	TimeSlice const & mapElement   = mapElementPtr->first;
+
+	TimeSlices::iterator newMapElementLeftPtr;
+	TimeSlices::iterator newMapElementMiddlePtr;
+	TimeSlices::iterator newMapElementRightPtr;
 
 	bool newTimeSliceEatenCompletelyUp = false;
 
@@ -162,7 +165,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(TimeSliceLeaf & newTimeSliceLeaf, 
 			// Merge the first piece with the new time slice.
 			// Leave the second piece unchanged.
 
-			// 
+			SliceMapEntry(mapElementPtr, newTimeSlice.time_end, newMapElementLeftPtr, newMapElementRightPtr);
 
 			newTimeSliceEatenCompletelyUp = true;
 
@@ -298,6 +301,46 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 	timeSlice.Reshape(right, rightedge);
 	timeSlices[timeSlice] = timeSliceData;
 
+}
+
+// Slices off the left part of the "incoming_slice" TimeSliceLeaf and returns it in the "new_left_slice" TimeSliceLeaf.
+// The "incoming_slice" TimeSliceLeaf is adjusted to become equal to the remaining part on the right.
+void AllWeightings::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice)
+{
+	new_left_slice = incoming_slice;
+	new_left_slice.first.time_end = slicePoint;
+
+	incoming_slice.first.time_start = slicePoint;
+}
+
+// Merge time slice data into a map element
+void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, std::string const & variable_group_name)
+{
+
+	VariableGroupTimeSliceData & variableGroupTimeSliceData = mapElementPtr->second;
+	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+	VariableGroupBranchesAndLeavesVector::iterator VariableGroupBranchesAndLeavesPtr = std::find(variableGroupBranchesAndLeavesVector.begin(), variableGroupBranchesAndLeavesVector.end(), variable_group_name);
+	if (VariableGroupBranchesAndLeavesPtr == variableGroupBranchesAndLeavesVector.end())
+	{
+		// add new branch corresponding to this variable group
+		VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_name);
+		BranchesAndLeaves & newBranchesAndLeaves = newVariableGroupBranch.branches_and_leaves;
+		newBranchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
+		variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
+	}
+	else
+	{
+		// branch already exists for this variable group
+		VariableGroupBranchesAndLeaves & variableGroupBranch = *VariableGroupBranchesAndLeavesPtr;
+		BranchesAndLeaves & branchesAndLeaves = variableGroupBranch.branches_and_leaves;
+
+		// *********************************************************************************** //
+		// This is where multiple rows with duplicated primary keys 
+		// and overlapping time range will be wiped out.
+		// ... Only one row with given primary keys and time range is allowed.
+		// *********************************************************************************** //
+		branchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if it doesn't already exist
+	}
 }
 
 void AllWeightings::CalculateWeightings()

@@ -11,7 +11,7 @@
 #endif
 #include "../../Utilities/NewGeneException.h"
 
-typedef boost::variant<std::int32_t, std::int64_t, double, std::string> DMU;
+typedef boost::variant<std::int32_t, std::int64_t, double, std::string> DMUInstanceData;
 
 class TimeSlice
 {
@@ -103,19 +103,22 @@ class Weighting
 
 };
 
+typedef std::vector<DMUInstanceData> DMUInstanceDataVector;
+
 class PrimaryKeysGrouping
 {
 
 	public:
 
-		PrimaryKeysGrouping()
+		PrimaryKeysGrouping(DMUInstanceDataVector const & dmuInstanceDataVector)
+			: primary_keys(dmuInstanceDataVector)
 		{}
 
 		PrimaryKeysGrouping(PrimaryKeysGrouping const & rhs)
 			: primary_keys(rhs.primary_keys)
 		{}
 
-		std::vector<DMU> primary_keys;
+		DMUInstanceDataVector primary_keys;
 
 		bool operator<(PrimaryKeysGrouping const & rhs) const
 		{
@@ -183,8 +186,8 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 	public:
 
-		PrimaryKeysGroupingMultiplicityGreaterThanOne()
-			: PrimaryKeysGrouping()
+		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector)
+			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data{ 0 }
 		{}
 
@@ -202,6 +205,16 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 {
 
 	public:
+
+		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
+			: PrimaryKeysGrouping(dmuInstanceDataVector)
+		{}
+
+		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
+			: PrimaryKeysGrouping(rhs)
+			, weighting{ rhs.weighting }
+		{}
+
 		Weighting weighting; // Weighting for this branch: This is the lowest-level, calculated value
 
 };
@@ -224,9 +237,11 @@ class VariableGroupBranchesAndLeaves
 		BranchesAndLeaves branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves
 
-		bool operator==(VariableGroupBranchesAndLeaves const & rhs) const
+		//bool operator==(VariableGroupBranchesAndLeaves const & rhs) const
+		bool operator==(std::string const & rhs) const
 		{
-			if (variable_group_name == rhs.variable_group_name)
+			//if (variable_group_name == rhs.variable_group_name)
+			if (variable_group_name == rhs)
 			{
 				return true;
 			}
@@ -259,17 +274,26 @@ class AllWeightings
 		TimeSlices timeSlices;
 		Weighting weighting; // sum over all time slices
 
-		void AddLeafToTimeSlices(TimeSliceLeaf const & timeSliceLeaf);
+		void AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, std::string const & variable_group_name);
 
 		void CalculateWeightings();
 
 	protected:
 
-		bool HandleTimeSliceNormalCase(TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr);
-		// breaks an existing map entry into two pieces and returns an iterator to both
+		bool HandleTimeSliceNormalCase(TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator const & mapElementPtr);
+
+		// Breaks an existing map entry into two pieces and returns an iterator to both.
 		void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr);
-		// breaks an existing map entry into three pieces and returns an iterator to the middle piece
+
+		// Breaks an existing map entry into three pieces and returns an iterator to the middle piece.
 		void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr);
+
+		// Slices off the left part of the "incoming_slice" TimeSliceLeaf and returns it in the "new_left_slice" TimeSliceLeaf.
+		// The "incoming_slice" TimeSliceLeaf is adjusted to become equal to the remaining part on the right.
+		void SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice);
+
+		// Merge time slice data into a map element
+		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, std::string const & variable_group_name);
 
 		bool is_rhs_start_time_greater_than_lhs_end_time(TimeSlices::value_type const & lhs, TimeSliceLeaf const & rhs)
 		{
