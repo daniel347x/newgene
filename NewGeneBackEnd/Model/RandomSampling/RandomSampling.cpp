@@ -29,8 +29,6 @@ void AllWeightings::AddLeafToTimeSlices(TimeSliceLeaf const & newTimeSliceLeaf)
 	else
 	{
 	
-		// existing_start_slice guaranteed to represent an existing instance of a map element
-
 		auto startMapSlicePtr = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &AllWeightings::is_rhs_start_time_greater_than_lhs_end_time);
 		bool start_of_new_slice_is_past_end_of_map = false;
 		if (startMapSlicePtr == existing_one_past_end_slice)
@@ -104,34 +102,43 @@ void AllWeightings::AddLeafToTimeSlices(TimeSliceLeaf const & newTimeSliceLeaf)
 				// Normal case: The new time slice starts inside
 				// (or at the left edge of) an existing time slice in the map (not the first)
 
-				// Call a function that takes the following arguments:
-				// - An entry in the map
-				// - A time slice
-				// The time slice's left edge is guaranteed to be inside (not at the right edge of)
-				// an existing (non-"end()") entry of the map, or at the left edge of this entry.
-				// This function does the following:
-				// Processes the given entry in the map in relation to the time slice.
-				//     This involves either merging the entire slice into some or all
-				//     of the map entry (if the entire slice fits inside the map entry),
-				//     or slicing off the left part of the slice and merging it with
-				//     either the entire map entry (if it is a perfect overlap)
-				//     or slicing the map entry and merging the left part of the slice
-				//     with the right part of the map entry (if the left of the map entry
-				//     extends to the left of the left edge of the slice).
-				// The function returns the following information:
-				// - Was the entire slice merged, or is there a part of the slice
-				//   that extends beyond the right edge of the map entry?
-				// The function returns the following data:
-				// - Any portion of the incoming slice that extends past the right edge
-				//   of the map entry
-				// - An iterator to the map entry to the right of the slice, if there is one,
-				//   or an iterator to one past the end of the map if there isn't one.
-
 			}
 
 		}
 
 	}
+
+}
+
+bool AllWeightings::HandleTimeSliceNormalCase(TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr)
+{
+
+	// This function that takes the following arguments:
+	// - A time slice
+	// - An entry in the map
+	// The time slice's left edge is guaranteed to be inside or at the left edge of
+	// (not at the right edge of) an existing (non-"end()") entry of the map.
+	// This function does the following:
+	// Processes the given entry in the map in relation to the time slice.
+	//     This involves either merging the entire slice into some or all
+	//     of the map entry (if the entire slice fits inside the map entry),
+	//     or slicing off the left part of the slice and merging it with
+	//     either the entire map entry (if it is a perfect overlap)
+	//     or slicing the map entry and merging the left part of the slice
+	//     with the right part of the map entry (if the left of the map entry
+	//     extends to the left of the left edge of the slice).
+	// The function returns the following information:
+	// - Was the entire slice merged, or is there a part of the slice
+	//   that extends beyond the right edge of the map entry?
+	// The function returns the following data:
+	// If the return value is TRUE:
+	// - an empty TimeSliceLeaf
+	// - an iterator equal to "end()"
+	// If the return value is FALSE:
+	// - The portion of the incoming slice that extends past the right edge
+	//   of the map entry
+	// - An iterator to the map entry to the right of the slice, if there is one,
+	//   or an iterator to one past the end of the map if there isn't one ("end()").
 
 }
 

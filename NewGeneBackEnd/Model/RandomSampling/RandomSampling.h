@@ -259,6 +259,8 @@ class AllWeightings
 
 	protected:
 
+		bool HandleTimeSliceNormalCase(TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr);
+
 		bool is_rhs_start_time_greater_than_lhs_end_time(TimeSlices::value_type const & lhs, TimeSliceLeaf const & rhs)
 		{
 
