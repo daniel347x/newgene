@@ -28,6 +28,16 @@ class TimeSlice
 			, time_end  { rhs.time_end }
 		{}
 
+		TimeSlice & operator=(TimeSlice const & rhs)
+		{
+			if (&rhs == this)
+			{
+				return *this;
+			}
+			time_start = rhs.time_start;
+			time_end = rhs.time_end;
+		}
+
 		void Reshape(std::int64_t const & new_start, std::int64_t const & new_end)
 		{
 			time_start = new_start;
@@ -97,6 +107,17 @@ class Weighting
 			, weighting_range_end{ rhs.weighting_range_end }
 		{}
 
+		Weighting & operator=(Weighting const & rhs)
+		{
+			if (&rhs == this)
+			{
+				return *this;
+			}
+			weighting = rhs.weighting;
+			weighting_range_start = rhs.weighting_range_start;
+			weighting_range_end = rhs.weighting_range_end;
+		}
+
 		boost::multiprecision::cpp_int weighting;
 		boost::multiprecision::cpp_int weighting_range_start;
 		boost::multiprecision::cpp_int weighting_range_end;
@@ -117,6 +138,24 @@ class PrimaryKeysGrouping
 		PrimaryKeysGrouping(PrimaryKeysGrouping const & rhs)
 			: primary_keys(rhs.primary_keys)
 		{}
+
+		PrimaryKeysGrouping & operator=(PrimaryKeysGrouping const & rhs)
+		{
+			if (&rhs == this)
+			{
+				return *this;
+			}
+			primary_keys = rhs.primary_keys;
+		}
+
+		PrimaryKeysGrouping & operator=(PrimaryKeysGrouping const && rhs)
+		{
+			if (&rhs == this)
+			{
+				return *this;
+			}
+			primary_keys = std::move(rhs.primary_keys);
+		}
 
 		DMUInstanceDataVector primary_keys;
 
@@ -196,6 +235,26 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 			, index_into_raw_data{ rhs.index_into_raw_data }
 		{}
 
+		PrimaryKeysGroupingMultiplicityGreaterThanOne & operator=(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
+		{
+			if (&rhs == this)
+			{
+				return *this;
+			}
+			PrimaryKeysGrouping::operator=(rhs);
+			index_into_raw_data = rhs.index_into_raw_data;
+		}
+
+		PrimaryKeysGroupingMultiplicityGreaterThanOne & operator=(PrimaryKeysGroupingMultiplicityGreaterThanOne const && rhs)
+		{
+			if (&rhs == this)
+			{
+				return *this;
+			}
+			PrimaryKeysGrouping::operator=(std::move(rhs));
+			index_into_raw_data = rhs.index_into_raw_data;
+		}
+
 		std::int64_t index_into_raw_data;
 
 };
@@ -214,6 +273,26 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			: PrimaryKeysGrouping(rhs)
 			, weighting{ rhs.weighting }
 		{}
+
+		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const & rhs)
+		{
+			if (&rhs == this)
+			{
+				return *this;
+			}
+			PrimaryKeysGrouping::operator=(rhs);
+			weighting = rhs.weighting;
+		}
+
+		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const && rhs)
+		{
+			if (&rhs == this)
+			{
+				return *this;
+			}
+			PrimaryKeysGrouping::operator=(std::move(rhs));
+			weighting = rhs.weighting;
+		}
 
 		Weighting weighting; // Weighting for this branch: This is the lowest-level, calculated value
 
@@ -280,7 +359,7 @@ class AllWeightings
 
 	protected:
 
-		bool HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator const & mapElementPtr, std::string const & variable_group_name);
+		bool HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, std::string const & variable_group_name);
 
 		// Breaks an existing map entry into two pieces and returns an iterator to both.
 		void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr);
