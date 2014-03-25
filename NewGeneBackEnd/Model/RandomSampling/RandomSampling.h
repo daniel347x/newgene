@@ -12,6 +12,8 @@
 #include "../../Utilities/NewGeneException.h"
 
 typedef boost::variant<std::int32_t, std::int64_t, double, std::string> DMUInstanceData;
+typedef boost::variant<std::int32_t, std::int64_t, double, std::string> SecondaryInstanceData;
+typedef std::map<std::int64_t, SecondaryInstanceData> DataCache;
 
 class TimeSlice
 {
@@ -347,6 +349,7 @@ class AllWeightings
 	public:
 
 		TimeSlices timeSlices;
+		DataCache dataCache; // caches secondary key data required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
 		Weighting weighting; // sum over all time slices
 
 		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number);

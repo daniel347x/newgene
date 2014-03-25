@@ -474,6 +474,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_primary_key_columns_with_multiplicity_equal_to_1;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_primary_key_columns_in_final_inner_table;
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_primary_key_columns_in_all_but_final_inner_table;
+						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_secondary_key_columns;
 
 						std::vector<bool> is_index_in_final_inner_table;
 						std::vector<bool> is_index_in_all_but_final_inner_table;
@@ -482,6 +483,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<bool> is_index_a_primary_key_with_outer_multiplicity_equal_to_1;
 						std::vector<bool> is_index_a_primary_key_in_the_final_inner_table;
 						std::vector<bool> is_index_a_primary_key_in_not_the_final_inner_table;
+						std::vector<bool> is_index_a_secondary_key;
 
 						int number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns;
 						int number_of_columns_in_inner_table;
@@ -689,7 +691,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				// Random sampling
 				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
-				SqlAndColumnSet WriteRandomSamplesToOutputTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
+				SqlAndColumnSet RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_x1_columns);
+				void RandomSamplingWriteToOutputTable(ColumnsInTempView const & primary_variable_group_x1_columns, AllWeightings & allWeightings);
 
 				// Functions involved in different phases of generation
 				void ObtainColumnInfoForRawDataTables();
