@@ -19899,9 +19899,4 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Writ
 
 	std::int64_t rowid { 0 };
 
-	while ((rowid = allWeightings.RetrieveNextLeafIndex()) != -1)
-	{
-
-	}
-
 }

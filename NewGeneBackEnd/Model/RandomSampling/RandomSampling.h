@@ -350,7 +350,7 @@ class AllWeightings
 		Weighting weighting; // sum over all time slices
 
 		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number);
-		void CalculateWeightings();
+		void CalculateWeightings(int const k);
 		void PrepareRandomNumbers(int how_many);
 		std::int64_t RetrieveNextLeafIndex();
 

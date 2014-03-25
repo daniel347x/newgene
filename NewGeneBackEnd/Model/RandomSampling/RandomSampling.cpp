@@ -400,7 +400,7 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 }
 
-void AllWeightings::CalculateWeightings()
+void AllWeightings::CalculateWeightings(int const k)
 {
 
 }
