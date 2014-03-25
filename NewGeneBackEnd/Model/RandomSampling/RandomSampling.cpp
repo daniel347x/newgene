@@ -127,16 +127,18 @@ void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf con
 //     with the right part of the map entry (if the left of the map entry
 //     extends to the left of the left edge of the slice).
 // The function returns the following information:
-// - Was the entire slice merged, or is there a part of the slice
-//   that extends beyond the right edge of the map entry?
+// - Was the entire slice merged (true), or is there a part of the slice
+//   that extends beyond the right edge of the map entry (false)?
 // The function returns the following data:
-// If the return value is TRUE:
-// - undefined values
-// If the return value is FALSE:
+// If the return value is true:
+// - undefined value of time slice
+// - iterator to the map entry whose left edge corresponds to the left edge
+//   of the original time slice
+// If the return value is false:
 // - The portion of the incoming slice that extends past the right edge
 //   of the map entry
-// - An iterator to the map entry to the right of the slice, if there is one,
-//   or an iterator to one past the end of the map if there isn't one ("end()").
+// - An iterator to the map entry whose left edge matches the left edge
+//   of the leftover time slice to the right.
 bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr, std::string const & variable_group_name)
 {
 
@@ -146,6 +148,8 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 	TimeSlices::iterator newMapElementLeftPtr;
 	TimeSlices::iterator newMapElementMiddlePtr;
 	TimeSlices::iterator newMapElementRightPtr;
+
+	TimeSliceLeaf new_left_slice;
 
 	bool newTimeSliceEatenCompletelyUp = false;
 
@@ -167,6 +171,8 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_end, newMapElementLeftPtr, newMapElementRightPtr);
 			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_name);
+
+			mapElementPtr = newMapElementLeftPtr;
 
 			newTimeSliceEatenCompletelyUp = true;
 
@@ -193,8 +199,10 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// perfectly overlaps the map element.
 			// Merge it with the map element.
 
-			SliceOffLeft(newTimeSliceLeaf, mapElement.time_end);
-			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_name);
+			SliceOffLeft(newTimeSliceLeaf, mapElement.time_end, new_left_slice);
+			MergeTimeSliceDataIntoMap(branch, new_left_slice, mapElementPtr, variable_group_name);
+
+			mapElementPtr = ++mapElementPtr;
 
 		}
 
@@ -217,6 +225,11 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// The second merges with the new time slice.
 			// The third is unchanged.
 
+			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newTimeSlice.time_end, newMapElementMiddlePtr);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementMiddlePtr, variable_group_name);
+
+			mapElementPtr = newMapElementMiddlePtr;
+
 			newTimeSliceEatenCompletelyUp = true;
 
 		}
@@ -232,6 +245,11 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// The second merges with the new time slice
 			// (with the right edge equal to the right edge of the map element).
 
+			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newMapElementLeftPtr, newMapElementRightPtr);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementRightPtr, variable_group_name);
+
+			mapElementPtr = newMapElementRightPtr;
+
 			newTimeSliceEatenCompletelyUp = true;
 
 		}
@@ -244,19 +262,19 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 
 			// Slice the left part of the time slice
 			// and the right part of the map element
-			// so that they are equal, and merge,
+			// so that they are equal, and merge.
+
+			SliceOffLeft(newTimeSliceLeaf, mapElement.time_end, new_left_slice);
+			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newMapElementLeftPtr, newMapElementRightPtr);
+			MergeTimeSliceDataIntoMap(branch, new_left_slice, newMapElementRightPtr, variable_group_name);
+
+			mapElementPtr = ++newMapElementRightPtr;
 
 		}
 
 	}
 
-	if (newTimeSliceEatenCompletelyUp)
-	{
-		return true;
-	}
-
-
-	return false;
+	return newTimeSliceEatenCompletelyUp;
 
 }
 
