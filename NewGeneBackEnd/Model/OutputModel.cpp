@@ -2498,7 +2498,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 	if (random_sampling)
 	{
-
+		RandomSamplingTimeSlices(x_table_result.second, primary_group_number);
 	}
 	else
 	{

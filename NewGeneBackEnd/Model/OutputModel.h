@@ -422,6 +422,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 					, FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP
 					, CHILD_VARIABLE_GROUP
 					, KAD_RESULTS
+					, RANDOMIZE // special case - not an "XR" table
 				};
 
 				class SavedRowData
@@ -671,6 +672,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void DetermineChildMultiplicitiesGreaterThanOne();
 				void PopulateVariableGroups();
 				void PopulatePrimaryKeySequenceInfo();
+
+				// Random sampling
+				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
 
 				// Functions involved in different phases of generation
 				void ObtainColumnInfoForRawDataTables();

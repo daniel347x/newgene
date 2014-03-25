@@ -1,4 +1,9 @@
 #include "RandomSampling.h"
+#include "../OutputModel.h"
+
+#ifndef Q_MOC_RUN
+#	include <boost/scope_exit.hpp>
+#endif
 
 void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number)
 {
@@ -410,4 +415,81 @@ void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch co
 	newBranchesAndLeaves[branch].emplace(newTimeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
 	variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
 	timeSlices[newTimeSliceLeaf.first] = variableGroupTimeSliceData;
+}
+
+void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number)
+{
+
+	std::int64_t current_rows_stepped = 0;
+	sqlite3_stmt *& the_prepared_stmt = SQLExecutor::stmt_insert;
+	std::shared_ptr<bool> statement_is_prepared(std::make_shared<bool>(false));
+	SQLExecutor::stmt_insert = nullptr;
+	sqlite3_stmt *& the_stmt__ = SQLExecutor::stmt_insert;
+	BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared, &the_stmt__)
+	{
+		if (the_prepared_stmt && *statement_is_prepared)
+		{
+			sqlite3_finalize(the_prepared_stmt);
+			++SQLExecutor::number_statement_finalizes;
+			the_prepared_stmt = nullptr;
+			*statement_is_prepared = false;
+		}
+		the_stmt__ = nullptr;
+	} BOOST_SCOPE_EXIT_END
+
+	{
+
+		BOOST_SCOPE_EXIT(this_)
+		{
+			this_->CloseObtainData();
+		} BOOST_SCOPE_EXIT_END
+
+		ObtainData(primary_variable_group_x1_columns);
+
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
+		//BeginNewTransaction();
+
+		SavedRowData sorting_row_of_data;
+
+		while (StepData())
+		{
+
+			sorting_row_of_data.PopulateFromCurrentRowInDatabase(primary_variable_group_x1_columns, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE);
+
+			// Construct branch and leaf
+
+
+			failed = sorting_row_of_data.failed;
+			if (failed)
+			{
+				SetFailureMessage(sorting_row_of_data.error_message);
+				return;
+			}
+			if (CheckCancelled())
+			{
+				return;
+			}
+
+			++current_rows_stepped;
+
+			if (current_rows_stepped % 100 == 0 || current_rows_stepped == current_number_rows_to_sort)
+			{
+				//UpdateProgressBarValue(messager, current_rows_stepped);
+			}
+
+		}
+
+		//ExecuteSQL(result);
+		//messager.UpdateProgressBarValue(1000);
+		//boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+		//msg % current_rows_stepped % current_number_rows_to_sort;
+		//messager.SetPerformanceLabel(msg.str());
+		//EndTransaction();
+
+	}
+
 }
