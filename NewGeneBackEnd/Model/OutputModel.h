@@ -16,6 +16,7 @@
 #include <set>
 #include <string>
 #include <list>
+#include "./RandomSampling/RandomSampling.h"
 
 class PrimaryKeySequence
 {
@@ -683,7 +684,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulatePrimaryKeySequenceInfo();
 
 				// Random sampling
-				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
+				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
 
 				// Functions involved in different phases of generation
 				void ObtainColumnInfoForRawDataTables();
