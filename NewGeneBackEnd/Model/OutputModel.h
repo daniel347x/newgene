@@ -422,7 +422,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 					, FINAL_MERGE_OF_PRIMARY_VARIABLE_GROUP
 					, CHILD_VARIABLE_GROUP
 					, KAD_RESULTS
-					, RANDOMIZE // special case - not an "XR" table
+					, RANDOMIZE // special case - not the same format of "XR" table
 				};
 
 				class SavedRowData
@@ -450,6 +450,15 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						std::vector<std::int64_t> current_parameter_ints;
 						std::vector<long double> current_parameter_floats;
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
+
+						// ************************************************************************************************* //
+						// Use these vectors to obtain the data you want.
+						// First, get the binding and index into the proper bound vector, above.
+						// Then, retrieve the data from the bound vector, above.
+						// ************************************************************************************************* //
+
+						// std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> contains the following data:
+						// WHICH_BINDING, the index in the corresponding bound vector (above), and the column number
 
 						std::vector<std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>>> indices_of_all_columns;
 

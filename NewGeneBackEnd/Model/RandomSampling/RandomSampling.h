@@ -23,6 +23,11 @@ class TimeSlice
 			, time_end  { 0 }
 		{}
 
+		TimeSlice(std::int64_t time_start_, std::int64_t time_end_)
+			: time_start{ time_start_ }
+			, time_end{ time_end_ }
+		{}
+
 		TimeSlice(TimeSlice const & rhs)
 			: time_start{ rhs.time_start }
 			, time_end  { rhs.time_end }

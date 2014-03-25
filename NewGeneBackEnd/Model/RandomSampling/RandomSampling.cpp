@@ -420,76 +420,196 @@ void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch co
 void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number)
 {
 
-	std::int64_t current_rows_stepped = 0;
-	sqlite3_stmt *& the_prepared_stmt = SQLExecutor::stmt_insert;
-	std::shared_ptr<bool> statement_is_prepared(std::make_shared<bool>(false));
-	SQLExecutor::stmt_insert = nullptr;
-	sqlite3_stmt *& the_stmt__ = SQLExecutor::stmt_insert;
-	BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared, &the_stmt__)
-	{
-		if (the_prepared_stmt && *statement_is_prepared)
-		{
-			sqlite3_finalize(the_prepared_stmt);
-			++SQLExecutor::number_statement_finalizes;
-			the_prepared_stmt = nullptr;
-			*statement_is_prepared = false;
-		}
-		the_stmt__ = nullptr;
-	} BOOST_SCOPE_EXIT_END
+	AllWeightings allWeightings;
 
 	{
 
-		BOOST_SCOPE_EXIT(this_)
+		std::int64_t current_rows_stepped = 0;
+		sqlite3_stmt *& the_prepared_stmt = SQLExecutor::stmt_insert;
+		std::shared_ptr<bool> statement_is_prepared(std::make_shared<bool>(false));
+		SQLExecutor::stmt_insert = nullptr;
+		sqlite3_stmt *& the_stmt__ = SQLExecutor::stmt_insert;
+		BOOST_SCOPE_EXIT(&the_prepared_stmt, &statement_is_prepared, &the_stmt__)
 		{
-			this_->CloseObtainData();
+			if (the_prepared_stmt && *statement_is_prepared)
+			{
+				sqlite3_finalize(the_prepared_stmt);
+				++SQLExecutor::number_statement_finalizes;
+				the_prepared_stmt = nullptr;
+				*statement_is_prepared = false;
+			}
+			the_stmt__ = nullptr;
 		} BOOST_SCOPE_EXIT_END
 
-		ObtainData(primary_variable_group_x1_columns);
-
-		if (failed || CheckCancelled())
-		{
-			return;
-		}
-
-		//BeginNewTransaction();
-
-		SavedRowData sorting_row_of_data;
-
-		while (StepData())
 		{
 
-			sorting_row_of_data.PopulateFromCurrentRowInDatabase(primary_variable_group_x1_columns, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE);
-
-			// Construct branch and leaf
-
-
-			failed = sorting_row_of_data.failed;
-			if (failed)
+			BOOST_SCOPE_EXIT(this_)
 			{
-				SetFailureMessage(sorting_row_of_data.error_message);
-				return;
-			}
-			if (CheckCancelled())
+				this_->CloseObtainData();
+			} BOOST_SCOPE_EXIT_END
+
+				ObtainData(primary_variable_group_x1_columns);
+
+			if (failed || CheckCancelled())
 			{
 				return;
 			}
 
-			++current_rows_stepped;
+			//BeginNewTransaction();
 
-			if (current_rows_stepped % 100 == 0 || current_rows_stepped == current_number_rows_to_sort)
+			SavedRowData sorting_row_of_data;
+
+			while (StepData())
 			{
-				//UpdateProgressBarValue(messager, current_rows_stepped);
+
+				if (CheckCancelled())
+				{
+					return;
+				}
+
+				sorting_row_of_data.PopulateFromCurrentRowInDatabase(primary_variable_group_x1_columns, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE);
+
+				// Construct branch and leaf
+
+				failed = sorting_row_of_data.failed;
+				if (failed)
+				{
+					SetFailureMessage(sorting_row_of_data.error_message);
+					return;
+				}
+
+				// Construct Leaf
+				DMUInstanceDataVector dmus_leaf;
+				bool bad = false;
+				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cbegin(), sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+				{
+
+					if (bad)
+					{
+						return;
+					}
+
+					SQLExecutor::WHICH_BINDING binding = binding_info.first;
+					std::pair<int, int> const & indices = binding_info.second;
+					int const index_in_bound_vector = indices.first;
+					int const column_number = indices.second;
+
+					switch (binding)
+					{
+
+						case SQLExecutor::INT64:
+						{
+							dmus_leaf.push_back(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]);
+						}
+						break;
+
+						case SQLExecutor::FLOAT:
+						{
+							dmus_leaf.push_back(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]);
+						}
+						break;
+
+						case SQLExecutor::STRING:
+						{
+							dmus_leaf.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
+						}
+						break;
+
+						default:
+						{
+							// No throw... TODO: log error
+							//boost::format msg("Data cannot be NULL in a primary key field.");
+							//throw NewGeneException() << newgene_error_description(msg.str());
+							return;
+						}
+						break;
+
+					}
+
+				});
+
+				// Construct Branch
+				DMUInstanceDataVector dmus_branch;
+				bool bad = false;
+				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(), sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+				{
+
+					if (bad)
+					{
+						return;
+					}
+
+					SQLExecutor::WHICH_BINDING binding = binding_info.first;
+					std::pair<int, int> const & indices = binding_info.second;
+					int const index_in_bound_vector = indices.first;
+					int const column_number = indices.second;
+
+					switch (binding)
+					{
+
+						case SQLExecutor::INT64:
+						{
+							dmus_branch.push_back(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]);
+						}
+						break;
+
+						case SQLExecutor::FLOAT:
+						{
+							dmus_branch.push_back(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]);
+						}
+						break;
+
+						case SQLExecutor::STRING:
+						{
+							dmus_branch.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
+						}
+						break;
+
+						default:
+						{
+							// No throw... TODO: log error
+							//boost::format msg("Data cannot be NULL in a primary key field.");
+							//throw NewGeneException() << newgene_error_description(msg.str());
+							return;
+						}
+						break;
+
+					}
+
+				});
+
+				if (!bad)
+				{
+					Leaf leaf(dmus_leaf);
+					Branch branch(dmus_branch);
+					allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), primary_group_number);
+				}
+
+				++current_rows_stepped;
+
+				if (current_rows_stepped % 100 == 0 || current_rows_stepped == current_number_rows_to_sort)
+				{
+					//UpdateProgressBarValue(messager, current_rows_stepped);
+				}
+
+				if (bad)
+				{
+					continue;
+				}
+
 			}
 
-		}
+			//ExecuteSQL(result);
+			//messager.UpdateProgressBarValue(1000);
+			//boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
+			//msg % current_rows_stepped % current_number_rows_to_sort;
+			//messager.SetPerformanceLabel(msg.str());
+			//EndTransaction();
 
-		//ExecuteSQL(result);
-		//messager.UpdateProgressBarValue(1000);
-		//boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
-		//msg % current_rows_stepped % current_number_rows_to_sort;
-		//messager.SetPerformanceLabel(msg.str());
-		//EndTransaction();
+		}
 
 	}
+
+
 
 }
