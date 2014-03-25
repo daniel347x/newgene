@@ -203,6 +203,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
 	, random_sampling_rows_per_stage(1)
 	, random_sampling(false)
+	, random_sampling_old(false)
 {
 	//debug_ordering = true;
 	//delete_tables = false;
@@ -2367,7 +2368,7 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 		total_progress_stages += (4 * (highest_multiplicity_primary_uoa - 1));
 
 		// If randomizing
-		if (random_sampling)
+		if (random_sampling_old)
 		{
 			total_progress_stages += (1 * (highest_multiplicity_primary_uoa - 1));
 		}
@@ -2513,7 +2514,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	UpdateProgressBarToNextStage(msg_.str(), std::string());
 
 	// Just pull raw data, making sure only to pull rows that overlap the time range selected by the end user,
-	// and ordering the rows first by primary keys, then by time range
+	// and ordering the rows first by primary keys, then by time range.
+	// For random sampling, only multiplicity 1 primary keys are included in the sort.
+	// For regular output, first multiplicity 1, then multiplicity > 1 are included.
+	// In both cases, the time range (start then end) is included last in the sort.
 	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, primary_group_number, false);
 	x_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(x_table_result);
@@ -2523,171 +2527,180 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
-	// The only purpose of CreateInitialPrimaryXRTable() is to modify the schema
-	// to add an additional pair of time range columns so that the schema is a proper "XR" schema.
-	// Nothing more.
-	SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(x_table_result.second, primary_group_number);
-	xr_table_result.second.most_recent_sql_statement_executed__index = -1;
-	ExecuteSQL(xr_table_result);
-	ClearTables(sql_and_column_sets);
-	sql_and_column_sets.push_back(xr_table_result);
-	if (failed || CheckCancelled())
+	if (random_sampling)
 	{
-		return SqlAndColumnSet();
+
 	}
-
-	std::int64_t previous_count = ObtainCount(xr_table_result.second);
-
-	// The initial XR table is necessary to clean up the (currently) raw input data,
-	// which may contain duplicates.  Perhaps it is also used to ensure the schema is correct for the next stage.
-	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = static_cast<int>(xr_table_result.second.columns_in_view.size()); // This class-global variable must be set
-    std::string sorting_results_text("Sorting results");
-    std::string removing_duplicates_text("Removing duplicates");
-	// DETAILED_COMMENTING: To see purpose of SortAndOrRemoveDuplicates(), search for DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM.
-	// But it just does what it says: sorts the rows by primary key, and removes duplicates
-	SqlAndColumnSet duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], sorting_results_text, removing_duplicates_text, 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP);
-
-	if (failed || CheckCancelled())
-	{
-		return SqlAndColumnSet();
-	}
-
-	for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
+	else
 	{
 
-		std::int64_t current_count = ObtainCount(primary_variable_group_raw_data_columns);
-		if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
-		{
-			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows).");
-			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].longhand % previous_count;
-			messager.SetPerformanceLabel(msg.str().c_str());
-		}
-		else
-		{
-			boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows).");
-			msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
-			messager.SetPerformanceLabel(msg.str().c_str());
-		}
-
-		std::int64_t number_of_rows_previous = ObtainCount(duplicates_removed.second);
-		std::int64_t number_of_rows_new = ObtainCount(primary_variable_group_raw_data_columns);
-
-		boost::format msg_("Multiplicity %2% - Retrieving data for variable group \"%1%\": merging %3% previous with %4% new rows");
-		msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
-			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
-			% current_multiplicity % number_of_rows_previous % number_of_rows_new;
-		UpdateProgressBarToNextStage(msg_.str(), std::string());
-		rows_estimate *= raw_rows_count;
-
-
-
-
-		// ******************************************************************************************************************* //
-		// Join with a new multiplicity of data.
-		// ******************************************************************************************************************* //
-		messager.SetPerformanceLabel("Performing a database join; please be patient...");
-		x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, duplicates_removed.second, current_multiplicity, primary_group_number);
-		x_table_result.second.most_recent_sql_statement_executed__index = -1;
-		ExecuteSQL(x_table_result);
-		messager.SetPerformanceLabel("");
-		ClearTables(sql_and_column_sets);
-		sql_and_column_sets.push_back(x_table_result);
-		if (failed || CheckCancelled())
-		{
-			return SqlAndColumnSet();
-		}
-
-		
-
-
-		std::int64_t number_of_rows_to_sort = ObtainCount(x_table_result.second);
-
-		boost::format msg_3("Multiplicity %2% - Splitting rows on time boundaries and removing redundant NULL rows for \"%1%\": %3% rows");
-		msg_3 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
-			: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
-			% current_multiplicity % number_of_rows_to_sort;
-		UpdateProgressBarToNextStage(msg_3.str(), std::string());
-
-
-		// ******************************************************************************************************************* //
-		// DESCRIPTION_OF_XR_ALGORITHM
-		// Merge identical rows, while keeping track of time ranges to handle them properly during the merge.
-		// This stage is the most complex.
-		// It takes advantage of the fact that the rows are both ordered within themselves
-		//    (inner tables from left to right within each row are sorted -
-		//     each inner table consisting of a SINGLE multiplicity of the DMU
-		//     which has multiplicity greater than 1, along with its
-		//     selected secondary key data)
-		// and sorted within the table (rows are sorted in ascending order).
-		//
-		// The merging of rows also splits rows to handle the time range overlap of the new data being joined.
-		//
-		// Finally, this stage also tracks all rows with the new data being NULL due to either:
-		// ... The reordering inside of individual rows of inner tables (from the last step)
-		//    that may have caused (potentially double) rows to appear, one of which has NULL in the final inner table,
-		// ... Or the merging/splitting of MULTIPLE rows together or apart in this stage due to time range handling.
-		//
-		// (Note that there are, therefore, TWO stages of the splitting and creation of multiple rows
-		// due to time range handling: One resulting from the joining of new data and the splitting of individual rows
-		// to handle time range overlap of each individual joined row (the prior stage),
-		// and the other to handle time range overlap of adjacent joined rows (in this stage).)
-		//
-		// Finally, this stage carefully tracks all rows with NULL and NOT NULL in the final inner table along with their time ranges,
-		// and when all rows with non-NULL in the final inner table that match on all other primary keys have completed processing,
-		// the algorithm does a special step of processing where it checks each tracked NULL row (including time range)
-		// against the non-NULL entries over the same time range that match on the keys, and if there is a match
-		// found it EXCLUDES the NULL row from the result set; otherwise it INCLUDES it.
-		// This is how NewGene handles displaying K-ads that have, in the final output,
-		// a smaller maximum count than the K-value selected by the user
-		// (i.e., K=6 but there are only 4 countries in the dispute over the time range).
-		// (In the latter case, a row with all 4 countries
-		// and 2 NULLs should appear; whereas if 5 or more countries are available over the same time range, a row
-		// with 4 countries should NOT appear - such a scenario could arise if the new inner table being merged in
-		// first adds a 5th country, but then this row gets split by time range such that the 5th country only
-		// partially overlaps the previous 4 countries, so the row gets split into two rows, one of which has
-		// the NULL in the fifth inner table - this row would then need to possibly be merged with ANOTHER
-		// row over the same time range as the NULL row that DOES have a country in the 5th slot).
-		// ******************************************************************************************************************* //
-
-		xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
+		// The only purpose of CreateInitialPrimaryXRTable() is to modify the schema
+		// to add an additional pair of time range columns so that the schema is a proper "XR" schema.
+		// Nothing more.
+		SqlAndColumnSet xr_table_result = CreateInitialPrimaryXRTable(x_table_result.second, primary_group_number);
+		xr_table_result.second.most_recent_sql_statement_executed__index = -1;
+		ExecuteSQL(xr_table_result);
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(xr_table_result);
 		if (failed || CheckCancelled())
 		{
 			return SqlAndColumnSet();
 		}
-		previous_count = ObtainCount(xr_table_result.second);
 
+		std::int64_t previous_count = ObtainCount(xr_table_result.second);
 
-
-
-
-		// ******************************************************************************************************************* //
-		// DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM
-		// The previous stage handled merging and splitting of rows to handle time range overlap and NULLs.
-		// However, it leaves some duplicate rows in its wake and it does not place rows into its result set in sorted order.
-		// Perform a final pass, this time once again sorting the rows in the table in ascending order,
-		// and then proceeding to step over all rows without doing any merging or splitting, but simply removing duplicate rows
-		// that it encounters.
-		//
-		// The final result of this stage is the final result for this multiplicity, in unformatted form
-		// (i.e., with UUID's added to column names, and with extraneous columns present).
-		// ******************************************************************************************************************* //
-        std::string sorting_rows_text("Sorting rows");
-        std::string removing_duplicates_text("Removing duplicates");
-		// DETAILED_COMMENTING: To see purpose of SortAndOrRemoveDuplicates(), search for DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM
-		duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], sorting_rows_text, removing_duplicates_text, current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
+		// The initial XR table is necessary to clean up the (currently) raw input data,
+		// which may contain duplicates.  Perhaps it is also used to ensure the schema is correct for the next stage.
+		inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = static_cast<int>(xr_table_result.second.columns_in_view.size()); // This class-global variable must be set
+		std::string sorting_results_text("Sorting results");
+		std::string removing_duplicates_text("Removing duplicates");
+		// DETAILED_COMMENTING: To see purpose of SortAndOrRemoveDuplicates(), search for DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM.
+		// But it just does what it says: sorts the rows by primary key, and removes duplicates
+		SqlAndColumnSet duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], sorting_results_text, removing_duplicates_text, 1, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP);
 
 		if (failed || CheckCancelled())
 		{
 			return SqlAndColumnSet();
 		}
 
-	}
+		for (int current_multiplicity = 2; current_multiplicity <= highest_multiplicity_primary_uoa; ++current_multiplicity)
+		{
 
-	if (failed || CheckCancelled())
-	{
-		return SqlAndColumnSet();
+			std::int64_t current_count = ObtainCount(primary_variable_group_raw_data_columns);
+			if (primary_variable_group_raw_data_columns.variable_groups[0].longhand)
+			{
+				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for \"%3%\" (%4% rows).");
+				msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].longhand % previous_count;
+				messager.SetPerformanceLabel(msg.str().c_str());
+			}
+			else
+			{
+				boost::format msg("Joining multiplicity %1% (%2% rows) with previous merged data for %3% (%4% rows).");
+				msg % current_multiplicity % current_count % *primary_variable_group_raw_data_columns.variable_groups[0].code % previous_count;
+				messager.SetPerformanceLabel(msg.str().c_str());
+			}
+
+			std::int64_t number_of_rows_previous = ObtainCount(duplicates_removed.second);
+			std::int64_t number_of_rows_new = ObtainCount(primary_variable_group_raw_data_columns);
+
+			boost::format msg_("Multiplicity %2% - Retrieving data for variable group \"%1%\": merging %3% previous with %4% new rows");
+			msg_ % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
+				: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
+				% current_multiplicity % number_of_rows_previous % number_of_rows_new;
+			UpdateProgressBarToNextStage(msg_.str(), std::string());
+			rows_estimate *= raw_rows_count;
+
+
+
+
+			// ******************************************************************************************************************* //
+			// Join with a new multiplicity of data.
+			// ******************************************************************************************************************* //
+			messager.SetPerformanceLabel("Performing a database join; please be patient...");
+			x_table_result = CreatePrimaryXTable(primary_variable_group_raw_data_columns, duplicates_removed.second, current_multiplicity, primary_group_number);
+			x_table_result.second.most_recent_sql_statement_executed__index = -1;
+			ExecuteSQL(x_table_result);
+			messager.SetPerformanceLabel("");
+			ClearTables(sql_and_column_sets);
+			sql_and_column_sets.push_back(x_table_result);
+			if (failed || CheckCancelled())
+			{
+				return SqlAndColumnSet();
+			}
+
+
+
+
+			std::int64_t number_of_rows_to_sort = ObtainCount(x_table_result.second);
+
+			boost::format msg_3("Multiplicity %2% - Splitting rows on time boundaries and removing redundant NULL rows for \"%1%\": %3% rows");
+			msg_3 % (primary_variable_group_raw_data_columns.variable_groups[0].longhand ? *primary_variable_group_raw_data_columns.variable_groups[0].longhand
+				: primary_variable_group_raw_data_columns.variable_groups[0].code ? *primary_variable_group_raw_data_columns.variable_groups[0].code : std::string())
+				% current_multiplicity % number_of_rows_to_sort;
+			UpdateProgressBarToNextStage(msg_3.str(), std::string());
+
+
+			// ******************************************************************************************************************* //
+			// DESCRIPTION_OF_XR_ALGORITHM
+			// Merge identical rows, while keeping track of time ranges to handle them properly during the merge.
+			// This stage is the most complex.
+			// It takes advantage of the fact that the rows are both ordered within themselves
+			//    (inner tables from left to right within each row are sorted -
+			//     each inner table consisting of a SINGLE multiplicity of the DMU
+			//     which has multiplicity greater than 1, along with its
+			//     selected secondary key data)
+			// and sorted within the table (rows are sorted in ascending order).
+			//
+			// The merging of rows also splits rows to handle the time range overlap of the new data being joined.
+			//
+			// Finally, this stage also tracks all rows with the new data being NULL due to either:
+			// ... The reordering inside of individual rows of inner tables (from the last step)
+			//    that may have caused (potentially double) rows to appear, one of which has NULL in the final inner table,
+			// ... Or the merging/splitting of MULTIPLE rows together or apart in this stage due to time range handling.
+			//
+			// (Note that there are, therefore, TWO stages of the splitting and creation of multiple rows
+			// due to time range handling: One resulting from the joining of new data and the splitting of individual rows
+			// to handle time range overlap of each individual joined row (the prior stage),
+			// and the other to handle time range overlap of adjacent joined rows (in this stage).)
+			//
+			// Finally, this stage carefully tracks all rows with NULL and NOT NULL in the final inner table along with their time ranges,
+			// and when all rows with non-NULL in the final inner table that match on all other primary keys have completed processing,
+			// the algorithm does a special step of processing where it checks each tracked NULL row (including time range)
+			// against the non-NULL entries over the same time range that match on the keys, and if there is a match
+			// found it EXCLUDES the NULL row from the result set; otherwise it INCLUDES it.
+			// This is how NewGene handles displaying K-ads that have, in the final output,
+			// a smaller maximum count than the K-value selected by the user
+			// (i.e., K=6 but there are only 4 countries in the dispute over the time range).
+			// (In the latter case, a row with all 4 countries
+			// and 2 NULLs should appear; whereas if 5 or more countries are available over the same time range, a row
+			// with 4 countries should NOT appear - such a scenario could arise if the new inner table being merged in
+			// first adds a 5th country, but then this row gets split by time range such that the 5th country only
+			// partially overlaps the previous 4 countries, so the row gets split into two rows, one of which has
+			// the NULL in the fifth inner table - this row would then need to possibly be merged with ANOTHER
+			// row over the same time range as the NULL row that DOES have a country in the 5th slot).
+			// ******************************************************************************************************************* //
+
+			xr_table_result = CreateXRTable(x_table_result.second, current_multiplicity, primary_group_number, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, 0, current_multiplicity);
+			ClearTables(sql_and_column_sets);
+			sql_and_column_sets.push_back(xr_table_result);
+			if (failed || CheckCancelled())
+			{
+				return SqlAndColumnSet();
+			}
+			previous_count = ObtainCount(xr_table_result.second);
+
+
+
+
+
+			// ******************************************************************************************************************* //
+			// DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM
+			// The previous stage handled merging and splitting of rows to handle time range overlap and NULLs.
+			// However, it leaves some duplicate rows in its wake and it does not place rows into its result set in sorted order.
+			// Perform a final pass, this time once again sorting the rows in the table in ascending order,
+			// and then proceeding to step over all rows without doing any merging or splitting, but simply removing duplicate rows
+			// that it encounters.
+			//
+			// The final result of this stage is the final result for this multiplicity, in unformatted form
+			// (i.e., with UUID's added to column names, and with extraneous columns present).
+			// ******************************************************************************************************************* //
+			std::string sorting_rows_text("Sorting rows");
+			std::string removing_duplicates_text("Removing duplicates");
+			// DETAILED_COMMENTING: To see purpose of SortAndOrRemoveDuplicates(), search for DESCRIPTION_OF_SORT_AND_OR_REMOVE_DUPLICATES_ALGORITHM
+			duplicates_removed = SortAndOrRemoveDuplicates(xr_table_result.second, primary_variable_group_raw_data_columns.variable_groups[0], sorting_rows_text, removing_duplicates_text, current_multiplicity, primary_group_number, sql_and_column_sets, true, OutputModel::OutputGenerator::PRIMARY_VARIABLE_GROUP, true);
+
+			if (failed || CheckCancelled())
+			{
+				return SqlAndColumnSet();
+			}
+
+		}
+
+		if (failed || CheckCancelled())
+		{
+			return SqlAndColumnSet();
+		}
+
 	}
 
 	return sql_and_column_sets.back();
@@ -7368,68 +7381,73 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 		});
 
-		// Then by columns with multiplicity greater than 1
-		if (highest_multiplicity_primary_uoa > 1)
+		if (!random_sampling)
 		{
 
-			// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
-			int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column)
+			// Then by columns with multiplicity greater than 1
+			if (highest_multiplicity_primary_uoa > 1)
 			{
-				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-				{
-					if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
-					{
-						if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
-						{
-							++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
-						}
-					}
-				}
-			});
 
-			// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
-			for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
-			{
-				std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &sql_string, &first](ColumnsInTempView::ColumnInTempView & view_column)
+				// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
+				int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
+				std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1, &sql_string](ColumnsInTempView::ColumnInTempView & view_column)
 				{
 					if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 					{
-						if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
+						if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
 						{
-							if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
+							if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
 							{
-								if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
-								{
-									if (!first)
-									{
-										sql_string += ", ";
-									}
-									else
-									{
-										sql_string += " ORDER BY ";
-									}
-									first = false;
-									if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
-									{
-										sql_string += "CAST (";
-									}
-									sql_string += "`";
-									sql_string += view_column.column_name_in_temporary_table;
-									sql_string += "`";
-									if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
-									{
-										sql_string += " AS INTEGER)";
-									}
-								}
+								++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
 							}
 						}
 					}
 				});
+
+				// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
+				for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
+				{
+					std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &sql_string, &first](ColumnsInTempView::ColumnInTempView & view_column)
+					{
+						if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+						{
+							if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
+							{
+								if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
+								{
+									if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
+									{
+										if (!first)
+										{
+											sql_string += ", ";
+										}
+										else
+										{
+											sql_string += " ORDER BY ";
+										}
+										first = false;
+										if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
+										{
+											sql_string += "CAST (";
+										}
+										sql_string += "`";
+										sql_string += view_column.column_name_in_temporary_table;
+										sql_string += "`";
+										if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
+										{
+											sql_string += " AS INTEGER)";
+										}
+									}
+								}
+							}
+						}
+					});
+				}
+
 			}
 
 		}
-	
+
 		// Finally, order by the time range columns
 		if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
 		{
@@ -14431,7 +14449,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Sort
 	ClearTables(sql_and_column_sets);
 	sql_and_column_sets.push_back(duplicates_removed_top_level_variable_group_result);
 
-	if (random_sampling && xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
+	if (random_sampling_old && xr_table_category == XR_TABLE_CATEGORY::PRIMARY_VARIABLE_GROUP)
 	{
 		duplicates_removed_top_level_variable_group_result = Randomize(duplicates_removed_top_level_variable_group_result.second, variable_group, current_multiplicity, primary_group_number, sql_and_column_sets);
 		if (failed || CheckCancelled())
