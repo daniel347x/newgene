@@ -3381,7 +3381,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 						indices_of_secondary_key_columns.push_back(std::make_pair(SQLExecutor::STRING, std::make_pair((int)current_parameter_strings.size() - 1, current_column)));
 					}
 
-			}
+				}
 				break;
 
 			case SQLITE_BLOB:
@@ -3442,7 +3442,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 						indices_of_secondary_key_columns.push_back(std::make_pair(SQLExecutor::NULL_BINDING, std::make_pair(0, current_column)));
 					}
 
-			}
+				}
 				break;
 
 			default:
@@ -5264,7 +5264,8 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 
 								if (merged_data_row.is_index_a_secondary_key[current_index])
 								{
-									merged_data_row.indices_of_secondary_key_columns.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)merged_data_row.current_parameter_ints.size() - 1, current_index)));
+									merged_data_row.indices_of_secondary_key_columns.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)merged_data_row.current_parameter_ints.size() - 1,
+											current_index)));
 								}
 
 							}
@@ -5333,7 +5334,7 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 								if (merged_data_row.is_index_a_secondary_key[current_index])
 								{
 									merged_data_row.indices_of_secondary_key_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size() - 1,
-										current_index)));
+											current_index)));
 								}
 
 							}
@@ -5402,7 +5403,7 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 								if (current_row_of_data.is_index_a_secondary_key[current_index])
 								{
 									merged_data_row.indices_of_secondary_key_columns.push_back(std::make_pair(SQLExecutor::STRING, std::make_pair((int)merged_data_row.current_parameter_strings.size() - 1,
-										current_index)));
+											current_index)));
 								}
 
 							}
@@ -5477,7 +5478,8 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 
 								if (merged_data_row.is_index_a_secondary_key[current_index])
 								{
-									merged_data_row.indices_of_secondary_key_columns.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)merged_data_row.current_parameter_ints.size() - 1, current_index)));
+									merged_data_row.indices_of_secondary_key_columns.push_back(std::make_pair(SQLExecutor::INT64, std::make_pair((int)merged_data_row.current_parameter_ints.size() - 1,
+											current_index)));
 								}
 
 							}
@@ -5546,7 +5548,7 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 								if (merged_data_row.is_index_a_secondary_key[current_index])
 								{
 									merged_data_row.indices_of_secondary_key_columns.push_back(std::make_pair(SQLExecutor::FLOAT, std::make_pair((int)merged_data_row.current_parameter_floats.size() - 1,
-										current_index)));
+											current_index)));
 								}
 
 							}
@@ -5615,7 +5617,7 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 								if (merged_data_row.is_index_a_secondary_key[current_index])
 								{
 									merged_data_row.indices_of_secondary_key_columns.push_back(std::make_pair(SQLExecutor::STRING, std::make_pair((int)merged_data_row.current_parameter_strings.size() - 1,
-										current_index)));
+											current_index)));
 								}
 
 							}
@@ -7223,6 +7225,7 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_s
 	CloseObtainData();
 
 	std::string sql;
+
 	if (obtain_rowid)
 	{
 		sql += "SELECT *, rowid FROM \"";
@@ -7231,6 +7234,7 @@ void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_s
 	{
 		sql += "SELECT * FROM \"";
 	}
+
 	sql += column_set.view_name;
 	sql += "\"";
 
@@ -8066,13 +8070,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 			// First order by primary key columns(with multiplicity 1
 			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &first](
-				ColumnsInTempView::ColumnInTempView & view_column)
+							  ColumnsInTempView::ColumnInTempView & view_column)
 			{
 				// Determine how many columns there are corresponding to the DMU category
 				int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
 				std::for_each(result_columns.columns_in_view.begin(),
-					result_columns.columns_in_view.end(), [this, &view_column, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](
-					ColumnsInTempView::ColumnInTempView & view_column_)
+							  result_columns.columns_in_view.end(), [this, &view_column, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](
+								  ColumnsInTempView::ColumnInTempView & view_column_)
 				{
 					if (view_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 					{
@@ -8140,8 +8144,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
 					int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
 					std::for_each(result_columns.columns_in_view.begin(),
-						result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1, &sql_string](
-						ColumnsInTempView::ColumnInTempView & view_column)
+								  result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1, &sql_string](
+									  ColumnsInTempView::ColumnInTempView & view_column)
 					{
 						if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 						{
@@ -8159,7 +8163,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
 					{
 						std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &sql_string, &first](
-							ColumnsInTempView::ColumnInTempView & view_column)
+										  ColumnsInTempView::ColumnInTempView & view_column)
 						{
 							if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 							{
@@ -8227,7 +8231,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			}
 
 		}
-	
+
 	}
 
 	if (!count_only)
@@ -19749,6 +19753,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 								// No throw... TODO: log error
 								//boost::format msg("Data cannot be NULL in a primary key field.");
 								//throw NewGeneException() << newgene_error_description(msg.str());
+								bad = true;
 								return;
 							}
 							break;
@@ -19800,6 +19805,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 								// No throw... TODO: log error
 								//boost::format msg("Data cannot be NULL in a primary key field.");
 								//throw NewGeneException() << newgene_error_description(msg.str());
+								bad = true;
 								return;
 							}
 							break;
@@ -19812,10 +19818,10 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 				// Note that this is stored in a cache.
 				// In the future, this cache can be enhanced to become an intelligent LIFO memory/disk cache
 				// to support huge input datasets.
-				DMUInstanceDataVector dmus_branch;
+				DMUInstanceDataVector secondary_data;
 				bool bad = false;
-				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(),
-					sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+				std::for_each(sorting_row_of_data.indices_of_secondary_key_columns.cbegin(),
+					sorting_row_of_data.indices_of_secondary_key_columns.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 				{
 
 					if (bad)
@@ -19831,32 +19837,33 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 					switch (binding)
 					{
 
-					case SQLExecutor::INT64:
-					{
-											   dmus_branch.push_back(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]);
-					}
-						break;
+						case SQLExecutor::INT64:
+							{
+								secondary_data.push_back(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]);
+							}
+							break;
 
-					case SQLExecutor::FLOAT:
-					{
-											   dmus_branch.push_back(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]);
-					}
-						break;
+						case SQLExecutor::FLOAT:
+							{
+								secondary_data.push_back(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]);
+							}
+							break;
 
-					case SQLExecutor::STRING:
-					{
-												dmus_branch.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
-					}
-						break;
+						case SQLExecutor::STRING:
+							{
+								secondary_data.push_back(sorting_row_of_data.current_parameter_strings[index_in_bound_vector]);
+							}
+							break;
 
-					default:
-					{
-							   // No throw... TODO: log error
-							   //boost::format msg("Data cannot be NULL in a primary key field.");
-							   //throw NewGeneException() << newgene_error_description(msg.str());
-							   return;
-					}
-						break;
+						default:
+							{
+								// No throw... TODO: log error
+								//boost::format msg("Data cannot be NULL in a primary key field.");
+								//throw NewGeneException() << newgene_error_description(msg.str());
+								bad = true;
+								return;
+							}
+							break;
 
 					}
 
@@ -19866,6 +19873,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 				{
 					Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 					Branch branch(dmus_branch);
+					allWeightings.dataCache[sorting_row_of_data.rowid] = secondary_data;
 					allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), primary_group_number);
 				}
 
@@ -20025,8 +20033,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 
 	result_columns.current_block_datetime_column_types = std::make_pair(
-		ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE,
-		ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE);
+				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE,
+				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE);
 	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
 
 	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
@@ -20091,15 +20099,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	//bool in_first_inner_table = true;
 	//bool reached_first_datetime_start_merged_column = false;
 	//bool reached_first_datetime_end_merged_column = false;
-	
-	std::for_each(primary_variable_group_x1_columns.columns_in_view.cbegin(), primary_variable_group_x1_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & existing_column)
+
+	std::for_each(primary_variable_group_x1_columns.columns_in_view.cbegin(),
+				  primary_variable_group_x1_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & existing_column)
 	{
 
 		result_columns.columns_in_view.push_back(existing_column);
 		ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
 
 		//previous_column_names_first_table.push_back(new_column.column_name_in_temporary_table);
-		
+
 		new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 		new_column.column_name_in_temporary_table += "_";
 		new_column.column_name_in_temporary_table += newUUID(true);
@@ -20125,8 +20134,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	//
 	// Start with the primary key columns.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&primary_variable_group_raw_data_columns, &result_columns, &variables_selected, &second_table_column_count, &current_multiplicity](
-		ColumnsInTempView::ColumnInTempView const & new_column_raw_data_table)
+				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&primary_variable_group_raw_data_columns, &result_columns, &variables_selected, &second_table_column_count, &current_multiplicity](
+					  ColumnsInTempView::ColumnInTempView const & new_column_raw_data_table)
 	{
 		if (new_column_raw_data_table.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 			|| new_column_raw_data_table.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
@@ -20172,8 +20181,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 	// Proceed to the secondary key columns.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &primary_variable_group_raw_data_columns, &variables_selected, &second_table_column_count, &current_multiplicity](
-		ColumnsInTempView::ColumnInTempView const & new_column_secondary)
+				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &primary_variable_group_raw_data_columns, &variables_selected, &second_table_column_count, &current_multiplicity](
+					  ColumnsInTempView::ColumnInTempView const & new_column_secondary)
 	{
 
 		bool make_secondary_datetime_column = false;
@@ -20236,8 +20245,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	// Proceed, finally, to the datetime columns, if they exist.  (If they don't, they will be added via ALTER TABLE to the temporary table under construction.)
 	int most_recent_current_inner_table_count = -1;
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&most_recent_current_inner_table_count, &primary_variable_group_raw_data_columns, &result_columns, &second_table_column_count](
-		ColumnsInTempView::ColumnInTempView const & new_column_datetime)
+				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&most_recent_current_inner_table_count, &primary_variable_group_raw_data_columns, &result_columns, &second_table_column_count](
+					  ColumnsInTempView::ColumnInTempView const & new_column_datetime)
 	{
 		if (new_column_datetime.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 0)
 		{
@@ -20261,8 +20270,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 	most_recent_current_inner_table_count = -1;
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&most_recent_current_inner_table_count, &result_columns, &second_table_column_count](
-		ColumnsInTempView::ColumnInTempView const & new_column_datetime)
+				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&most_recent_current_inner_table_count, &result_columns, &second_table_column_count](
+					  ColumnsInTempView::ColumnInTempView const & new_column_datetime)
 	{
 		if (new_column_datetime.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > 0)
 		{
