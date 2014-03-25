@@ -118,6 +118,8 @@ class ColumnsInTempView
 					, COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT
 					, COLUMN_TYPE__DATETIMESTART_TEXT
 					, COLUMN_TYPE__DATETIMEEND_TEXT
+					, COLUMN_TYPE__DATETIMESTART__TIME_SLICE
+					, COLUMN_TYPE__DATETIMEEND__TIME_SLICE
 				};
 
 				ColumnInTempView()
@@ -684,7 +686,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulatePrimaryKeySequenceInfo();
 
 				// Random sampling
-				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
+				SqlAndColumnSet RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
+				void WriteRandomSamplesToOutputTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
 
 				// Functions involved in different phases of generation
 				void ObtainColumnInfoForRawDataTables();
