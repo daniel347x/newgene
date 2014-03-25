@@ -299,19 +299,19 @@ class VariableGroupBranchesAndLeaves
 
 	public:
 
-		VariableGroupBranchesAndLeaves(std::string const & variable_group_name_)
-			: variable_group_name(variable_group_name_)
+		VariableGroupBranchesAndLeaves(int const & variable_group_number_)
+			: variable_group_number(variable_group_number_)
 		{}
 
-		std::string variable_group_name;
+		int variable_group_number;
 		BranchesAndLeaves branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves
 
 		//bool operator==(VariableGroupBranchesAndLeaves const & rhs) const
-		bool operator==(std::string const & rhs) const
+		bool operator==(int const & rhs) const
 		{
 			//if (variable_group_name == rhs.variable_group_name)
-			if (variable_group_name == rhs)
+			if (variable_group_number == rhs)
 			{
 				return true;
 			}
@@ -344,15 +344,15 @@ class AllWeightings
 		TimeSlices timeSlices;
 		Weighting weighting; // sum over all time slices
 
-		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, std::string const & variable_group_name);
+		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number);
 
 		void CalculateWeightings();
 
 	protected:
 
-		bool HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, std::string const & variable_group_name);
+		bool HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number);
 
-		void AddNewTimeSlice(std::string const & variable_group_name, Branch const & branch, TimeSliceLeaf const &newTimeSliceLeaf);
+		void AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const &newTimeSliceLeaf);
 
 		// Breaks an existing map entry into two pieces and returns an iterator to both.
 		void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr);
@@ -365,7 +365,7 @@ class AllWeightings
 		void SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice);
 
 		// Merge time slice data into a map element
-		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, std::string const & variable_group_name);
+		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number);
 
 		bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_ , TimeSlices::value_type const & map_entry_)
 		{

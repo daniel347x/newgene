@@ -475,7 +475,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		{
 			return;
 		}
-
 	}
 
 	// RANDOM_SAMPLING: From here forward, this stage should be identical
@@ -2436,36 +2435,6 @@ void OutputModel::OutputGenerator::DetermineNumberStages()
 
 	// Two stages for construction of final K-ad results
 	//total_progress_stages += 2;
-
-}
-
-void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroupsRandomSampling()
-{
-
-	// RANDOM_SAMPLING: completely rework the following loop
-
-	int primary_group_number = 1;
-	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [this, &primary_group_number](ColumnsInTempView const & primary_variable_group_raw_data_columns)
-	{
-		if (failed || CheckCancelled())
-		{
-			return;
-		}
-		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
-		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
-		SqlAndColumnSet primary_group_final_result = ConstructFullOutputForSinglePrimaryGroup(primary_variable_group_raw_data_columns, primary_group_column_sets, primary_group_number);
-		if (failed || CheckCancelled())
-		{
-			return;
-		}
-
-		// EVERY inner table, including the LAST, has three pairs at its end:
-		// COLUMN_TYPE__DATETIMESTART / COLUMN_TYPE__DATETIMEEND ***OR*** COLUMN_TYPE__DATETIMESTART_INTERNAL / COLUMN_TYPE__DATETIMEEND_INTERNAL
-		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__BEFORE_DUPLICATES_REMOVED
-		// COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED / COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED
-		primary_group_final_results.push_back(primary_group_final_result);
-		++primary_group_number;
-	});
 
 }
 
@@ -9977,6 +9946,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (!reached_second_inner_table)
 		{
+			// The number of columns in each top-level primary variable group, including datetime columns.
+			// Used to determine which top-level variable group we're in.
 			++top_level_inner_table_column_count;
 		}
 	});
@@ -10425,7 +10396,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	}
 
-	// No!  No WHERE clause for timerange when merging child groups!
+	// No!  No WHERE clause for time range when merging child groups!
 	// This has the effect of causing valid rows to not appear in the result set
 	// (i.e., the child data should just be NULL, rather than the entire row be missing).
 	// The later "XR" algorithm that loops through all rows evaluating the time range
