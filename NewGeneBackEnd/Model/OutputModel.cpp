@@ -452,13 +452,29 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	// RANDOM_SAMPLING: This stage should not be included
-	messager.AppendKadStatusText("Merging top-level variable groups...", this);
-	MergeHighLevelGroupResults();
-
-	if (failed || CheckCancelled())
+	// RANDOM_SAMPLING: This stage should not be included if ever multiple top-level variable groups are supported
+	// (the data structures are in place in the random sampling algorithm to support multiple top-level variable groups
+	// in a single random sampling algorithm, but it is not implemented yet.  For now, with random sampling,
+	// multiple top-level groups is disabled.)
+	//
+	// Unless implemented within the core data structures, multiple top - level variable groups are not supported, 
+	// even with the possibility of constructing full random output for each such table first and then merging these 
+	// top - level tables, because of the bias of unknown overlap between the tables.The only reason to have both appear 
+	// in the same output is *precisely* to have NewGene merge them together.
+	// 
+	// And when random sampling is implemented in the core data structures, this stage will not be necessary in any case,
+	// because all top-level variable groups are added to the same TimeSlices random sampling core data structure
+	// in the loop over top-level primary variable groups.
+	if (!random_sampling)
 	{
-		return;
+		messager.AppendKadStatusText("Merging top-level variable groups...", this);
+		MergeHighLevelGroupResults();
+
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
 	}
 
 	// RANDOM_SAMPLING: From here forward, this stage should be identical
@@ -2522,6 +2538,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 	std::int64_t previous_count = ObtainCount(xr_table_result.second);
 
+	// The initial XR table is necessary to clean up the (currently) raw input data,
+	// which may contain duplicates.  Perhaps it is also used to ensure the schema is correct for the next stage.
 	inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = static_cast<int>(xr_table_result.second.columns_in_view.size()); // This class-global variable must be set
     std::string sorting_results_text("Sorting results");
     std::string removing_duplicates_text("Removing duplicates");
@@ -7098,13 +7116,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		bool make_secondary_datetime_column = false;
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART || column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 		{
-			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
+			// No!  If the user selects these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
 			//return; // Enforce that datetime columns appear last.
 			make_secondary_datetime_column = true;
 		}
 		if (column_in_view.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
-			// No!  If the user selectes these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
+			// No!  If the user selects these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
 			if (!make_secondary_datetime_column)
 			{
 				return; // We are populating secondary columns now, so exit if this isn't one
