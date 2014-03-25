@@ -67,18 +67,9 @@ class TimeSlice
 			return true;
 		}
 
-		inline bool IsStartTimeGreaterThanRhsEndTime(TimeSlice const & rhs) const
+		inline bool IsEndTimeGreaterThanRhsStartTime(TimeSlice const & rhs) const
 		{
-			if (time_start > rhs.time_end)
-			{
-				return true;
-			}
-			return false;
-		}
-
-		inline bool IsEndTimeLessThanRhsEndTime(TimeSlice const & rhs) const
-		{
-			if (time_end < rhs.time_end)
+			if (time_end > rhs.time_start)
 			{
 				return true;
 			}
@@ -353,13 +344,15 @@ class AllWeightings
 		TimeSlices timeSlices;
 		Weighting weighting; // sum over all time slices
 
-		void AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, std::string const & variable_group_name);
+		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, std::string const & variable_group_name);
 
 		void CalculateWeightings();
 
 	protected:
 
 		bool HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, std::string const & variable_group_name);
+
+		void AddNewTimeSlice(std::string const & variable_group_name, Branch const & branch, TimeSliceLeaf const &newTimeSliceLeaf);
 
 		// Breaks an existing map entry into two pieces and returns an iterator to both.
 		void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr);
@@ -374,27 +367,13 @@ class AllWeightings
 		// Merge time slice data into a map element
 		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, std::string const & variable_group_name);
 
-		bool is_rhs_start_time_greater_than_lhs_end_time(TimeSlices::value_type const & lhs, TimeSliceLeaf const & rhs)
+		bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_ , TimeSlices::value_type const & map_entry_)
 		{
 
-			// The start time comparison compares the start time of 'rhs' to the map elements ('lhs') using std::upper_bound against the end time of the map's time slices
-			TimeSlice const & lhs_slice = lhs.first;
-			TimeSlice const & rhs_slice = rhs.first;
+			TimeSlice const & new_time_slice = new_time_slice_.first;
+			TimeSlice const & map_entry = map_entry_.first;
 
-			// deliberate reversal of labels
-			return rhs_slice.IsStartTimeGreaterThanRhsEndTime(lhs_slice);
-
-		}
-
-		bool is_rhs_end_time_less_than_lhs_end_time(TimeSlices::value_type const & lhs, TimeSliceLeaf const & rhs)
-		{
-
-			// The end time comparison compares the end time of 'rhs' to the map elements ('lhs') using std::lower_bound against the end time of the map's time slices
-			TimeSlice const & lhs_slice = lhs.first;
-			TimeSlice const & rhs_slice = rhs.first;
-
-			// deliberate reversal of labels
-			return rhs_slice.IsEndTimeLessThanRhsEndTime(lhs_slice);
+			return map_entry.IsEndTimeGreaterThanRhsStartTime(new_time_slice);
 
 		}
 

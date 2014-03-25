@@ -1,6 +1,6 @@
 #include "RandomSampling.h"
 
-void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf, std::string const & variable_group_name)
+void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, std::string const & variable_group_name)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
@@ -15,21 +15,22 @@ void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf con
 	// or the potentially overlapping existing time slices in the 'timeSlices' map
 
 	// Save beginning, one past end time slices in the existing map for reference
-	auto const & existing_start_slice          = timeSlices.cbegin();
-	auto const & existing_one_past_end_slice   = timeSlices.cend();
+	TimeSlices::iterator existing_start_slice          = timeSlices.begin();
+	TimeSlices::iterator existing_one_past_end_slice   = timeSlices.end();
+
+	TimeSlices::iterator mapIterator;
+	bool normalCase = false;
 
 	if (existing_start_slice == existing_one_past_end_slice)
 	{
-		
 		// No entries in the 'timeSlices' map yet
-
 		// Add the entire new time slice as the first entry in the map
-	
+		AddNewTimeSlice(variable_group_name, branch, newTimeSliceLeaf);
 	}
 	else
 	{
 	
-		auto startMapSlicePtr = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &AllWeightings::is_rhs_start_time_greater_than_lhs_end_time);
+		TimeSlices::iterator startMapSlicePtr = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &AllWeightings::is_map_entry_end_time_greater_than_new_time_slice_start_time);
 		bool start_of_new_slice_is_past_end_of_map = false;
 		if (startMapSlicePtr == existing_one_past_end_slice)
 		{
@@ -40,6 +41,7 @@ void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf con
 		{
 			// The new slice is entirely past the end of the map.
 			// Add new map entry consisting solely of the new slice.
+			AddNewTimeSlice(variable_group_name, branch, newTimeSliceLeaf);
 		}
 		else
 		{
@@ -65,10 +67,9 @@ void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf con
 
 					if (newTimeSlice.time_end <= startMapSlice.time_start)
 					{
-
 						// The entire new time slice is less than the first time slice in the map.
 						// Add the entire new time slice as a unit to the beginning of the map.
-
+						AddNewTimeSlice(variable_group_name, branch, newTimeSliceLeaf);
 					}
 					else
 					{
@@ -77,9 +78,13 @@ void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf con
 						// and ends inside or at the right edge of the first time slice in the map
 
 						// Slice off the left-most piece of the new time slice and add it to the beginning of the map
-						// and add as new map entry consisting solely of this slice
+						TimeSliceLeaf new_left_slice;
+						SliceOffLeft(newTimeSliceLeaf, existing_start_slice->first.time_start, new_left_slice);
+						AddNewTimeSlice(variable_group_name, branch, new_left_slice);
 
 						// For the remainder of the slice, proceed with normal case
+						normalCase = true;
+						mapIterator = existing_start_slice;
 
 					}
 
@@ -93,6 +98,8 @@ void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf con
 
 					// This is actually the normal case - it turns out that it doesn't matter
 					// that this was the first element in the map.
+					normalCase = true;
+					mapIterator = existing_start_slice;
 
 				}
 
@@ -102,11 +109,32 @@ void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf con
 
 				// Normal case: The new time slice starts inside
 				// (or at the left edge of) an existing time slice in the map (not the first)
+				normalCase = true;
+				mapIterator = startMapSlicePtr;
 
 			}
 
 		}
 
+	}
+
+	if (normalCase)
+	{
+		for (;;)
+		{
+			bool no_more_time_slice = HandleTimeSliceNormalCase(branch, newTimeSliceLeaf, mapIterator, variable_group_name);
+			if (no_more_time_slice)
+			{
+				break;
+			}
+			if (mapIterator == timeSlices.end())
+			{
+				// We have a chunk left but it's past the end of the map.
+				// Add it solo to the end of the map.
+				AddNewTimeSlice(variable_group_name, branch, newTimeSliceLeaf);
+				break;
+			}
+		}
 	}
 
 }
@@ -133,7 +161,7 @@ void AllWeightings::AddLeafToTimeSlices(Branch const & branch, TimeSliceLeaf con
 // If the return value is true:
 // - undefined value of time slice
 // - iterator to the map entry whose left edge corresponds to the left edge
-//   of the original time slice
+//   of the original time slice (but this is unused by the algorithm)
 // If the return value is false:
 // - The portion of the incoming slice that extends past the right edge
 //   of the map entry
@@ -371,4 +399,15 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 void AllWeightings::CalculateWeightings()
 {
 
+}
+
+void AllWeightings::AddNewTimeSlice(std::string const & variable_group_name, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf)
+{
+	VariableGroupTimeSliceData variableGroupTimeSliceData;
+	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+	VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_name);
+	BranchesAndLeaves & newBranchesAndLeaves = newVariableGroupBranch.branches_and_leaves;
+	newBranchesAndLeaves[branch].emplace(newTimeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
+	variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
+	timeSlices[newTimeSliceLeaf.first] = variableGroupTimeSliceData;
 }
