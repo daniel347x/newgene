@@ -443,9 +443,11 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						}
 
 						void Clear();
-						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result, XR_TABLE_CATEGORY const xr_table_category);
+						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result, XR_TABLE_CATEGORY const xr_table_category, bool const obtain_rowid = false);
 
 						SavedRowData & GetSavedRowData() { return *this; }
+
+						std::int64_t rowid; // for use with SQLite's "rowid" - currently only used for random sampling algorithm
 
 						std::int64_t datetime_start;
 						std::int64_t datetime_end;
@@ -686,8 +688,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulatePrimaryKeySequenceInfo();
 
 				// Random sampling
-				SqlAndColumnSet RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
-				void WriteRandomSamplesToOutputTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
+				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
+				SqlAndColumnSet WriteRandomSamplesToOutputTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
 
 				// Functions involved in different phases of generation
 				void ObtainColumnInfoForRawDataTables();
@@ -720,7 +722,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void BeginNewTransaction();
 				void EndTransaction();
 				void ExecuteSQL(SqlAndColumnSet & sql_and_column_set);
-				void ObtainData(ColumnsInTempView const & column_set);
+				void ObtainData(ColumnsInTempView const & column_set, bool const obtain_rowid = false);
 				void CloseObtainData();
 				std::int64_t ObtainCount(ColumnsInTempView const & column_set);
 				bool StepData();

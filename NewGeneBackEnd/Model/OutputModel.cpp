@@ -2691,6 +2691,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		AllWeightings allWeightings;
 		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings);
 		allWeightings.CalculateWeightings();
+		allWeightings.PrepareRandomNumbers(1000);
+		WriteRandomSamplesToOutputTable(x_table_result.second, primary_group_number, allWeightings);
 	}
 	else
 	{
@@ -2908,7 +2910,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 }
 
 void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & sorted_result_columns, sqlite3_stmt * stmt_result,
-		XR_TABLE_CATEGORY const xr_table_category)
+		XR_TABLE_CATEGORY const xr_table_category, bool const obtain_rowid)
 {
 
 	Clear();
@@ -3419,6 +3421,12 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 		++current_column;
 
 	});
+
+	if (obtain_rowid)
+	{
+		data_int64 = sqlite3_column_int64(stmt_result, current_column);
+		rowid = data_int64;
+	}
 
 	if (sorted_result_columns.not_first_variable_group_column_index == -1)
 	{
@@ -7126,13 +7134,20 @@ bool OutputModel::OutputGenerator::StepData()
 
 }
 
-void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_set)
+void OutputModel::OutputGenerator::ObtainData(ColumnsInTempView const & column_set, bool const obtain_rowid)
 {
 
 	CloseObtainData();
 
 	std::string sql;
-	sql += "SELECT * FROM \"";
+	if (obtain_rowid)
+	{
+		sql += "SELECT *, rowid FROM \"";
+	}
+	else
+	{
+		sql += "SELECT * FROM \"";
+	}
 	sql += column_set.view_name;
 	sql += "\"";
 
@@ -7749,6 +7764,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			result_columns.columns_in_view.push_back(column_in_view);
 		}
 	});
+
 	// Proceed to the secondary key columns.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
 				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
@@ -8773,6 +8789,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			++second_table_column_count;
 		}
 	});
+
 	// Proceed to the secondary key columns.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
 				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &primary_variable_group_raw_data_columns, &variables_selected, &second_table_column_count, &current_multiplicity](
@@ -19558,7 +19575,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 				this_->CloseObtainData();
 			} BOOST_SCOPE_EXIT_END
 
-			ObtainData(primary_variable_group_x1_columns);
+			ObtainData(primary_variable_group_x1_columns, true);
 
 			if (failed || CheckCancelled())
 			{
@@ -19577,7 +19594,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 					return;
 				}
 
-				sorting_row_of_data.PopulateFromCurrentRowInDatabase(primary_variable_group_x1_columns, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE);
+				sorting_row_of_data.PopulateFromCurrentRowInDatabase(primary_variable_group_x1_columns, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE, true);
 
 				// Construct branch and leaf
 
@@ -19693,7 +19710,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 				if (!bad)
 				{
-					Leaf leaf(dmus_leaf);
+					Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 					Branch branch(dmus_branch);
 					allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), primary_group_number);
 				}
@@ -19725,7 +19742,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 }
 
-SqlAndColumnSet OutputModel::OutputGenerator::WriteRandomSamplesToOutputTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::WriteRandomSamplesToOutputTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings)
 {
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
@@ -19879,5 +19896,12 @@ SqlAndColumnSet OutputModel::OutputGenerator::WriteRandomSamplesToOutputTable(Co
 	std::vector<std::int64_t> bound_parameter_ints;
 	std::vector<long double> bound_parameter_floats;
 	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
+
+	std::int64_t rowid { 0 };
+
+	while ((rowid = allWeightings.RetrieveNextLeafIndex()) != -1)
+	{
+
+	}
 
 }

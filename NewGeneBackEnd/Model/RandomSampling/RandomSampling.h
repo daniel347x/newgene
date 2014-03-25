@@ -221,9 +221,9 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 	public:
 
-		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector)
+		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int64_t const & index_into_raw_data_)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
-			, index_into_raw_data{ 0 }
+			, index_into_raw_data{ index_into_raw_data_ }
 		{}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
@@ -350,8 +350,9 @@ class AllWeightings
 		Weighting weighting; // sum over all time slices
 
 		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number);
-
 		void CalculateWeightings();
+		void PrepareRandomNumbers(int how_many);
+		std::int64_t RetrieveNextLeafIndex();
 
 	protected:
 
@@ -381,6 +382,8 @@ class AllWeightings
 			return map_entry.IsEndTimeGreaterThanRhsStartTime(new_time_slice);
 
 		}
+
+		std::set<boost::multiprecision::cpp_int> random_numbers;
 
 };
 
