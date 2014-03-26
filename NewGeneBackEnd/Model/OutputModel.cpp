@@ -20225,6 +20225,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 
 	BOOST_SCOPE_EXIT(this_)
 	{
+		// Transaction is for efficiency;
+		// rollback not yet enabled
 		this_->EndTransaction();
 	} BOOST_SCOPE_EXIT_END
 
