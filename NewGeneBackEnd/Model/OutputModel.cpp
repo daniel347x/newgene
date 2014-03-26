@@ -2688,15 +2688,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 	if (random_sampling)
 	{
+		std::vector<std::string> errorMessages;
 		int const K = 2;
 		std::int64_t const samples = 1000;
 		AllWeightings allWeightings;
-		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings);
+		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings, errorMessages);
 		allWeightings.CalculateWeightings(K);
 		allWeightings.PrepareRandomNumbers(samples);
 		SqlAndColumnSet random_sampling_schema = RandomSamplingBuildSchema(primary_variable_group_raw_data_columns);
 		RandomSamplingCreateOutputTable(random_sampling_schema);
-		RandomSamplingWriteToOutputTable(random_sampling_schema.second, allWeightings);
+		RandomSamplingWriteToOutputTable(random_sampling_schema.second, allWeightings, errorMessages);
 	}
 	else
 	{
@@ -19661,7 +19662,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 }
 
 void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number,
-		AllWeightings & allWeightings)
+		AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
 {
 
 	{
@@ -19710,7 +19711,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 					return;
 				}
 
-				sorting_row_of_data.PopulateFromCurrentRowInDatabase(primary_variable_group_x1_columns, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE, true, current_rows_stepped == 0);
+				sorting_row_of_data.PopulateFromCurrentRowInDatabase(primary_variable_group_x1_columns, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE, true);
 
 				// Construct branch and leaf
 
@@ -19750,7 +19751,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 						case SQLExecutor::FLOAT:
 							{
-								dmus_leaf.push_back(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]);
+								dmus_leaf.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
 							}
 							break;
 
@@ -19776,7 +19777,6 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 				// Construct Branch
 				DMUInstanceDataVector dmus_branch;
-				bool bad = false;
 				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(),
 							  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 				{
@@ -19802,7 +19802,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 						case SQLExecutor::FLOAT:
 							{
-								dmus_branch.push_back(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]);
+								dmus_branch.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
 							}
 							break;
 
@@ -19831,7 +19831,6 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 				// In the future, this cache can be enhanced to become an intelligent LIFO memory/disk cache
 				// to support huge input datasets.
 				DMUInstanceDataVector secondary_data;
-				bool bad = false;
 				std::for_each(sorting_row_of_data.indices_of_secondary_key_columns.cbegin(),
 							  sorting_row_of_data.indices_of_secondary_key_columns.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 				{
@@ -19857,7 +19856,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 						case SQLExecutor::FLOAT:
 							{
-								secondary_data.push_back(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]);
+								secondary_data.push_back(static_cast<double>(sorting_row_of_data.current_parameter_floats[index_in_bound_vector]));
 							}
 							break;
 
@@ -20309,7 +20308,6 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 	{
 		std::string insert_random_sample_string;
 
-		bool first = true;
 		insert_random_sample_string += "INSERT INTO \"";
 		insert_random_sample_string += random_sampling_columns.view_name;
 		insert_random_sample_string += "\" (";

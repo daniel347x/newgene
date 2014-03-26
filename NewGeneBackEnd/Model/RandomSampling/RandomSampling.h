@@ -150,6 +150,7 @@ class PrimaryKeysGrouping
 				return *this;
 			}
 			primary_keys = rhs.primary_keys;
+			return *this;
 		}
 
 		PrimaryKeysGrouping & operator=(PrimaryKeysGrouping const && rhs)
