@@ -223,6 +223,10 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 	public:
 
+		PrimaryKeysGroupingMultiplicityGreaterThanOne()
+			: index_into_raw_data { 0 }
+		{}
+
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int64_t const & index_into_raw_data_)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data{ index_into_raw_data_ }
@@ -262,6 +266,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 {
 
 	public:
+
+		PrimaryKeysGroupingMultiplicityOne()
+		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
@@ -355,7 +362,7 @@ class AllWeightings
 		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number);
 		void CalculateWeightings(int const k);
 		void PrepareRandomNumbers(int how_many);
-		std::int64_t RetrieveNextLeafIndex();
+		bool RetrieveNextBranchAndLeaves(Branch & branch, Leaves & leaves, TimeSlice & time_slice);
 
 	protected:
 

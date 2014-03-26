@@ -20213,4 +20213,38 @@ void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable(SqlAndColumnS
 void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings)
 {
 
+	Executor executor(model->getDb());
+
+	int const    minimum_desired_rows_per_transaction = 1024 * 16;
+	std::int64_t current_rows_added = 0;
+	std::int64_t current_rows_stepped = 0;
+	std::int64_t current_rows_added_since_execution = 0;
+	std::int64_t rowid{ 0 };
+
+	BeginNewTransaction();
+
+	BOOST_SCOPE_EXIT(this_)
+	{
+		this_->EndTransaction();
+	} BOOST_SCOPE_EXIT_END
+
+
+	Branch branch;
+	Leaves leaves;
+	TimeSlice time_slice;
+	while (allWeightings.RetrieveNextBranchAndLeaves(branch, leaves, time_slice))
+	{
+
+
+
+		++current_rows_stepped;
+		++current_rows_added;
+		if (current_rows_added % minimum_desired_rows_per_transaction == 0)
+		{
+			EndTransaction();
+			BeginNewTransaction();
+		}
+
+	}
+
 }
