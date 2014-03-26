@@ -2695,6 +2695,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		allWeightings.CalculateWeightings(K);
 		allWeightings.PrepareRandomNumbers(samples);
 		SqlAndColumnSet random_sampling_schema = RandomSamplingBuildSchema(primary_variable_group_raw_data_columns);
+		RandomSamplingCreateOutputTable(random_sampling_schema);
 		RandomSamplingWriteToOutputTable(random_sampling_schema.second, allWeightings);
 	}
 	else
@@ -19934,15 +19935,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	result_columns.view_number = 1;
 	result_columns.has_no_datetime_columns = false;
 
-
-
-
-	//int first_full_table_column_count = 0;
-	//inner_table_no_multiplicities__with_all_datetime_columns_included__column_count = 0;
-	//int second_table_column_count = 0;
-
-	//std::vector<std::string> previous_column_names_first_table;
-
 	WidgetInstanceIdentifier variable_group;
 	WidgetInstanceIdentifier uoa;
 
@@ -20171,29 +20163,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable(SqlAndColumnSet & random_sampling_schema)
 {
 
-	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
-	std::vector<SQLExecutor> & sql_strings = result.first;
-	ColumnsInTempView & result_columns = result.second;
-
-	result_columns = random_sampling_columns;
-	result_columns.most_recent_sql_statement_executed__index = -1;
-
-	std::string view_name = "NGTEMP_RANDOM_SAMPLING";
-	result_columns.view_name_no_uuid = view_name;
-
-	view_name += "_";
-	view_name += newUUID(true);
-
-	result_columns.view_name = view_name;
-	result_columns.view_number = 1;
-	result_columns.has_no_datetime_columns = false;
+	std::vector<SQLExecutor> & sql_strings = random_sampling_schema.first;
+	ColumnsInTempView & random_sampling_columns = random_sampling_schema.second;
+	random_sampling_columns.most_recent_sql_statement_executed__index = -1;
 
 	std::string sql_create_empty_table;
 	sql_create_empty_table += "CREATE TABLE \"";
-	sql_create_empty_table += result_columns.view_name;
+	sql_create_empty_table += random_sampling_columns.view_name;
 	sql_create_empty_table += " (";
 
 	bool first = true;
@@ -20215,6 +20194,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 	sql_create_empty_table += " )";
 
 	sql_strings.push_back(SQLExecutor(this, db, sql_create_empty_table));
+	ExecuteSQL(random_sampling_schema);
+	ClearTable(random_sampling_schema);
 
 	if (failed)
 	{
@@ -20227,17 +20208,9 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 		return;
 	}
 
-	int const minimum_desired_rows_per_transaction = 1024 * 16;
-	long current_rows_added = 0;
-	std::int64_t current_rows_stepped = 0;
-	std::int64_t current_rows_added_since_execution = 0;
-	std::string sql_add_xr_row;
-	bool first_row_added = true;
-	std::vector<std::string> bound_parameter_strings;
-	std::vector<std::int64_t> bound_parameter_ints;
-	std::vector<long double> bound_parameter_floats;
-	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
+}
 
-	std::int64_t rowid { 0 };
+void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings)
+{
 
 }

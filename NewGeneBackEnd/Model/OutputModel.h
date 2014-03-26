@@ -702,7 +702,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// Random sampling
 				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
 				SqlAndColumnSet RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_x1_columns);
-				void RandomSamplingWriteToOutputTable(ColumnsInTempView const & primary_variable_group_x1_columns, AllWeightings & allWeightings);
+				void RandomSamplingCreateOutputTable(SqlAndColumnSet & random_sampling_schema);
+				void RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings);
 
 				// Functions involved in different phases of generation
 				void ObtainColumnInfoForRawDataTables();
