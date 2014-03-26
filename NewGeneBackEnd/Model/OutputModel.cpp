@@ -2059,7 +2059,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 					||
 					primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, very_last_primary_variable_group))
 				{
-					if (primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
+					if (primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
 						== current_outer_multiplicity_of_top_level_variable_group___same_as___current_inner_table_number_of_top_level_variable_group)
 					{
 						int column_count = 0;
@@ -9103,7 +9103,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 									  ColumnsInTempView::ColumnInTempView const & new_column)
 					{
 						if (new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg ==
-							primary_key_info.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group)
+							primary_key_info.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group)
 						{
 							if (column_count < (int)previous_xr_columns.columns_in_view.size())
 							{
@@ -11213,7 +11213,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				if (
 
 					// Match against a primary key that states itself to be in the same inner table number as we are building an inner table for
-					primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
+					primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
 					== current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group
 
 
@@ -11225,7 +11225,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 					|| (primary_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1
 
 						// redundant, but safe check - these primary keys only appear once in the list of primary keys, and they therefore all have a value of 1
-						&& primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
+						&& primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
 						== 1)
 
 				)
@@ -11251,7 +11251,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 							// All the keys are in the first inner table (of the top-level group).
 							if (primary_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 							{
-								if (primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
+								if (primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
 									== 1)
 								{
 									match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0
@@ -11271,7 +11271,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 								// All columns exist in the first inner table.
 								if (highest_multiplicity_primary_uoa == 1)
 								{
-									if (primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
+									if (primary_key_info_this_variable_group.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
 										== current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group)
 									{
 										match_condition = (new_column.primary_key_index_within_total_kad_for_dmu_category >= 0
@@ -12952,7 +12952,25 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 			//    (only includes one instance of columns with multiplicity > 1)
 			// which correspond to primary keys, and if so, WHICH of the primary keys
 			// in the FULL SEQUENCE they correspond to (includes multiplicity > 1,
-			//     so single columns in the former match to multiple columns in the latter)
+			//     so single columns in the raw data table match to multiple columns in the full sequence)
+
+			// Loop through all variable groups that are associated with this column in the final output sequence of columns.
+			// I.e., if the primary UOA has 4 CTY columns and the user sets K=8 for CTY for the output,
+			// and a child variable group UOA has 2 CTY columns for (necessarily the same) 8 output columns,
+			// then each CTY column corresponds to *two* variable groups -
+			// in this case, the single top-level (primary) variable group, and the child variable group.
+			// In the first case (the top-level variable group with a UOA with 4 CTY columns),
+			// the first four CTY columns in the output are the first inner table, and the second four are the second.
+			// In the second case (the child variable group with a UOA with 2 CTY columns),
+			// the first two CTY columns in the output are the first inner table, the second two
+			// are the second inner table, the third two are the third inner table,
+			// and the fourth two are the fourth inner table.
+			// Note that in this example, the 3rd and 4th columns in the final output
+			// correspond both to the first inner table for the top-level primary variable group,
+			// and the second inner table for the child variable group -
+			// all in one and the same columns.
+			// You can see that each column therefore corresponds to possibly *multiple* variable groups,
+			// and correspondingly for each such VG one and the same column can be a member of a different inner table.
 			std::for_each(primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys.cbegin(),
 						  primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys.cend(), [this, &number_inner_tables, &k_count__corresponding_to_top_level_uoa__and_current_dmu_category, &dmu_counts_corresponding_to_top_level_uoa, &dmu_counts_corresponding_to_uoa_for_current_primary_or_child_variable_group, &the_variable_group, &column_in_variable_group_data_table, &primary_key_entry__output__including_multiplicities, &variables_in_group_primary_keys_metadata](
 							  PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & current_variable_group_primary_key_entry)
@@ -12964,14 +12982,17 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 						if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, column_in_variable_group_data_table.column_name_in_original_data_table))
 						{
 
+							// Test if this column in the raw data table corresponds to outer multiplicity > 1 column in the full sequence
 							bool matched = false;
 
-							if (current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
+							if (current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
 								== 1)
 							{
 								// For the raw data table, there is only one instance of the primary keys associated with multiplicity greater than 1.
 								// But the total primary key sequence ("sequence") stores the columns of the OUTPUT, which contains all multiplicities.
 								// So use the first occurrence of the primary keys (current_multiplicity == 1) to obtain the information.
+
+								// In fact, this column in the raw data table corresponds to outer multiplicity > 1 column in the full sequence
 								matched = true;
 							}
 							else
@@ -12982,13 +13003,15 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 									<
 									current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category)
 								{
-									if (current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
+									if (current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
 										<= current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category)
 									{
 										// The current column corresponds to the first inner table of the top-level variable groups,
 										// though it corresponds to the second or greater inner table of a current child variable group.
 										// i.e., this is the second or following call to this function corresponding to a second or
 										// higher multiplicity of a child variable group.
+
+										// In fact, this column in the raw data table corresponds to outer multiplicity > 1 column in the full sequence
 										matched = true;
 									}
 								}
@@ -12996,6 +13019,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 
 							if (matched)
 							{
+								// In fact, this column in the raw data table corresponds to outer multiplicity > 1 column in the full sequence
 								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry__output__including_multiplicities.dmu_category;
 								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category =
 									primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_spin_control;
@@ -13004,7 +13028,7 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 								column_in_variable_group_data_table.primary_key_index_within_primary_uoa_for_dmu_category =
 									primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_primary_uoa;
 								column_in_variable_group_data_table.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg
-									= current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group;
+									= current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group;
 								column_in_variable_group_data_table.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group =
 									current_variable_group_primary_key_entry.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
 								column_in_variable_group_data_table.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category =
@@ -13871,7 +13895,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group__current_dmu_primary_key_instance.longhand;
 								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_for_this_variable_groups_uoa =
 									inner_sequence_number__current_variable_group__current_primary_key_dmu_category;
-								current_variable_group_current_primary_key_info.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
+								current_variable_group_current_primary_key_info.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
 									= m + 1;
 								current_variable_group_current_primary_key_info.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group =
 									outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa;
@@ -14108,7 +14132,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 								current_variable_group_current_primary_key_info.table_column_name = *current_variable_group_current_dmu_primary_key.longhand;
 								current_variable_group_current_primary_key_info.sequence_number_within_dmu_category_for_this_variable_groups_uoa =
 									inner_sequence_number__current_variable_group__current_primary_key_dmu_category;
-								current_variable_group_current_primary_key_info.current_outer_multiplicity_of_this_primary_key__within__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
+								current_variable_group_current_primary_key_info.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
 									= m + 1;
 								current_variable_group_current_primary_key_info.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group =
 									outer_multiplicity__within_current_dmu_category__compared_to_total_spin_count__for_that_dmu_category__for_the_current_primary_or_child_uoa;
