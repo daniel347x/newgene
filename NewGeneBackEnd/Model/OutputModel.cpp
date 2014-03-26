@@ -2688,11 +2688,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 	if (random_sampling)
 	{
+		int const K = 2;
+		std::int64_t const samples = 1000;
 		AllWeightings allWeightings;
 		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings);
-		allWeightings.CalculateWeightings(2);
-		allWeightings.PrepareRandomNumbers(1000);
-		RandomSamplingBuildSchema(primary_variable_group_raw_data_columns);
+		allWeightings.CalculateWeightings(K);
+		allWeightings.PrepareRandomNumbers(samples);
+		RandomSamplingBuildSchema(primary_variable_group_raw_data_columns, K);
 		RandomSamplingWriteToOutputTable(x_table_result.second, allWeightings);
 	}
 	else
@@ -3616,7 +3618,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 			*previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-		datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 		datetime_start_column.column_name_in_original_data_table = "";
 
@@ -3658,7 +3659,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 			previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 			*previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-		datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 		datetime_end_column.column_name_in_original_data_table = "";
 	}
@@ -3757,7 +3757,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED;
 				datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 				datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
-				datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			}
 			break;
@@ -3769,7 +3768,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 					previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 				datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 					*previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-				datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			}
 			break;
@@ -3781,7 +3779,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 					previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 				datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 					*previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-				datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			}
 			break;
@@ -3793,7 +3790,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 					previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 				datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 					*previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-				datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			}
 			break;
@@ -3895,7 +3891,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 				datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED;
 				datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 				datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
-				datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 				result_columns.current_block_datetime_column_types = std::make_pair(
 							ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__PRIMARY_VG_INNER_TABLE_MERGE__AFTER_DUPLICATES_REMOVED,
@@ -3911,7 +3906,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 					previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 				datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 					*previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-				datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 				result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_PRE_MERGED_KAD_OUTPUT,
 						ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_PRE_MERGED_KAD_OUTPUT);
@@ -3925,7 +3919,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 					previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 				datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 					*previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-				datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 				result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT,
 						ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT);
@@ -3939,7 +3932,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Remo
 					previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 				datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 					*previous_result_columns.columns_in_view[previous_result_columns.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-				datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 				datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 				result_columns.current_block_datetime_column_types = std::make_pair(
 							ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__POST_TIMERANGE_MERGED_BETWEEN_TOP_LEVEL_PRIMARY_VARIABLE_GROUPS,
@@ -7929,7 +7921,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		new_column.column_name_in_temporary_table += "_";
 		new_column.column_name_in_temporary_table += newUUID(true);
 
-		new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 		new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 
 		if (first)
@@ -8275,7 +8266,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_saved;
 			datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
 			datetime_start_column.column_name_in_original_data_table = "";
-			datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
 			datetime_start_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
@@ -8312,7 +8302,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_saved;
 			datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
 			datetime_end_column.column_name_in_original_data_table = "";
-			datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
 			datetime_end_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
@@ -8471,7 +8460,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_start_column.column_name_in_original_data_table = "";
-	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
 	datetime_start_column.number_inner_tables_in_set = primary_variable_group_x1_columns.columns_in_view.back().number_inner_tables_in_set;
@@ -8508,7 +8496,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_end_column.column_name_in_original_data_table = "";
-	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
 	datetime_end_column.number_inner_tables_in_set = primary_variable_group_x1_columns.columns_in_view.back().number_inner_tables_in_set;
@@ -8668,7 +8655,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_start_column.column_name_in_original_data_table = "";
-	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
 		first_final_primary_variable_group_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
@@ -8707,7 +8693,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_end_column.column_name_in_original_data_table = "";
-	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
 		first_final_primary_variable_group_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
@@ -8863,7 +8848,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 
@@ -8920,7 +8904,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 
@@ -8965,7 +8948,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = most_recent_current_inner_table_count;
 			++second_table_column_count;
@@ -8990,7 +8972,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = most_recent_current_inner_table_count;
 			++second_table_column_count;
@@ -9568,7 +9549,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 		datetime_start_column.column_name_in_original_data_table = "";
-		datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
 			primary_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
@@ -9606,7 +9586,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 		datetime_end_column.column_name_in_original_data_table = "";
-		datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
 			primary_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
@@ -11000,7 +10979,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
 				current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group;
@@ -11076,7 +11054,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
 				current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group;
@@ -11135,7 +11112,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			++second_table_column_count;
 		}
@@ -11152,7 +11128,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = child_set_number;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 			++second_table_column_count;
 		}
@@ -11737,7 +11712,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_child;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_child;
 		datetime_start_column.column_name_in_original_data_table = "";
-		datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = child_set_number;
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
 			child_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
@@ -11775,7 +11749,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_child;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_child;
 		datetime_end_column.column_name_in_original_data_table = "";
-		datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = child_set_number;
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
 			child_variable_group_raw_data_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
@@ -12006,7 +11979,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_start_column.column_name_in_original_data_table = "";
-	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = current_set_number;
 
 	switch (xr_table_category)
 	{
@@ -12128,7 +12100,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
 	datetime_end_column.column_name_in_original_data_table = "";
-	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = current_set_number;
 
 	switch (xr_table_category)
 	{
@@ -16125,7 +16096,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 			*column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-		datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 		datetime_start_column.column_name_in_original_data_table = "";
 
@@ -16167,7 +16137,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 			*column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-		datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 		datetime_end_column.column_name_in_original_data_table = "";
 	}
@@ -16210,7 +16179,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 		*column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 	datetime_start_column.column_name_in_original_data_table = "";
 
@@ -16252,7 +16220,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table =
 		*column_set.columns_in_view[column_set.columns_in_view.size() - 2].variable_group_associated_with_current_inner_table.identifier_parent;
-	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
 	result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_MERGED_KAD_OUTPUT,
 			ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_MERGED_KAD_OUTPUT);
@@ -19990,7 +19957,6 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
 	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
-	datetime_start_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 
 	datetime_start_column.column_name_in_original_data_table = "";
@@ -20029,7 +19995,6 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
 	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
-	datetime_end_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = -1;
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 
 	result_columns.current_block_datetime_column_types = std::make_pair(
@@ -20063,7 +20028,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_x1_columns)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const K)
 {
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
@@ -20100,8 +20065,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	//bool reached_first_datetime_start_merged_column = false;
 	//bool reached_first_datetime_end_merged_column = false;
 
-	std::for_each(primary_variable_group_x1_columns.columns_in_view.cbegin(),
-				  primary_variable_group_x1_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & existing_column)
+	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
+		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & existing_column)
 	{
 
 		result_columns.columns_in_view.push_back(existing_column);
@@ -20142,7 +20107,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 			|| new_column_raw_data_table.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
 			|| new_column_raw_data_table.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL)
 		{
-			return; // Add these columns last
+			return; // Add these columns last, if selected by user
 		}
 
 		bool match = true;
@@ -20159,7 +20124,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 
@@ -20175,7 +20139,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 				}
 			}
 
-			++second_table_column_count;
+			//++second_table_column_count;
 		}
 	});
 
@@ -20216,7 +20180,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 
@@ -20261,7 +20224,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = most_recent_current_inner_table_count;
 			++second_table_column_count;
@@ -20286,7 +20248,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 			new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
 			new_column.column_name_in_temporary_table += "_";
 			new_column.column_name_in_temporary_table += newUUID(true);
-			new_column.inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables = 0;
 			new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 			new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = most_recent_current_inner_table_count;
 			++second_table_column_count;

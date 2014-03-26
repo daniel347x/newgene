@@ -124,7 +124,6 @@ class ColumnsInTempView
 
 				ColumnInTempView()
                     : is_within_inner_table_corresponding_to_top_level_uoa(false)
-                    , inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables(-1)
                     , column_type(COLUMN_TYPE__UNKNOWN)
                     , primary_key_index_within_total_kad_for_dmu_category(-1)
 					, primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category(-1)
@@ -143,7 +142,6 @@ class ColumnsInTempView
 				}
 
 				bool is_within_inner_table_corresponding_to_top_level_uoa;
-				int inner_table_set_number__within_given_primary_vg_and_its_children___each_set_contains_multiple_inner_tables; // 0 for primary, 1 for first child variable group, etc.  Note that each set includes potentially multiple inner tables, depending on the multiplicity of the given primary or child variable group.
 				std::string column_name_in_temporary_table; // The name of the column in the temporary view (includes UUID)
 				std::string column_name_in_temporary_table_no_uuid; // The name of the column in the temporary view (without UUID)
 				std::string column_name_in_original_data_table; // The name of the column in the original raw data table corresponding to this column (if any)
@@ -691,7 +689,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				// Random sampling
 				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings);
-				SqlAndColumnSet RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_x1_columns);
+				SqlAndColumnSet RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_x1_columns, int const K);
 				void RandomSamplingWriteToOutputTable(ColumnsInTempView const & primary_variable_group_x1_columns, AllWeightings & allWeightings);
 
 				// Functions involved in different phases of generation
