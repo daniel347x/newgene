@@ -228,7 +228,8 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 	public:
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne()
-			: index_into_raw_data { 0 }
+			: PrimaryKeysGrouping{ DMUInstanceDataVector() }
+			, index_into_raw_data{ 0 }
 		{}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int64_t const & index_into_raw_data_)
@@ -272,6 +273,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 	public:
 
 		PrimaryKeysGroupingMultiplicityOne()
+			: PrimaryKeysGrouping{ DMUInstanceDataVector() }
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
@@ -392,7 +394,7 @@ class AllWeightings
 		// Merge time slice data into a map element
 		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number);
 
-		bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_ , TimeSlices::value_type const & map_entry_)
+		static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_ , TimeSlices::value_type const & map_entry_)
 		{
 
 			TimeSlice const & new_time_slice = new_time_slice_.first;
