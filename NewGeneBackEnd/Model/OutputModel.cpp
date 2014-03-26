@@ -2915,7 +2915,7 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 }
 
 void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & sorted_result_columns, sqlite3_stmt * stmt_result,
-		XR_TABLE_CATEGORY const xr_table_category, bool const obtain_rowid)
+	XR_TABLE_CATEGORY const xr_table_category, bool const obtain_rowid)
 {
 
 	Clear();
@@ -19709,7 +19709,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 					return;
 				}
 
-				sorting_row_of_data.PopulateFromCurrentRowInDatabase(primary_variable_group_x1_columns, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE, true);
+				sorting_row_of_data.PopulateFromCurrentRowInDatabase(primary_variable_group_x1_columns, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE, true, current_rows_stepped == 0);
 
 				// Construct branch and leaf
 
@@ -19915,163 +19915,6 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTempView const & primary_variable_group_x1_columns, AllWeightings & allWeightings)
-{
-
-	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
-	std::vector<SQLExecutor> & sql_strings = result.first;
-	ColumnsInTempView & result_columns = result.second;
-
-	result_columns = primary_variable_group_x1_columns;
-	result_columns.most_recent_sql_statement_executed__index = -1;
-
-	std::string view_name = "NGTEMP_RANDOM_SAMPLING";
-	result_columns.view_name_no_uuid = view_name;
-
-	view_name += "_";
-	view_name += newUUID(true);
-
-	result_columns.view_name = view_name;
-	result_columns.view_number = 1;
-	result_columns.has_no_datetime_columns = false;
-
-	std::string sql_create_empty_table;
-	sql_create_empty_table += "CREATE TABLE \"";
-	sql_create_empty_table += result_columns.view_name;
-	sql_create_empty_table += "\" AS SELECT * FROM \"";
-	sql_create_empty_table += primary_variable_group_x1_columns.view_name;
-	sql_create_empty_table += "\" WHERE 0";
-	sql_strings.push_back(SQLExecutor(this, db, sql_create_empty_table));
-
-	if (failed)
-	{
-		SetFailureMessage(sql_error);
-		return result;
-	}
-
-	if (CheckCancelled())
-	{
-		return result;
-	}
-
-
-	// Add the "time slice" time range columns
-
-	// The variable group is that of the primary variable group for this final result set,
-	// which is obtained from the first column
-	WidgetInstanceIdentifier variable_group = primary_variable_group_x1_columns.columns_in_view[0].variable_group_associated_with_current_inner_table;
-	WidgetInstanceIdentifier uoa = primary_variable_group_x1_columns.columns_in_view[0].uoa_associated_with_variable_group_associated_with_current_inner_table;
-
-	std::string datetime_start_col_name;
-	std::string datetime_end_col_name;
-	std::string datetime_start_col_name_text;
-	std::string datetime_end_col_name_text;
-
-	std::string datetime_start_col_name_no_uuid = "DATETIMESTART__TIME_SLICE";
-	datetime_start_col_name = datetime_start_col_name_no_uuid;
-	datetime_start_col_name += "_";
-	datetime_start_col_name += newUUID(true);
-
-	std::string alter_string;
-	alter_string += "ALTER TABLE \"";
-	alter_string += result_columns.view_name;
-	alter_string += "\" ADD COLUMN ";
-	alter_string += datetime_start_col_name;
-	alter_string += " INTEGER DEFAULT 0";
-	sql_strings.push_back(SQLExecutor(this, db, alter_string));
-
-	if (failed)
-	{
-		SetFailureMessage(sql_error);
-		return result;
-	}
-
-	if (CheckCancelled())
-	{
-		return result;
-	}
-
-	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
-	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
-	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
-	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
-		primary_variable_group_x1_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
-	datetime_start_column.number_inner_tables_in_set = primary_variable_group_x1_columns.columns_in_view.back().number_inner_tables_in_set;
-	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
-	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
-	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
-	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
-
-	datetime_start_column.column_name_in_original_data_table = "";
-
-	std::string datetime_end_col_name_no_uuid = "DATETIMEEND__TIME_SLICE";
-	datetime_end_col_name = datetime_end_col_name_no_uuid;
-	datetime_end_col_name += "_";
-	datetime_end_col_name += newUUID(true);
-
-	alter_string.clear();
-	alter_string += "ALTER TABLE \"";
-	alter_string += result_columns.view_name;
-	alter_string += "\" ADD COLUMN ";
-	alter_string += datetime_end_col_name;
-	alter_string += " INTEGER DEFAULT 0";
-	sql_strings.push_back(SQLExecutor(this, db, alter_string));
-
-	if (failed)
-	{
-		SetFailureMessage(sql_error);
-		return result;
-	}
-
-	if (CheckCancelled())
-	{
-		return result;
-	}
-
-	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
-	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
-	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
-	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
-		primary_variable_group_x1_columns.columns_in_view.back().current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
-	datetime_end_column.number_inner_tables_in_set = primary_variable_group_x1_columns.columns_in_view.back().number_inner_tables_in_set;
-	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
-	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
-	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
-	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
-
-	result_columns.current_block_datetime_column_types = std::make_pair(
-				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE,
-				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE);
-	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
-
-	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
-	datetime_end_column.column_name_in_original_data_table = "";
-
-	ExecuteSQL(result); // Executes all SQL queries up to the current one
-
-	if (failed || CheckCancelled())
-	{
-		return result;
-	}
-
-
-	int const minimum_desired_rows_per_transaction = 1024 * 16;
-	long current_rows_added = 0;
-	std::int64_t current_rows_stepped = 0;
-	std::int64_t current_rows_added_since_execution = 0;
-	std::string sql_add_xr_row;
-	bool first_row_added = true;
-	std::vector<std::string> bound_parameter_strings;
-	std::vector<std::int64_t> bound_parameter_ints;
-	std::vector<long double> bound_parameter_floats;
-	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
-
-	std::int64_t rowid { 0 };
-
-}
-
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_raw_data_columns)
 {
 
@@ -20135,6 +19978,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
 					  ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 	{
+
 		if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 			|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
 			|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND
@@ -20269,5 +20113,131 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 		});
 
 	}
+
+	// Add the "time slice" time range columns
+
+	std::string datetime_start_col_name;
+	std::string datetime_end_col_name;
+	std::string datetime_start_col_name_text;
+	std::string datetime_end_col_name_text;
+
+	std::string datetime_start_col_name_no_uuid = "DATETIMESTART__TIME_SLICE";
+	datetime_start_col_name = datetime_start_col_name_no_uuid;
+	datetime_start_col_name += "_";
+	datetime_start_col_name += newUUID(true);
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+	datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
+	datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
+	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = highest_multiplicity;
+	datetime_start_column.number_inner_tables_in_set = highest_multiplicity;
+	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
+	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
+	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
+	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+	datetime_start_column.column_name_in_original_data_table = "";
+
+	std::string datetime_end_col_name_no_uuid = "DATETIMEEND__TIME_SLICE";
+	datetime_end_col_name = datetime_end_col_name_no_uuid;
+	datetime_end_col_name += "_";
+	datetime_end_col_name += newUUID(true);
+
+	result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+	ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+	datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
+	datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
+	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = highest_multiplicity;
+	datetime_end_column.number_inner_tables_in_set = highest_multiplicity;
+	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
+	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
+	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
+	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+	datetime_end_column.column_name_in_original_data_table = "";
+
+	result_columns.current_block_datetime_column_types = std::make_pair(
+		ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE,
+		ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE);
+	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
+
+	ExecuteSQL(result); // Executes all SQL queries up to the current one
+
+	if (failed || CheckCancelled())
+	{
+		return result;
+	}
+
+	return result;
+
+}
+
+void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings)
+{
+
+	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
+	std::vector<SQLExecutor> & sql_strings = result.first;
+	ColumnsInTempView & result_columns = result.second;
+
+	result_columns = random_sampling_columns;
+	result_columns.most_recent_sql_statement_executed__index = -1;
+
+	std::string view_name = "NGTEMP_RANDOM_SAMPLING";
+	result_columns.view_name_no_uuid = view_name;
+
+	view_name += "_";
+	view_name += newUUID(true);
+
+	result_columns.view_name = view_name;
+	result_columns.view_number = 1;
+	result_columns.has_no_datetime_columns = false;
+
+	std::string sql_create_empty_table;
+	sql_create_empty_table += "CREATE TABLE \"";
+	sql_create_empty_table += result_columns.view_name;
+	sql_create_empty_table += " (";
+
+	bool first = true;
+	std::for_each(random_sampling_columns.columns_in_view.cbegin(),
+				  random_sampling_columns.columns_in_view.cend(), [&](
+					  ColumnsInTempView::ColumnInTempView const & random_sampling_column)
+	{
+
+		if (!first)
+		{
+			sql_create_empty_table += ", ";
+		}
+		first = false;
+
+		sql_create_empty_table += random_sampling_column.column_name_in_temporary_table;
+
+	});
+
+	sql_create_empty_table += " )";
+
+	sql_strings.push_back(SQLExecutor(this, db, sql_create_empty_table));
+
+	if (failed)
+	{
+		SetFailureMessage(sql_error);
+		return;
+	}
+
+	if (CheckCancelled())
+	{
+		return;
+	}
+
+	int const minimum_desired_rows_per_transaction = 1024 * 16;
+	long current_rows_added = 0;
+	std::int64_t current_rows_stepped = 0;
+	std::int64_t current_rows_added_since_execution = 0;
+	std::string sql_add_xr_row;
+	bool first_row_added = true;
+	std::vector<std::string> bound_parameter_strings;
+	std::vector<std::int64_t> bound_parameter_ints;
+	std::vector<long double> bound_parameter_floats;
+	std::vector<SQLExecutor::WHICH_BINDING> bound_parameter_which_binding_to_use;
+
+	std::int64_t rowid { 0 };
 
 }
