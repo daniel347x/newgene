@@ -2694,8 +2694,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings);
 		allWeightings.CalculateWeightings(K);
 		allWeightings.PrepareRandomNumbers(samples);
-		RandomSamplingBuildSchema(primary_variable_group_raw_data_columns, K);
-		RandomSamplingWriteToOutputTable(x_table_result.second, allWeightings);
+		SqlAndColumnSet random_sampling_schema = RandomSamplingBuildSchema(primary_variable_group_raw_data_columns);
+		RandomSamplingWriteToOutputTable(random_sampling_schema.second, allWeightings);
 	}
 	else
 	{
@@ -20072,7 +20072,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const K)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_raw_data_columns)
 {
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
