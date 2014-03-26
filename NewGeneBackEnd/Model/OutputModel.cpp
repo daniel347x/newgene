@@ -12982,7 +12982,6 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 						if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, column_in_variable_group_data_table.column_name_in_original_data_table))
 						{
 
-							// Test if this column in the raw data table corresponds to outer multiplicity > 1 column in the full sequence
 							bool matched = false;
 
 							if (current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
@@ -12992,34 +12991,43 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 								// But the total primary key sequence ("sequence") stores the columns of the OUTPUT, which contains all multiplicities.
 								// So use the first occurrence of the primary keys (current_multiplicity == 1) to obtain the information.
 
-								// In fact, this column in the raw data table corresponds to outer multiplicity > 1 column in the full sequence
 								matched = true;
 							}
-							else
-							{
-								// deal with child tables that have a smaller number of columns in this DMU category
-								// than the primary variable groups do.
-								if (current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group
-									<
-									current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category)
-								{
-									if (current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
-										<= current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category)
-									{
-										// The current column corresponds to the first inner table of the top-level variable groups,
-										// though it corresponds to the second or greater inner table of a current child variable group.
-										// i.e., this is the second or following call to this function corresponding to a second or
-										// higher multiplicity of a child variable group.
 
-										// In fact, this column in the raw data table corresponds to outer multiplicity > 1 column in the full sequence
-										matched = true;
-									}
-								}
-							}
+
+							// DN removed Wednesday, Mar 26, 2014 after careful review.
+							// Only affects child variable groups, and is simply wrong.
+							// Note that for smaller child variable groups, it will match multiple times,
+							// and the last hit will overwrite others and persist.
+
+							//else
+							//{
+							//	// deal with child tables that have a smaller number of columns in this DMU category
+							//	// than the primary variable groups do.
+							//	if (current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group
+							//		<
+							//		current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category)
+							//	{
+
+							//		// matching the above condition means we're a child variable group
+							//		// and that the current column in this child variable group
+							//		// is a DMU that has a smaller count in the child than in the primary variable group
+
+							//		if (current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
+							//			<= current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category)
+							//		{
+							//			// The current column corresponds to the first inner table of the top-level variable groups,
+							//			// though it corresponds to the second or greater inner table of a current child variable group.
+							//			// i.e., this is the second or following call to this function corresponding to a second or
+							//			// higher multiplicity of a child variable group.
+
+							//			matched = true;
+							//		}
+							//	}
+							//}
 
 							if (matched)
 							{
-								// In fact, this column in the raw data table corresponds to outer multiplicity > 1 column in the full sequence
 								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry__output__including_multiplicities.dmu_category;
 								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category =
 									primary_key_entry__output__including_multiplicities.sequence_number_within_dmu_category_spin_control;
@@ -14014,6 +14022,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 				// The primary key metadata for the_variable_group - a possible SUBSET of all primary keys from the primary UOA.
 				// This include *all* DMU categories that form the primary keys for this variable group,
 				// each of which might appear multiple times as a separate entry here.
+				// NOT the total K-spin-control count; JUST the value of K for this particular variable group's UOA.
 				// This metadata just states which DMU category the key refers to,
 				// what the total (overall) sequence number is of the primary key in the variable group table,
 				// and the column name in the variable group table for this column.
