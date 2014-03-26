@@ -19832,7 +19832,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 				DMUInstanceDataVector secondary_data;
 				bool bad = false;
 				std::for_each(sorting_row_of_data.indices_of_secondary_key_columns.cbegin(),
-					sorting_row_of_data.indices_of_secondary_key_columns.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+							  sorting_row_of_data.indices_of_secondary_key_columns.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 				{
 
 					if (bad)
@@ -20107,7 +20107,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	bool first = true;
 	int highest_multiplicity = 1;
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 	{
 
 		if (raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > highest_multiplicity)
@@ -20174,8 +20174,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	{
 
 		std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-			primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
-			ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+					  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
+						  ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 		{
 			if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 				|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
@@ -20221,7 +20221,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	{
 
 		std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-			primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+					  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 		{
 
 			bool make_secondary_datetime_column = false;
@@ -20257,6 +20257,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 				new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 				new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 				new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity;
+
 				if (make_secondary_datetime_column)
 				{
 					new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
