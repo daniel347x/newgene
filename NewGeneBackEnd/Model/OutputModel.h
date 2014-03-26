@@ -705,7 +705,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void RandomSamplingCreateOutputTable(SqlAndColumnSet & random_sampling_schema);
 				void RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
 				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);
-				void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, FieldData const & data, int bindIndex);
+				void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex);
 				class bind_visitor : public boost::static_visitor<>
 				{
 

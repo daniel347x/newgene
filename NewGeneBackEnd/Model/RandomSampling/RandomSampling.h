@@ -12,7 +12,7 @@
 #include "../../Utilities/NewGeneException.h"
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
-typedef boost::variant<std::int64_t, double, std::string> FieldData;
+typedef boost::variant<std::int64_t, double, std::string> InstanceData;
 typedef boost::variant<std::int64_t, double, std::string> DMUInstanceData;
 typedef boost::variant<std::int64_t, double, std::string> SecondaryInstanceData;
 
@@ -49,6 +49,7 @@ class TimeSlice
 			}
 			time_start = rhs.time_start;
 			time_end = rhs.time_end;
+			return *this;
 		}
 
 		void Reshape(std::int64_t const & new_start, std::int64_t const & new_end)
@@ -120,6 +121,7 @@ class Weighting
 			weighting = rhs.weighting;
 			weighting_range_start = rhs.weighting_range_start;
 			weighting_range_end = rhs.weighting_range_end;
+			return *this;
 		}
 
 		boost::multiprecision::cpp_int weighting;
@@ -250,6 +252,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 			}
 			PrimaryKeysGrouping::operator=(rhs);
 			index_into_raw_data = rhs.index_into_raw_data;
+			return *this;
 		}
 
 		PrimaryKeysGroupingMultiplicityGreaterThanOne & operator=(PrimaryKeysGroupingMultiplicityGreaterThanOne const && rhs)
@@ -293,6 +296,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			}
 			PrimaryKeysGrouping::operator=(rhs);
 			weighting = rhs.weighting;
+			return *this;
 		}
 
 		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const && rhs)

@@ -20362,7 +20362,7 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 
 }
 
-void OutputModel::OutputGenerator::BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, FieldData const & data, int bindIndex)
+void OutputModel::OutputGenerator::BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex)
 {
 	bind_visitor visitor(insert_random_sample_stmt, bindIndex);
 	boost::apply_visitor(visitor, data);
