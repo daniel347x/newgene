@@ -20210,16 +20210,14 @@ void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable(SqlAndColumnS
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
 {
 
 	Executor executor(model->getDb());
 
 	int const    minimum_desired_rows_per_transaction = 1024 * 16;
-	std::int64_t current_rows_added = 0;
+	std::int64_t current_rows_in_error = 0;
 	std::int64_t current_rows_stepped = 0;
-	std::int64_t current_rows_added_since_execution = 0;
-	std::int64_t rowid{ 0 };
 
 	BeginNewTransaction();
 
@@ -20279,11 +20277,22 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 
 		});
 
+		int step_result = 0;
 
+		if ((step_result = sqlite3_step(allWeightings.insert_random_sample_stmt)) != SQLITE_DONE)
+		{
+			std::string sql_error = sqlite3_errmsg(db);
+			boost::format msg("Unable to execute prepared insert query to insert a new random sample: %1%");
+			msg % sql_error;
+			errorMessages.push_back(msg.str());
+			++current_rows_in_error;
+		}
+
+		sqlite3_clear_bindings(allWeightings.insert_random_sample_stmt);
+		sqlite3_reset(allWeightings.insert_random_sample_stmt);
 
 		++current_rows_stepped;
-		++current_rows_added;
-		if (current_rows_added % minimum_desired_rows_per_transaction == 0)
+		if (current_rows_stepped % minimum_desired_rows_per_transaction == 0)
 		{
 			EndTransaction();
 			BeginNewTransaction();
