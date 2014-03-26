@@ -20223,19 +20223,61 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 
 	BeginNewTransaction();
 
-	BOOST_SCOPE_EXIT(this_)
+	BOOST_SCOPE_EXIT(this_, &allWeightings)
 	{
 		// Transaction is for efficiency;
 		// rollback not yet enabled
+		if (allWeightings.insert_random_sample_stmt != nullptr)
+		{
+			sqlite3_finalize(allWeightings.insert_random_sample_stmt);
+			allWeightings.insert_random_sample_stmt = nullptr;
+		}
 		this_->EndTransaction();
 	} BOOST_SCOPE_EXIT_END
 
+	PrepareInsertStatement(allWeightings.insert_random_sample_stmt, random_sampling_columns);
 
 	Branch branch;
 	Leaves leaves;
 	TimeSlice time_slice;
 	while (allWeightings.RetrieveNextBranchAndLeaves(branch, leaves, time_slice))
 	{
+
+		int bindIndex = 1;
+
+		// The branch represents the primary keys of multiplicity 1
+		DMUInstanceDataVector const & branch_primary_keys = branch.primary_keys;
+		std::for_each(branch_primary_keys.cbegin(), branch_primary_keys.cend(), [&](DMUInstanceData const & branch_primary_key)
+		{
+			BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, branch_primary_key, bindIndex++);
+		});
+
+		std::vector<std::int64_t> secondary_key_row_indices;
+
+		// The leaves represents the primary keys of multiplicity > 1
+		std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
+		{
+			
+			secondary_key_row_indices.push_back(leaf.index_into_raw_data);
+
+			DMUInstanceDataVector const & leaf_primary_keys = leaf.primary_keys;
+			std::for_each(leaf_primary_keys.cbegin(), leaf_primary_keys.cend(), [&](DMUInstanceData const & leaf_primary_key)
+			{
+				BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, leaf_primary_key, bindIndex++);
+			});
+
+		});
+
+		std::for_each(secondary_key_row_indices.cbegin(), secondary_key_row_indices.cend(), [&](std::int64_t const secondary_key_row_index)
+		{
+
+			SecondaryInstanceDataVector const & secondary_data = allWeightings.dataCache[secondary_key_row_index];
+			std::for_each(secondary_data.cbegin(), secondary_data.cend(), [&](SecondaryInstanceData const & secondary_data)
+			{
+				BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
+			});
+
+		});
 
 
 
@@ -20249,4 +20291,70 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 
 	}
 
+}
+
+void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns)
+{
+
+	if (insert_random_sample_stmt != nullptr)
+	{
+		std::string insert_random_sample_string;
+
+		bool first = true;
+		insert_random_sample_string += "INSERT INTO \"";
+		insert_random_sample_string += random_sampling_columns.view_name;
+		insert_random_sample_string += "\" (";
+
+		bool first = true;
+		std::for_each(random_sampling_columns.columns_in_view.cbegin(),
+			random_sampling_columns.columns_in_view.cend(), [&](
+			ColumnsInTempView::ColumnInTempView const & random_sampling_column)
+		{
+
+			if (!first)
+			{
+				insert_random_sample_string += ", ";
+			}
+			first = false;
+
+			insert_random_sample_string += random_sampling_column.column_name_in_temporary_table;
+
+		});
+
+		insert_random_sample_string += ") VALUES (";
+
+		first = true;
+		for (size_t n = 0; n < random_sampling_columns.columns_in_view.size(); ++n)
+		{
+
+			if (!first)
+			{
+				insert_random_sample_string += ", ";
+			}
+			first = false;
+
+			insert_random_sample_string += "?";
+
+		}
+
+		insert_random_sample_string += ")";
+
+		sqlite3_prepare_v2(db, insert_random_sample_string.c_str(), static_cast<int>(insert_random_sample_string.size()) + 1, &insert_random_sample_stmt, NULL);
+
+		if (insert_random_sample_stmt == NULL)
+		{
+			std::string sql_error = sqlite3_errmsg(db);
+			boost::format msg("Unable to prepare SQL query to insert a random K-ad row: %1% (%2%)");
+			msg % sql_error.c_str() % insert_random_sample_string.c_str();
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+	}
+
+}
+
+void OutputModel::OutputGenerator::BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, FieldData const & data, int bindIndex)
+{
+	bind_visitor visitor(insert_random_sample_stmt, bindIndex);
+	boost::apply_visitor(visitor, data);
 }

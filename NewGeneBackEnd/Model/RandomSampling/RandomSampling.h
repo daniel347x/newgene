@@ -10,10 +10,16 @@
 #	include <boost/variant.hpp>
 #endif
 #include "../../Utilities/NewGeneException.h"
+#include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 
-typedef boost::variant<std::int32_t, std::int64_t, double, std::string> DMUInstanceData;
-typedef boost::variant<std::int32_t, std::int64_t, double, std::string> SecondaryInstanceData;
-typedef std::map<std::int64_t, SecondaryInstanceData> DataCache;
+typedef boost::variant<std::int64_t, double, std::string> FieldData;
+typedef boost::variant<std::int64_t, double, std::string> DMUInstanceData;
+typedef boost::variant<std::int64_t, double, std::string> SecondaryInstanceData;
+
+typedef std::vector<DMUInstanceData> DMUInstanceDataVector;
+typedef std::vector<SecondaryInstanceData> SecondaryInstanceDataVector;
+
+typedef std::map<std::int64_t, SecondaryInstanceDataVector> DataCache;
 
 class TimeSlice
 {
@@ -121,8 +127,6 @@ class Weighting
 		boost::multiprecision::cpp_int weighting_range_end;
 
 };
-
-typedef std::vector<DMUInstanceData> DMUInstanceDataVector;
 
 class PrimaryKeysGrouping
 {
@@ -355,9 +359,14 @@ class AllWeightings
 
 	public:
 
+		AllWeightings();
+		~AllWeightings();
+
 		TimeSlices timeSlices;
 		DataCache dataCache; // caches secondary key data required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
 		Weighting weighting; // sum over all time slices
+
+		sqlite3_stmt * insert_random_sample_stmt;
 
 		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number);
 		void CalculateWeightings(int const k);

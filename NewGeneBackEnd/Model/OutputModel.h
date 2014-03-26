@@ -704,6 +704,37 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSet RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_x1_columns);
 				void RandomSamplingCreateOutputTable(SqlAndColumnSet & random_sampling_schema);
 				void RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings);
+				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);
+				void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, FieldData const & data, int bindIndex);
+				class bind_visitor : public boost::static_visitor<>
+				{
+
+				public:
+
+					bind_visitor(sqlite3_stmt * stmt_, int const bindIndex_)
+						: stmt(stmt_)
+						, bindIndex(bindIndex)
+					{}
+
+					void operator()(std::int64_t const & data)
+					{
+						sqlite3_bind_int64(stmt, bindIndex, data);
+					}
+
+					void operator()(double const & data)
+					{
+						sqlite3_bind_double(stmt, bindIndex, data);
+					}
+
+					void operator()(std::string const & data)
+					{
+						sqlite3_bind_text(stmt, bindIndex, data.c_str(), static_cast<int>(data.size()), SQLITE_STATIC);
+					}
+
+					sqlite3_stmt * stmt;
+					int const bindIndex;
+
+				};
 
 				// Functions involved in different phases of generation
 				void ObtainColumnInfoForRawDataTables();

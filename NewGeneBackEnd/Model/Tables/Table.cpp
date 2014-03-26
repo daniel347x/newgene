@@ -104,8 +104,9 @@ void Table_basemost::ImportBlockBulk(sqlite3 * db, ImportDefinition const & impo
 
 	if (stmt == NULL)
 	{
-		boost::format msg("Unable to prepare SQL query: %1%");
-		msg % sql_insert.c_str();
+		std::string sql_error = sqlite3_errmsg(db);
+		boost::format msg("Unable to prepare SQL query: %1% (%2%)");
+		msg % sql_error.c_str() % sql_insert.c_str();
 		errors.push_back(msg.str());
 		return;
 	}
@@ -358,8 +359,9 @@ int Table_basemost::TryUpdateRow(DataBlock const & block, int row, bool & failed
 
 		if (stmt == NULL)
 		{
-			boost::format msg("Unable to prepare SQL query in TryUpdateRow: %1%");
-			msg % sql_update.c_str();
+			std::string sql_error = sqlite3_errmsg(db);
+			boost::format msg("Unable to prepare SQL query in TryUpdateRow: %1% (%2%)");
+			msg % sql_error.c_str() % sql_update.c_str();
 			errorMsg = msg.str();
 			failed = true;
 			return 0;
@@ -579,8 +581,9 @@ void Table_basemost::TryInsertRow(DataBlock const & block, int row, bool & faile
 
 		if (stmt == NULL)
 		{
-			boost::format msg("Unable to prepare SQL query in TryInsertRow: %1%");
-			msg % sql_insert.c_str();
+			std::string sql_error = sqlite3_errmsg(db);
+			boost::format msg("Unable to prepare SQL query in TryInsertRow: %1% (%2%)");
+			msg % sql_error.c_str() % sql_insert.c_str();
 			errorMsg = msg.str();
 			failed = true;
 			return;

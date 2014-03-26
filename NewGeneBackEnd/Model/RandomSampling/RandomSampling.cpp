@@ -4,6 +4,21 @@
 #	include <boost/scope_exit.hpp>
 #endif
 
+AllWeightings::AllWeightings()
+: insert_random_sample_stmt(nullptr)
+{
+
+}
+
+AllWeightings::~AllWeightings()
+{
+	if (insert_random_sample_stmt)
+	{
+		sqlite3_finalize(insert_random_sample_stmt);
+		insert_random_sample_stmt = nullptr;
+	}
+}
+
 void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number)
 {
 
