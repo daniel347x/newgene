@@ -318,7 +318,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		Weighting weighting; // Weighting for this branch: This is the lowest-level, calculated value
 
 		mutable std::set<std::set<int>> hit; // cache of leaf combinations already hit
-		mutable std::set<std::set<int>> remaining;
+		mutable std::vector<std::set<int>> remaining;
 
 };
 
