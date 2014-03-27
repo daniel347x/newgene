@@ -2697,7 +2697,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		allWeightings.PrepareRandomNumbers(samples);
 		SqlAndColumnSet random_sampling_schema = RandomSamplingBuildSchema(primary_variable_group_raw_data_columns);
 		RandomSamplingCreateOutputTable(random_sampling_schema);
-		RandomSamplingWriteToOutputTable(random_sampling_schema.second, allWeightings, errorMessages);
+		RandomSamplingWriteToOutputTable(K, random_sampling_schema.second, allWeightings, errorMessages);
 	}
 	else
 	{
@@ -20209,7 +20209,7 @@ void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable(SqlAndColumnS
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
+void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K, ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
 {
 
 	Executor executor(model->getDb());
@@ -20237,7 +20237,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTem
 	Branch branch;
 	Leaves leaves;
 	TimeSlice time_slice;
-	while (allWeightings.RetrieveNextBranchAndLeaves(branch, leaves, time_slice))
+	while (allWeightings.RetrieveNextBranchAndLeaves(K, branch, leaves, time_slice))
 	{
 
 		int bindIndex = 1;

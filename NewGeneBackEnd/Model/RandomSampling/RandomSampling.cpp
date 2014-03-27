@@ -4,7 +4,10 @@
 #	include <boost/scope_exit.hpp>
 #	include <boost/math/special_functions/binomial.hpp>
 #	include <boost/multiprecision/random.hpp>
+#	include <boost/assert.hpp>
 #endif
+#include <random>
+#include <functional>
 
 AllWeightings::AllWeightings()
 : insert_random_sample_stmt(nullptr)
@@ -467,6 +470,9 @@ void AllWeightings::CalculateWeightings(int const K)
 					number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(numberLeaves, K);
 				}
 
+				// clear the hit cache
+				branch.hit.clear();
+
 				branchWeighting.weighting = timeSlice.Width() * number_branch_combinations;
 				branchWeighting.weighting_range_start = currentWeighting;
 				branchWeighting.weighting_range_end = branchWeighting.weighting_range_start + branchWeighting.weighting - 1;
@@ -510,17 +516,17 @@ void AllWeightings::PrepareRandomNumbers(int how_many)
 {
 
 	random_numbers.clear();
-	boost::random::mt19937 mt(std::time(0));
-	boost::random::uniform_int_distribution<boost::multiprecision::cpp_int> generator(weighting.weighting_range_start, weighting.weighting_range_end);
+	boost::random::mt19937 engine(std::time(0));
+	boost::random::uniform_int_distribution<boost::multiprecision::cpp_int> distribution(weighting.weighting_range_start, weighting.weighting_range_end);
 	while (random_numbers.size < how_many)
 	{
-		random_numbers.insert(generator(mt));
+		random_numbers.insert(distribution(engine));
 	}
 	random_number_iterator = random_numbers.cbegin();
 
 }
 
-bool AllWeightings::RetrieveNextBranchAndLeaves(Branch & branch, Leaves & leaves, TimeSlice & time_slice)
+bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice)
 {
 	
 	if (random_number_iterator == random_numbers.cend())
@@ -542,12 +548,81 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(Branch & branch, Leaves & leaves
 
 	TimeSlice const & timeSlice = timeSlicePtr->first;
 	VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second;
-	random_number -= variableGroupTimeSliceData.weighting.weighting_range_start;
-	random_number /= timeSlice.Width(); // truncation
+	VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+
+	// For now, assume only one variable group
+	if (variableGroupBranchesAndLeavesVector.size() > 1)
+	{
+		boost::format msg("Only one top-level variable group is currently supported for the random and full sampler.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+
+	BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+		
+	BranchesAndLeaves::const_iterator branchesAndLeavesPtr = std::lower_bound(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), random_number, [&](std::pair<Branch, Leaves> const & testBranchAndLeaves, boost::multiprecision::cpp_int const & test_random_number)
+	{
+		Branch const & testBranch = testBranchAndLeaves.first;
+		if (testBranch.weighting.weighting_range_end < test_random_number)
+		{
+			return true;
+		}
+		return false;
+	});
+
+	if ()
+
+	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
+	BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || (random_number - branch.weighting.weighting_range_start) / timeSlice.Width() >= boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K), "Random index is outside [0. binomial coefficient)");
+
+	Branch const & branch = branchesAndLeavesPtr->first;
+	Leaves const & leaves = branchesAndLeavesPtr->second;
+
+	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
+	if (index < 0 || index >= boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K))
+	{
+		boost::format msg("Random index out of range in the random sampler!");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
 
 	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData;
+	Leaves KAd = GetLeafCombination(K, branch, leaves);
 
 	++random_number_iterator;
 	return true;
+
+}
+
+Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Leaves const & leaves)
+{
+
+	static int saved_K = -1;
+	static std::mt19937 engine(std::time(0));
+	static std::uniform_int_distribution<int> distribution(1, 1);
+	static std::function<int ()> rng;
+
+	if (saved_K != K)
+	{
+		std::uniform_int_distribution<int> tmp_distribution(1, K);
+		distribution.param(tmp_distribution.param());
+		rng = std::bind(distribution, engine);
+	}
+
+	std::set<int> test_leaf_combination;
+
+	// skip any leaf combinations returned from previous random numbers
+	while (test_leaf_combination.empty() || branch.hit.count(test_leaf_combination))
+	{
+
+		test_leaf_combination.clear();
+
+		// Fill it up, with no duplicates
+		while (test_leaf_combination.size() < K)
+		{
+			test_leaf_combination.insert(rng());
+		}
+
+	}
 
 }

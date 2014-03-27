@@ -317,6 +317,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		Weighting weighting; // Weighting for this branch: This is the lowest-level, calculated value
 
+		mutable std::set<std::set<int>> hit; // cache of leaf combinations already hit
+
 };
 
 typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
@@ -383,7 +385,7 @@ class AllWeightings
 		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number);
 		void CalculateWeightings(int const K);
 		void PrepareRandomNumbers(int how_many);
-		bool RetrieveNextBranchAndLeaves(Branch & branch, Leaves & leaves, TimeSlice & time_slice);
+		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);
 
 	protected:
 
@@ -403,6 +405,8 @@ class AllWeightings
 
 		// Merge time slice data into a map element
 		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number);
+
+		Leaves GetLeafCombination(int const K, Branch const & branch, Leaves const & leaves);
 
 		static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_ , TimeSlices::value_type const & map_entry_)
 		{
