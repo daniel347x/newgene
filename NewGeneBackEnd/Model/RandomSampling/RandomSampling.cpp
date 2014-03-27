@@ -535,7 +535,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 		return false;
 	}
 
-	boost::multiprecision::cpp_int & random_number = *random_number_iterator;
+	boost::multiprecision::cpp_int const & random_number = *random_number_iterator;
 
 	TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](std::pair<TimeSlice, VariableGroupTimeSliceData> const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
 	{
@@ -637,8 +637,9 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 			std::uniform_int_distribution<size_t> distribution(0, branch.remaining.size() - 1);
 			size_t which_remaining_leaf_combination = distribution(engine);
 
-			int number_remaining = static_cast<int>(branch.remaining.size());
+			test_leaf_combination = branch.remaining[which_remaining_leaf_combination];
 
+			branch.remaining.erase(std::remove(std::begin(branch.remaining), std::end(branch.remaining), test_leaf_combination), std::end(branch.remaining));
 
 		}
 		else
