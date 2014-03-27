@@ -705,7 +705,7 @@ void AllWeightings::PopulateAllLeafCombinations(int const K, Branch const & bran
 		AddPositionToRemaining(position, branch);
 		bool succeeded = IncrementPosition(K, position, leaves);
 
-		BOOST_ASSERT_MSG(succeeded, "Invalid logic in position incrementer in sampler!");
+		BOOST_ASSERT_MSG(succeeded || (total_added + 1) == number_branch_combinations, "Invalid logic in position incrementer in sampler!");
 
 		++total_added;
 
