@@ -283,15 +283,20 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityOne()
 			: PrimaryKeysGrouping{ DMUInstanceDataVector() }
+			, number_branch_combinations{ 0 }
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
+			, number_branch_combinations{ 0 }
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
 			, weighting{ rhs.weighting }
+			, hit{ rhs.hit }
+			, remaining{ rhs.remaining }
+			, number_branch_combinations{rhs.number_branch_combinations}
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const & rhs)
@@ -302,6 +307,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			}
 			PrimaryKeysGrouping::operator=(rhs);
 			weighting = rhs.weighting;
+			hit = rhs.hit;
+			remaining = rhs.remaining;
+			number_branch_combinations = rhs.number_branch_combinations;
 			return *this;
 		}
 
@@ -313,12 +321,16 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			}
 			PrimaryKeysGrouping::operator=(std::move(rhs));
 			weighting = rhs.weighting;
+			hit = rhs.hit;
+			remaining = rhs.remaining;
+			number_branch_combinations = rhs.number_branch_combinations;
 		}
 
 		Weighting weighting; // Weighting for this branch: This is the lowest-level, calculated value
 
 		mutable std::set<std::set<int>> hit; // cache of leaf combinations already hit
 		mutable std::vector<std::set<int>> remaining;
+		boost::multiprecision::cpp_int number_branch_combinations;
 
 };
 
