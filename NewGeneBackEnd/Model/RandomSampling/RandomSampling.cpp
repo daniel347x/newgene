@@ -622,7 +622,7 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 
 		test_leaf_combination.clear();
 
-		if (branch.hit.size() > number_branch_combinations / 2)
+		if (boost::multiprecision::cpp_int(branch.hit.size()) > number_branch_combinations / 2)
 		{
 			// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
 			// and then pick randomly from that
@@ -633,11 +633,18 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 			{
 				PopulateAllLeafCombinations(K, branch, leaves);
 			}
+
+			std::uniform_int_distribution<size_t> distribution(0, branch.remaining.size() - 1);
+			size_t which_remaining_leaf_combination = distribution(engine);
+
+			int number_remaining = static_cast<int>(branch.remaining.size());
+
+
 		}
 		else
 		{
 
-			std::list<int> remaining_leaves;
+			std::vector<int> remaining_leaves;
 			for (int n = 0; n < leaves.size(); ++n)
 			{
 				remaining_leaves.push_back(n);
@@ -646,12 +653,10 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 			// Fill it up, with no duplicates
 			while (test_leaf_combination.size() < K)
 			{
-				std::uniform_int_distribution<int> distribution(0, remaining_leaves.size() - 1);
-				int index_of_index = distribution(engine);
-				std::list<int>::const_iterator listPtr = remaining_leaves.cbegin();
-				for (int x = 0; x < index_of_index; ++x) ++listPtr;
-				int index_of_leaf = *listPtr;
-				remaining_leaves.erase(listPtr);
+				std::uniform_int_distribution<size_t> distribution(0, remaining_leaves.size() - 1);
+				size_t index_of_index = distribution(engine);
+				int index_of_leaf = remaining_leaves[index_of_index];
+				remaining_leaves.erase(std::remove(std::begin(remaining_leaves), std::end(remaining_leaves), index_of_leaf), std::end(remaining_leaves));
 				test_leaf_combination.insert(index_of_leaf);
 			}
 
@@ -724,7 +729,7 @@ void AllWeightings::AddPositionToRemaining(std::vector<int> const & position, Br
 
 	if (branch.hit.count(new_remaining) == 0)
 	{
-		branch.remaining.insert(new_remaining);
+		branch.remaining.push_back(new_remaining);
 	}
 
 }
