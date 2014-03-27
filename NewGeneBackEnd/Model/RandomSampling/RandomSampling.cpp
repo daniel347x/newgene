@@ -539,6 +539,13 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 
 	boost::multiprecision::cpp_int const & random_number = *random_number_iterator;
 
+	std::string val1 = random_number.str();
+	std::string val2 = weighting.weighting.str();
+	std::string val3 = weighting.weighting_range_start.str();
+	std::string val4 = weighting.weighting_range_end.str();
+
+	BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.weighting && weighting.weighting_range_start == 0 && weighting.weighting_range_end == weighting.weighting - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
+
 	TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](std::pair<TimeSlice, VariableGroupTimeSliceData> const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
 	{
 		VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
@@ -548,6 +555,11 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 		}
 		return false;
 	});
+
+	if (timeSlicePtr == timeSlices.cend())
+	{
+		int debug___ = 0;
+	}
 
 	TimeSlice const & timeSlice = timeSlicePtr->first;
 	VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second;
