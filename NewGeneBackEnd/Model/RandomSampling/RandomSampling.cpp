@@ -574,6 +574,9 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 		return false;
 	});
 
+	std::string val1 = random_number.str();
+	std::string val2 = (random_number - branch.weighting.weighting_range_start) / boost::multiprecision::cpp_int(timeSlice.Width()).str();
+
 	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
 	//BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || (random_number - branch.weighting.weighting_range_start) / boost::multiprecision::cpp_int(timeSlice.Width()) >= boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K), "Random index is outside [0. binomial coefficient)");
 	BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || (random_number - branch.weighting.weighting_range_start) / boost::multiprecision::cpp_int(timeSlice.Width()) >= BinomialCoefficient(leaves.size(), K), "Random index is outside [0. binomial coefficient)");
