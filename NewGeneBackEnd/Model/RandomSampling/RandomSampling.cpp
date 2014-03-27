@@ -571,8 +571,6 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 		return false;
 	});
 
-	if ()
-
 	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
 	BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || (random_number - branch.weighting.weighting_range_start) / timeSlice.Width() >= boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K), "Random index is outside [0. binomial coefficient)");
 
@@ -597,14 +595,25 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Leaves const & leaves)
 {
 
-	static int saved_K = -1;
+	static int saved_range = -1;
 	static std::mt19937 engine(std::time(0));
-	static std::uniform_int_distribution<int> distribution(1, 1);
+	static std::uniform_int_distribution<int> distribution(0, 0);
 	static std::function<int ()> rng;
 
-	if (saved_K != K)
+	if (K >= leaves.size())
 	{
-		std::uniform_int_distribution<int> tmp_distribution(1, K);
+		return leaves;
+	}
+
+	if (K <= 0)
+	{
+		return Leaves();
+	}
+
+	if (saved_range != leaves.size())
+	{
+		saved_range = leaves.size();
+		std::uniform_int_distribution<int> tmp_distribution(0, saved_range - 1);
 		distribution.param(tmp_distribution.param());
 		rng = std::bind(distribution, engine);
 	}
@@ -624,5 +633,30 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 		}
 
 	}
+
+	branch.hit.insert(test_leaf_combination);
+
+	Leaves leaf_combination;
+	std::set<int>::const_iterator current_index_to_use_ptr = test_leaf_combination.cbegin();
+	int current_index_to_use = *current_index_to_use_ptr;
+	int current_index = 0;
+	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
+	{
+		if (current_index_to_use_ptr == test_leaf_combination.cend())
+		{
+			return;
+		}
+		current_index_to_use = *current_index_to_use_ptr;
+		if (current_index == current_index_to_use)
+		{
+			leaf_combination.insert(leaf);
+		}
+		++current_index;
+		++current_index_to_use_ptr;
+	});
+
+	BOOST_ASSERT_MSG(leaf_combination.size() == K, "Number of leaves generated does not equal K.");
+
+	return leaf_combination;
 
 }
