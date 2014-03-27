@@ -6,6 +6,7 @@
 #include <set>
 #include <map>
 #ifndef Q_MOC_RUN
+#	include <boost/multiprecision/number.hpp>
 #	include <boost/multiprecision/cpp_int.hpp>
 #	include <boost/variant.hpp>
 #endif

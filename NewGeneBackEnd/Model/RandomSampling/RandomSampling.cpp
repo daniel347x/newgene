@@ -790,7 +790,7 @@ int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std
 
 }
 
-boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K)
+boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, int const K)
 {
 
 	// Goddamn boost::multiprecision under no circumstances will allow an integer calculation of the binomial coefficient
