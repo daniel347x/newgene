@@ -592,6 +592,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 #	ifdef _DEBUG
 	std::string val5 = random_number.str();
 	std::string val6 = boost::multiprecision::cpp_int((random_number - branch.weighting.getWeightingRangeStart()) / boost::multiprecision::cpp_int(timeSlice.Width())).str();
+	std::string val7 = BinomialCoefficient(tmp_leaves.size(), K).str();
 #	endif
 
 	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
