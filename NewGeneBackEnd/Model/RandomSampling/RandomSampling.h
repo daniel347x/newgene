@@ -318,6 +318,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		Weighting weighting; // Weighting for this branch: This is the lowest-level, calculated value
 
 		mutable std::set<std::set<int>> hit; // cache of leaf combinations already hit
+		mutable std::set<std::set<int>> remaining;
 
 };
 
@@ -386,6 +387,7 @@ class AllWeightings
 		void CalculateWeightings(int const K);
 		void PrepareRandomNumbers(int how_many);
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);
+		void PopulateAllLeafCombinations(int const K, Branch const & branch, Leaves const & leaves);
 
 	protected:
 
@@ -420,6 +422,10 @@ class AllWeightings
 
 		std::set<boost::multiprecision::cpp_int> random_numbers;
 		std::set<boost::multiprecision::cpp_int>::const_iterator random_number_iterator;
+
+	private:
+
+		void AddPositionSetToRemaining(std::vector<int> const & positions, Branch const & branch);
 
 };
 

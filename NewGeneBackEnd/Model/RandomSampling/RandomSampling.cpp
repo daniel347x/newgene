@@ -575,15 +575,16 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
 	BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || (random_number - branch.weighting.weighting_range_start) / timeSlice.Width() >= boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K), "Random index is outside [0. binomial coefficient)");
 
-	Branch const & branch = branchesAndLeavesPtr->first;
-	Leaves const & leaves = branchesAndLeavesPtr->second;
+	const Branch & new_branch = branchesAndLeavesPtr->first;
 
-	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
-	if (index < 0 || index >= boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K))
+	if (new_branch.primary_keys != branch.primary_keys)
 	{
-		boost::format msg("Random index out of range in the random sampler!");
-		throw NewGeneException() << newgene_error_description(msg.str());
+		branch.remaining.clear();
 	}
+
+	branch = new_branch;
+
+	leaves = branchesAndLeavesPtr->second;
 
 	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData;
 	Leaves KAd = GetLeafCombination(K, branch, leaves);
@@ -625,6 +626,13 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 		{
 			// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
 			// and then pick randomly from that
+			
+			// A previous call may have populated "remaining"
+
+			if (branch.remaining.size() == 0)
+			{
+				PopulateAllLeafCombinations(K, branch, leaves);
+			}
 		}
 		else
 		{
@@ -675,5 +683,32 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 	BOOST_ASSERT_MSG(leaf_combination.size() == K, "Number of leaves generated does not equal K.");
 
 	return leaf_combination;
+
+}
+
+void AllWeightings::PopulateAllLeafCombinations(int const K, Branch const & branch, Leaves const & leaves)
+{
+
+	branch.remaining.clear();
+	std::vector<int> positions;
+	for (int n = 0; n < K; ++n)
+	{
+		positions.push_back(n);
+	}
+	
+	AddPositionSetToRemaining(positions, branch);
+
+}
+
+void AllWeightings::AddPositionSetToRemaining(std::vector<int> const & positions, Branch const & branch)
+{
+
+	std::set<int> new_remaining;
+	std::for_each(positions.cbegin(), positions.cend(), [&](int const position)
+	{
+		new_remaining.insert(position);
+	});
+
+	branch.remaining.insert(new_remaining);
 
 }
