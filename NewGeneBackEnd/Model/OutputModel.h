@@ -713,7 +713,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 					bind_visitor(sqlite3_stmt * stmt_, int const bindIndex_)
 						: stmt(stmt_)
-						, bindIndex(bindIndex)
+						, bindIndex(bindIndex_)
 					{}
 
 					void operator()(std::int64_t const & data)
