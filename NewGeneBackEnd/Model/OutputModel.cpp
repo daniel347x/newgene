@@ -19985,6 +19985,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 	});
 
+	K = highest_multiplicity;
+
 	WidgetInstanceIdentifiers const & variables_selected =
 		(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
 
