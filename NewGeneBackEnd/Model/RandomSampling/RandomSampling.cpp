@@ -703,7 +703,10 @@ void AllWeightings::PopulateAllLeafCombinations(int const K, Branch const & bran
 	{
 
 		AddPositionToRemaining(position, branch);
-		IncrementPosition(K, position, leaves);
+		bool succeeded = IncrementPosition(K, position, leaves);
+
+		BOOST_ASSERT_MSG(succeeded, "Invalid logic in position incrementer in sampler!");
+
 		++total_added;
 
 	}	
@@ -726,11 +729,20 @@ void AllWeightings::AddPositionToRemaining(std::vector<int> const & position, Br
 
 }
 
-void AllWeightings::IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves)
+bool AllWeightings::IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves)
 {
 
 	int sub_k_being_managed = K;
-	IncrementPositionManageSubK(K, sub_k_being_managed, position, leaves);
+	
+	int new_leaf = IncrementPositionManageSubK(K, sub_k_being_managed, position, leaves);
+
+	if (new_leaf == -1)
+	{
+		// No more positions!
+		return false;
+	}
+
+	return true;
 
 }
 
@@ -752,7 +764,22 @@ int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std
 	int & index_being_managed_value = position[subK];
 	if (index_being_managed_value == max_leaf_for_subk)
 	{
-
+		if (subK == 0)
+		{
+			// All done!
+			return -1;
+		}
+		int previous_k_new_leaf = IncrementPositionManageSubK(K, subK, position, leaves);
+		if (previous_k_new_leaf == -1)
+		{
+			// All done, as reported by nested call!
+			return -1;
+		}
+		index_being_managed_value = previous_k_new_leaf; // we will point to the leaf one higher than the leaf to which the previous index points
 	}
+
+	++index_being_managed_value;
+
+	return index_being_managed_value;
 
 }

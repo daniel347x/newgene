@@ -426,7 +426,7 @@ class AllWeightings
 	private:
 
 		void AddPositionToRemaining(std::vector<int> const & position, Branch const & branch);
-		void IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves);
+		bool IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves);
 		int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Leaves const & leaves);
 
 };
