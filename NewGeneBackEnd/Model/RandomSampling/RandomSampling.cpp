@@ -465,16 +465,16 @@ void AllWeightings::CalculateWeightings(int const K)
 				// The number of K-ad combinations for this branch is easily calculated.
 				// It is just the binomial coefficient (assuming K <= N)
 
-				boost::multiprecision::cpp_int number_branch_combinations = 1; // covers K > numberLeaves condition
+				branch.number_branch_combinations = 1; // covers K > numberLeaves condition
 				if (K <= numberLeaves)
 				{
-					number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(numberLeaves, K);
+					branch.number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(numberLeaves, K);
 				}
 
 				// clear the hit cache
 				branch.hit.clear();
 
-				branchWeighting.weighting = timeSlice.Width() * number_branch_combinations;
+				branchWeighting.weighting = timeSlice.Width() * branch.number_branch_combinations;
 				branchWeighting.weighting_range_start = currentWeighting;
 				branchWeighting.weighting_range_end = branchWeighting.weighting_range_start + branchWeighting.weighting - 1;
 				currentWeighting += branchWeighting.weighting;
@@ -610,9 +610,7 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 		return Leaves();
 	}
 
-	boost::multiprecision::cpp_int number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K);;
-
-	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hit.size()) < number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
+	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hit.size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
 
 	std::set<int> test_leaf_combination;
 
@@ -622,7 +620,7 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 
 		test_leaf_combination.clear();
 
-		if (boost::multiprecision::cpp_int(branch.hit.size()) > number_branch_combinations / 2)
+		if (boost::multiprecision::cpp_int(branch.hit.size()) > branch.number_branch_combinations / 2)
 		{
 			// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
 			// and then pick randomly from that
@@ -696,7 +694,6 @@ void AllWeightings::PopulateAllLeafCombinations(int const K, Branch const & bran
 {
 
 	boost::multiprecision::cpp_int total_added = 0;
-	boost::multiprecision::cpp_int number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K);
 
 	branch.remaining.clear();
 	std::vector<int> position;
@@ -705,13 +702,13 @@ void AllWeightings::PopulateAllLeafCombinations(int const K, Branch const & bran
 		position.push_back(n);
 	}
 
-	while (total_added < number_branch_combinations)
+	while (total_added < branch.number_branch_combinations)
 	{
 
 		AddPositionToRemaining(position, branch);
 		bool succeeded = IncrementPosition(K, position, leaves);
 
-		BOOST_ASSERT_MSG(succeeded || (total_added + 1) == number_branch_combinations, "Invalid logic in position incrementer in sampler!");
+		BOOST_ASSERT_MSG(succeeded || (total_added + 1) == branch.number_branch_combinations, "Invalid logic in position incrementer in sampler!");
 
 		++total_added;
 
