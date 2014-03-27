@@ -466,7 +466,7 @@ void AllWeightings::CalculateWeightings(int const K)
 				// The number of K-ad combinations for this branch is easily calculated.
 				// It is just the binomial coefficient (assuming K <= N)
 
-				branch.number_branch_combinations = 1; // covers K > numberLeaves condition
+				branch.number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
 				if (K <= numberLeaves)
 				{
 					//branch.number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(numberLeaves, K);
@@ -587,10 +587,10 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 
 	branch = new_branch;
 
-	leaves = branchesAndLeavesPtr->second;
+	Leaves const & tmp_leaves = branchesAndLeavesPtr->second;
 
 	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData;
-	Leaves KAd = GetLeafCombination(K, branch, leaves);
+	leaves = GetLeafCombination(K, branch, tmp_leaves);
 
 	++random_number_iterator;
 	return true;

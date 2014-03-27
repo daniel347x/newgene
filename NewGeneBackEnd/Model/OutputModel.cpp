@@ -2690,9 +2690,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	{
 		std::vector<std::string> errorMessages;
 		std::int64_t const samples = 1000;
+		int K = 0;
 		AllWeightings allWeightings;
 		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings, errorMessages);
-		int K = 0;
 		SqlAndColumnSet random_sampling_schema = RandomSamplingBuildSchema(primary_variable_group_raw_data_columns, K);
 		allWeightings.CalculateWeightings(K);
 		allWeightings.PrepareRandomNumbers(samples);
@@ -19741,8 +19741,8 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 				// Construct Leaf
 				DMUInstanceDataVector dmus_leaf;
 				bool bad = false;
-				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cbegin(),
-							  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(),
+					sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 				{
 
 					if (bad)
@@ -19792,8 +19792,8 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 				// Construct Branch
 				DMUInstanceDataVector dmus_branch;
-				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cbegin(),
-							  sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_greater_than_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
+				std::for_each(sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cbegin(),
+					sorting_row_of_data.indices_of_primary_key_columns_with_multiplicity_equal_to_1.cend(), [&](std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> const & binding_info)
 				{
 
 					if (bad)
@@ -20274,13 +20274,16 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K,
 		std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
 		{
 			
-			secondary_key_row_indices.push_back(leaf.index_into_raw_data);
-
-			DMUInstanceDataVector const & leaf_primary_keys = leaf.primary_keys;
-			std::for_each(leaf_primary_keys.cbegin(), leaf_primary_keys.cend(), [&](DMUInstanceData const & leaf_primary_key)
+			if (!leaf.primary_keys.empty())
 			{
-				BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, leaf_primary_key, bindIndex++);
-			});
+				secondary_key_row_indices.push_back(leaf.index_into_raw_data);
+
+				DMUInstanceDataVector const & leaf_primary_keys = leaf.primary_keys;
+				std::for_each(leaf_primary_keys.cbegin(), leaf_primary_keys.cend(), [&](DMUInstanceData const & leaf_primary_key)
+				{
+					BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, leaf_primary_key, bindIndex++);
+				});
+			}
 
 		});
 
