@@ -110,13 +110,17 @@ class Weighting
 			: weighting{ 0 }
 			, weighting_range_start{ 0 }
 			, weighting_range_end{ 0 }
-		{}
+		{
+			InternalSetWeighting();
+		}
 
 		Weighting(Weighting const & rhs)
 			: weighting{ rhs.weighting }
 			, weighting_range_start{ rhs.weighting_range_start }
 			, weighting_range_end{ rhs.weighting_range_end }
-		{}
+		{
+			InternalSetWeighting();
+		}
 
 		Weighting & operator=(Weighting const & rhs)
 		{
@@ -126,7 +130,7 @@ class Weighting
 			}
 			weighting = rhs.weighting;
 			weighting_range_start = rhs.weighting_range_start;
-			weighting_range_end = rhs.weighting_range_end;
+			InternalSetWeighting();
 			return *this;
 		}
 
@@ -134,18 +138,20 @@ class Weighting
 		{
 			weighting = weighting_;
 			weighting_range_end = weighting_range_start + weighting - 1;
+			InternalSetWeighting();
 		}
 
 		void setWeightingRangeStart(boost::multiprecision::cpp_int const & weighting_range_start_)
 		{
 			weighting_range_start = weighting_range_start_;
 			weighting_range_end = weighting_range_start + weighting - 1;
+			InternalSetWeighting();
 		}
 
 		void addWeighting(boost::multiprecision::cpp_int const & weighting_to_add)
 		{
 			weighting += weighting_to_add;
-			weighting_range_end = weighting_range_start + weighting - 1;
+			InternalSetWeighting();
 		}
 
 		boost::multiprecision::cpp_int getWeighting() const
@@ -168,11 +174,21 @@ private:
 		boost::multiprecision::cpp_int weighting;
 		boost::multiprecision::cpp_int weighting_range_start;
 		boost::multiprecision::cpp_int weighting_range_end;
-#	ifdef _DEBUG
+#		ifdef _DEBUG
 		std::string weighting_string;
 		std::string weighting_range_start_string;
 		std::string weighting_range_end_string;
-#	endif
+#		endif
+
+		void InternalSetWeighting()
+		{
+			weighting_range_end = weighting_range_start + weighting - 1;
+#			ifdef _DEBUG
+			weighting_string = weighting.str();
+			weighting_range_start_string = weighting_range_start.str();
+			weighting_range_end_string = weighting_range_end.str();
+#			endif
+		}
 
 };
 
