@@ -685,9 +685,9 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 		if (current_index == current_index_to_use)
 		{
 			leaf_combination.insert(leaf);
+			++current_index_to_use_ptr;
 		}
 		++current_index;
-		++current_index_to_use_ptr;
 	});
 
 	BOOST_ASSERT_MSG(leaf_combination.size() == K, "Number of leaves generated does not equal K.");
