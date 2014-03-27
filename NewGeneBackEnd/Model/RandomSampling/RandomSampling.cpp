@@ -441,7 +441,7 @@ void AllWeightings::CalculateWeightings(int const K)
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 
-		variableGroupTimeSliceDataWeighting.weighting_range_start = currentWeighting;
+		variableGroupTimeSliceDataWeighting.setWeightingRangeStart(currentWeighting);
 
 		// We know there's only one variable group currently supported, but include the loop as a reminder that
 		// we may support multiple variable groups in the random sampler in the future.
@@ -450,7 +450,7 @@ void AllWeightings::CalculateWeightings(int const K)
 			
 			BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
 			Weighting & variableGroupBranchesAndLeavesWeighting = variableGroupBranchesAndLeaves.weighting;
-			variableGroupBranchesAndLeavesWeighting.weighting_range_start = currentWeighting;
+			variableGroupBranchesAndLeavesWeighting.setWeightingRangeStart(currentWeighting);
 
 			std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
 			{
@@ -476,31 +476,21 @@ void AllWeightings::CalculateWeightings(int const K)
 				// clear the hit cache
 				branch.hit.clear();
 
-				branchWeighting.weighting = timeSlice.Width() * branch.number_branch_combinations;
-				branchWeighting.weighting_range_start = currentWeighting;
-				branchWeighting.weighting_range_end = branchWeighting.weighting_range_start + branchWeighting.weighting - 1;
-				currentWeighting += branchWeighting.weighting;
+				branchWeighting.setWeighting(timeSlice.Width() * branch.number_branch_combinations);
+				branchWeighting.setWeightingRangeStart(currentWeighting);
+				currentWeighting += branchWeighting.getWeighting();
 
-				variableGroupBranchesAndLeavesWeighting.weighting += branchWeighting.weighting;
-				variableGroupBranchesAndLeavesWeighting.weighting_range_end += branchWeighting.weighting;
+				variableGroupBranchesAndLeavesWeighting.addWeighting(branchWeighting.getWeighting());
 
 			});
 
-			variableGroupBranchesAndLeavesWeighting.weighting_range_end -= 1;
-
-			variableGroupTimeSliceDataWeighting.weighting_range_end += variableGroupBranchesAndLeavesWeighting.weighting;
-			variableGroupTimeSliceDataWeighting.weighting += variableGroupBranchesAndLeavesWeighting.weighting;
+			variableGroupTimeSliceDataWeighting.addWeighting(variableGroupBranchesAndLeavesWeighting.getWeighting());
 
 		});
 
-		variableGroupTimeSliceDataWeighting.weighting_range_end -= 1;
-
-		weighting.weighting_range_end += variableGroupTimeSliceDataWeighting.weighting;
-		weighting.weighting += variableGroupTimeSliceDataWeighting.weighting;
+		weighting.addWeighting(variableGroupTimeSliceDataWeighting.getWeighting());
 
 	});
-
-	weighting.weighting_range_end -= 1;
 
 }
 
@@ -520,7 +510,7 @@ void AllWeightings::PrepareRandomNumbers(int how_many)
 
 	random_numbers.clear();
 	boost::random::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
-	boost::random::uniform_int_distribution<boost::multiprecision::cpp_int> distribution(weighting.weighting_range_start, weighting.weighting_range_end);
+	boost::random::uniform_int_distribution<boost::multiprecision::cpp_int> distribution(weighting.getWeightingRangeStart(), weighting.getWeightingRangeEnd());
 	while (random_numbers.size() < static_cast<size_t>(how_many))
 	{
 		random_numbers.insert(distribution(engine));
@@ -539,17 +529,19 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 
 	boost::multiprecision::cpp_int const & random_number = *random_number_iterator;
 
+#	ifdef _DEBUG
 	std::string val1 = random_number.str();
-	std::string val2 = weighting.weighting.str();
-	std::string val3 = weighting.weighting_range_start.str();
-	std::string val4 = weighting.weighting_range_end.str();
+	std::string val2 = weighting.getWeighting().str();
+	std::string val3 = weighting.getWeightingRangeStart().str();
+	std::string val4 = weighting.getWeightingRangeEnd().str();
+#	endif
 
-	BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.weighting && weighting.weighting_range_start == 0 && weighting.weighting_range_end == weighting.weighting - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
+	BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
 
 	TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](std::pair<TimeSlice, VariableGroupTimeSliceData> const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
 	{
 		VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
-		if (testVariableGroupTimeSliceData.weighting.weighting_range_end < test_random_number)
+		if (testVariableGroupTimeSliceData.weighting.getWeightingRangeEnd() < test_random_number)
 		{
 			return true;
 		}
@@ -579,7 +571,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 	BranchesAndLeaves::const_iterator branchesAndLeavesPtr = std::lower_bound(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), random_number, [&](std::pair<Branch, Leaves> const & testBranchAndLeaves, boost::multiprecision::cpp_int const & test_random_number)
 	{
 		Branch const & testBranch = testBranchAndLeaves.first;
-		if (testBranch.weighting.weighting_range_end < test_random_number)
+		if (testBranch.weighting.getWeightingRangeEnd() < test_random_number)
 		{
 			return true;
 		}
@@ -597,12 +589,14 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 
 	Leaves const & tmp_leaves = branchesAndLeavesPtr->second;
 
+#	ifdef _DEBUG
 	std::string val5 = random_number.str();
-	std::string val6 = boost::multiprecision::cpp_int((random_number - branch.weighting.weighting_range_start) / boost::multiprecision::cpp_int(timeSlice.Width())).str();
+	std::string val6 = boost::multiprecision::cpp_int((random_number - branch.weighting.getWeightingRangeStart()) / boost::multiprecision::cpp_int(timeSlice.Width())).str();
+#	endif
 
 	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
 	//BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || (random_number - branch.weighting.weighting_range_start) / boost::multiprecision::cpp_int(timeSlice.Width()) >= boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(tmp_leaves.size(), K), "Random index is outside [0. binomial coefficient)");
-	BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || boost::multiprecision::cpp_int((random_number - branch.weighting.weighting_range_start) / boost::multiprecision::cpp_int(timeSlice.Width())) >= BinomialCoefficient(tmp_leaves.size(), K), "Random index is outside [0. binomial coefficient)");
+	BOOST_ASSERT_MSG((random_number - branch.weighting.getWeightingRangeStart()) < 0 || boost::multiprecision::cpp_int((random_number - branch.weighting.getWeightingRangeStart()) / boost::multiprecision::cpp_int(timeSlice.Width())) >= BinomialCoefficient(tmp_leaves.size(), K), "Random index is outside [0. binomial coefficient)");
 
 	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData;
 	leaves = GetLeafCombination(K, branch, tmp_leaves);

@@ -130,9 +130,49 @@ class Weighting
 			return *this;
 		}
 
+		void setWeighting(boost::multiprecision::cpp_int const & weighting_)
+		{
+			weighting = weighting_;
+			weighting_range_end = weighting_range_start + weighting - 1;
+		}
+
+		void setWeightingRangeStart(boost::multiprecision::cpp_int const & weighting_range_start_)
+		{
+			weighting_range_start = weighting_range_start_;
+			weighting_range_end = weighting_range_start + weighting - 1;
+		}
+
+		void addWeighting(boost::multiprecision::cpp_int const & weighting_to_add)
+		{
+			weighting += weighting_to_add;
+			weighting_range_end = weighting_range_start + weighting - 1;
+		}
+
+		boost::multiprecision::cpp_int getWeighting() const
+		{
+			return weighting;
+		}
+
+		boost::multiprecision::cpp_int getWeightingRangeStart() const
+		{
+			return weighting_range_start;
+		}
+
+		boost::multiprecision::cpp_int getWeightingRangeEnd() const
+		{
+			return weighting_range_end;
+		}
+
+private:
+	
 		boost::multiprecision::cpp_int weighting;
 		boost::multiprecision::cpp_int weighting_range_start;
 		boost::multiprecision::cpp_int weighting_range_end;
+#	ifdef _DEBUG
+		std::string weighting_string;
+		std::string weighting_range_start_string;
+		std::string weighting_range_end_string;
+#	endif
 
 };
 
