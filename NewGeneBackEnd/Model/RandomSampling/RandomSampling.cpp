@@ -3,6 +3,7 @@
 #ifndef Q_MOC_RUN
 #	include <boost/scope_exit.hpp>
 #	include <boost/math/special_functions/binomial.hpp>
+#	include <boost/multiprecision/random.hpp>
 #endif
 
 AllWeightings::AllWeightings()
@@ -507,6 +508,14 @@ void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch co
 
 void AllWeightings::PrepareRandomNumbers(int how_many)
 {
+
+	random_numbers.clear();
+	boost::random::mt19937 mt(std::time(0));
+	boost::random::uniform_int_distribution<boost::multiprecision::cpp_int> generator(weighting.weighting_range_start, weighting.weighting_range_end);
+	while (random_numbers.size < how_many)
+	{
+		random_numbers.insert(generator(mt));
+	}
 
 }
 
