@@ -4,6 +4,7 @@
 #	include <boost/scope_exit.hpp>
 #	include <boost/math/special_functions/binomial.hpp>
 #	include <boost/multiprecision/random.hpp>
+#	include <boost/multiprecision/cpp_dec_float.hpp>
 #	include <boost/assert.hpp>
 #endif
 #include <random>
@@ -468,7 +469,8 @@ void AllWeightings::CalculateWeightings(int const K)
 				branch.number_branch_combinations = 1; // covers K > numberLeaves condition
 				if (K <= numberLeaves)
 				{
-					branch.number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(numberLeaves, K);
+					//branch.number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(numberLeaves, K);
+					branch.number_branch_combinations = BinomialCoefficient(numberLeaves, K);
 				}
 
 				// clear the hit cache
@@ -517,9 +519,9 @@ void AllWeightings::PrepareRandomNumbers(int how_many)
 {
 
 	random_numbers.clear();
-	boost::random::mt19937 engine(std::time(0));
+	boost::random::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
 	boost::random::uniform_int_distribution<boost::multiprecision::cpp_int> distribution(weighting.weighting_range_start, weighting.weighting_range_end);
-	while (random_numbers.size < how_many)
+	while (random_numbers.size() < static_cast<size_t>(how_many))
 	{
 		random_numbers.insert(distribution(engine));
 	}
@@ -573,7 +575,8 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 	});
 
 	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
-	BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || (random_number - branch.weighting.weighting_range_start) / timeSlice.Width() >= boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K), "Random index is outside [0. binomial coefficient)");
+	//BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || (random_number - branch.weighting.weighting_range_start) / boost::multiprecision::cpp_int(timeSlice.Width()) >= boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K), "Random index is outside [0. binomial coefficient)");
+	BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || (random_number - branch.weighting.weighting_range_start) / boost::multiprecision::cpp_int(timeSlice.Width()) >= BinomialCoefficient(leaves.size(), K), "Random index is outside [0. binomial coefficient)");
 
 	const Branch & new_branch = branchesAndLeavesPtr->first;
 
@@ -598,9 +601,9 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 {
 
 	static int saved_range = -1;
-	static std::mt19937 engine(std::time(0));
+	static std::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
 
-	if (K >= leaves.size())
+	if (static_cast<size_t>(K) >= leaves.size())
 	{
 		return leaves;
 	}
@@ -644,13 +647,13 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 		{
 
 			std::vector<int> remaining_leaves;
-			for (int n = 0; n < leaves.size(); ++n)
+			for (size_t n = 0; n < leaves.size(); ++n)
 			{
 				remaining_leaves.push_back(n);
 			}
 
 			// Fill it up, with no duplicates
-			while (test_leaf_combination.size() < K)
+			while (test_leaf_combination.size() < static_cast<size_t>(K))
 			{
 				std::uniform_int_distribution<size_t> distribution(0, remaining_leaves.size() - 1);
 				size_t index_of_index = distribution(engine);
@@ -784,5 +787,27 @@ int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std
 	++index_being_managed_value;
 
 	return index_being_managed_value;
+
+}
+
+boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K)
+{
+
+	// Goddamn boost::multiprecision under no circumstances will allow an integer calculation of the binomial coefficient
+
+	boost::multiprecision::cpp_int numerator{ 1 };
+	boost::multiprecision::cpp_int denominator{ 1 };
+
+	for (int n = N; n > N - K; --n)
+	{
+		numerator *= boost::multiprecision::cpp_int(n);
+	}
+
+	for (int n = 1; n <= K; ++n)
+	{
+		denominator *= boost::multiprecision::cpp_int(n);
+	}
+
+	return numerator / denominator;
 
 }

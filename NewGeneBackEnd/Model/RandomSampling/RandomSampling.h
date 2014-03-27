@@ -441,6 +441,8 @@ class AllWeightings
 		bool IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves);
 		int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Leaves const & leaves);
 
+		boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K);
+
 };
 
 #endif
