@@ -2698,6 +2698,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		SqlAndColumnSet random_sampling_schema = RandomSamplingBuildSchema(primary_variable_group_raw_data_columns);
 		RandomSamplingCreateOutputTable(random_sampling_schema);
 		RandomSamplingWriteToOutputTable(K, random_sampling_schema.second, allWeightings, errorMessages);
+		ClearTables(sql_and_column_sets);
+		sql_and_column_sets.push_back(random_sampling_schema);
+		if (failed || CheckCancelled())
+		{
+			return SqlAndColumnSet();
+		}
 	}
 	else
 	{
@@ -20194,7 +20200,6 @@ void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable(SqlAndColumnS
 
 	sql_strings.push_back(SQLExecutor(this, db, sql_create_empty_table));
 	ExecuteSQL(random_sampling_schema);
-	ClearTable(random_sampling_schema);
 
 	if (failed)
 	{
