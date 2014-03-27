@@ -2,6 +2,7 @@
 
 #ifndef Q_MOC_RUN
 #	include <boost/scope_exit.hpp>
+#	include <boost/math/special_functions/binomial.hpp>
 #endif
 
 AllWeightings::AllWeightings()
@@ -415,8 +416,81 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 }
 
-void AllWeightings::CalculateWeightings(int const k)
+void AllWeightings::CalculateWeightings(int const K)
 {
+
+	boost::multiprecision::cpp_int currentWeighting = 0;
+
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice, VariableGroupTimeSliceData> & timeSliceEntry)
+	{
+
+		TimeSlice & timeSlice = timeSliceEntry.first;
+		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second;
+		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+		Weighting & variableGroupTimeSliceDataWeighting = variableGroupTimeSliceData.weighting;
+
+		if (variableGroupBranchesAndLeavesVector.size() > 1)
+		{
+			boost::format msg("Only one top-level variable group is currently supported for the random / full sampler.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+		variableGroupTimeSliceDataWeighting.weighting_range_start = currentWeighting;
+
+		// We know there's only one variable group currently supported, but include the loop as a reminder that
+		// we may support multiple variable groups in the random sampler in the future.
+		std::for_each(variableGroupBranchesAndLeavesVector.begin(), variableGroupBranchesAndLeavesVector.end(), [&](VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves)
+		{
+			
+			BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+			Weighting & variableGroupBranchesAndLeavesWeighting = variableGroupBranchesAndLeaves.weighting;
+			variableGroupBranchesAndLeavesWeighting.weighting_range_start = currentWeighting;
+
+			std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch, Leaves> & branchAndLeaves)
+			{
+
+				Branch & branch = branchAndLeaves.first;
+				Leaves & leaves = branchAndLeaves.second;
+
+				Weighting & branchWeighting = branch.weighting;
+
+				// Count the leaves
+				int numberLeaves = static_cast<int>(leaves.size());
+
+				// The number of K-ad combinations for this branch is easily calculated.
+				// It is just the binomial coefficient (assuming K <= N)
+
+				boost::multiprecision::cpp_int number_branch_combinations = 1; // covers K > numberLeaves condition
+				if (K <= numberLeaves)
+				{
+					number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(numberLeaves, K);
+				}
+
+				branchWeighting.weighting = timeSlice.Width() * number_branch_combinations;
+				branchWeighting.weighting_range_start = currentWeighting;
+				branchWeighting.weighting_range_end = branchWeighting.weighting_range_start + branchWeighting.weighting - 1;
+				currentWeighting += branchWeighting.weighting;
+
+				variableGroupBranchesAndLeavesWeighting.weighting += branchWeighting.weighting;
+				variableGroupBranchesAndLeavesWeighting.weighting_range_end += branchWeighting.weighting;
+
+			});
+
+			variableGroupBranchesAndLeavesWeighting.weighting_range_end -= 1;
+
+			variableGroupTimeSliceDataWeighting.weighting_range_end += variableGroupBranchesAndLeavesWeighting.weighting;
+			variableGroupTimeSliceDataWeighting.weighting += variableGroupBranchesAndLeavesWeighting.weighting;
+
+		});
+
+		variableGroupTimeSliceDataWeighting.weighting_range_end -= 1;
+
+		weighting.weighting_range_end += variableGroupTimeSliceDataWeighting.weighting;
+		weighting.weighting += variableGroupTimeSliceDataWeighting.weighting;
+
+	});
+
+	weighting.weighting_range_end -= 1;
 
 }
 
@@ -429,4 +503,14 @@ void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch co
 	newBranchesAndLeaves[branch].emplace(newTimeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
 	variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
 	timeSlices[newTimeSliceLeaf.first] = variableGroupTimeSliceData;
+}
+
+void AllWeightings::PrepareRandomNumbers(int how_many)
+{
+
+}
+
+bool AllWeightings::RetrieveNextBranchAndLeaves(Branch & branch, Leaves & leaves, TimeSlice & time_slice)
+{
+
 }

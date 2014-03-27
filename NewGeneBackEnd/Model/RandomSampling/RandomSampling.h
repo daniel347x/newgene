@@ -41,6 +41,11 @@ class TimeSlice
 			, time_end  { rhs.time_end }
 		{}
 
+		std::int64_t Width() const
+		{
+			return time_end - time_start;
+		}
+
 		TimeSlice & operator=(TimeSlice const & rhs)
 		{
 			if (&rhs == this)
@@ -376,7 +381,7 @@ class AllWeightings
 		sqlite3_stmt * insert_random_sample_stmt;
 
 		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number);
-		void CalculateWeightings(int const k);
+		void CalculateWeightings(int const K);
 		void PrepareRandomNumbers(int how_many);
 		bool RetrieveNextBranchAndLeaves(Branch & branch, Leaves & leaves, TimeSlice & time_slice);
 
