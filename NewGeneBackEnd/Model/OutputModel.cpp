@@ -20338,7 +20338,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K,
 void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns)
 {
 
-	if (insert_random_sample_stmt != nullptr)
+	if (insert_random_sample_stmt == nullptr)
 	{
 		std::string insert_random_sample_string;
 
