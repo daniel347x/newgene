@@ -528,7 +528,24 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(Branch & branch, Leaves & leaves
 		return false;
 	}
 
-	boost::multiprecision::cpp_int const & random_number = *random_number_iterator;
+	boost::multiprecision::cpp_int & random_number = *random_number_iterator;
+
+	TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](std::pair<TimeSlice, VariableGroupTimeSliceData> const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
+	{
+		VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
+		if (testVariableGroupTimeSliceData.weighting.weighting_range_end < test_random_number)
+		{
+			return true;
+		}
+		return false;
+	});
+
+	TimeSlice const & timeSlice = timeSlicePtr->first;
+	VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second;
+	random_number -= variableGroupTimeSliceData.weighting.weighting_range_start;
+	random_number /= timeSlice.Width(); // truncation
+
+	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData;
 
 	++random_number_iterator;
 	return true;
