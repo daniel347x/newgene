@@ -8,6 +8,7 @@
 #endif
 #include <random>
 #include <functional>
+#include <list>
 
 AllWeightings::AllWeightings()
 : insert_random_sample_stmt(nullptr)
@@ -597,8 +598,6 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 
 	static int saved_range = -1;
 	static std::mt19937 engine(std::time(0));
-	static std::uniform_int_distribution<int> distribution(0, 0);
-	static std::function<int ()> rng;
 
 	if (K >= leaves.size())
 	{
@@ -610,13 +609,9 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 		return Leaves();
 	}
 
-	if (saved_range != leaves.size())
-	{
-		saved_range = leaves.size();
-		std::uniform_int_distribution<int> tmp_distribution(0, saved_range - 1);
-		distribution.param(tmp_distribution.param());
-		rng = std::bind(distribution, engine);
-	}
+	boost::multiprecision::cpp_int number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K);;
+
+	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hit.size()) < number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
 
 	std::set<int> test_leaf_combination;
 
@@ -626,10 +621,32 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 
 		test_leaf_combination.clear();
 
-		// Fill it up, with no duplicates
-		while (test_leaf_combination.size() < K)
+		if (branch.hit.size() > number_branch_combinations / 2)
 		{
-			test_leaf_combination.insert(rng());
+			// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
+			// and then pick randomly from that
+		}
+		else
+		{
+
+			std::list<int> remaining_leaves;
+			for (int n = 0; n < leaves.size(); ++n)
+			{
+				remaining_leaves.push_back(n);
+			}
+
+			// Fill it up, with no duplicates
+			while (test_leaf_combination.size() < K)
+			{
+				std::uniform_int_distribution<int> distribution(0, remaining_leaves.size() - 1);
+				int index_of_index = distribution(engine);
+				std::list<int>::const_iterator listPtr = remaining_leaves.cbegin();
+				for (int x = 0; x < index_of_index; ++x) ++listPtr;
+				int index_of_leaf = *listPtr;
+				remaining_leaves.erase(listPtr);
+				test_leaf_combination.insert(index_of_leaf);
+			}
+
 		}
 
 	}
