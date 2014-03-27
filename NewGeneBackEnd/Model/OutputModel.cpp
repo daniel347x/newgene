@@ -20245,8 +20245,6 @@ void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable(SqlAndColumnS
 void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K, ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
 {
 
-	Executor executor(model->getDb());
-
 	int const    minimum_desired_rows_per_transaction = 1024 * 16;
 	std::int64_t current_rows_in_error = 0;
 	std::int64_t current_rows_stepped = 0;
