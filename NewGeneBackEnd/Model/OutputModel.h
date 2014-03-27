@@ -701,7 +701,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				// Random sampling
 				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
-				SqlAndColumnSet RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_x1_columns);
+				SqlAndColumnSet RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_x1_columns, int & K);
 				void RandomSamplingCreateOutputTable(SqlAndColumnSet & random_sampling_schema);
 				void RandomSamplingWriteToOutputTable(int const K, ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
 				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);
