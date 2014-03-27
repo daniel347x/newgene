@@ -427,10 +427,10 @@ void AllWeightings::CalculateWeightings(int const K)
 
 	boost::multiprecision::cpp_int currentWeighting = 0;
 
-	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice, VariableGroupTimeSliceData> & timeSliceEntry)
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceEntry)
 	{
 
-		TimeSlice & timeSlice = timeSliceEntry.first;
+		TimeSlice const & timeSlice = timeSliceEntry.first;
 		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second;
 		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 		Weighting & variableGroupTimeSliceDataWeighting = variableGroupTimeSliceData.weighting;
@@ -452,10 +452,10 @@ void AllWeightings::CalculateWeightings(int const K)
 			Weighting & variableGroupBranchesAndLeavesWeighting = variableGroupBranchesAndLeaves.weighting;
 			variableGroupBranchesAndLeavesWeighting.weighting_range_start = currentWeighting;
 
-			std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch, Leaves> & branchAndLeaves)
+			std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
 			{
 
-				Branch & branch = branchAndLeaves.first;
+				Branch const & branch = branchAndLeaves.first;
 				Leaves & leaves = branchAndLeaves.second;
 
 				Weighting & branchWeighting = branch.weighting;

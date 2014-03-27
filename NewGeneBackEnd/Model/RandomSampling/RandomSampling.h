@@ -326,11 +326,11 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			number_branch_combinations = rhs.number_branch_combinations;
 		}
 
-		Weighting weighting; // Weighting for this branch: This is the lowest-level, calculated value
+		mutable Weighting weighting; // Weighting for this branch: This is the lowest-level, calculated value
 
 		mutable std::set<std::set<int>> hit; // cache of leaf combinations already hit
 		mutable std::vector<std::set<int>> remaining;
-		boost::multiprecision::cpp_int number_branch_combinations;
+		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
 };
 
