@@ -19900,7 +19900,19 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 					Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 					Branch branch(dmus_branch);
 					allWeightings.dataCache[sorting_row_of_data.rowid] = secondary_data;
-					allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), primary_group_number);
+					try
+					{
+						allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), primary_group_number);
+					}
+					catch (boost::exception & e)
+					{
+						bad = true;
+						if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
+						{
+							boost::format msg("Error: %1%");
+							errorMessages.push_back(error_desc->c_str());
+						}
+					}
 				}
 
 				++current_rows_stepped;

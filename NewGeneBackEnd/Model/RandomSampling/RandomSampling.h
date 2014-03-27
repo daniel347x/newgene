@@ -221,7 +221,7 @@ class PrimaryKeysGrouping
 			}
 
 			template <typename T>
-			bool operator()(T const & lhs, T const & rhs)
+			bool operator()(T const & lhs, T const & rhs) const
 			{
 				return lhs < rhs;
 			}
