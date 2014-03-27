@@ -18,10 +18,22 @@ pragma foreign_keys = off;
 /* Begin Transaction */
 begin transaction;
 
-/* Database [DefaultOutputModel.newgene.out] */
+/* Database [DefaultOutputProjectSettings.newgene.out] */
 pragma auto_vacuum=0;
 pragma encoding='UTF-8';
 pragma page_size=1024;
+
+/* Drop table [main].[GENERAL_OPTIONS] */
+drop table if exists [main].[GENERAL_OPTIONS];
+
+/* Table structure [main].[GENERAL_OPTIONS] */
+CREATE TABLE [main].[GENERAL_OPTIONS] (
+  [DO_RANDOM_SAMPLING] INT NOT NULL ON CONFLICT FAIL DEFAULT 0, 
+  [RANDOM_SAMPLING_COUNT_PER_STAGE] INT NOT NULL DEFAULT 0);
+
+/* Data [main].[GENERAL_OPTIONS] */
+insert into [main].[GENERAL_OPTIONS] values(0, 0);
+
 
 /* Drop table [main].[KAD_COUNT] */
 drop table if exists [main].[KAD_COUNT];
@@ -40,10 +52,6 @@ drop table if exists [main].[TIMERANGE_SELECTED];
 CREATE TABLE [main].[TIMERANGE_SELECTED] (
   [TIMERANGE_START] INT64, 
   [TIMERANGE_END] INT64);
-
-/* Data [main].[TIMERANGE_SELECTED] */
-insert into [main].[TIMERANGE_SELECTED] values(-2208988799912, -1577923199024);
-
 
 /* Drop table [main].[VG_SET_MEMBERS_SELECTED] */
 drop table if exists [main].[VG_SET_MEMBERS_SELECTED];
