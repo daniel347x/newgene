@@ -20199,6 +20199,7 @@ void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable(SqlAndColumnS
 	std::string sql_create_empty_table;
 	sql_create_empty_table += "CREATE TABLE \"";
 	sql_create_empty_table += random_sampling_columns.view_name;
+	sql_create_empty_table += "\"";
 	sql_create_empty_table += " (";
 
 	bool first = true;
