@@ -415,6 +415,7 @@ class AllWeightings
 		}
 
 		std::set<boost::multiprecision::cpp_int> random_numbers;
+		std::set<boost::multiprecision::cpp_int>::const_iterator random_number_iterator;
 
 };
 

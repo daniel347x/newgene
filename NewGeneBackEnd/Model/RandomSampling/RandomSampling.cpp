@@ -516,10 +516,21 @@ void AllWeightings::PrepareRandomNumbers(int how_many)
 	{
 		random_numbers.insert(generator(mt));
 	}
+	random_number_iterator = random_numbers.cbegin();
 
 }
 
 bool AllWeightings::RetrieveNextBranchAndLeaves(Branch & branch, Leaves & leaves, TimeSlice & time_slice)
 {
+	
+	if (random_number_iterator == random_numbers.cend())
+	{
+		return false;
+	}
+
+	boost::multiprecision::cpp_int const & random_number = *random_number_iterator;
+
+	++random_number_iterator;
+	return true;
 
 }
