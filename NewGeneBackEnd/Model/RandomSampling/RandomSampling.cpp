@@ -689,26 +689,70 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 void AllWeightings::PopulateAllLeafCombinations(int const K, Branch const & branch, Leaves const & leaves)
 {
 
+	boost::multiprecision::cpp_int total_added = 0;
+	boost::multiprecision::cpp_int number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(leaves.size(), K);
+
 	branch.remaining.clear();
-	std::vector<int> positions;
+	std::vector<int> position;
 	for (int n = 0; n < K; ++n)
 	{
-		positions.push_back(n);
+		position.push_back(n);
 	}
-	
-	AddPositionSetToRemaining(positions, branch);
+
+	while (total_added < number_branch_combinations)
+	{
+
+		AddPositionToRemaining(position, branch);
+		IncrementPosition(K, position, leaves);
+		++total_added;
+
+	}	
 
 }
 
-void AllWeightings::AddPositionSetToRemaining(std::vector<int> const & positions, Branch const & branch)
+void AllWeightings::AddPositionToRemaining(std::vector<int> const & position, Branch const & branch)
 {
 
 	std::set<int> new_remaining;
-	std::for_each(positions.cbegin(), positions.cend(), [&](int const position)
+	std::for_each(position.cbegin(), position.cend(), [&](int const position_index)
 	{
-		new_remaining.insert(position);
+		new_remaining.insert(position_index);
 	});
 
-	branch.remaining.insert(new_remaining);
+	if (branch.hit.count(new_remaining) == 0)
+	{
+		branch.remaining.insert(new_remaining);
+	}
+
+}
+
+void AllWeightings::IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves)
+{
+
+	int sub_k_being_managed = K;
+	IncrementPositionManageSubK(K, sub_k_being_managed, position, leaves);
+
+}
+
+int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std::vector<int> & position, Leaves const & leaves)
+{
+
+	int number_leaves = static_cast<int>(leaves.size());
+
+	int max_leaf_for_subk = number_leaves - 1 - (K - subK_); // this is the highest possible value of the leaf index that the given subK can be pointing to.
+	// i.e., if there are 10 leaves and K=3,
+	// 'positions' will have a size of three, with the 'lowest' position = {0,1,2}
+	// and the 'highest' position = {7,8,9}.
+	// If subK = K (=3), this corresponds to the final slot which has 9 as its highest allowed value (it can point at the last leaf).
+	// But if subK = K-1, the highest leaf it can point to is 8.
+	// Etc.
+
+	int const subK = subK_ - 1; // make it 0-based
+
+	int & index_being_managed_value = position[subK];
+	if (index_being_managed_value == max_leaf_for_subk)
+	{
+
+	}
 
 }
