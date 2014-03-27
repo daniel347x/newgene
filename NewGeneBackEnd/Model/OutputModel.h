@@ -1032,6 +1032,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				SqlAndColumnSets primary_group_final_results;
 				SqlAndColumnSets intermediate_merging_of_primary_groups_column_sets;
 				SqlAndColumnSets merging_of_children_column_sets;
+				SqlAndColumnSet random_sampling_schema;
 				SqlAndColumnSet primary_group_merged_results;
 				SqlAndColumnSet all_merged_results_unformatted;
 				SqlAndColumnSet child_merge_final_result;

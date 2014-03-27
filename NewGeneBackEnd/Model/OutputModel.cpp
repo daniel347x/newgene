@@ -493,6 +493,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			return;
 		}
 	}
+	else
+	{
+		primary_group_merged_results = random_sampling_schema;
+	}
 
 	// RANDOM_SAMPLING: From here forward, this stage should be identical
 	messager.AppendKadStatusText("Merging child variable groups...", this);
@@ -2693,7 +2697,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		int K = 0;
 		AllWeightings allWeightings;
 		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings, errorMessages);
-		SqlAndColumnSet random_sampling_schema = RandomSamplingBuildSchema(primary_variable_group_raw_data_columns, K);
+		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_group_raw_data_columns, K);
 		allWeightings.CalculateWeightings(K);
 		allWeightings.PrepareRandomNumbers(samples);
 		RandomSamplingCreateOutputTable(random_sampling_schema);
