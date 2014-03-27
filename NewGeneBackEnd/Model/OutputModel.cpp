@@ -2693,7 +2693,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	if (random_sampling)
 	{
 		std::vector<std::string> errorMessages;
-		std::int64_t const samples = 1000;
+		std::int64_t const samples = 10;
 		int K = 0;
 		AllWeightings allWeightings;
 		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings, errorMessages);
@@ -20304,6 +20304,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K,
 
 		});
 
+		// This is the data - dependent columns
 		std::for_each(secondary_key_row_indices.cbegin(), secondary_key_row_indices.cend(), [&](std::int64_t const secondary_key_row_index)
 		{
 
@@ -20317,6 +20318,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K,
 
 		int step_result = 0;
 
+		// Execute the insert of the row into the table
 		if ((step_result = sqlite3_step(allWeightings.insert_random_sample_stmt)) != SQLITE_DONE)
 		{
 			std::string sql_error = sqlite3_errmsg(db);
@@ -20326,6 +20328,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K,
 			++current_rows_in_error;
 		}
 
+		// Prepare statement for next row
 		sqlite3_clear_bindings(allWeightings.insert_random_sample_stmt);
 		sqlite3_reset(allWeightings.insert_random_sample_stmt);
 
@@ -20337,6 +20340,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K,
 		}
 
 	}
+
+	EndTransaction();
 
 }
 
