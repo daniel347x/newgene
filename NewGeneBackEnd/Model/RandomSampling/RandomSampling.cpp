@@ -55,7 +55,7 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 	}
 	else
 	{
-	
+
 		TimeSlices::iterator startMapSlicePtr = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &AllWeightings::is_map_entry_end_time_greater_than_new_time_slice_start_time);
 		bool start_of_new_slice_is_past_end_of_map = false;
 		if (startMapSlicePtr == existing_one_past_end_slice)
@@ -75,55 +75,35 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 			// The start of the new slice is to the left of the end of the map
 
 			TimeSlice const & startMapSlice = startMapSlicePtr->first;
-			auto firstMapSlicePtr = timeSlices.begin();
 
-			if (startMapSlicePtr == firstMapSlicePtr)
+			// The new time slice MIGHT start to the left of the map element returned by upper_bound.
+			// Or it might not - it might start IN or at the left edge of this element.
+			// In any case, upper_bound ensures that it starts PAST any previous map elements.
+
+			if (newTimeSlice.time_start < startMapSlice.time_start)
 			{
 
-				// The starting slice is the first element in the map.
-				// This is special-case logic on the left.
-				// It means that the new time slice MIGHT start to the left of the map.
-				// Or it might not - it might start IN or at the left edge of
-				// the first time slice in the map.
+				// The new time slice starts to the left of the map element returned by upper_bound.
 
-				if (newTimeSlice.time_start < startMapSlice.time_start)
+				if (newTimeSlice.time_end <= startMapSlice.time_start)
 				{
-
-					// The new time slice starts to the left of the map.
-
-					if (newTimeSlice.time_end <= startMapSlice.time_start)
-					{
-						// The entire new time slice is less than the first time slice in the map.
-						// Add the entire new time slice as a unit to the beginning of the map.
-						AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
-					}
-					else
-					{
-
-						// The new time slice starts to the left of the map,
-						// and ends inside or at the right edge of the first time slice in the map
-
-						// Slice off the left-most piece of the new time slice and add it to the beginning of the map
-						TimeSliceLeaf new_left_slice;
-						SliceOffLeft(newTimeSliceLeaf, startMapSlicePtr->first.time_start, new_left_slice);
-						AddNewTimeSlice(variable_group_number, branch, new_left_slice);
-
-						// For the remainder of the slice, proceed with normal case
-						normalCase = true;
-						mapIterator = startMapSlicePtr;
-
-					}
-
+					// The entire new time slice is less than the map element returned by upper_bound.
+					// (But past any previous map elements.)
+					// Add the entire new time slice as a unit to the map.
+					AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
 				}
 				else
 				{
 
-					// The new time slice starts at the left edge, or to the right of the left edge,
-					// of the first element in the map, but is to the left of the right edge
-					// of the first element in the map.
+					// The new time slice starts to the left of the map element returned by upper_bound,
+					// and ends inside or at the right edge of the first time slice in the map element returned by upper_bound.
 
-					// This is actually the normal case - it turns out that it doesn't matter
-					// that this was the first element in the map.
+					// Slice off the left-most piece of the new time slice and add it to the map
+					TimeSliceLeaf new_left_slice;
+					SliceOffLeft(newTimeSliceLeaf, startMapSlicePtr->first.time_start, new_left_slice);
+					AddNewTimeSlice(variable_group_number, branch, new_left_slice);
+
+					// For the remainder of the slice, proceed with normal case
 					normalCase = true;
 					mapIterator = startMapSlicePtr;
 
@@ -133,8 +113,11 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 			else
 			{
 
-				// Normal case: The new time slice starts inside
-				// (or at the left edge of) an existing time slice in the map (not the first)
+				// The new time slice starts at the left edge, or to the right of the left edge,
+				// of the map element returned by upper_bound, but the new time slice
+				// start to the left of the right edge of the map element returned by upper_bound.
+
+				// This is the normal case.
 				normalCase = true;
 				mapIterator = startMapSlicePtr;
 
