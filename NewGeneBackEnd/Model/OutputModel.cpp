@@ -595,6 +595,11 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	SqlAndColumnSet xr_table_result = x_table_result;
 	SqlAndColumnSet duplicates_removed = xr_table_result;
 
+	if (random_sampling)
+	{
+		// First, the top-level VG's that are *not* primary
+	}
+
 	// Child tables
 	int current_child_view_name_index = 1;
 	int child_set_number = 1;
