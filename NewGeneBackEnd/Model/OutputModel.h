@@ -700,6 +700,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulatePrimaryKeySequenceInfo();
 
 				size_t top_level_vg_index; // in case there are multiple top-level variable groups, which one to use as primary (the others will be treated as children)
+				int K; // the multiplicity
 
 				// Random sampling
 				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings, std::vector<std::string> & errorMessages);

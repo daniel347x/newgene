@@ -214,6 +214,8 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, random_sampling_rows_per_stage(1)
 	, random_sampling(false)
 	, random_sampling_old(false)
+	, top_level_vg_index(0)
+	, K(0)
 {
 	//debug_ordering = true;
 	//delete_tables = false;
@@ -464,6 +466,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// RANDOM_SAMPLING: The work is all done here
 	if (random_sampling)
 	{
+		K = 0;
 		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info, K);
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
@@ -2705,7 +2708,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	{
 		std::vector<std::string> errorMessages;
 		std::int64_t const samples = 10;
-		int K = 0;
 		AllWeightings allWeightings;
 		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings, errorMessages);
 		allWeightings.CalculateWeightings(K);
