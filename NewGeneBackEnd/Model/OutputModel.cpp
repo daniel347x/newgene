@@ -467,7 +467,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	if (random_sampling)
 	{
 		K = 0;
-		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info, K);
+		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info);
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
 		SqlAndColumnSet primary_group_final_result = ConstructFullOutputForSinglePrimaryGroup(primary_variable_groups_column_info[top_level_vg_index], primary_group_column_sets);
@@ -2713,7 +2713,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		allWeightings.CalculateWeightings(K);
 		allWeightings.PrepareRandomNumbers(samples);
 		RandomSamplingCreateOutputTable(random_sampling_schema);
-		RandomSamplingWriteToOutputTable(K, random_sampling_schema.second, allWeightings, errorMessages);
+		RandomSamplingWriteToOutputTable(random_sampling_schema.second, allWeightings, errorMessages);
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(random_sampling_schema);
 		if (failed || CheckCancelled())
@@ -19983,7 +19983,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, int & K)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns)
 {
 
 
@@ -20294,7 +20294,7 @@ void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable(SqlAndColumnS
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K, ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
+void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
 {
 
 	int const    minimum_desired_rows_per_transaction = 1024 * 16;
