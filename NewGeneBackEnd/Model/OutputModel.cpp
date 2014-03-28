@@ -20226,7 +20226,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = highest_multiplicity;
 	datetime_end_column.number_inner_tables_in_set = highest_multiplicity;
 	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
-	datetime_end_column.variable_group_associated_with_current_inner_table = = WidgetInstanceIdentifier();
+	datetime_end_column.variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
 	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_end_column.column_name_in_original_data_table = "";
