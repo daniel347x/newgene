@@ -19949,6 +19949,11 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_raw_data_columns, int & K)
 {
 
+
+	// **************************************************************************************** //
+	// Initialize schema
+	// **************************************************************************************** //
+
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
@@ -19980,6 +19985,13 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	});
 
 	K = highest_multiplicity;
+
+
+
+
+	// **************************************************************************************** //
+	// Loop through top-level VG's
+	// **************************************************************************************** //
 
 	WidgetInstanceIdentifiers const & variables_selected =
 		(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
@@ -20128,7 +20140,14 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 	}
 
-	// Add the "time slice" time range columns
+
+
+
+
+	// **************************************************************************************** //
+	// Finalize schema
+	// ... by adding the "time slice" time range columns
+	// **************************************************************************************** //
 
 	std::string datetime_start_col_name;
 	std::string datetime_end_col_name;
