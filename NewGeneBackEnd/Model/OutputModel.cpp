@@ -467,38 +467,23 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	if (random_sampling)
 	{
 		K = 0;
-		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info);
+		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
 		SqlAndColumnSet primary_group_final_result = ConstructFullOutputForSinglePrimaryGroup(primary_variable_groups_column_info[top_level_vg_index], primary_group_column_sets);
 		primary_group_final_results.push_back(primary_group_final_result);
+		primary_group_merged_results = random_sampling_schema;
 	}
 	else
 	{
 		messager.AppendKadStatusText("Looping through top-level variable groups...", this);
 		LoopThroughPrimaryVariableGroups();
-	}
 
-	if (failed || CheckCancelled())
-	{
-		return;
-	}
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
 
-	// RANDOM_SAMPLING: This stage should not be included if ever multiple top-level variable groups are supported
-	// (the data structures are in place in the random sampling algorithm to support multiple top-level variable groups
-	// in a single random sampling algorithm, but it is not implemented yet.  For now, with random sampling,
-	// multiple top-level groups is disabled.)
-	//
-	// Unless implemented within the core data structures, multiple top - level variable groups are not supported,
-	// even with the possibility of constructing full random output for each such table first and then merging these
-	// top - level tables, because of the bias of unknown overlap between the tables.The only reason to have both appear
-	// in the same output is *precisely* to have NewGene merge them together.
-	//
-	// And when random sampling is implemented in the core data structures, this stage will not be necessary in any case,
-	// because all top-level variable groups are added to the same TimeSlices random sampling core data structure
-	// in the loop over top-level primary variable groups.
-	if (!random_sampling)
-	{
 		messager.AppendKadStatusText("Merging top-level variable groups...", this);
 		MergeHighLevelGroupResults();
 
@@ -506,15 +491,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		{
 			return;
 		}
-	}
-	else
-	{
-		primary_group_merged_results = random_sampling_schema;
-	}
 
-	// RANDOM_SAMPLING: From here forward, this stage should be identical
-	messager.AppendKadStatusText("Merging child variable groups...", this);
-	MergeChildGroups();
+		messager.AppendKadStatusText("Merging child variable groups...", this);
+		MergeChildGroups();
+	}
 
 	if (failed || CheckCancelled())
 	{
@@ -19988,7 +19968,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info)
 {
 
 
@@ -20122,12 +20102,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 
 	// **************************************************************************************** //
-	// Loop through top-level VG's to construct secondary columns
+	// For the primary variable group, construct secondary data columns
 	// **************************************************************************************** //
 
 	// **************************************************************************************** //
-	// Note! By providing this loop, we are en-route
-	// to enabling multiple top-level variable groups
+	// Note! By providing the following (disabled) loop, we are taking a step
+	// in the direction of enabling multiple top-level variable groups
 	// **************************************************************************************** //
 
 #if 0
