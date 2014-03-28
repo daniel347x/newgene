@@ -525,6 +525,12 @@ void AllWeightings::PrepareRandomNumbers(int how_many)
 		if (reverse_mode)
 		{
 
+			if (remaining.empty())
+			{
+				boost::format msg("Too many output rows have been requested for the given data set.");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
 			std::uniform_int_distribution<size_t> remaining_distribution(0, remaining.size() - 1);
 			size_t which_remaining_random_number = remaining_distribution(engine);
 
