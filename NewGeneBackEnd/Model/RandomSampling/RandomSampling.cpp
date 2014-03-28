@@ -495,6 +495,18 @@ void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch co
 void AllWeightings::PrepareRandomNumbers(int how_many)
 {
 
+	if (weighting.getWeighting() < 1)
+	{
+		boost::format msg("There is no data from which the sampler can obtain rows.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	if (how_many < 1)
+	{
+		boost::format msg("The number of desired rows is zero.  There is nothing for the sampler to do, and no output will be generated.");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
 	random_numbers.clear();
 	boost::random::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
 	boost::random::uniform_int_distribution<boost::multiprecision::cpp_int> distribution(weighting.getWeightingRangeStart(), weighting.getWeightingRangeEnd());
@@ -504,9 +516,47 @@ void AllWeightings::PrepareRandomNumbers(int how_many)
 	// So duplicates are rejected here, guaranteeing unbiased
 	// choice of branches (each branch corresponding to a
 	// window of discrete values), including no-replacement.
+	bool reverse_mode = false;
+	std::vector<boost::multiprecision::cpp_int> remaining;
 	while (random_numbers.size() < static_cast<size_t>(how_many))
 	{
-		random_numbers.insert(distribution(engine));
+
+		// Check if we've consumed over 50% of the random numbers available
+		if (reverse_mode)
+		{
+
+			std::uniform_int_distribution<size_t> remaining_distribution(0, remaining.size() - 1);
+			size_t which_remaining_random_number = remaining_distribution(engine);
+
+			random_numbers.insert(remaining[which_remaining_random_number]);
+
+			auto remainingPtr = remaining.begin() + which_remaining_random_number;
+			remaining.erase(remainingPtr);
+
+		}
+		else
+		if (boost::multiprecision::cpp_int(random_numbers.size()) > weighting.getWeighting() / 2)
+		{
+			// Over 50% of the available numbers are already consumed.
+			// It must be a "somewhat" small number of available numbers.
+
+			// Begin pulling numbers randomly from the remaining set available.
+			for (boost::multiprecision::cpp_int n = 0; n < weighting.getWeighting(); ++n)
+			{
+				if (random_numbers.count(n) == 0)
+				{
+					remaining.push_back(n);
+				}
+			}
+
+			// Prepare reverse mode, but do not populate a new random number
+			reverse_mode = true;
+		}
+		else
+		{
+			random_numbers.insert(distribution(engine));
+		}
+
 	}
 
 	random_number_iterator = random_numbers.cbegin();
@@ -638,8 +688,9 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 			size_t which_remaining_leaf_combination = distribution(engine);
 
 			test_leaf_combination = branch.remaining[which_remaining_leaf_combination];
+			auto remainingPtr = branch.remaining.begin() + which_remaining_leaf_combination;
 
-			branch.remaining.erase(std::remove(std::begin(branch.remaining), std::end(branch.remaining), test_leaf_combination), std::end(branch.remaining));
+			branch.remaining.erase(remainingPtr);
 
 		}
 		else
@@ -657,7 +708,8 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 				std::uniform_int_distribution<size_t> distribution(0, remaining_leaves.size() - 1);
 				size_t index_of_index = distribution(engine);
 				int index_of_leaf = remaining_leaves[index_of_index];
-				remaining_leaves.erase(std::remove(std::begin(remaining_leaves), std::end(remaining_leaves), index_of_leaf), std::end(remaining_leaves));
+				auto remainingPtr = remaining_leaves.begin() + index_of_index;
+				remaining_leaves.erase(remainingPtr);
 				test_leaf_combination.insert(index_of_leaf);
 			}
 
