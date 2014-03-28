@@ -105,12 +105,12 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 
 						// Slice off the left-most piece of the new time slice and add it to the beginning of the map
 						TimeSliceLeaf new_left_slice;
-						SliceOffLeft(newTimeSliceLeaf, existing_start_slice->first.time_start, new_left_slice);
+						SliceOffLeft(newTimeSliceLeaf, startMapSlicePtr->first.time_start, new_left_slice);
 						AddNewTimeSlice(variable_group_number, branch, new_left_slice);
 
 						// For the remainder of the slice, proceed with normal case
 						normalCase = true;
-						mapIterator = existing_start_slice;
+						mapIterator = startMapSlicePtr;
 
 					}
 
@@ -125,7 +125,7 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 					// This is actually the normal case - it turns out that it doesn't matter
 					// that this was the first element in the map.
 					normalCase = true;
-					mapIterator = existing_start_slice;
+					mapIterator = startMapSlicePtr;
 
 				}
 
