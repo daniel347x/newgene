@@ -19965,11 +19965,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	result_columns.view_number = 1;
 	result_columns.has_no_datetime_columns = false;
 
-	WidgetInstanceIdentifier variable_group;
-	WidgetInstanceIdentifier uoa;
 
 	// First, calculate some indices.
-	bool first = true;
 	int highest_multiplicity = 1;
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
 				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
@@ -19978,13 +19975,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 		if (raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > highest_multiplicity)
 		{
 			highest_multiplicity = raw_data_table_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group;
-		}
-
-		if (first)
-		{
-			first = false;
-			variable_group = raw_data_table_column.variable_group_associated_with_current_inner_table;
-			uoa = raw_data_table_column.uoa_associated_with_variable_group_associated_with_current_inner_table;
 		}
 
 	});
@@ -20157,8 +20147,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = highest_multiplicity;
 	datetime_start_column.number_inner_tables_in_set = highest_multiplicity;
 	datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
-	datetime_start_column.variable_group_associated_with_current_inner_table = variable_group;
-	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
+	datetime_start_column.variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
+	datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
 	datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_start_column.column_name_in_original_data_table = "";
 
@@ -20174,8 +20164,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = highest_multiplicity;
 	datetime_end_column.number_inner_tables_in_set = highest_multiplicity;
 	datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART__TIME_SLICE;
-	datetime_end_column.variable_group_associated_with_current_inner_table = variable_group;
-	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa;
+	datetime_end_column.variable_group_associated_with_current_inner_table = = WidgetInstanceIdentifier();
+	datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = WidgetInstanceIdentifier();
 	datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
 	datetime_end_column.column_name_in_original_data_table = "";
 
@@ -20291,8 +20281,9 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K,
 		std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
 		{
 			
-			// This handles the case of multiplicity = 1 for all DMU's:
-			// In this scenario, a single, empty leaf will be present on each branch.
+			// This handles not only the case of multiplicity > 1,
+			// but also the case of multiplicity = 1 for all DMU's:
+			// In the latter scenario, a single, empty leaf will be present on each branch.
 			// But this leaf will carry the secondary key information just fine.
 			secondary_key_row_indices.push_back(leaf.index_into_raw_data);
 
@@ -20307,7 +20298,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K,
 
 		});
 
-		// This is the data - dependent columns
+		// This is the data for the secondary keys (i.e., for the dependent data)
 		std::for_each(secondary_key_row_indices.cbegin(), secondary_key_row_indices.cend(), [&](std::int64_t const secondary_key_row_index)
 		{
 
