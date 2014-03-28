@@ -71,9 +71,19 @@ class TimeSlice
 				return true;
 			}
 			else
+			if (time_start > rhs.time_start)
+			{
+				return false;
+			}
+			else
 			if (time_end < rhs.time_end)
 			{
 				return true;
+			}
+			else
+			if (time_end > rhs.time_end)
+			{
+				return false;
 			}
 			return false;
 		}
