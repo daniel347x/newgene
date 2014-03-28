@@ -472,7 +472,45 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
-		RandomSamplerFillDataForSinglePrimaryGroup(primary_variable_groups_column_info[top_level_vg_index], primary_group_column_sets);
+
+		AllWeightings allWeightings;
+		RandomSamplerFillDataForSinglePrimaryGroup(allWeightings, primary_variable_groups_column_info[top_level_vg_index], primary_group_column_sets);
+
+		allWeightings.CalculateWeightings(K);
+
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
+		std::int64_t const samples = 10;
+		allWeightings.PrepareRandomNumbers(samples);
+
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
+		//RandomSamplingCreateOutputTable();
+
+		//if (failed || CheckCancelled())
+		//{
+		//	return SqlAndColumnSet();
+		//}
+
+		//RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
+
+		//if (failed || CheckCancelled())
+		//{
+		//	return SqlAndColumnSet();
+		//}
+
+		//ClearTables(sql_and_column_sets);
+		//sql_and_column_sets.push_back(random_sampling_schema);
+		//if (failed || CheckCancelled())
+		//{
+		//	return SqlAndColumnSet();
+		//}
 
 		//primary_group_final_results.push_back(primary_group_final_result);
 		//primary_group_merged_results = random_sampling_schema;
@@ -2662,37 +2700,18 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplerFillDataForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets)
+void OutputModel::OutputGenerator::RandomSamplerFillDataForSinglePrimaryGroup(AllWeightings & allWeightings, ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets)
 {
+
 	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, 1, false);
 	x_table_result.second.most_recent_sql_statement_executed__index = -1;
 	ExecuteSQL(x_table_result);
 	sql_and_column_sets.push_back(x_table_result);
 
 	std::vector<std::string> errorMessages;
-	std::int64_t const samples = 10;
-	AllWeightings allWeightings;
 
 	RandomSamplingTimeSlices(x_table_result.second, 1, allWeightings, errorMessages);
 
-	if (failed || CheckCancelled())
-	{
-		return;
-	}
-
-	allWeightings.CalculateWeightings(K);
-
-	if (failed || CheckCancelled())
-	{
-		return;
-	}
-
-	allWeightings.PrepareRandomNumbers(samples);
-
-	if (failed || CheckCancelled())
-	{
-		return;
-	}
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const &
@@ -2730,51 +2749,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 	if (random_sampling)
 	{
 
-		std::vector<std::string> errorMessages;
-		std::int64_t const samples = 10;
-		AllWeightings allWeightings;
-
-		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings, errorMessages);
-
-		if (failed || CheckCancelled())
-		{
-			return SqlAndColumnSet();
-		}
-
-		allWeightings.CalculateWeightings(K);
-
-		if (failed || CheckCancelled())
-		{
-			return SqlAndColumnSet();
-		}
-
-		allWeightings.PrepareRandomNumbers(samples);
-
-		if (failed || CheckCancelled())
-		{
-			return SqlAndColumnSet();
-		}
-
-		//RandomSamplingCreateOutputTable();
-
-		//if (failed || CheckCancelled())
-		//{
-		//	return SqlAndColumnSet();
-		//}
-
-		//RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
-
-		//if (failed || CheckCancelled())
-		//{
-		//	return SqlAndColumnSet();
-		//}
-
-		ClearTables(sql_and_column_sets);
-		sql_and_column_sets.push_back(random_sampling_schema);
-		//if (failed || CheckCancelled())
-		//{
-		//	return SqlAndColumnSet();
-		//}
+		// moved to another function called in a different way
 
 	}
 	else

@@ -703,7 +703,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				int K; // the multiplicity
 
 				// Random sampling
-				void RandomSamplerFillDataForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets);
+				void RandomSamplerFillDataForSinglePrimaryGroup(AllWeightings & allWeightings, ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets);
 				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
 				SqlAndColumnSet RandomSamplingBuildSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info);
 				void RandomSamplingCreateOutputTable();
