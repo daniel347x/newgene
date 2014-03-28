@@ -484,6 +484,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		}
 
 		std::int64_t const samples = 10;
+
+		// The following prepares the sampler to return random rows
 		allWeightings.PrepareRandomNumbers(samples);
 
 		if (failed || CheckCancelled())
