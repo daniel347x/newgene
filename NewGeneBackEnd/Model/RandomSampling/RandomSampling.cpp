@@ -702,7 +702,7 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 				remaining_leaves.push_back(n);
 			}
 
-			// Fill it up, with no duplicates
+			// Pull random leaves, one at a time, to create the random row
 			while (test_leaf_combination.size() < static_cast<size_t>(K))
 			{
 				std::uniform_int_distribution<size_t> distribution(0, remaining_leaves.size() - 1);
@@ -717,6 +717,10 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 
 	}
 
+	// It might easily be a duplicate - random sampling will produce multiple hits on the same row
+	// because some rows can have a heavier weight than other rows;
+	// this is handled by storing a map of every *millisecond* (the finest time granularity supported)
+	// and all leaf combinations that have been hit for that millisecond.
 	branch.hit[which_millisecond].insert(test_leaf_combination);
 
 	Leaves leaf_combination;
