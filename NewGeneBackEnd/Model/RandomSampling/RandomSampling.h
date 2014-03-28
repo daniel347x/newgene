@@ -401,7 +401,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// map from millisecond to a set of leaf combinations hit for that millisecond
 		mutable std::map<boost::multiprecision::cpp_int, std::set<std::set<int>>> hit;
 
-		mutable std::vector<std::set<int>> remaining;
+		mutable std::map<boost::multiprecision::cpp_int, std::vector<std::set<int>>> remaining;
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
 };
@@ -492,7 +492,7 @@ class AllWeightings
 		// Merge time slice data into a map element
 		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number);
 
-		Leaves GetLeafCombination(int const K, Branch const & branch, Leaves const & leaves);
+		Leaves GetLeafCombination(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves);
 
 		static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_ , TimeSlices::value_type const & map_entry_)
 		{

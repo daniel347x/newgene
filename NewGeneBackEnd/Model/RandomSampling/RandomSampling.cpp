@@ -581,9 +581,6 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 
 #	ifdef _DEBUG
 	std::string val1 = random_number.str();
-	std::string val2 = weighting.getWeighting().str();
-	std::string val3 = weighting.getWeightingRangeStart().str();
-	std::string val4 = weighting.getWeightingRangeEnd().str();
 #	endif
 
 	BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
@@ -638,15 +635,19 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 	BOOST_ASSERT_MSG((random_number - branch.weighting.getWeightingRangeStart()) >= 0 && boost::multiprecision::cpp_int((random_number - branch.weighting.getWeightingRangeStart()) / boost::multiprecision::cpp_int(timeSlice.Width())) < BinomialCoefficient(tmp_leaves.size(), K), "Random index is outside [0. binomial coefficient)");
 
 	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData;
-	leaves = GetLeafCombination(K, branch, tmp_leaves);
+	leaves = GetLeafCombination(random_number, K, branch, tmp_leaves);
 
 	++random_number_iterator;
 	return true;
 
 }
 
-Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Leaves const & leaves)
+Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves)
 {
+
+	random_number -= branch.weighting.getWeightingRangeStart();
+
+	boost::multiprecision::cpp_int which_millisecond = random_number / branch.number_branch_combinations;
 
 	static int saved_range = -1;
 	static std::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
@@ -661,35 +662,35 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 		return Leaves();
 	}
 
-	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hit.size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
+	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hit[which_millisecond].size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
 
 	std::set<int> test_leaf_combination;
 
 	// skip any leaf combinations returned from previous random numbers
-	while (test_leaf_combination.empty() || branch.hit.count(test_leaf_combination))
+	while (test_leaf_combination.empty() || branch.hit[which_millisecond].count(test_leaf_combination))
 	{
 
 		test_leaf_combination.clear();
 
-		if (boost::multiprecision::cpp_int(branch.hit.size()) > branch.number_branch_combinations / 2)
+		if (boost::multiprecision::cpp_int(branch.hit[which_millisecond].size()) > branch.number_branch_combinations / 2)
 		{
 			// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
 			// and then pick randomly from that
 			
 			// A previous call may have populated "remaining"
 
-			if (branch.remaining.size() == 0)
+			if (branch.remaining[which_millisecond].size() == 0)
 			{
 				PopulateAllLeafCombinations(K, branch, leaves);
 			}
 
-			std::uniform_int_distribution<size_t> distribution(0, branch.remaining.size() - 1);
+			std::uniform_int_distribution<size_t> distribution(0, branch.remaining[which_millisecond].size() - 1);
 			size_t which_remaining_leaf_combination = distribution(engine);
 
-			test_leaf_combination = branch.remaining[which_remaining_leaf_combination];
-			auto remainingPtr = branch.remaining.begin() + which_remaining_leaf_combination;
+			test_leaf_combination = branch.remaining[which_millisecond][which_remaining_leaf_combination];
+			auto remainingPtr = branch.remaining[which_millisecond].begin() + which_remaining_leaf_combination;
 
-			branch.remaining.erase(remainingPtr);
+			branch.remaining[which_millisecond].erase(remainingPtr);
 
 		}
 		else
@@ -716,7 +717,7 @@ Leaves AllWeightings::GetLeafCombination(int const K, Branch const & branch, Lea
 
 	}
 
-	branch.hit.insert(test_leaf_combination);
+	branch.hit[which_millisecond].insert(test_leaf_combination);
 
 	Leaves leaf_combination;
 	std::set<int>::const_iterator current_index_to_use_ptr = test_leaf_combination.cbegin();
