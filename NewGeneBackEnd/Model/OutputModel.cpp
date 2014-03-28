@@ -20006,6 +20006,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	result_columns.has_no_datetime_columns = false;
 
 
+	// Take the first top-level primary variable group, and use it to construct the primary key columns
+	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_raw_data_columns[0];
+
 	// First, calculate some indices.
 	int highest_multiplicity = 1;
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
@@ -20020,9 +20023,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	});
 
 	K = highest_multiplicity;
-
-	// Take the first top-level primary variable group, and use it to construct the primary key columns
-	primary_variable_group_raw_data_columns = primary_variable_groups_raw_data_columns[0];
 
 	// Start with the primary key columns of multiplicity 1.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
