@@ -398,7 +398,9 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 		// *********************************************************************************** //
 		// This is where multiple rows with duplicated primary keys 
 		// and overlapping time range will be wiped out.
-		// ... Only one row with given primary keys and time range is allowed.
+		// ... Only one row with given primary keys and time range is allowed
+		// ... (the first one - emplace does nothing if the entry already exists).
+		// ... (Note that the leaf points to a specific row of secondary data.)
 		// *********************************************************************************** //
 		branchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if it doesn't already exist
 	}
@@ -459,6 +461,8 @@ void AllWeightings::CalculateWeightings(int const K)
 				// clear the hit cache
 				branch.hit.clear();
 
+				// Holes between time slices are handled here -
+				// There is no gap in the sequence of discretized values in branches.
 				branchWeighting.setWeighting(timeSlice.Width() * branch.number_branch_combinations);
 				branchWeighting.setWeightingRangeStart(currentWeighting);
 				currentWeighting += branchWeighting.getWeighting();
@@ -494,10 +498,17 @@ void AllWeightings::PrepareRandomNumbers(int how_many)
 	random_numbers.clear();
 	boost::random::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
 	boost::random::uniform_int_distribution<boost::multiprecision::cpp_int> distribution(weighting.getWeightingRangeStart(), weighting.getWeightingRangeEnd());
+
+	// Check out this clean, simple approach:
+	// The available row samples are discretely numbered.
+	// So duplicates are rejected here, guaranteeing unbiased
+	// choice of branches (each branch corresponding to a
+	// window of discrete values), including no-replacement.
 	while (random_numbers.size() < static_cast<size_t>(how_many))
 	{
 		random_numbers.insert(distribution(engine));
 	}
+
 	random_number_iterator = random_numbers.cbegin();
 
 }
@@ -530,11 +541,6 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 		}
 		return false;
 	});
-
-	if (timeSlicePtr == timeSlices.cend())
-	{
-		int debug___ = 0;
-	}
 
 	TimeSlice const & timeSlice = timeSlicePtr->first;
 	VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second;

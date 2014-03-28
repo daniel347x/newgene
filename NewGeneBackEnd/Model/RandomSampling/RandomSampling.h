@@ -393,9 +393,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			number_branch_combinations = rhs.number_branch_combinations;
 		}
 
-		mutable Weighting weighting; // Weighting for this branch: This is the lowest-level, calculated value
+		// Weighting for this branch: This is the lowest-level, calculated value, with millisecond granularity.
+		// It is the product of the number of branch combinations and the number of milliseconds in this time slice.
+		mutable Weighting weighting;
 
-		mutable std::set<std::set<int>> hit; // cache of leaf combinations already hit
+		// cache of leaf combinations already hit:
+		// map from millisecond to a set of leaf combinations hit for that millisecond
+		mutable std::map<boost::multiprecision::cpp_int, std::set<std::set<int>>> hit;
+
 		mutable std::vector<std::set<int>> remaining;
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
