@@ -682,7 +682,7 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 
 			if (branch.remaining[which_millisecond].size() == 0)
 			{
-				PopulateAllLeafCombinations(K, branch, leaves);
+				PopulateAllLeafCombinations(which_millisecond, K, branch, leaves);
 			}
 
 			std::uniform_int_distribution<size_t> distribution(0, branch.remaining[which_millisecond].size() - 1);
@@ -749,7 +749,7 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 
 }
 
-void AllWeightings::PopulateAllLeafCombinations(int const K, Branch const & branch, Leaves const & leaves)
+void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_millisecond, int const K, Branch const & branch, Leaves const & leaves)
 {
 
 	boost::multiprecision::cpp_int total_added = 0;
@@ -764,7 +764,7 @@ void AllWeightings::PopulateAllLeafCombinations(int const K, Branch const & bran
 	while (total_added < branch.number_branch_combinations)
 	{
 
-		AddPositionToRemaining(position, branch);
+		AddPositionToRemaining(which_millisecond, position, branch);
 		bool succeeded = IncrementPosition(K, position, leaves);
 
 		BOOST_ASSERT_MSG(succeeded || (total_added + 1) == branch.number_branch_combinations, "Invalid logic in position incrementer in sampler!");
@@ -775,7 +775,7 @@ void AllWeightings::PopulateAllLeafCombinations(int const K, Branch const & bran
 
 }
 
-void AllWeightings::AddPositionToRemaining(std::vector<int> const & position, Branch const & branch)
+void AllWeightings::AddPositionToRemaining(boost::multiprecision::cpp_int const & which_millisecond, std::vector<int> const & position, Branch const & branch)
 {
 
 	std::set<int> new_remaining;
@@ -784,9 +784,9 @@ void AllWeightings::AddPositionToRemaining(std::vector<int> const & position, Br
 		new_remaining.insert(position_index);
 	});
 
-	if (branch.hit.count(new_remaining) == 0)
+	if (branch.hit[which_millisecond].count(new_remaining) == 0)
 	{
-		branch.remaining.push_back(new_remaining);
+		branch.remaining[which_millisecond].push_back(new_remaining);
 	}
 
 }

@@ -471,7 +471,7 @@ class AllWeightings
 		void CalculateWeightings(int const K);
 		void PrepareRandomNumbers(int how_many);
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);
-		void PopulateAllLeafCombinations(int const K, Branch const & branch, Leaves const & leaves);
+		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_millisecond, int const K, Branch const & branch, Leaves const & leaves);
 
 	protected:
 
@@ -509,7 +509,7 @@ class AllWeightings
 
 	private:
 
-		void AddPositionToRemaining(std::vector<int> const & position, Branch const & branch);
+		void AddPositionToRemaining(boost::multiprecision::cpp_int const & which_millisecond, std::vector<int> const & position, Branch const & branch);
 		bool IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves);
 		int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Leaves const & leaves);
 
