@@ -393,16 +393,21 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			number_branch_combinations = rhs.number_branch_combinations;
 		}
 
-		void ConsolidateHits()
+		void ConsolidateHits() const
 		{
-			std::for_each(hit.cbegin(), hit.cend(), [&](std::set<std::set<int>> const & the_hits)
+			std::for_each(hit.begin(), hit.end(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<std::set<int>>> & the_hits)
 			{
-				std::for_each(the_hits.cbegin(), the_hits.cend(), [&](std::set<int> const & the_hit)
+				std::for_each(the_hits.second.begin(), the_hits.second.end(), [&](std::set<int> const & the_hit)
 				{
 					hits_consolidated.insert(the_hit);
 				});
 			});
 		}
+
+
+		// The following must be MUTABLE
+		// because the BRANCH is used as the KEY for various maps...
+		// But the mutable data is not part of the operator<(), so it is safe
 
 		// Weighting for this branch: This is the lowest-level, calculated value, with millisecond granularity.
 		// It is the product of the number of branch combinations and the number of milliseconds in this time slice.
@@ -413,7 +418,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		mutable std::map<boost::multiprecision::cpp_int, std::set<std::set<int>>> hit;
 		mutable std::map<boost::multiprecision::cpp_int, std::vector<std::set<int>>> remaining;
 
-		std::set<std::set<int>> hits_consolidated; // After-the-fact: Merge identical hits across milliseconds within this branch
+		mutable std::set<std::set<int>> hits_consolidated; // After-the-fact: Merge identical hits across milliseconds within this branch
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 

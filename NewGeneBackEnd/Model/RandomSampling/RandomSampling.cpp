@@ -892,10 +892,10 @@ Leaves AllWeightings::RetrieveLeafCombinationFromLeafIndices(std::set<int> &test
 void AllWeightings::ConsolidateHits()
 {
 
-	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice, VariableGroupTimeSliceData> & timeSliceData)
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
 	{
 
-		TimeSlice & timeSlice = timeSliceData.first;
+		TimeSlice const & timeSlice = timeSliceData.first;
 		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceData.second;
 
 		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
@@ -910,10 +910,10 @@ void AllWeightings::ConsolidateHits()
 		VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
 		BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
 
-		std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch, Leaves> & branchAndLeaves)
+		std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
 		{
 
-			Branch & branch = branchAndLeaves.first;
+			Branch const & branch = branchAndLeaves.first;
 			branch.ConsolidateHits();
 
 		});
