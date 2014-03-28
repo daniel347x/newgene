@@ -462,8 +462,19 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	}
 
 	// RANDOM_SAMPLING: The work is all done here
-	messager.AppendKadStatusText("Looping through top-level variable groups...", this);
-	LoopThroughPrimaryVariableGroups();
+	if (random_sampling)
+	{
+		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info, K);
+		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
+		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
+		SqlAndColumnSet primary_group_final_result = ConstructFullOutputForSinglePrimaryGroup(primary_variable_groups_column_info[top_level_vg_index], primary_group_column_sets);
+		primary_group_final_results.push_back(primary_group_final_result);
+	}
+	else
+	{
+		messager.AppendKadStatusText("Looping through top-level variable groups...", this);
+		LoopThroughPrimaryVariableGroups();
+	}
 
 	if (failed || CheckCancelled())
 	{
@@ -2697,7 +2708,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		int K = 0;
 		AllWeightings allWeightings;
 		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings, errorMessages);
-		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_group_raw_data_columns, K);
 		allWeightings.CalculateWeightings(K);
 		allWeightings.PrepareRandomNumbers(samples);
 		RandomSamplingCreateOutputTable(random_sampling_schema);
@@ -12729,13 +12739,38 @@ void OutputModel::OutputGenerator::Prepare()
 
 	PopulateVariableGroups();
 
+	top_level_vg_index = 0;
 	if (primary_variable_groups_vector.size() > 1)
 	{
 		if (random_sampling)
 		{
-			boost::format msg("Multiple top-level variable groups are not currently supported.");
-			SetFailureMessage(msg.str());
-			failed = true;
+			if (false)
+			{
+				std::vector<std::string> variableGroupOptions;
+				std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
+				{
+					WidgetInstanceIdentifier const & vg = vg_to_selected.first;
+					boost::format msg("%1%%2%");
+					std::string desc;
+					if (vg.longhand && !vg.longhand->empty())
+					{
+						desc = " (";
+						desc += *vg.longhand;
+						desc += ")";
+					}
+					msg % *vg.code % desc;
+					variableGroupOptions.push_back(msg.str());
+				});
+				boost::format msgTitle("Select top-level variable group");
+				boost::format msgQuestion("Available top-level variable groups:");
+				top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
+			}
+			else
+			{
+				boost::format msg("Multiple top-level variable groups are not currently supported.");
+				SetFailureMessage(msg.str());
+				failed = true;
+			}
 		}
 		else
 		{
@@ -19946,7 +19981,7 @@ void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView co
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_raw_data_columns, int & K)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, int & K)
 {
 
 
@@ -19987,6 +20022,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	K = highest_multiplicity;
 
 	// Take the first top-level primary variable group, and use it to construct the primary key columns
+	primary_variable_group_raw_data_columns = primary_variable_groups_raw_data_columns[0];
 
 	// Start with the primary key columns of multiplicity 1.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
@@ -20082,62 +20118,68 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	// Loop through top-level VG's to construct secondary columns
 	// **************************************************************************************** //
 
-	WidgetInstanceIdentifiers const & variables_selected =
-		(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
-
-	// Proceed to the secondary key columns.
-	for (int current_multiplicity = 1; current_multiplicity <= highest_multiplicity; ++current_multiplicity)
+	std::for_each(primary_variable_groups_raw_data_columns.cbegin(), primary_variable_groups_raw_data_columns.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
 
-		std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-					  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+		WidgetInstanceIdentifiers const & variables_selected =
+			(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
+
+		// Proceed to the secondary key columns.
+		for (int current_multiplicity = 1; current_multiplicity <= highest_multiplicity; ++current_multiplicity)
 		{
 
-			bool make_secondary_datetime_column = false;
-
-			if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
-				|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+			std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
+				primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 			{
-				// Do not return!  If the user selects these columns, they should appear as regular secondary key columns.
-				make_secondary_datetime_column = true;
-			}
 
-			if (!make_secondary_datetime_column && raw_data_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
-			{
-				return; // We are populating secondary columns now, so exit if this isn't one
-			}
+				bool make_secondary_datetime_column = false;
 
-			bool match = false;
-			std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&](WidgetInstanceIdentifier const & variable_selected)
-			{
-				if (boost::iequals(raw_data_table_column.column_name_in_original_data_table, *variable_selected.code))
+				if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
+					|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 				{
-					match = true;
+					// Do not return!  If the user selects these columns, they should appear as regular secondary key columns.
+					make_secondary_datetime_column = true;
 				}
+
+				if (!make_secondary_datetime_column && raw_data_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+				{
+					return; // We are populating secondary columns now, so exit if this isn't one
+				}
+
+				bool match = false;
+				std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&](WidgetInstanceIdentifier const & variable_selected)
+				{
+					if (boost::iequals(raw_data_table_column.column_name_in_original_data_table, *variable_selected.code))
+					{
+						match = true;
+					}
+				});
+
+				if (match)
+				{
+					result_columns.columns_in_view.push_back(raw_data_table_column);
+					ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
+					new_column.column_name_in_temporary_table += "_";
+					new_column.column_name_in_temporary_table += newUUID(true);
+					new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
+					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity;
+
+					if (make_secondary_datetime_column)
+					{
+						new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+						new_column.originally_datetime = true;
+					}
+
+				}
+
 			});
 
-			if (match)
-			{
-				result_columns.columns_in_view.push_back(raw_data_table_column);
-				ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
-				new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
-				new_column.column_name_in_temporary_table += "_";
-				new_column.column_name_in_temporary_table += newUUID(true);
-				new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
-				new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
-				new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity;
+		}
 
-				if (make_secondary_datetime_column)
-				{
-					new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
-					new_column.originally_datetime = true;
-				}
+	});
 
-			}
-
-		});
-
-	}
 
 
 

@@ -699,9 +699,11 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulateVariableGroups();
 				void PopulatePrimaryKeySequenceInfo();
 
+				size_t top_level_vg_index; // in case there are multiple top-level variable groups, which one to use as primary (the others will be treated as children)
+
 				// Random sampling
 				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
-				SqlAndColumnSet RandomSamplingBuildSchema(ColumnsInTempView const & primary_variable_group_x1_columns, int & K);
+				SqlAndColumnSet RandomSamplingBuildSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, int & K);
 				void RandomSamplingCreateOutputTable(SqlAndColumnSet & random_sampling_schema);
 				void RandomSamplingWriteToOutputTable(int const K, ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
 				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);
@@ -746,7 +748,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void FormatResultsForOutput();
 				void WriteResultsToFileOrScreen();
 				SqlAndColumnSet ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets,
-						int const primary_group_number);
+						int const primary_group_number = 1);
 				SqlAndColumnSet CreateInitialPrimaryXTable_OrCount(ColumnsInTempView const & primary_variable_group_raw_data_columns, int const primary_group_number, bool const count_only);
 				SqlAndColumnSet CreateInitialPrimaryXRTable(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number);
 				SqlAndColumnSet CreateInitialPrimaryMergeXRTable(ColumnsInTempView const & primary_variable_group_x1_columns);
