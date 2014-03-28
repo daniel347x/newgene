@@ -472,9 +472,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
-		SqlAndColumnSet primary_group_final_result = ConstructFullOutputForSinglePrimaryGroup(primary_variable_groups_column_info[top_level_vg_index], primary_group_column_sets);
-		primary_group_final_results.push_back(primary_group_final_result);
-		primary_group_merged_results = random_sampling_schema;
+		RandomSamplerFillDataForSinglePrimaryGroup(primary_variable_groups_column_info[top_level_vg_index], primary_group_column_sets);
+
+		//primary_group_final_results.push_back(primary_group_final_result);
+		//primary_group_merged_results = random_sampling_schema;
 
 	}
 	else
@@ -2659,6 +2660,39 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 		++primary_group_number;
 	});
 
+}
+
+void OutputModel::OutputGenerator::RandomSamplerFillDataForSinglePrimaryGroup(ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets)
+{
+	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, 1, false);
+	x_table_result.second.most_recent_sql_statement_executed__index = -1;
+	ExecuteSQL(x_table_result);
+	sql_and_column_sets.push_back(x_table_result);
+
+	std::vector<std::string> errorMessages;
+	std::int64_t const samples = 10;
+	AllWeightings allWeightings;
+
+	RandomSamplingTimeSlices(x_table_result.second, 1, allWeightings, errorMessages);
+
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
+
+	allWeightings.CalculateWeightings(K);
+
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
+
+	allWeightings.PrepareRandomNumbers(samples);
+
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
 }
 
 OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::ConstructFullOutputForSinglePrimaryGroup(ColumnsInTempView const &
