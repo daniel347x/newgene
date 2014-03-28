@@ -19986,23 +19986,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 	K = highest_multiplicity;
 
-
-
-
-	// **************************************************************************************** //
-	// Loop through top-level VG's
-	// **************************************************************************************** //
-
-	WidgetInstanceIdentifiers const & variables_selected =
-		(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
-
-	// These columns are from the new table (the raw data table) being added.
-	// Use this as a building block to construct the desired schema for the K-adic output.
+	// Take the first top-level primary variable group, and use it to construct the primary key columns
 
 	// Start with the primary key columns of multiplicity 1.
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-				  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
-					  ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
+		ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 	{
 
 		if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
@@ -20044,8 +20033,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	{
 
 		std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-					  primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
-						  ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+			primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
+			ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
 		{
 			if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 				|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL
@@ -20085,6 +20074,16 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 		});
 
 	}
+
+
+
+
+	// **************************************************************************************** //
+	// Loop through top-level VG's to construct secondary columns
+	// **************************************************************************************** //
+
+	WidgetInstanceIdentifiers const & variables_selected =
+		(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
 
 	// Proceed to the secondary key columns.
 	for (int current_multiplicity = 1; current_multiplicity <= highest_multiplicity; ++current_multiplicity)
