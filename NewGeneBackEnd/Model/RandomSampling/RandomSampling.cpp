@@ -675,6 +675,7 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 
 		if (boost::multiprecision::cpp_int(branch.hit[which_millisecond].size()) > branch.number_branch_combinations / 2)
 		{
+
 			// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
 			// and then pick randomly from that
 			
