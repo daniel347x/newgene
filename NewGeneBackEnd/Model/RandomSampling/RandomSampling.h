@@ -420,6 +420,55 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		mutable std::set<std::set<int>> hits_consolidated; // After-the-fact: Merge identical hits across milliseconds within this branch
 
+		// Indices into cached secondary data table for child groups.
+		// 
+		// Overview:
+		//
+		// There is a single top-level primary variable group.
+		//
+		// Each branch corresponds to a single combination of specific primary key data values
+		// ... for those primary keys of multiplicity 1
+		// ... for the UOA corresponding to this primary variable group.
+		// Each leaf corresponds to a single combination of specific primary key data values
+		// ... for those primary keys of multiplicity greater than 1
+		// ... for the UOA corresponding to this primary variable group.
+		// Each row of output data has one branch, and multiple leaves (one leaf per multiplicity).
+		// Each leaf represents a single set of secondary column data.
+		// Example: UOA "MID, CTY, CTY", with K-ad "MID, CTY, CTY, CTY, CTY":
+		// ... has branch DMU "MID", and leave DMU "CTY, CTY".
+		// ... Each branch has a single value of a MID, such as "MID = 257" or "MID = 258".
+		// ... Each leaf has a single value for the "CTY, CTY" pair corresponding to the UOA,
+		// ... ... such as "CTY_1 = 2, CTY_2 = 20".
+		// ... Each row contains the value from the current (single) branch,
+		// ... ... and the values from two leaves (i.e., two pairs of countries, or 4 countries total).
+		//
+		// There can be child variable groups.
+		//
+		// Each child variable group's UOA is a subset of the UOA of the primary variable group.
+		// The full set of primary keys for this child variable group's UOA includes a subset of 
+		// ... the primary keys for the primary variable group's branch, and
+		// ... the primary keys for the primary variable group's leaves.
+		// The child variable group also has 0, 1, or more leaves.
+		// ... Each leaf corresponds to a separate set of secondary child variable group
+		// ... column data that appears in every row of output.
+		// Example: For the above UOA "MID, CTY, CTY" and K-ad "MID, CTY, CTY, CTY, CTY",
+		// ... a child group could have UOA "MID, CTY".
+		// For every row of output, this child group has four leaves, one for each country.
+		// ... (Multiple *sets* of leaves per row, as opposed to one *set* of leaves per row,
+		// ... is prohibited by data validation.)
+		// Each such child variable group leaf represents a single set of secondary column data. 
+		// 
+		// The following data structure tracks all such secondary column data
+		// ... for *child* variable groups.
+		// ... (The secondary data for the *primary* variable group is tracked via the 
+		// ...  'index_into_raw_data' data member of the "Leaf" class.)
+		//
+		// The following variable is defined as:
+		// A map of row (given by the set of primary variable group leaves)
+		// ... to a map of the child variable group's leaf index 
+		// ... to the index in the child variable group's secondary data table cache for that child leaf.
+		std::map<int, std::map<std::set<int>, std::map<int, std::int64_t>>> child_group_secondary_data_lookup;
+
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
 };
@@ -442,10 +491,8 @@ class VariableGroupBranchesAndLeaves
 		BranchesAndLeaves branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves
 
-		//bool operator==(VariableGroupBranchesAndLeaves const & rhs) const
 		bool operator==(int const & rhs) const
 		{
-			//if (variable_group_name == rhs.variable_group_name)
 			if (variable_group_number == rhs)
 			{
 				return true;
@@ -480,8 +527,10 @@ class AllWeightings
 		~AllWeightings();
 
 		TimeSlices timeSlices;
-		DataCache dataCache; // caches secondary key data required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
+		DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
+		std::map<int, DataCache> secondaryCache; // Ditto, but for child groups
 		Weighting weighting; // sum over all time slices
+
 
 		sqlite3_stmt * insert_random_sample_stmt;
 
