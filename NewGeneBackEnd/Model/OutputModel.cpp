@@ -466,16 +466,20 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// RANDOM_SAMPLING: The work is all done here
 	if (random_sampling)
 	{
+
 		K = 0;
 		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
+
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
 		SqlAndColumnSet primary_group_final_result = ConstructFullOutputForSinglePrimaryGroup(primary_variable_groups_column_info[top_level_vg_index], primary_group_column_sets);
 		primary_group_final_results.push_back(primary_group_final_result);
 		primary_group_merged_results = random_sampling_schema;
+
 	}
 	else
 	{
+
 		messager.AppendKadStatusText("Looping through top-level variable groups...", this);
 		LoopThroughPrimaryVariableGroups();
 
@@ -494,6 +498,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		messager.AppendKadStatusText("Merging child variable groups...", this);
 		MergeChildGroups();
+
 	}
 
 	if (failed || CheckCancelled())
@@ -2690,20 +2695,53 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 
 	if (random_sampling)
 	{
+
 		std::vector<std::string> errorMessages;
 		std::int64_t const samples = 10;
 		AllWeightings allWeightings;
+
 		RandomSamplingTimeSlices(x_table_result.second, primary_group_number, allWeightings, errorMessages);
+
+		if (failed || CheckCancelled())
+		{
+			return SqlAndColumnSet();
+		}
+
 		allWeightings.CalculateWeightings(K);
+
+		if (failed || CheckCancelled())
+		{
+			return SqlAndColumnSet();
+		}
+
 		allWeightings.PrepareRandomNumbers(samples);
-		RandomSamplingCreateOutputTable(random_sampling_schema);
-		RandomSamplingWriteToOutputTable(random_sampling_schema.second, allWeightings, errorMessages);
+
+		if (failed || CheckCancelled())
+		{
+			return SqlAndColumnSet();
+		}
+
+		RandomSamplingCreateOutputTable();
+
+		if (failed || CheckCancelled())
+		{
+			return SqlAndColumnSet();
+		}
+
+		RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
+
+		if (failed || CheckCancelled())
+		{
+			return SqlAndColumnSet();
+		}
+
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(random_sampling_schema);
 		if (failed || CheckCancelled())
 		{
 			return SqlAndColumnSet();
 		}
+
 	}
 	else
 	{
@@ -20318,7 +20356,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable(SqlAndColumnSet & random_sampling_schema)
+void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable()
 {
 
 	std::vector<SQLExecutor> & sql_strings = random_sampling_schema.first;
@@ -20365,8 +20403,10 @@ void OutputModel::OutputGenerator::RandomSamplingCreateOutputTable(SqlAndColumnS
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(ColumnsInTempView const & random_sampling_columns, AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
+void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
 {
+
+	ColumnsInTempView const & random_sampling_columns = random_sampling_schema.second;
 
 	int const    minimum_desired_rows_per_transaction = 1024 * 16;
 	std::int64_t current_rows_in_error = 0;
