@@ -20291,10 +20291,13 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(int const K,
 		std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
 		{
 			
+			// This handles the case of multiplicity = 1 for all DMU's:
+			// In this scenario, a single, empty leaf will be present on each branch.
+			// But this leaf will carry the secondary key information just fine.
+			secondary_key_row_indices.push_back(leaf.index_into_raw_data);
+
 			if (!leaf.primary_keys.empty())
 			{
-				secondary_key_row_indices.push_back(leaf.index_into_raw_data);
-
 				DMUInstanceDataVector const & leaf_primary_keys = leaf.primary_keys;
 				std::for_each(leaf_primary_keys.cbegin(), leaf_primary_keys.cend(), [&](DMUInstanceData const & leaf_primary_key)
 				{
