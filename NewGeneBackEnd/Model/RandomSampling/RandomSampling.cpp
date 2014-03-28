@@ -634,14 +634,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 
 	Leaves const & tmp_leaves = branchesAndLeavesPtr->second;
 
-#	ifdef _DEBUG
-	std::string val5 = random_number.str();
-	std::string val6 = boost::multiprecision::cpp_int((random_number - branch.weighting.getWeightingRangeStart()) / boost::multiprecision::cpp_int(timeSlice.Width())).str();
-	std::string val7 = BinomialCoefficient(tmp_leaves.size(), K).str();
-#	endif
-
 	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
-	//BOOST_ASSERT_MSG((random_number - branch.weighting.weighting_range_start) < 0 || (random_number - branch.weighting.weighting_range_start) / boost::multiprecision::cpp_int(timeSlice.Width()) >= boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(tmp_leaves.size(), K), "Random index is outside [0. binomial coefficient)");
 	BOOST_ASSERT_MSG((random_number - branch.weighting.getWeightingRangeStart()) >= 0 && boost::multiprecision::cpp_int((random_number - branch.weighting.getWeightingRangeStart()) / boost::multiprecision::cpp_int(timeSlice.Width())) < BinomialCoefficient(tmp_leaves.size(), K), "Random index is outside [0. binomial coefficient)");
 
 	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData;
