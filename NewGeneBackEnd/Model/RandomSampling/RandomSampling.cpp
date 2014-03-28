@@ -610,6 +610,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 
 	BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
 		
+	// Pick a branch randomly (with weight!)
 	BranchesAndLeaves::const_iterator branchesAndLeavesPtr = std::lower_bound(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), random_number, [&](std::pair<Branch, Leaves> const & testBranchAndLeaves, boost::multiprecision::cpp_int const & test_random_number)
 	{
 		Branch const & testBranch = testBranchAndLeaves.first;
