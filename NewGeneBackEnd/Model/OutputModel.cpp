@@ -2721,26 +2721,26 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 			return SqlAndColumnSet();
 		}
 
-		RandomSamplingCreateOutputTable();
+		//RandomSamplingCreateOutputTable();
 
-		if (failed || CheckCancelled())
-		{
-			return SqlAndColumnSet();
-		}
+		//if (failed || CheckCancelled())
+		//{
+		//	return SqlAndColumnSet();
+		//}
 
-		RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
+		//RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
 
-		if (failed || CheckCancelled())
-		{
-			return SqlAndColumnSet();
-		}
+		//if (failed || CheckCancelled())
+		//{
+		//	return SqlAndColumnSet();
+		//}
 
 		ClearTables(sql_and_column_sets);
 		sql_and_column_sets.push_back(random_sampling_schema);
-		if (failed || CheckCancelled())
-		{
-			return SqlAndColumnSet();
-		}
+		//if (failed || CheckCancelled())
+		//{
+		//	return SqlAndColumnSet();
+		//}
 
 	}
 	else
