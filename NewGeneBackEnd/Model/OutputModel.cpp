@@ -20012,7 +20012,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 	K = highest_multiplicity;
 
+
+	// **************************************************************************************** //
 	// Start with the primary key columns of multiplicity 1.
+	// **************************************************************************************** //
+
 	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
 		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](
 		ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
@@ -20178,31 +20182,12 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 #endif
 
 
+	// **************************************************************************************** //
+	// Child variable groups - secondary columns
+	// **************************************************************************************** //
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	// Child tables
-	int current_child_view_name_index = 1;
-	int child_set_number = 1;
 	std::for_each(secondary_variable_groups_column_info.cbegin(),
-		secondary_variable_groups_column_info.cend(), [this, &](ColumnsInTempView const & child_variable_group_raw_data_columns)
+		secondary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 
 		if (failed || CheckCancelled())
@@ -20226,8 +20211,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 				if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 					|| new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
 				{
-					// No!  If the user selects these columns, they should appear as regular secondary key columns.  Change the column type in this case to "secondary".
-					//return; // Add these columns last
+					// Do not return!  If the user selects these columns, they should appear as regular secondary key columns.
 					make_secondary_datetime_column = true;
 				}
 
@@ -20253,33 +20237,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 					new_column.column_name_in_temporary_table += "_";
 					new_column.column_name_in_temporary_table += newUUID(true);
 					new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
-					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set =
-						current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group;
-
-					if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-					{
-						if (new_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
-						{
-							new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg =
-								current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group; // update current multiplicity
-
-							if (new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category <
-								new_column.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category)
-							{
-								new_column.primary_key_index_within_total_kad_for_dmu_category =
-									current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group;
-							}
-							else
-							{
-								// must have: new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category
-								//         == new_column.total_k_count__within_uoa_corresponding_to_top_level_variable_group__for_current_dmu_category
-								new_column.primary_key_index_within_total_kad_for_dmu_category =
-									new_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category
-									+ (current_outer_multiplicity_of_child_table___same_as___current_inner_table_number_within_the_inner_table_set_for_the_current_child_variable_group - 1) *
-									new_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
-							}
-						}
-					}
+					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
 
 					if (make_secondary_datetime_column)
 					{
@@ -20287,14 +20245,6 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 						new_column.originally_datetime = true;
 					}
 
-					++second_table_column_count;
-
-					if (first)
-					{
-						first = false;
-						variable_group_child = new_column.variable_group_associated_with_current_inner_table;
-						uoa_child = new_column.uoa_associated_with_variable_group_associated_with_current_inner_table;
-					}
 				}
 			});
 
@@ -20303,48 +20253,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 				return;
 			}
 
-			++current_child_view_name_index;
-
 		}
 
-		++child_set_number;
-
 	});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	// **************************************************************************************** //
