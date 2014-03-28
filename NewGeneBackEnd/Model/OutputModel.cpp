@@ -20120,8 +20120,15 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	// Loop through top-level VG's to construct secondary columns
 	// **************************************************************************************** //
 
+	// **************************************************************************************** //
+	// Note! By providing this loop, we are en-route
+	// to enabling multiple top-level variable groups
+	// **************************************************************************************** //
+
+#if 0
 	std::for_each(primary_variable_groups_raw_data_columns.cbegin(), primary_variable_groups_raw_data_columns.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
+#endif
 
 		WidgetInstanceIdentifiers const & variables_selected =
 			(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
@@ -20180,8 +20187,9 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 		}
 
+#if 0
 	});
-
+#endif
 
 
 
