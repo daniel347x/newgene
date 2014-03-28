@@ -472,6 +472,7 @@ class AllWeightings
 		void PrepareRandomNumbers(int how_many);
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);
 		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_millisecond, int const K, Branch const & branch, Leaves const & leaves);
+		Leaves RetrieveLeafCombinationFromLeafIndices(std::set<int> &test_leaf_combination, Leaves const &leaves, int const K);
 
 	protected:
 

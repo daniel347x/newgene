@@ -725,26 +725,7 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 	// and all leaf combinations that have been hit for that millisecond.
 	branch.hit[which_millisecond].insert(test_leaf_combination);
 
-	Leaves leaf_combination;
-	std::set<int>::const_iterator current_index_to_use_ptr = test_leaf_combination.cbegin();
-	int current_index_to_use = *current_index_to_use_ptr;
-	int current_index = 0;
-	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
-	{
-		if (current_index_to_use_ptr == test_leaf_combination.cend())
-		{
-			return;
-		}
-		current_index_to_use = *current_index_to_use_ptr;
-		if (current_index == current_index_to_use)
-		{
-			leaf_combination.insert(leaf);
-			++current_index_to_use_ptr;
-		}
-		++current_index;
-	});
-
-	BOOST_ASSERT_MSG(leaf_combination.size() == K, "Number of leaves generated does not equal K.");
+	Leaves leaf_combination = RetrieveLeafCombinationFromLeafIndices(test_leaf_combination, leaves, K);
 
 	return leaf_combination;
 
@@ -876,5 +857,34 @@ boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, i
 	}
 
 	return numerator / denominator;
+
+}
+
+Leaves AllWeightings::RetrieveLeafCombinationFromLeafIndices(std::set<int> &test_leaf_combination, Leaves const &leaves, int const K)
+{
+
+	Leaves leaf_combination;
+
+	std::set<int>::const_iterator current_index_to_use_ptr = test_leaf_combination.cbegin();
+	int current_index_to_use = *current_index_to_use_ptr;
+	int current_index = 0;
+	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
+	{
+		if (current_index_to_use_ptr == test_leaf_combination.cend())
+		{
+			return;
+		}
+		current_index_to_use = *current_index_to_use_ptr;
+		if (current_index == current_index_to_use)
+		{
+			leaf_combination.insert(leaf);
+			++current_index_to_use_ptr;
+		}
+		++current_index;
+	});
+
+	BOOST_ASSERT_MSG(leaf_combination.size() == K, "Number of leaves generated does not equal K.");
+
+	return leaf_combination;
 
 }
