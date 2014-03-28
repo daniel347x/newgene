@@ -888,3 +888,36 @@ Leaves AllWeightings::RetrieveLeafCombinationFromLeafIndices(std::set<int> &test
 	return leaf_combination;
 
 }
+
+void AllWeightings::ConsolidateHits()
+{
+
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice, VariableGroupTimeSliceData> & timeSliceData)
+	{
+
+		TimeSlice & timeSlice = timeSliceData.first;
+		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceData.second;
+
+		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+
+		// For now, assume only one variable group
+		if (variableGroupBranchesAndLeavesVector.size() > 1)
+		{
+			boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+		VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+		BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+
+		std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch, Leaves> & branchAndLeaves)
+		{
+
+			Branch & branch = branchAndLeaves.first;
+			branch.ConsolidateHits();
+
+		});
+
+	});
+
+}

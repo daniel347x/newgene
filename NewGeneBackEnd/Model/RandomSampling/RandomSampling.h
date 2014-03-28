@@ -393,6 +393,17 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			number_branch_combinations = rhs.number_branch_combinations;
 		}
 
+		void ConsolidateHits()
+		{
+			std::for_each(hit.cbegin(), hit.cend(), [&](std::set<std::set<int>> const & the_hits)
+			{
+				std::for_each(the_hits.cbegin(), the_hits.cend(), [&](std::set<int> const & the_hit)
+				{
+					hits_consolidated.insert(the_hit);
+				});
+			});
+		}
+
 		// Weighting for this branch: This is the lowest-level, calculated value, with millisecond granularity.
 		// It is the product of the number of branch combinations and the number of milliseconds in this time slice.
 		mutable Weighting weighting;
@@ -400,8 +411,10 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// cache of leaf combinations already hit:
 		// map from millisecond to a set of leaf combinations hit for that millisecond
 		mutable std::map<boost::multiprecision::cpp_int, std::set<std::set<int>>> hit;
-
 		mutable std::map<boost::multiprecision::cpp_int, std::vector<std::set<int>>> remaining;
+
+		std::set<std::set<int>> hits_consolidated; // After-the-fact: Merge identical hits across milliseconds within this branch
+
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
 };
@@ -473,6 +486,7 @@ class AllWeightings
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);
 		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_millisecond, int const K, Branch const & branch, Leaves const & leaves);
 		Leaves RetrieveLeafCombinationFromLeafIndices(std::set<int> &test_leaf_combination, Leaves const &leaves, int const K);
+		void ConsolidateHits(); // one-time pass to consolidate hits across ms within branches
 
 	protected:
 
