@@ -420,7 +420,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		mutable std::set<std::set<int>> hits_consolidated; // After-the-fact: Merge identical hits across milliseconds within this branch
 
-		// Indices into cached secondary data table for child groups.
+		// Indices into cached secondary data tables for child groups.
 		// 
 		// Overview:
 		//
@@ -428,37 +428,49 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		//
 		// Each branch corresponds to a single combination of specific primary key data values
 		// ... for those primary keys of multiplicity 1
-		// ... for the UOA corresponding to this primary variable group.
+		// ... for the UOA corresponding to the (single) primary top-level variable group.
 		// Each leaf corresponds to a single combination of specific primary key data values
 		// ... for those primary keys of multiplicity greater than 1
-		// ... for the UOA corresponding to this primary variable group.
+		// ... for the UOA corresponding to the primary top-level variable group.
 		// Each row of output data has one branch, and multiple leaves (one leaf per multiplicity).
+		// The set of leaves per row is stored in "hits_consolidated", a data member of this *branch*,
+		// ... and is also stored (redundantly) across individual millisecond entries within this branch
+		// ... (where duplicates can occur, because if the same row (i.e., combination of leaves)
+		// ...  appears in multiple millisecond entries in the same time slice,
+		// ...  that row will appear only once in the output for the time slice).
 		// Each leaf represents a single set of secondary column data.
 		// Example: UOA "MID, CTY, CTY", with K-ad "MID, CTY, CTY, CTY, CTY":
 		// ... has branch DMU "MID", and leave DMU "CTY, CTY".
 		// ... Each branch has a single value of a MID, such as "MID = 257" or "MID = 258".
 		// ... Each leaf has a single value for the "CTY, CTY" pair corresponding to the UOA,
 		// ... ... such as "CTY_1 = 2, CTY_2 = 20".
-		// ... Each row contains the value from the current (single) branch,
+		// ... Each row (or "hit") contains the value from the current (single) branch,
 		// ... ... and the values from two leaves (i.e., two pairs of countries, or 4 countries total).
 		//
-		// There can be child variable groups.
+		// There can also be child variable groups.
 		//
 		// Each child variable group's UOA is a subset of the UOA of the primary variable group.
 		// The full set of primary keys for this child variable group's UOA includes a subset of 
-		// ... the primary keys for the primary variable group's branch, and
-		// ... the primary keys for the primary variable group's leaves.
+		// ... the primary keys for the primary variable group's branch, and a subset of
+		// ... the primary keys for the primary variable group's leaves (including ALL the leaves).
 		// The child variable group also has 0, 1, or more leaves.
-		// ... Each leaf corresponds to a separate set of secondary child variable group
+		// ... Each child leaf corresponds to a separate set of secondary child variable group
 		// ... column data that appears in every row of output.
 		// Example: For the above UOA "MID, CTY, CTY" and K-ad "MID, CTY, CTY, CTY, CTY",
 		// ... a child group could have UOA "MID, CTY".
 		// For every row of output, this child group has four leaves, one for each country.
-		// ... (Multiple *sets* of leaves per row, as opposed to one *set* of leaves per row,
-		// ... is prohibited by data validation.)
-		// Each such child variable group leaf represents a single set of secondary column data. 
+		// ... (Multiple *sets* of leaves per row, as opposed to *one* *set* of leaves per row,
+		// ... is prohibited by data validation.  The latter would be a scenario such as
+		// ... primary UOA = "MID, MID, CTY, CTY" and child UOA = "MID, CTY", a case in which
+		// ... both MID and CTY have multiple sets of data for a single row - a prohibited case.)
+		// Each such child variable group leaf represents a single set of secondary column data.
+		//
+		// The actual raw data for the secondary columns - the data values themselves -
+		// ... are stored in the AllWeightings' "dataCache" (for primary top-level VG)
+		// ... and in the AllWeightings' "secondaryCache" (for non-primary top-level, and child, VG's).
 		// 
 		// The following data structure tracks all such secondary column data
+		// (via INDEX into the above caches)
 		// ... for *child* variable groups.
 		// ... (The secondary data for the *primary* variable group is tracked via the 
 		// ...  'index_into_raw_data' data member of the "Leaf" class.)
