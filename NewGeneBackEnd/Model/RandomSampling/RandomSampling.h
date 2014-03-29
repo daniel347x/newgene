@@ -476,6 +476,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ...  'index_into_raw_data' data member of the "Leaf" class.)
 		//
 		// The following variable is defined as:
+		// For each non-primary top-level (also referred to as "child"),
+		// and child, variable group (the child VG identifier is the first map key):
 		// A map of row (given by the set of primary variable group leaves)
 		// ... to a map of the child variable group's leaf index 
 		// ... to the index in the child variable group's secondary data table cache for that child leaf.
