@@ -469,53 +469,43 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		K = 0;
 		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
+		if (failed || CheckCancelled()) return;
 
 		AllWeightings allWeightings;
 
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
-		RandomSamplerFillDataForSinglePrimaryGroup(allWeightings, primary_variable_groups_column_info[top_level_vg_index], primary_group_column_sets);
 
-		RandomSamplerFillDataForChildGroups(allWeightings);
+		SqlAndColumnSet selected_raw_data_table_schema = CreateTableOfSelectedVariablesFromRawData(primary_variable_groups_column_info[top_level_vg_index], top_level_vg_index);
+		if (failed || CheckCancelled()) return;
+		selected_raw_data_table_schema.second.most_recent_sql_statement_executed__index = -1;
+		ExecuteSQL(selected_raw_data_table_schema);
+		primary_group_column_sets.push_back(selected_raw_data_table_schema);
+
+		std::vector<std::string> errorMessages;
+		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, 1, allWeightings, errorMessages);
+		if (failed || CheckCancelled()) return;
 
 		allWeightings.CalculateWeightings(K);
-
-		if (failed || CheckCancelled())
-		{
-			return;
-		}
+		if (failed || CheckCancelled()) return;
 
 		std::int64_t const samples = 10;
 
 		// The following prepares the sampler to return random rows
 		allWeightings.PrepareRandomNumbers(samples);
+		if (failed || CheckCancelled()) return;
 
-		if (failed || CheckCancelled())
-		{
-			return;
-		}
+		RandomSamplerFillDataForChildGroups(allWeightings);
+		if (failed || CheckCancelled()) return;
 
 		//RandomSamplingCreateOutputTable();
-
-		//if (failed || CheckCancelled())
-		//{
-		//	return SqlAndColumnSet();
-		//}
+		//if (failed || CheckCancelled()) return;
 
 		//RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
-
-		//if (failed || CheckCancelled())
-		//{
-		//	return SqlAndColumnSet();
-		//}
+		//if (failed || CheckCancelled()) return;
 
 		//ClearTables(sql_and_column_sets);
 		//sql_and_column_sets.push_back(random_sampling_schema);
-		//if (failed || CheckCancelled())
-		//{
-		//	return SqlAndColumnSet();
-		//}
-
 		//primary_group_final_results.push_back(primary_group_final_result);
 		//primary_group_merged_results = random_sampling_schema;
 
@@ -2701,20 +2691,6 @@ void OutputModel::OutputGenerator::LoopThroughPrimaryVariableGroups()
 		primary_group_final_results.push_back(primary_group_final_result);
 		++primary_group_number;
 	});
-
-}
-
-void OutputModel::OutputGenerator::RandomSamplerFillDataForSinglePrimaryGroup(AllWeightings & allWeightings, ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets)
-{
-
-	SqlAndColumnSet x_table_result = CreateInitialPrimaryXTable_OrCount(primary_variable_group_raw_data_columns, 1, false);
-	x_table_result.second.most_recent_sql_statement_executed__index = -1;
-	ExecuteSQL(x_table_result);
-	sql_and_column_sets.push_back(x_table_result);
-
-	std::vector<std::string> errorMessages;
-
-	RandomSamplingTimeSlices(x_table_result.second, 1, allWeightings, errorMessages);
 
 }
 
@@ -7860,6 +7836,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	std::vector<SQLExecutor> & sql_strings = result.first;
 	ColumnsInTempView & result_columns = result.second;
 
+	// Note: The "columns_in_view" of result_columns will be CLEARED
+	// and REFILLED below!
 	result_columns = variable_group_raw_data_columns;
 
 	result_columns.view_number = 1; // which set of secondary keys is this table - from 1 to K where K is the multiplicity.  This is the first, so set to 1.  (Regardless of which top-level primary variable group this is (currently multiple top-level primary variable groups is not supported).)
@@ -13354,7 +13332,8 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 		}
 
 
-		// Populate primary key column data, for those columns that are primary keys
+		// Populate primary key column data, for those columns that are primary keys.
+		// The logic is a bit tricky, but works... See comments above, and below, for context.
 
 		int number_inner_tables = 0;
 		std::for_each(sequence.primary_key_sequence_info.cbegin(),
@@ -13407,6 +13386,9 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 						if (boost::iequals(current_variable_group_primary_key_entry.table_column_name, column_in_variable_group_data_table.column_name_in_original_data_table))
 						{
 
+							// If we're here, we're a PRIMARY KEY -
+							// not a secondary key
+
 							bool matched = false;
 
 							if (current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
@@ -13456,14 +13438,17 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 
 								// The various loops have left us in the following state:
 								// This block will be hit once, and only once, for every primary key.
+								// It will never be hit for secondary keys.
 								// "primary_key_entry__output__including_multiplicities"
 								// and
 								// "current_variable_group_primary_key_entry"
 								// will both correspond to the LEFTMOST (i.e., first)
-								// occurrence of the primary key in the total K-spin-count selected by the user.
+								// occurrence of the primary key in the total K-spin-count selected by the user,
+								// even though THIS block is hit (once) for EVERY occurrence of the primary key
+								// in the total K-spin-count selected by the user.
 								// Due to the "column name" check, above, the current
 								// "column_in_variable_group_data_table" variable will properly match
-								// the sequence number it's supposed to be.
+								// the sequence number it's supposed to be within that total K-spin-count.
 
 								column_in_variable_group_data_table.primary_key_dmu_category_identifier = primary_key_entry__output__including_multiplicities.dmu_category;
 								column_in_variable_group_data_table.primary_key_index_within_total_kad_for_dmu_category =
@@ -20088,7 +20073,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number,
+void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number,
 		AllWeightings & allWeightings, std::vector<std::string> & errorMessages)
 {
 
@@ -20952,7 +20937,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 			std::vector<std::string> errorMessages;
 
-			RandomSamplingTimeSlices(x_table_result.second, 1, allWeightings, errorMessages);
+			RandomSampling_ReadData_AddToTimeSlices(x_table_result.second, 1, allWeightings, errorMessages);
 
 		}
 

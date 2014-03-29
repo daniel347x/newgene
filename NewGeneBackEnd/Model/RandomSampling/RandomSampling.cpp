@@ -462,7 +462,7 @@ void AllWeightings::CalculateWeightings(int const K)
 				branch.hit.clear();
 
 				// Holes between time slices are handled here -
-				// There is no gap in the sequence of discretized values in branches.
+				// There is no gap in the sequence of discretized weight values in branches.
 				branchWeighting.setWeighting(timeSlice.Width() * branch.number_branch_combinations);
 				branchWeighting.setWeightingRangeStart(currentWeighting);
 				currentWeighting += branchWeighting.getWeighting();
