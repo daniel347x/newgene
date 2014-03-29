@@ -470,11 +470,13 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		K = 0;
 		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
 
+		AllWeightings allWeightings;
+
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
-
-		AllWeightings allWeightings;
 		RandomSamplerFillDataForSinglePrimaryGroup(allWeightings, primary_variable_groups_column_info[top_level_vg_index], primary_group_column_sets);
+
+		RandomSamplerFillDataForChildGroups(allWeightings);
 
 		allWeightings.CalculateWeightings(K);
 
@@ -20043,8 +20045,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	result_columns.has_no_datetime_columns = false;
 
 
-	// Take the first top-level primary variable group, and use it to construct the primary key columns
-	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_raw_data_columns[0];
+	ColumnsInTempView const & primary_variable_group_raw_data_columns = primary_variable_groups_raw_data_columns[top_level_vg_index];
 
 	// First, calculate some indices.
 	int highest_multiplicity = 1;
@@ -20105,7 +20106,10 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 	});
 
+	// **************************************************************************************** //
 	// Proceed with the primary key columns of multiplicity > 1.
+	// **************************************************************************************** //
+
 	for (int current_multiplicity = 1; current_multiplicity <= highest_multiplicity; ++current_multiplicity)
 	{
 
@@ -20156,18 +20160,11 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 
 	// **************************************************************************************** //
-	// For the primary variable group, construct secondary data columns
+	// For the primary variable groups, construct secondary data columns
 	// **************************************************************************************** //
 
-	// **************************************************************************************** //
-	// Note! By providing the following (disabled) loop, we are taking a step
-	// in the direction of enabling multiple top-level variable groups
-	// **************************************************************************************** //
-
-#if 0
 	std::for_each(primary_variable_groups_raw_data_columns.cbegin(), primary_variable_groups_raw_data_columns.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
 	{
-#endif
 
 		WidgetInstanceIdentifiers const & variables_selected =
 			(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
@@ -20226,9 +20223,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 
 		}
 
-#if 0
 	});
-#endif
 
 
 	// **************************************************************************************** //
@@ -20586,4 +20581,164 @@ void OutputModel::OutputGenerator::BindTermToInsertStatement(sqlite3_stmt * inse
 {
 	bind_visitor visitor(insert_random_sample_stmt, bindIndex);
 	boost::apply_visitor(visitor, data);
+}
+
+void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeightings & allWeightings)
+{
+	
+	// **************************************************************************************** //
+	// Top-level variable groups that are *not* primary are considered child data
+	// **************************************************************************************** //
+
+	int current_top_level_vg_index = 0;
+	std::for_each(primary_variable_groups_column_info.cbegin(), primary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & primary_variable_group_raw_data_columns)
+	{
+
+		if (current_top_level_vg_index == top_level_vg_index)
+		{
+			// Skip the primary top-level variable group;
+			// we are only populating columns of secondary data
+			// for NON-primary top-level variable groups,
+			// which are for the purposes of this function
+			// considered to be child variable groups
+			return;
+		}
+
+		WidgetInstanceIdentifiers const & variables_selected =
+			(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
+
+		// Proceed to the secondary key columns.
+		for (int current_multiplicity = 1; current_multiplicity <= K; ++current_multiplicity)
+		{
+
+			std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
+				primary_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & raw_data_table_column)
+			{
+
+				bool make_secondary_datetime_column = false;
+
+				if (raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
+					|| raw_data_table_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+				{
+					// Do not return!  If the user selects these columns, they should appear as regular secondary key columns.
+					make_secondary_datetime_column = true;
+				}
+
+				if (!make_secondary_datetime_column && raw_data_table_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+				{
+					return; // We are populating secondary columns now, so exit if this isn't one
+				}
+
+				bool match = false;
+				std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&](WidgetInstanceIdentifier const & variable_selected)
+				{
+					if (boost::iequals(raw_data_table_column.column_name_in_original_data_table, *variable_selected.code))
+					{
+						match = true;
+					}
+				});
+
+				if (match)
+				{
+					result_columns.columns_in_view.push_back(raw_data_table_column);
+					ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
+					new_column.column_name_in_temporary_table += "_";
+					new_column.column_name_in_temporary_table += newUUID(true);
+					new_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
+					new_column.current_multiplicity__corresponding_to__current_inner_table___is_1_in_all_inner_tables_when_multiplicity_is_1_for_that_dmu_category_for_that_vg = current_multiplicity;
+
+					if (make_secondary_datetime_column)
+					{
+						new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+						new_column.originally_datetime = true;
+					}
+
+				}
+
+			});
+
+		}
+
+		++current_top_level_vg_index;
+
+	});
+
+
+	// **************************************************************************************** //
+	// Child variable groups - secondary columns
+	// **************************************************************************************** //
+
+	std::for_each(secondary_variable_groups_column_info.cbegin(),
+		secondary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & child_variable_group_raw_data_columns)
+	{
+
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
+		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
+
+		for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
+		{
+
+			WidgetInstanceIdentifiers const & variables_selected =
+				(*the_map)[*child_variable_group_raw_data_columns.variable_groups[0].identifier_parent][child_variable_group_raw_data_columns.variable_groups[0]];
+
+			std::for_each(child_variable_group_raw_data_columns.columns_in_view.cbegin(),
+				child_variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & new_column_secondary)
+			{
+				bool make_secondary_datetime_column = false;
+
+				if (new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
+					|| new_column_secondary.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
+				{
+					// Do not return!  If the user selects these columns, they should appear as regular secondary key columns.
+					make_secondary_datetime_column = true;
+				}
+
+				if (!make_secondary_datetime_column && new_column_secondary.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+				{
+					return; // We are populating secondary columns now, so exit if this isn't one
+				}
+
+				bool match = false;
+				std::for_each(variables_selected.cbegin(), variables_selected.cend(), [&new_column_secondary, &match](WidgetInstanceIdentifier const & variable_selected)
+				{
+					if (boost::iequals(new_column_secondary.column_name_in_original_data_table, *variable_selected.code))
+					{
+						match = true;
+					}
+				});
+
+				if (match)
+				{
+					result_columns.columns_in_view.push_back(new_column_secondary);
+					ColumnsInTempView::ColumnInTempView & new_column = result_columns.columns_in_view.back();
+					new_column.column_name_in_temporary_table = new_column.column_name_in_temporary_table_no_uuid;
+					new_column.column_name_in_temporary_table += "_";
+					new_column.column_name_in_temporary_table += newUUID(true);
+					new_column.is_within_inner_table_corresponding_to_top_level_uoa = false;
+					new_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = current_multiplicity;
+
+					if (make_secondary_datetime_column)
+					{
+						new_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY;
+						new_column.originally_datetime = true;
+					}
+
+				}
+			});
+
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
+
+		}
+
+	});
+
 }
