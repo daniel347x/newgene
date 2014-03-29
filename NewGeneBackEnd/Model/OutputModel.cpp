@@ -7853,7 +7853,7 @@ bool OutputModel::OutputGenerator::SQLExecutor::Step()
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const primary_group_number)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number)
 {
 
 	SqlAndColumnSet result = std::make_pair(std::vector<SQLExecutor>(), ColumnsInTempView());
@@ -7862,26 +7862,37 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	result_columns = variable_group_raw_data_columns;
 
-	result_columns.view_number = 1;
-	result_columns.has_no_datetime_columns = false;
-	std::string view_name = "NGTEMP_V";
-	view_name += std::to_string(primary_group_number);
-	view_name += "_x";
-	view_name += "1";
+	result_columns.view_number = 1; // which set of secondary keys is this table - from 1 to K where K is the multiplicity.  This is the first, so set to 1.  (Regardless of which top-level primary variable group this is (currently multiple top-level primary variable groups is not supported).)
+	result_columns.has_no_datetime_columns = false; // Only the actual permanent data table in the database can have this be set to true.  Here, we are doing a SELECT of the permanent data for the first time into a temporary table.
+	std::string view_name;
+	switch (variable_group_raw_data_columns.schema_type)
+	{
+		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
+			view_name = "NGTEMP__RAW__SELECTED_VARIABLES_PRIMARY";
+			break;
+		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
+			view_name = "NGTEMP__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY";
+			break;
+		case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
+			view_name = "NGTEMP__RAW__SELECTED_VARIABLES_CHILD";
+			break;
+	}
+	view_name += "_";
+	view_name += boost::lexical_cast<std::string>(group_number);
 	result_columns.view_name_no_uuid = view_name;
 	view_name += "_";
 	view_name += newUUID(true);
 	result_columns.view_name = view_name;
 
 	WidgetInstanceIdentifiers const & variables_selected =
-		(*the_map)[*primary_variable_group_raw_data_columns.variable_groups[0].identifier_parent][primary_variable_group_raw_data_columns.variable_groups[0]];
+		(*the_map)[*variable_group_raw_data_columns.variable_groups[0].identifier_parent][variable_group_raw_data_columns.variable_groups[0]];
 
 	result_columns.columns_in_view.clear();
 
-	// Add the columns from the raw data table into this initial temporary table.
+	// Create the schema columns from the raw data table into the temporary table.
 	// Start with the primary key columns.
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
+		variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART
 			|| column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
@@ -7903,8 +7914,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	});
 
 	// Proceed to the secondary key columns.
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
+		variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		bool make_secondary_datetime_column = false;
 
@@ -7947,8 +7958,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	});
 
 	// Proceed, finally, to the datetime columns, if they exist.  (If they don't, they will be added via ALTER TABLE to the temporary table under construction.)
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
+		variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		// Now do the datetime_start column
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART)
@@ -7956,8 +7967,8 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 			result_columns.columns_in_view.push_back(column_in_view);
 		}
 	});
-	std::for_each(primary_variable_group_raw_data_columns.columns_in_view.cbegin(),
-		primary_variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
+	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
+		variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		// Now do the datetime_end column
 		if (column_in_view.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND)
@@ -7992,55 +8003,40 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	sql_strings.push_back(SQLExecutor(this, db));
 	std::string & sql_string = sql_strings.back().sql;
 
-	if (!count_only)
-	{
-		sql_string = "CREATE TABLE \"";
-		sql_string += result_columns.view_name;
-		sql_string += "\" AS ";
-	}
-	else
-	{
-		sql_strings.back().statement_type = SQLExecutor::RETURNS_ROWS;
-	}
-
+	sql_string = "CREATE TABLE \"";
+	sql_string += result_columns.view_name;
+	sql_string += "\" AS ";
 	sql_string += "SELECT ";
 
-	if (count_only)
+	first = true;
+	std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
 	{
-		sql_string += "COUNT(*)";
-	}
-	else
-	{
-		first = true;
-		std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [&sql_string, &first](ColumnsInTempView::ColumnInTempView & new_column)
+		if (!first)
 		{
-			if (!first)
-			{
-				sql_string += ", ";
-			}
+			sql_string += ", ";
+		}
 
-			first = false;
+		first = false;
 
-			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
-			{
-				sql_string += "CAST (";
-			}
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
+		{
+			sql_string += "CAST (";
+		}
 
-			sql_string += "`";
-			sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
-			sql_string += "`";
+		sql_string += "`";
+		sql_string += new_column.column_name_in_temporary_table_no_uuid; // This is the original column name
+		sql_string += "`";
 
-			if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
-			{
-				sql_string += " AS INTEGER)";
-			}
+		if (new_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY && new_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
+		{
+			sql_string += " AS INTEGER)";
+		}
 
-			sql_string += " AS ";
-			sql_string += "`";
-			sql_string += new_column.column_name_in_temporary_table;
-			sql_string += "`";
-		});
-	}
+		sql_string += " AS ";
+		sql_string += "`";
+		sql_string += new_column.column_name_in_temporary_table;
+		sql_string += "`";
+	});
 
 	sql_string += " FROM \"";
 	sql_string += result_columns.original_table_names[0];
@@ -8049,331 +8045,122 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	// Only include rows in raw data that overlap the time range selected
 	// by the user, or that have no time range granularity (represented by 0
 	// in the time range fields)
-	if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
+	if (!variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
-		if (count_only)
-		{
-			sql_string += " WHERE CASE WHEN `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid;
-			sql_string += "` = 0 AND `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid;
-			sql_string += "` = 0 ";
-			sql_string += " THEN 1 ";
-			sql_string += " WHEN `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid;
-			sql_string += "` < ";
-			sql_string += boost::lexical_cast<std::string>(timerange_end);
-			sql_string += " THEN `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid;
-			sql_string += "` > ";
-			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " WHEN `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid;
-			sql_string += "` > ";
-			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " THEN `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid;
-			sql_string += "` < ";
-			sql_string += boost::lexical_cast<std::string>(timerange_end);
-			sql_string += " ELSE 0";
-			sql_string += " END";
-		}
-		else
-		{
-			sql_string += " WHERE CASE WHEN `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += "` = 0 AND `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += "` = 0 ";
-			sql_string += " THEN 1 ";
-			sql_string += " WHEN `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += "` < ";
-			sql_string += boost::lexical_cast<std::string>(timerange_end);
-			sql_string += " THEN `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += "` > ";
-			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " WHEN `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
-			sql_string += "` > ";
-			sql_string += boost::lexical_cast<std::string>(timerange_start);
-			sql_string += " THEN `";
-			sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
-			sql_string += "` < ";
-			sql_string += boost::lexical_cast<std::string>(timerange_end);
-			sql_string += " ELSE 0";
-			sql_string += " END";
-		}
+		sql_string += " WHERE CASE WHEN `";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += "` = 0 AND `";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += "` = 0 ";
+		sql_string += " THEN 1 ";
+		sql_string += " WHEN `";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += "` < ";
+		sql_string += boost::lexical_cast<std::string>(timerange_end);
+		sql_string += " THEN `";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += "` > ";
+		sql_string += boost::lexical_cast<std::string>(timerange_start);
+		sql_string += " WHEN `";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table;
+		sql_string += "` > ";
+		sql_string += boost::lexical_cast<std::string>(timerange_start);
+		sql_string += " THEN `";
+		sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table;
+		sql_string += "` < ";
+		sql_string += boost::lexical_cast<std::string>(timerange_end);
+		sql_string += " ELSE 0";
+		sql_string += " END";
 	}
 
-	// Add the ORDER BY column/s
-	//if (!count_only && debug_ordering)
-	if (!random_sampling)
+	// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
+	if (variable_group_raw_data_columns.has_no_datetime_columns_originally)
 	{
 
-		if (!count_only && true)
+		result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL,
+			ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL);
+
+		std::string datetime_start_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName;
+		std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
+		datetime_start_col_name += "_";
+		datetime_start_col_name += newUUID(true);
+
+		std::string alter_string;
+		alter_string += "ALTER TABLE \"";
+		alter_string += result_columns.view_name;
+		alter_string += "\" ADD COLUMN ";
+		alter_string += datetime_start_col_name;
+		alter_string += " INTEGER DEFAULT 0";
+		sql_strings.push_back(SQLExecutor(this, db, alter_string));
+
+		if (failed)
 		{
-
-			bool first = true;
-
-			// First order by primary key columns (with multiplicity 1)
-			std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &sql_string, &result_columns, &first](
-				ColumnsInTempView::ColumnInTempView & view_column)
-			{
-				// Determine how many columns there are corresponding to the DMU category
-				int number_primary_key_columns_in_dmu_category_with_multiplicity_of_1 = 0;
-				std::for_each(result_columns.columns_in_view.begin(),
-					result_columns.columns_in_view.end(), [this, &view_column, &number_primary_key_columns_in_dmu_category_with_multiplicity_of_1, &sql_string](
-					ColumnsInTempView::ColumnInTempView & view_column_)
-				{
-					if (view_column_.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-					{
-						if (view_column_.primary_key_dmu_category_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, view_column.primary_key_dmu_category_identifier))
-						{
-							if (view_column_.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
-							{
-								if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
-								{
-									++number_primary_key_columns_in_dmu_category_with_multiplicity_of_1;
-								}
-							}
-						}
-					}
-				});
-
-				if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-				{
-					if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
-					{
-						for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_of_1; ++inner_dmu_multiplicity)
-						{
-							if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
-							{
-								if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
-								{
-									if (!first)
-									{
-										sql_string += ", ";
-									}
-									else
-									{
-										sql_string += " ORDER BY ";
-									}
-
-									first = false;
-
-									if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
-									{
-										sql_string += "CAST (";
-									}
-
-									sql_string += "`";
-									sql_string += view_column.column_name_in_temporary_table;
-									sql_string += "`";
-
-									if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
-									{
-										sql_string += " AS INTEGER)";
-									}
-								}
-							}
-						}
-					}
-				}
-			});
-
-			if (!random_sampling)
-			{
-
-				// Then by columns with multiplicity greater than 1
-				if (highest_multiplicity_primary_uoa > 1)
-				{
-
-					// Determine how many columns there are corresponding to the DMU category with multiplicity greater than 1
-					int number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1 = 0;
-					std::for_each(result_columns.columns_in_view.begin(),
-						result_columns.columns_in_view.end(), [this, &number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1, &sql_string](
-						ColumnsInTempView::ColumnInTempView & view_column)
-					{
-						if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-						{
-							if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
-							{
-								if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
-								{
-									++number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1;
-								}
-							}
-						}
-					});
-
-					// Create the ORDER BY clause, taking the proper primary key columns that compose the DMU category with multiplicity greater than 1, in sequence
-					for (int inner_dmu_multiplicity = 0; inner_dmu_multiplicity < number_primary_key_columns_in_dmu_category_with_multiplicity_greater_than_1; ++inner_dmu_multiplicity)
-					{
-						std::for_each(result_columns.columns_in_view.begin(), result_columns.columns_in_view.end(), [this, &inner_dmu_multiplicity, &sql_string, &first](
-							ColumnsInTempView::ColumnInTempView & view_column)
-						{
-							if (view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
-							{
-								if (view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == highest_multiplicity_primary_uoa)
-								{
-									if (view_column.primary_key_index__within_uoa_corresponding_to_variable_group_corresponding_to_current_inner_table__for_dmu_category == inner_dmu_multiplicity)
-									{
-										if (view_column.is_within_inner_table_corresponding_to_top_level_uoa)
-										{
-											if (!first)
-											{
-												sql_string += ", ";
-											}
-											else
-											{
-												sql_string += " ORDER BY ";
-											}
-
-											first = false;
-
-											if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
-											{
-												sql_string += "CAST (";
-											}
-
-											sql_string += "`";
-											sql_string += view_column.column_name_in_temporary_table;
-											sql_string += "`";
-
-											if (view_column.primary_key_should_be_treated_as_integer_____float_not_allowed_as_primary_key)
-											{
-												sql_string += " AS INTEGER)";
-											}
-										}
-									}
-								}
-							}
-						});
-					}
-
-				}
-
-			}
-
-			// Finally, order by the time range columns
-			if (!primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
-			{
-				if (!first)
-				{
-					sql_string += ", ";
-				}
-				else
-				{
-					sql_string += " ORDER BY ";
-				}
-
-				first = false;
-				sql_string += "`";
-				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 2].column_name_in_temporary_table_no_uuid; // final merged datetime start column
-				sql_string += "`";
-				sql_string += ", ";
-				sql_string += "`";
-				sql_string += result_columns.columns_in_view[result_columns.columns_in_view.size() - 1].column_name_in_temporary_table_no_uuid; // final merged datetime end column
-				sql_string += "`";
-			}
-
+			SetFailureMessage(sql_error);
+			return result;
 		}
 
-	}
+		if (CheckCancelled())
+		{
+			return result;
+		}
 
-	if (!count_only)
+		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
+		datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
+		datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
+		datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
+		datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_saved;
+		datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
+		datetime_start_column.column_name_in_original_data_table = "";
+		datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+		datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
+		datetime_start_column.number_inner_tables_in_set = variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
+
+		std::string datetime_end_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
+		std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
+		datetime_end_col_name += "_";
+		datetime_end_col_name += newUUID(true);
+
+		alter_string.clear();
+		alter_string += "ALTER TABLE \"";
+		alter_string += result_columns.view_name;
+		alter_string += "\" ADD COLUMN ";
+		alter_string += datetime_end_col_name;
+		alter_string += " INTEGER DEFAULT 0";
+		sql_strings.push_back(SQLExecutor(this, db, alter_string));
+
+		if (failed)
+		{
+			SetFailureMessage(sql_error);
+			return result;
+		}
+
+		if (CheckCancelled())
+		{
+			return result;
+		}
+
+		result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
+		ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
+		datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
+		datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
+		datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
+		datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_saved;
+		datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
+		datetime_end_column.column_name_in_original_data_table = "";
+		datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
+		datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
+		datetime_end_column.number_inner_tables_in_set = variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
+
+	}
+	else
 	{
-		// SQL to add the datetime columns, if they are not present in the raw data table (filled with 0)
-		if (primary_variable_group_raw_data_columns.has_no_datetime_columns_originally)
-		{
-
-			result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL,
-				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL);
-
-			std::string datetime_start_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeStartColumnName;
-			std::string datetime_start_col_name = datetime_start_col_name_no_uuid;
-			datetime_start_col_name += "_";
-			datetime_start_col_name += newUUID(true);
-
-			std::string alter_string;
-			alter_string += "ALTER TABLE \"";
-			alter_string += result_columns.view_name;
-			alter_string += "\" ADD COLUMN ";
-			alter_string += datetime_start_col_name;
-			alter_string += " INTEGER DEFAULT 0";
-			sql_strings.push_back(SQLExecutor(this, db, alter_string));
-
-			if (failed)
-			{
-				SetFailureMessage(sql_error);
-				return result;
-			}
-
-			if (CheckCancelled())
-			{
-				return result;
-			}
-
-			result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-			ColumnsInTempView::ColumnInTempView & datetime_start_column = result_columns.columns_in_view.back();
-			datetime_start_column.column_name_in_temporary_table = datetime_start_col_name;
-			datetime_start_column.column_name_in_temporary_table_no_uuid = datetime_start_col_name_no_uuid;
-			datetime_start_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART_INTERNAL;
-			datetime_start_column.variable_group_associated_with_current_inner_table = variable_group_saved;
-			datetime_start_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
-			datetime_start_column.column_name_in_original_data_table = "";
-			datetime_start_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
-			datetime_start_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
-			datetime_start_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
-
-			std::string datetime_end_col_name_no_uuid = Table_VariableGroupMetadata_DateTimeColumns::DefaultDatetimeEndColumnName;
-			std::string datetime_end_col_name = datetime_end_col_name_no_uuid;
-			datetime_end_col_name += "_";
-			datetime_end_col_name += newUUID(true);
-
-			alter_string.clear();
-			alter_string += "ALTER TABLE \"";
-			alter_string += result_columns.view_name;
-			alter_string += "\" ADD COLUMN ";
-			alter_string += datetime_end_col_name;
-			alter_string += " INTEGER DEFAULT 0";
-			sql_strings.push_back(SQLExecutor(this, db, alter_string));
-
-			if (failed)
-			{
-				SetFailureMessage(sql_error);
-				return result;
-			}
-
-			if (CheckCancelled())
-			{
-				return result;
-			}
-
-			result_columns.columns_in_view.push_back(ColumnsInTempView::ColumnInTempView());
-			ColumnsInTempView::ColumnInTempView & datetime_end_column = result_columns.columns_in_view.back();
-			datetime_end_column.column_name_in_temporary_table = datetime_end_col_name;
-			datetime_end_column.column_name_in_temporary_table_no_uuid = datetime_end_col_name_no_uuid;
-			datetime_end_column.column_type = ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND_INTERNAL;
-			datetime_end_column.variable_group_associated_with_current_inner_table = variable_group_saved;
-			datetime_end_column.uoa_associated_with_variable_group_associated_with_current_inner_table = uoa_saved;
-			datetime_end_column.column_name_in_original_data_table = "";
-			datetime_end_column.is_within_inner_table_corresponding_to_top_level_uoa = true;
-			datetime_end_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set = 1;
-			datetime_end_column.number_inner_tables_in_set = primary_variable_group_raw_data_columns.columns_in_view.back().number_inner_tables_in_set;
-
-		}
-		else
-		{
-			result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART,
-				ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND);
-			at_least_one_variable_group_has_timerange = true;
-		}
-
-		result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
+		result_columns.current_block_datetime_column_types = std::make_pair(ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMESTART,
+			ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__DATETIMEEND);
+		at_least_one_variable_group_has_timerange = true;
 	}
+
+	result_columns.previous_block_datetime_column_types = result_columns.current_block_datetime_column_types;
 
 	return result;
 
@@ -8390,7 +8177,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 	result_columns = primary_variable_group_raw_data_columns;
 
 	result_columns.view_number = 1;
-	result_columns.has_no_datetime_columns = false; // Only the actual permanent data table in the database can have this be set to true.  Here, we are doing a SELECT of the permanent data for the first time into a temporary table.
+	result_columns.has_no_datetime_columns = false;
 	std::string view_name = "NGTEMP_V";
 	view_name += std::to_string(primary_group_number);
 	view_name += "_x";
@@ -13370,23 +13157,27 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForRawDataTables()
 {
 
 	int primary_view_count = 0;
+	int primary_or_secondary_view_index = 0;
 	std::for_each(primary_variable_groups_vector.cbegin(),
-				  primary_variable_groups_vector.cend(), [this, &primary_view_count](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
+				  primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
 	{
-		PopulateColumnsFromRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true);
+		PopulateColumnsFromRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true, primary_or_secondary_view_index);
+		++primary_or_secondary_view_index;
 	});
 
 	int secondary_view_count = 0;
+	primary_or_secondary_view_index = 0;
 	std::for_each(secondary_variable_groups_vector.cbegin(),
-				  secondary_variable_groups_vector.cend(), [this, &secondary_view_count](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_secondary_variable_group)
+				  secondary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_secondary_variable_group)
 	{
-		PopulateColumnsFromRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_column_info, false);
+		PopulateColumnsFromRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_column_info, false, primary_or_secondary_view_index);
+		++primary_or_secondary_view_index;
 	});
 
 }
 
 void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group, int view_count,
-		std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary)
+	std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index)
 {
 
 	// ************************************************************************************************ //
@@ -13410,6 +13201,22 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 
 	variable_groups_column_info.push_back(ColumnsInTempView());
 	ColumnsInTempView & columns_in_variable_group_view = variable_groups_column_info.back();
+
+	if (is_primary)
+	{
+		if (primary_or_secondary_view_index == top_level_vg_index)
+		{
+			columns_in_variable_group_view.schema_type = ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY;
+		}
+		else
+		{
+			columns_in_variable_group_view.schema_type = ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY;
+		}
+	}
+	else
+	{
+		columns_in_variable_group_view.schema_type = ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD;
+	}
 
 
 

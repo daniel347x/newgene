@@ -88,6 +88,15 @@ class ColumnsInTempView
 
 	public:
 
+		enum SCHEMA_TYPE
+		{
+			  SCHEMA_TYPE__UNKNOWN
+			, SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY
+			, SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY
+			, SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD
+			, SCHEMA_TYPE__DEDUCED
+		};
+
 		class ColumnInTempView
 		{
 
@@ -95,8 +104,8 @@ class ColumnsInTempView
 
 				enum COLUMN_TYPE
 				{
-					COLUMN_TYPE__UNKNOWN = 0
-										   , COLUMN_TYPE__PRIMARY
+					  COLUMN_TYPE__UNKNOWN = 0
+					, COLUMN_TYPE__PRIMARY
 					, COLUMN_TYPE__SECONDARY
 					, COLUMN_TYPE__DATETIMESTART
 					, COLUMN_TYPE__DATETIMEEND
@@ -186,6 +195,7 @@ class ColumnsInTempView
 			, most_recent_sql_statement_executed__index(-1)
 			, make_table_permanent(false)
 			, not_first_variable_group_column_index(-1)
+			, schema_type(SCHEMA_TYPE__UNKNOWN)
 		{
 
 		}
@@ -205,7 +215,7 @@ class ColumnsInTempView
 			, current_block_datetime_column_types(rhs.current_block_datetime_column_types)
 			, most_recent_sql_statement_executed__index(rhs.most_recent_sql_statement_executed__index)
 			, make_table_permanent(rhs.make_table_permanent)
-
+			, schema_type(rhs.schema_type)
 		{
 			// For optimization variables
 			// Force recalculation of this
@@ -229,6 +239,8 @@ class ColumnsInTempView
 		int most_recent_sql_statement_executed__index;
 
 		bool make_table_permanent;
+
+		SCHEMA_TYPE schema_type;
 
 		// optimizations
 		mutable int not_first_variable_group_column_index;
@@ -703,7 +715,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				int K; // the multiplicity
 
 				// Random sampling
-				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const primary_group_number = 1);
+				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number);
 				void RandomSamplerFillDataForSinglePrimaryGroup(AllWeightings & allWeightings, ColumnsInTempView const & primary_variable_group_raw_data_columns, SqlAndColumnSets & sql_and_column_sets);
 				void RandomSamplerFillDataForChildGroups(AllWeightings & allWeightings);
 				void RandomSamplingTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
@@ -745,7 +757,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// Functions involved in different phases of generation
 				void ObtainColumnInfoForRawDataTables();
 				void PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,
-													 std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary);
+					std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index);
 				void LoopThroughPrimaryVariableGroups();
 				void MergeHighLevelGroupResults();
 				void MergeChildGroups();
