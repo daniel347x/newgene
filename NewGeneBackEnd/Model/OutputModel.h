@@ -26,14 +26,16 @@ class PrimaryKeySequence
 		class VariableGroup_PrimaryKey_Info
 		{
 
-			VariableGroup_PrimaryKey_Info()
-			: sequence_number_within_dmu_category_for_this_variable_groups_uoa(-1) // will only be populated later if exists
-			, current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group(-1) // will be populated later
-			, total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group(0) // will only be populated later if exists
-			, total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group(-1) // will be populated later
-			, total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group(0) // will only be populated later if exists
-			, total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category(-1) // will be populated later
-			{}
+			public:
+
+				VariableGroup_PrimaryKey_Info()
+					: sequence_number_within_dmu_category_for_this_variable_groups_uoa(-1) // will only be populated later if exists
+					, current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group(-1) // will be populated later
+					, total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group(0) // will only be populated later if exists
+					, total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group(-1) // will be populated later
+					, total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group(0) // will only be populated later if exists
+					, total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category(-1) // will be populated later
+				{}
 
 			public:
 

@@ -20082,8 +20082,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 	AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages,
 	std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary,
 	std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary,
-	int const leaf_index = -1)
-	)
+	int const leaf_index)
 {
 
 	{
