@@ -21021,16 +21021,35 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(child_variable_group_raw_data_columns.variable_groups[0].identifier_parent)].second;
 
-		std::for_each(sequence.primary_key_sequence_info.cbegin(),
-			sequence.primary_key_sequence_info.cend(), [&](PrimaryKeySequence::PrimaryKeySequenceEntry const & primary_key)
+		std::vector<ChildToPrimaryMapping> mappings_from_child_to_primary;
+
+		int current_primary_branch_index = 0;
+		int current_primary_leaf_index = 0;
+		int current_child_branch_index = 0;
+		int current_child_leaf_index = 0;
+		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&](PrimaryKeySequence::PrimaryKeySequenceEntry const & full_kad_key_info)
 		{
 
-			std::for_each(primary_key.variable_group_info_for_primary_keys.cbegin(),
-				primary_key.variable_group_info_for_primary_keys.cend(), [&](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & primary_key_info_this_variable_group)
+			bool is_primary_group_branch = false;
+			if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+			{
+				is_primary_group_branch = true;
+			}
+
+			std::for_each(full_kad_key_info.variable_group_info_for_primary_keys.cbegin(),
+				full_kad_key_info.variable_group_info_for_primary_keys.cend(), [&](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_this_variable_group)
 			{
 
-				if (primary_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, variable_group_child))
+				if (full_kad_key_info_this_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, child_variable_group_raw_data_columns.variable_groups[0]))
 				{
+
+					bool is_child_group_branch = false;
+					if (full_kad_key_info_this_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+					{
+						is_child_group_branch = true;
+					}
+
+
 
 				}
 

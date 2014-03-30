@@ -651,6 +651,23 @@ typedef std::map<TimeSlice, VariableGroupTimeSliceData> TimeSlices;
 
 typedef std::pair<TimeSlice, Leaf> TimeSliceLeaf;
 
+enum CHILD_TO_PRIMARY_MAPPING
+{
+	CHILD_TO_PRIMARY_MAPPING__UNKNOWN
+	, CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH
+	, CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF
+};
+
+struct ChildToPrimaryMapping
+{
+	ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING const mapping_, int const index_, int const leaf_number_ = -1)
+	: mapping(mapping_), index(index_), leaf_number(leaf_number_) {}
+
+	CHILD_TO_PRIMARY_MAPPING mapping;
+	int index;
+	int leaf_number;
+};
+
 class AllWeightings
 {
 
