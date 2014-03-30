@@ -451,7 +451,19 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				if (branchAndLeavesPtr != branchesAndLeaves.end())
 				{
 					// There must already be a branch in place
+					Leaves & leaves = branchAndLeavesPtr->second;
+					auto leafPtr = leaves.find(timeSliceLeaf.second);
+					if (leafPtr != leaves.end())
+					{
+						// This branch has a leaf that matches the incoming leaf.
+						// Set its data.
+						Leaf const & leaf = *leafPtr;
 
+						// pass the index over from the incoming leaf (which contains only the index for the current top-level variable group being merged in)
+						// into the active leaf saved in the AllWeightings instance, and used to construct the output rows.
+						// (This active leaf may also have been called previously to set other top-level variable group rows.)
+						leaf.other_top_level_indices_into_raw_data[variable_group_number] = timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number];
+					}
 				}
 
 			}

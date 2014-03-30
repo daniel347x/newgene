@@ -191,7 +191,7 @@ class Weighting
 			return weighting_range_end;
 		}
 
-private:
+	private:
 	
 		boost::multiprecision::cpp_int weighting;
 		boost::multiprecision::cpp_int weighting_range_start;
@@ -361,7 +361,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 		std::int64_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
 
 		// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
-		std::map<int, std::int64_t> other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
+		mutable std::map<int, std::int64_t> other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
 
 };
 
@@ -579,7 +579,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		// This data structure is a helper index that maps the DMU set corresponding
 		// to incoming child variable group, to output rows for that variable group
-		mutable std::map<ChildDMUInstanceDataVector, std::vector<std::set<BranchOutputRow>::iterator>> helper_lookup__from_child_key_set__to_matching_output_rows;
+		mutable std::map<ChildDMUInstanceDataVector, std::vector<BranchOutputRow>::iterator> helper_lookup__from_child_key_set__to_matching_output_rows;
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
