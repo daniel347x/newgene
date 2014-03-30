@@ -434,6 +434,11 @@ class BranchOutputRow
 		// Index into the branch's Leaf set
 		std::set<int> primary_leaves;
 
+		// Map from child variable group ID to:
+		// Map from child leaf index to:
+		// index into child variable group's raw data cache (stored in the AllWeightings instance)
+		mutable std::map<int, std::map<int, std::int64_t>> child_indices_into_raw_data;
+
 };
 
 // "Branch"
