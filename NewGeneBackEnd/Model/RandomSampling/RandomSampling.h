@@ -583,10 +583,11 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ... and in the AllWeightings' "secondaryCache" (for non-primary top-level, and child, VG's).
 
 		// This data structure is a helper index that maps the *FULL* DMU set (including child leaf)
-		// corresponding to incoming child variable group, to output rows for that variable group
+		// corresponding to incoming child variable group (NOT non-primary top-level variable group),
+		// to output rows for that variable group
 		// along with the child leaf offset/s in the output row corresponding to the DMU set.
 		mutable std::map<ChildDMUInstanceDataVector, std::vector<std::pair<std::vector<BranchOutputRow>::iterator, std::vector<int>>>> helper_lookup__from_child_key_set__to_matching_output_rows;
-		void ConstructChildCombinationCache() const; // Populate the above data structure
+		void ConstructChildCombinationCache(int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), int const leaf_index = -1) const; // Populate the above data structure
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
@@ -718,7 +719,7 @@ class AllWeightings
 		void SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice);
 
 		// Merge time slice data into a map element
-		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode);
+		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), int const leaf_index = -1);
 
 		Leaves GetLeafCombination(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves);
 

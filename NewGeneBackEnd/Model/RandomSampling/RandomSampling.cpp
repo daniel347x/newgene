@@ -223,7 +223,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// Leave the second piece unchanged.
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_end, newMapElementLeftPtr, newMapElementRightPtr);
-			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_number, merge_mode);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 
 			mapElementPtr = newMapElementLeftPtr;
 
@@ -237,7 +237,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 
 			// Merge the new time slice with the map element.
 
-			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, mapElementPtr, variable_group_number, merge_mode);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, mapElementPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 
 			newTimeSliceEatenCompletelyUp = true;
 
@@ -256,7 +256,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// The remainder of the new time slice (at the right) is now in the variable "newTimeSliceLeaf" and ready for the next iteration.
 
 			SliceOffLeft(newTimeSliceLeaf, mapElement.time_end, new_left_slice);
-			MergeTimeSliceDataIntoMap(branch, new_left_slice, mapElementPtr, variable_group_number, merge_mode);
+			MergeTimeSliceDataIntoMap(branch, new_left_slice, mapElementPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 
 			mapElementPtr = ++mapElementPtr;
 
@@ -282,7 +282,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// The third is unchanged.
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newTimeSlice.time_end, newMapElementMiddlePtr);
-			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementMiddlePtr, variable_group_number, merge_mode);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementMiddlePtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 
 			mapElementPtr = newMapElementMiddlePtr;
 
@@ -302,7 +302,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// (with the right edge equal to the right edge of the map element).
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newMapElementLeftPtr, newMapElementRightPtr);
-			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementRightPtr, variable_group_number, merge_mode);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementRightPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 
 			mapElementPtr = newMapElementRightPtr;
 
@@ -325,7 +325,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 
 			SliceOffLeft(newTimeSliceLeaf, mapElement.time_end, new_left_slice);
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newMapElementLeftPtr, newMapElementRightPtr);
-			MergeTimeSliceDataIntoMap(branch, new_left_slice, newMapElementRightPtr, variable_group_number, merge_mode);
+			MergeTimeSliceDataIntoMap(branch, new_left_slice, newMapElementRightPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 
 			mapElementPtr = ++newMapElementRightPtr;
 
@@ -397,7 +397,7 @@ void AllWeightings::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t co
 }
 
 // Merge time slice data into a map element
-void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode)
+void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const leaf_index)
 {
 
 	VariableGroupTimeSliceData & variableGroupTimeSliceData = mapElementPtr->second;
@@ -477,7 +477,7 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
 				dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
 
-				branch.ConstructChildCombinationCache();
+				branch.ConstructChildCombinationCache(variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 
 			}
 			break;
@@ -1010,7 +1010,12 @@ void AllWeightings::ConsolidateHits()
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache()
+void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const leaf_index) const
 {
+
+	if (helper_lookup__from_child_key_set__to_matching_output_rows.empty())
+	{
+
+	}
 
 }
