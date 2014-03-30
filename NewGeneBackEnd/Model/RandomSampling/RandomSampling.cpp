@@ -1051,6 +1051,18 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 
 		// The cache has yet to be filled, or we are specifically being requested to refresh it
 
+		std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_output_rows)
+		{
+
+			std::for_each(time_unit_output_rows.second.cbegin(), time_unit_output_rows.second.cend(), [&](BranchOutputRow const & outputRow)
+			{
+
+
+
+			});
+
+		});
+
 	}
 
 }
