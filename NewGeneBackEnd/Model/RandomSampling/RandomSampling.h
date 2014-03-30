@@ -582,9 +582,10 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ... are stored in the AllWeightings' "dataCache" (for primary top-level VG)
 		// ... and in the AllWeightings' "secondaryCache" (for non-primary top-level, and child, VG's).
 
-		// This data structure is a helper index that maps the DMU set corresponding
-		// to incoming child variable group, to output rows for that variable group
-		mutable std::map<ChildDMUInstanceDataVector, std::vector<BranchOutputRow>::iterator> helper_lookup__from_child_key_set__to_matching_output_rows;
+		// This data structure is a helper index that maps the *FULL* DMU set (including child leaf)
+		// corresponding to incoming child variable group, to output rows for that variable group
+		// along with the child leaf offset/s in the output row corresponding to the DMU set.
+		mutable std::map<ChildDMUInstanceDataVector, std::vector<std::pair<BranchOutputRow::iterator, std::vector<int>>>> helper_lookup__from_child_key_set__to_matching_output_rows;
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
