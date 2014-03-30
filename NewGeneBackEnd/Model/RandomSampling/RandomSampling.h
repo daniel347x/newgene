@@ -700,6 +700,7 @@ class AllWeightings
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);
 		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
 		Leaves RetrieveLeafCombinationFromLeafIndices(BranchOutputRow & test_leaf_combination, Leaves const & leaves, int const K);
+		void ClearBranchCaches();
 		void ConsolidateHits(); // one-time pass to consolidate hits across time units within branches
 
 	protected:
@@ -741,7 +742,6 @@ class AllWeightings
 		void AddPositionToRemaining(boost::multiprecision::cpp_int const & which_time_unit, std::vector<int> const & position, Branch const & branch);
 		bool IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves);
 		int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Leaves const & leaves);
-		void ClearBranchCaches();
 
 		boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K);
 
