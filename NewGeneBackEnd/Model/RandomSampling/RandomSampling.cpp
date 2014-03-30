@@ -143,7 +143,7 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 
 	if (normalCase)
 	{
-		bool no_more_time_slice = HandleTimeSliceNormalCase(branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode);
+		bool no_more_time_slice = HandleTimeSliceNormalCase(branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 		if (no_more_time_slice)
 		{
 			// no-op
@@ -159,7 +159,7 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 		}
 		else
 		{
-			HandleBranchAndLeaf(branch, newTimeSliceLeaf, variable_group_number, merge_mode);
+			HandleBranchAndLeaf(branch, newTimeSliceLeaf, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 		}
 	}
 
@@ -192,7 +192,7 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 // - The portion of the incoming slice that extends past the right edge
 //   of the map entry
 // - An iterator to the next map entry.
-bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode)
+bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const leaf_index)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
