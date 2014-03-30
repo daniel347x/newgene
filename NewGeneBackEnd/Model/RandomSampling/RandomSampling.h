@@ -487,17 +487,17 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			number_branch_combinations = rhs.number_branch_combinations;
 		}
 
-		void ConsolidateHits() const
-		{
-			std::for_each(hits.begin(), hits.end(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> & the_hits)
-			{
-				std::for_each(the_hits.second.begin(), the_hits.second.end(), [&](BranchOutputRow const & the_hit)
-				{
-					// Disabled pending further work to support "random selection of rows WITH removal".
-					//hits_consolidated.insert(the_hit);
-				});
-			});
-		}
+		//void ConsolidateHits() const
+		//{
+		//	std::for_each(hits.begin(), hits.end(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> & the_hits)
+		//	{
+		//		std::for_each(the_hits.second.begin(), the_hits.second.end(), [&](BranchOutputRow const & the_hit)
+		//		{
+		//			// Disabled pending further work to support "random selection of rows WITH removal".
+		//			//hits_consolidated.insert(the_hit);
+		//		});
+		//	});
+		//}
 
 
 		// The following must be MUTABLE
@@ -507,6 +507,10 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Weighting for this branch: This is the lowest-level, calculated value, with unit granularity according to the primary variable group.
 		// It is the product of the number of branch combinations and the number of time units in this time slice.
 		mutable Weighting weighting;
+
+		// ******************************************************************************************************** //
+		// The following is the official location of the random hits
+		// ******************************************************************************************************** //
 
 		// cache of leaf combinations already hit:
 		// map from time unit to a set of leaf combinations hit for that time units
@@ -569,7 +573,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		// This data structure is a helper index that maps the DMU set corresponding
 		// to incoming child variable group, to output rows for that variable group
-		std::map<ChildDMUInstanceDataVector, std::vector<std::set<BranchOutputRow>::iterator>> helper_lookup__from_child_key_set__to_matching_output_rows;
+		mutable std::map<ChildDMUInstanceDataVector, std::vector<std::set<BranchOutputRow>::iterator>> helper_lookup__from_child_key_set__to_matching_output_rows;
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
@@ -601,8 +605,6 @@ class VariableGroupBranchesAndLeaves
 			}
 			return false;
 		}
-
-		//std::map<ChildDMUInstanceDataVector, std::vector<>>;
 
 };
 

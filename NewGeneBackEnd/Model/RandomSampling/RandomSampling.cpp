@@ -402,29 +402,68 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 	VariableGroupTimeSliceData & variableGroupTimeSliceData = mapElementPtr->second;
 	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
-	VariableGroupBranchesAndLeavesVector::iterator VariableGroupBranchesAndLeavesPtr = std::find(variableGroupBranchesAndLeavesVector.begin(), variableGroupBranchesAndLeavesVector.end(), variable_group_number);
+
+	// Note: Currently, only one primary top-level variable group is supported.
+	VariableGroupBranchesAndLeavesVector::iterator VariableGroupBranchesAndLeavesPtr = variableGroupBranchesAndLeavesVector.begin();
+
 	if (VariableGroupBranchesAndLeavesPtr == variableGroupBranchesAndLeavesVector.end())
 	{
+
 		// add new branch corresponding to this variable group
+
+		// This case will only be hit for the primary variable group!
+
 		VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_number);
 		BranchesAndLeaves & newBranchesAndLeaves = newVariableGroupBranch.branches_and_leaves;
 		newBranchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
 		variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
+
 	}
 	else
 	{
+
 		// branch already exists for this variable group
 		VariableGroupBranchesAndLeaves & variableGroupBranch = *VariableGroupBranchesAndLeavesPtr;
 		BranchesAndLeaves & branchesAndLeaves = variableGroupBranch.branches_and_leaves;
 
-		// *********************************************************************************** //
-		// This is where multiple rows with duplicated primary keys 
-		// and overlapping time range will be wiped out.
-		// ... Only one row with given primary keys and time range is allowed
-		// ... (the first one - emplace does nothing if the entry already exists).
-		// ... (Note that the leaf points to a specific row of secondary data.)
-		// *********************************************************************************** //
-		branchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if it doesn't already exist
+		switch (merge_mode)
+		{
+
+			case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
+			{
+
+				// *********************************************************************************** //
+				// This is where multiple rows with duplicated primary keys 
+				// and overlapping time range will be wiped out.
+				// ... Only one row with given primary keys and time range is allowed
+				// ... (the first one - emplace does nothing if the entry already exists).
+				// ... (Note that the leaf points to a specific row of secondary data.)
+				// *********************************************************************************** //
+				branchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
+
+			}
+			break;
+
+			case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
+			{
+
+			}
+			break;
+
+			case VARIABLE_GROUP_MERGE_MODE__CHILD:
+			{
+
+			}
+			break;
+
+			default:
+			{
+
+			}
+			break;
+
+		}
+
 	}
 
 }
