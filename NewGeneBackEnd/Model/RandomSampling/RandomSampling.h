@@ -481,6 +481,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			{
 				std::for_each(the_hits.second.begin(), the_hits.second.end(), [&](BranchOutputRow const & the_hit)
 				{
+					// Disabled pending further work to support "random selection of rows WITH removal".
 					//hits_consolidated.insert(the_hit);
 				});
 			});
