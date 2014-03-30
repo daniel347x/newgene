@@ -477,7 +477,7 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
 				dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
 
-				branch.ConstructChildCombinationCache(variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+				branch.ConstructChildCombinationCache(variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 			}
 			break;
@@ -1043,13 +1043,15 @@ void AllWeightings::ClearBranchCaches()
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const leaf_index, bool const force) const
+void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, bool const force) const
 {
 
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
 	{
 
 		// The cache has yet to be filled, or we are specifically being requested to refresh it
+
+		// Create vectors that pack the relevant indices, for rapid use in the loop below
 
 		std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_output_rows)
 		{
