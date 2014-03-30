@@ -665,13 +665,13 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 
 	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hit[which_millisecond].size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
 
-	std::set<int> test_leaf_combination;
+	BranchOutputRow test_leaf_combination;
 
 	// skip any leaf combinations returned from previous random numbers
-	while (test_leaf_combination.empty() || branch.hit[which_millisecond].count(test_leaf_combination))
+	while (test_leaf_combination.Empty() || branch.hit[which_millisecond].count(test_leaf_combination))
 	{
 
-		test_leaf_combination.clear();
+		test_leaf_combination.Clear();
 
 		if (boost::multiprecision::cpp_int(branch.hit[which_millisecond].size()) > branch.number_branch_combinations / 2)
 		{
@@ -705,14 +705,14 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 			}
 
 			// Pull random leaves, one at a time, to create the random row
-			while (test_leaf_combination.size() < static_cast<size_t>(K))
+			while (test_leaf_combination.Size() < static_cast<size_t>(K))
 			{
 				std::uniform_int_distribution<size_t> distribution(0, remaining_leaves.size() - 1);
 				size_t index_of_index = distribution(engine);
 				int index_of_leaf = remaining_leaves[index_of_index];
 				auto remainingPtr = remaining_leaves.begin() + index_of_index;
 				remaining_leaves.erase(remainingPtr);
-				test_leaf_combination.insert(index_of_leaf);
+				test_leaf_combination.Insert(index_of_leaf);
 			}
 
 		}
@@ -760,10 +760,10 @@ void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int c
 void AllWeightings::AddPositionToRemaining(boost::multiprecision::cpp_int const & which_millisecond, std::vector<int> const & position, Branch const & branch)
 {
 
-	std::set<int> new_remaining;
+	BranchOutputRow new_remaining;
 	std::for_each(position.cbegin(), position.cend(), [&](int const position_index)
 	{
-		new_remaining.insert(position_index);
+		new_remaining.Insert(position_index);
 	});
 
 	if (branch.hit[which_millisecond].count(new_remaining) == 0)
@@ -860,17 +860,17 @@ boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, i
 
 }
 
-Leaves AllWeightings::RetrieveLeafCombinationFromLeafIndices(std::set<int> &test_leaf_combination, Leaves const &leaves, int const K)
+Leaves AllWeightings::RetrieveLeafCombinationFromLeafIndices(BranchOutputRow & test_leaf_combination, Leaves const & leaves, int const K)
 {
 
 	Leaves leaf_combination;
 
-	std::set<int>::const_iterator current_index_to_use_ptr = test_leaf_combination.cbegin();
+	std::set<int>::const_iterator current_index_to_use_ptr = test_leaf_combination.primary_leaves.cbegin();
 	int current_index_to_use = *current_index_to_use_ptr;
 	int current_index = 0;
 	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
 	{
-		if (current_index_to_use_ptr == test_leaf_combination.cend())
+		if (current_index_to_use_ptr == test_leaf_combination.primary_leaves.cend())
 		{
 			return;
 		}

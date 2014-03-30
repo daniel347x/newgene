@@ -349,11 +349,67 @@ class BranchOutputRow
 
 	public:
 
+		BranchOutputRow()
+		{}
+
+		BranchOutputRow(BranchOutputRow const & rhs)
+			: primary_leaves(rhs.primary_leaves)
+		{}
+
+		BranchOutputRow(BranchOutputRow && rhs)
+			: primary_leaves(std::move(rhs.primary_leaves))
+		{}
+
+		BranchOutputRow & operator=(BranchOutputRow const & rhs)
+		{
+			if (this == &rhs)
+			{
+				return *this;
+			}
+			primary_leaves = rhs.primary_leaves;
+			return *this;
+		}
+
+		BranchOutputRow & operator=(BranchOutputRow && rhs)
+		{
+			if (this == &rhs)
+			{
+				return *this;
+			}
+			primary_leaves = std::move(rhs.primary_leaves);
+			return *this;
+		}
+
+		bool operator==(BranchOutputRow const & rhs)
+		{
+			return primary_leaves == rhs.primary_leaves;
+		}
+
 		std::set<int> primary_leaves;
 
-		bool operator<(BranchOutputRow const & rhs)
+		bool operator<(BranchOutputRow const & rhs) const
 		{
 			return primary_leaves < rhs.primary_leaves;
+		}
+
+		void Insert(int const index_of_leaf)
+		{
+			primary_leaves.insert(index_of_leaf);
+		}
+
+		size_t Size() const
+		{
+			return primary_leaves.size();
+		}
+
+		bool Empty() const
+		{
+			return primary_leaves.empty();
+		}
+
+		void Clear()
+		{
+			primary_leaves.clear();
 		}
 
 };
@@ -411,9 +467,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		void ConsolidateHits() const
 		{
-			std::for_each(hit.begin(), hit.end(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<std::set<int>>> & the_hits)
+			std::for_each(hit.begin(), hit.end(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> & the_hits)
 			{
-				std::for_each(the_hits.second.begin(), the_hits.second.end(), [&](std::set<int> const & the_hit)
+				std::for_each(the_hits.second.begin(), the_hits.second.end(), [&](BranchOutputRow const & the_hit)
 				{
 					hits_consolidated.insert(the_hit);
 				});
@@ -435,9 +491,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		mutable std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> hit;
 
 		// Used for optimization purposes only
-		mutable std::map<boost::multiprecision::cpp_int, std::vector<std::set<int>>> remaining;
+		mutable std::map<boost::multiprecision::cpp_int, std::vector<BranchOutputRow>> remaining;
 
-		mutable std::set<std::set<int>> hits_consolidated; // After-the-fact: Merge identical hits across milliseconds within this branch
+		mutable std::set<BranchOutputRow> hits_consolidated; // After-the-fact: Merge identical hits across milliseconds within this branch
 
 		// Indices into cached secondary data tables for child groups.
 		// 
@@ -580,7 +636,7 @@ class AllWeightings
 		void PrepareRandomNumbers(int how_many);
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);
 		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_millisecond, int const K, Branch const & branch, Leaves const & leaves);
-		Leaves RetrieveLeafCombinationFromLeafIndices(std::set<int> &test_leaf_combination, Leaves const &leaves, int const K);
+		Leaves RetrieveLeafCombinationFromLeafIndices(BranchOutputRow & test_leaf_combination, Leaves const & leaves, int const K);
 		void ConsolidateHits(); // one-time pass to consolidate hits across ms within branches
 
 	protected:
