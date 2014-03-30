@@ -446,6 +446,12 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 			case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
 			{
+				
+				BranchesAndLeaves::iterator branchAndLeavesPtr = branchesAndLeaves.find(branch);
+				if (branchAndLeavesPtr != branchesAndLeaves.end())
+				{
+					// There must already be a branch in place
+				}
 
 			}
 			break;
