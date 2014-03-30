@@ -21104,6 +21104,9 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 			if (failed || CheckCancelled()) return;
 
+			std::vector<std::string> errorMessages;
+			RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
+
 		}
 
 		++current_child_vg_index;
