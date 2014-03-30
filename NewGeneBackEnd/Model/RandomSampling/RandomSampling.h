@@ -540,11 +540,20 @@ class AllWeightings
 		AllWeightings();
 		~AllWeightings();
 
+	public:
+
+		// The main time slice data
 		TimeSlices timeSlices;
-		DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
-		std::map<int, DataCache> secondaryCache; // Ditto, but for child groups
 		Weighting weighting; // sum over all time slices
 
+	public:
+
+		// Cache of secondary data: One cache for the primary top-level variable group, and a set of caches for all other variable groups (the non-primary top-level groups, and the child groups)
+		DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
+		std::map<int, DataCache> secondaryCache; // Ditto, but for child groups
+
+
+	public:
 
 		sqlite3_stmt * insert_random_sample_stmt;
 
