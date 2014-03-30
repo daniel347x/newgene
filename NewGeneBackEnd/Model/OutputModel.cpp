@@ -20351,6 +20351,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// Add the secondary data for this child variable group to the cache
 								allWeightings.childCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
 
+								allWeightings.ClearBranchCaches();
 								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 
 							}

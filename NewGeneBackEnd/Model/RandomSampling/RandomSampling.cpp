@@ -1010,11 +1010,46 @@ void AllWeightings::ConsolidateHits()
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const leaf_index) const
+void AllWeightings::ClearBranchCaches()
 {
 
-	if (helper_lookup__from_child_key_set__to_matching_output_rows.empty())
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
 	{
+
+		TimeSlice const & timeSlice = timeSliceData.first;
+		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceData.second;
+
+		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+
+		// For now, assume only one variable group
+		if (variableGroupBranchesAndLeavesVector.size() > 1)
+		{
+			boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+		VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+		BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+
+		std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
+		{
+
+			Branch const & branch = branchAndLeaves.first;
+			branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
+
+		});
+
+	});
+
+}
+
+void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const leaf_index, bool const force) const
+{
+
+	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
+	{
+
+		// The cache has yet to be filled, or we are specifically being requested to refresh it
 
 	}
 
