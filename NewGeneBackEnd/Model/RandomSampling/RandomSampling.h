@@ -414,6 +414,7 @@ class BranchOutputRow
 		void Insert(int const index_of_leaf)
 		{
 			primary_leaves.insert(index_of_leaf);
+			//primary_leaves.push_back(index_of_leaf);
 		}
 
 		size_t Size() const
@@ -433,6 +434,13 @@ class BranchOutputRow
 
 		// Index into the branch's Leaf set
 		std::set<int> primary_leaves;
+
+		void SaveCache()
+		{
+			primary_leaves_cache.clear();
+			primary_leaves_cache.insert(primary_leaves_cache.begin(), primary_leaves.begin(), primary_leaves.end());
+		}
+		std::vector<int> primary_leaves_cache; // for optimized lookup only
 
 		// Map from child variable group ID to:
 		// Map from child leaf index to:
@@ -587,7 +595,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// to output rows for that variable group
 		// along with the child leaf offset/s in the output row corresponding to the DMU set.
 		mutable std::map<ChildDMUInstanceDataVector, std::vector<std::pair<std::vector<BranchOutputRow>::iterator, std::vector<int>>>> helper_lookup__from_child_key_set__to_matching_output_rows;
-		void ConstructChildCombinationCache(int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), bool const force = false) const; // Populate the above data structure
+		void ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), bool const force = false) const; // Populate the above data structure
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 

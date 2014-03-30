@@ -409,7 +409,8 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 	if (VariableGroupBranchesAndLeavesPtr == variableGroupBranchesAndLeavesVector.end())
 	{
 
-		// add new branch corresponding to this variable group
+		// add new variable group entry,
+		// and then add new branch corresponding to this variable group
 
 		// This case will only be hit for the primary variable group!
 
@@ -422,7 +423,10 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 	else
 	{
 
-		// branch already exists for this variable group
+		// Branches already exists for this variable group.
+		// The incoming branch might match one of these, or it might not.
+		// In any case, retrieve the existing set of branches for this variable group.
+
 		VariableGroupBranchesAndLeaves & variableGroupBranch = *VariableGroupBranchesAndLeavesPtr;
 		BranchesAndLeaves & branchesAndLeaves = variableGroupBranch.branches_and_leaves;
 
@@ -447,23 +451,37 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 			case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
 			{
 				
+				// Let's take a peek and see if our branch is already present
+
 				BranchesAndLeaves::iterator branchAndLeavesPtr = branchesAndLeaves.find(branch);
 				if (branchAndLeavesPtr != branchesAndLeaves.end())
 				{
-					// There must already be a branch in place
+					
+					// *********************************************************************************** //
+					// The incoming branch *does* already exist!
+					// We want to see if this branch contains the incoming leaf, or not.
+					// *********************************************************************************** //
+
 					Leaves & leaves = branchAndLeavesPtr->second;
 					auto leafPtr = leaves.find(timeSliceLeaf.second);
 					if (leafPtr != leaves.end())
 					{
-						// This branch has a leaf that matches the incoming leaf.
-						// Set its data.
+
+						// This branch *does* contain the incoming leaf!
+						// Set the data in the leaf for this non-primary top-level variable group.
+
+						// Note that many different OUTPUT ROWS might reference this leaf;
+						// perhaps even multiple times within a single output row.  Fine!
+
 						Leaf const & leaf = *leafPtr;
 
 						// pass the index over from the incoming leaf (which contains only the index for the current top-level variable group being merged in)
 						// into the active leaf saved in the AllWeightings instance, and used to construct the output rows.
 						// (This active leaf may also have been called previously to set other top-level variable group rows.)
 						leaf.other_top_level_indices_into_raw_data[variable_group_number] = timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number];
+
 					}
+
 				}
 
 			}
@@ -477,7 +495,7 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
 				dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
 
-				branch.ConstructChildCombinationCache(variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+				branch.ConstructChildCombinationCache(*this, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 			}
 			break;
@@ -795,6 +813,13 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 			// Pull random leaves, one at a time, to create the random row
 			while (test_leaf_combination.Size() < static_cast<size_t>(K))
 			{
+				
+				// ************************************************************************ //
+				// TODO: 
+				// This could be optimized in case K is high
+				// and the number of leaves is just a little larger than K
+				// ************************************************************************ //
+
 				std::uniform_int_distribution<size_t> distribution(0, remaining_leaves.size() - 1);
 				size_t index_of_index = distribution(engine);
 				int index_of_leaf = remaining_leaves[index_of_index];
@@ -802,6 +827,8 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 				remaining_leaves.erase(remainingPtr);
 				test_leaf_combination.Insert(index_of_leaf);
 			}
+
+			test_leaf_combination.SaveCache();
 
 		}
 
@@ -853,6 +880,7 @@ void AllWeightings::AddPositionToRemaining(boost::multiprecision::cpp_int const 
 	{
 		new_remaining.Insert(position_index);
 	});
+	new_remaining.SaveCache();
 
 	if (branch.hits[which_time_unit].count(new_remaining) == 0)
 	{
@@ -1043,7 +1071,7 @@ void AllWeightings::ClearBranchCaches()
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, bool const force) const
+void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, bool const force) const
 {
 
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
@@ -1051,15 +1079,49 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 
 		// The cache has yet to be filled, or we are specifically being requested to refresh it
 
-		// Create vectors that pack the relevant indices, for rapid use in the loop below
-
+		ChildDMUInstanceDataVector child_hit_vector;
 		std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_output_rows)
 		{
 
 			std::for_each(time_unit_output_rows.second.cbegin(), time_unit_output_rows.second.cend(), [&](BranchOutputRow const & outputRow)
 			{
 
+				// We have a new hit we're dealing with
+				child_hit_vector.clear();
 
+				std::for_each(mappings_from_child_branch_to_primary.cbegin(), mappings_from_child_branch_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				{
+
+					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're still working on the branch)
+
+					switch (childToPrimaryMapping.mapping)
+					{
+
+						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
+						{
+
+							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+							child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
+
+						}
+						break;
+
+						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
+						{
+
+
+							// leaf_number tells us which leaf
+							// index tells us which index in that leaf
+
+							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+							child_hit_vector.push_back(DMUInstanceData(allWeightings.dataCache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
+
+						}
+						break;
+
+					}
+
+				});
 
 			});
 
