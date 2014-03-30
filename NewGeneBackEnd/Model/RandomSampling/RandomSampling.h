@@ -550,23 +550,13 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ... both MID and CTY have multiple sets of data for a single row - a prohibited case.)
 		// Each such child variable group leaf represents a single set of secondary column data.
 		//
-		// The actual raw data for the secondary columns - the data values themselves -
+		// The actual raw data for the SECONDARY columns - the data values themselves -
 		// ... are stored in the AllWeightings' "dataCache" (for primary top-level VG)
 		// ... and in the AllWeightings' "secondaryCache" (for non-primary top-level, and child, VG's).
-		// 
-		// The following data structure tracks all such secondary column data
-		// (via INDEX into the above caches)
-		// ... for *child* variable groups.
-		// ... (The secondary data for the *primary* variable group is tracked via the 
-		// ...  'index_into_raw_data' data member of the "Leaf" class.)
-		//
-		// The following variable is defined as:
-		// For each non-primary top-level (also referred to as "child")
-		// & child variable group (the child VG identifier is the first map key):
-		// A map of row in this branch (given by the set of primary variable group leaves)
-		// ... to a map of the child variable group's leaf index 
-		// ... to the index in the child variable group's secondary data table cache for that child leaf.
-		std::map<int, std::map<std::set<int>, std::map<int, std::int64_t>>> child_group_secondary_data_lookup;
+
+		// This data structure is a helper index that maps the DMU set corresponding
+		// to incoming child variable group, to output rows for that variable group
+		std::map<ChildDMUInstanceDataVector, std::vector<std::set<BranchOutputRow>::iterator>> helper_lookup__from_child_key_set__to_matching_output_rows;
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
