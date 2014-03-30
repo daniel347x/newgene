@@ -46,7 +46,17 @@ class TimeSlice
 
 		std::int64_t Width(std::int64_t const ms_per_unit_time) const
 		{
-			return (time_end - time_start) / ms_per_unit_time;
+			std::int64_t absolute = time_end - time_start;
+			std::int64_t mod = absolute % ms_per_unit_time;
+			std::int64_t val = absolute - mod;
+			std::int64_t ret = val / ms_per_unit_time;
+			if (mod < ms_per_unit_time / 2)
+			{
+				// round down
+				return ret;
+			}
+			// round up
+			return ret + 1;
 		}
 
 		TimeSlice & operator=(TimeSlice const & rhs)
