@@ -350,7 +350,10 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 			index_into_raw_data = rhs.index_into_raw_data;
 		}
 
-		std::int64_t index_into_raw_data;
+		std::int64_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
+
+		// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
+		std::map<int, std::int64_t> other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
 
 };
 

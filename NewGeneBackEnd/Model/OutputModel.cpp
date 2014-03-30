@@ -20294,12 +20294,43 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 				if (!bad)
 				{
+
 					Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 					Branch branch(dmus_branch);
-					allWeightings.dataCache[sorting_row_of_data.rowid] = secondary_data;
+
 					try
 					{
-						allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), primary_group_number);
+						
+						switch (merge_mode)
+						{
+
+							case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
+							{
+								allWeightings.dataCache[sorting_row_of_data.rowid] = secondary_data;
+								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), primary_group_number);
+							}
+							break;
+
+							case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
+							{
+
+							}
+							break;
+
+							case VARIABLE_GROUP_MERGE_MODE__CHILD:
+							{
+
+							}
+							break;
+
+							default:
+							{
+
+							}
+							break;
+
+						}
+
 					}
 					catch (boost::exception & e)
 					{
@@ -20310,6 +20341,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 							errorMessages.push_back(error_desc->c_str());
 						}
 					}
+
 				}
 
 				++current_rows_stepped;
