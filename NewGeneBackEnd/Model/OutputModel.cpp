@@ -483,7 +483,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		primary_group_column_sets.push_back(selected_raw_data_table_schema);
 
 		std::vector<std::string> errorMessages;
-		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, 1, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
+		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 		if (failed || CheckCancelled()) return;
 
 		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
@@ -13094,6 +13094,8 @@ void OutputModel::OutputGenerator::Prepare()
 				});
 				boost::format msgTitle("Select top-level variable group");
 				boost::format msgQuestion("Available top-level variable groups:");
+
+				// 0-based
 				top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
 			}
 			else
@@ -20073,7 +20075,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 
 }
 
-void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number,
+void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & variable_group_selected_columns_schema, int const variable_group_number,
 	AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages)
 {
 
@@ -20104,7 +20106,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 				this_->CloseObtainData();
 			} BOOST_SCOPE_EXIT_END
 
-			ObtainData(primary_variable_group_x1_columns, true);
+			ObtainData(variable_group_selected_columns_schema, true);
 
 			if (failed || CheckCancelled())
 			{
@@ -20123,7 +20125,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 					return;
 				}
 
-				sorting_row_of_data.PopulateFromCurrentRowInDatabase(primary_variable_group_x1_columns, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE, true);
+				sorting_row_of_data.PopulateFromCurrentRowInDatabase(variable_group_selected_columns_schema, stmt_result, XR_TABLE_CATEGORY::RANDOMIZE, true);
 
 				// Construct branch and leaf
 
@@ -20295,9 +20297,6 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 				if (!bad)
 				{
 
-					Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
-					Branch branch(dmus_branch);
-
 					try
 					{
 						
@@ -20306,19 +20305,44 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 							case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
 							{
+
+								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
+								Branch branch(dmus_branch);
+
+								// Add the secondary data for this primary variable group to the cache
 								allWeightings.dataCache[sorting_row_of_data.rowid] = secondary_data;
-								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), primary_group_number);
+
+								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number);
+
 							}
 							break;
 
 							case VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL:
 							{
 
+								Leaf leaf(dmus_leaf);
+								Branch branch(dmus_branch);
+
+								// Add the secondary data for this non-primary top-level variable group to the cache
+								allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
+
+								// Set the secondary data index into the above cache for this non-primary top-level variable group
+								leaf.other_top_level_indices_into_raw_data[variable_group_number] = sorting_row_of_data.rowid;
+
 							}
 							break;
 
 							case VARIABLE_GROUP_MERGE_MODE__CHILD:
 							{
+
+								Leaf leaf(dmus_leaf);
+								Branch branch(dmus_branch);
+
+								// Add the secondary data for this child variable group to the cache
+								allWeightings.childCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
+
+								// Set the secondary data index into the above cache for this child variable group
+								//leaf.other_top_level_indices_into_raw_data[variable_group_number] = sorting_row_of_data.rowid;
 
 							}
 							break;
@@ -20964,7 +20988,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		merging_of_children_column_sets.push_back(selected_raw_data_table_schema);
 
 		std::vector<std::string> errorMessages;
-		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, 1, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
+		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL, errorMessages);
 		if (failed || CheckCancelled()) return;
 
 		++current_top_level_vg_index;

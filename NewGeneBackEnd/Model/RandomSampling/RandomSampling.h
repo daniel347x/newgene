@@ -319,7 +319,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 			, index_into_raw_data{ 0 }
 		{}
 
-		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int64_t const & index_into_raw_data_)
+		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int64_t const & index_into_raw_data_ = -1)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data{ index_into_raw_data_ }
 		{}
@@ -398,8 +398,6 @@ class BranchOutputRow
 			return primary_leaves == rhs.primary_leaves;
 		}
 
-		std::set<int> primary_leaves;
-
 		bool operator<(BranchOutputRow const & rhs) const
 		{
 			return primary_leaves < rhs.primary_leaves;
@@ -424,6 +422,9 @@ class BranchOutputRow
 		{
 			primary_leaves.clear();
 		}
+
+		// Index into the branch's Leaf set
+		std::set<int> primary_leaves;
 
 };
 
@@ -507,6 +508,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Used for optimization purposes only
 		mutable std::map<boost::multiprecision::cpp_int, std::vector<BranchOutputRow>> remaining;
 
+		// Commented out for now
 		//mutable std::vector<BranchOutputRow> hits_consolidated; // After-the-fact: Merge identical hits across time units within this branch
 
 		// Indices into cached secondary data tables for child groups.
@@ -630,7 +632,8 @@ class AllWeightings
 
 		// Cache of secondary data: One cache for the primary top-level variable group, and a set of caches for all other variable groups (the non-primary top-level groups, and the child groups)
 		DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
-		std::map<int, DataCache> secondaryCache; // Ditto, but for child groups
+		std::map<int, DataCache> otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
+		std::map<int, DataCache> childCache; // Ditto, but for child variable groups
 
 	public:
 
