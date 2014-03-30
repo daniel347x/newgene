@@ -472,7 +472,10 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 			case VARIABLE_GROUP_MERGE_MODE__CHILD:
 			{
 
-				// Construct the child's DMU keys 
+				// Construct the child's DMU keys, including leaf
+				ChildDMUInstanceDataVector dmu_keys;
+				dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
+				dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
 
 			}
 			break;
