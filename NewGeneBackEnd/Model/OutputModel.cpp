@@ -21025,7 +21025,8 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary;
 
 		int current_primary_branch_index = 0;
-		int current_primary_leaf_index = 0;
+		int current_primary_internal_leaf_index = 0;
+		int current_primary_leaf_number = 0;
 		std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&](PrimaryKeySequence::PrimaryKeySequenceEntry const & full_kad_key_info)
 		{
 
@@ -21066,11 +21067,11 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 					else
 					if (!is_primary_group_branch && is_child_group_branch)
 					{
-						mappings_from_child_branch_to_primary.push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_leaf_index, 0));
+						mappings_from_child_branch_to_primary.push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
 					}
 					else if (!is_primary_group_branch && !is_child_group_branch)
 					{
-						mappings_from_child_leaf_to_primary.push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_leaf_index));
+						mappings_from_child_leaf_to_primary.push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
 					}
 					else
 					{
@@ -21088,7 +21089,12 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 			}
 			else
 			{
-				++current_primary_leaf_index;
+				++current_primary_internal_leaf_index;
+				if (full_kad_key_info.sequence_number_within_dmu_category_primary_uoa + 1 == full_kad_key_info.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
+				{
+					++current_primary_leaf_number;
+					current_primary_internal_leaf_index = 0;
+				}
 			}
 
 		});
