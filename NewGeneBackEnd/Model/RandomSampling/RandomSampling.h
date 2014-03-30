@@ -214,6 +214,14 @@ private:
 
 };
 
+enum VARIABLE_GROUP_MERGE_MODE
+{
+	VARIABLE_GROUP_MERGE_MODE__UNKNOWN,
+	, VARIABLE_GROUP_MERGE_MODE__PRIMARY,
+	, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL,
+	, VARIABLE_GROUP_MERGE_MODE__CHILD
+};
+
 class PrimaryKeysGrouping
 {
 
@@ -639,7 +647,7 @@ class AllWeightings
 
 		sqlite3_stmt * insert_random_sample_stmt;
 
-		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number);
+		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode);
 		void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
 		void PrepareRandomNumbers(int how_many);
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);

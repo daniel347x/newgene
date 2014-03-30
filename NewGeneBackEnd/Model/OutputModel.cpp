@@ -20312,7 +20312,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// Add the secondary data for this primary variable group to the cache
 								allWeightings.dataCache[sorting_row_of_data.rowid] = secondary_data;
 
-								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number);
+								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode);
 
 							}
 							break;
@@ -20328,6 +20328,8 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 								// Set the secondary data index into the above cache for this non-primary top-level variable group
 								leaf.other_top_level_indices_into_raw_data[variable_group_number] = sorting_row_of_data.rowid;
+
+								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode);
 
 							}
 							break;

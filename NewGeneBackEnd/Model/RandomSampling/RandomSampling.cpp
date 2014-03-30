@@ -26,7 +26,7 @@ AllWeightings::~AllWeightings()
 	}
 }
 
-void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number)
+void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;

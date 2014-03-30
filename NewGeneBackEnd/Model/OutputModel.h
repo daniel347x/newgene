@@ -715,13 +715,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				int K; // the multiplicity
 
 				// Random sampling
-				enum VARIABLE_GROUP_MERGE_MODE
-				{
-					  VARIABLE_GROUP_MERGE_MODE__UNKNOWN,
-					, VARIABLE_GROUP_MERGE_MODE__PRIMARY,
-					, VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL,
-					, VARIABLE_GROUP_MERGE_MODE__CHILD
-				};
 				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number);
 				void RandomSamplerFillDataForChildGroups(AllWeightings & allWeightings);
 				void RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages);
