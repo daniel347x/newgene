@@ -407,7 +407,7 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 }
 
-void AllWeightings::CalculateWeightings(int const K)
+void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_unit_time)
 {
 
 	boost::multiprecision::cpp_int currentWeighting = 0;
@@ -463,7 +463,7 @@ void AllWeightings::CalculateWeightings(int const K)
 
 				// Holes between time slices are handled here -
 				// There is no gap in the sequence of discretized weight values in branches.
-				branchWeighting.setWeighting(timeSlice.Width() * branch.number_branch_combinations);
+				branchWeighting.setWeighting(timeSlice.Width(ms_per_unit_time) * branch.number_branch_combinations);
 				branchWeighting.setWeightingRangeStart(currentWeighting);
 				currentWeighting += branchWeighting.getWeighting();
 

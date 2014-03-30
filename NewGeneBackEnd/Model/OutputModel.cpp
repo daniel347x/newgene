@@ -486,7 +486,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, 1, allWeightings, errorMessages);
 		if (failed || CheckCancelled()) return;
 
-		allWeightings.CalculateWeightings(K);
+		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
 		if (failed || CheckCancelled()) return;
 
 		std::int64_t const samples = 10;

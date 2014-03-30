@@ -44,9 +44,9 @@ class TimeSlice
 			, time_end  { rhs.time_end }
 		{}
 
-		std::int64_t Width() const
+		std::int64_t Width(std::int64_t const ms_per_unit_time) const
 		{
-			return time_end - time_start;
+			return (time_end - time_start) / ms_per_unit_time;
 		}
 
 		TimeSlice & operator=(TimeSlice const & rhs)
@@ -634,7 +634,7 @@ class AllWeightings
 		sqlite3_stmt * insert_random_sample_stmt;
 
 		void HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number);
-		void CalculateWeightings(int const K);
+		void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
 		void PrepareRandomNumbers(int how_many);
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);
 		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_millisecond, int const K, Branch const & branch, Leaves const & leaves);
