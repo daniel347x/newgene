@@ -351,7 +351,7 @@ class BranchOutputRow
 
 		std::set<int> primary_leaves;
 
-		bool operator<(OutputRow const & rhs)
+		bool operator<(BranchOutputRow const & rhs)
 		{
 			return primary_leaves < rhs.primary_leaves;
 		}
