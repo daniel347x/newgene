@@ -595,7 +595,15 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// to output rows for that variable group
 		// along with the child leaf offset/s in the output row corresponding to the DMU set.
 		mutable std::map<ChildDMUInstanceDataVector, std::vector<std::pair<std::vector<BranchOutputRow>::iterator, std::vector<int>>>> helper_lookup__from_child_key_set__to_matching_output_rows;
-		void ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), bool const force = false) const; // Populate the above data structure
+		void ConstructChildCombinationCache(AllWeightings & allWeightings, Leaves & leaves, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), bool const force = false) const; // Populate the above data structure
+
+		// Cache the leaves for this branch.  This is a CACHE only.
+		mutable std::vector<Leaf> leaves_cache;
+		void CreateLeafCache(Leaves const & leaves) const
+		{
+			leaves_cache.clear();
+			leaves_cache.insert(leaves_cache.begin(), leaves.cbegin(), leaves.cend());
+		}
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 
@@ -708,7 +716,7 @@ class AllWeightings
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);
 		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
 		Leaves RetrieveLeafCombinationFromLeafIndices(BranchOutputRow & test_leaf_combination, Leaves const & leaves, int const K);
-		void ClearBranchCaches();
+		void ResetBranchCaches(bool const empty_all = false);
 		void ConsolidateHits(); // one-time pass to consolidate hits across time units within branches
 
 	protected:

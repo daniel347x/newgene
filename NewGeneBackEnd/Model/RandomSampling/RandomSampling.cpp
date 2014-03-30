@@ -495,7 +495,19 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
 				dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
 
-				branch.ConstructChildCombinationCache(*this, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+				// *********************************************************************************** //
+				// Loop through all BRANCHES for this variable group in this time slice.
+				// For each, we have a set of output rows.
+				// For each, we must therefore build its cache that maps the incoming 
+				// *********************************************************************************** //
+
+				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
+				{
+
+					Leaves & leaves = branchAndLeaves.second;
+					branch.ConstructChildCombinationCache(*this, leaves, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+
+				});
 
 			}
 			break;
@@ -1038,7 +1050,7 @@ void AllWeightings::ConsolidateHits()
 
 }
 
-void AllWeightings::ClearBranchCaches()
+void AllWeightings::ResetBranchCaches(bool const empty_all)
 {
 
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
@@ -1063,7 +1075,17 @@ void AllWeightings::ClearBranchCaches()
 		{
 
 			Branch const & branch = branchAndLeaves.first;
+			Leaves const & leaves = branchAndLeaves.second;
 			branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
+
+			if (empty_all)
+			{
+				branch.leaves_cache.clear();
+			}
+			else
+			{
+				branch.CreateLeafCache(leaves);
+			}
 
 		});
 
@@ -1071,7 +1093,7 @@ void AllWeightings::ClearBranchCaches()
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, bool const force) const
+void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, Leaves & leaves, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, bool const force) const
 {
 
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
@@ -1114,7 +1136,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 							// index tells us which index in that leaf
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-							child_hit_vector.push_back(DMUInstanceData(allWeightings.dataCache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
+							child_hit_vector.push_back(DMUInstanceData(leaves[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
 
 						}
 						break;
