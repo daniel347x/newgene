@@ -20079,7 +20079,11 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 }
 
 void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & variable_group_selected_columns_schema, int const variable_group_number,
-	AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages)
+	AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages,
+	std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary,
+	std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary,
+	int const leaf_index = -1)
+	)
 {
 
 	{
@@ -21007,8 +21011,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 	// **************************************************************************************** //
 
 	int current_child_vg_index = 0;
-	std::for_each(secondary_variable_groups_column_info.cbegin(),
-		secondary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & child_variable_group_raw_data_columns)
+	std::for_each(secondary_variable_groups_column_info.cbegin(), secondary_variable_groups_column_info.cend(), [&](ColumnsInTempView const & child_variable_group_raw_data_columns)
 	{
 
 		if (failed || CheckCancelled()) return;
@@ -21099,13 +21102,13 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 		});
 
-		for (int current_multiplicity = 1; current_multiplicity <= the_child_multiplicity; ++current_multiplicity)
+		for (int current_leaf_index = 0; current_leaf_index < the_child_multiplicity; ++current_leaf_index)
 		{
 
 			if (failed || CheckCancelled()) return;
 
 			std::vector<std::string> errorMessages;
-			RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
+			RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, current_leaf_index);
 
 		}
 
