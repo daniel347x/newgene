@@ -143,28 +143,24 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 
 	if (normalCase)
 	{
-		//for (;;)
-		//{
-			bool no_more_time_slice = HandleTimeSliceNormalCase(branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode);
-			if (no_more_time_slice)
+		bool no_more_time_slice = HandleTimeSliceNormalCase(branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode);
+		if (no_more_time_slice)
+		{
+			// no-op
+		}
+		else if (mapIterator == timeSlices.end())
+		{
+			// We have a chunk left but it's past the end of the map.
+			if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 			{
-				//break;
+				// Add it solo to the end of the map.
+				AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
 			}
-			else if (mapIterator == timeSlices.end())
-			{
-				// We have a chunk left but it's past the end of the map.
-				if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
-				{
-					// Add it solo to the end of the map.
-					AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
-				}
-				//break;
-			}
-			else
-			{
-				HandleBranchAndLeaf(branch, newTimeSliceLeaf, variable_group_number, merge_mode);
-			}
-		//}
+		}
+		else
+		{
+			HandleBranchAndLeaf(branch, newTimeSliceLeaf, variable_group_number, merge_mode);
+		}
 	}
 
 }
