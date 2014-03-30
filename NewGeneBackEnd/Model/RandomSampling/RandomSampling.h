@@ -508,14 +508,20 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// It is the product of the number of branch combinations and the number of time units in this time slice.
 		mutable Weighting weighting;
 
+
 		// ******************************************************************************************************** //
-		// The following is the official location of the random hits
+		// ******************************************************************************************************** //
+		// The following is the official location of the randomly generated rows
+		// ******************************************************************************************************** //
+		// Leaf combinations hit by the random generator.
+		//
+		// map from time unit to a set of leaf combinations hit for that time units
+		//
+		mutable std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> hits;
+		//
+		// ******************************************************************************************************** //
 		// ******************************************************************************************************** //
 
-		// cache of leaf combinations already hit:
-		// map from time unit to a set of leaf combinations hit for that time units
-		//mutable std::map<boost::multiprecision::cpp_int, std::set<std::set<int>>> hits;
-		mutable std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> hits;
 
 		// Used for optimization purposes only
 		mutable std::map<boost::multiprecision::cpp_int, std::vector<BranchOutputRow>> remaining;
@@ -582,7 +588,21 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 typedef std::set<Leaf> Leaves;
 typedef PrimaryKeysGroupingMultiplicityOne Branch;
+
+
+
+// ******************************************************************************************************** //
+// ******************************************************************************************************** //
+// Each time slice has one of these
+// ******************************************************************************************************** //
+// (Only one, since currently only one primary top-level variable group is supported)
+//
 typedef std::map<Branch, Leaves> BranchesAndLeaves;
+//
+// ******************************************************************************************************** //
+// ******************************************************************************************************** //
+
+
 
 class VariableGroupBranchesAndLeaves
 {

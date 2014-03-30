@@ -451,6 +451,7 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				if (branchAndLeavesPtr != branchesAndLeaves.end())
 				{
 					// There must already be a branch in place
+
 				}
 
 			}
