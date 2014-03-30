@@ -458,8 +458,8 @@ void AllWeightings::CalculateWeightings(int const K)
 					branch.number_branch_combinations = BinomialCoefficient(numberLeaves, K);
 				}
 
-				// clear the hit cache
-				branch.hit.clear();
+				// clear the hits cache
+				branch.hits.clear();
 
 				// Holes between time slices are handled here -
 				// There is no gap in the sequence of discretized weight values in branches.
@@ -663,17 +663,17 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 		return Leaves();
 	}
 
-	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hit[which_millisecond].size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
+	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hits[which_millisecond].size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
 
 	BranchOutputRow test_leaf_combination;
 
 	// skip any leaf combinations returned from previous random numbers
-	while (test_leaf_combination.Empty() || branch.hit[which_millisecond].count(test_leaf_combination))
+	while (test_leaf_combination.Empty() || branch.hits[which_millisecond].count(test_leaf_combination))
 	{
 
 		test_leaf_combination.Clear();
 
-		if (boost::multiprecision::cpp_int(branch.hit[which_millisecond].size()) > branch.number_branch_combinations / 2)
+		if (boost::multiprecision::cpp_int(branch.hits[which_millisecond].size()) > branch.number_branch_combinations / 2)
 		{
 
 			// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
@@ -723,7 +723,7 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 	// because some rows can have a heavier weight than other rows;
 	// this is handled by storing a map of every *millisecond* (the finest time granularity supported)
 	// and all leaf combinations that have been hit for that millisecond.
-	branch.hit[which_millisecond].insert(test_leaf_combination);
+	branch.hits[which_millisecond].insert(test_leaf_combination);
 
 	Leaves leaf_combination = RetrieveLeafCombinationFromLeafIndices(test_leaf_combination, leaves, K);
 
@@ -766,7 +766,7 @@ void AllWeightings::AddPositionToRemaining(boost::multiprecision::cpp_int const 
 		new_remaining.Insert(position_index);
 	});
 
-	if (branch.hit[which_millisecond].count(new_remaining) == 0)
+	if (branch.hits[which_millisecond].count(new_remaining) == 0)
 	{
 		branch.remaining[which_millisecond].push_back(new_remaining);
 	}

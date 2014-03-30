@@ -433,7 +433,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
 			, weighting{ rhs.weighting }
-			, hit{ rhs.hit }
+			, hits{ rhs.hits }
 			, remaining{ rhs.remaining }
 			, number_branch_combinations{rhs.number_branch_combinations}
 		{}
@@ -446,7 +446,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			}
 			PrimaryKeysGrouping::operator=(rhs);
 			weighting = rhs.weighting;
-			hit = rhs.hit;
+			hits = rhs.hits;
 			remaining = rhs.remaining;
 			number_branch_combinations = rhs.number_branch_combinations;
 			return *this;
@@ -460,14 +460,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			}
 			PrimaryKeysGrouping::operator=(std::move(rhs));
 			weighting = rhs.weighting;
-			hit = rhs.hit;
+			hits = rhs.hits;
 			remaining = rhs.remaining;
 			number_branch_combinations = rhs.number_branch_combinations;
 		}
 
 		void ConsolidateHits() const
 		{
-			std::for_each(hit.begin(), hit.end(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> & the_hits)
+			std::for_each(hits.begin(), hits.end(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> & the_hits)
 			{
 				std::for_each(the_hits.second.begin(), the_hits.second.end(), [&](BranchOutputRow const & the_hit)
 				{
@@ -487,8 +487,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		// cache of leaf combinations already hit:
 		// map from millisecond to a set of leaf combinations hit for that millisecond
-		//mutable std::map<boost::multiprecision::cpp_int, std::set<std::set<int>>> hit;
-		mutable std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> hit;
+		//mutable std::map<boost::multiprecision::cpp_int, std::set<std::set<int>>> hits;
+		mutable std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> hits;
 
 		// Used for optimization purposes only
 		mutable std::map<boost::multiprecision::cpp_int, std::vector<BranchOutputRow>> remaining;
@@ -552,7 +552,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		//
 		// The following variable is defined as:
 		// For each non-primary top-level (also referred to as "child")
-		// / child variable group (the child VG identifier is the first map key):
+		// & child variable group (the child VG identifier is the first map key):
 		// A map of row in this branch (given by the set of primary variable group leaves)
 		// ... to a map of the child variable group's leaf index 
 		// ... to the index in the child variable group's secondary data table cache for that child leaf.
@@ -576,7 +576,7 @@ class VariableGroupBranchesAndLeaves
 			: variable_group_number(variable_group_number_)
 		{}
 
-		int variable_group_number;
+		int variable_group_number; // unused: Always the single primary top-level variable group identifier
 		BranchesAndLeaves branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves
 
@@ -588,6 +588,8 @@ class VariableGroupBranchesAndLeaves
 			}
 			return false;
 		}
+
+		//std::map<ChildDMUInstanceDataVector, std::vector<>>;
 
 };
 
