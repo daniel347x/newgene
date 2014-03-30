@@ -477,6 +477,8 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				dmu_keys.insert(dmu_keys.end(), branch.primary_keys.begin(), branch.primary_keys.end());
 				dmu_keys.insert(dmu_keys.end(), timeSliceLeaf.second.primary_keys.begin(), timeSliceLeaf.second.primary_keys.end());
 
+				branch.ConstructChildCombinationCache();
+
 			}
 			break;
 
@@ -978,32 +980,37 @@ Leaves AllWeightings::RetrieveLeafCombinationFromLeafIndices(BranchOutputRow & t
 void AllWeightings::ConsolidateHits()
 {
 
-	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
-	{
+	//std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
+	//{
 
-		TimeSlice const & timeSlice = timeSliceData.first;
-		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceData.second;
+	//	TimeSlice const & timeSlice = timeSliceData.first;
+	//	VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceData.second;
 
-		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+	//	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
-		// For now, assume only one variable group
-		if (variableGroupBranchesAndLeavesVector.size() > 1)
-		{
-			boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
+	//	// For now, assume only one variable group
+	//	if (variableGroupBranchesAndLeavesVector.size() > 1)
+	//	{
+	//		boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
+	//		throw NewGeneException() << newgene_error_description(msg.str());
+	//	}
 
-		VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-		BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+	//	VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+	//	BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
 
-		std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
-		{
+	//	std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
+	//	{
 
-			Branch const & branch = branchAndLeaves.first;
-			branch.ConsolidateHits();
+	//		Branch const & branch = branchAndLeaves.first;
+	//		//branch.ConsolidateHits();
 
-		});
+	//	});
 
-	});
+	//});
+
+}
+
+void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache()
+{
 
 }
