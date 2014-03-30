@@ -672,7 +672,7 @@ class AllWeightings
 		void SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice);
 
 		// Merge time slice data into a map element
-		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number);
+		void MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode);
 
 		Leaves GetLeafCombination(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves);
 

@@ -143,14 +143,14 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 
 	if (normalCase)
 	{
-		for (;;)
-		{
+		//for (;;)
+		//{
 			bool no_more_time_slice = HandleTimeSliceNormalCase(branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode);
 			if (no_more_time_slice)
 			{
-				break;
+				//break;
 			}
-			if (mapIterator == timeSlices.end())
+			else if (mapIterator == timeSlices.end())
 			{
 				// We have a chunk left but it's past the end of the map.
 				if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
@@ -158,9 +158,13 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 					// Add it solo to the end of the map.
 					AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
 				}
-				break;
+				//break;
 			}
-		}
+			else
+			{
+				HandleBranchAndLeaf(branch, newTimeSliceLeaf, variable_group_number, merge_mode);
+			}
+		//}
 	}
 
 }
@@ -183,16 +187,15 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 // The function returns the following information:
 // - Was the entire slice merged (true), or is there a part of the slice
 //   that extends beyond the right edge of the map entry (false)?
-// The function returns the following data:
+// The function returns the following data through incoming parameters (by reference):
 // If the return value is true:
 // - undefined value of time slice
-// - iterator to the map entry whose left edge corresponds to the left edge
+// - (unused currently) iterator to the map entry whose left edge corresponds to the left edge
 //   of the original time slice (but this is unused by the algorithm)
 // If the return value is false:
 // - The portion of the incoming slice that extends past the right edge
 //   of the map entry
-// - An iterator to the map entry whose left edge matches the left edge
-//   of the leftover time slice to the right.
+// - An iterator to the next map entry.
 bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
@@ -224,7 +227,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// Leave the second piece unchanged.
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_end, newMapElementLeftPtr, newMapElementRightPtr);
-			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_number);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = newMapElementLeftPtr;
 
@@ -238,7 +241,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 
 			// Merge the new time slice with the map element.
 
-			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, mapElementPtr, variable_group_number);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, mapElementPtr, variable_group_number, merge_mode);
 
 			newTimeSliceEatenCompletelyUp = true;
 
@@ -249,12 +252,15 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// The new time slice starts at the left edge of the map element,
 			// and extends past the right edge.
 
-			// Slice the first part of the time slice off so that it
+			// Slice the first part of the new time slice off so that it
 			// perfectly overlaps the map element.
 			// Merge it with the map element.
 
+			// Then set the iterator to point to the next map element, ready for the next iteration.
+			// The remainder of the new time slice (at the right) is now in the variable "newTimeSliceLeaf" and ready for the next iteration.
+
 			SliceOffLeft(newTimeSliceLeaf, mapElement.time_end, new_left_slice);
-			MergeTimeSliceDataIntoMap(branch, new_left_slice, mapElementPtr, variable_group_number);
+			MergeTimeSliceDataIntoMap(branch, new_left_slice, mapElementPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = ++mapElementPtr;
 
@@ -280,7 +286,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// The third is unchanged.
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newTimeSlice.time_end, newMapElementMiddlePtr);
-			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementMiddlePtr, variable_group_number);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementMiddlePtr, variable_group_number, merge_mode);
 
 			mapElementPtr = newMapElementMiddlePtr;
 
@@ -300,7 +306,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// (with the right edge equal to the right edge of the map element).
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newMapElementLeftPtr, newMapElementRightPtr);
-			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementRightPtr, variable_group_number);
+			MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementRightPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = newMapElementRightPtr;
 
@@ -314,13 +320,16 @@ bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLe
 			// but past its left edge.
 			// The new time slice ends past the right edge of the map element.
 
-			// Slice the left part of the time slice
-			// and the right part of the map element
+			// Slice the right part of the map element
+			// and the left part of the time slice
 			// so that they are equal, and merge.
+
+			// Then set the iterator to point to the next map element, ready for the next iteration.
+			// The remainder of the new time slice (at the right) is now in the variable "newTimeSliceLeaf" and ready for the next iteration.
 
 			SliceOffLeft(newTimeSliceLeaf, mapElement.time_end, new_left_slice);
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newMapElementLeftPtr, newMapElementRightPtr);
-			MergeTimeSliceDataIntoMap(branch, new_left_slice, newMapElementRightPtr, variable_group_number);
+			MergeTimeSliceDataIntoMap(branch, new_left_slice, newMapElementRightPtr, variable_group_number, merge_mode);
 
 			mapElementPtr = ++newMapElementRightPtr;
 
@@ -392,7 +401,7 @@ void AllWeightings::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t co
 }
 
 // Merge time slice data into a map element
-void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number)
+void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
 	VariableGroupTimeSliceData & variableGroupTimeSliceData = mapElementPtr->second;
