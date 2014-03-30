@@ -18,8 +18,10 @@ typedef boost::variant<std::int64_t, double, std::string> DMUInstanceData;
 typedef boost::variant<std::int64_t, double, std::string> SecondaryInstanceData;
 
 typedef std::vector<DMUInstanceData> DMUInstanceDataVector;
+typedef DMUInstanceDataVector ChildDMUInstanceDataVector;
 typedef std::vector<SecondaryInstanceData> SecondaryInstanceDataVector;
 
+// Row ID -> secondary data for that row
 typedef std::map<std::int64_t, SecondaryInstanceDataVector> DataCache;
 
 class TimeSlice
@@ -342,6 +344,20 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 
 };
 
+class BranchOutputRow
+{
+
+	public:
+
+		std::set<int> primary_leaves;
+
+		bool operator<(OutputRow const & rhs)
+		{
+			return primary_leaves < rhs.primary_leaves;
+		}
+
+};
+
 // "Branch"
 class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 {
@@ -415,7 +431,10 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		// cache of leaf combinations already hit:
 		// map from millisecond to a set of leaf combinations hit for that millisecond
-		mutable std::map<boost::multiprecision::cpp_int, std::set<std::set<int>>> hit;
+		//mutable std::map<boost::multiprecision::cpp_int, std::set<std::set<int>>> hit;
+		mutable std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> hit;
+
+		// Used for optimization purposes only
 		mutable std::map<boost::multiprecision::cpp_int, std::vector<std::set<int>>> remaining;
 
 		mutable std::set<std::set<int>> hits_consolidated; // After-the-fact: Merge identical hits across milliseconds within this branch
@@ -551,7 +570,6 @@ class AllWeightings
 		// Cache of secondary data: One cache for the primary top-level variable group, and a set of caches for all other variable groups (the non-primary top-level groups, and the child groups)
 		DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
 		std::map<int, DataCache> secondaryCache; // Ditto, but for child groups
-
 
 	public:
 
