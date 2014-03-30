@@ -20337,14 +20337,15 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 							case VARIABLE_GROUP_MERGE_MODE__CHILD:
 							{
 
-								Leaf leaf(dmus_leaf);
+								// pack the child data index into the main leaf for use in the function called below - because this leaf is TEMPORARY
+								// (this data will be unpacked from the temporary leaf and put into the proper place in the function called below)
+								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 								Branch branch(dmus_branch);
 
 								// Add the secondary data for this child variable group to the cache
 								allWeightings.childCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
 
-								// Set the secondary data index into the above cache for this child variable group
-								//leaf.other_top_level_indices_into_raw_data[variable_group_number] = sorting_row_of_data.rowid;
+								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode);
 
 							}
 							break;
