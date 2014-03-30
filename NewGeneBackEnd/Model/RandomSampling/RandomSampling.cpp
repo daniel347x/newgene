@@ -667,7 +667,8 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 
 	BranchOutputRow test_leaf_combination;
 
-	// skip any leaf combinations returned from previous random numbers
+	// skip any leaf combinations returned from previous random numbers - count will be 1 if previously hit for this time unit
+	// THIS is where random selection WITH REMOVAL is implemented (along with the fact that the random numbers generated are also with removal)
 	while (test_leaf_combination.Empty() || branch.hits[which_time_unit].count(test_leaf_combination))
 	{
 
