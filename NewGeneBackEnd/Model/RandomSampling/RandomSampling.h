@@ -481,7 +481,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			{
 				std::for_each(the_hits.second.begin(), the_hits.second.end(), [&](BranchOutputRow const & the_hit)
 				{
-					hits_consolidated.insert(the_hit);
+					//hits_consolidated.insert(the_hit);
 				});
 			});
 		}
@@ -503,7 +503,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Used for optimization purposes only
 		mutable std::map<boost::multiprecision::cpp_int, std::vector<BranchOutputRow>> remaining;
 
-		mutable std::set<BranchOutputRow> hits_consolidated; // After-the-fact: Merge identical hits across time units within this branch
+		//mutable std::vector<BranchOutputRow> hits_consolidated; // After-the-fact: Merge identical hits across time units within this branch
 
 		// Indices into cached secondary data tables for child groups.
 		// 
@@ -518,8 +518,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ... for those primary keys of multiplicity greater than 1
 		// ... for the UOA corresponding to the primary top-level variable group.
 		// Each row of output data has one branch, and multiple leaves (one leaf per multiplicity).
-		// The set of leaves per row is stored in "hits_consolidated", a data member of this *branch*,
-		// ... and is also stored (redundantly) across individual time unit entries within this branch
+		// The set of leaves per row is stored across individual time unit entries within this branch
 		// ... (where duplicates can occur, because if the same row (i.e., combination of leaves)
 		// ...  appears in multiple time unit entries in the same time slice,
 		// ...  that row will appear only once in the output for the time slice).
