@@ -49,9 +49,12 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 
 	if (existing_start_slice == existing_one_past_end_slice)
 	{
-		// No entries in the 'timeSlices' map yet
-		// Add the entire new time slice as the first entry in the map
-		AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+		if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
+		{
+			// No entries in the 'timeSlices' map yet
+			// Add the entire new time slice as the first entry in the map
+			AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+		}
 	}
 	else
 	{
@@ -65,9 +68,12 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 
 		if (start_of_new_slice_is_past_end_of_map)
 		{
-			// The new slice is entirely past the end of the map.
-			// Add new map entry consisting solely of the new slice.
-			AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+			if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
+			{
+				// The new slice is entirely past the end of the map.
+				// Add new map entry consisting solely of the new slice.
+				AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+			}
 		}
 		else
 		{
@@ -87,10 +93,13 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 
 				if (newTimeSlice.time_end <= startMapSlice.time_start)
 				{
-					// The entire new time slice is less than the map element returned by upper_bound.
-					// (But past any previous map elements.)
-					// Add the entire new time slice as a unit to the map.
-					AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+					if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
+					{
+						// The entire new time slice is less than the map element returned by upper_bound.
+						// (But past previous map elements, if any.)
+						// Add the entire new time slice as a unit to the map.
+						AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+					}
 				}
 				else
 				{
@@ -98,10 +107,15 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 					// The new time slice starts to the left of the map element returned by upper_bound,
 					// and ends inside or at the right edge of the first time slice in the map element returned by upper_bound.
 
-					// Slice off the left-most piece of the new time slice and add it to the map
+					// Slice off the left-most piece of the new time slice
+					// (and add it to the map if appropriate)
 					TimeSliceLeaf new_left_slice;
 					SliceOffLeft(newTimeSliceLeaf, startMapSlicePtr->first.time_start, new_left_slice);
-					AddNewTimeSlice(variable_group_number, branch, new_left_slice);
+
+					if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
+					{
+						AddNewTimeSlice(variable_group_number, branch, new_left_slice);
+					}
 
 					// For the remainder of the slice, proceed with normal case
 					normalCase = true;
@@ -114,8 +128,8 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 			{
 
 				// The new time slice starts at the left edge, or to the right of the left edge,
-				// of the map element returned by upper_bound, but the new time slice
-				// start to the left of the right edge of the map element returned by upper_bound.
+				// of the map element returned by upper_bound.
+				// The right edge of the new time slice could end anywhere (past the left edge of the new time slice).
 
 				// This is the normal case.
 				normalCase = true;
@@ -131,7 +145,7 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 	{
 		for (;;)
 		{
-			bool no_more_time_slice = HandleTimeSliceNormalCase(branch, newTimeSliceLeaf, mapIterator, variable_group_number);
+			bool no_more_time_slice = HandleTimeSliceNormalCase(branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode);
 			if (no_more_time_slice)
 			{
 				break;
@@ -139,8 +153,11 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 			if (mapIterator == timeSlices.end())
 			{
 				// We have a chunk left but it's past the end of the map.
-				// Add it solo to the end of the map.
-				AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+				if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
+				{
+					// Add it solo to the end of the map.
+					AddNewTimeSlice(variable_group_number, branch, newTimeSliceLeaf);
+				}
 				break;
 			}
 		}
@@ -176,7 +193,7 @@ void AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 //   of the map entry
 // - An iterator to the map entry whose left edge matches the left edge
 //   of the leftover time slice to the right.
-bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number)
+bool AllWeightings::HandleTimeSliceNormalCase(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
