@@ -491,19 +491,19 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// because the BRANCH is used as the KEY for various maps...
 		// But the mutable data is not part of the operator<(), so it is safe
 
-		// Weighting for this branch: This is the lowest-level, calculated value, with millisecond granularity.
-		// It is the product of the number of branch combinations and the number of milliseconds in this time slice.
+		// Weighting for this branch: This is the lowest-level, calculated value, with unit granularity according to the primary variable group.
+		// It is the product of the number of branch combinations and the number of time units in this time slice.
 		mutable Weighting weighting;
 
 		// cache of leaf combinations already hit:
-		// map from millisecond to a set of leaf combinations hit for that millisecond
+		// map from time unit to a set of leaf combinations hit for that time units
 		//mutable std::map<boost::multiprecision::cpp_int, std::set<std::set<int>>> hits;
 		mutable std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> hits;
 
 		// Used for optimization purposes only
 		mutable std::map<boost::multiprecision::cpp_int, std::vector<BranchOutputRow>> remaining;
 
-		mutable std::set<BranchOutputRow> hits_consolidated; // After-the-fact: Merge identical hits across milliseconds within this branch
+		mutable std::set<BranchOutputRow> hits_consolidated; // After-the-fact: Merge identical hits across time units within this branch
 
 		// Indices into cached secondary data tables for child groups.
 		// 
@@ -519,9 +519,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ... for the UOA corresponding to the primary top-level variable group.
 		// Each row of output data has one branch, and multiple leaves (one leaf per multiplicity).
 		// The set of leaves per row is stored in "hits_consolidated", a data member of this *branch*,
-		// ... and is also stored (redundantly) across individual millisecond entries within this branch
+		// ... and is also stored (redundantly) across individual time unit entries within this branch
 		// ... (where duplicates can occur, because if the same row (i.e., combination of leaves)
-		// ...  appears in multiple millisecond entries in the same time slice,
+		// ...  appears in multiple time unit entries in the same time slice,
 		// ...  that row will appear only once in the output for the time slice).
 		// Each leaf represents a single set of secondary column data.
 		// Example: UOA "MID, CTY, CTY", with K-ad "MID, CTY, CTY, CTY, CTY":
@@ -647,9 +647,9 @@ class AllWeightings
 		void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
 		void PrepareRandomNumbers(int how_many);
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice);
-		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_millisecond, int const K, Branch const & branch, Leaves const & leaves);
+		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
 		Leaves RetrieveLeafCombinationFromLeafIndices(BranchOutputRow & test_leaf_combination, Leaves const & leaves, int const K);
-		void ConsolidateHits(); // one-time pass to consolidate hits across ms within branches
+		void ConsolidateHits(); // one-time pass to consolidate hits across time units within branches
 
 	protected:
 
@@ -687,7 +687,7 @@ class AllWeightings
 
 	private:
 
-		void AddPositionToRemaining(boost::multiprecision::cpp_int const & which_millisecond, std::vector<int> const & position, Branch const & branch);
+		void AddPositionToRemaining(boost::multiprecision::cpp_int const & which_time_unit, std::vector<int> const & position, Branch const & branch);
 		bool IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves);
 		int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Leaves const & leaves);
 

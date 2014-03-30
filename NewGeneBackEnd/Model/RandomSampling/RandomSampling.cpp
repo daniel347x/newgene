@@ -648,7 +648,7 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 
 	random_number -= branch.weighting.getWeightingRangeStart();
 
-	boost::multiprecision::cpp_int which_millisecond = random_number / branch.number_branch_combinations;
+	boost::multiprecision::cpp_int which_time_unit = random_number / branch.number_branch_combinations;
 
 	static int saved_range = -1;
 	static std::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
@@ -663,17 +663,17 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 		return Leaves();
 	}
 
-	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hits[which_millisecond].size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
+	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hits[which_time_unit].size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
 
 	BranchOutputRow test_leaf_combination;
 
 	// skip any leaf combinations returned from previous random numbers
-	while (test_leaf_combination.Empty() || branch.hits[which_millisecond].count(test_leaf_combination))
+	while (test_leaf_combination.Empty() || branch.hits[which_time_unit].count(test_leaf_combination))
 	{
 
 		test_leaf_combination.Clear();
 
-		if (boost::multiprecision::cpp_int(branch.hits[which_millisecond].size()) > branch.number_branch_combinations / 2)
+		if (boost::multiprecision::cpp_int(branch.hits[which_time_unit].size()) > branch.number_branch_combinations / 2)
 		{
 
 			// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
@@ -681,18 +681,18 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 			
 			// A previous call may have populated "remaining"
 
-			if (branch.remaining[which_millisecond].size() == 0)
+			if (branch.remaining[which_time_unit].size() == 0)
 			{
-				PopulateAllLeafCombinations(which_millisecond, K, branch, leaves);
+				PopulateAllLeafCombinations(which_time_unit, K, branch, leaves);
 			}
 
-			std::uniform_int_distribution<size_t> distribution(0, branch.remaining[which_millisecond].size() - 1);
+			std::uniform_int_distribution<size_t> distribution(0, branch.remaining[which_time_unit].size() - 1);
 			size_t which_remaining_leaf_combination = distribution(engine);
 
-			test_leaf_combination = branch.remaining[which_millisecond][which_remaining_leaf_combination];
-			auto remainingPtr = branch.remaining[which_millisecond].begin() + which_remaining_leaf_combination;
+			test_leaf_combination = branch.remaining[which_time_unit][which_remaining_leaf_combination];
+			auto remainingPtr = branch.remaining[which_time_unit].begin() + which_remaining_leaf_combination;
 
-			branch.remaining[which_millisecond].erase(remainingPtr);
+			branch.remaining[which_time_unit].erase(remainingPtr);
 
 		}
 		else
@@ -721,9 +721,9 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 
 	// It might easily be a duplicate - random sampling will produce multiple hits on the same row
 	// because some rows can have a heavier weight than other rows;
-	// this is handled by storing a map of every *millisecond* (the finest time granularity supported)
-	// and all leaf combinations that have been hit for that millisecond.
-	branch.hits[which_millisecond].insert(test_leaf_combination);
+	// this is handled by storing a map of every *time unut* (corresponding to the primary variable group)
+	// and all leaf combinations that have been hit for that time unit.
+	branch.hits[which_time_unit].insert(test_leaf_combination);
 
 	Leaves leaf_combination = RetrieveLeafCombinationFromLeafIndices(test_leaf_combination, leaves, K);
 
@@ -731,7 +731,7 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 
 }
 
-void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_millisecond, int const K, Branch const & branch, Leaves const & leaves)
+void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves)
 {
 
 	boost::multiprecision::cpp_int total_added = 0;
@@ -746,7 +746,7 @@ void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int c
 	while (total_added < branch.number_branch_combinations)
 	{
 
-		AddPositionToRemaining(which_millisecond, position, branch);
+		AddPositionToRemaining(which_time_unit, position, branch);
 		bool succeeded = IncrementPosition(K, position, leaves);
 
 		BOOST_ASSERT_MSG(succeeded || (total_added + 1) == branch.number_branch_combinations, "Invalid logic in position incrementer in sampler!");
@@ -757,7 +757,7 @@ void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int c
 
 }
 
-void AllWeightings::AddPositionToRemaining(boost::multiprecision::cpp_int const & which_millisecond, std::vector<int> const & position, Branch const & branch)
+void AllWeightings::AddPositionToRemaining(boost::multiprecision::cpp_int const & which_time_unit, std::vector<int> const & position, Branch const & branch)
 {
 
 	BranchOutputRow new_remaining;
@@ -766,9 +766,9 @@ void AllWeightings::AddPositionToRemaining(boost::multiprecision::cpp_int const 
 		new_remaining.Insert(position_index);
 	});
 
-	if (branch.hits[which_millisecond].count(new_remaining) == 0)
+	if (branch.hits[which_time_unit].count(new_remaining) == 0)
 	{
-		branch.remaining[which_millisecond].push_back(new_remaining);
+		branch.remaining[which_time_unit].push_back(new_remaining);
 	}
 
 }
