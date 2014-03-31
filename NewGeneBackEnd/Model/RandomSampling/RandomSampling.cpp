@@ -1147,7 +1147,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 							// index tells us which index in that leaf
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-							child_hit_vector.push_back(DMUInstanceData(leaves[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
+							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
 
 						}
 						break;

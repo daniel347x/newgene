@@ -601,6 +601,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		mutable std::map<ChildDMUInstanceDataVector, std::vector<std::pair<std::vector<BranchOutputRow>::iterator, std::vector<int>>>> helper_lookup__from_child_key_set__to_matching_output_rows;
 		void ConstructChildCombinationCache(AllWeightings & allWeightings, std::vector<Leaf> & leaves_cache, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), bool const force = false) const; // Populate the above data structure
 
+		// *********************************************************************************** //
+		// Every branch ALREADY has a std::set<Leaf>,
+		// so we're already one-to-one with each branch.
+		// but it is NOT stored inside the branch itself.
+		// Therefore, we are "only" doubling the memory required 
+		// by using this cache.
+		// *********************************************************************************** //
+		//
 		// Cache the leaves for this branch.  This is a CACHE only.
 		mutable std::vector<Leaf> leaves_cache;
 		void CreateLeafCache(Leaves const & leaves) const
