@@ -13099,7 +13099,8 @@ void OutputModel::OutputGenerator::Prepare()
 				boost::format msgQuestion("Available top-level variable groups:");
 
 				// 0-based
-				top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
+				//top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
+				top_level_vg_index = 0;
 			}
 			else
 			{
