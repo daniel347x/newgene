@@ -594,11 +594,19 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ... are stored in the AllWeightings' "dataCache" (for primary top-level VG)
 		// ... and in the AllWeightings' "secondaryCache" (for non-primary top-level, and child, VG's).
 
-		// This data structure is a helper index that maps the *FULL* DMU set (including child leaf)
-		// corresponding to incoming child variable group (NOT non-primary top-level variable group),
-		// to output rows for that variable group
-		// along with the child leaf offset/s in the output row corresponding to the DMU set.
-		mutable std::map<ChildDMUInstanceDataVector, std::vector<std::pair<std::vector<BranchOutputRow>::iterator, std::vector<int>>>> helper_lookup__from_child_key_set__to_matching_output_rows;
+		// **************************************************************************************** //
+		// **************************************************************************************** //
+		// This data structure is a helper index that maps the *FULL* child DMU set
+		// (including the single child leaf, if any)
+		// representing an incoming row of data from a child variable group raw data table
+		// (including only child primary keys and selected child variables)
+		// - this corresponds to incoming child variable group (NOT non-primary top-level variable group) -
+		// to output rows for that variable group.
+		// The output rows are represented by a map from the actual iterator to a specific output row,
+		// to a vector of child leaf numbers in the output row matching the single incoming child leaf.
+		// **************************************************************************************** //
+		// **************************************************************************************** //
+		mutable std::map<ChildDMUInstanceDataVector, std::map<std::vector<BranchOutputRow>::iterator, std::vector<int>>> helper_lookup__from_child_key_set__to_matching_output_rows;
 		void ConstructChildCombinationCache(AllWeightings & allWeightings, std::vector<Leaf> & leaves_cache, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), int const number_columns_in_one_child_leaf = 0, bool const force = false) const; // Populate the above data structure
 
 		// *********************************************************************************** //

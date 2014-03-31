@@ -1110,6 +1110,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 
 		// The cache has yet to be filled, or we are specifically being requested to refresh it
 
+		ChildDMUInstanceDataVector child_hit_vector_branch_components;
 		ChildDMUInstanceDataVector child_hit_vector;
 		std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_output_rows)
 		{
@@ -1118,7 +1119,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 			{
 
 				// We have a new hit we're dealing with
-				child_hit_vector.clear();
+				child_hit_vector_branch_components.clear();
 
 				// First in the "child DMU" vector are the child's BRANCH DMU values
 				std::for_each(mappings_from_child_branch_to_primary.cbegin(), mappings_from_child_branch_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
@@ -1133,7 +1134,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 						{
 
 							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-							child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
+							child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
 
 						}
 						break;
@@ -1145,7 +1146,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 							// index tells us which index in that leaf
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
+							child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
 
 						}
 						break;
@@ -1162,6 +1163,8 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 				int child_leaf_index_crossing_multiple_child_leaves = 0;
 				int child_leaf_index_within_a_single_child_leaf = 0;
 				int current_child_leaf_number = 0;
+				child_hit_vector.clear();
+				child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector_branch_components.begin(), child_hit_vector_branch_components.end());
 				std::for_each(mappings_from_child_leaf_to_primary.cbegin(), mappings_from_child_leaf_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
@@ -1201,8 +1204,12 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 					++child_leaf_index_within_a_single_child_leaf;
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
+						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector].push_back(std::make_pair());
+
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;
+						child_hit_vector.clear();
+						child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector_branch_components.begin(), child_hit_vector_branch_components.end());
 					}
 
 				});
