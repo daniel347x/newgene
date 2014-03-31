@@ -495,7 +495,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.PrepareRandomNumbers(samples);
 		if (failed || CheckCancelled()) return;
 
-		allWeightings.PrepareRandomSamples();
+		allWeightings.PrepareRandomSamples(K);
 		if (failed || CheckCancelled()) return;
 
 		if (true)

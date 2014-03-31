@@ -842,7 +842,7 @@ void AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_num
 	if (static_cast<size_t>(K) >= leaves.size())
 	{
 		skip = true;
-		for (int n = 0; n < leaves.size(); ++n)
+		for (int n = 0; n < static_cast<int>(leaves.size()); ++n)
 		{
 			test_leaf_combination.Insert(n);
 		}
