@@ -499,7 +499,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, number_branch_combinations{ 0 }
-		{}
+		{
+			CreateLeafCache();
+		}
 
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
 			: PrimaryKeysGrouping(rhs)
@@ -508,7 +510,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, remaining{ rhs.remaining }
 			, number_branch_combinations{ rhs.number_branch_combinations }
 			, leaves_cache{ rhs.leaves_cache }
-		{}
+		{
+		}
 
 		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const & rhs)
 		{
@@ -539,19 +542,6 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			leaves_cache = rhs.leaves_cache;
 			return *this;
 		}
-
-		//void ConsolidateHits() const
-		//{
-		//	std::for_each(hits.begin(), hits.end(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> & the_hits)
-		//	{
-		//		std::for_each(the_hits.second.begin(), the_hits.second.end(), [&](BranchOutputRow const & the_hit)
-		//		{
-		//			// Disabled pending further work to support "random selection of rows WITH removal".
-		//			//hits_consolidated.insert(the_hit);
-		//		});
-		//	});
-		//}
-
 
 		// The following must be MUTABLE
 		// because the BRANCH is used as the KEY for various maps...
