@@ -20941,8 +20941,29 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 		// Now the secondary keys for the child variable groups
 		for (int group_number = 0; group_number < secondary_variable_groups_vector.size(); ++group_number)
 		{
-			int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[group_number].first.identifier_parent)].second;
+
 			std::map<int, std::int64_t> const & child_group_indices = outputRow.child_indices_into_raw_data[group_number];
+			int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[group_number].first.identifier_parent)].second;
+			for (int leaf_number = 0; leaf_number < the_child_multiplicity; ++leaf_number)
+			{
+				// We have a particular child variable group, and a particular leaf for that child variable group
+				auto const found = child_group_indices.find(leaf_number);
+				if (found == child_group_indices.cend())
+				{
+					// No data for this leaf.
+					// Bind a blank.
+					BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
+				}
+				else
+				{
+					// bind the real data
+					std::int64_t const & index_into_child_group_secondary_data_cache = found->second;
+					DataCache const & secondary_data_cache = allWeightings.childCache[group_number];
+					SecondaryInstanceDataVector const & secondary_data = secondary_data_cache[index_into_child_group_secondary_data_cache];
+					BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
+				}
+			}
+
 		}
 
 		int step_result = 0;
