@@ -516,7 +516,7 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					Leaves & leaves = branchAndLeaves.second;
 					std::vector<Leaf> & leaves_cache = branch.leaves_cache;
 
-					branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+					branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
 
 				});
 
@@ -1104,7 +1104,7 @@ void AllWeightings::ResetBranchCaches(bool const empty_all)
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, std::vector<Leaf> & leaves_cache, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, bool const force) const
+void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, std::vector<Leaf> & leaves_cache, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const number_columns_in_one_child_leaf, bool const force) const
 {
 
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
@@ -1161,6 +1161,9 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 				});
 
 				// Next in the "child DMU" vector are the child's LEAF DMU values
+				int child_leaf_index_crossing_multiple_child_leaves = 0;
+				int child_leaf_index_within_a_single_child_leaf = 0;
+				int current_child_leaf_number = 0;
 				std::for_each(mappings_from_child_leaf_to_primary.cbegin(), mappings_from_child_leaf_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
@@ -1194,6 +1197,14 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 						{}
 						break;
 
+					}
+
+					++child_leaf_index_crossing_multiple_child_leaves;
+					++child_leaf_index_within_a_single_child_leaf;
+					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
+					{
+						++current_child_leaf_number;
+						child_leaf_index_within_a_single_child_leaf = 0;
 					}
 
 				});

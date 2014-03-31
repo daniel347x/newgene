@@ -21126,15 +21126,21 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 		}
 
-		for (int current_leaf_index = 0; current_leaf_index < the_child_multiplicity; ++current_leaf_index)
-		{
+		if (failed || CheckCancelled()) return;
 
-			if (failed || CheckCancelled()) return;
+		// **************************************************************************************** //
+		// We here loop through child variable group raw data
+		// (previously stored in a temporary table that includes only primary keys and selected variables)
+		// and pass INDIVIDUAL child leaves to the time slice data handling functions
+		// (we do not pass multiple leaves, even though multiple child leaves might appear
+		//  in each individual row of output),
+		// and internally this SINGLE child variable group leaf (with its branch)
+		// will be used to locate ALL rows of actual output that contain that individual child leaf,
+		// regardless of the child leaf number in that particular output row.
+		// **************************************************************************************** //
 
-			std::vector<std::string> errorMessages;
-			RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, current_leaf_index);
-
-		}
+		std::vector<std::string> errorMessages;
+		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, current_leaf_index);
 
 		++current_child_vg_index;
 
