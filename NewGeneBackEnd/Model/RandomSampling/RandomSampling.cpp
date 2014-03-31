@@ -506,14 +506,12 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				{
 
 					// *********************************************************************************** //
-					// "leaves" is the EXISTING set of leaves for the EXISTING branch in the EXISTING map entry.
 					// "leaves_cache" is a vector cache containing the same leaves in the same order.
 					//
 					// Note that a call to "ResetBranchCaches()" previous to the high-level call to "HandleBranchAndLeaf()",
 					// in which we are nested, has already set the "leaves_cache" cache,
 					// and this cache is copied whenever any map entry changes.
 					// *********************************************************************************** //
-					Leaves & leaves = branchAndLeaves.second;
 					std::vector<Leaf> & leaves_cache = branch.leaves_cache;
 
 					branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
