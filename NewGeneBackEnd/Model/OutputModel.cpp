@@ -20941,6 +20941,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 		// Now the secondary keys for the child variable groups
 		for (int group_number = 0; group_number < secondary_variable_groups_vector.size(); ++group_number)
 		{
+			int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[group_number].first.identifier_parent)].second;
 			std::map<int, std::int64_t> const & child_group_indices = outputRow.child_indices_into_raw_data[group_number];
 		}
 
