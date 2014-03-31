@@ -531,7 +531,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				// For each, we must therefore build its cache that maps the incoming 
 				// *********************************************************************************** //
 
-				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](decltype(branchesAndLeaves)::value_type & branchAndLeaves)
+				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
 				{
 
 					// *********************************************************************************** //
@@ -555,7 +555,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					auto const & matchingOutputRows = the_branch.helper_lookup__from_child_key_set__to_matching_output_rows[dmu_keys];
 
 					// Loop through all matching output rows
-					std::for_each(matchingOutputRows.cbegin(), matchingOutputRows.cend(), [&](decltype(matchingOutputRows)::value_type const & matchingOutputRow)
+					std::for_each(matchingOutputRows.cbegin(), matchingOutputRows.cend(), [&](std::pair<BranchOutputRow const *, std::vector<int>> const & matchingOutputRow)
 					{
 
 						BranchOutputRow const * outputRowPtr = matchingOutputRow.first;
