@@ -531,7 +531,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				// For each, we must therefore build its cache that maps the incoming 
 				// *********************************************************************************** //
 
-				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
+				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](decltype(branchesAndLeaves)::value_type & branchAndLeaves)
 				{
 
 					// *********************************************************************************** //
@@ -543,7 +543,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// and this cache is copied whenever any map entry changes.
 					// *********************************************************************************** //
 					Branch const & the_branch = branchAndLeaves.first;
-					std::vector<Leaf> & leaves_cache = branch.leaves_cache;
+					std::vector<Leaf> & leaves_cache = the_branch.leaves_cache;
 
 					// The following cache will only be filled on the first pass
 					the_branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()), true);
@@ -552,10 +552,10 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// We have an incoming child variable group branch and leaf.
 					// Find all matching output rows that contain the same DMU data on the matching columns.
 					// *********************************************************************************** //
-					std::map<BranchOutputRow const *, std::vector<int>> const & matchingOutputRows = the_branch.helper_lookup__from_child_key_set__to_matching_output_rows[dmu_keys];
+					auto const & matchingOutputRows = the_branch.helper_lookup__from_child_key_set__to_matching_output_rows[dmu_keys];
 
 					// Loop through all matching output rows
-					std::for_each(matchingOutputRows.cbegin(), matchingOutputRows.cend(), [&](std::pair<BranchOutputRow const *, std::vector<int>> const & matchingOutputRow)
+					std::for_each(matchingOutputRows.cbegin(), matchingOutputRows.cend(), [&](decltype(matchingOutputRows)::value_type const & matchingOutputRow)
 					{
 
 						BranchOutputRow const * outputRowPtr = matchingOutputRow.first;
@@ -571,7 +571,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 							{
 								outputRow.child_indices_into_raw_data[variable_group_number] = std::map<int, std::int64_t>();
 							}
-							std::map<int, std::int64_t> & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
+							auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
 							outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
 
 							added = true;
@@ -1118,14 +1118,16 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
 	{
 
+		helper_lookup__from_child_key_set__to_matching_output_rows.clear();
+
 		// The cache has yet to be filled, or we are specifically being requested to refresh it
 
 		ChildDMUInstanceDataVector child_hit_vector_branch_components;
 		ChildDMUInstanceDataVector child_hit_vector;
-		std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_output_rows)
+		std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & time_unit_output_rows)
 		{
 
-			for (std::set<BranchOutputRow>::const_iterator outputRowPtr = time_unit_output_rows.second.cbegin(); outputRowPtr != time_unit_output_rows.second.cend(); ++outputRowPtr)
+			for (auto outputRowPtr = time_unit_output_rows.second.cbegin(); outputRowPtr != time_unit_output_rows.second.cend(); ++outputRowPtr)
 			{
 
 				BranchOutputRow const & outputRow = *outputRowPtr;
@@ -1142,29 +1144,29 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					switch (childToPrimaryMapping.mapping)
 					{
 
-						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-						{
+					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
+					{
 
-							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-							child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
+																	 // The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+																	 child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
 
-						}
+					}
 						break;
 
-						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
-						{
+					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
+					{
 
-							// leaf_number tells us which leaf
-							// index tells us which index in that leaf
+																   // leaf_number tells us which leaf
+																   // index tells us which index in that leaf
 
-							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-							child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
+																   // The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+																   child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
 
-						}
+					}
 						break;
 
 					default:
-						{}
+					{}
 						break;
 
 					}
@@ -1185,29 +1187,29 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					switch (childToPrimaryMapping.mapping)
 					{
 
-						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-						{
+					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
+					{
 
-							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-							child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
+																	 // The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+																	 child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
 
-						}
+					}
 						break;
 
 					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
-						{
+					{
 
-							// leaf_number tells us which leaf
-							// index tells us which index in that leaf
+																   // leaf_number tells us which leaf
+																   // index tells us which index in that leaf
 
-							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
+																   // The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+																   child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
 
-						}
+					}
 						break;
 
 					default:
-						{}
+					{}
 						break;
 
 					}
@@ -1217,7 +1219,6 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
 						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
-
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;
 						child_hit_vector.clear();
@@ -1229,6 +1230,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 			}
 
 		});
+		//}
 
 	}
 
@@ -1245,4 +1247,49 @@ void AllWeightings::PrepareRandomSamples(int const K)
 	{
 	}
 
+}
+
+BranchOutputRow::BranchOutputRow()
+{
+	int m = 0; // debug
+}
+
+BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
+: primary_leaves(rhs.primary_leaves)
+{
+	SaveCache();
+}
+
+BranchOutputRow::BranchOutputRow(BranchOutputRow && rhs)
+: primary_leaves(std::move(rhs.primary_leaves))
+{
+	SaveCache();
+}
+
+BranchOutputRow & BranchOutputRow::operator=(BranchOutputRow const & rhs)
+{
+	if (this == &rhs)
+	{
+		return *this;
+	}
+	primary_leaves = rhs.primary_leaves;
+	SaveCache();
+	return *this;
+}
+
+// Destructor to debug
+BranchOutputRow::~BranchOutputRow()
+{
+	int m = 0; // debug
+}
+
+BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
+{
+	if (this == &rhs)
+	{
+		return *this;
+	}
+	primary_leaves = std::move(rhs.primary_leaves);
+	SaveCache();
+	return *this;
 }

@@ -391,42 +391,14 @@ class BranchOutputRow
 
 	public:
 
-		BranchOutputRow()
-		{}
+		BranchOutputRow();
+		BranchOutputRow(BranchOutputRow const & rhs);
+		BranchOutputRow(BranchOutputRow && rhs);
+		BranchOutputRow & operator=(BranchOutputRow const & rhs);
 
-		BranchOutputRow(BranchOutputRow const & rhs)
-			: primary_leaves(rhs.primary_leaves)
-		{
-			SaveCache();
-		}
-
-		BranchOutputRow(BranchOutputRow && rhs)
-			: primary_leaves(std::move(rhs.primary_leaves))
-		{
-			SaveCache();
-		}
-
-		BranchOutputRow & operator=(BranchOutputRow const & rhs)
-		{
-			if (this == &rhs)
-			{
-				return *this;
-			}
-			primary_leaves = rhs.primary_leaves;
-			SaveCache();
-			return *this;
-		}
-
-		BranchOutputRow & operator=(BranchOutputRow && rhs)
-		{
-			if (this == &rhs)
-			{
-				return *this;
-			}
-			primary_leaves = std::move(rhs.primary_leaves);
-			SaveCache();
-			return *this;
-		}
+		// Destructor to debug
+		~BranchOutputRow();
+		BranchOutputRow & operator=(BranchOutputRow && rhs);
 
 		bool operator==(BranchOutputRow const & rhs)
 		{
