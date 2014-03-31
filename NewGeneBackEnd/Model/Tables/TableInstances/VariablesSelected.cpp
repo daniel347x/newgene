@@ -42,6 +42,7 @@ void Table_VARIABLES_SELECTED::Load(sqlite3 * db, OutputModel * output_model_, I
 			{
 				WidgetInstanceIdentifier identifier;
 				bool found = input_model_->t_vgp_setmembers.getIdentifierFromStringCodeAndParentUUID(code_variable, *identifier_parent.uuid, identifier);
+				identifier.time_granularity = identifier.identifier_parent->time_granularity;
 				if (found && identifier.uuid && identifier.uuid->size())
 				{
 					// Variable group => Variable group set member mapping
