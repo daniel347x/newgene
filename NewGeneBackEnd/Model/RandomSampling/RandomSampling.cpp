@@ -546,7 +546,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					std::vector<Leaf> & leaves_cache = branch.leaves_cache;
 
 					// The following cache will only be filled on the first pass
-					the_branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
+					the_branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()), true);
 
 					// *********************************************************************************** //
 					// We have an incoming child variable group branch and leaf.
