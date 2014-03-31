@@ -1227,6 +1227,9 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					++child_leaf_index_within_a_single_child_leaf;
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
+
+						std::string test = boost::lexical_cast<std::string>(child_hit_vector[0]);
+
 						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;

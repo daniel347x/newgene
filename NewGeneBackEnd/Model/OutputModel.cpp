@@ -14206,7 +14206,7 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 	{
 		if (failed || CheckCancelled())
 		{
-			return; // from lamda
+			return;
 		}
 
 		WidgetInstanceIdentifier const & the_dmu_category = k_count_for_primary_uoa_for_given_dmu_category__info.first;
