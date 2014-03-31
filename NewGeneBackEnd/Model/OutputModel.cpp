@@ -20863,7 +20863,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 		std::vector<std::int64_t> secondary_key_row_indices;
 		std::map<int, std::vector<std::int64_t>> other_top_level_secondary_row_indices;
 
-		// The leaves represents the primary keys of multiplicity > 1
+		// The leaves represent the primary keys of multiplicity > 1
 		std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
 		{
 			
