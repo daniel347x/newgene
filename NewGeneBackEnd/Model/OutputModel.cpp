@@ -21030,7 +21030,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 
 					// No data for this leaf.
 					// bind blanks; one per selected secondary variable
-					for (size_t m = 0; m < top_level_number_secondary_columns[variable_group_number].size(); ++m)
+					for (size_t m = 0; m < top_level_number_secondary_columns[variable_group_number]; ++m)
 					{
 						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
 					}
@@ -21065,7 +21065,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 
 					// No data for this leaf.
 					// bind blanks; one per selected secondary variable
-					for (size_t m = 0; m < child_number_secondary_columns[group_number].size(); ++m)
+					for (size_t m = 0; m < child_number_secondary_columns[group_number]; ++m)
 					{
 						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
 					}
