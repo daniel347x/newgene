@@ -23,88 +23,88 @@ std::int64_t AvgMsperUnit(TIME_GRANULARITY const time_granularity)
 	switch (time_granularity)
 	{
 
-	case TIME_GRANULARITY__SECOND:
-	{
-									 result = second;
-	}
+		case TIME_GRANULARITY__SECOND:
+		{
+			result = second;
+		}
 		break;
 
-	case TIME_GRANULARITY__MINUTE:
-	{
-									 result = minute;
-	}
+		case TIME_GRANULARITY__MINUTE:
+		{
+			result = minute;
+		}
 		break;
 
-	case TIME_GRANULARITY__HOUR:
-	{
-								   result = hour;
-	}
+		case TIME_GRANULARITY__HOUR:
+		{
+			result = hour;
+		}
 		break;
 
-	case TIME_GRANULARITY__DAY:
-	{
-								  result = day;
-	}
+		case TIME_GRANULARITY__DAY:
+		{
+			result = day;
+		}
 		break;
 
-	case TIME_GRANULARITY__WEEK:
-	{
-								   result = week;
-	}
+		case TIME_GRANULARITY__WEEK:
+		{
+			result = week;
+		}
 		break;
 
-	case TIME_GRANULARITY__MONTH:
-	{
-									result = month;
-	}
+		case TIME_GRANULARITY__MONTH:
+		{
+			result = month;
+		}
 		break;
 
-	case TIME_GRANULARITY__QUARTER:
-	{
-									  result = quarter;
-	}
+		case TIME_GRANULARITY__QUARTER:
+		{
+			result = quarter;
+		}
 		break;
 
-	case TIME_GRANULARITY__YEAR:
-	{
-								   result = year;
-	}
+		case TIME_GRANULARITY__YEAR:
+		{
+			result = year;
+		}
 		break;
 
-	case TIME_GRANULARITY__BIENNIAL:
-	{
-									   result = biennial;
-	}
+		case TIME_GRANULARITY__BIENNIAL:
+		{
+			result = biennial;
+		}
 		break;
 
-	case TIME_GRANULARITY__QUADRENNIAL:
-	{
-										  result = quadrennial;
-	}
+		case TIME_GRANULARITY__QUADRENNIAL:
+		{
+			result = quadrennial;
+		}
 		break;
 
-	case TIME_GRANULARITY__DECADE:
-	{
-									 result = decade;
-	}
+		case TIME_GRANULARITY__DECADE:
+		{
+			result = decade;
+		}
 		break;
 
-	case TIME_GRANULARITY__CENTURY:
-	{
-									  result = century;
-	}
+		case TIME_GRANULARITY__CENTURY:
+		{
+			result = century;
+		}
 		break;
 
-	case TIME_GRANULARITY__MILLENIUM:
-	{
-										result = millenium;
-	}
+		case TIME_GRANULARITY__MILLENIUM:
+		{
+			result = millenium;
+		}
 		break;
 
-	default:
-	{
-			   // no-op;
-	}
+		default:
+		{
+			// no-op;
+		}
 		break;
 
 	}
