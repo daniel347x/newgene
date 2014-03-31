@@ -596,7 +596,7 @@ void Table_VG_SET_MEMBER::Load(sqlite3 * db, InputModel * input_model_)
 			//if (std::string(code) != "DATETIME_ROW_START" && std::string(code) != "DATETIME_ROW_END")
 			//{
 				WidgetInstanceIdentifier vg_category_identifier = input_model_->t_vgp_identifiers.getIdentifier(fk_vg_uuid);
-				identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, vg_category_identifier, code, longhand, seqnumber, flags, vg_category_identifier.time_granularity,
+				identifiers_map[fk_vg_uuid].push_back(WidgetInstanceIdentifier(uuid, vg_category_identifier, code, longhand, seqnumber, flags, vg_category_identifier.identifier_parent->time_granularity,
 					MakeNotes(notes1, notes2, notes3)));
 			//}
 		}
