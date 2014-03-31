@@ -426,6 +426,10 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 	VariableGroupTimeSliceData & variableGroupTimeSliceData = mapElementPtr->second;
 	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
+
+	VariableGroupBranchesAndLeavesVector * test1 = &variableGroupBranchesAndLeavesVector;
+
+
 	// Note: Currently, only one primary top-level variable group is supported.
 	// It will be the "begin()" element, if it exists.
 	VariableGroupBranchesAndLeavesVector::iterator VariableGroupBranchesAndLeavesPtr = variableGroupBranchesAndLeavesVector.begin();
@@ -455,6 +459,9 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 		VariableGroupBranchesAndLeaves & variableGroupBranch = *VariableGroupBranchesAndLeavesPtr;
 		BranchesAndLeaves & branchesAndLeaves = variableGroupBranch.branches_and_leaves;
+
+		VariableGroupBranchesAndLeaves const * test3 = &variableGroupBranch;
+		BranchesAndLeaves const * test4 = &branchesAndLeaves;
 
 		switch (merge_mode)
 		{
@@ -531,7 +538,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				// For each, we must therefore build its cache that maps the incoming 
 				// *********************************************************************************** //
 
-				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
+				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
 				{
 
 					// *********************************************************************************** //
@@ -545,6 +552,8 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					Branch const & the_branch = branchAndLeaves.first;
 					std::vector<Leaf> & leaves_cache = the_branch.leaves_cache;
 
+					Branch const * test2 = &the_branch;
+
 					// The following cache will only be filled on the first pass
 					the_branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()), true);
 
@@ -555,12 +564,15 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					auto const & matchingOutputRows = the_branch.helper_lookup__from_child_key_set__to_matching_output_rows[dmu_keys];
 
 					// Loop through all matching output rows
-					std::for_each(matchingOutputRows.cbegin(), matchingOutputRows.cend(), [&](std::pair<BranchOutputRow const *, std::vector<int>> const & matchingOutputRow)
+					for (auto matchingOutputRowPtr = matchingOutputRows.cbegin(); matchingOutputRowPtr != matchingOutputRows.cend(); ++matchingOutputRowPtr)
+					//std::for_each(matchingOutputRows.cbegin(), matchingOutputRows.cend(), [&](std::pair<BranchOutputRow const *, std::vector<int>> const & matchingOutputRow)
 					{
 
-						BranchOutputRow const * outputRowPtr = matchingOutputRow.first;
+						//BranchOutputRow const * outputRowPtr = matchingOutputRow.first;
+						BranchOutputRow const * const & outputRowPtr = matchingOutputRowPtr->first;
 						BranchOutputRow const & outputRow = *outputRowPtr;
-						std::vector<int> const & matchingOutputChildLeaves = matchingOutputRow.second;
+						//std::vector<int> const & matchingOutputChildLeaves = matchingOutputRow.second;
+						std::vector<int> const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
 
 						// Loop through all matching output row child leaves
 						std::for_each(matchingOutputChildLeaves.cbegin(), matchingOutputChildLeaves.cend(), [&](int const matching_child_leaf_index)
@@ -576,12 +588,34 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 							added = true;
 
+							std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
+							{
+								TimeSlice const & timeSlice = timeSliceData.first;
+								VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
+								VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+								VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+								BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+								std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
+								{
+									Branch const & branch = branchAndLeaves.first;
+									Leaves const & leaves = branchAndLeaves.second;
+									std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_and_rows)
+									{
+										std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
+										std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
+										{
+											if (outputRow.child_indices_into_raw_data.size() > 0)
+											{
+												int m_ = 0;
+											}
+										});
+									});
+								});
+							});
 						});
-
-					});
-
+					//});
+					}
 				});
-
 			}
 			break;
 
