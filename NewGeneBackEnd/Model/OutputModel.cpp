@@ -21036,7 +21036,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 
 					// No data for this leaf.
 					// bind blanks; one per selected secondary variable
-					for (size_t m = 0; m < top_level_number_secondary_columns[variable_group_number]; ++m)
+					for (int m = 0; m < top_level_number_secondary_columns[variable_group_number]; ++m)
 					{
 						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
 					}
@@ -21071,7 +21071,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 
 					// No data for this leaf.
 					// bind blanks; one per selected secondary variable
-					for (size_t m = 0; m < child_number_secondary_columns[group_number]; ++m)
+					for (int m = 0; m < child_number_secondary_columns[group_number]; ++m)
 					{
 						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
 					}
@@ -21354,7 +21354,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllWeightings const & allWeightings)
+void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings)
 {
 
 	std::string setting_path_to_kad_output = CheckOutputFileExists();
@@ -21402,7 +21402,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 	std::int64_t rows_written = 0;
 
-	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> const & timeSliceData)
+	std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
 	{
 
 		if (failed || CheckCancelled())
