@@ -1122,6 +1122,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 				// We have a new hit we're dealing with
 				child_hit_vector.clear();
 
+				// First in the "child DMU" vector are the child's BRANCH DMU values
 				std::for_each(mappings_from_child_branch_to_primary.cbegin(), mappings_from_child_branch_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
@@ -1142,6 +1143,43 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
 						{
 
+							// leaf_number tells us which leaf
+							// index tells us which index in that leaf
+
+							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
+
+						}
+						break;
+
+					default:
+						{}
+						break;
+
+					}
+
+				});
+
+				// Next in the "child DMU" vector are the child's LEAF DMU values
+				std::for_each(mappings_from_child_leaf_to_primary.cbegin(), mappings_from_child_leaf_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				{
+
+					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're still working on the branch)
+
+					switch (childToPrimaryMapping.mapping)
+					{
+
+						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
+						{
+
+							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+							child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
+
+						}
+						break;
+
+					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
+						{
 
 							// leaf_number tells us which leaf
 							// index tells us which index in that leaf
@@ -1150,6 +1188,10 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
 
 						}
+						break;
+
+					default:
+						{}
 						break;
 
 					}
