@@ -505,10 +505,18 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
 				{
 
-					// "leaves" is the EXISTING set of leaves for the EXISTING branch in the EXISTING map entry
+					// *********************************************************************************** //
+					// "leaves" is the EXISTING set of leaves for the EXISTING branch in the EXISTING map entry.
+					// "leaves_cache" is a vector cache containing the same leaves in the same order.
+					//
+					// Note that a call to "ResetBranchCaches()" previous to the high-level call to "HandleBranchAndLeaf()",
+					// in which we are nested, has already set the "leaves_cache" cache,
+					// and this cache is copied whenever any map entry changes.
+					// *********************************************************************************** //
 					Leaves & leaves = branchAndLeaves.second;
+					std::vector<Leaf> & leaves_cache = branch.leaves_cache;
 
-					branch.ConstructChildCombinationCache(*this, leaves, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+					branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 				});
 
@@ -1096,7 +1104,7 @@ void AllWeightings::ResetBranchCaches(bool const empty_all)
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, Leaves & leaves, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, bool const force) const
+void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, std::vector<Leaf> & leaves_cache, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, bool const force) const
 {
 
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
