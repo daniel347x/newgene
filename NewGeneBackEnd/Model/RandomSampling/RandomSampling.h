@@ -396,11 +396,15 @@ class BranchOutputRow
 
 		BranchOutputRow(BranchOutputRow const & rhs)
 			: primary_leaves(rhs.primary_leaves)
-		{}
+		{
+			SaveCache();
+		}
 
 		BranchOutputRow(BranchOutputRow && rhs)
 			: primary_leaves(std::move(rhs.primary_leaves))
-		{}
+		{
+			SaveCache();
+		}
 
 		BranchOutputRow & operator=(BranchOutputRow const & rhs)
 		{
@@ -409,6 +413,7 @@ class BranchOutputRow
 				return *this;
 			}
 			primary_leaves = rhs.primary_leaves;
+			SaveCache();
 			return *this;
 		}
 
@@ -419,6 +424,7 @@ class BranchOutputRow
 				return *this;
 			}
 			primary_leaves = std::move(rhs.primary_leaves);
+			SaveCache();
 			return *this;
 		}
 
@@ -436,6 +442,7 @@ class BranchOutputRow
 		{
 			primary_leaves.insert(index_of_leaf);
 			//primary_leaves.push_back(index_of_leaf);
+			SaveCache();
 		}
 
 		size_t Size() const
@@ -451,10 +458,15 @@ class BranchOutputRow
 		void Clear()
 		{
 			primary_leaves.clear();
+			SaveCache();
 		}
 
+	private:
+	
 		// Index into the branch's Leaf set
 		std::set<int> primary_leaves;
+
+	public:
 
 		void SaveCache()
 		{
