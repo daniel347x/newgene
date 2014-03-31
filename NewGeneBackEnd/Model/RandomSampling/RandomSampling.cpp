@@ -529,6 +529,7 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					{
 
 						std::vector<BranchOutputRow>::iterator const outputRowPtr = matchingOutputRow.first;
+						BranchOutputRow const & outputRow = *outputRowPtr;
 						std::vector<int> const & matchingOutputChildLeaves = matchingOutputRow.second;
 
 						// Loop through all matching output row child leaves
