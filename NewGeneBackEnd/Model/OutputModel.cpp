@@ -498,7 +498,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSamplerFillDataForChildGroups(allWeightings);
 		if (failed || CheckCancelled()) return;
 
-		if (false)
+		if (true)
 		{
 
 			// This is only necessary for debugging
