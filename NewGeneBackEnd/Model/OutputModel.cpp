@@ -20315,10 +20315,13 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 								Branch branch(dmus_branch);
 
-								// Add the secondary data for this primary variable group to the cache
-								allWeightings.dataCache[sorting_row_of_data.rowid] = secondary_data;
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode);
 
-								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode);
+								if (added)
+								{
+									// Add the secondary data for this primary variable group to the cache
+									allWeightings.dataCache[sorting_row_of_data.rowid] = secondary_data;
+								}
 
 							}
 							break;
@@ -20332,10 +20335,13 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// Add the secondary data for this non-primary top-level variable group to the cache
 								allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
 
-								// Set the secondary data index into the above cache for this non-primary top-level variable group
-								leaf.other_top_level_indices_into_raw_data[variable_group_number] = sorting_row_of_data.rowid;
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode);
 
-								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode);
+								if (added)
+								{
+									// Set the secondary data index into the above cache for this non-primary top-level variable group
+									leaf.other_top_level_indices_into_raw_data[variable_group_number] = sorting_row_of_data.rowid;
+								}
 
 							}
 							break;
@@ -20348,9 +20354,6 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 								Branch branch(dmus_branch);
 
-								// Add the secondary data for this child variable group to the cache
-								allWeightings.childCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
-
 								// ************************************************************************************************** //
 								// Important!
 								// This is a *CHILD* merge,
@@ -20362,9 +20365,15 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// ************************************************************************************************** //
 								allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.  See comment just above.
 
-								allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
 
 								allWeightings.ResetBranchCaches(true); // no need for caches any more
+
+								if (added)
+								{
+									// Add the secondary data for this child variable group to the cache
+									allWeightings.childCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
+								}
 
 							}
 							break;
