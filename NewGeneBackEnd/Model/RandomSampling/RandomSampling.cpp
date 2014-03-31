@@ -719,8 +719,10 @@ void AllWeightings::PrepareRandomNumbers(int how_many)
 
 			if (remaining.empty())
 			{
-				boost::format msg("Too many output rows have been requested for the given data set.");
-				throw NewGeneException() << newgene_error_description(msg.str());
+				// TODO: warning
+				//boost::format msg("Too many output rows have been requested for the given data set.");
+				//throw NewGeneException() << newgene_error_description(msg.str());
+				break;
 			}
 
 			std::uniform_int_distribution<size_t> remaining_distribution(0, remaining.size() - 1);
