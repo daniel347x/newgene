@@ -355,6 +355,7 @@ Table_VARIABLES_SELECTED::UOA_To_Variables_Map Table_VARIABLES_SELECTED::GetSele
 			failed = true;
 			return; // from lambda
 		}
+		variable_group.time_granularity = variable_group.identifier_parent->time_granularity;
 		WidgetInstanceIdentifier uoa = *variable_group.identifier_parent;
 
 		VariableGroup_To_VariableSelections_Map & variable_groups_same_uoa = the_map[uoa]; // create or obtain the map of variable groups corresponding to the same UOA
