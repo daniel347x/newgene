@@ -1,6 +1,8 @@
 #ifndef TIMEGRANULARITY_H
 #define TIMEGRANULARITY_H
 
+#include <cstdint>
+
 enum TIME_GRANULARITY
 {
 

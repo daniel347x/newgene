@@ -20082,8 +20082,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & variable_group_selected_columns_schema, int const variable_group_number,
 	AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages,
 	std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary,
-	std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary,
-	int const leaf_index)
+	std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary)
 {
 
 	{
@@ -20366,7 +20365,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// ************************************************************************************************** //
 								allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.  See comment just above.
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 								allWeightings.ResetBranchCaches(true); // no need for caches any more
 
@@ -20957,7 +20956,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 				other_top_level_secondary_row_indices[vg_id_and_index_into_secondary_data.first].push_back(vg_id_and_index_into_secondary_data.second);
 			});
 			// fill in any entries that don't exist - they will be left blank in the output
-			for (int group_number = 0; group_number < primary_variable_groups_vector.size(); ++group_number)
+			for (int group_number = 0; group_number < static_cast<int>(primary_variable_groups_vector.size()); ++group_number)
 			{
 				if (group_number == top_level_vg_index)
 				{
@@ -20967,8 +20966,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 				if (found == other_top_level_secondary_row_indices.cend())
 				{
 					// Make sure the leaf has an entry for every non-primary top-level variable group.
-					// Fill with -1 if no match exists.
-					other_top_level_secondary_row_indices[group_number] = -1;
+					other_top_level_secondary_row_indices[group_number].push_back(-1); // side-effect creates the empty vector
 				}
 			}
 
@@ -20987,8 +20985,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 		std::for_each(secondary_key_row_indices.cbegin(), secondary_key_row_indices.cend(), [&](std::int64_t const secondary_key_row_index)
 		{
 
-			SecondaryInstanceDataVector const & secondary_data = allWeightings.dataCache[secondary_key_row_index];
-			std::for_each(secondary_data.cbegin(), secondary_data.cend(), [&](SecondaryInstanceData const & secondary_data)
+			SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[secondary_key_row_index];
+			std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & secondary_data)
 			{
 				BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
 			});
@@ -20996,10 +20994,11 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 		});
 
 		// Now the secondary keys for the other top-level variable groups
-		std::for_each(other_top_level_secondary_row_indices.cbegin(), other_top_level_secondary_row_indices.cend(), [&](std::pair<int, std::vector<std::int64_t>> const & variable_group_number_to_secondary_index)
+		std::for_each(other_top_level_secondary_row_indices.cbegin(), other_top_level_secondary_row_indices.cend(), [&](std::pair<int, std::vector<std::int64_t>> const & variable_group_number_to_secondary_indices)
 		{
-			int const variable_group_number = variable_group_number_to_secondary_index.first;
-			std::vector<std::int64_t> const & indices_into_secondary_data_cache = variable_group_number_to_secondary_index.second;
+			int const variable_group_number = variable_group_number_to_secondary_indices.first;
+			std::vector<std::int64_t> const & indices_into_secondary_data_cache = variable_group_number_to_secondary_indices.second;
+			int leaf_index = 0;
 			std::for_each(indices_into_secondary_data_cache.cbegin(), indices_into_secondary_data_cache.cend(), [&](std::int64_t const & index_into_secondary_data_cache)
 			{
 				if (index_into_secondary_data_cache == -1)
@@ -21010,15 +21009,19 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 				else
 				{
 					// bind the real data
-					DataCache const & secondary_data_cache = allWeightings.otherTopLevelCache[variable_group_number];
-					SecondaryInstanceDataVector const & secondary_data = secondary_data_cache[index_into_secondary_data_cache];
-					BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
+					DataCache & secondary_data_cache = allWeightings.otherTopLevelCache[variable_group_number];
+					SecondaryInstanceDataVector const & secondary_data_vector = secondary_data_cache[index_into_secondary_data_cache];
+					std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & secondary_data)
+					{
+						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
+					});
 				}
+				++leaf_index;
 			});
 		});
 
 		// Now the secondary keys for the child variable groups
-		for (int group_number = 0; group_number < secondary_variable_groups_vector.size(); ++group_number)
+		for (int group_number = 0; group_number < static_cast<int>(secondary_variable_groups_vector.size()); ++group_number)
 		{
 
 			std::map<int, std::int64_t> const & child_group_indices = outputRow.child_indices_into_raw_data[group_number];
@@ -21037,9 +21040,12 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 				{
 					// bind the real data
 					std::int64_t const & index_into_child_group_secondary_data_cache = found->second;
-					DataCache const & secondary_data_cache = allWeightings.childCache[group_number];
-					SecondaryInstanceDataVector const & secondary_data = secondary_data_cache[index_into_child_group_secondary_data_cache];
-					BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
+					DataCache & secondary_data_cache = allWeightings.childCache[group_number];
+					SecondaryInstanceDataVector const & secondary_data_vector = secondary_data_cache[index_into_child_group_secondary_data_cache];
+					std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & secondary_data)
+					{
+						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
+					});
 				}
 			}
 
@@ -21299,7 +21305,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		// **************************************************************************************** //
 
 		std::vector<std::string> errorMessages;
-		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, current_leaf_index);
+		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 		++current_child_vg_index;
 

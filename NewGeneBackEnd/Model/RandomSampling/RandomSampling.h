@@ -24,6 +24,8 @@ typedef std::vector<SecondaryInstanceData> SecondaryInstanceDataVector;
 // Row ID -> secondary data for that row
 typedef std::map<std::int64_t, SecondaryInstanceDataVector> DataCache;
 
+class AllWeightings;
+
 class TimeSlice
 {
 
@@ -214,6 +216,23 @@ class Weighting
 
 };
 
+enum CHILD_TO_PRIMARY_MAPPING
+{
+	CHILD_TO_PRIMARY_MAPPING__UNKNOWN
+	, CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH
+	, CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF
+};
+
+struct ChildToPrimaryMapping
+{
+	ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING const mapping_, int const index_, int const leaf_number_ = -1)
+	: mapping(mapping_), index(index_), leaf_number(leaf_number_) {}
+
+	CHILD_TO_PRIMARY_MAPPING mapping;
+	int index;
+	int leaf_number;
+};
+
 enum VARIABLE_GROUP_MERGE_MODE
 {
 	VARIABLE_GROUP_MERGE_MODE__UNKNOWN
@@ -252,6 +271,7 @@ class PrimaryKeysGrouping
 				return *this;
 			}
 			primary_keys = std::move(rhs.primary_keys);
+			return *this;
 		}
 
 		DMUInstanceDataVector primary_keys;
@@ -356,6 +376,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 			}
 			PrimaryKeysGrouping::operator=(std::move(rhs));
 			index_into_raw_data = rhs.index_into_raw_data;
+			return *this;
 		}
 
 		std::int64_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
@@ -448,6 +469,9 @@ class BranchOutputRow
 		mutable std::map<int, std::map<int, std::int64_t>> child_indices_into_raw_data;
 
 };
+
+typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
+typedef std::set<Leaf> Leaves;
 
 // "Branch"
 class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
@@ -606,7 +630,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// to a vector of child leaf numbers in the output row matching the single incoming child leaf.
 		// **************************************************************************************** //
 		// **************************************************************************************** //
-		mutable std::map<ChildDMUInstanceDataVector, std::map<std::vector<BranchOutputRow>::iterator, std::vector<int>>> helper_lookup__from_child_key_set__to_matching_output_rows;
+		mutable std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> helper_lookup__from_child_key_set__to_matching_output_rows;
 		void ConstructChildCombinationCache(AllWeightings & allWeightings, std::vector<Leaf> & leaves_cache, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), int const number_columns_in_one_child_leaf = 0, bool const force = false) const; // Populate the above data structure
 
 		// *********************************************************************************** //
@@ -629,8 +653,6 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 };
 
-typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
-typedef std::set<Leaf> Leaves;
 typedef PrimaryKeysGroupingMultiplicityOne Branch;
 
 
@@ -688,23 +710,6 @@ typedef std::map<TimeSlice, VariableGroupTimeSliceData> TimeSlices;
 
 typedef std::pair<TimeSlice, Leaf> TimeSliceLeaf;
 
-enum CHILD_TO_PRIMARY_MAPPING
-{
-	CHILD_TO_PRIMARY_MAPPING__UNKNOWN
-	, CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH
-	, CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF
-};
-
-struct ChildToPrimaryMapping
-{
-	ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING const mapping_, int const index_, int const leaf_number_ = -1)
-	: mapping(mapping_), index(index_), leaf_number(leaf_number_) {}
-
-	CHILD_TO_PRIMARY_MAPPING mapping;
-	int index;
-	int leaf_number;
-};
-
 class AllWeightings
 {
 
@@ -730,7 +735,7 @@ class AllWeightings
 
 		sqlite3_stmt * insert_random_sample_stmt;
 
-		bool HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), int const leaf_index = -1);
+		bool HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
 		void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
 		void PrepareRandomNumbers(int how_many);
 		bool RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice, BranchOutputRow & outputRow);
@@ -741,7 +746,7 @@ class AllWeightings
 
 	protected:
 
-		bool HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), int const leaf_index = -1);
+		bool HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
 
 		void AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const &newTimeSliceLeaf);
 
@@ -756,7 +761,7 @@ class AllWeightings
 		void SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice);
 
 		// Merge time slice data into a map element
-		bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), int const leaf_index = -1);
+		bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
 
 		Leaves GetLeafCombination(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves);
 

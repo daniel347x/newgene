@@ -26,14 +26,14 @@ AllWeightings::~AllWeightings()
 	}
 }
 
-bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const leaf_index)
+bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
 
 	if (!newTimeSlice.Validate())
 	{
-		return;
+		return false;
 	}
 
 	bool added = false; // true if there is a match
@@ -151,7 +151,7 @@ bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 
 	if (normalCase)
 	{
-		bool no_more_time_slice = HandleTimeSliceNormalCase(added, branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+		bool no_more_time_slice = HandleTimeSliceNormalCase(added, branch, newTimeSliceLeaf, mapIterator, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 		if (no_more_time_slice)
 		{
 			// no-op
@@ -167,7 +167,7 @@ bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 		}
 		else
 		{
-			bool added_recurse = HandleBranchAndLeaf(branch, newTimeSliceLeaf, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+			bool added_recurse = HandleBranchAndLeaf(branch, newTimeSliceLeaf, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 			if (added_recurse)
 			{
 				added = true; // It could have been true previously, so never set to false
@@ -206,7 +206,7 @@ bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 // - The portion of the incoming slice that extends past the right edge
 //   of the map entry
 // - An iterator to the next map entry.
-bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const leaf_index)
+bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary)
 {
 
 	bool added_new = false;
@@ -239,7 +239,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 			// Leave the second piece unchanged.
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_end, newMapElementLeftPtr, newMapElementRightPtr);
-			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementLeftPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 			mapElementPtr = newMapElementLeftPtr;
 
@@ -253,7 +253,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 
 			// Merge the new time slice with the map element.
 
-			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, mapElementPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, mapElementPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 			newTimeSliceEatenCompletelyUp = true;
 
@@ -272,7 +272,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 			// The remainder of the new time slice (at the right) is now in the variable "newTimeSliceLeaf" and ready for the next iteration.
 
 			SliceOffLeft(newTimeSliceLeaf, mapElement.time_end, new_left_slice);
-			added_new = MergeTimeSliceDataIntoMap(branch, new_left_slice, mapElementPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+			added_new = MergeTimeSliceDataIntoMap(branch, new_left_slice, mapElementPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 			mapElementPtr = ++mapElementPtr;
 
@@ -298,7 +298,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 			// The third is unchanged.
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newTimeSlice.time_end, newMapElementMiddlePtr);
-			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementMiddlePtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementMiddlePtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 			mapElementPtr = newMapElementMiddlePtr;
 
@@ -318,7 +318,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 			// (with the right edge equal to the right edge of the map element).
 
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newMapElementLeftPtr, newMapElementRightPtr);
-			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementRightPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+			added_new = MergeTimeSliceDataIntoMap(branch, newTimeSliceLeaf, newMapElementRightPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 			mapElementPtr = newMapElementRightPtr;
 
@@ -341,7 +341,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 
 			SliceOffLeft(newTimeSliceLeaf, mapElement.time_end, new_left_slice);
 			SliceMapEntry(mapElementPtr, newTimeSlice.time_start, newMapElementLeftPtr, newMapElementRightPtr);
-			added_new = MergeTimeSliceDataIntoMap(branch, new_left_slice, newMapElementRightPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, leaf_index);
+			added_new = MergeTimeSliceDataIntoMap(branch, new_left_slice, newMapElementRightPtr, variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 			mapElementPtr = ++newMapElementRightPtr;
 
@@ -418,7 +418,7 @@ void AllWeightings::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t co
 }
 
 // Merge time slice data into a map element
-bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const leaf_index)
+bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary)
 {
 
 	bool added = false;
@@ -551,13 +551,13 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// We have an incoming child variable group branch and leaf.
 					// Find all matching output rows that contain the same DMU data on the matching columns.
 					// *********************************************************************************** //
-					std::map<std::vector<BranchOutputRow>::iterator, std::vector<int>> const & matchingOutputRows = branch.helper_lookup__from_child_key_set__to_matching_output_rows[dmu_keys];
+					std::map<BranchOutputRow const *, std::vector<int>> const & matchingOutputRows = branch.helper_lookup__from_child_key_set__to_matching_output_rows[dmu_keys];
 
 					// Loop through all matching output rows
-					std::for_each(matchingOutputRows.cbegin(), matchingOutputRows.cend(), [&](std::pair<std::vector<BranchOutputRow>::iterator, std::vector<int>> const & matchingOutputRow)
+					std::for_each(matchingOutputRows.cbegin(), matchingOutputRows.cend(), [&](std::pair<BranchOutputRow const *, std::vector<int>> const & matchingOutputRow)
 					{
 
-						std::vector<BranchOutputRow>::iterator const outputRowPtr = matchingOutputRow.first;
+						BranchOutputRow const * outputRowPtr = matchingOutputRow.first;
 						BranchOutputRow const & outputRow = *outputRowPtr;
 						std::vector<int> const & matchingOutputChildLeaves = matchingOutputRow.second;
 
@@ -565,7 +565,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						std::for_each(matchingOutputChildLeaves.cbegin(), matchingOutputChildLeaves.cend(), [&](int const matching_child_leaf_index)
 						{
 
-							std::map<int, std::int64_t> const & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
+							std::map<int, std::int64_t> & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
 							outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
 
 							added = true;
@@ -819,7 +819,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 	Leaves const & tmp_leaves = branchesAndLeavesPtr->second;
 
 	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
-	BOOST_ASSERT_MSG((random_number - branch.weighting.getWeightingRangeStart()) >= 0 && boost::multiprecision::cpp_int((random_number - branch.weighting.getWeightingRangeStart()) / boost::multiprecision::cpp_int(timeSlice.Width())) < BinomialCoefficient(tmp_leaves.size(), K), "Random index is outside [0. binomial coefficient)");
+	//BOOST_ASSERT_MSG((random_number - branch.weighting.getWeightingRangeStart()) >= 0 && boost::multiprecision::cpp_int((random_number - branch.weighting.getWeightingRangeStart()) / boost::multiprecision::cpp_int(timeSlice.Width())) < BinomialCoefficient(tmp_leaves.size(), K), "Random index is outside [0. binomial coefficient)");
 
 	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData
 	leaves = GetLeafCombination(random_number, K, branch, tmp_leaves);
@@ -1162,7 +1162,7 @@ void AllWeightings::ResetBranchCaches(bool const empty_all)
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, std::vector<Leaf> & leaves_cache, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const number_columns_in_one_child_leaf, bool const force) const
+void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, std::vector<Leaf> & leaves_cache, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const number_columns_in_one_child_leaf, bool const force) const
 {
 
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
@@ -1208,7 +1208,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 							// index tells us which index in that leaf
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-							child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
+							child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
 
 						}
 						break;
@@ -1251,7 +1251,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 							// index tells us which index in that leaf
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]][childToPrimaryMapping.index]));
+							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
 
 						}
 						break;
@@ -1266,7 +1266,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 					++child_leaf_index_within_a_single_child_leaf;
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
-						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][outputRowPtr].push_back(current_child_leaf_number);
+						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;
