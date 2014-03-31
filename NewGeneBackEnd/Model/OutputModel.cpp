@@ -498,17 +498,20 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSamplerFillDataForChildGroups(allWeightings);
 		if (failed || CheckCancelled()) return;
 
-		RandomSamplingCreateOutputTable();
-		if (failed || CheckCancelled()) return;
-
 		if (false)
 		{
+
 			// This is only necessary for debugging
 			// or further sorting/ordering/processing
+
+			RandomSamplingCreateOutputTable();
+			if (failed || CheckCancelled()) return;
+
 			RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
 			if (failed || CheckCancelled()) return;
 
 			final_result = random_sampling_schema;
+
 		}
 
 		messager.AppendKadStatusText("Writing results to disk...", this);
