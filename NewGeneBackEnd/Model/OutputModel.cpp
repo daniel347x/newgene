@@ -495,6 +495,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.PrepareRandomNumbers(samples);
 		if (failed || CheckCancelled()) return;
 
+		allWeightings.PrepareRandomSamples();
+		if (failed || CheckCancelled()) return;
+
 		if (true)
 		{
 
@@ -20951,11 +20954,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 
 	PrepareInsertStatement(allWeightings.insert_random_sample_stmt, random_sampling_columns);
 
-	Branch branch;
-	Leaves leaves;
-	TimeSlice time_slice;
-	BranchOutputRow outputRow;
-	while (allWeightings.RetrieveNextBranchAndLeaves(K, branch, leaves, time_slice, outputRow))
+	std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
 	{
 
 		if (failed || CheckCancelled())
@@ -20963,162 +20962,154 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 			return;
 		}
 
-		int bindIndex = 1;
+		TimeSlice const & timeSlice = timeSliceData.first;
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
 
-		// The branch represents the primary keys of multiplicity 1
-		DMUInstanceDataVector const & branch_primary_keys = branch.primary_keys;
-		std::for_each(branch_primary_keys.cbegin(), branch_primary_keys.cend(), [&](DMUInstanceData const & branch_primary_key)
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+
+		// For now, assume only one variable group
+		if (variableGroupBranchesAndLeavesVector.size() > 1)
 		{
-			BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, branch_primary_key, bindIndex++);
-		});
+			boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
 
-		std::vector<std::int64_t> secondary_key_row_indices;
-		std::map<int, std::vector<std::int64_t>> other_top_level_secondary_row_indices;
+		VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+		BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
 
-		// The leaves represent the primary keys of multiplicity > 1
-		std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
+		std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
 		{
-			
-			// This handles not only the case of multiplicity > 1,
-			// but also the case of multiplicity = 1 for all DMU's:
-			// In the latter scenario, a single, empty leaf will be present on each branch.
-			// But this leaf will carry the secondary key information just fine.
-			secondary_key_row_indices.push_back(leaf.index_into_raw_data);
-			std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int, std::int64_t> const & vg_id_and_index_into_secondary_data)
+
+			if (failed || CheckCancelled())
 			{
-				other_top_level_secondary_row_indices[vg_id_and_index_into_secondary_data.first].push_back(vg_id_and_index_into_secondary_data.second);
-			});
-			// fill in any entries that don't exist - they will be left blank in the output
-			for (int group_number = 0; group_number < static_cast<int>(primary_variable_groups_vector.size()); ++group_number)
-			{
-				if (group_number == top_level_vg_index)
-				{
-					continue; // ignore primary variable group.  But there should be an entry for every OTHER top-level variable group
-				}
-				auto const found = other_top_level_secondary_row_indices.find(group_number);
-				if (found == other_top_level_secondary_row_indices.cend())
-				{
-					// Make sure the leaf has an entry for every non-primary top-level variable group.
-					other_top_level_secondary_row_indices[group_number].push_back(-1); // side-effect creates the empty vector
-				}
+				return;
 			}
 
-			if (!leaf.primary_keys.empty())
+			Branch const & branch = branchAndLeaves.first;
+			Leaves const & leaves = branchAndLeaves.second;
+
+			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_and_rows)
 			{
-				DMUInstanceDataVector const & leaf_primary_keys = leaf.primary_keys;
-				std::for_each(leaf_primary_keys.cbegin(), leaf_primary_keys.cend(), [&](DMUInstanceData const & leaf_primary_key)
+
+				if (failed || CheckCancelled())
 				{
-					BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, leaf_primary_key, bindIndex++);
+					return;
+				}
+
+				std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
+
+				std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
+				{
+
+					// We have a row to output
+
+					if (failed || CheckCancelled())
+					{
+						return;
+					}
+
+					int bindIndex = 1;
+
+					// The branch represents the primary keys of multiplicity 1
+					std::for_each(branch.primary_keys.cbegin(), branch.primary_keys.cend(), [&](DMUInstanceData const & data)
+					{
+						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
+					});
+
+					std::vector<std::int64_t> secondary_key_row_indices;
+					std::map<int, std::vector<std::int64_t>> other_top_level_secondary_row_indices;
+
+					// The leaves represent the primary keys of multiplicity > 1
+					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+					{
+						Leaf & leaf = branch.leaves_cache[leafIndex];
+						std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
+						{
+							BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
+						});
+					});
+
+					// This is the data for the secondary keys (i.e., for the dependent data)
+					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+					{
+						Leaf & leaf = branch.leaves_cache[leafIndex];
+						SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
+						std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+						{
+							BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
+						});
+					});
+
+					// Now the secondary keys for the other top-level variable groups
+					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+					{
+						Leaf & leaf = branch.leaves_cache[leafIndex];
+						std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int, std::int64_t> const & top_level_vg_and_data_index)
+						{
+							int const vg_number = top_level_vg_and_data_index.first;
+							std::int64_t const & data_index = top_level_vg_and_data_index.second;
+							DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
+							SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
+							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+							{
+								BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
+							});
+						});
+					});
+
+					// Now the secondary keys for the child variable groups
+					std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int, std::map<int, std::int64_t>> const & leaf_index_mappings)
+					{
+						int const vg_number = leaf_index_mappings.first;
+						std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
+						std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int, std::int64_t> const & leaf_index_mapping)
+						{
+
+							// unused - we're just looping through the leaves printing the actual leaf data out,
+							// not the leaf number - but we have it if we need it
+							int const leaf_number = leaf_index_mapping.first;
+
+							std::int64_t const & data_index = leaf_index_mapping.second;
+							DataCache & data_cache = allWeightings.childCache[vg_number];
+							SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
+							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+							{
+								BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
+							});
+
+						});
+					});
+
+					int step_result = 0;
+
+					// Execute the insert of the row into the table
+					if ((step_result = sqlite3_step(allWeightings.insert_random_sample_stmt)) != SQLITE_DONE)
+					{
+						std::string sql_error = sqlite3_errmsg(db);
+						boost::format msg("Unable to execute prepared insert query to insert a new random sample: %1%");
+						msg % sql_error;
+						errorMessages.push_back(msg.str());
+						++current_rows_in_error;
+					}
+
+					// Prepare statement for next row
+					sqlite3_clear_bindings(allWeightings.insert_random_sample_stmt);
+					sqlite3_reset(allWeightings.insert_random_sample_stmt);
+
+					++current_rows_stepped;
+					if (current_rows_stepped % minimum_desired_rows_per_transaction == 0)
+					{
+						EndTransaction();
+						BeginNewTransaction();
+					}
+
 				});
-			}
 
-		});
-
-		// This is the data for the secondary keys (i.e., for the dependent data)
-		std::for_each(secondary_key_row_indices.cbegin(), secondary_key_row_indices.cend(), [&](std::int64_t const secondary_key_row_index)
-		{
-
-			SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[secondary_key_row_index];
-			std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & secondary_data)
-			{
-				BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
 			});
 
 		});
 
-		// Now the secondary keys for the other top-level variable groups
-		std::for_each(other_top_level_secondary_row_indices.cbegin(), other_top_level_secondary_row_indices.cend(), [&](std::pair<int, std::vector<std::int64_t>> const & variable_group_number_to_secondary_indices)
-		{
-			int const variable_group_number = variable_group_number_to_secondary_indices.first;
-			std::vector<std::int64_t> const & indices_into_secondary_data_cache = variable_group_number_to_secondary_indices.second;
-			int leaf_index = 0;
-			std::for_each(indices_into_secondary_data_cache.cbegin(), indices_into_secondary_data_cache.cend(), [&](std::int64_t const & index_into_secondary_data_cache)
-			{
-				if (index_into_secondary_data_cache == -1)
-				{
-
-					// No data for this leaf.
-					// bind blanks; one per selected secondary variable
-					for (int m = 0; m < top_level_number_secondary_columns[variable_group_number]; ++m)
-					{
-						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
-					}
-
-				}
-				else
-				{
-					// bind the real data
-					DataCache & secondary_data_cache = allWeightings.otherTopLevelCache[variable_group_number];
-					SecondaryInstanceDataVector const & secondary_data_vector = secondary_data_cache[index_into_secondary_data_cache];
-					std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & secondary_data)
-					{
-						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
-					});
-				}
-				++leaf_index;
-			});
-		});
-
-		// Now the secondary keys for the child variable groups
-		for (int group_number = 0; group_number < static_cast<int>(secondary_variable_groups_vector.size()); ++group_number)
-		{
-
-			std::map<int, std::int64_t> const & child_group_indices = outputRow.child_indices_into_raw_data[group_number];
-			int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[group_number].first.identifier_parent)].second;
-			for (int leaf_number = 0; leaf_number < the_child_multiplicity; ++leaf_number)
-			{
-				// We have a particular child variable group, and a particular leaf for that child variable group
-				auto const found = child_group_indices.find(leaf_number);
-				if (found == child_group_indices.cend())
-				{
-
-					// No data for this leaf.
-					// bind blanks; one per selected secondary variable
-					for (int m = 0; m < child_number_secondary_columns[group_number]; ++m)
-					{
-						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
-					}
-
-				}
-				else
-				{
-					// bind the real data
-					std::int64_t const & index_into_child_group_secondary_data_cache = found->second;
-					DataCache & secondary_data_cache = allWeightings.childCache[group_number];
-					SecondaryInstanceDataVector const & secondary_data_vector = secondary_data_cache[index_into_child_group_secondary_data_cache];
-					std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & secondary_data)
-					{
-						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
-					});
-				}
-			}
-
-		}
-
-		int step_result = 0;
-
-		// Execute the insert of the row into the table
-		if ((step_result = sqlite3_step(allWeightings.insert_random_sample_stmt)) != SQLITE_DONE)
-		{
-			std::string sql_error = sqlite3_errmsg(db);
-			boost::format msg("Unable to execute prepared insert query to insert a new random sample: %1%");
-			msg % sql_error;
-			errorMessages.push_back(msg.str());
-			++current_rows_in_error;
-		}
-
-		// Prepare statement for next row
-		sqlite3_clear_bindings(allWeightings.insert_random_sample_stmt);
-		sqlite3_reset(allWeightings.insert_random_sample_stmt);
-
-		++current_rows_stepped;
-		if (current_rows_stepped % minimum_desired_rows_per_transaction == 0)
-		{
-			EndTransaction();
-			BeginNewTransaction();
-		}
-
-	}
+	});
 
 	EndTransaction();
 

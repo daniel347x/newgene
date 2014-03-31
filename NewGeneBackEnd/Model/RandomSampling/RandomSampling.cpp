@@ -761,7 +761,7 @@ void AllWeightings::PrepareRandomNumbers(int how_many)
 
 }
 
-bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice, BranchOutputRow & outputRow)
+bool AllWeightings::RetrieveNextBranchAndLeaves(int const K)
 {
 	
 	if (random_number_iterator == random_numbers.cend())
@@ -815,27 +815,18 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Le
 
 	const Branch & new_branch = branchesAndLeavesPtr->first;
 
-	if (new_branch.primary_keys != branch.primary_keys)
-	{
-		branch.remaining.clear();
-	}
-
-	branch = new_branch;
-
 	Leaves const & tmp_leaves = branchesAndLeavesPtr->second;
 
-	// random_number should be between 0 and the binomial coefficient representing the number of combinations of K leaves out of the total number of leaves
-	//BOOST_ASSERT_MSG((random_number - branch.weighting.getWeightingRangeStart()) >= 0 && boost::multiprecision::cpp_int((random_number - branch.weighting.getWeightingRangeStart()) / boost::multiprecision::cpp_int(timeSlice.Width())) < BinomialCoefficient(tmp_leaves.size(), K), "Random index is outside [0. binomial coefficient)");
-
 	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData
-	leaves = GetLeafCombination(random_number, K, branch, tmp_leaves);
+	GetLeafCombination(random_number, K, new_branch, tmp_leaves);
 
 	++random_number_iterator;
+
 	return true;
 
 }
 
-Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves)
+void AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves)
 {
 
 	random_number -= branch.weighting.getWeightingRangeStart();
@@ -860,7 +851,7 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 
 	if (K <= 0)
 	{
-		return Leaves();
+		return;
 	}
 
 	if (!skip)
@@ -937,10 +928,6 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 	// this is handled by storing a map of every *time unut* (corresponding to the primary variable group)
 	// and all leaf combinations that have been hit for that time unit.
 	branch.hits[which_time_unit].insert(test_leaf_combination);
-
-	Leaves leaf_combination = RetrieveLeafCombinationFromLeafIndices(test_leaf_combination, leaves, K);
-
-	return leaf_combination;
 
 }
 
@@ -1071,68 +1058,6 @@ boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, i
 	}
 
 	return numerator / denominator;
-
-}
-
-Leaves AllWeightings::RetrieveLeafCombinationFromLeafIndices(BranchOutputRow & test_leaf_combination, Leaves const & leaves, int const K)
-{
-
-	Leaves leaf_combination;
-
-	std::set<int>::const_iterator current_index_to_use_ptr = test_leaf_combination.primary_leaves.cbegin();
-	int current_index_to_use = *current_index_to_use_ptr;
-	int current_index = 0;
-	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
-	{
-		if (current_index_to_use_ptr == test_leaf_combination.primary_leaves.cend())
-		{
-			return;
-		}
-		current_index_to_use = *current_index_to_use_ptr;
-		if (current_index == current_index_to_use)
-		{
-			leaf_combination.insert(leaf);
-			++current_index_to_use_ptr;
-		}
-		++current_index;
-	});
-
-	BOOST_ASSERT_MSG(leaf_combination.size() == K, "Number of leaves generated does not equal K.");
-
-	return leaf_combination;
-
-}
-
-void AllWeightings::ConsolidateHits()
-{
-
-	//std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
-	//{
-
-	//	TimeSlice const & timeSlice = timeSliceData.first;
-	//	VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceData.second;
-
-	//	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
-
-	//	// For now, assume only one variable group
-	//	if (variableGroupBranchesAndLeavesVector.size() > 1)
-	//	{
-	//		boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
-	//		throw NewGeneException() << newgene_error_description(msg.str());
-	//	}
-
-	//	VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-	//	BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
-
-	//	std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
-	//	{
-
-	//		Branch const & branch = branchAndLeaves.first;
-	//		//branch.ConsolidateHits();
-
-	//	});
-
-	//});
 
 }
 
@@ -1297,6 +1222,19 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 
 		});
 
+	}
+
+}
+
+void AllWeightings::PrepareRandomSamples(int const K)
+{
+
+	Branch branch;
+	Leaves leaves;
+	TimeSlice time_slice;
+	BranchOutputRow outputRow;
+	while (RetrieveNextBranchAndLeaves(K))
+	{
 	}
 
 }
