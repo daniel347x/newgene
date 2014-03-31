@@ -7891,9 +7891,20 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 		}
 	});
 
+	switch (variable_group_raw_data_columns.schema_type)
+	{
+	case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
+	case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
+		top_level_number_secondary_columns[group_number] = 0;
+		break;
+	case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
+		child_number_secondary_columns[group_number] = 0;
+		break;
+	}
+
 	// Proceed to the secondary key columns.
 	std::for_each(variable_group_raw_data_columns.columns_in_view.cbegin(),
-		variable_group_raw_data_columns.columns_in_view.cend(), [&result_columns, &variables_selected](ColumnsInTempView::ColumnInTempView const & column_in_view)
+		variable_group_raw_data_columns.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & column_in_view)
 	{
 		bool make_secondary_datetime_column = false;
 
@@ -7925,6 +7936,19 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 		if (match)
 		{
+			
+			switch (variable_group_raw_data_columns.schema_type)
+			{
+			case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_PRIMARY:
+			case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_TOP_LEVEL_NOT_PRIMARY:
+				++top_level_number_secondary_columns[group_number];
+				break;
+			case ColumnsInTempView::SCHEMA_TYPE__RAW__SELECTED_VARIABLES_CHILD:
+				++child_number_secondary_columns[group_number];
+				break;
+			}
+
+
 			result_columns.columns_in_view.push_back(column_in_view);
 
 			if (make_secondary_datetime_column)
@@ -21003,8 +21027,14 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 			{
 				if (index_into_secondary_data_cache == -1)
 				{
-					// bind a blank
-					BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
+
+					// No data for this leaf.
+					// bind blanks; one per selected secondary variable
+					for (size_t m = 0; m < top_level_number_secondary_columns[variable_group_number].size(); ++m)
+					{
+						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
+					}
+
 				}
 				else
 				{
@@ -21032,9 +21062,14 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 				auto const found = child_group_indices.find(leaf_number);
 				if (found == child_group_indices.cend())
 				{
+
 					// No data for this leaf.
-					// Bind a blank.
-					BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
+					// bind blanks; one per selected secondary variable
+					for (size_t m = 0; m < child_number_secondary_columns[group_number].size(); ++m)
+					{
+						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
+					}
+
 				}
 				else
 				{
