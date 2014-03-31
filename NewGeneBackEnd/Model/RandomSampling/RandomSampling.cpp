@@ -542,16 +542,17 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// in which we are nested, has already set the "leaves_cache" cache,
 					// and this cache is copied whenever any map entry changes.
 					// *********************************************************************************** //
+					Branch const & the_branch = branchAndLeaves.first;
 					std::vector<Leaf> & leaves_cache = branch.leaves_cache;
 
 					// The following cache will only be filled on the first pass
-					branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
+					the_branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
 
 					// *********************************************************************************** //
 					// We have an incoming child variable group branch and leaf.
 					// Find all matching output rows that contain the same DMU data on the matching columns.
 					// *********************************************************************************** //
-					std::map<BranchOutputRow const *, std::vector<int>> const & matchingOutputRows = branch.helper_lookup__from_child_key_set__to_matching_output_rows[dmu_keys];
+					std::map<BranchOutputRow const *, std::vector<int>> const & matchingOutputRows = the_branch.helper_lookup__from_child_key_set__to_matching_output_rows[dmu_keys];
 
 					// Loop through all matching output rows
 					std::for_each(matchingOutputRows.cbegin(), matchingOutputRows.cend(), [&](std::pair<BranchOutputRow const *, std::vector<int>> const & matchingOutputRow)
