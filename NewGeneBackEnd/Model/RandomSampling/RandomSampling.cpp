@@ -1115,8 +1115,10 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 		std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_output_rows)
 		{
 
-			std::for_each(time_unit_output_rows.second.cbegin(), time_unit_output_rows.second.cend(), [&](BranchOutputRow const & outputRow)
+			for (std::set<BranchOutputRow>::const_iterator outputRowPtr = time_unit_output_rows.second.cbegin(); outputRowPtr != time_unit_output_rows.second.cend(); ++outputRowPtr)
 			{
+
+				BranchOutputRow const & outputRow = *outputRowPtr;
 
 				// We have a new hit we're dealing with
 				child_hit_vector_branch_components.clear();
@@ -1204,7 +1206,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 					++child_leaf_index_within_a_single_child_leaf;
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
-						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][];
+						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][outputRowPtr].push_back(current_child_leaf_number);
 
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;
@@ -1214,7 +1216,7 @@ void PrimaryKeysGroupingMultiplicityOne::PrimaryKeysGroupingMultiplicityOne::Con
 
 				});
 
-			});
+			}
 
 		});
 
