@@ -21429,7 +21429,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 			Branch const & branch = branchAndLeaves.first;
 			Leaves const & leaves = branchAndLeaves.second;
 
-			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_and_rows)
+			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & time_unit_and_rows)
 			{
 
 				if (failed || CheckCancelled())

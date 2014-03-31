@@ -588,34 +588,12 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 							added = true;
 
-							std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
-							{
-								TimeSlice const & timeSlice = timeSliceData.first;
-								VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
-								VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
-								VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-								BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
-								std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
-								{
-									Branch const & branch = branchAndLeaves.first;
-									Leaves const & leaves = branchAndLeaves.second;
-									std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_and_rows)
-									{
-										std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
-										std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
-										{
-											if (outputRow.child_indices_into_raw_data.size() > 0)
-											{
-												int m_ = 0;
-											}
-										});
-									});
-								});
-							});
 						});
-					//});
+
 					}
+
 				});
+
 			}
 			break;
 
