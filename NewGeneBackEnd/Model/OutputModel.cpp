@@ -498,6 +498,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.PrepareRandomSamples(K);
 		if (failed || CheckCancelled()) return;
 
+		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.  See comment just above.
+		if (failed || CheckCancelled()) return;
+
 		if (true)
 		{
 
@@ -20399,8 +20402,6 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// which might slice the time slices, each such slice will not add any new primary leaves
 								// and the previous set of cached leaves will be persisted in the time slice copies.
 								// ************************************************************************************************** //
-								allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.  See comment just above.
-
 								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 								if (added)
