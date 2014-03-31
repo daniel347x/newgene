@@ -504,10 +504,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
 		if (failed || CheckCancelled()) return;
 
-		//ClearTables(sql_and_column_sets);
-		//sql_and_column_sets.push_back(random_sampling_schema);
-		//primary_group_final_results.push_back(primary_group_final_result);
-		//primary_group_merged_results = random_sampling_schema;
+		child_merge_final_result = random_sampling_schema;
 
 	}
 	else
