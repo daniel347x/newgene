@@ -1239,7 +1239,6 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 			}
 
 		});
-		//}
 
 	}
 
