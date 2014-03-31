@@ -565,13 +565,10 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 					// Loop through all matching output rows
 					for (auto matchingOutputRowPtr = matchingOutputRows.cbegin(); matchingOutputRowPtr != matchingOutputRows.cend(); ++matchingOutputRowPtr)
-					//std::for_each(matchingOutputRows.cbegin(), matchingOutputRows.cend(), [&](std::pair<BranchOutputRow const *, std::vector<int>> const & matchingOutputRow)
 					{
 
-						//BranchOutputRow const * outputRowPtr = matchingOutputRow.first;
 						BranchOutputRow const * const & outputRowPtr = matchingOutputRowPtr->first;
 						BranchOutputRow const & outputRow = *outputRowPtr;
-						//std::vector<int> const & matchingOutputChildLeaves = matchingOutputRow.second;
 						std::vector<int> const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
 
 						// Loop through all matching output row child leaves
@@ -1130,9 +1127,9 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
 	{
 
-		helper_lookup__from_child_key_set__to_matching_output_rows.clear();
-
 		// The cache has yet to be filled, or we are specifically being requested to refresh it
+
+		helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 
 		ChildDMUInstanceDataVector child_hit_vector_branch_components;
 		ChildDMUInstanceDataVector child_hit_vector;
@@ -1156,29 +1153,29 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					switch (childToPrimaryMapping.mapping)
 					{
 
-					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-					{
+						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
+						{
 
-																	 // The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-																	 child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
+							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+							child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
 
-					}
+						}
 						break;
 
-					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
-					{
+						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
+						{
 
-																   // leaf_number tells us which leaf
-																   // index tells us which index in that leaf
+							// leaf_number tells us which leaf
+							// index tells us which index in that leaf
 
-																   // The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-																   child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
+							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+							child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
 
-					}
+						}
 						break;
 
-					default:
-					{}
+						default:
+						{}
 						break;
 
 					}
@@ -1199,29 +1196,29 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					switch (childToPrimaryMapping.mapping)
 					{
 
-					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
-					{
+						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
+						{
 
-																	 // The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-																	 child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
+							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
+							child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
 
-					}
+						}
 						break;
 
-					case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
-					{
+						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
+						{
 
-																   // leaf_number tells us which leaf
-																   // index tells us which index in that leaf
+							// leaf_number tells us which leaf
+							// index tells us which index in that leaf
 
-																   // The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
-																   child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
+							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
 
-					}
+						}
 						break;
 
-					default:
-					{}
+						default:
+						{}
 						break;
 
 					}
