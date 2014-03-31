@@ -21449,11 +21449,6 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						return;
 					}
 
-					if (outputRow.child_indices_into_raw_data.size() > 0)
-					{
-						int m = 0;
-					}
-
 					first = true;
 
 					// First, the branch primary keys
