@@ -755,7 +755,7 @@ void AllWeightings::PrepareRandomNumbers(int how_many)
 
 }
 
-bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice)
+bool AllWeightings::RetrieveNextBranchAndLeaves(int const K, Branch & branch, Leaves & leaves, TimeSlice & time_slice, BranchOutputRow & outputRow)
 {
 	
 	if (random_number_iterator == random_numbers.cend())

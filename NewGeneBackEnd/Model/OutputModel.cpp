@@ -20843,7 +20843,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 	Branch branch;
 	Leaves leaves;
 	TimeSlice time_slice;
-	while (allWeightings.RetrieveNextBranchAndLeaves(K, branch, leaves, time_slice))
+	BranchOutputRow outputRow;
+	while (allWeightings.RetrieveNextBranchAndLeaves(K, branch, leaves, time_slice, outputRow))
 	{
 
 		if (failed || CheckCancelled())
@@ -20938,6 +20939,10 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 		});
 
 		// Now the secondary keys for the child variable groups
+		for (int group_number = 0; group_number < secondary_variable_groups_vector.size(); ++group_number)
+		{
+			std::map<int, std::int64_t> const & child_group_indices = outputRow.child_indices_into_raw_data[group_number];
+		}
 
 		int step_result = 0;
 
