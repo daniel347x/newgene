@@ -650,6 +650,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		}
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
+#		ifdef _DEBUG
+		mutable std::string number_branch_combinations_string;
+#		endif
 
 };
 
