@@ -495,9 +495,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.PrepareRandomNumbers(samples);
 		if (failed || CheckCancelled()) return;
 
-		RandomSamplerFillDataForChildGroups(allWeightings);
-		if (failed || CheckCancelled()) return;
-
 		if (true)
 		{
 
@@ -513,6 +510,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			final_result = random_sampling_schema;
 
 		}
+
+		RandomSamplerFillDataForChildGroups(allWeightings);
+		if (failed || CheckCancelled()) return;
 
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
