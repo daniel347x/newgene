@@ -404,6 +404,7 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 	// Note: Currently, only one primary top-level variable group is supported.
+	// It will be the "begin()" element, if it exists.
 	VariableGroupBranchesAndLeavesVector::iterator VariableGroupBranchesAndLeavesPtr = variableGroupBranchesAndLeavesVector.begin();
 
 	if (VariableGroupBranchesAndLeavesPtr == variableGroupBranchesAndLeavesVector.end())
@@ -504,7 +505,9 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
 				{
 
+					// "leaves" is the EXISTING set of leaves for the EXISTING branch in the EXISTING map entry
 					Leaves & leaves = branchAndLeaves.second;
+
 					branch.ConstructChildCombinationCache(*this, leaves, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 				});

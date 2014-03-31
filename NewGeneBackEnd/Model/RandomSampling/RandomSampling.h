@@ -470,7 +470,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, weighting{ rhs.weighting }
 			, hits{ rhs.hits }
 			, remaining{ rhs.remaining }
-			, number_branch_combinations{rhs.number_branch_combinations}
+			, number_branch_combinations{ rhs.number_branch_combinations }
+			, leaves_cache{ rhs.leaves_cache }
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const & rhs)
@@ -484,6 +485,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			hits = rhs.hits;
 			remaining = rhs.remaining;
 			number_branch_combinations = rhs.number_branch_combinations;
+			leaves_cache = rhs.leaves_cache;
 			return *this;
 		}
 
@@ -498,6 +500,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			hits = rhs.hits;
 			remaining = rhs.remaining;
 			number_branch_combinations = rhs.number_branch_combinations;
+			leaves_cache = rhs.leaves_cache;
+			return *this;
 		}
 
 		//void ConsolidateHits() const
