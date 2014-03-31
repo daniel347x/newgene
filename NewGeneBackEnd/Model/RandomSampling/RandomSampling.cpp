@@ -566,6 +566,11 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						std::for_each(matchingOutputChildLeaves.cbegin(), matchingOutputChildLeaves.cend(), [&](int const matching_child_leaf_index)
 						{
 
+							auto const found = outputRow.child_indices_into_raw_data.find(variable_group_number);
+							if (found == outputRow.child_indices_into_raw_data.cend())
+							{
+								outputRow.child_indices_into_raw_data[variable_group_number] = std::map<int, std::int64_t>();
+							}
 							std::map<int, std::int64_t> & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
 							outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
 
