@@ -20861,6 +20861,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 		});
 
 		std::vector<std::int64_t> secondary_key_row_indices;
+		std::map<int, std::vector<std::int64_t>> other_top_level_secondary_row_indices;
 
 		// The leaves represents the primary keys of multiplicity > 1
 		std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
@@ -20871,6 +20872,25 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 			// In the latter scenario, a single, empty leaf will be present on each branch.
 			// But this leaf will carry the secondary key information just fine.
 			secondary_key_row_indices.push_back(leaf.index_into_raw_data);
+			std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int, std::int64_t> const & vg_id_and_index_into_secondary_data)
+			{
+				other_top_level_secondary_row_indices[vg_id_and_index_into_secondary_data.first].push_back(vg_id_and_index_into_secondary_data.second);
+			});
+			// fill in any entries that don't exist - they will be left blank in the output
+			for (int group_number = 0; group_number < primary_variable_groups_vector.size(); ++group_number)
+			{
+				if (group_number == top_level_vg_index)
+				{
+					continue; // ignore primary variable group.  But there should be an entry for every OTHER top-level variable group
+				}
+				auto const found = other_top_level_secondary_row_indices.find(group_number);
+				if (found == other_top_level_secondary_row_indices.cend())
+				{
+					// Make sure the leaf has an entry for every non-primary top-level variable group.
+					// Fill with -1 if no match exists.
+					other_top_level_secondary_row_indices[group_number] = -1;
+				}
+			}
 
 			if (!leaf.primary_keys.empty())
 			{
@@ -20894,6 +20914,30 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 			});
 
 		});
+
+		// Now the secondary keys for the other top-level variable groups
+		std::for_each(other_top_level_secondary_row_indices.cbegin(), other_top_level_secondary_row_indices.cend(), [&](std::pair<int, std::vector<std::int64_t>> const & variable_group_number_to_secondary_index)
+		{
+			int const variable_group_number = variable_group_number_to_secondary_index.first;
+			std::vector<std::int64_t> const & indices_into_secondary_data_cache = variable_group_number_to_secondary_index.second;
+			std::for_each(indices_into_secondary_data_cache.cbegin(), indices_into_secondary_data_cache.cend(), [&](std::int64_t const & index_into_secondary_data_cache)
+			{
+				if (index_into_secondary_data_cache == -1)
+				{
+					// bind a blank
+					BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, DMUInstanceData(std::string()), bindIndex++);
+				}
+				else
+				{
+					// bind the real data
+					DataCache const & secondary_data_cache = allWeightings.otherTopLevelCache[variable_group_number];
+					SecondaryInstanceDataVector const & secondary_data = secondary_data_cache[index_into_secondary_data_cache];
+					BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, secondary_data, bindIndex++);
+				}
+			});
+		});
+
+		// Now the secondary keys for the child variable groups
 
 		int step_result = 0;
 
