@@ -839,9 +839,17 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 	static int saved_range = -1;
 	static std::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
 
+	BranchOutputRow test_leaf_combination;
+
+	bool skip = false;
 	if (static_cast<size_t>(K) >= leaves.size())
 	{
-		return leaves;
+		skip = true;
+		for (int n = 0; n < leaves.size(); ++n)
+		{
+			test_leaf_combination.Insert(n);
+		}
+		test_leaf_combination.SaveCache();
 	}
 
 	if (K <= 0)
@@ -849,67 +857,70 @@ Leaves AllWeightings::GetLeafCombination(boost::multiprecision::cpp_int random_n
 		return Leaves();
 	}
 
-	BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hits[which_time_unit].size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
-
-	BranchOutputRow test_leaf_combination;
-
-	// skip any leaf combinations returned from previous random numbers - count will be 1 if previously hit for this time unit
-	// THIS is where random selection WITH REMOVAL is implemented (along with the fact that the random numbers generated are also with removal)
-	while (test_leaf_combination.Empty() || branch.hits[which_time_unit].count(test_leaf_combination))
+	if (!skip)
 	{
 
-		test_leaf_combination.Clear();
+		BOOST_ASSERT_MSG(boost::multiprecision::cpp_int(branch.hits[which_time_unit].size()) < branch.number_branch_combinations, "The number of hits is as large as the number of combinations for a branch.  Invalid!");
 
-		if (boost::multiprecision::cpp_int(branch.hits[which_time_unit].size()) > branch.number_branch_combinations / 2)
+		// skip any leaf combinations returned from previous random numbers - count will be 1 if previously hit for this time unit
+		// THIS is where random selection WITH REMOVAL is implemented (along with the fact that the random numbers generated are also with removal)
+		while (test_leaf_combination.Empty() || branch.hits[which_time_unit].count(test_leaf_combination))
 		{
 
-			// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
-			// and then pick randomly from that
-			
-			// A previous call may have populated "remaining"
+			test_leaf_combination.Clear();
 
-			if (branch.remaining[which_time_unit].size() == 0)
+			if (boost::multiprecision::cpp_int(branch.hits[which_time_unit].size()) > branch.number_branch_combinations / 2)
 			{
-				PopulateAllLeafCombinations(which_time_unit, K, branch, leaves);
+
+				// There are so many requests that it is more efficient to populate a list with all the remaining possibilities,
+				// and then pick randomly from that
+
+				// A previous call may have populated "remaining"
+
+				if (branch.remaining[which_time_unit].size() == 0)
+				{
+					PopulateAllLeafCombinations(which_time_unit, K, branch, leaves);
+				}
+
+				std::uniform_int_distribution<size_t> distribution(0, branch.remaining[which_time_unit].size() - 1);
+				size_t which_remaining_leaf_combination = distribution(engine);
+
+				test_leaf_combination = branch.remaining[which_time_unit][which_remaining_leaf_combination];
+				auto remainingPtr = branch.remaining[which_time_unit].begin() + which_remaining_leaf_combination;
+
+				branch.remaining[which_time_unit].erase(remainingPtr);
+
 			}
-
-			std::uniform_int_distribution<size_t> distribution(0, branch.remaining[which_time_unit].size() - 1);
-			size_t which_remaining_leaf_combination = distribution(engine);
-
-			test_leaf_combination = branch.remaining[which_time_unit][which_remaining_leaf_combination];
-			auto remainingPtr = branch.remaining[which_time_unit].begin() + which_remaining_leaf_combination;
-
-			branch.remaining[which_time_unit].erase(remainingPtr);
-
-		}
-		else
-		{
-
-			std::vector<int> remaining_leaves;
-			for (size_t n = 0; n < leaves.size(); ++n)
+			else
 			{
-				remaining_leaves.push_back(n);
+
+				std::vector<int> remaining_leaves;
+				for (size_t n = 0; n < leaves.size(); ++n)
+				{
+					remaining_leaves.push_back(n);
+				}
+
+				// Pull random leaves, one at a time, to create the random row
+				while (test_leaf_combination.Size() < static_cast<size_t>(K))
+				{
+
+					// ************************************************************************ //
+					// TODO: 
+					// This could be optimized in case K is high
+					// and the number of leaves is just a little larger than K
+					// ************************************************************************ //
+
+					std::uniform_int_distribution<size_t> distribution(0, remaining_leaves.size() - 1);
+					size_t index_of_index = distribution(engine);
+					int index_of_leaf = remaining_leaves[index_of_index];
+					auto remainingPtr = remaining_leaves.begin() + index_of_index;
+					remaining_leaves.erase(remainingPtr);
+					test_leaf_combination.Insert(index_of_leaf);
+				}
+
+				test_leaf_combination.SaveCache();
+
 			}
-
-			// Pull random leaves, one at a time, to create the random row
-			while (test_leaf_combination.Size() < static_cast<size_t>(K))
-			{
-				
-				// ************************************************************************ //
-				// TODO: 
-				// This could be optimized in case K is high
-				// and the number of leaves is just a little larger than K
-				// ************************************************************************ //
-
-				std::uniform_int_distribution<size_t> distribution(0, remaining_leaves.size() - 1);
-				size_t index_of_index = distribution(engine);
-				int index_of_leaf = remaining_leaves[index_of_index];
-				auto remainingPtr = remaining_leaves.begin() + index_of_index;
-				remaining_leaves.erase(remainingPtr);
-				test_leaf_combination.Insert(index_of_leaf);
-			}
-
-			test_leaf_combination.SaveCache();
 
 		}
 
