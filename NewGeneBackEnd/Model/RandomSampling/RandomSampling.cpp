@@ -506,7 +506,8 @@ void AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				{
 
 					// *********************************************************************************** //
-					// "leaves_cache" is a vector cache containing the same leaves in the same order.
+					// "leaves_cache" is a vector cache containing the same leaves in the same order
+					// as the official "leaves" set containing the leaves for the current branch.
 					//
 					// Note that a call to "ResetBranchCaches()" previous to the high-level call to "HandleBranchAndLeaf()",
 					// in which we are nested, has already set the "leaves_cache" cache,
