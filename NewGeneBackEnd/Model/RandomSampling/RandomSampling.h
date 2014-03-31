@@ -788,4 +788,30 @@ class AllWeightings
 
 };
 
+class write_to_output_visitor : public boost::static_visitor<>
+{
+
+public:
+
+	write_to_output_visitor(std::fstream & output_file_, bool & first_)
+		: output_file(output_file_)
+		, first(first_)
+	{}
+
+	template <typename T>
+	void operator()(const T & data) const
+	{
+		if (!first)
+		{
+			output_file << ",";
+		}
+		first = false;
+		output_file << data;
+	}
+
+	std::fstream & output_file;
+	bool & first;
+
+};
+
 #endif

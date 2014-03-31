@@ -501,10 +501,19 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSamplingCreateOutputTable();
 		if (failed || CheckCancelled()) return;
 
-		RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
-		if (failed || CheckCancelled()) return;
+		if (false)
+		{
+			// This is only necessary for debugging
+			// or further sorting/ordering/processing
+			RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
+			if (failed || CheckCancelled()) return;
 
-		child_merge_final_result = random_sampling_schema;
+			final_result = random_sampling_schema;
+		}
+
+		messager.AppendKadStatusText("Writing results to disk...", this);
+		messager.SetPerformanceLabel("Writing results to disk...");
+		RandomSamplingWriteResultsToFileOrScreen(allWeightings);
 
 	}
 	else
@@ -529,35 +538,35 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText("Merging child variable groups...", this);
 		MergeChildGroups();
 
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
+		messager.AppendKadStatusText("Construction of final K-ad results...", this);
+		all_merged_results_unformatted = CreateKadResultSet(child_merge_final_result.second);
+
+		messager.AppendKadStatusText("Formatting results...", this);
+		messager.SetPerformanceLabel("Formatting results...");
+		FormatResultsForOutput();
+
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
+		messager.AppendKadStatusText("Writing results to disk...", this);
+		messager.SetPerformanceLabel("Writing results to disk...");
+		WriteResultsToFileOrScreen();
+
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
+		ClearTable(final_result);
+
 	}
-
-	if (failed || CheckCancelled())
-	{
-		return;
-	}
-
-	messager.AppendKadStatusText("Construction of final K-ad results...", this);
-	all_merged_results_unformatted = CreateKadResultSet(child_merge_final_result.second);
-
-	messager.AppendKadStatusText("Formatting results...", this);
-	messager.SetPerformanceLabel("Formatting results...");
-	FormatResultsForOutput();
-
-	if (failed || CheckCancelled())
-	{
-		return;
-	}
-
-	messager.AppendKadStatusText("Writing results to disk...", this);
-	messager.SetPerformanceLabel("Writing results to disk...");
-	WriteResultsToFileOrScreen();
-
-	if (failed || CheckCancelled())
-	{
-		return;
-	}
-
-	ClearTable(final_result);
 
 	messager.AppendKadStatusText("Vacuuming and defragmenting database...", this);
 	messager.SetPerformanceLabel("Vacuuming and defragmenting database...");
@@ -21342,5 +21351,207 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		++current_child_vg_index;
 
 	});
+
+}
+
+void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllWeightings const & allWeightings)
+{
+
+	std::string setting_path_to_kad_output = CheckOutputFileExists();
+
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
+
+	if (setting_path_to_kad_output.empty())
+	{
+		return;
+	}
+
+	std::fstream output_file;
+	output_file.open(setting_path_to_kad_output, std::ios::out | std::ios::trunc);
+
+	if (!output_file.good())
+	{
+		boost::format msg("Cannot open output file %1%");
+		msg % setting_path_to_kad_output;
+		SetFailureMessage(msg.str());
+		failed = true;
+		return;
+	}
+
+	// Write columns headers
+	int column_index = 0;
+	bool first = true;
+	std::for_each(final_result.second.columns_in_view.begin(),
+		final_result.second.columns_in_view.end(), [this, &output_file, &first, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	{
+		++column_index;
+
+		if (!first)
+		{
+			output_file << ",";
+		}
+
+		first = false;
+		output_file << unformatted_column.column_name_in_temporary_table;
+	});
+	output_file << std::endl;
+
+
+	std::int64_t rows_written = 0;
+
+	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> const & timeSliceData)
+	{
+
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
+		TimeSlice const & timeSlice = timeSliceData.first;
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
+
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+
+		// For now, assume only one variable group
+		if (variableGroupBranchesAndLeavesVector.size() > 1)
+		{
+			boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+		VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+		BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+
+		std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
+		{
+
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
+
+			Branch const & branch = branchAndLeaves.first;
+			Leaves const & leaves = branchAndLeaves.second;
+
+			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_and_rows)
+			{
+
+				if (failed || CheckCancelled())
+				{
+					return;
+				}
+
+				std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
+
+				std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
+				{
+
+					// We have a row to output
+
+					if (failed || CheckCancelled())
+					{
+						return;
+					}
+
+					first = true;
+
+					// First, the branch primary keys
+					std::for_each(branch.primary_keys.cbegin(), branch.primary_keys.cend(), [&](DMUInstanceData const & data)
+					{
+						boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+					});
+
+					// Then, the leaf primary keys - for multiple leaves
+					// (this is the K-ad)
+					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+					{
+						Leaf & leaf = branch.leaves_cache[leafIndex];
+						std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
+						{
+							boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+						});
+					});
+
+					// Then, the primary top-level variable group secondary data.
+					// This info is stored in each leaf.
+					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+					{
+						Leaf & leaf = branch.leaves_cache[leafIndex];
+						SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
+						std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+						{
+							boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+						});
+					});
+
+					// Then, the non-primary top-level variable group secondary data.
+					// This info is stored in the leaf also.
+					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+					{
+						Leaf & leaf = branch.leaves_cache[leafIndex];
+						std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int, std::int64_t> const & top_level_vg_and_data_index)
+						{
+							int const vg_number = top_level_vg_and_data_index.first;
+							std::int64_t const & data_index = top_level_vg_and_data_index.second;
+							DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
+							SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
+							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+							{
+								boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+							});
+						});
+					});
+
+					// Then, the child variable group secondary data.
+					// This info is stored in the output row itself.
+					std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int, std::map<int, std::int64_t>> const & leaf_index_mappings)
+					{
+						int const vg_number = leaf_index_mappings.first;
+						std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
+						std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int, std::int64_t> const & leaf_index_mapping)
+						{
+
+							// unused - we're just looping through the leaves printing the actual leaf data out,
+							// not the leaf number - but we have it if we need it
+							int const leaf_number = leaf_index_mapping.first;
+
+							std::int64_t const & data_index = leaf_index_mapping.second;
+							DataCache & data_cache = allWeightings.childCache[vg_number];
+							SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
+							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+							{
+								boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+							});
+
+						});
+					});
+
+					output_file << std::endl;
+					++rows_written;
+
+				});
+
+			});
+
+		});
+
+	});
+
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
+
+	if (output_file.good())
+	{
+		output_file.close();
+	}
+
+	boost::format msg("%1% rows written to output.");
+	msg % rows_written;
+	messager.AppendKadStatusText(msg.str(), this);
 
 }
