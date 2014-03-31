@@ -500,7 +500,6 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, number_branch_combinations{ 0 }
 		{
-			CreateLeafCache();
 		}
 
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
