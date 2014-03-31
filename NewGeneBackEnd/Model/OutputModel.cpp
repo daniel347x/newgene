@@ -489,7 +489,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
 		if (failed || CheckCancelled()) return;
 
-		std::int64_t const samples = 10;
+		std::int64_t const samples = 1000;
 
 		// The following prepares all randomly-generated output rows
 		allWeightings.PrepareRandomNumbers(samples);
