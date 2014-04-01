@@ -21504,12 +21504,15 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						{
 							if (boost::lexical_cast<std::string>(branch.primary_keys[2]) == std::string("230"))
 							{
-								SpitBranch(a, branch);
-								SpitLeaves(b, leaves);
-								SpitDataCache(c, allWeightings.dataCache);
-								SpitDataCaches(d, allWeightings.otherTopLevelCache);
-								SpitDataCaches(e, allWeightings.childCache);
-								stopp = true;
+								if (false)
+								{
+									SpitBranch(a, branch);
+									SpitLeaves(b, leaves);
+									SpitDataCache(c, allWeightings.dataCache);
+									SpitDataCaches(d, allWeightings.otherTopLevelCache);
+									SpitDataCaches(e, allWeightings.childCache);
+									stopp = true;
+								}
 							}
 						}
 					}

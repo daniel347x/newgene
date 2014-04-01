@@ -594,6 +594,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 									showme = true;
 								}
 							}
+							showme = false;
 						}
 					}
 
