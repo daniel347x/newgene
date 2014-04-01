@@ -585,7 +585,11 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 								{
 									showme = true;
 								}
-								if (boost::lexical_cast<std::string>(dmu_keys[0]) == "230")
+								else if (boost::lexical_cast<std::string>(dmu_keys[0]) == "230")
+								{
+									showme = true;
+								}
+								else
 								{
 									showme = true;
 								}
