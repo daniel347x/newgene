@@ -1433,22 +1433,27 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 	});
 	sdata += "DONE LEAF INDICES; ";
 
-	sdata += "CHILD INDICES INTO RAW DATA: ";
+	sdata += "CHILD INDICES INTO RAW DATA, ALL VG's: ";
 	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & childindices)
 	{
 		sdata += "CHILD VG ";
 		sdata += boost::lexical_cast<std::string>(childindices.first);
+		sdata += " LEAF INDICES: "
 		std::for_each(childindices.second.cbegin(), childindices.second.cend(), [&](std::pair<int const, std::int64_t> const & childleaves)
 		{
 			sdata += "CHILD LEAF INDEX ";
 			sdata += boost::lexical_cast<std::string>(childleaves.first);
 			sdata += ": ";
 			sdata += boost::lexical_cast<std::string>(childleaves.second);
-			sdata += ", ";
+			sdata += " DONE CHILD LEAF INDEX; ";
 		});
-		sdata += "DONE LEAF INDICES; ";
+		sdata += "DONE CHILD VG ";
+		sdata += boost::lexical_cast<std::string>(childindices.first);
+		sdata += " LEAF INDICES; ";
 	});
-	sdata += "DONE CHILD INDICES; ";
+	sdata += "DONE CHILD INDICES INTO RAW DATA, ALL VG's; ";
+
+	sdata += "DONE ROW; ";
 }
 
 void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup)

@@ -21498,9 +21498,9 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 					std::string g;
 					std::string h;
 					bool stopp = false;
-					if (boost::lexical_cast<std::string>(branch.primary_keys[0]) == std::string("89"))
+					if (boost::lexical_cast<std::string>(branch.primary_keys[0]) == std::string("3237"))
 					{
-						if (boost::lexical_cast<std::string>(branch.primary_keys[1]) == std::string("220"))
+						if (boost::lexical_cast<std::string>(branch.primary_keys[1]) == std::string("2"))
 						{
 							if (boost::lexical_cast<std::string>(branch.primary_keys[2]) == std::string("230"))
 							{
