@@ -1363,17 +1363,18 @@ void AllWeightings::PrepareRandomSamples(int const K)
 
 BranchOutputRow::BranchOutputRow()
 {
-	int m = 0; // debug
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow const & rhs)
 : primary_leaves(rhs.primary_leaves)
+, child_indices_into_raw_data(rhs.child_indices_into_raw_data)
 {
 	SaveCache();
 }
 
 BranchOutputRow::BranchOutputRow(BranchOutputRow && rhs)
 : primary_leaves(std::move(rhs.primary_leaves))
+, child_indices_into_raw_data(rhs.child_indices_into_raw_data)
 {
 	SaveCache();
 }
@@ -1385,14 +1386,9 @@ BranchOutputRow & BranchOutputRow::operator=(BranchOutputRow const & rhs)
 		return *this;
 	}
 	primary_leaves = rhs.primary_leaves;
+	child_indices_into_raw_data = rhs.child_indices_into_raw_data;
 	SaveCache();
 	return *this;
-}
-
-// Destructor to debug
-BranchOutputRow::~BranchOutputRow()
-{
-	int m = 0; // debug
 }
 
 BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
@@ -1402,8 +1398,13 @@ BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
 		return *this;
 	}
 	primary_leaves = std::move(rhs.primary_leaves);
+	child_indices_into_raw_data = std::move(rhs.child_indices_into_raw_data);
 	SaveCache();
 	return *this;
+}
+
+BranchOutputRow::~BranchOutputRow()
+{
 }
 
 void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys)

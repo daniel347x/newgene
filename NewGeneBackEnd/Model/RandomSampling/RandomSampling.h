@@ -443,10 +443,10 @@ class BranchOutputRow
 		BranchOutputRow(BranchOutputRow const & rhs);
 		BranchOutputRow(BranchOutputRow && rhs);
 		BranchOutputRow & operator=(BranchOutputRow const & rhs);
+		BranchOutputRow & operator=(BranchOutputRow && rhs);
 
 		// Destructor to debug
 		~BranchOutputRow();
-		BranchOutputRow & operator=(BranchOutputRow && rhs);
 
 		bool operator==(BranchOutputRow const & rhs)
 		{
@@ -461,7 +461,6 @@ class BranchOutputRow
 		void Insert(int const index_of_leaf)
 		{
 			primary_leaves.insert(index_of_leaf);
-			//primary_leaves.push_back(index_of_leaf);
 			SaveCache();
 		}
 
@@ -481,7 +480,7 @@ class BranchOutputRow
 			SaveCache();
 		}
 
-	//private:
+	//private: // for debugging convenience, make public; but be sure it builds when private
 	
 		// Index into the branch's Leaf set
 		std::set<int> primary_leaves;
