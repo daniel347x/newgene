@@ -1281,19 +1281,21 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					std::string c;
 					std::string d;
 					std::string e;
+					bool hit640 = false;
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
 						if (boost::lexical_cast<std::string>(child_hit_vector[0]) == "640")
 						{
+							hit640 = true;
 							SpitKeys(a, child_hit_vector);
 							SpitKeys(b, child_hit_vector_branch_components);
 							SpitOutputRow(c, outputRow);
 							SpitBranch(d, *this);
-							if (boost::lexical_cast<std::string>(outputRow.primary_leaves_cache[0]) == "3237")
+							if (boost::lexical_cast<std::string>(primary_keys[0]) == "3237")
 							{
-								if (boost::lexical_cast<std::string>(outputRow.primary_leaves_cache[1]) == "2")
+								if (boost::lexical_cast<std::string>(primary_keys[1]) == "2")
 								{
-									if (boost::lexical_cast<std::string>(outputRow.primary_leaves_cache[2]) == "230")
+									if (boost::lexical_cast<std::string>(primary_keys[2]) == "230")
 									{
 										int m = 0;
 									}
