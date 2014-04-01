@@ -585,8 +585,19 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 								{
 									showme = true;
 								}
+								if (boost::lexical_cast<std::string>(dmu_keys[0]) == "230")
+								{
+									showme = true;
+								}
 							}
 						}
+					}
+
+					if (showme)
+					{
+						std::string existingbranchb4;
+						SpitBranch(existingbranchb4, the_current_map_branch);
+						int m = 0;
 					}
 
 					// Loop through all matching output rows
