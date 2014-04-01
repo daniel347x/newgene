@@ -21031,7 +21031,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 						});
 					});
 
-					// This is the data for the secondary keys (i.e., for the dependent data)
+					// This is the data for the primary top-level variable group
+					// secondary keys (i.e., for the dependent data)
 					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 					{
 						Leaf & leaf = branch.leaves_cache[leafIndex];
@@ -21119,30 +21120,58 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 
 					// Then, the child variable group secondary data.
 					// This info is stored in the output row itself.
-					// How many total child variable groups are there?
-					int numberChildVariableGroups = static_cast<int>(secondary_variable_groups_vector.size());
-					std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
+					//
+					// Show secondary data grouped by variable group,
+					// then by multiplicity.
+					// There might be multiple fields for each variable group and within each multiplicity,
+					// ... so the logic is a bit non-trivial to get the display order right.
+					int numberChildGroups = static_cast<int>(secondary_variable_groups_vector.size());
+					for (int vgNumber = 0; vgNumber < numberChildGroups; ++vgNumber)
 					{
-						int expectedVG = 0;
-						int const vg_number = leaf_index_mappings.first;
-						std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
-						std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
+						int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[vgNumber].first.identifier_parent)].second;
+						for (int multiplicity = 0; multiplicity < the_child_multiplicity; ++multiplicity)
 						{
-
-							// unused - we're just looping through the leaves printing the actual leaf data out,
-							// not the leaf number - but we have it if we need it
-							int const leaf_number = leaf_index_mapping.first;
-
-							std::int64_t const & data_index = leaf_index_mapping.second;
-							DataCache & data_cache = allWeightings.childCache[vg_number];
-							SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
-							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+							bool matched = false;
+							std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
 							{
-								BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
-							});
+								int const vg_number = leaf_index_mappings.first;
+								if (vg_number != vgNumber)
+								{
+									return;
+								}
+								std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
+								std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
+								{
 
-						});
-					});
+									int const leaf_number = leaf_index_mapping.first;
+									if (leaf_number != multiplicity)
+									{
+										return;
+									}
+
+									// This is the desired variable group and multiplicity
+									matched = true;
+
+									std::int64_t const & data_index = leaf_index_mapping.second;
+									DataCache & data_cache = allWeightings.childCache[vg_number];
+									SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
+									std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+									{
+										BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
+									});
+
+								});
+							});
+							if (!matched)
+							{
+								int numberSecondaries = child_number_secondary_columns[vgNumber];
+								for (int n = 0; n < numberSecondaries; ++n)
+								{
+									BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, InstanceData(std::string()), bindIndex++);
+								}
+							}
+						}
+					}
 
 					int step_result = 0;
 
@@ -21658,35 +21687,59 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 					// Then, the child variable group secondary data.
 					// This info is stored in the output row itself.
-					// How many total child variable groups are there?
-					int numberChildVariableGroups = static_cast<int>(secondary_variable_groups_vector.size());
-					std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
+					//
+					// Show secondary data grouped by variable group,
+					// then by multiplicity.
+					// There might be multiple fields for each variable group and within each multiplicity,
+					// ... so the logic is a bit non-trivial to get the display order right.
+					int numberChildGroups = static_cast<int>(secondary_variable_groups_vector.size());
+					for (int vgNumber = 0; vgNumber < numberChildGroups; ++vgNumber)
 					{
-						int expectedVG = 0;
-						int const vg_number = leaf_index_mappings.first;
-						std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
-						std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
+						int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[vgNumber].first.identifier_parent)].second;
+						for (int multiplicity = 0; multiplicity < the_child_multiplicity; ++multiplicity)
 						{
-
-							// unused - we're just looping through the leaves printing the actual leaf data out,
-							// not the leaf number - but we have it if we need it
-							int const leaf_number = leaf_index_mapping.first;
-
-							std::int64_t const & data_index = leaf_index_mapping.second;
-							DataCache & data_cache = allWeightings.childCache[vg_number];
-							SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
-							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+							bool matched = false;
+							std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
 							{
-								boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+								int const vg_number = leaf_index_mappings.first;
+								if (vg_number != vgNumber)
+								{
+									return;
+								}
+								std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
+								std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
+								{
+
+									int const leaf_number = leaf_index_mapping.first;
+									if (leaf_number != multiplicity)
+									{
+										return;
+									}
+
+									// This is the desired variable group and multiplicity
+									matched = true;
+
+									std::int64_t const & data_index = leaf_index_mapping.second;
+									DataCache & data_cache = allWeightings.childCache[vg_number];
+									SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
+									std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+									{
+										boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+									});
+
+								});
 							});
-
-						});
-					});
-
-					if (stopp)
-					{
-						int m = 0;
+							if (!matched)
+							{
+								int numberSecondaries = child_number_secondary_columns[vgNumber];
+								for (int n = 0; n < numberSecondaries; ++n)
+								{
+									boost::apply_visitor(write_to_output_visitor(output_file, first), InstanceData(std::string()));
+								}
+							}
+						}
 					}
+
 					output_file << std::endl;
 					++rows_written;
 
