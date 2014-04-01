@@ -569,7 +569,13 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// We have an incoming child variable group branch and leaf.
 					// Find all matching output rows that contain the same DMU data on the matching columns.
 					// *********************************************************************************** //
-					auto const & matchingOutputRows = the_branch.helper_lookup__from_child_key_set__to_matching_output_rows[dmu_keys];
+					auto const & matchingOutputRows = the_branch.helper_lookup__from_child_key_set__to_matching_output_rows.find(dmu_keys);
+
+					bool no_matches_for_this_child = false;
+					if (matchingOutputRows == the_branch.helper_lookup__from_child_key_set__to_matching_output_rows.cend())
+					{
+						no_matches_for_this_child = true;
+					}
 
 					if (false)
 					{
@@ -614,29 +620,32 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					}
 
 					// Loop through all matching output rows
-					for (auto matchingOutputRowPtr = matchingOutputRows.cbegin(); matchingOutputRowPtr != matchingOutputRows.cend(); ++matchingOutputRowPtr)
+					if (!no_matches_for_this_child)
 					{
-
-						BranchOutputRow const * const & outputRowPtr = matchingOutputRowPtr->first;
-						BranchOutputRow const & outputRow = *outputRowPtr;
-						std::vector<int> const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
-
-						// Loop through all matching output row child leaves
-						std::for_each(matchingOutputChildLeaves.cbegin(), matchingOutputChildLeaves.cend(), [&](int const matching_child_leaf_index)
+						for (auto matchingOutputRowPtr = matchingOutputRows.cbegin(); matchingOutputRowPtr != matchingOutputRows.cend(); ++matchingOutputRowPtr)
 						{
 
-							auto const found = outputRow.child_indices_into_raw_data.find(variable_group_number);
-							if (found == outputRow.child_indices_into_raw_data.cend())
+							BranchOutputRow const * const & outputRowPtr = matchingOutputRowPtr->first;
+							BranchOutputRow const & outputRow = *outputRowPtr;
+							std::vector<int> const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
+
+							// Loop through all matching output row child leaves
+							std::for_each(matchingOutputChildLeaves.cbegin(), matchingOutputChildLeaves.cend(), [&](int const matching_child_leaf_index)
 							{
-								outputRow.child_indices_into_raw_data[variable_group_number] = std::map<int, std::int64_t>();
-							}
-							auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
-							outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
 
-							added = true;
+								auto const found = outputRow.child_indices_into_raw_data.find(variable_group_number);
+								if (found == outputRow.child_indices_into_raw_data.cend())
+								{
+									outputRow.child_indices_into_raw_data[variable_group_number] = std::map<int, std::int64_t>();
+								}
+								auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
+								outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
 
-						});
+								added = true;
 
+							});
+
+						}
 					}
 
 				});
