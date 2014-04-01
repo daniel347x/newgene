@@ -21264,7 +21264,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 					full_kad_key_info.variable_group_info_for_primary_keys.cend(), [&](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_primary_not_child_variable_group)
 				{
 
-					// The primary key information we seek is that for our own, CHILD, variable group
+					// The primary key information we seek here is for the TOP LEVEL variable group
 					if (full_kad_key_info_primary_not_child_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_variable_groups_column_info[0].variable_groups[0]))
 					{
 
@@ -21273,6 +21273,8 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 							if (boost::iequals(full_kad_key_info_primary_not_child_variable_group.table_column_name, primary_variable_group_set_member.column_name_in_original_data_table))
 							{
+
+								// Valid TOP-LEVEL primary key in sequence of TOP-LEVEL primary keys
 
 								std::for_each(full_kad_key_info.variable_group_info_for_primary_keys.cbegin(),
 									full_kad_key_info.variable_group_info_for_primary_keys.cend(), [&](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_child_variable_group)
@@ -21331,6 +21333,20 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 								});
 
+								if (is_current_index_a_top_level_primary_group_branch)
+								{
+									++current_primary_branch_index;
+								}
+								else
+								{
+									++current_primary_internal_leaf_index;
+									if (full_kad_key_info.sequence_number_within_dmu_category_primary_uoa + 1 == full_kad_key_info.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
+									{
+										++current_primary_leaf_number;
+										current_primary_internal_leaf_index = 0;
+									}
+								}
+
 							}
 
 						}
@@ -21338,20 +21354,6 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 					}
 
 				});
-
-				if (is_current_index_a_top_level_primary_group_branch)
-				{
-					++current_primary_branch_index;
-				}
-				else
-				{
-					++current_primary_internal_leaf_index;
-					if (full_kad_key_info.sequence_number_within_dmu_category_primary_uoa + 1 == full_kad_key_info.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
-					{
-						++current_primary_leaf_number;
-						current_primary_internal_leaf_index = 0;
-					}
-				}
 
 			});
 
