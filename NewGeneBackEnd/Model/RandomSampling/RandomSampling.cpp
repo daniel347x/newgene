@@ -1438,7 +1438,7 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 	{
 		sdata += "CHILD VG ";
 		sdata += boost::lexical_cast<std::string>(childindices.first);
-		sdata += " LEAF INDICES: "
+		sdata += " LEAF INDICES: ";
 		std::for_each(childindices.second.cbegin(), childindices.second.cend(), [&](std::pair<int const, std::int64_t> const & childleaves)
 		{
 			sdata += "CHILD LEAF INDEX ";
