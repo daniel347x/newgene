@@ -622,7 +622,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// Loop through all matching output rows
 					if (!no_matches_for_this_child)
 					{
-						for (auto matchingOutputRowPtr = matchingOutputRows.cbegin(); matchingOutputRowPtr != matchingOutputRows.cend(); ++matchingOutputRowPtr)
+						for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
 						{
 
 							BranchOutputRow const * const & outputRowPtr = matchingOutputRowPtr->first;
