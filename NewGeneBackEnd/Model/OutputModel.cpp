@@ -21489,28 +21489,27 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 					first = true;
 
+					std::string a;
+					std::string b;
+					std::string c;
+					std::string d;
+					std::string e;
+					std::string f;
+					std::string g;
+					std::string h;
+					bool stopp = false;
 					if (boost::lexical_cast<std::string>(branch.primary_keys[0]) == std::string("89"))
 					{
 						if (boost::lexical_cast<std::string>(branch.primary_keys[1]) == std::string("220"))
 						{
-							if (boost::lexical_cast<std::string>(branch.primary_keys[1]) == std::string("230"))
+							if (boost::lexical_cast<std::string>(branch.primary_keys[2]) == std::string("230"))
 							{
-								std::string a;
 								SpitBranch(a, branch);
-
-								std::string b;
 								SpitLeaves(b, leaves);
-
-								std::string c;
 								SpitDataCache(c, allWeightings.dataCache);
-
-								std::string d;
-								SpitDataCaches(c, allWeightings.otherTopLevelCache);
-
-								std::string e;
-								SpitDataCaches(c, allWeightings.childCache);
-
-								int m = 0;
+								SpitDataCaches(d, allWeightings.otherTopLevelCache);
+								SpitDataCaches(e, allWeightings.childCache);
+								stopp = true;
 							}
 						}
 					}
@@ -21575,6 +21574,11 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							// not the leaf number - but we have it if we need it
 							int const leaf_number = leaf_index_mapping.first;
 
+							if (stopp)
+							{
+								SpitOutputRow(f, outputRow);
+							}
+
 							std::int64_t const & data_index = leaf_index_mapping.second;
 							DataCache & data_cache = allWeightings.childCache[vg_number];
 							SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
@@ -21586,6 +21590,10 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						});
 					});
 
+					if (stopp)
+					{
+						int m = 0;
+					}
 					output_file << std::endl;
 					++rows_written;
 

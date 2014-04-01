@@ -120,6 +120,28 @@ class TimeSlice
 			return false;
 		}
 
+		void setStart(std::int64_t const & time_start_)
+		{
+			time_start = time_start_;
+		}
+
+		void setEnd(std::int64_t const & time_end_)
+		{
+			time_end = time_end_;
+		}
+
+		std::int64_t getStart() const
+		{
+			return time_start;
+		}
+
+		std::int64_t getEnd() const
+		{
+			return time_end;
+		}
+
+	private:
+
 		std::int64_t time_start;
 		std::int64_t time_end;
 
@@ -800,5 +822,6 @@ void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitBranch(std::string & sdata, Branch const & branch);
 void SpitLeaves(std::string & sdata, std::vector<Leaf> const & leaves);
 void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves);
+//void SpitChildHit(std::string & sdata, std::map<int, std::map<int, std::int64_t>>);
 
 #endif
