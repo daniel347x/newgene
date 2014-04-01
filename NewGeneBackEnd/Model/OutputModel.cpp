@@ -21149,7 +21149,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 										return;
 									}
 
-									if (leaf_number <= 0)
+									if (leaf_number < 0)
 									{
 										return;
 									}
@@ -21721,7 +21721,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 										return;
 									}
 
-									if (leaf_number <= 0)
+									if (leaf_number < 0)
 									{
 										return;
 									}
