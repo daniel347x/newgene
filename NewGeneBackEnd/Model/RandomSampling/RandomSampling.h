@@ -39,7 +39,12 @@ class TimeSlice
 		TimeSlice(std::int64_t time_start_, std::int64_t time_end_)
 			: time_start{ time_start_ }
 			, time_end{ time_end_ }
-		{}
+		{
+			if (!Validate())
+			{
+				int m = 0; // debugging
+			}
+		}
 
 		TimeSlice(TimeSlice const & rhs)
 			: time_start{ rhs.time_start }
@@ -69,6 +74,12 @@ class TimeSlice
 			}
 			time_start = rhs.time_start;
 			time_end = rhs.time_end;
+
+			if (!Validate())
+			{
+				int m = 0; // debugging
+			}
+
 			return *this;
 		}
 
@@ -76,6 +87,11 @@ class TimeSlice
 		{
 			time_start = new_start;
 			time_end = new_end;
+
+			if (!Validate())
+			{
+				int m = 0; // debugging
+			}
 		}
 
 		bool operator<(TimeSlice const & rhs) const
@@ -123,11 +139,21 @@ class TimeSlice
 		void setStart(std::int64_t const & time_start_)
 		{
 			time_start = time_start_;
+
+			if (!Validate())
+			{
+				int m = 0; // debugging
+			}
 		}
 
 		void setEnd(std::int64_t const & time_end_)
 		{
 			time_end = time_end_;
+
+			if (!Validate())
+			{
+				int m = 0; // debugging
+			}
 		}
 
 		std::int64_t getStart() const
