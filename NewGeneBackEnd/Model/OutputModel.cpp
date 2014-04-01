@@ -6524,7 +6524,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			int current_excess_count = 0;
 			std::for_each(saved_strings_current__map_from_inner_primary_key_group__to__count.cbegin(),
 						  saved_strings_current__map_from_inner_primary_key_group__to__count.cend(), [&current_excess_count, &an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous, &primary_key_group_in_current__does_not_exist_in_previous, &saved_strings_previous__map_from_inner_primary_key_group__to__count](
-							  std::pair<std::vector<std::string>, int> const & inner_table_primary_key_group_info)
+							  std::pair<std::vector<std::string> const, int> const & inner_table_primary_key_group_info)
 			{
 				if (saved_strings_previous__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) ==
 					saved_strings_previous__map_from_inner_primary_key_group__to__count.cend())
@@ -6549,7 +6549,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			int previous_excess_count = 0;
 			std::for_each(saved_strings_previous__map_from_inner_primary_key_group__to__count.cbegin(),
 						  saved_strings_previous__map_from_inner_primary_key_group__to__count.cend(), [&previous_excess_count, &an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current, &primary_key_group_in_previous__does_not_exist_in_current, &saved_strings_current__map_from_inner_primary_key_group__to__count](
-							  std::pair<std::vector<std::string>, int> const & inner_table_primary_key_group_info)
+							  std::pair<std::vector<std::string> const, int> const & inner_table_primary_key_group_info)
 			{
 				if (saved_strings_current__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) ==
 					saved_strings_current__map_from_inner_primary_key_group__to__count.cend())
@@ -6607,7 +6607,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			int current_excess_count = 0;
 			std::for_each(saved_ints_current__map_from_inner_primary_key_group__to__count.cbegin(),
 						  saved_ints_current__map_from_inner_primary_key_group__to__count.cend(), [&current_excess_count, &an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous, &primary_key_group_in_current__does_not_exist_in_previous, &saved_ints_previous__map_from_inner_primary_key_group__to__count](
-							  std::pair<std::vector<std::int64_t>, int> const & inner_table_primary_key_group_info)
+							  std::pair<std::vector<std::int64_t> const, int> const & inner_table_primary_key_group_info)
 			{
 				if (saved_ints_previous__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) ==
 					saved_ints_previous__map_from_inner_primary_key_group__to__count.cend())
@@ -6632,7 +6632,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			int previous_excess_count = 0;
 			std::for_each(saved_ints_previous__map_from_inner_primary_key_group__to__count.cbegin(),
 						  saved_ints_previous__map_from_inner_primary_key_group__to__count.cend(), [&previous_excess_count, &an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current, &primary_key_group_in_previous__does_not_exist_in_current, &saved_ints_current__map_from_inner_primary_key_group__to__count](
-							  std::pair<std::vector<std::int64_t>, int> const & inner_table_primary_key_group_info)
+						  std::pair<std::vector<std::int64_t> const, int> const & inner_table_primary_key_group_info)
 			{
 				if (saved_ints_current__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) ==
 					saved_ints_current__map_from_inner_primary_key_group__to__count.cend())
@@ -6690,7 +6690,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			int current_excess_count = 0;
 			std::for_each(saved_floats_current__map_from_inner_primary_key_group__to__count.cbegin(),
 						  saved_floats_current__map_from_inner_primary_key_group__to__count.cend(), [&current_excess_count, &an_existing_primary_key_group_in_current__has_a_bigger_count_than__an_existing_primary_key_group_in_previous, &primary_key_group_in_current__does_not_exist_in_previous, &saved_floats_previous__map_from_inner_primary_key_group__to__count](
-							  std::pair<std::vector<long double>, int> const & inner_table_primary_key_group_info)
+						  std::pair<std::vector<long double> const, int> const & inner_table_primary_key_group_info)
 			{
 				if (saved_floats_previous__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) ==
 					saved_floats_previous__map_from_inner_primary_key_group__to__count.cend())
@@ -6715,7 +6715,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			int previous_excess_count = 0;
 			std::for_each(saved_floats_previous__map_from_inner_primary_key_group__to__count.cbegin(),
 						  saved_floats_previous__map_from_inner_primary_key_group__to__count.cend(), [&previous_excess_count, &an_existing_primary_key_group_in_previous__has_a_bigger_count_than__an_existing_primary_key_group_in_current, &primary_key_group_in_previous__does_not_exist_in_current, &saved_floats_current__map_from_inner_primary_key_group__to__count](
-							  std::pair<std::vector<long double>, int> const & inner_table_primary_key_group_info)
+						  std::pair<std::vector<long double> const, int> const & inner_table_primary_key_group_info)
 			{
 				if (saved_floats_current__map_from_inner_primary_key_group__to__count.find(inner_table_primary_key_group_info.first) ==
 					saved_floats_current__map_from_inner_primary_key_group__to__count.cend())
@@ -20990,7 +20990,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 			Branch const & branch = branchAndLeaves.first;
 			Leaves const & leaves = branchAndLeaves.second;
 
-			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & time_unit_and_rows)
+			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & time_unit_and_rows)
 			{
 
 				if (failed || CheckCancelled())
@@ -21046,7 +21046,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 					{
 						Leaf & leaf = branch.leaves_cache[leafIndex];
-						std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int, std::int64_t> const & top_level_vg_and_data_index)
+						std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
 						{
 							int const vg_number = top_level_vg_and_data_index.first;
 							std::int64_t const & data_index = top_level_vg_and_data_index.second;
@@ -21060,11 +21060,11 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 					});
 
 					// Now the secondary keys for the child variable groups
-					std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int, std::map<int, std::int64_t>> const & leaf_index_mappings)
+					std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
 					{
 						int const vg_number = leaf_index_mappings.first;
 						std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
-						std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int, std::int64_t> const & leaf_index_mapping)
+						std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
 						{
 
 							// unused - we're just looping through the leaves printing the actual leaf data out,
@@ -21548,7 +21548,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 					{
 						Leaf & leaf = branch.leaves_cache[leafIndex];
-						std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int, std::int64_t> const & top_level_vg_and_data_index)
+						std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
 						{
 							int const vg_number = top_level_vg_and_data_index.first;
 							std::int64_t const & data_index = top_level_vg_and_data_index.second;
@@ -21563,11 +21563,11 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 					// Then, the child variable group secondary data.
 					// This info is stored in the output row itself.
-					std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int, std::map<int, std::int64_t>> const & leaf_index_mappings)
+					std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
 					{
 						int const vg_number = leaf_index_mappings.first;
 						std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
-						std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int, std::int64_t> const & leaf_index_mapping)
+						std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
 						{
 
 							// unused - we're just looping through the leaves printing the actual leaf data out,

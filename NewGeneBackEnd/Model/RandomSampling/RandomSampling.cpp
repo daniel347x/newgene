@@ -853,7 +853,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K)
 
 	BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
 
-	TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](std::pair<TimeSlice, VariableGroupTimeSliceData> const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
+	TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
 	{
 		VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
 		if (testVariableGroupTimeSliceData.weighting.getWeightingRangeEnd() < test_random_number)
@@ -879,7 +879,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K)
 	BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
 		
 	// Pick a branch randomly (with weight!)
-	BranchesAndLeaves::const_iterator branchesAndLeavesPtr = std::lower_bound(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), random_number, [&](std::pair<Branch, Leaves> const & testBranchAndLeaves, boost::multiprecision::cpp_int const & test_random_number)
+	BranchesAndLeaves::const_iterator branchesAndLeavesPtr = std::lower_bound(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), random_number, [&](std::pair<Branch const, Leaves> const & testBranchAndLeaves, boost::multiprecision::cpp_int const & test_random_number)
 	{
 		Branch const & testBranch = testBranchAndLeaves.first;
 		if (testBranch.weighting.getWeightingRangeEnd() < test_random_number)
@@ -1292,7 +1292,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					std::string e;
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
-						//if (boost::lexical_cast<std::string>(child_hit_vector[0]) == "640")
+						if (boost::lexical_cast<std::string>(child_hit_vector[0]) == "2")
 						{
 							if (boost::lexical_cast<std::string>(primary_keys[0]) == "3237")
 							{
