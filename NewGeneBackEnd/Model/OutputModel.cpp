@@ -20551,7 +20551,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	});
 
 	// **************************************************************************************** //
-	// Proceed with the primary key columns of multiplicity > 1.
+	// Proceed with the primary key columns of multiplicity greater than 1.
 	// **************************************************************************************** //
 
 	for (int current_multiplicity = 1; current_multiplicity <= highest_multiplicity; ++current_multiplicity)
@@ -21035,33 +21035,95 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 					{
 						Leaf & leaf = branch.leaves_cache[leafIndex];
-						SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
-						std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+						if (leaf.index_into_raw_data > 0)
 						{
-							BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
-						});
-					});
-
-					// Now the secondary keys for the other top-level variable groups
-					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
-					{
-						Leaf & leaf = branch.leaves_cache[leafIndex];
-						std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
-						{
-							int const vg_number = top_level_vg_and_data_index.first;
-							std::int64_t const & data_index = top_level_vg_and_data_index.second;
-							DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
-							SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
+							SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
 							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 							{
 								BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
 							});
-						});
+						}
+						else
+						{
+							// no data available.  Import should always place blanks, so this should never happen.
+							boost::format msg("Logic error: Missing primary variable group data (there isn't even blank data).");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
 					});
 
-					// Now the secondary keys for the child variable groups
+					// Then, the non-primary top-level variable group secondary data.
+					// This info is stored in the leaf also.
+					//
+					// Show secondary data grouped by variable group,
+					// then by multiplicity.
+					// There might be multiple fields for each variable group and within each multiplicity,
+					// ... so the logic is a bit non-trivial to get the display order right.
+					int numberTopLevelGroups = static_cast<int>(primary_variable_groups_vector.size());
+					for (int vgNumber = 0; vgNumber < numberTopLevelGroups; ++vgNumber)
+					{
+						for (int multiplicity = 0; multiplicity < K; ++multiplicity)
+						{
+							bool matched = false;
+
+							// Find the variable group and leaf that is desired
+							int testMultiplicity = 0;
+							std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+							{
+								if (testMultiplicity != multiplicity)
+								{
+									return;
+								}
+								Leaf & leaf = branch.leaves_cache[leafIndex];
+								std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
+								{
+									int const vg_number = top_level_vg_and_data_index.first;
+									if (vg_number == vgNumber)
+									{
+
+										// We now have both the multiplicity and the variable group that is desired
+										// for the correct sequence of output data
+										matched = true;
+
+										// *********************************************************************** //
+										// If we have ANY secondary data, we have ALL ROWS
+										// because the schema controls this and the data is pulled from the DB,
+										// which has empty columns rather than missing columns
+										// *********************************************************************** //
+										std::int64_t const & data_index = top_level_vg_and_data_index.second;
+										DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
+										SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
+										std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+										{
+											BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
+										});
+
+									}
+								});
+								++testMultiplicity;
+							});
+
+							if (!matched)
+							{
+								if (vgNumber != top_level_vg_index)
+								{
+									// Missing a variable group.  Fill with blanks.
+									int numberSecondaries = top_level_number_secondary_columns[vgNumber];
+									for (int n = 0; n < numberSecondaries; ++n)
+									{
+										BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, InstanceData(std::string()), bindIndex++);
+									}
+								}
+							}
+						}
+					}
+
+					// Then, the child variable group secondary data.
+					// This info is stored in the output row itself.
+					// How many total child variable groups are there?
+					int numberChildVariableGroups = static_cast<int>(secondary_variable_groups_vector.size());
 					std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
 					{
+						int expectedVG = 0;
 						int const vg_number = leaf_index_mappings.first;
 						std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
 						std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
@@ -21489,34 +21551,6 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 					first = true;
 
-					std::string a;
-					std::string b;
-					std::string c;
-					std::string d;
-					std::string e;
-					std::string f;
-					std::string g;
-					std::string h;
-					bool stopp = false;
-					if (boost::lexical_cast<std::string>(branch.primary_keys[0]) == std::string("3237"))
-					{
-						if (boost::lexical_cast<std::string>(branch.primary_keys[1]) == std::string("2"))
-						{
-							if (boost::lexical_cast<std::string>(branch.primary_keys[2]) == std::string("230"))
-							{
-								if (false)
-								{
-									SpitBranch(a, branch);
-									SpitLeaves(b, leaves);
-									SpitDataCache(c, allWeightings.dataCache);
-									SpitDataCaches(d, allWeightings.otherTopLevelCache);
-									SpitDataCaches(e, allWeightings.childCache);
-									stopp = true;
-								}
-							}
-						}
-					}
-
 					// First, the branch primary keys
 					std::for_each(branch.primary_keys.cbegin(), branch.primary_keys.cend(), [&](DMUInstanceData const & data)
 					{
@@ -21539,35 +21573,96 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 					{
 						Leaf & leaf = branch.leaves_cache[leafIndex];
-						SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
-						std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+						if (leaf.index_into_raw_data > 0)
 						{
-							boost::apply_visitor(write_to_output_visitor(output_file, first), data);
-						});
-					});
-
-					// Then, the non-primary top-level variable group secondary data.
-					// This info is stored in the leaf also.
-					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
-					{
-						Leaf & leaf = branch.leaves_cache[leafIndex];
-						std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
-						{
-							int const vg_number = top_level_vg_and_data_index.first;
-							std::int64_t const & data_index = top_level_vg_and_data_index.second;
-							DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
-							SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
+							SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
 							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 							{
 								boost::apply_visitor(write_to_output_visitor(output_file, first), data);
 							});
-						});
+						}
+						else
+						{
+							// no data available.  Import should always place blanks, so this should never happen.
+							boost::format msg("Logic error: Missing primary variable group data (there isn't even blank data).");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
 					});
+
+					// Then, the non-primary top-level variable group secondary data.
+					// This info is stored in the leaf also.
+					//
+					// Show secondary data grouped by variable group,
+					// then by multiplicity.
+					// There might be multiple fields for each variable group and within each multiplicity,
+					// ... so the logic is a bit non-trivial to get the display order right.
+					int numberTopLevelGroups = static_cast<int>(primary_variable_groups_vector.size());
+					for (int vgNumber = 0; vgNumber < numberTopLevelGroups; ++vgNumber)
+					{
+						for (int multiplicity = 0; multiplicity < K; ++multiplicity)
+						{
+							bool matched = false;
+
+							// Find the variable group and leaf that is desired
+							int testMultiplicity = 0;
+							std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+							{
+								if (testMultiplicity != multiplicity)
+								{
+									return;
+								}
+								Leaf & leaf = branch.leaves_cache[leafIndex];
+								std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
+								{
+									int const vg_number = top_level_vg_and_data_index.first;
+									if (vg_number == vgNumber)
+									{
+
+										// We now have both the multiplicity and the variable group that is desired
+										// for the correct sequence of output data
+										matched = true;
+
+										// *********************************************************************** //
+										// If we have ANY secondary data, we have ALL ROWS
+										// because the schema controls this and the data is pulled from the DB,
+										// which has empty columns rather than missing columns
+										// *********************************************************************** //
+										int const vg_number = top_level_vg_and_data_index.first;
+										std::int64_t const & data_index = top_level_vg_and_data_index.second;
+										DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
+										SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
+										std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+										{
+											boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+										});
+
+									}
+								});
+								++testMultiplicity;
+							});
+
+							if (!matched)
+							{
+								if (vgNumber != top_level_vg_index)
+								{
+									// Missing a variable group.  Fill with blanks.
+									int numberSecondaries = top_level_number_secondary_columns[vgNumber];
+									for (int n = 0; n < numberSecondaries; ++n)
+									{
+										boost::apply_visitor(write_to_output_visitor(output_file, first), InstanceData(std::string()));
+									}
+								}
+							}
+						}
+					}
 
 					// Then, the child variable group secondary data.
 					// This info is stored in the output row itself.
+					// How many total child variable groups are there?
+					int numberChildVariableGroups = static_cast<int>(secondary_variable_groups_vector.size());
 					std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
 					{
+						int expectedVG = 0;
 						int const vg_number = leaf_index_mappings.first;
 						std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
 						std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
@@ -21576,11 +21671,6 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							// unused - we're just looping through the leaves printing the actual leaf data out,
 							// not the leaf number - but we have it if we need it
 							int const leaf_number = leaf_index_mapping.first;
-
-							if (stopp)
-							{
-								SpitOutputRow(f, outputRow);
-							}
 
 							std::int64_t const & data_index = leaf_index_mapping.second;
 							DataCache & data_cache = allWeightings.childCache[vg_number];

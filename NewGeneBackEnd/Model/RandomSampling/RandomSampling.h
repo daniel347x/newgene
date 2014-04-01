@@ -395,7 +395,7 @@ class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 			, index_into_raw_data{ 0 }
 		{}
 
-		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int64_t const & index_into_raw_data_ = -1)
+		PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int64_t const & index_into_raw_data_ = 0)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, index_into_raw_data{ index_into_raw_data_ }
 		{}
