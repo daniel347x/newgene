@@ -543,7 +543,6 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				// *********************************************************************************** //
 				// Loop through all BRANCHES for this variable group in this time slice.
 				// For each, we have a set of output rows.
-				// For each, we must therefore build its cache that maps the incoming 
 				// *********************************************************************************** //
 
 				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
@@ -557,42 +556,50 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// in which we are nested, has already set the "leaves_cache" cache,
 					// and this cache is copied whenever any map entry changes.
 					// *********************************************************************************** //
-					Branch const & the_branch = branchAndLeaves.first;
-					std::vector<Leaf> & leaves_cache = the_branch.leaves_cache;
-
-					Branch const * test2 = &the_branch;
+					Branch const & the_current_map_branch = branchAndLeaves.first;
+					std::vector<Leaf> & leaves_cache_for_current_branch = the_current_map_branch.leaves_cache;
 
 					// The following cache will only be filled on the first pass
-					the_branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
+					the_current_map_branch.ConstructChildCombinationCache(*this, leaves_cache_for_current_branch, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
 
 					// *********************************************************************************** //
 					// We have an incoming child variable group branch and leaf.
 					// Find all matching output rows that contain the same DMU data on the matching columns.
 					// *********************************************************************************** //
-					auto const & matchingOutputRows = the_branch.helper_lookup__from_child_key_set__to_matching_output_rows.find(dmu_keys);
+					auto const & matchingOutputRows = the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.find(dmu_keys);
 
 					bool no_matches_for_this_child = false;
-					if (matchingOutputRows == the_branch.helper_lookup__from_child_key_set__to_matching_output_rows.cend())
+					if (matchingOutputRows == the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows.cend())
 					{
 						no_matches_for_this_child = true;
 					}
 
-					if (false)
+					bool showme = false;
+					if (boost::lexical_cast<std::string>(the_current_map_branch.primary_keys[0]) == "3237")
+					{
+						if (boost::lexical_cast<std::string>(the_current_map_branch.primary_keys[1]) == "2")
+						{
+							if (boost::lexical_cast<std::string>(the_current_map_branch.primary_keys[2]) == "230")
+							{
+								if (boost::lexical_cast<std::string>(dmu_keys[0]) == "2")
+								{
+									showme = true;
+								}
+							}
+						}
+					}
+
+					if (showme)
 					{
 
 						std::string keys;
 						SpitKeys(keys, dmu_keys);
 
-						if (boost::lexical_cast<std::string>(dmu_keys[0]) == "230")
-						{
-							int m = 0;
-						}
-
 						std::string helper;
-						SpitChildLookup(helper, the_branch.helper_lookup__from_child_key_set__to_matching_output_rows);
+						SpitChildLookup(helper, the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows);
 
 						std::string hits_;
-						SpitHits(hits_, the_branch.hits);
+						SpitHits(hits_, the_current_map_branch.hits);
 
 						std::string datacache("Primary data cache: ");
 						SpitDataCache(datacache, dataCache);
@@ -607,15 +614,15 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						SpitBranch(newbranch, branch);
 
 						std::string existingbranch;
-						SpitBranch(existingbranch, the_branch);
+						SpitBranch(existingbranch, the_current_map_branch);
 
 						std::string branchvals;
-						SpitKeys(branchvals, the_branch.primary_keys);
+						SpitKeys(branchvals, the_current_map_branch.primary_keys);
 
 						std::string branchleaves;
-						SpitLeaves(branchleaves, leaves_cache);
+						SpitLeaves(branchleaves, leaves_cache_for_current_branch);
 
-						int m = 0;
+						int m_ = 0;
 
 					}
 
