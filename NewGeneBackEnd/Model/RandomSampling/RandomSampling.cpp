@@ -1288,6 +1288,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 							SpitKeys(a, child_hit_vector);
 							SpitKeys(b, child_hit_vector_branch_components);
 							SpitOutputRow(c, outputRow);
+							SpitBranch(d, *this);
 							if (boost::lexical_cast<std::string>(outputRow.primary_leaves_cache[0]) == "3237")
 							{
 								if (boost::lexical_cast<std::string>(outputRow.primary_leaves_cache[1]) == "2")
