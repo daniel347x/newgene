@@ -563,7 +563,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					Branch const * test2 = &the_branch;
 
 					// The following cache will only be filled on the first pass
-					the_branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()), true);
+					the_branch.ConstructChildCombinationCache(*this, leaves_cache, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
 
 					// *********************************************************************************** //
 					// We have an incoming child variable group branch and leaf.
@@ -1281,22 +1281,20 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					std::string c;
 					std::string d;
 					std::string e;
-					bool hit640 = false;
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
-						if (boost::lexical_cast<std::string>(child_hit_vector[0]) == "640")
+						//if (boost::lexical_cast<std::string>(child_hit_vector[0]) == "640")
 						{
-							hit640 = true;
-							SpitKeys(a, child_hit_vector);
-							SpitKeys(b, child_hit_vector_branch_components);
-							SpitOutputRow(c, outputRow);
-							SpitBranch(d, *this);
 							if (boost::lexical_cast<std::string>(primary_keys[0]) == "3237")
 							{
 								if (boost::lexical_cast<std::string>(primary_keys[1]) == "2")
 								{
 									if (boost::lexical_cast<std::string>(primary_keys[2]) == "230")
 									{
+										SpitKeys(a, child_hit_vector);
+										SpitKeys(b, child_hit_vector_branch_components);
+										SpitOutputRow(c, outputRow);
+										SpitBranch(d, *this);
 										int m = 0;
 									}
 								}
