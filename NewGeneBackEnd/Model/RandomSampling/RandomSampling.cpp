@@ -426,10 +426,6 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 	VariableGroupTimeSliceData & variableGroupTimeSliceData = mapElementPtr->second;
 	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
-
-	VariableGroupBranchesAndLeavesVector * test1 = &variableGroupBranchesAndLeavesVector;
-
-
 	// Note: Currently, only one primary top-level variable group is supported.
 	// It will be the "begin()" element, if it exists.
 	VariableGroupBranchesAndLeavesVector::iterator VariableGroupBranchesAndLeavesPtr = variableGroupBranchesAndLeavesVector.begin();
@@ -459,9 +455,6 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 		VariableGroupBranchesAndLeaves & variableGroupBranch = *VariableGroupBranchesAndLeavesPtr;
 		BranchesAndLeaves & branchesAndLeaves = variableGroupBranch.branches_and_leaves;
-
-		VariableGroupBranchesAndLeaves const * test3 = &variableGroupBranch;
-		BranchesAndLeaves const * test4 = &branchesAndLeaves;
 
 		switch (merge_mode)
 		{
@@ -562,6 +555,48 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// Find all matching output rows that contain the same DMU data on the matching columns.
 					// *********************************************************************************** //
 					auto const & matchingOutputRows = the_branch.helper_lookup__from_child_key_set__to_matching_output_rows[dmu_keys];
+
+					if (false)
+					{
+
+						std::string keys;
+						SpitKeys(keys, dmu_keys);
+
+						if (boost::lexical_cast<std::string>(dmu_keys[0]) == "230")
+						{
+							int m = 0;
+						}
+
+						std::string helper;
+						SpitChildLookup(helper, the_branch.helper_lookup__from_child_key_set__to_matching_output_rows);
+
+						std::string hits_;
+						SpitHits(hits_, the_branch.hits);
+
+						std::string datacache("Primary data cache: ");
+						SpitDataCache(datacache, dataCache);
+
+						std::string otherdatacaches("Primary data cache: ");
+						SpitDataCaches(otherdatacaches, otherTopLevelCache);
+
+						std::string childdatacaches("Primary data cache: ");
+						SpitDataCaches(childdatacaches, childCache);
+
+						std::string newbranch;
+						SpitBranch(newbranch, branch);
+
+						std::string existingbranch;
+						SpitBranch(existingbranch, the_branch);
+
+						std::string branchvals;
+						SpitKeys(branchvals, the_branch.primary_keys);
+
+						std::string branchleaves;
+						SpitLeaves(branchleaves, leaves_cache);
+
+						int m = 0;
+
+					}
 
 					// Loop through all matching output rows
 					for (auto matchingOutputRowPtr = matchingOutputRows.cbegin(); matchingOutputRowPtr != matchingOutputRows.cend(); ++matchingOutputRowPtr)
@@ -1227,9 +1262,6 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					++child_leaf_index_within_a_single_child_leaf;
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
-
-						std::string test = boost::lexical_cast<std::string>(child_hit_vector[0]);
-
 						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;
@@ -1303,4 +1335,178 @@ BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
 	primary_leaves = std::move(rhs.primary_leaves);
 	SaveCache();
 	return *this;
+}
+
+void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys)
+{
+	int index = 0;
+	sdata += "DMU KEYS: ";
+	std::for_each(dmu_keys.cbegin(), dmu_keys.cend(), [&](DMUInstanceData const & data)
+	{
+		sdata += boost::lexical_cast<std::string>(index);
+		sdata += ": ";
+		sdata += boost::lexical_cast<std::string>(data);
+		sdata += ", ";
+		++index;
+	});
+	sdata += "DONE DMU KEYS; ";
+}
+
+void SpitDataCache(std::string & sdata, DataCache const & dataCache)
+{
+	sdata += "DATA CACHE: ";
+	std::for_each(dataCache.cbegin(), dataCache.cend(), [&](std::pair<std::int64_t const, SecondaryInstanceDataVector> const & dataEntry)
+	{
+		sdata += "INDEX WITHIN DATA CACHE IS ";
+		sdata += boost::lexical_cast<std::string>(dataEntry.first);
+		sdata += ": ";
+		SpitKeys(sdata, dataEntry.second);
+	});
+	sdata += "DONE DATA CACHE; ";
+}
+
+void SpitDataCaches(std::string & sdata, std::map<int, DataCache> const & dataCaches)
+{
+	sdata += "DATA CACHES: ";
+	std::for_each(dataCaches.cbegin(), dataCaches.cend(), [&](std::pair<int const, DataCache> const & dataEntry)
+	{
+		sdata += "INDEX OF DATA CACHE WITHIN DATA CACHES IS ";
+		sdata += boost::lexical_cast<std::string>(dataEntry.first);
+		sdata += ": ";
+		SpitDataCache(sdata, dataEntry.second);
+	});
+	sdata += "DONE DATA CACHES; ";
+}
+
+void SpitHits(std::string & sdata, std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & hits)
+{
+	sdata += "HITS: ";
+	std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hitsEntry)
+	{
+		sdata += "INDEXED TIME UNIT WITHIN HITS IS ";
+		sdata += boost::lexical_cast<std::string>(hitsEntry.first);
+		sdata += ": ";
+		SpitSetOfOutputRows(sdata, hitsEntry.second);
+	});
+	sdata += "DONE HITS; ";
+}
+
+void SpitSetOfOutputRows(std::string & sdata, std::set<BranchOutputRow> const & setOfRows)
+{
+	sdata += "SET OF ROWS: ";
+	int index = 0;
+	std::for_each(setOfRows.cbegin(), setOfRows.cend(), [&](BranchOutputRow const & row)
+	{
+		sdata += "ROW INDEX ";
+		sdata += boost::lexical_cast<std::string>(index);
+		sdata += ": ";
+		SpitOutputRow(sdata, row);
+		++index;
+	});
+	sdata += "DONE HITS; ";
+}
+
+void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
+{
+	sdata += "ROW: ";
+
+	sdata += "LEAF INDICES INTO BRANCH'S LEAF SET: ";
+	std::for_each(row.primary_leaves.cbegin(), row.primary_leaves.cend(), [&](int const & leafindex)
+	{
+		sdata += boost::lexical_cast<std::string>(leafindex);
+		sdata += ", ";
+	});
+	sdata += "DONE LEAF INDICES; ";
+
+	sdata += "CHILD INDICES INTO RAW DATA: ";
+	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & childindices)
+	{
+		sdata += "CHILD VG ";
+		sdata += boost::lexical_cast<std::string>(childindices.first);
+		std::for_each(childindices.second.cbegin(), childindices.second.cend(), [&](std::pair<int const, std::int64_t> const & childleaves)
+		{
+			sdata += "CHILD LEAF INDEX ";
+			sdata += boost::lexical_cast<std::string>(childleaves.first);
+			sdata += ": ";
+			sdata += boost::lexical_cast<std::string>(childleaves.second);
+			sdata += ", ";
+		});
+		sdata += "DONE LEAF INDICES; ";
+	});
+	sdata += "DONE CHILD INDICES; ";
+}
+
+void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup)
+{
+	sdata += "HELPER LOOKUP: ";
+	std::for_each(helperLookup.cbegin(), helperLookup.cend(), [&](std::pair<ChildDMUInstanceDataVector const, std::map<BranchOutputRow const *, std::vector<int>>> const & helper)
+	{
+		sdata += "CHILD DMU KEY SET AS MAP KEY: ";
+		SpitKeys(sdata, helper.first);
+
+		sdata += "MATCHING OUTPUT ROWS: ";
+		std::for_each(helper.second.cbegin(), helper.second.cend(), [&](std::pair<BranchOutputRow const *, std::vector<int>> const & helperrow)
+		{
+			sdata += "BRANCH OUTPUT ROW AS INDEX: ";
+			SpitOutputRow(sdata, *helperrow.first);
+
+			sdata += "MATCHING CHILD LEAF NUMBERS: ";
+			std::for_each(helperrow.second.cbegin(), helperrow.second.cend(), [&](int const & leafindex)
+			{
+				sdata += boost::lexical_cast<std::string>(leafindex);
+				sdata += ", ";
+			});
+			sdata += "DONE MATCHING CHILD LEAF NUMBERS; ";
+		});
+		sdata += "DONE MATCHING OUTPUT ROWS; ";
+	});
+	sdata += "DONE HELPER LOOKUP; ";
+}
+
+void SpitLeaf(std::string & sdata, Leaf const & leaf)
+{
+	sdata += "LEAF: ";
+	sdata += "Index into raw data: ";
+	sdata += boost::lexical_cast<std::string>(leaf.index_into_raw_data);
+	sdata += "; ";
+	sdata += "Primary key values: ";
+	SpitKeys(sdata, leaf.primary_keys);
+	sdata += "Done primary key values; ";
+	sdata += "Other top level indices into raw data: ";
+	std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & leafindicesintorawdata)
+	{
+		sdata += "VG INDEX: ";
+		sdata += boost::lexical_cast<std::string>(leafindicesintorawdata.first);
+		sdata += ", INDEX INTO RAW DATA: ";
+		sdata += boost::lexical_cast<std::string>(leafindicesintorawdata.second);
+		sdata += ", ";
+	});
+	sdata += "END LEAVES; ";
+}
+
+void SpitBranch(std::string & sdata, Branch const & branch)
+{
+	sdata += "BRANCH: ";
+
+	sdata += "PRIMARY KEYS: ";
+	SpitKeys(sdata, branch.primary_keys);
+	sdata += "END PRIMARY KEYS; ";
+
+	sdata += "HITS: ";
+	SpitHits(sdata, branch.hits);
+	sdata += "END HITS; ";
+
+	sdata += "CHILD VG KEY LOOKUP: ";
+	SpitChildLookup(sdata, branch.helper_lookup__from_child_key_set__to_matching_output_rows);
+	sdata += "END CHILD VG KEY LOOKUP; ";
+
+	sdata += "BRANCH LEAVES: ";
+	SpitLeaves(sdata, branch.leaves_cache);
+	sdata += "END BRANCH LEAVES; ";
+
+	sdata += "Number leaf combinations: ";
+	sdata += branch.number_branch_combinations.str();
+	sdata += "; ";
+
+	sdata += "END BRANCH; ";
 }

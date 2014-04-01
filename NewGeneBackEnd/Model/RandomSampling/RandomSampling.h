@@ -433,7 +433,7 @@ class BranchOutputRow
 			SaveCache();
 		}
 
-	private:
+	//private:
 	
 		// Index into the branch's Leaf set
 		std::set<int> primary_leaves;
@@ -788,5 +788,45 @@ public:
 	bool & first;
 
 };
+
+void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys);
+void SpitDataCache(std::string & sdata, DataCache const & dataCache);
+void SpitDataCaches(std::string & sdata, std::map<int, DataCache> const & dataCaches);
+void SpitHits(std::string & sdata, std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & hits);
+void SpitSetOfOutputRows(std::string & sdata, std::set<BranchOutputRow> const & setOfRows); 
+void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
+void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup);
+void SpitLeaf(std::string & sdata, Leaf const & leaf);
+void SpitBranch(std::string & sdata, Branch const & branch);
+
+void SpitLeaves(std::string & sdata, std::vector<Leaf> const & leaves)
+{
+	sdata += "LEAVES: ";
+	int index = 0;
+	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
+	{
+		sdata += "LEAF ";
+		sdata += boost::lexical_cast<std::string>(index);
+		sdata += ": ";
+		SpitLeaf(sdata, leaf);
+		++index;
+	});
+	sdata += "END LEAVES; ";
+}
+
+void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves)
+{
+	sdata += "LEAVES: ";
+	int index = 0;
+	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
+	{
+		sdata += "LEAF ";
+		sdata += boost::lexical_cast<std::string>(index);
+		sdata += ": ";
+		SpitLeaf(sdata, leaf);
+		++index;
+	});
+	sdata += "END LEAVES; ";
+}
 
 #endif

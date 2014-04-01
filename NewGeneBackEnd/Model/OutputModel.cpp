@@ -13205,11 +13205,14 @@ void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<Wid
 
 	// ************************************************************************************************ //
 	// the_variable_group:
-	// A pair: VG identifier -> Variables in this group selected by the user.
+	// A pair: VG identifier -> Variables in this group selected by the user - but the latter is UNUSED.
 	// Note that even though only the variables selected by the user appear as the second member
 	// of the pair, that nonetheless in this function we bypass this data structure
 	// and retrieve the *full* set of columns from the vg_set_member table
 	// via the VG identifier.
+	// 
+	// Truly! The purpose of this function is to populate the THIRD incoming argument
+	// with ALL of the fields in the table, not just those selected by the user.
 	// ************************************************************************************************ //
 
 	// Convert column metadata into a far more useful form for construction of K-adic output
@@ -21485,6 +21488,32 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 					}
 
 					first = true;
+
+					if (boost::lexical_cast<std::string>(branch.primary_keys[0]) == std::string("89"))
+					{
+						if (boost::lexical_cast<std::string>(branch.primary_keys[1]) == std::string("220"))
+						{
+							if (boost::lexical_cast<std::string>(branch.primary_keys[1]) == std::string("230"))
+							{
+								std::string a;
+								SpitBranch(a, branch);
+
+								std::string b;
+								SpitLeaves(b, leaves);
+
+								std::string c;
+								SpitDataCache(c, allWeightings.dataCache);
+
+								std::string d;
+								SpitDataCaches(c, allWeightings.otherTopLevelCache);
+
+								std::string e;
+								SpitDataCaches(c, allWeightings.childCache);
+
+								int m = 0;
+							}
+						}
+					}
 
 					// First, the branch primary keys
 					std::for_each(branch.primary_keys.cbegin(), branch.primary_keys.cend(), [&](DMUInstanceData const & data)
