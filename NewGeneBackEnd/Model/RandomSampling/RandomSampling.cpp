@@ -1510,3 +1510,33 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 
 	sdata += "END BRANCH; ";
 }
+
+void SpitLeaves(std::string & sdata, std::vector<Leaf> const & leaves)
+{
+	sdata += "LEAVES: ";
+	int index = 0;
+	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
+	{
+		sdata += "LEAF ";
+		sdata += boost::lexical_cast<std::string>(index);
+		sdata += ": ";
+		SpitLeaf(sdata, leaf);
+		++index;
+	});
+	sdata += "END LEAVES; ";
+}
+
+void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves)
+{
+	sdata += "LEAVES: ";
+	int index = 0;
+	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
+	{
+		sdata += "LEAF ";
+		sdata += boost::lexical_cast<std::string>(index);
+		sdata += ": ";
+		SpitLeaf(sdata, leaf);
+		++index;
+	});
+	sdata += "END LEAVES; ";
+}

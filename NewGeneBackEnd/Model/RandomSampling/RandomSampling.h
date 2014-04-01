@@ -798,35 +798,7 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
 void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup);
 void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitBranch(std::string & sdata, Branch const & branch);
-
-void SpitLeaves(std::string & sdata, std::vector<Leaf> const & leaves)
-{
-	sdata += "LEAVES: ";
-	int index = 0;
-	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
-	{
-		sdata += "LEAF ";
-		sdata += boost::lexical_cast<std::string>(index);
-		sdata += ": ";
-		SpitLeaf(sdata, leaf);
-		++index;
-	});
-	sdata += "END LEAVES; ";
-}
-
-void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves)
-{
-	sdata += "LEAVES: ";
-	int index = 0;
-	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
-	{
-		sdata += "LEAF ";
-		sdata += boost::lexical_cast<std::string>(index);
-		sdata += ": ";
-		SpitLeaf(sdata, leaf);
-		++index;
-	});
-	sdata += "END LEAVES; ";
-}
+void SpitLeaves(std::string & sdata, std::vector<Leaf> const & leaves);
+void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves);
 
 #endif
