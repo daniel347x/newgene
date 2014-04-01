@@ -1198,7 +1198,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 				std::for_each(mappings_from_child_branch_to_primary.cbegin(), mappings_from_child_branch_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
-					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're still working on the branch)
+					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the branch)
 
 					switch (childToPrimaryMapping.mapping)
 					{
@@ -1241,7 +1241,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 				std::for_each(mappings_from_child_leaf_to_primary.cbegin(), mappings_from_child_leaf_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
-					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're still working on the branch)
+					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the leaf)
 
 					switch (childToPrimaryMapping.mapping)
 					{
@@ -1275,8 +1275,30 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 
 					++child_leaf_index_crossing_multiple_child_leaves;
 					++child_leaf_index_within_a_single_child_leaf;
+
+					std::string a;
+					std::string b;
+					std::string c;
+					std::string d;
+					std::string e;
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
+						if (boost::lexical_cast<std::string>(child_hit_vector[0]) == "640")
+						{
+							SpitKeys(a, child_hit_vector);
+							SpitKeys(b, child_hit_vector_branch_components);
+							SpitOutputRow(c, outputRow);
+							if (boost::lexical_cast<std::string>(outputRow.primary_leaves_cache[0]) == "3237")
+							{
+								if (boost::lexical_cast<std::string>(outputRow.primary_leaves_cache[1]) == "2")
+								{
+									if (boost::lexical_cast<std::string>(outputRow.primary_leaves_cache[2]) == "230")
+									{
+										int m = 0;
+									}
+								}
+							}
+						}
 						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;
@@ -1355,20 +1377,20 @@ BranchOutputRow & BranchOutputRow::operator = (BranchOutputRow && rhs)
 void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys)
 {
 	int index = 0;
-	sdata += "<DMU_KEYS>";
+	sdata += "<DATA_VALUES>";
 	std::for_each(dmu_keys.cbegin(), dmu_keys.cend(), [&](DMUInstanceData const & data)
 	{
-		sdata += "<DMU_KEY>";
-		sdata += "<DMU_KEY_INDEX>";
+		sdata += "<DATA_VALUE>";
+		sdata += "<DATA_VALUE_INDEX>";
 		sdata += boost::lexical_cast<std::string>(index);
-		sdata += "</DMU_KEY_INDEX>";
-		sdata += "<DMU_KEY_DATA_VALUE>";
+		sdata += "</DATA_VALUE_INDEX>";
+		sdata += "<DATA>";
 		sdata += boost::lexical_cast<std::string>(data);
-		sdata += "</DMU_KEY_DATA_VALUE>";
+		sdata += "</DATA>";
 		++index;
-		sdata += "</DMU_KEY>";
+		sdata += "</DATA_VALUE>";
 	});
-	sdata += "</DMU_KEYS>";
+	sdata += "</DATA_VALUES>";
 }
 
 void SpitDataCache(std::string & sdata, DataCache const & dataCache)
@@ -1410,9 +1432,9 @@ void SpitHits(std::string & sdata, std::map<boost::multiprecision::cpp_int, std:
 		sdata += "<TIME_UNIT_INDEX>";
 		sdata += boost::lexical_cast<std::string>(hitsEntry.first);
 		sdata += "</TIME_UNIT_INDEX>";
-		sdata += "<OUTPUT_ROWS_CORRESPONDING_TO_HIT>";
+		sdata += "<OUTPUT_ROWS_CORRESPONDING_TO_TIME_UNIT>";
 		SpitSetOfOutputRows(sdata, hitsEntry.second);
-		sdata += "</OUTPUT_ROWS_CORRESPONDING_TO_HIT>";
+		sdata += "</OUTPUT_ROWS_CORRESPONDING_TO_TIME_UNIT>";
 		sdata += "</HIT>";
 	});
 	sdata += "</HITS>";
@@ -1478,6 +1500,8 @@ void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, s
 	sdata += "<LIST_OF_CHILD_KEYLISTS_THAT_MATCH_SOMETHING_IN_THIS_BRANCH>";
 	std::for_each(helperLookup.cbegin(), helperLookup.cend(), [&](std::pair<ChildDMUInstanceDataVector const, std::map<BranchOutputRow const *, std::vector<int>>> const & helper)
 	{
+		sdata += "<CHILD_KEYLIST_THAT_MATCHES_SOMETHING_IN_THIS_BRANCH>";
+
 		sdata += "<CHILD_DMU_KEYS>";
 		SpitKeys(sdata, helper.first);
 		sdata += "</CHILD_DMU_KEYS>";
@@ -1503,6 +1527,8 @@ void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, s
 			sdata += "</ROW_CONTAINING_DATA_THAT_INCLUDES_THE_GIVEN_CHILD_KEYS>";
 		});
 		sdata += "</ROWS_CONTAINING_DATA_THAT_INCLUDES_THE_GIVEN_CHILD_KEYS>";
+
+		sdata += "</CHILD_KEYLIST_THAT_MATCHES_SOMETHING_IN_THIS_BRANCH>";
 	});
 	sdata += "</LIST_OF_CHILD_KEYLISTS_THAT_MATCH_SOMETHING_IN_THIS_BRANCH>";
 }
