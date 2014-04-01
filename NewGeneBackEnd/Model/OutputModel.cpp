@@ -21149,6 +21149,11 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 										return;
 									}
 
+									if (leaf_number <= 0)
+									{
+										return;
+									}
+
 									// This is the desired variable group and multiplicity
 									matched = true;
 
@@ -21712,6 +21717,11 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 									int const leaf_number = leaf_index_mapping.first;
 									if (leaf_number != multiplicity)
+									{
+										return;
+									}
+
+									if (leaf_number <= 0)
 									{
 										return;
 									}
