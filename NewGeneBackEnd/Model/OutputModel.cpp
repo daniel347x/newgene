@@ -21585,7 +21585,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						return;
 					}
 
-					if (true)
+					if (false)
 					{
 						std::string thebranch;
 						SpitBranch(thebranch, branch);
