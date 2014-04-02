@@ -480,7 +480,7 @@ class BranchOutputRow
 			SaveCache();
 		}
 
-#	ifdef _DEBUG
+#	ifndef _DEBUG
 	private: // for debugging convenience, make public; but be sure it builds when private
 #	endif
 	
@@ -872,6 +872,7 @@ public:
 
 };
 
+#ifdef _DEBUG
 void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys);
 void SpitDataCache(std::string & sdata, DataCache const & dataCache);
 void SpitDataCaches(std::string & sdata, std::map<int, DataCache> const & dataCaches);
@@ -884,5 +885,6 @@ void SpitBranch(std::string & sdata, Branch const & branch);
 void SpitLeaves(std::string & sdata, std::vector<Leaf> const & leaves);
 void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves);
 //void SpitChildHit(std::string & sdata, std::map<int, std::map<int, std::int64_t>>);
+#endif
 
 #endif

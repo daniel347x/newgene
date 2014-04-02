@@ -466,7 +466,7 @@ void NewGeneManageVGs::on_pushButton_add_vg_clicked()
 	QHBoxLayout formConstructionPane;
 	QListView * listpane = nullptr;
 	WidgetInstanceIdentifiers uoas = backend_input_model.t_uoa_category.getIdentifiers();
-	ImportDialogHelper::AddVgCreationBlock(dialog, form, VgConstructionWidget, formOverall, VgConstructionPanes, formConstructionPane, listpane, uoas);
+	DialogHelper::AddVgCreationBlock(dialog, form, VgConstructionWidget, formOverall, VgConstructionPanes, formConstructionPane, listpane, uoas);
 
 	if (!listpane)
 	{
@@ -738,7 +738,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 	// File chooser block
 	// ********************************************************************************************************************** //
 
-	// Pair: file chooser widget and its layout (added as layout in ImportDialogHelper::AddFileChooserBlock(), below)
+	// Pair: file chooser widget and its layout (added as layout in DialogHelper::AddFileChooserBlock(), below)
 	QWidget FileChooserWidget;
 	QBoxLayout formFileSelection(QBoxLayout::LeftToRight);
 
@@ -748,7 +748,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	QList<QLineEdit *> fieldsFileChooser;
 	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited data file", "Choose comma-delimited data file location", "", "" };
-	ImportDialogHelper::AddFileChooserBlock(dialog, form, formFileSelection, FileChooserWidget, fieldsFileChooser, fileChooserStrings);
+	DialogHelper::AddFileChooserBlock(dialog, form, formFileSelection, FileChooserWidget, fieldsFileChooser, fileChooserStrings);
 
 
 
@@ -813,7 +813,7 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 	if (uoa.time_granularity != TIME_GRANULARITY__NONE)
 	{
-		ImportDialogHelper::AddTimeRangeSelectorBlock(
+		DialogHelper::AddTimeRangeSelectorBlock(
 
 													  dialog,
 													  form,
@@ -968,13 +968,13 @@ void NewGeneManageVGs::on_pushButton_refresh_vg_clicked()
 
 		if (valid)
 		{
-			valid = ImportDialogHelper::ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
+			valid = DialogHelper::ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
 		}
 		if (valid)
 		{
 			if (uoa.time_granularity != TIME_GRANULARITY__NONE)
 			{
-				valid = ImportDialogHelper::ValidateTimeRangeBlock(
+				valid = DialogHelper::ValidateTimeRangeBlock(
 
 																   dialog,
 																   form,

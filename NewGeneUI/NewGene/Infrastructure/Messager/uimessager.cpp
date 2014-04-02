@@ -17,7 +17,7 @@ bool UIMessager::ManagersInitialized = false;
 int UIMessager::next_messager_id = 1;
 
 UIMessager::UIMessager(QObject *parent) :
-    QObject(parent)
+	QObject(parent)
   , do_not_handle_messages_on_destruction(false)
   , mode(NORMAL)
   , singleShotActive(false)
@@ -256,7 +256,7 @@ bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg_title, std:
 int UIMessagerOutputProject::ShowOptionMessageBox(std::string msg_title, std::string msg_question, std::vector<WidgetInstanceIdentifier> option_list)
 {
 	int selection = -1;
-	QMetaObject::invokeMethod(get(), "OptionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( int, yes ), Q_ARG( STD_STRING, msg_title ), Q_ARG( STD_STRING, msg_question ), Q_ARG( STD_VECTOR_WIDGETIDENTIFIER, option_list ));
+	QMetaObject::invokeMethod(get(), "OptionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( int, selection ), Q_ARG( STD_STRING, msg_title ), Q_ARG( STD_STRING, msg_question ), Q_ARG( STD_VECTOR_WIDGETIDENTIFIER, option_list ));
 	return selection;
 }
 

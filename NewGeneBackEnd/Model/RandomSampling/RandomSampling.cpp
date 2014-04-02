@@ -1408,6 +1408,7 @@ BranchOutputRow::~BranchOutputRow()
 {
 }
 
+#ifdef _DEBUG
 void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys)
 {
 	int index = 0;
@@ -1656,3 +1657,5 @@ void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves)
 	});
 	sdata += "</LEAVES>";
 }
+
+#endif

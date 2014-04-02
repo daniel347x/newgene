@@ -280,7 +280,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 
 	QVBoxLayout formTimeRangeGranularitySelection;
 	QList<QRadioButton *> radioButtonsTimeRangeGranularity;
-	ImportDialogHelper::AddTimeRangeGranularitySelectionBlock(dialog, form, formTimeRangeGranularitySelection, radioButtonsTimeRangeGranularity);
+	DialogHelper::AddTimeRangeGranularitySelectionBlock(dialog, form, formTimeRangeGranularitySelection, radioButtonsTimeRangeGranularity);
 
 	QWidget UoaConstructionWidget;
 	QVBoxLayout formOverall;
@@ -289,7 +289,7 @@ void NewGeneManageUOAs::on_pushButton_createUOA_clicked()
 	QVBoxLayout formConstructionDivider;
 	QListView * lhs = nullptr;
 	QListView * rhs = nullptr;
-	ImportDialogHelper::AddUoaCreationBlock(dialog, form, UoaConstructionWidget, formOverall, UoaConstructionPanes, formConstructionPanes, formConstructionDivider, lhs, rhs, dmu_categories);
+	DialogHelper::AddUoaCreationBlock(dialog, form, UoaConstructionWidget, formOverall, UoaConstructionPanes, formConstructionPanes, formConstructionDivider, lhs, rhs, dmu_categories);
 
 	if (!lhs || !rhs)
 	{

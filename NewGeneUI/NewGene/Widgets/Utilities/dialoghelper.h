@@ -12,7 +12,7 @@
 #include <QListView>
 #include "../../../../NewGeneBackEnd/Utilities/WidgetIdentifier.h"
 
-namespace ImportDialogHelper
+namespace DialogHelper
 {
 
 	void AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBoxLayout & formFileSelection, QWidget & FileChooserWidget, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings);

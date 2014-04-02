@@ -3,6 +3,12 @@
 #include "../../Widgets/newgenewidget.h"
 #include "newgenemainwindow.h"
 #include "newgenegenerateoutput.h"
+#include "../../Widgets/Utilities/dialoghelper.h"
+
+#include <QFormLayout>
+#include <QLabel>
+#include <QDialogButtonBox>
+#include <QStandardItemModel>
 
 UIOutputProject::UIOutputProject(std::shared_ptr<UIOutputProjectSettings> const & project_settings,
 				std::shared_ptr<UIOutputModelSettings> const & model_settings,
@@ -43,7 +49,7 @@ bool UIOutputProject::QuestionMessageBox(STD_STRING msg_title, STD_STRING msg_te
 int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_question, STD_VECTOR_WIDGETIDENTIFIER option_list)
 {
 
-	QDialog dialog(this);
+	QDialog dialog;
 	QFormLayout form(&dialog);
 	form.addRow(new QLabel(msg_title.c_str()));
 
@@ -52,7 +58,7 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 	QWidget VgConstructionPanes;
 	QHBoxLayout formConstructionPane;
 	QListView * listpane = nullptr;
-	ImportDialogHelper::AddVgCreationBlock(dialog, form, VgConstructionWidget, formOverall, VgConstructionPanes, formConstructionPane, listpane, msg_question, option_list);
+	DialogHelper::AddTopLevelVariableGroupChooserBlock(dialog, form, VgConstructionWidget, formOverall, VgConstructionPanes, formConstructionPane, listpane, msg_question, option_list);
 
 	if (!listpane)
 	{
@@ -60,7 +66,7 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 		QMessageBox msgBox;
 		msgBox.setText( msg.str().c_str() );
 		msgBox.exec();
-		return;
+		return -1;
 	}
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
@@ -124,7 +130,10 @@ int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_quest
 		return -1;
 	}
 
-	auto const found = option_list.find(vg_to_use);
+	auto const found = std::find_if(option_list.cbegin(), option_list.cend(), [&](WidgetInstanceIdentifier const & test)
+	{
+		return test.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, vg_to_use);
+	});
 	if (found == option_list.cend())
 	{
 		boost::format msg("Selected variable group cannot be found.");

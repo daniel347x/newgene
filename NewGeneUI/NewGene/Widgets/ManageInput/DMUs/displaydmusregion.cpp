@@ -498,11 +498,11 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 
 	QList<QLineEdit *> fieldsFileChooser;
 	std::vector<std::string> const & fileChooserStrings { "Choose comma-delimited file", "Choose DMU comma-delimited data file location", "", "" };
-	ImportDialogHelper::AddFileChooserBlock(dialog, form, formFileSelection, FileChooserWidget, fieldsFileChooser, fileChooserStrings);
+	DialogHelper::AddFileChooserBlock(dialog, form, formFileSelection, FileChooserWidget, fieldsFileChooser, fileChooserStrings);
 
 	//QList<QLineEdit *> fieldsTimeRange;
 	//QList<QRadioButton *> radioButtonsTimeRange;
-	//ImportDialogHelper::AddTimeRangeSelectorBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange);
+	//DialogHelper::AddTimeRangeSelectorBlock(dialog, form, fieldsTimeRange, radioButtonsTimeRange);
 
 	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
@@ -576,11 +576,11 @@ void DisplayDMUsRegion::on_pushButton_refresh_dmu_members_from_file_clicked()
 		// Factored validation
 		if (valid)
 		{
-			valid = ImportDialogHelper::ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
+			valid = DialogHelper::ValidateFileChooserBlock(fieldsFileChooser, dataFileChooser, errorMsg);
 		}
 		//if (valid)
 		//{
-		//	valid = ImportDialogHelper::ValidateTimeRangeBlock(fieldsTimeRange, radioButtonsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
+		//	valid = DialogHelper::ValidateTimeRangeBlock(fieldsTimeRange, radioButtonsTimeRange, dataTimeRange, timeRangeMode, errorMsg);
 		//}
 
 		if (!valid)

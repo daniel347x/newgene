@@ -24,7 +24,7 @@
 
 #include <set>
 
-void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBoxLayout & formFileSelection, QWidget & FileChooserWidget, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
+void DialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & form, QBoxLayout & formFileSelection, QWidget & FileChooserWidget, QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> const & fileChooserStrings)
 {
 
 	FileChooserWidget.setLayout(&formFileSelection);
@@ -54,7 +54,7 @@ void ImportDialogHelper::AddFileChooserBlock(QDialog & dialog, QFormLayout & for
 
 }
 
-bool ImportDialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> & dataFileChooser, std::string & errorMsg)
+bool DialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFileChooser, std::vector<std::string> & dataFileChooser, std::string & errorMsg)
 {
 
 	bool valid = true;
@@ -91,7 +91,7 @@ bool ImportDialogHelper::ValidateFileChooserBlock(QList<QLineEdit *> & fieldsFil
 
 }
 
-void ImportDialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog, QFormLayout & form, QVBoxLayout & formTimeRangeGranularitySelection, QList<QRadioButton *> & radioButtonsTimeRangeGranularity)
+void DialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog, QFormLayout & form, QVBoxLayout & formTimeRangeGranularitySelection, QList<QRadioButton *> & radioButtonsTimeRangeGranularity)
 {
 
 	// Time range RADIO BUTTONS
@@ -114,7 +114,7 @@ void ImportDialogHelper::AddTimeRangeGranularitySelectionBlock(QDialog & dialog,
 
 }
 
-void ImportDialogHelper::AddTimeRangeSelectorBlock(
+void DialogHelper::AddTimeRangeSelectorBlock(
 
 												   QDialog & dialog,
 												   QFormLayout & form,
@@ -476,7 +476,7 @@ void ImportDialogHelper::AddTimeRangeSelectorBlock(
 
 }
 
-bool ImportDialogHelper::ValidateTimeRangeBlock
+bool DialogHelper::ValidateTimeRangeBlock
 (
 		QDialog & dialog,
 		QFormLayout & form,
@@ -831,7 +831,7 @@ bool ImportDialogHelper::ValidateTimeRangeBlock
 
 }
 
-void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories)
+void DialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & UoaConstructionWidget, QVBoxLayout & formOverall, QWidget & UoaConstructionPanes, QHBoxLayout & formConstructionPanes, QVBoxLayout & formConstructionDivider, QListView *& lhs, QListView *& rhs, WidgetInstanceIdentifiers const & dmu_categories)
 {
 
 	QString labelTitle = QString("Define the DMU categories for the new Unit of Analysis:");
@@ -1011,7 +1011,7 @@ void ImportDialogHelper::AddUoaCreationBlock(QDialog & dialog, QFormLayout & for
 
 }
 
-void ImportDialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, WidgetInstanceIdentifiers const & uoas)
+void DialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, WidgetInstanceIdentifiers const & uoas)
 {
 
 	QString labelTitle = QString("Choose the unit of analysis:");
@@ -1066,7 +1066,7 @@ void ImportDialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form
 
 }
 
-void ImportDialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, std::string const & dlgQuestion, std::vector<WidgetInstanceIdentifier> const & vg_list)
+void DialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, std::string const & dlgQuestion, std::vector<WidgetInstanceIdentifier> const & vg_list)
 {
 
 	QString labelQuestion = QString(dlgQuestion.c_str());
@@ -1102,7 +1102,7 @@ void ImportDialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, 
 		{
 
 			QStandardItem * item = new QStandardItem();
-			std::string text = Table_VG_Identifier::GetVgDisplayText(vg);
+			std::string text = Table_VG_CATEGORY::GetVgDisplayText(vg);
 			item->setText(text.c_str());
 			item->setEditable(false);
 			item->setCheckable(false);
