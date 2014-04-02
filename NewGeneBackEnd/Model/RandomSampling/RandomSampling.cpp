@@ -524,11 +524,14 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						// (This active leaf may also have been called previously to set other top-level variable group rows.)
 						leaf.other_top_level_indices_into_raw_data[variable_group_number] = timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number];
 
-						std::string sdataleaf;
-						SpitLeaf(sdataleaf, leaf);
+						if (false)
+						{
+							std::string sdataleaf;
+							SpitLeaf(sdataleaf, leaf);
 
-						std::vector<std::string> sdataall;
-						SpitAllWeightings(sdataall, *this, true);
+							std::vector<std::string> sdataall;
+							SpitAllWeightings(sdataall, *this, true);
+						}
 
 						added = true;
 

@@ -21582,6 +21582,13 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						return;
 					}
 
+					if (true)
+					{
+						std::vector<std::string> sdataall;
+						SpitAllWeightings(sdataall, allWeightings, true);
+						int m = 0;
+					}
+
 					first = true;
 
 					// First, the branch primary keys
