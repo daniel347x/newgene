@@ -21584,6 +21584,15 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 					if (true)
 					{
+						std::string thebranch;
+						SpitBranch(thebranch, branch);
+
+						std::string theleaves;
+						SpitLeaves(theleaves, outputRow.primary_leaves_cache);
+
+						std::string therow;
+						SpitOutputRow(therow, outputRow);
+
 						std::vector<std::string> sdataall;
 						SpitAllWeightings(sdataall, allWeightings, true);
 						int m = 0;

@@ -1119,6 +1119,8 @@ void DialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormL
 
 		listpane->setModel(model);
 
+		listpane->clearSelection();
+
 	}
 
 }
