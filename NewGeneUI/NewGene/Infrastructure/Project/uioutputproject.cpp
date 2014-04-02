@@ -42,13 +42,100 @@ bool UIOutputProject::QuestionMessageBox(STD_STRING msg_title, STD_STRING msg_te
 
 int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_question, STD_VECTOR_WIDGETIDENTIFIER option_list)
 {
-	QMessageBox::StandardButton reply;
-	reply = QMessageBox::question(nullptr, QString(msg_title.c_str()), QString(msg_text.c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
-	if (reply == QMessageBox::Yes)
+
+	QDialog dialog(this);
+	QFormLayout form(&dialog);
+	form.addRow(new QLabel(msg_title.c_str()));
+
+	QWidget VgConstructionWidget;
+	QVBoxLayout formOverall;
+	QWidget VgConstructionPanes;
+	QHBoxLayout formConstructionPane;
+	QListView * listpane = nullptr;
+	ImportDialogHelper::AddVgCreationBlock(dialog, form, VgConstructionWidget, formOverall, VgConstructionPanes, formConstructionPane, listpane, msg_question, option_list);
+
+	if (!listpane)
 	{
-		return true;
+		boost::format msg("Unable to create \"Choose top-level variable group\" dialog.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return;
 	}
-	return false;
+
+	// Add some standard buttons (Cancel/Ok) at the bottom of the dialog
+	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
+	form.addRow(&buttonBox);
+
+	WidgetInstanceIdentifier vg_to_use;
+
+	QObject::connect(&buttonBox, SIGNAL(rejected()), &dialog, SLOT(reject()));
+	QObject::connect(&buttonBox, &QDialogButtonBox::accepted, [&]()
+	{
+
+		std::string errorMsg;
+
+		bool valid = true;
+
+		if (valid)
+		{
+
+			// retrieve the VG to use as the primary, top-level VG
+			QStandardItemModel * listpaneModel = static_cast<QStandardItemModel*>(listpane->model());
+			if (listpaneModel == nullptr)
+			{
+				boost::format msg("Invalid list view items in \"Select VG to use as Primary\" popup.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			QItemSelectionModel * listpane_selectionModel = listpane->selectionModel();
+			if (listpane_selectionModel == nullptr)
+			{
+				boost::format msg("Invalid selection in Selct Variable Group popup.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			QModelIndex selectedIndex = listpane_selectionModel->currentIndex();
+			if (!selectedIndex.isValid())
+			{
+				boost::format msg("A variable group must be selected.");
+				QMessageBox msgBox;
+				msgBox.setText( msg.str().c_str() );
+				msgBox.exec();
+				return false;
+			}
+
+			QVariant vg_variant = listpaneModel->item(selectedIndex.row())->data();
+			vg_to_use = vg_variant.value<WidgetInstanceIdentifier>();
+
+			dialog.accept();
+		}
+
+	});
+
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return -1;
+	}
+
+	auto const found = option_list.find(vg_to_use);
+	if (found == option_list.cend())
+	{
+		boost::format msg("Selected variable group cannot be found.");
+		QMessageBox msgBox;
+		msgBox.setText( msg.str().c_str() );
+		msgBox.exec();
+		return -1;
+	}
+
+	return found - option_list.cbegin();
+
 }
 
 bool UIOutputProject::is_model_equivalent(UIMessager & messager, UIOutputModel * model_)

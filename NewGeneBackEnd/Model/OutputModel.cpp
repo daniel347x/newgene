@@ -13124,27 +13124,17 @@ void OutputModel::OutputGenerator::Prepare()
 		{
 			if (false)
 			{
-				std::vector<std::string> variableGroupOptions;
+				std::vector<WidgetInstanceIdentifier> variableGroupOptions;
 				std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
 				{
-					WidgetInstanceIdentifier const & vg = vg_to_selected.first;
-					boost::format msg("%1%%2%");
-					std::string desc;
-					if (vg.longhand && !vg.longhand->empty())
-					{
-						desc = " (";
-						desc += *vg.longhand;
-						desc += ")";
-					}
-					msg % *vg.code % desc;
-					variableGroupOptions.push_back(msg.str());
+					variableGroupOptions.push_back(vg_to_selected.first);
 				});
 				boost::format msgTitle("Select top-level variable group");
-				boost::format msgQuestion("Available top-level variable groups:");
+				boost::format msgQuestion("There are multiple variable groups with the same set of unit of analysis fields that might be used as the \"primary\" variable group for the run.  Please select one to use as the primary variable group for this run:");
 
 				// 0-based
-				//top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
-				top_level_vg_index = 0;
+				top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
+				//top_level_vg_index = 0;
 			}
 			else
 			{

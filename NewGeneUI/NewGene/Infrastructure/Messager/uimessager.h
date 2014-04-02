@@ -178,7 +178,7 @@ class UIMessagerOutputProject : public UIMessager
 
 		void ShowMessageBox(std::string, bool block = false);
 		bool ShowQuestionMessageBox(std::string, std::string); // title, question text
-		int  ShowOptionMessageBox(std::string, std::string, std::vector<std::string>); // title, question, option list
+		int  ShowOptionMessageBox(std::string, std::string, std::vector<WidgetInstanceIdentifier>); // title, question, option list
 		virtual void StartProgressBar(std::int64_t const min_value, std::int64_t const max_value);
 		virtual void EndProgressBar();
 		virtual void UpdateProgressBarValue(std::int64_t const);

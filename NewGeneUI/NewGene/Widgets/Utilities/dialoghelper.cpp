@@ -19,6 +19,8 @@
 #include "../../../../NewGeneBackEnd/Utilities/TimeRangeHelper.h"
 #include "../../../../NewGeneBackEnd/Model/InputModel.h"
 #include "../../../../NewGeneBackEnd/Model/Tables/TableInstances/DMU.h"
+#include "../../../../NewGeneBackEnd/Model/Tables/TableInstances/UOA.h"
+#include "../../../../NewGeneBackEnd/Model/Tables/TableInstances/VariableGroup.h"
 
 #include <set>
 
@@ -1064,20 +1066,31 @@ void ImportDialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form
 
 }
 
-void ImportDialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, std::vector<std::string> const & vg_list_as_strings)
+void ImportDialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, std::string const & dlgQuestion, std::vector<WidgetInstanceIdentifier> const & vg_list)
 {
 
-	QString labelTitle = QString("Choose the unit of analysis:");
-	QLabel * title = new QLabel(labelTitle, &dialog);
+	QString labelQuestion = QString(dlgQuestion.c_str());
+	QLabel * question = new QLabel(labelQuestion, &dialog);
 
+	// The parent of the list view is a widget, not a layout
 	listpane = new QListView(&VgConstructionPanes);
 
+	// But the list view gets added to the layout, not to its parent widget
 	formConstructionPane.addWidget(listpane);
 
+	// Now we set the layout of the parent widget
 	VgConstructionPanes.setLayout(&formConstructionPane);
-	formOverall.addWidget(title);
+
+	// Now we start adding elements to the overall (high-level) form layout
+	formOverall.addWidget(question);
+
+	// ... this includes adding the parent widget of the list view that has the layout (with the list view already added) as its layout
 	formOverall.addWidget(&VgConstructionPanes);
+
+	// The high-level form layout must be the layout of some widget, which is the high-level widget
 	VgConstructionWidget.setLayout(&formOverall);
+
+	// The entire dialog has a single form layout as its layout.  Add the high-level widget to the dialog's form layout.
 	form.addRow(&VgConstructionWidget);
 
 	{
@@ -1085,30 +1098,21 @@ void ImportDialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, 
 		QStandardItemModel * model = new QStandardItemModel(listpane);
 
 		int index = 0;
-		std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
+		std::for_each(vg_list.cbegin(), vg_list.cend(), [&](WidgetInstanceIdentifier const & vg)
 		{
-			if (uoa.uuid && !uoa.uuid->empty() && uoa.code && !uoa.code->empty())
-			{
 
-				if (!uoa.foreign_key_identifiers)
-				{
-					boost::format msg("Missing foreign_key_identifiers in UOA object.");
-					throw NewGeneException() << newgene_error_description(msg.str());
-				}
+			QStandardItem * item = new QStandardItem();
+			std::string text = Table_VG_Identifier::GetVgDisplayText(vg);
+			item->setText(text.c_str());
+			item->setEditable(false);
+			item->setCheckable(false);
+			QVariant v;
+			v.setValue(vg);
+			item->setData(v);
+			model->setItem( index, item );
 
-				QStandardItem * item = new QStandardItem();
-				std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa, *uoa.foreign_key_identifiers);
-				item->setText(text.c_str());
-				item->setEditable(false);
-				item->setCheckable(false);
-				QVariant v;
-				v.setValue(uoa);
-				item->setData(v);
-				model->setItem( index, item );
+			++index;
 
-				++index;
-
-			}
 		});
 
 		model->sort(0);
