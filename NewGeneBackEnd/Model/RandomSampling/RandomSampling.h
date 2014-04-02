@@ -882,8 +882,29 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
 void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup);
 void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitBranch(std::string & sdata, Branch const & branch);
-void SpitLeaves(std::string & sdata, std::vector<Leaf> const & leaves);
-void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves);
+//void SpitLeaves(std::string & sdata, std::vector<Leaf> const & leaves);
+//void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves);
+
+template< template<typename, typename> class T, typename A >
+void SpitLeaves(std::string & sdata, T<Leaf, A> const & leaves)
+{
+	sdata += "<LEAVES>";
+	int index = 0;
+	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
+	{
+		sdata += "<LEAF>";
+		sdata += "<LEAF_NUMBER>";
+		sdata += boost::lexical_cast<std::string>(index);
+		sdata += "</LEAF_NUMBER>";
+		sdata += "<LEAF_DATA>";
+		SpitLeaf(sdata, leaf);
+		sdata += "</LEAF_DATA>";
+		++index;
+		sdata += "</LEAF>";
+	});
+	sdata += "</LEAVES>";
+}
+
 //void SpitChildHit(std::string & sdata, std::map<int, std::map<int, std::int64_t>>);
 #endif
 

@@ -20369,16 +20369,14 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								Leaf leaf(dmus_leaf);
 								Branch branch(dmus_branch);
 
+								// Set the secondary data index into the above cache for this non-primary top-level variable group
+								// so that it can be set in the corresponding leaf already present for the branch
+								leaf.other_top_level_indices_into_raw_data[variable_group_number] = sorting_row_of_data.rowid;
+
 								// Add the secondary data for this non-primary top-level variable group to the cache
 								allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
 
 								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode);
-
-								if (added)
-								{
-									// Set the secondary data index into the above cache for this non-primary top-level variable group
-									leaf.other_top_level_indices_into_raw_data[variable_group_number] = sorting_row_of_data.rowid;
-								}
 
 							}
 							break;
