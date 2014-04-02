@@ -887,7 +887,7 @@ void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitBranch(std::string & sdata, Branch const & branch);
 void SpitWeighting(std::string & sdata, Weighting const & weighting);
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
-void SpitAllWeightings(std::string & sdata, AllWeightings const & allWeightings);
+void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings);
 template< template<typename...> class T, typename... TX>
 void SpitLeaves(std::string & sdata, T<Leaf, TX...> const & leaves)
 {
