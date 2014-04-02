@@ -21591,8 +21591,13 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						theleaves += "<LEAVES>";
 						std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 						{
+							theleaves += "<LEAF_PLUS_INDEX>";
+							theleaves += "<LEAF_INDEX>";
+							theleaves += boost::lexical_cast<std::string>(leafIndex);
+							theleaves += "</LEAF_INDEX>";
 							Leaf & leaf = branch.leaves_cache[leafIndex];
 							SpitLeaf(theleaves, leaf);
+							theleaves += "</LEAF_PLUS_INDEX>";
 						});
 						theleaves += "</LEAVES>";
 
