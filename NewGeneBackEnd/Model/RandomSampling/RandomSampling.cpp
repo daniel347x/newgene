@@ -528,12 +528,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						SpitLeaf(sdataleaf, leaf);
 
 						std::vector<std::string> sdataall;
-						SpitAllWeightings(sdataall, *this);
-						size_t sz = sdataall.size();
-						std::for_each(sdataall.cbegin(), sdataall.cend(), [&](std::string const & thestring)
-						{
-							std::string const & thestring_ = thestring;
-						});
+						SpitAllWeightings(sdataall, *this, true);
 
 						added = true;
 
@@ -1665,8 +1660,14 @@ void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 	sdata += "</DATETIME_END>";
 }
 
-void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings)
+void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file)
 {
+
+	std::fstream file_;
+	if (to_file)
+	{
+		file_.open("all_weightings.xml", std::ios::trunc);
+	}
 
 	sdata_.push_back(std::string());
 
@@ -1752,6 +1753,15 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	*sdata += "</WEIGHTING>";
 
 	*sdata += "</ALL_WEIGHTINGS>";
+
+	if (to_file)
+	{
+		std::for_each(sdata_.cbegin(), sdata_.cend(), [&](std::string const & sdata__)
+		{
+			file_ << sdata__;
+		});
+		file_.close();
+	}
 
 }
 
