@@ -21588,7 +21588,13 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						SpitBranch(thebranch, branch);
 
 						std::string theleaves;
-						SpitLeaves(theleaves, outputRow.primary_leaves_cache);
+						theleaves += "<LEAVES>";
+						std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+						{
+							Leaf & leaf = branch.leaves_cache[leafIndex];
+							SpitLeaf(theleaves, leaf);
+						});
+						theleaves += "</LEAVES>";
 
 						std::string therow;
 						SpitOutputRow(therow, outputRow);
