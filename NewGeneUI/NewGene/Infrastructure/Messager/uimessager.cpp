@@ -253,6 +253,13 @@ bool UIMessagerOutputProject::ShowQuestionMessageBox(std::string msg_title, std:
 	return yes;
 }
 
+int UIMessagerOutputProject::ShowOptionMessageBox(std::string msg_title, std::string msg_question, std::vector<std::string> option_list)
+{
+	int selection = -1;
+	QMetaObject::invokeMethod(get(), "OptionMessageBox", Qt::BlockingQueuedConnection, Q_RETURN_ARG( int, yes ), Q_ARG( STD_STRING, msg_title ), Q_ARG( STD_STRING, msg_question ), Q_ARG( STD_VECTOR_STRING, option_list ));
+	return selection;
+}
+
 void UIMessagerOutputProject::StartProgressBar(std::int64_t const min_value, std::int64_t const max_value)
 {
 	emit SignalStartProgressBar(current_messager_id, (STD_INT64)min_value, (STD_INT64)max_value);

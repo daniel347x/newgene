@@ -2,6 +2,7 @@
 #define GLOBALS_H
 
 #include <string>
+#include <vector>
 
 #if 0
 //#include <boost/predef.h> // not until Boost 1.55
@@ -55,6 +56,7 @@
 
 typedef std::string STD_STRING;
 typedef std::int64_t STD_INT64;
+typedef std::vector<std::string> STD_VECTOR_STRING;
 
 #include "../../NewGeneBackEnd/globals.h"
 #include <QMessageBox>

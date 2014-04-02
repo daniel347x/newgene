@@ -1,4 +1,4 @@
-#include "importdialoghelper.h"
+#include "dialoghelper.h"
 
 #ifndef Q_MOC_RUN
 #	include <boost/filesystem.hpp>

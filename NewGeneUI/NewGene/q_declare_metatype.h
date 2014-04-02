@@ -22,6 +22,7 @@ typedef std::vector<WidgetChangeMessage> WidgetChangeMessages;
 
 Q_DECLARE_METATYPE(STD_STRING)
 Q_DECLARE_METATYPE(STD_INT64)
+Q_DECLARE_METATYPE(STD_VECTOR_STRING)
 
 Q_DECLARE_METATYPE(WidgetChangeMessage)
 Q_DECLARE_METATYPE(WidgetChangeMessages)

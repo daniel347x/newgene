@@ -147,7 +147,7 @@ SOURCES += main.cpp\
 	Widgets/ManageInput/VGs/newgenemanagevgs.cpp \
 	Widgets/ManageInput/DMUs/displaydmusregion.cpp \
 	Widgets/Utilities/qsortfilterproxymodel_numberslast.cpp \
-	Widgets/Utilities/importdialoghelper.cpp
+    Widgets/Utilities/dialoghelper.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -266,9 +266,9 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/ManageInput/DMUs/displaydmusregion.h \
 	Infrastructure/UIAction/dmumanagement.h \
 	Widgets/Utilities/qsortfilterproxymodel_numberslast.h \
-	Widgets/Utilities/importdialoghelper.h \
 	Infrastructure/UIAction/uoamanagement.h \
-	Infrastructure/UIAction/vgmanagement.h
+	Infrastructure/UIAction/vgmanagement.h \
+    Widgets/Utilities/dialoghelper.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \

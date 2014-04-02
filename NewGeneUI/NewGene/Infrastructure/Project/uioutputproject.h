@@ -38,7 +38,8 @@ class UIOutputProject : public QObject, public UIProject<OutputProject, UIOutput
 		void DataChangeMessageSlot(WidgetChangeMessages);
 		void SignalMessageBox(STD_STRING);
 		bool QuestionMessageBox(STD_STRING, STD_STRING); // title, question text
-
+		int OptionMessageBox(STD_STRING msg_title, STD_STRING msg_question, STD_VECTOR_STRING option_list);
+	
 	public:
 
 		QObject * mainWindowObject;

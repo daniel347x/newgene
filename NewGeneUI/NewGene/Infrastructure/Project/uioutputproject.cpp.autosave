@@ -43,7 +43,7 @@ bool UIOutputProject::QuestionMessageBox(STD_STRING msg_title, STD_STRING msg_te
 int UIOutputProject::OptionMessageBox(STD_STRING msg_title, STD_STRING msg_question, STD_VECTOR_STRING option_list)
 {
 	QMessageBox::StandardButton reply;
-	reply = QMessageBox::question(nullptr, QString(msg_title.c_str()), QString(msg_text.c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
+tas	reply = QMessageBox::question(nullptr, QString(msg_title.c_str()), QString(msg_text.c_str()), QMessageBox::StandardButtons(QMessageBox::Yes | QMessageBox::No));
 	if (reply == QMessageBox::Yes)
 	{
 		return true;
