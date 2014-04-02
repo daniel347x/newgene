@@ -503,10 +503,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.PrepareRandomSamples(K);
 		if (failed || CheckCancelled()) return;
 
-		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.  See comment just above.
+		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
 		if (failed || CheckCancelled()) return;
 
-		if (true)
+		if (false)
 		{
 
 			// This is only necessary for debugging
@@ -523,6 +523,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		}
 
 		RandomSamplerFillDataForChildGroups(allWeightings);
+		if (failed || CheckCancelled()) return;
+
+		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
 		if (failed || CheckCancelled()) return;
 
 		messager.AppendKadStatusText("Writing results to disk...", this);
