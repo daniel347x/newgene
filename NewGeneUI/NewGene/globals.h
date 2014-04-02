@@ -70,6 +70,8 @@ typedef std::vector<std::string> STD_VECTOR_STRING;
 #endif
 #include "Infrastructure/Messager/uimessager.h"
 
+typedef std::vector<WidgetInstanceIdentifier> STD_VECTOR_WIDGETIDENTIFIER;
+
 class NewGeneMainWindow;
 class UIMessager;
 

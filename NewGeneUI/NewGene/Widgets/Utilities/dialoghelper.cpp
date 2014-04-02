@@ -1063,3 +1063,58 @@ void ImportDialogHelper::AddVgCreationBlock(QDialog & dialog, QFormLayout & form
 	}
 
 }
+
+void ImportDialogHelper::AddTopLevelVariableGroupChooserBlock(QDialog & dialog, QFormLayout & form, QWidget & VgConstructionWidget, QVBoxLayout & formOverall, QWidget & VgConstructionPanes, QHBoxLayout & formConstructionPane, QListView *& listpane, std::vector<std::string> const & vg_list_as_strings)
+{
+
+	QString labelTitle = QString("Choose the unit of analysis:");
+	QLabel * title = new QLabel(labelTitle, &dialog);
+
+	listpane = new QListView(&VgConstructionPanes);
+
+	formConstructionPane.addWidget(listpane);
+
+	VgConstructionPanes.setLayout(&formConstructionPane);
+	formOverall.addWidget(title);
+	formOverall.addWidget(&VgConstructionPanes);
+	VgConstructionWidget.setLayout(&formOverall);
+	form.addRow(&VgConstructionWidget);
+
+	{
+
+		QStandardItemModel * model = new QStandardItemModel(listpane);
+
+		int index = 0;
+		std::for_each(uoas.cbegin(), uoas.cend(), [&](WidgetInstanceIdentifier const & uoa)
+		{
+			if (uoa.uuid && !uoa.uuid->empty() && uoa.code && !uoa.code->empty())
+			{
+
+				if (!uoa.foreign_key_identifiers)
+				{
+					boost::format msg("Missing foreign_key_identifiers in UOA object.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				QStandardItem * item = new QStandardItem();
+				std::string text = Table_UOA_Identifier::GetUoaCategoryDisplayText(uoa, *uoa.foreign_key_identifiers);
+				item->setText(text.c_str());
+				item->setEditable(false);
+				item->setCheckable(false);
+				QVariant v;
+				v.setValue(uoa);
+				item->setData(v);
+				model->setItem( index, item );
+
+				++index;
+
+			}
+		});
+
+		model->sort(0);
+
+		listpane->setModel(model);
+
+	}
+
+}

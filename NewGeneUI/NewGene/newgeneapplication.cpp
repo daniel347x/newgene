@@ -13,6 +13,7 @@ NewGeneApplication::NewGeneApplication( int argc, char * argv[] ) :
 	qRegisterMetaType<STD_STRING>("STD_STRING");
 	qRegisterMetaType<STD_INT64>("STD_INT64");
 	qRegisterMetaType<STD_INT64>("STD_VECTOR_STRING");
+	qRegisterMetaType<STD_INT64>("STD_VECTOR_WIDGETIDENTIFIER");
 
 	qRegisterMetaType<WidgetChangeMessage>("WidgetChangeMessage");
 	qRegisterMetaType<WidgetChangeMessages>("WidgetChangeMessages");

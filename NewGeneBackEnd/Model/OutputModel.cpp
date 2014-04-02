@@ -411,6 +411,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	if (!boost::filesystem::path(setting_path_to_kad_output).has_extension())
+	{
+		setting_path_to_kad_output = boost::filesystem::path(setting_path_to_kad_output).replace_extension("csv").string();
+	}
+
 	debug_sql_path = setting_path_to_kad_output;
 	debug_sql_path.replace_extension(".debugsql.txt");
 
