@@ -13122,7 +13122,7 @@ void OutputModel::OutputGenerator::Prepare()
 	{
 		if (random_sampling)
 		{
-			if (false)
+			if (true)
 			{
 				std::vector<WidgetInstanceIdentifier> variableGroupOptions;
 				std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
