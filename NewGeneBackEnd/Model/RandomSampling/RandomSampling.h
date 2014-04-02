@@ -885,11 +885,11 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
 void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup);
 void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitBranch(std::string & sdata, Branch const & branch);
-//void SpitLeaves(std::string & sdata, std::vector<Leaf> const & leaves);
-//void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves);
-
-template< template<typename, typename> class T, typename A >
-void SpitLeaves(std::string & sdata, T<Leaf, A> const & leaves)
+void SpitWeighting(std::string & sdata, Weighting const & weighting);
+void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
+void SpitAllWeightings(std::string & sdata, AllWeightings const & allWeightings);
+template< template<typename...> class T, typename... TX>
+void SpitLeaves(std::string & sdata, T<Leaf, TX...> const & leaves)
 {
 	sdata += "<LEAVES>";
 	int index = 0;

@@ -10,6 +10,7 @@
 #include <random>
 #include <functional>
 #include <list>
+#include "../../Utilities/TimeRangeHelper.h"
 
 AllWeightings::AllWeightings()
 : insert_random_sample_stmt(nullptr)
@@ -1617,45 +1618,116 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	sdata += branch.number_branch_combinations.str();
 	sdata += "</NUMBER_OF_LEAF_COMBINATIONS>";
 
+	sdata += "<WEIGHTING>";
+	SpitWeighting(sdata, branch.weighting);
+	sdata += "</WEIGHTING>";
+
 	sdata += "</BRANCH>";
 }
 
-//void SpitLeaves(std::string & sdata, std::vector<Leaf> const & leaves)
-//{
-//	sdata += "<LEAVES>";
-//	int index = 0;
-//	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
-//	{
-//		sdata += "<LEAF>";
-//		sdata += "<LEAF_NUMBER>";
-//		sdata += boost::lexical_cast<std::string>(index);
-//		sdata += "</LEAF_NUMBER>";
-//		sdata += "<LEAF_DATA>";
-//		SpitLeaf(sdata, leaf);
-//		sdata += "</LEAF_DATA>";
-//		++index;
-//		sdata += "</LEAF>";
-//	});
-//	sdata += "</LEAVES>";
-//}
-//
-//void SpitLeaves(std::string & sdata, std::set<Leaf> const & leaves)
-//{
-//	sdata += "<LEAVES>";
-//	int index = 0;
-//	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
-//	{
-//		sdata += "<LEAF>";
-//		sdata += "<LEAF_NUMBER>";
-//		sdata += boost::lexical_cast<std::string>(index);
-//		sdata += "</LEAF_NUMBER>";
-//		sdata += "<LEAF_DATA>";
-//		SpitLeaf(sdata, leaf);
-//		sdata += "</LEAF_DATA>";
-//		++index;
-//		sdata += "</LEAF>";
-//	});
-//	sdata += "</LEAVES>";
-//}
+void SpitWeighting(std::string & sdata, Weighting const & weighting)
+{
+	sdata += "<WEIGHTING_START>";
+	sdata += weighting.getWeightingRangeStart().str();
+	sdata += "</WEIGHTING_START>";
+	sdata += "<WEIGHTING_END>";
+	sdata += weighting.getWeightingRangeEnd().str();
+	sdata += "</WEIGHTING_END>";
+	sdata += "<WEIGHTING_VALUE>";
+	sdata += weighting.getWeighting().str();
+	sdata += "</WEIGHTING_VALUE>";
+}
+
+void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
+{
+	sdata += "<TIMESTAMP_START>";
+	sdata += boost::lexical_cast<std::string>(time_slice.getStart());
+	sdata += "</TIMESTAMP_START>";
+	sdata += "<TIMESTAMP_END>";
+	sdata += boost::lexical_cast<std::string>(time_slice.getEnd());
+	sdata += "</TIMESTAMP_END>";
+	sdata += "<DATETIME_START>";
+	sdata += TimeRange::convertTimestampToString(time_slice.getStart());
+	sdata += "</DATETIME_START>";
+	sdata += "<DATETIME_END>";
+	sdata += TimeRange::convertTimestampToString(time_slice.getEnd());
+	sdata += "</DATETIME_END>";
+}
+
+void SpitAllWeightings(std::string & sdata, AllWeightings const & allWeightings)
+{
+
+	sdata += "<DATA_CACHE_PRIMARY>";
+	SpitDataCache(sdata, allWeightings.dataCache);
+	sdata += "</DATA_CACHE_PRIMARY>";
+
+	sdata += "<DATA_CACHES_TOP_LEVEL_NON_PRIMARY>";
+	SpitDataCaches(sdata, allWeightings.otherTopLevelCache);
+	sdata += "</DATA_CACHES_TOP_LEVEL_NON_PRIMARY>";
+
+	sdata += "<DATA_CACHES_CHILDREN>";
+	SpitDataCaches(sdata, allWeightings.childCache);
+	sdata += "</DATA_CACHES_CHILDREN>";
+
+	sdata += "<TIME_SLICES>";
+	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
+	{
+		sdata += "<TIME_SLICE>";
+
+		TimeSlice const & the_slice = timeSlice.first;
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+
+		sdata += "<TIME>";
+		SpitTimeSlice(sdata, the_slice);
+		sdata += "</TIME>";
+
+		sdata += "<WEIGHTING>";
+		SpitWeighting(sdata, variableGroupTimeSliceData.weighting);
+		sdata += "</WEIGHTING>";
+
+		sdata += "<VARIABLE_GROUPS_BRANCHES_AND_LEAVES>";
+		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+		{
+			sdata += "<VARIABLE_GROUP_BRANCHES_AND_LEAVES>";
+
+			sdata += "<VARIABLE_GROUP_NUMBER>";
+			sdata += boost::lexical_cast<std::string>(variableGroupBranchesAndLeaves.variable_group_number);
+			sdata += "</VARIABLE_GROUP_NUMBER>";
+
+			sdata += "<WEIGHTING>";
+			SpitWeighting(sdata, variableGroupBranchesAndLeaves.weighting);
+			sdata += "</WEIGHTING>";
+
+			sdata += "<BRANCHES_AND_LEAVES>";
+			std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+			{
+				sdata += "<BRANCH_AND_LEAVES>";
+
+				sdata += "<BRANCH>";
+				SpitBranch(sdata, branch_and_leaves.first);
+				sdata += "</BRANCH>";
+
+				sdata += "<LEAVES>";
+				SpitLeaves(sdata, branch_and_leaves.second);
+				sdata += "</LEAVES>";
+
+				sdata += "</BRANCH_AND_LEAVES>";
+			});
+			sdata += "</BRANCHES_AND_LEAVES>";
+
+			sdata += "</VARIABLE_GROUP_BRANCHES_AND_LEAVES>";
+		});
+		sdata += "</VARIABLE_GROUPS_BRANCHES_AND_LEAVES>";
+
+		sdata += "</TIME_SLICE>";
+	});
+	sdata += "</TIME_SLICES>";
+
+	sdata += "<WEIGHTING>";
+	SpitWeighting(sdata, allWeightings.weighting);
+	sdata += "</WEIGHTING>";
+
+}
 
 #endif

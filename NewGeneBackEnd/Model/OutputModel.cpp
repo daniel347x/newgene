@@ -7080,8 +7080,6 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 					if (!datetimestart_text_colname.empty())
 					{
 						// Final results: The columns with text
-						std::string datetimestart_text;
-						std::string datetimeend_text;
 
 						boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
@@ -21072,6 +21070,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 							{
 								if (testMultiplicity != multiplicity)
 								{
+									++testMultiplicity;
 									return;
 								}
 								Leaf & leaf = branch.leaves_cache[leafIndex];
@@ -21643,6 +21642,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							{
 								if (testMultiplicity != multiplicity)
 								{
+									++testMultiplicity;
 									return;
 								}
 								Leaf & leaf = branch.leaves_cache[leafIndex];
