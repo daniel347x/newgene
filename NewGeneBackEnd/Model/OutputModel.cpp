@@ -13134,6 +13134,13 @@ void OutputModel::OutputGenerator::Prepare()
 
 				// 0-based
 				top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
+
+				if (top_level_vg_index == -1)
+				{
+					// user cancelled
+					failed = true;
+					return;
+				}
 				//top_level_vg_index = 0;
 			}
 			else
