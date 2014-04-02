@@ -21,7 +21,7 @@ typedef std::vector<DMUInstanceData> DMUInstanceDataVector;
 typedef DMUInstanceDataVector ChildDMUInstanceDataVector;
 typedef std::vector<SecondaryInstanceData> SecondaryInstanceDataVector;
 
-// Row ID -> secondary data for that row
+// Row ID -> secondary data for that row for a given (unspecified) leaf
 typedef std::map<std::int64_t, SecondaryInstanceDataVector> DataCache;
 
 class AllWeightings;
@@ -480,7 +480,9 @@ class BranchOutputRow
 			SaveCache();
 		}
 
-	//private: // for debugging convenience, make public; but be sure it builds when private
+#	ifdef _DEBUG
+	private: // for debugging convenience, make public; but be sure it builds when private
+#	endif
 	
 		// Index into the branch's Leaf set
 		std::set<int> primary_leaves;
@@ -590,11 +592,18 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Commented out for now
 		//mutable std::vector<BranchOutputRow> hits_consolidated; // After-the-fact: Merge identical hits across time units within this branch
 
+
+		// **************************************************************************************** //
+		// **************************************************************************************** //
 		// Indices into cached secondary data tables for child groups.
 		// 
 		// Overview:
 		//
-		// There is a single top-level primary variable group.
+		// There is a single top-level *primary* variable group,
+		// with 0, 1, or more top-level *non-primary* variable groups.
+		// (A "top-level" group is one whose UOA is a superset of all non-top-level VG's,
+		//  and equal to all other top-level VG's.  By "superset" is meant the DMU
+		//  columns - not the time range granularity.)
 		//
 		// Each branch corresponds to a single combination of specific primary key data values
 		// ... for those primary keys of multiplicity 1
@@ -602,9 +611,18 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Each leaf corresponds to a single combination of specific primary key data values
 		// ... for those primary keys of multiplicity greater than 1
 		// ... for the UOA corresponding to the primary top-level variable group.
-		// Each row of output data has one branch, and multiple leaves (one leaf per multiplicity).
+		// ... For the multiplicity = 1 case (i.e., K=1)), there will be a single output row
+		// ... for each branch which is represented by a single EMPTY leaf,
+		// ... because all DMU's exist in the branch.
+		// ... (This empty leaf will be empty only in terms of its DMU's.
+		// ...  It will still contain other leaf-related data that is independent of the number of
+		// ...  DMU's in the leaf - specifically, an index into *secondary* data.
+		// ...  This is equivalent to identifying a single arbitrary DMU as the DMU involved
+		// ...  in the K-ad, but with K=1.)
+		// Each row of output data has one branch, and multiple leaves (one leaf per multiplicity)
+		//     (but see exception above for the K=1 case).
 		// The set of leaves per row is stored across individual time unit entries within this branch
-		// ... (where duplicates can occur, because if the same row (i.e., combination of leaves)
+		// ... (where duplicates can occur in the branch, because if the same row (i.e., combination of leaves)
 		// ...  appears in multiple time unit entries in the same time slice,
 		// ...  that row will appear only once in the output for the time slice).
 		// Each leaf represents a single set of secondary column data.
@@ -616,7 +634,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ... Each row (or "hit") contains the value from the current (single) branch,
 		// ... ... and the values from two leaves (i.e., two pairs of countries, or 4 countries total).
 		//
-		// There can also be child variable groups.
+		// There can also be child variable groups.  These "children" include non-primary
+		// top-level variable groups.
 		//
 		// Each child variable group's UOA is a subset of the UOA of the primary variable group.
 		// The full set of primary keys for this child variable group's UOA includes a subset of 
@@ -628,19 +647,23 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Example: For the above UOA "MID, CTY, CTY" and K-ad "MID, CTY, CTY, CTY, CTY",
 		// ... a child group could have UOA "MID, CTY".
 		// For every row of output, this child group has four leaves, one for each country.
-		// ... (Multiple *sets* of leaves per row, as opposed to *one* *set* of leaves per row,
+		// ... (Multiple *sets* of leaves per row, as opposed to *one* **set** of leaves per row,
 		// ... is prohibited by data validation.  The latter would be a scenario such as
 		// ... primary UOA = "MID, MID, CTY, CTY" and child UOA = "MID, CTY", a case in which
-		// ... both MID and CTY have multiple sets of data for a single row - a prohibited case.)
-		// Each such child variable group leaf represents a single set of secondary column data.
+		// ... both MID and CTY have multiple sets of data for a single row -
+		// ... this is an example of the prohibited case.)
+		// Each such child variable group *leaf* represents a single set of the child's secondary column data,
+		// as well as the value of the leaf DMU's.
 		//
 		// The actual raw data for the SECONDARY columns - the data values themselves -
 		// ... are stored in the AllWeightings' "dataCache" (for primary top-level VG)
-		// ... and in the AllWeightings' "secondaryCache" (for non-primary top-level, and child, VG's).
+		// ... in the AllWeightings' "otherTopLevelCache" (for non-primary top-level VG's),
+		// ... and in the AllWeightings' "childCache" (for true child VG's).
 
 		// **************************************************************************************** //
 		// **************************************************************************************** //
-		// This data structure is a helper index that maps the *FULL* child DMU set
+		// With these comments in mind:
+		// The following data structure is a helper index that maps the *FULL* child DMU set
 		// (including the single child leaf, if any)
 		// representing an incoming row of data from a child variable group raw data table
 		// (including only child primary keys and selected child variables)
@@ -656,12 +679,25 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// *********************************************************************************** //
 		// Every branch ALREADY has a std::set<Leaf>,
 		// so we're already one-to-one with each branch.
-		// but it is NOT stored inside the branch itself.
+		// (To see this, track through the TimeSlices data structure,
+		//  which breaks the data first into branches, then into leaves.
+		//  Also, note that a set of leaves is a set of SPECIFIC DATA VALUES,
+		//  so it must be stored branch-by-branch.
+		//  Example: For UOA with DMU's "MID-CTY", and with K=2 on CTY:
+		//      Branch #1 (MID = 257): Leaves are CTY=2, CTY=20, CTY=220, ...
+		//      ... resulting in a set of many K-ads for this branch (each a single output row).
+		//      Branch #2 (MID = 37): Leaves are CTY=2, CTY=20, CTY=21 (this is just made up data)
+		//      ... resulting in a set of 3 K-ads for this branch (each a single output row).
+		//  The example makes clear that each branch contains a unique set of leaves.
 		// Therefore, we are "only" doubling the memory required 
-		// by using this cache.
+		// by using the following cache, which is stored within each branch
+		// (in addition to having the leaves stored inside the "timeSlices" data member
+		//  of the "AllWeightings" object, where the leaves are nonetheless broken down by branch.)
 		// *********************************************************************************** //
 		//
 		// Cache the leaves for this branch.  This is a CACHE only.
+		// The official location of the leaves are contained in the AllWeightings instance.
+		// This cache stores only the subset of leaves
 		mutable std::vector<Leaf> leaves_cache;
 		void CreateLeafCache(Leaves const & leaves) const
 		{
