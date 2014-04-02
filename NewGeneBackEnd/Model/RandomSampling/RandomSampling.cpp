@@ -1666,7 +1666,12 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	std::fstream file_;
 	if (to_file)
 	{
-		file_.open("all_weightings.xml", std::ios::trunc);
+		file_.open("all_weightings.xml", std::ofstream::out | std::ios::trunc);
+		if (!file_.is_open())
+		{
+			std::string theerr = strerror(errno);
+			int m = 0;
+		}
 	}
 
 	sdata_.push_back(std::string());
