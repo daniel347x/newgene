@@ -21585,7 +21585,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						return;
 					}
 
-					if (false)
+					if (false) // set to true when debugging
 					{
 						std::string thebranch;
 						SpitBranch(thebranch, branch);
@@ -21628,9 +21628,15 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						Leaf & leaf = branch.leaves_cache[leafIndex];
 
 						// For the case K = 1, there ARE no primary keys for this leaf.
-						// In the K = 1 case, the branch has one and only one leaf object with no primary keys,
-						// just a data lookup, and everything is guaranteed to be output from the branch in this case,
-						// and every output row has one leaf index, as well, pointing to this branch's single leaf.
+						// But this is still covered here, see comments starting next line.
+						// In the K = 1 case, the branch has one and only one leaf object with no primary keys
+						// (just a data lookup), and everything is guaranteed to be output from the *branch* in this case.
+						// But the branch data has already been output, above, so we're set in the K=1 case.
+						// (Note that every output row has one leaf index, pointing to this branch's single leaf).
+						//
+						// For the K > N case (i.e., there are more leaves requested by the user
+						// than there are leaves available for this branch),
+						// see the following code block.
 						if (leaf.primary_keys.size() > 0)
 						{
 							std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
@@ -21663,6 +21669,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 					{
 						Leaf & leaf = branch.leaves_cache[leafIndex];
+
 						// Even the K=1 case is handled in the "index_into_raw_data > 0" block,
 						// because although the leaf has no primary keys,
 						// **it does have an index to data** (See RandomSampling_ReadData_AddToTimeSlices(),
