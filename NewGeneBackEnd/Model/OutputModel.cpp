@@ -21632,25 +21632,23 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						// In the K = 1 case, the branch has one and only one leaf object with no primary keys
 						// (just a data lookup), and everything is guaranteed to be output from the *branch* in this case.
 						// But the branch data has already been output, above, so we're set in the K=1 case.
-						// (Note that every output row has one leaf index, pointing to this branch's single leaf).
+						// (Note that every output row has one leaf index in the K=1 case, pointing to this branch's single leaf).
 						//
 						// For the K > N case (i.e., there are more leaves requested by the user
 						// than there are leaves available for this branch),
-						// see the following code block.
-						if (leaf.primary_keys.size() > 0)
+						// see the following code block after this std::for_each() exits.
+						std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
 						{
-							std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
-							{
-								boost::apply_visitor(write_to_output_visitor(output_file, first), data);
-							});
-							++numberLeavesHandled;
-						}
+							boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+						});
+						++numberLeavesHandled;
 					});
 
 					// Fill in remaining leaf slots with blanks for the case K > N.
 					// Note that K >= 1, and N >= 1.
 					// Note that the K = 1 case corresponds to no data in any leaves,
-					// and all primary key data will be output from the branch.
+					// and all primary key data will be output from the *branch*.
+					// which has already been done, above.
 					// (The K = 1 case is indicated by "which_primary_index_has_multiplicity_greater_than_1 == -1".)
 					if (which_primary_index_has_multiplicity_greater_than_1 != -1)
 					{
@@ -21666,6 +21664,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 					// Then, the primary top-level variable group secondary data.
 					// This info is stored in each leaf.
+					numberLeavesHandled = 0;
 					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 					{
 						Leaf & leaf = branch.leaves_cache[leafIndex];
@@ -21674,6 +21673,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						// because although the leaf has no primary keys,
 						// **it does have an index to data** (See RandomSampling_ReadData_AddToTimeSlices(),
 						//   where the leaf's data index is set regardless of whether there are DMU columns for the leaf.)
+						// Further, this secondary data is guaranteed to be present,
+						// because it came from the same row of input data that the branch+leaf (or branch, for K=1) did.
 						if (leaf.index_into_raw_data > 0) // index_into_raw_data is 1-based because it corresponds to SQLite's automatically-generated "rowid" column.
 						{
 							SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
@@ -21688,7 +21689,22 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							boost::format msg("Logic error: Missing primary variable group data (there isn't even blank data).");
 							throw NewGeneException() << newgene_error_description(msg.str());
 						}
+						++numberLeavesHandled;
 					});
+
+					// Fill in remaining leaf slots with blanks for the case K > N.
+					// See comments for identical scenario above, where the leaf primary data is being output.
+					if (which_primary_index_has_multiplicity_greater_than_1 != -1)
+					{
+						int numberSecondaryColumns = top_level_number_secondary_columns[top_level_vg_index];
+						for (int n = numberLeavesHandled; n < K; ++n)
+						{
+							for (int nk = 0; nk < numberSecondaryColumns; ++n)
+							{
+								boost::apply_visitor(write_to_output_visitor(output_file, first), InstanceData(std::string()));
+							}
+						}
+					}
 
 					// Then, the non-primary top-level variable group secondary data.
 					// This info is stored in the leaf also.
@@ -21702,14 +21718,17 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 					{
 						for (int multiplicity = 0; multiplicity < K; ++multiplicity)
 						{
-							bool matched = false;
+
+							bool matchedVariableGroup = false;
+							bool matchedMultiplicity = false;
 
 							// Find the variable group and leaf that is desired.
 							// Some variable groups have no data, in which case they will not be in the list;
 							// this case is covered below.
 							int testMultiplicity = 0;
 
-							// Again, the K=1 case has one leaf per output row,
+							// Again, the K=1 case is covered here.
+							// In the K=1 case, there is one leaf per output row,
 							// and this leaf has no primary keys,
 							// but it has the same secondary key information as any other leaf -
 							// for both the primary variable group, and all non-primary top-level variable groups.
@@ -21720,11 +21739,15 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							//   K=1 case where there are no primary keys)).
 							std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 							{
+
 								if (testMultiplicity != multiplicity)
 								{
 									++testMultiplicity;
 									return;
 								}
+
+								matchedMultiplicity = true;
+
 								Leaf & leaf = branch.leaves_cache[leafIndex];
 
 								// Here is where, in addition to the K>1 case, the K=1 case is supported,
@@ -21738,7 +21761,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 										// We now have both the multiplicity and the variable group that is desired
 										// for the correct sequence of output data
-										matched = true;
+										matchedVariableGroup = true;
 
 										// *********************************************************************** //
 										// If we have ANY secondary data, which we do if we're here,
@@ -21758,13 +21781,42 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 									}
 								});
 								++testMultiplicity;
+							
 							});
 
-							if (!matched)
+							if (matchedMultiplicity)
 							{
+								// The case of no matching data for an existing leaf,
+								// for non-primary top-level variable groups, is covered here.
+								//
+								// We have matched the multiplicity,
+								// but there was no variable group data for this multiplicity.
+								// We must fill in all secondary keys for this multiplicity with blanks
+								if (!matchedVariableGroup)
+								{
+									if (vgNumber != top_level_vg_index)
+									{
+										// Missing a variable group.  Fill with blanks.
+										int numberSecondaries = top_level_number_secondary_columns[vgNumber];
+										for (int n = 0; n < numberSecondaries; ++n)
+										{
+											boost::apply_visitor(write_to_output_visitor(output_file, first), InstanceData(std::string()));
+										}
+									}
+								}
+							}
+							else
+							{
+								// The K > N case is covered here (missing leaves).
+								//
+								// We did not match the multiplicity.
+								// This means there are missing leaves.
+								// For the current leaf and variable group,
+								// we must now fill in the secondary keys.
+								// This "else" block could be merged with
+								// the "if" block, but for conceptual clarity it is separated.
 								if (vgNumber != top_level_vg_index)
 								{
-									// Missing a variable group.  Fill with blanks.
 									int numberSecondaries = top_level_number_secondary_columns[vgNumber];
 									for (int n = 0; n < numberSecondaries; ++n)
 									{
@@ -21772,6 +21824,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 									}
 								}
 							}
+						
 						}
 					}
 
@@ -21824,6 +21877,27 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 								});
 							});
+
+							// All cases of missing data are covered here.
+							// There was no child data that matched the given child leaf slots,
+							// which could occur in one of two ways:
+							// Either:
+							// (1) There IS data present in the corresponding primary keys
+							//     for this particular child leaf, but there is no matching child data
+							// (2) There is no data present in the corresponding primary keys
+							//     because K > N for the top-level unit of analysis for this branch
+							// In either case, this means there is no child data so we will not have
+							// an entry in "child_indices_into_raw_data" for the given
+							// variable group and leaf number.
+							// Special case: If there is no data for *any* child leaf, 
+							// there will be no entry in "child_indices_into_raw_data" for the child variable group.
+							//
+							// See "AllWeightings::MergeTimeSliceDataIntoMap()" for where "child_indices_into_raw_data" is populated:
+							// The code looks into the "helper_lookup__from_child_key_set__to_matching_output_rows" cache
+							// for the branch to lookup both the output rows, and corresponding child leaf
+							// indices within those output rows, that match against any given incoming child leaf.
+							// Therefore, "leaf_number_to_data_index" will exist for all (and only for) those
+							// matching output row / leaf indexes that match.
 							if (!matched)
 							{
 								int numberSecondaries = child_number_secondary_columns[vgNumber];

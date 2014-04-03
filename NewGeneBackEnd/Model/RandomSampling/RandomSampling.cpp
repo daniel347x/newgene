@@ -586,45 +586,13 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						no_matches_for_this_child = true;
 					}
 
-					bool showme = false;
-					if (boost::lexical_cast<std::string>(the_current_map_branch.primary_keys[0]) == "3237")
-					{
-						if (boost::lexical_cast<std::string>(the_current_map_branch.primary_keys[1]) == "2")
-						{
-							if (boost::lexical_cast<std::string>(the_current_map_branch.primary_keys[2]) == "230")
-							{
-								if (boost::lexical_cast<std::string>(dmu_keys[0]) == "2")
-								{
-									showme = true;
-								}
-								else if (boost::lexical_cast<std::string>(dmu_keys[0]) == "230")
-								{
-									showme = true;
-								}
-								else
-								{
-									showme = true;
-								}
-							}
-							showme = false;
-						}
-					}
-
-					if (showme)
-					{
-						std::string existingbranchb4;
-						SpitBranch(existingbranchb4, the_current_map_branch);
-						int m = 0;
-					}
-
 					// Loop through all matching output rows
 					if (!no_matches_for_this_child)
 					{
 						for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
 						{
 
-							BranchOutputRow const * const & outputRowPtr = matchingOutputRowPtr->first;
-							BranchOutputRow const & outputRow = *outputRowPtr;
+							BranchOutputRow const & outputRow = *matchingOutputRowPtr->first;
 							std::vector<int> const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
 
 							// Loop through all matching output row child leaves
@@ -646,7 +614,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						}
 					}
 
-					if (showme)
+					if (false)
 					{
 
 						std::string keys;
