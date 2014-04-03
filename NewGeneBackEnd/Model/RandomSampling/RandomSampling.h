@@ -229,28 +229,29 @@ class TimeSlice
 		inline bool IsEndTimeGreaterThanRhsStartTime(TimeSlice const & rhs) const
 		{
 
-			if (none)
+			bool my_right_edge_is_infinite = false;
+			if (none && plus_infinity)
 			{
-				if (rhs.none)
-				{
-					return false;
-				}
-				else
-				{
-					return true;
-				}
+				my_right_edge_is_infinite = true;
 			}
-			else
+
+			if (my_right_edge_is_infinite)
 			{
-				if (rhs.none)
-				{
-					return true;
-				}
-				else
-				{
-					// normal case.  no-op
-				}
+				return true;
 			}
+
+			bool rhs_left_edge_is_infinite = false;
+			if (rhs.none && rhs.minus_infinity)
+			{
+				rhs_left_edge_is_infinite = true;
+			}
+
+			if (rhs_left_edge_is_infinite)
+			{
+				return true;
+			}
+
+			// normal case
 
 			if (time_end > rhs.time_start)
 			{
