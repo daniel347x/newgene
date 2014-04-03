@@ -78,15 +78,18 @@ class TimeSlice
 
 		}
 
-		std::int64_t Width(std::int64_t const ms_per_unit_time) const
+		std::int64_t WidthForWeighting(std::int64_t const ms_per_unit_time) const
 		{
 			if (none)
 			{
-				if (minus_infinity || plus_infinity)
-				{
-					boost::format msg("Requesting width of infinite time slice!");
-					throw NewGeneException() << newgene_error_description(msg.str());
-				}
+				// This function is only called for the primary variable group.
+				// In this case, it's all-or-none:
+				// Either *all* rows have no time granularity, or none do.
+				// Assume, therefore, that if any call to this function
+				// hits this block, all calls will for this run.
+				// This is a scenario where each branch has only one time slice
+				// and it should have a weight of 1.
+				return 1;
 			}
 
 			std::int64_t absolute = time_end - time_start;

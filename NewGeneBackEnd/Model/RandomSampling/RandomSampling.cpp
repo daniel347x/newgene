@@ -733,24 +733,18 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 				// It is just the binomial coefficient (assuming K <= N)
 
 				branch.number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
-#				ifdef _DEBUG
-				branch.number_branch_combinations_string = branch.number_branch_combinations.str();
-#				endif
 				if (K <= numberLeaves)
 				{
 					//branch.number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(numberLeaves, K);
 					branch.number_branch_combinations = BinomialCoefficient(numberLeaves, K);
-#				ifdef _DEBUG
-					branch.number_branch_combinations_string = branch.number_branch_combinations.str();
-#				endif
 				}
 
 				// clear the hits cache
 				branch.hits.clear();
 
-				// Holes between time slices are handled here -
+				// Holes between time slices are handled here, as well as the standard case of no holes between time slices -
 				// There is no gap in the sequence of discretized weight values in branches.
-				branchWeighting.setWeighting(timeSlice.Width(ms_per_unit_time) * branch.number_branch_combinations);
+				branchWeighting.setWeighting(timeSlice.WidthForWeighting(ms_per_unit_time) * branch.number_branch_combinations);
 				branchWeighting.setWeightingRangeStart(currentWeighting);
 				currentWeighting += branchWeighting.getWeighting();
 
