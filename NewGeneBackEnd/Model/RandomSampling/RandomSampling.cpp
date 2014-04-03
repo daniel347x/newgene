@@ -929,7 +929,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K)
 	Leaves const & tmp_leaves = branchesAndLeavesPtr->second;
 
 	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData
-	CreateOutputRow(random_number, K, new_branch, tmp_leaves);
+	GenerateOutputRow(random_number, K, new_branch, tmp_leaves);
 
 	++random_number_iterator;
 
@@ -937,7 +937,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K)
 
 }
 
-void AllWeightings::CreateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves)
+void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves)
 {
 
 	random_number -= branch.weighting.getWeightingRangeStart();

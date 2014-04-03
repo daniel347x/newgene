@@ -13713,7 +13713,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	// Make sure that at most 1 DMU has a multiplicity greater than 1,
 	// and save the name/index of the DMU category with the highest multiplicity.
 
-	multiplicities_primary_uoa.clear();
+	outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.clear();
 	highest_multiplicity_primary_uoa = 0;
 	highest_multiplicity_primary_uoa_dmu_string_code.clear();
 
@@ -13839,7 +13839,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 			return;
 		}
 
-		multiplicities_primary_uoa.push_back(multiplicity);
+		outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.push_back(multiplicity);
 
 		if (multiplicity > highest_multiplicity_primary_uoa)
 		{
@@ -13859,7 +13859,7 @@ void OutputModel::OutputGenerator::ValidateUOAs()
 	which_primary_index_has_multiplicity_greater_than_1 = -1;
 
 	int current_index = 0;
-	std::for_each(multiplicities_primary_uoa.cbegin(), multiplicities_primary_uoa.cend(), [this, &current_index](int const & test_multiplicity)
+	std::for_each(outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cbegin(), outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA.cend(), [this, &current_index](int const & test_multiplicity)
 	{
 		if (failed || CheckCancelled())
 		{
@@ -21622,14 +21622,40 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 					// Then, the leaf primary keys - for multiple leaves
 					// (this is the K-ad)
+					int numberLeavesHandled = 0;
 					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 					{
 						Leaf & leaf = branch.leaves_cache[leafIndex];
-						std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
+
+						// For the case K = 1, there ARE no primary keys for this leaf.
+						// In the K = 1 case, the branch has one and only one leaf object with no primary keys,
+						// just a data lookup, and everything is guaranteed to be output from the branch in this case.
+						if (leaf.primary_keys.size() > 0)
 						{
-							boost::apply_visitor(write_to_output_visitor(output_file, first), data);
-						});
+							std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
+							{
+								boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+							});
+							++numberLeavesHandled;
+						}
 					});
+
+					// Fill in remaining leaf slots with blanks for the case K>N.
+					// Note that K >= 1, and N >= 1.
+					// Note that the K = 1 case corresponds to no data in any leaves,
+					// and all primary key data will be output from the branch.
+					// (The K = 1 case is indicated by "which_primary_index_has_multiplicity_greater_than_1 == -1".)
+					if (which_primary_index_has_multiplicity_greater_than_1 != -1)
+					{
+						int numberColumnsInTheDMUWithMultiplicityGreaterThan1 = biggest_counts[0].second[which_primary_index_has_multiplicity_greater_than_1].second;
+						for (int n = numberLeavesHandled; n < K; ++n)
+						{
+							for (int nk = 0; nk < numberColumnsInTheDMUWithMultiplicityGreaterThan1; ++n)
+							{
+								boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+							}
+						}
+					}
 
 					// Then, the primary top-level variable group secondary data.
 					// This info is stored in each leaf.

@@ -1139,11 +1139,17 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::vector<std::pair<WidgetInstanceIdentifier, Table_UOA_Identifier::DMU_Counts>> child_counts;
 
 				// Keep track of multiplicities involved
-				std::vector<int> multiplicities_primary_uoa;
+				// The following variable has a hideously long name
+				// because it is used rarely, but when it is used it is critical
+				// to understand exactly what it is.
+				// The order of elements in this vector exactly corresponds
+				// to the order of elements in the vector corresponding to 
+				// each UOA in 'biggest_counts', above.
+				std::vector<int> outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA;
 				int highest_multiplicity_primary_uoa;
 				std::string highest_multiplicity_primary_uoa_dmu_string_code;
 				bool any_primary_dmu_has_multiplicity_greater_than_1;
-				int which_primary_index_has_multiplicity_greater_than_1;
+				int which_primary_index_has_multiplicity_greater_than_1; // corresponds to the single DMU in the primary UOA whose outer multiplicity is greater than 1; if none have outer multiplicity greater than 1, this value will be set to -1.  Corresponds to the above "outer_multiplicities_primary_uoa___ie___if_there_are_3_cols_for_a_single_dmu_in_the_primary_uoa__and_K_is_12__then__this_value_is_4_for_that_DMU____note_this_is_greater_than_1_for_only_1_DMU_in_the_primary_UOA" variable.
 
 				// child_uoas__which_multiplicity_is_greater_than_1:
 				// Map of:
