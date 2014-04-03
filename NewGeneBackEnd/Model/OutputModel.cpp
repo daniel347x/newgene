@@ -21663,6 +21663,10 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 					{
 						Leaf & leaf = branch.leaves_cache[leafIndex];
+						// Even the K=1 case is handled in the "index_into_raw_data > 0" block,
+						// because although the leaf has no primary keys,
+						// **it does have an index to data** (See RandomSampling_ReadData_AddToTimeSlices(),
+						//   where the leaf's data index is set regardless of whether there are DMU columns for the leaf.)
 						if (leaf.index_into_raw_data > 0)
 						{
 							SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
