@@ -104,12 +104,14 @@ bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 			// Or it might not - it might start IN or at the left edge of this element.
 			// In any case, upper_bound ensures that it starts PAST any previous map elements.
 
-			if (newTimeSlice.getStart() < startMapSlice.getStart())
+			if (newTimeSlice.IsStartLessThanRHSStart(startMapSlice))
+			//if (newTimeSlice.getStart() < startMapSlice.getStart())
 			{
 
 				// The new time slice starts to the left of the map element returned by upper_bound.
 
-				if (newTimeSlice.getEnd() <= startMapSlice.getStart())
+				if (newTimeSlice.IsEndLessThanOrEqualToRHSStart(startMapSlice))
+				//if (newTimeSlice.getEnd() <= startMapSlice.getStart())
 				{
 					if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 					{
@@ -239,12 +241,14 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 
 	bool newTimeSliceEatenCompletelyUp = false;
 
-	if (newTimeSlice.getStart() == mapElement.getStart())
+	if (newTimeSlice.IsStartEqualToRHSStart(mapElement))
+	//if (newTimeSlice.getStart() == mapElement.getStart())
 	{
 
 		// The new time slice starts at the left edge of the map element.
 
-		if (newTimeSlice.getEnd() < mapElement.getEnd())
+		if (newTimeSlice.IsEndLessThanRHSEnd(mapElement)
+		//if (newTimeSlice.getEnd() < mapElement.getEnd())
 		{
 
 			// The new time slice starts at the left edge of the map element,
@@ -263,7 +267,8 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 			newTimeSliceEatenCompletelyUp = true;
 
 		}
-		else if (newTimeSlice.getEnd() == mapElement.getEnd())
+		else if (newTimeSlice.IsEndEqualToRHSEnd(mapElement))
+		//else if (newTimeSlice.getEnd() == mapElement.getEnd())
 		{
 
 			// The new time slice exactly matches the first map element.
@@ -302,7 +307,8 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 		// The new time slice is inside the map element,
 		// but starts past its left edge.
 
-		if (newTimeSlice.getEnd() < mapElement.getEnd())
+		if (newTimeSlice.IsEndLessThanRHSEnd(mapElement))
+		//if (newTimeSlice.getEnd() < mapElement.getEnd())
 		{
 
 			// The new time slice starts in the map element,
@@ -322,7 +328,8 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 			newTimeSliceEatenCompletelyUp = true;
 
 		}
-		else if (newTimeSlice.getEnd() == mapElement.getEnd())
+		else if (newTimeSlice.IsEndEqualToRHSEnd(mapElement))
+		//else if (newTimeSlice.getEnd() == mapElement.getEnd())
 		{
 
 			// The new time slice starts in the map element,
@@ -1679,18 +1686,54 @@ void SpitWeighting(std::string & sdata, Weighting const & weighting)
 
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 {
+
+	bool startinf = false;
+	bool endinf = false;
+
 	sdata += "<TIMESTAMP_START>";
-	sdata += boost::lexical_cast<std::string>(time_slice.getStart());
+	if (!time_slice.hasTimeGranularity())
+	{
+		if (time_slice.startsAtNegativeInfinity())
+		{
+			sdata += "NEG_INF";
+			startinf = true;
+		}
+	}
+	if (!startinf)
+	{
+		sdata += boost::lexical_cast<std::string>(time_slice.getStart());
+	}
 	sdata += "</TIMESTAMP_START>";
+
 	sdata += "<TIMESTAMP_END>";
-	sdata += boost::lexical_cast<std::string>(time_slice.getEnd());
+	if (!time_slice.hasTimeGranularity())
+	{
+		if (time_slice.endsAtPlusInfinity())
+		{
+			sdata += "INF";
+			endinf = true;
+		}
+	}
+	if (!endinf)
+	{
+		sdata += boost::lexical_cast<std::string>(time_slice.getEnd());
+	}
 	sdata += "</TIMESTAMP_END>";
+
 	sdata += "<DATETIME_START>";
-	sdata += TimeRange::convertTimestampToString(time_slice.getStart());
+	if (!startinf)
+	{
+		sdata += TimeRange::convertTimestampToString(time_slice.getStart());
+	}
 	sdata += "</DATETIME_START>";
+
 	sdata += "<DATETIME_END>";
-	sdata += TimeRange::convertTimestampToString(time_slice.getEnd());
+	if (!endinf)
+	{
+		sdata += TimeRange::convertTimestampToString(time_slice.getEnd());
+	}
 	sdata += "</DATETIME_END>";
+
 }
 
 void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file)
