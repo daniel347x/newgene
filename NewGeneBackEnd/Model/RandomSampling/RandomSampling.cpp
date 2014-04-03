@@ -1246,6 +1246,23 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 								break;
 							}
 
+							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys.size() == 0)
+							{
+								// This is the K=1 case - the matching leaf of the *top-level* UOA
+								// has no primary keys.  This is a logic error, as we should never match
+								// a "leaf" in the top-level UOA in this case.
+								//
+								// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups()",
+								// in particular the following lines:
+								// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+								// --> // {
+								// --> //     is_current_index_a_top_level_primary_group_branch = true;
+								// --> // }
+
+								boost::format msg("Logic error: attempting to match child data to a leaf in the top-level unit of analysis when K=1");
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
+
 							child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
 
 						}
