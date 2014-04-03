@@ -32,10 +32,7 @@ bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
 
-	if (!newTimeSlice.Validate())
-	{
-		return false;
-	}
+	newTimeSlice.Validate();
 
 	bool added = false; // true if there is a match
 
@@ -383,19 +380,19 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 {
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
+	TimeSlice originalMapTimeSlice = timeSlice;
 	VariableGroupTimeSliceData const timeSliceData = existingMapElementPtr->second;
-
-	std::int64_t left = timeSlice.getStart();
-	std::int64_t right = timeSlice.getEnd();
 
 	timeSlices.erase(existingMapElementPtr);
 
-	timeSlice.Reshape(left, middle);
+	timeSlice = originalMapTimeSlice;
+	timeSlice.setEnd(middle);
 	timeSlices[timeSlice] = timeSliceData;
 
 	newMapElementLeftPtr = timeSlices.find(timeSlice);
 
-	timeSlice.Reshape(middle, right);
+	timeSlice = originalMapTimeSlice;
+	timeSlice.setStart(middle);
 	timeSlices[timeSlice] = timeSliceData;
 
 	newMapElementRightPtr = timeSlices.find(timeSlice);
@@ -407,22 +404,23 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 {
 
 	TimeSlice timeSlice = existingMapElementPtr->first;
+	TimeSlice originalMapTimeSlice = timeSlice;
 	VariableGroupTimeSliceData const timeSliceData = existingMapElementPtr->second;
-
-	std::int64_t leftedge = timeSlice.getStart();
-	std::int64_t rightedge = timeSlice.getEnd();
 
 	timeSlices.erase(existingMapElementPtr);
 
-	timeSlice.Reshape(leftedge, left);
+	timeSlice = originalMapTimeSlice;
+	timeSlice.setEnd(left);
 	timeSlices[timeSlice] = timeSliceData;
 
+	timeSlice = originalMapTimeSlice;
 	timeSlice.Reshape(left, right);
 	timeSlices[timeSlice] = timeSliceData;
 
 	newMapElementMiddlePtr = timeSlices.find(timeSlice);
 
-	timeSlice.Reshape(right, rightedge);
+	timeSlice = originalMapTimeSlice;
+	timeSlice.setStart(right);
 	timeSlices[timeSlice] = timeSliceData;
 
 }
@@ -433,13 +431,22 @@ void AllWeightings::SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t co
 {
 	new_left_slice = incoming_slice;
 	new_left_slice.first.setEnd(slicePoint);
-
 	incoming_slice.first.setStart(slicePoint);
 }
 
 // Merge time slice data into a map element
 bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary)
 {
+
+	// ******************************************************************************************************************************** //
+	// ******************************************************************************************************************************** //
+	//
+	// If we reach this function, the time slice of the leaf is guaranteed to match the time slice of the map element
+	// it is being merge into.
+	// We do not check this here.
+	//
+	// ******************************************************************************************************************************** //
+	// ******************************************************************************************************************************** //
 
 	bool added = false;
 

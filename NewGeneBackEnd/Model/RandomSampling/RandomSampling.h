@@ -39,11 +39,8 @@ class TimeSlice
 			, plus_infinity{ true }
 
 		{
-			if (!Validate())
-			{
-				boost::format msg("Invalid time slice!");
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
+			CheckForAndSetNoTimeRangeGranularity();
+			Validate();
 		}
 
 		TimeSlice(std::int64_t const time_start_, std::int64_t const time_end_)
@@ -54,11 +51,7 @@ class TimeSlice
 			, plus_infinity{ false }
 		{
 			CheckForAndSetNoTimeRangeGranularity();
-			if (!Validate())
-			{
-				boost::format msg("Invalid time slice being created!");
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
+			Validate();
 		}
 
 		TimeSlice(TimeSlice const & rhs)
@@ -68,11 +61,8 @@ class TimeSlice
 			, minus_infinity{ rhs.minus_infinity }
 			, plus_infinity{ rhs.plus_infinity }
 		{
-			if (!Validate())
-			{
-				boost::format msg("Invalid time slice being copied!");
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
+			CheckForAndSetNoTimeRangeGranularity();
+			Validate();
 		}
 
 		void CheckForAndSetNoTimeRangeGranularity()
@@ -124,11 +114,9 @@ class TimeSlice
 			minus_infinity = rhs.minus_infinity;
 			plus_infinity = rhs.plus_infinity;
 
-			if (!Validate())
-			{
-				boost::format msg("Invalid time slice being assigned!");
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
+			CheckForAndSetNoTimeRangeGranularity();
+
+			Validate();
 
 			return *this;
 		}
@@ -136,20 +124,12 @@ class TimeSlice
 		void Reshape(std::int64_t const & new_start, std::int64_t const & new_end)
 		{
 
-			none = false;
-			minus_infinity = false;
-			plus_infinity = false;
-
-			time_start = new_start;
-			time_end = new_end;
+			setStart(new_start);
+			setEnd(new_end);
 
 			CheckForAndSetNoTimeRangeGranularity();
 
-			if (!Validate())
-			{
-				boost::format msg("Invalid reshaping of time slice!");
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
+			Validate();
 
 		}
 
@@ -212,21 +192,25 @@ class TimeSlice
 
 		}
 
-		inline bool Validate() const
+		inline void Validate() const
 		{
+			bool valid = true;
 			if (none)
 			{
 				if (!minus_infinity && !plus_infinity)
 				{
-					return false;
+					valid = false;
 				}
-				return true;
 			}
-			if (time_end <= time_start)
+			else if (time_end <= time_start)
 			{
-				return false;
+				valid = false;
 			}
-			return true;
+			if (!valid)
+			{
+				boost::format msg("Invalid time slice!");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
 		}
 
 		inline bool IsEndTimeGreaterThanRhsStartTime(TimeSlice const & rhs) const
@@ -298,8 +282,6 @@ class TimeSlice
 		{
 			time_start = time_start_;
 
-			CheckForAndSetNoTimeRangeGranularity();
-
 			if (none)
 			{
 				minus_infinity = false;
@@ -311,17 +293,14 @@ class TimeSlice
 				}
 			}
 
-			if (!Validate())
-			{
-				int m = 0; // debugging
-			}
+			CheckForAndSetNoTimeRangeGranularity();
+
+			Validate();
 		}
 
 		void setEnd(std::int64_t const & time_end_)
 		{
 			time_end = time_end_;
-
-			CheckForAndSetNoTimeRangeGranularity();
 
 			if (none)
 			{
@@ -334,10 +313,9 @@ class TimeSlice
 				}
 			}
 
-			if (!Validate())
-			{
-				int m = 0; // debugging
-			}
+			CheckForAndSetNoTimeRangeGranularity();
+
+			Validate();
 		}
 
 		std::int64_t getStart() const
