@@ -318,6 +318,154 @@ class TimeSlice
 			Validate();
 		}
 
+
+		// Less than checks
+		bool IsStartLessThanRHSStart(TimeSlice const & rhs) const
+		{
+			if (none && minus_infinity)
+			{
+				if (rhs.none && rhs.minus_infinity)
+				{
+					return false;
+				}
+				return true;
+			}
+			else if (rhs.none && rhs.minus_infinity)
+			{
+				return false;
+			}
+			return time_start < rhs.time_start;
+		}
+
+		bool IsStartLessThanRHSEnd(TimeSlice const & rhs) const
+		{
+			if (none && minus_infinity)
+			{
+				return true;
+			}
+			else if (rhs.none && rhs.plus_infinity)
+			{
+				return true;
+			}
+			return time_start < rhs.time_end;
+		}
+
+		bool IsEndLessThanRHSStart(TimeSlice const & rhs) const
+		{
+			if (none && plus_infinity)
+			{
+				return false;
+			}
+			else if (rhs.none && rhs.minus_infinity)
+			{
+				return false;
+			}
+			return time_end < rhs.time_start;
+		}
+
+		bool IsEndLessThanRHSEnd(TimeSlice const & rhs) const
+		{
+			if (none && plus_infinity)
+			{
+				return false;
+			}
+			else if (rhs.none && rhs.plus_infinity)
+			{
+				return true;
+			}
+			return time_end < rhs.time_end;
+		}
+
+
+		// Less than or equal to checks
+		bool IsStartLessThanOrEqualToRHSStart(TimeSlice const & rhs) const
+		{
+			return IsStartLessThanRHSStart(rhs) || IsStartEqualToRHSStart(rhs);
+		}
+
+		bool IsStartLessThanOrEqualToRHSEnd(TimeSlice const & rhs) const
+		{
+			return IsStartLessThanRHSEnd(rhs) || IsStartEqualToRHSEnd(rhs);
+		}
+
+		bool IsEndLessThanOrEqualToRHSStart(TimeSlice const & rhs) const
+		{
+			return IsEndLessThanRHSStart(rhs) || IsEndEqualToRHSStart(rhs);
+		}
+
+		bool IsEndLessThanOrEqualToRHSEnd(TimeSlice const & rhs) const
+		{
+			return IsEndLessThanRHSEnd(rhs) || IsEndEqualToRHSEnd(rhs);
+		}
+
+
+		// Equality checks
+		bool IsStartEqualToRHSStart(TimeSlice const & rhs) const
+		{
+			return !IsStartLessThanRHSStart(rhs) && !rhs.IsStartLessThanRHSStart(*this);
+		}
+
+		bool IsStartEqualToRHSEnd(TimeSlice const & rhs) const
+		{
+			return !IsStartLessThanRHSEnd(rhs) && !rhs.IsEndLessThanRHSStart(*this);
+		}
+
+		bool IsEndEqualToRHSStart(TimeSlice const & rhs) const
+		{
+			return !IsEndLessThanRHSStart(rhs) && !rhs.IsStartLessThanRHSEnd(*this);
+		}
+
+		bool IsEndEqualToRHSEnd(TimeSlice const & rhs) const
+		{
+			return !IsEndLessThanRHSEnd(rhs) && !rhs.IsEndLessThanRHSEnd(*this);
+		}
+
+
+
+		// Greater than checks
+		bool IsStartGreaterThanRHSStart(TimeSlice const & rhs) const
+		{
+			return rhs.IsStartLessThanRHSStart(*this);
+		}
+
+		bool IsStartGreaterThanRHSEnd(TimeSlice const & rhs) const
+		{
+			return rhs.IsEndLessThanRHSStart(*this);
+		}
+
+		bool IsEndGreaterThanRHSStart(TimeSlice const & rhs) const
+		{
+			return rhs.IsStartLessThanRHSEnd(*this);
+		}
+
+		bool IsEndGreaterThanRHSEnd(TimeSlice const & rhs) const
+		{
+			return rhs.IsEndLessThanRHSEnd(*this);
+		}
+
+
+		// Greater than or equal to checks
+		bool IsStartGreaterThanOrEqualToRHSStart(TimeSlice const & rhs) const
+		{
+			return !IsStartLessThanRHSStart(rhs);
+		}
+
+		bool IsStartGreaterThanOrEqualToRHSEnd(TimeSlice const & rhs) const
+		{
+			return !IsStartLessThanRHSEnd(rhs);
+		}
+
+		bool IsEndGreaterThanOrEqualToRHSStart(TimeSlice const & rhs) const
+		{
+			return !IsEndLessThanRHSStart(rhs);
+		}
+
+		bool IsEndGreaterThanOrEqualToRHSEnd(TimeSlice const & rhs) const
+		{
+			return !IsEndLessThanRHSEnd(rhs);
+		}
+
+
 		std::int64_t getStart() const
 		{
 			if (none && minus_infinity)
