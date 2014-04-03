@@ -46,27 +46,14 @@ class TimeSlice
 			}
 		}
 
-		TimeSlice(bool const has_time_granularity)
-			: time_start{ 0 }
-			, time_end  { 0 }
-			, none      { !has_time_granularity }
-			, minus_infinity{ !has_time_granularity }
-			, plus_infinity{ !has_time_granularity }
-		{
-			if (!Validate())
-			{
-				boost::format msg("Invalid time slice!");
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
-		}
-
 		TimeSlice(std::int64_t const time_start_, std::int64_t const time_end_)
 			: time_start{ time_start_ }
 			, time_end  { time_end_ }
 			, none      { false }
 			, minus_infinity{ false }
 			, plus_infinity{ false }
-			{
+		{
+			CheckForAndSetNoTimeRangeGranularity();
 			if (!Validate())
 			{
 				boost::format msg("Invalid time slice being created!");
@@ -88,6 +75,19 @@ class TimeSlice
 			}
 		}
 
+		void CheckForAndSetNoTimeRangeGranularity()
+		{
+			if (time_start == 0 && time_end == 0)
+			{
+				// this means we really have no time range granularity
+
+				none = true;
+				minus_infinity = true;
+				plus_infinity = true;
+			}
+
+		}
+
 		std::int64_t Width(std::int64_t const ms_per_unit_time) const
 		{
 			if (none)
@@ -98,6 +98,7 @@ class TimeSlice
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
 			}
+
 			std::int64_t absolute = time_end - time_start;
 			std::int64_t mod = absolute % ms_per_unit_time;
 			std::int64_t val = absolute - mod;
@@ -141,6 +142,8 @@ class TimeSlice
 
 			time_start = new_start;
 			time_end = new_end;
+
+			CheckForAndSetNoTimeRangeGranularity();
 
 			if (!Validate())
 			{
@@ -295,6 +298,8 @@ class TimeSlice
 		{
 			time_start = time_start_;
 
+			CheckForAndSetNoTimeRangeGranularity();
+
 			if (none)
 			{
 				minus_infinity = false;
@@ -315,6 +320,8 @@ class TimeSlice
 		void setEnd(std::int64_t const & time_end_)
 		{
 			time_end = time_end_;
+
+			CheckForAndSetNoTimeRangeGranularity();
 
 			if (none)
 			{
