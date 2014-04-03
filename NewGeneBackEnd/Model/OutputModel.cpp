@@ -522,9 +522,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
 			if (failed || CheckCancelled()) return;
 
-			final_result = random_sampling_schema;
-
 		}
+
+		final_result = random_sampling_schema;
 
 		RandomSamplerFillDataForChildGroups(allWeightings);
 		if (failed || CheckCancelled()) return;
