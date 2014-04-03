@@ -21697,8 +21697,17 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						{
 							bool matched = false;
 
-							// Find the variable group and leaf that is desired
+							// Find the variable group and leaf that is desired.
+							// Some variable groups have no data, in which case they will not be in the list;
+							// this case is covered below.
 							int testMultiplicity = 0;
+
+							// Again, the K=1 case has one leaf per output row,
+							// and this leaf has no primary keys,
+							// but it has the same secondary key information as any other leaf -
+							// for both the primary variable group, and all non-primary top-level variable groups.
+							// I.e., the non-primary top-level variable groups populate their
+							// "other_top_level_indices_into_raw_data" variable in the same way that the K>1 case does.
 							std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 							{
 								if (testMultiplicity != multiplicity)
@@ -21718,7 +21727,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 										matched = true;
 
 										// *********************************************************************** //
-										// If we have ANY secondary data, we have ALL ROWS
+										// If we have ANY secondary data, which we do if we're here,
+										// then we have ALL COLUMNS of secondary data,
 										// because the schema controls this and the data is pulled from the DB,
 										// which has empty columns rather than missing columns
 										// *********************************************************************** //
