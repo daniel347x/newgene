@@ -21667,7 +21667,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						// because although the leaf has no primary keys,
 						// **it does have an index to data** (See RandomSampling_ReadData_AddToTimeSlices(),
 						//   where the leaf's data index is set regardless of whether there are DMU columns for the leaf.)
-						if (leaf.index_into_raw_data > 0)
+						if (leaf.index_into_raw_data > 0) // index_into_raw_data is 1-based because it corresponds to SQLite's automatically-generated "rowid" column.
 						{
 							SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
 							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
