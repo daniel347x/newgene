@@ -21004,6 +21004,51 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 				std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
 				{
 
+
+
+
+
+
+
+
+
+
+					// ******************************** //
+
+					// INCOMPLETE LOGIC!!!!
+					// Merge with RandomSamplingWriteResultsToFileOrScreen()!
+
+					// ******************************** //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 					// We have a row to output
 
 					if (failed || CheckCancelled())
