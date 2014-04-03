@@ -247,7 +247,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 
 		// The new time slice starts at the left edge of the map element.
 
-		if (newTimeSlice.IsEndLessThanRHSEnd(mapElement)
+		if (newTimeSlice.IsEndLessThanRHSEnd(mapElement))
 		//if (newTimeSlice.getEnd() < mapElement.getEnd())
 		{
 
@@ -1259,7 +1259,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
 
-							if (childToPrimaryMapping.leaf_number >= outputRow.primary_leaves_cache.size())
+							if (childToPrimaryMapping.leaf_number >= static_cast<int>(outputRow.primary_leaves_cache.size()))
 							{
 								branch_component_bad = true;
 								break;
@@ -1334,7 +1334,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
 
-							if (childToPrimaryMapping.leaf_number >= outputRow.primary_leaves_cache.size())
+							if (childToPrimaryMapping.leaf_number >= static_cast<int>(outputRow.primary_leaves_cache.size()))
 							{
 								// The current child leaf maps to a top-level leaf that has no data.
 								// We therefore cannot match.
