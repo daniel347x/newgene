@@ -21653,7 +21653,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						{
 							for (int nk = 0; nk < numberColumnsInTheDMUWithMultiplicityGreaterThan1; ++n)
 							{
-								boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+								boost::apply_visitor(write_to_output_visitor(output_file, first), InstanceData(std::string()));
 							}
 						}
 					}
