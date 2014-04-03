@@ -515,6 +515,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			RandomSamplingCreateOutputTable();
 			if (failed || CheckCancelled()) return;
 
+			// *********************************************************************** //
+			// The following function has incomplete logic, and should
+			// be merged with RandomSamplingWriteResultsToFileOrScreen().
+			// *********************************************************************** //
 			RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
 			if (failed || CheckCancelled()) return;
 
