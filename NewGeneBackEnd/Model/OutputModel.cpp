@@ -21707,7 +21707,10 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							// but it has the same secondary key information as any other leaf -
 							// for both the primary variable group, and all non-primary top-level variable groups.
 							// I.e., the non-primary top-level variable groups populate their
-							// "other_top_level_indices_into_raw_data" variable in the same way that the K>1 case does.
+							// "other_top_level_indices_into_raw_data" variable in the same way that the K>1 case does
+							//  (see RandomSampling_ReadData_AddToTimeSlices(), the VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL case,
+							//   for where "other_top_level_indices_into_raw_data" is populated (regardless of the
+							//   K=1 case where there are no primary keys)).
 							std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 							{
 								if (testMultiplicity != multiplicity)
@@ -21716,6 +21719,10 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 									return;
 								}
 								Leaf & leaf = branch.leaves_cache[leafIndex];
+
+								// Here is where, in addition to the K>1 case, the K=1 case is supported,
+								// because "other_top_level_indices_into_raw_data" is populated
+								// regardless of whether "primary_keys" is populated for the leaf.
 								std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
 								{
 									int const vg_number = top_level_vg_and_data_index.first;
