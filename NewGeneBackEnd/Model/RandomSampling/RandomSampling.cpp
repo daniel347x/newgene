@@ -1201,10 +1201,19 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 			for (auto outputRowPtr = time_unit_output_rows.second.cbegin(); outputRowPtr != time_unit_output_rows.second.cend(); ++outputRowPtr)
 			{
 
+				// ******************************************************************************************************** //
+				// We have a new hit we're dealing with
+				// ******************************************************************************************************** //
+
 				BranchOutputRow const & outputRow = *outputRowPtr;
 
-				// We have a new hit we're dealing with
 				child_hit_vector_branch_components.clear();
+
+				// Some child leaves map, in part, to branch leaves of the top-level UOA.
+				// If there is no leaf data for these leaves (which can happen in the K>N case),
+				// there cannot possibly be a match for any of the child leaves for this output row.
+				// Set the following flag to capture this case.
+				bool branch_component_bad = false;
 
 				// First in the "child DMU" vector are the child's BRANCH DMU values
 				std::for_each(mappings_from_child_branch_to_primary.cbegin(), mappings_from_child_branch_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
@@ -1231,6 +1240,12 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 							// index tells us which index in that leaf
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+							if (childToPrimaryMapping.leaf_number >= outputRow.primary_leaves_cache.size())
+							{
+								branch_component_bad = true;
+								break;
+							}
+
 							child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
 
 						}
@@ -1243,6 +1258,13 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					}
 
 				});
+
+				if (branch_component_bad)
+				{
+					// No luck for this output row for any child leaf.
+					// Try the next row.
+					continue;
+				}
 
 				// Next in the "child DMU" vector are the child's LEAF DMU values
 				int child_leaf_index_crossing_multiple_child_leaves = 0;
@@ -1288,30 +1310,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					++child_leaf_index_crossing_multiple_child_leaves;
 					++child_leaf_index_within_a_single_child_leaf;
 
-					std::string a;
-					std::string b;
-					std::string c;
-					std::string d;
-					std::string e;
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
-						if (boost::lexical_cast<std::string>(child_hit_vector[0]) == "2")
-						{
-							if (boost::lexical_cast<std::string>(primary_keys[0]) == "3237")
-							{
-								if (boost::lexical_cast<std::string>(primary_keys[1]) == "2")
-								{
-									if (boost::lexical_cast<std::string>(primary_keys[2]) == "230")
-									{
-										SpitKeys(a, child_hit_vector);
-										SpitKeys(b, child_hit_vector_branch_components);
-										SpitOutputRow(c, outputRow);
-										SpitBranch(d, *this);
-										int m = 0;
-									}
-								}
-							}
-						}
 						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;
