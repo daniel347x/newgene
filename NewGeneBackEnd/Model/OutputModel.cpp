@@ -21629,7 +21629,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 						// For the case K = 1, there ARE no primary keys for this leaf.
 						// In the K = 1 case, the branch has one and only one leaf object with no primary keys,
-						// just a data lookup, and everything is guaranteed to be output from the branch in this case.
+						// just a data lookup, and everything is guaranteed to be output from the branch in this case,
+						// and every output row has one leaf index, as well, pointing to this branch's single leaf.
 						if (leaf.primary_keys.size() > 0)
 						{
 							std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
@@ -21640,7 +21641,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						}
 					});
 
-					// Fill in remaining leaf slots with blanks for the case K>N.
+					// Fill in remaining leaf slots with blanks for the case K > N.
 					// Note that K >= 1, and N >= 1.
 					// Note that the K = 1 case corresponds to no data in any leaves,
 					// and all primary key data will be output from the branch.
