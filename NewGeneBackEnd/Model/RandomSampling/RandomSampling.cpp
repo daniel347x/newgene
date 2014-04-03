@@ -1240,6 +1240,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 							// index tells us which index in that leaf
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+
 							if (childToPrimaryMapping.leaf_number >= outputRow.primary_leaves_cache.size())
 							{
 								branch_component_bad = true;
@@ -1259,7 +1260,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 								// --> //     is_current_index_a_top_level_primary_group_branch = true;
 								// --> // }
 
-								boost::format msg("Logic error: attempting to match child data to a leaf in the top-level unit of analysis when K=1");
+								boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1");
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
 
@@ -1287,6 +1288,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 				int child_leaf_index_crossing_multiple_child_leaves = 0;
 				int child_leaf_index_within_a_single_child_leaf = 0;
 				int current_child_leaf_number = 0;
+				bool missing_top_level_leaf = false;
 				child_hit_vector.clear();
 				child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector_branch_components.begin(), child_hit_vector_branch_components.end());
 				std::for_each(mappings_from_child_leaf_to_primary.cbegin(), mappings_from_child_leaf_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
@@ -1313,6 +1315,32 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 							// index tells us which index in that leaf
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+
+							if (childToPrimaryMapping.leaf_number >= outputRow.primary_leaves_cache.size())
+							{
+								// The current child leaf maps to a top-level leaf that has no data.
+								// We therefore cannot match.
+								missing_top_level_leaf = true;
+								break;
+							}
+
+							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys.size() == 0)
+							{
+								// This is the K=1 case - the matching leaf of the *top-level* UOA
+								// has no primary keys.  This is a logic error, as we should never match
+								// a "leaf" in the top-level UOA in this case.
+								//
+								// To confirm this is a legitimate logic error, see "OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups()",
+								// in particular the following lines:
+								// --> // if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+								// --> // {
+								// --> //     is_current_index_a_top_level_primary_group_branch = true;
+								// --> // }
+
+								boost::format msg("Logic error: attempting to match child leaf data to a leaf in the top-level unit of analysis when K=1");
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
+
 							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
 
 						}
@@ -1329,9 +1357,13 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 
 					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
 					{
-						helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
+						if (!missing_top_level_leaf)
+						{
+							helper_lookup__from_child_key_set__to_matching_output_rows[child_hit_vector][&outputRow].push_back(current_child_leaf_number);
+						}
 						++current_child_leaf_number;
 						child_leaf_index_within_a_single_child_leaf = 0;
+						missing_top_level_leaf = false;
 						child_hit_vector.clear();
 						child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector_branch_components.begin(), child_hit_vector_branch_components.end());
 					}
