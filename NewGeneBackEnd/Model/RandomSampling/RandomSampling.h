@@ -34,25 +34,70 @@ class TimeSlice
 		TimeSlice()
 			: time_start{ 0 }
 			, time_end  { 0 }
-		{}
+			, none{ true }
+			, minus_infinity{true}
+			, plus_infinity{ true }
 
-		TimeSlice(std::int64_t time_start_, std::int64_t time_end_)
-			: time_start{ time_start_ }
-			, time_end{ time_end_ }
 		{
 			if (!Validate())
 			{
-				int m = 0; // debugging
+				boost::format msg("Invalid time slice!");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+		}
+
+		TimeSlice(bool const has_time_granularity)
+			: time_start{ 0 }
+			, time_end  { 0 }
+			, none      { !has_time_granularity }
+			, minus_infinity{ !has_time_granularity }
+			, plus_infinity{ !has_time_granularity }
+		{
+			if (!Validate())
+			{
+				boost::format msg("Invalid time slice!");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+		}
+
+		TimeSlice(std::int64_t const time_start_, std::int64_t const time_end_)
+			: time_start{ time_start_ }
+			, time_end  { time_end_ }
+			, none      { false }
+			, minus_infinity{ false }
+			, plus_infinity{ false }
+			{
+			if (!Validate())
+			{
+				boost::format msg("Invalid time slice being created!");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 		}
 
 		TimeSlice(TimeSlice const & rhs)
 			: time_start{ rhs.time_start }
-			, time_end  { rhs.time_end }
-		{}
+			, time_end{ rhs.time_end }
+			, none{ rhs.none }
+			, minus_infinity{ rhs.minus_infinity }
+			, plus_infinity{ rhs.plus_infinity }
+		{
+			if (!Validate())
+			{
+				boost::format msg("Invalid time slice being copied!");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+		}
 
 		std::int64_t Width(std::int64_t const ms_per_unit_time) const
 		{
+			if (none)
+			{
+				if (minus_infinity || plus_infinity)
+				{
+					boost::format msg("Requesting width of infinite time slice!");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+			}
 			std::int64_t absolute = time_end - time_start;
 			std::int64_t mod = absolute % ms_per_unit_time;
 			std::int64_t val = absolute - mod;
@@ -74,10 +119,14 @@ class TimeSlice
 			}
 			time_start = rhs.time_start;
 			time_end = rhs.time_end;
+			none = rhs.none;
+			minus_infinity = rhs.minus_infinity;
+			plus_infinity = rhs.plus_infinity;
 
 			if (!Validate())
 			{
-				int m = 0; // debugging
+				boost::format msg("Invalid time slice being assigned!");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 
 			return *this;
@@ -85,47 +134,94 @@ class TimeSlice
 
 		void Reshape(std::int64_t const & new_start, std::int64_t const & new_end)
 		{
+
+			none = false;
+			minus_infinity = false;
+			plus_infinity = false;
+
 			time_start = new_start;
 			time_end = new_end;
 
 			if (!Validate())
 			{
-				int m = 0; // debugging
+				boost::format msg("Invalid reshaping of time slice!");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
+
 		}
 
 		bool operator<(TimeSlice const & rhs) const
 		{
-			if (time_start < rhs.time_start)
+
+			if (none)
 			{
-				return true;
+				if (rhs.none)
+				{
+					if (minus_infinity && rhs.minus_infinity)
+					{
+						if (plus_infinity && rhs.plus_infinity) return false; // we're the same
+						else if (plus_infinity && !rhs.plus_infinity) return false; // I'm bigger
+						else if (!plus_infinity && rhs.plus_infinity) return true; // I'm smaller
+						else return time_end < rhs.time_end;
+					}
+					else if (minus_infinity && !rhs.minus_infinity) return true; // I'm smaller
+					else if (!minus_infinity && rhs.minus_infinity) return false; // I'm bigger
+					else
+					{
+						if (time_start < rhs.time_start) return true;
+						else if (time_start > rhs.time_start) return false;
+						else
+						{
+							if (plus_infinity && rhs.plus_infinity) return false; // we're the same
+							else if (plus_infinity && !rhs.plus_infinity) return false; // I'm bigger
+							else if (!plus_infinity && rhs.plus_infinity) return true; // I'm smaller
+							else return time_end < rhs.time_end;
+						}
+					}
+				}
+				else
+				{
+					if (!minus_infinity)
+					{
+						if (time_start < rhs.time_start) return true; // I'm smaller
+						else if (time_start > rhs.time_start) return false; // I'm bigger
+						else return false; // I'm bigger: This is the case where we start at the same left edge, but I go out to infinity and rhs has a finite right edge
+					}
+					else return true; // I'm smaller - my left edge is at negative infinity, but the rhs's left edge is finite
+				}
 			}
 			else
-			if (time_start > rhs.time_start)
 			{
-				return false;
+				if (rhs.none)
+				{
+					return !(rhs < *this); // utilize the above logic
+				}
 			}
-			else
-			if (time_end < rhs.time_end)
-			{
-				return true;
-			}
-			else
-			if (time_end > rhs.time_end)
-			{
-				return false;
-			}
+
+			// Normal case follows
+
+			if      (time_start < rhs.time_start) return true;
+			else if (time_start > rhs.time_start) return false;
+			else if (time_end < rhs.time_end)     return true;
+			else if (time_end > rhs.time_end)     return false;
+
 			return false;
+
 		}
 
 		inline bool Validate() const
 		{
-			if (time_end <= time_start)
+			if (none)
 			{
-				if (time_start != 0)
+				if (!minus_infinity && !plus_infinity)
 				{
 					return false;
 				}
+				return true;
+			}
+			if (time_end <= time_start)
+			{
+				return false;
 			}
 			return true;
 		}
@@ -133,20 +229,9 @@ class TimeSlice
 		inline bool IsEndTimeGreaterThanRhsStartTime(TimeSlice const & rhs) const
 		{
 
-			bool lhs_has_no_time_granularity = false;
-			bool rhs_has_no_time_granularity = false;
-			if (time_start == 0 && time_end == 0)
+			if (none)
 			{
-				lhs_has_no_time_granularity = true;
-			}
-			if (rhs.time_start == 0 && rhs.time_end == 0)
-			{
-				rhs_has_no_time_granularity = true;
-			}
-
-			if (lhs_has_no_time_granularity)
-			{
-				if (rhs_has_no_time_granularity)
+				if (rhs.none)
 				{
 					return false;
 				}
@@ -157,7 +242,7 @@ class TimeSlice
 			}
 			else
 			{
-				if (rhs_has_no_time_granularity)
+				if (rhs.none)
 				{
 					return true;
 				}
@@ -176,9 +261,49 @@ class TimeSlice
 
 		}
 
+		bool hasTimeGranularity() const
+		{
+			return !none;
+		}
+
+		bool startsAtNegativeInfinity() const
+		{
+			if (none)
+			{
+				if (minus_infinity)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool endsAtPlusInfinity() const
+		{
+			if (none)
+			{
+				if (plus_infinity)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		void setStart(std::int64_t const & time_start_)
 		{
 			time_start = time_start_;
+
+			if (none)
+			{
+				minus_infinity = false;
+				if (!plus_infinity)
+				{
+					// we had no time granularity,
+					// but now we've been "snipped finite" from both directions
+					none = false;
+				}
+			}
 
 			if (!Validate())
 			{
@@ -190,6 +315,17 @@ class TimeSlice
 		{
 			time_end = time_end_;
 
+			if (none)
+			{
+				plus_infinity = false;
+				if (!minus_infinity)
+				{
+					// we had no time granularity,
+					// but now we've been "snipped finite" from both directions
+					none = false;
+				}
+			}
+
 			if (!Validate())
 			{
 				int m = 0; // debugging
@@ -198,11 +334,21 @@ class TimeSlice
 
 		std::int64_t getStart() const
 		{
+			if (none && minus_infinity)
+			{
+				boost::format msg("Attempting to get start time of time slice with no time range granularity!");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
 			return time_start;
 		}
 
 		std::int64_t getEnd() const
 		{
+			if (none && plus_infinity)
+			{
+				boost::format msg("Attempting to get start time of time slice with no time range granularity!");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
 			return time_end;
 		}
 
@@ -210,6 +356,9 @@ class TimeSlice
 
 		std::int64_t time_start;
 		std::int64_t time_end;
+		bool none;
+		bool minus_infinity;
+		bool plus_infinity;
 
 };
 

@@ -68,6 +68,18 @@ bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 	else
 	{
 
+		// ********************************************************************************************* //
+		// ********************************************************************************************* //
+		//
+		// Another slick use of upper_bound!
+		// Map elements are never compared against each other.
+		// They are only compared against the new time slice.
+		// If the new time slice is EQUAL to a given map entry, for example,
+		// the map entry will be considered GREATER than the new time slice using this comparison.
+		//
+		// ********************************************************************************************* //
+		// ********************************************************************************************* //
+
 		TimeSlices::iterator startMapSlicePtr = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &AllWeightings::is_map_entry_end_time_greater_than_new_time_slice_start_time);
 		bool start_of_new_slice_is_past_end_of_map = false;
 		if (startMapSlicePtr == existing_one_past_end_slice)
