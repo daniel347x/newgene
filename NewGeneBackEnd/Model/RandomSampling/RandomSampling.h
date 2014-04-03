@@ -122,18 +122,58 @@ class TimeSlice
 		{
 			if (time_end <= time_start)
 			{
-				return false;
+				if (time_start != 0)
+				{
+					return false;
+				}
 			}
 			return true;
 		}
 
 		inline bool IsEndTimeGreaterThanRhsStartTime(TimeSlice const & rhs) const
 		{
+
+			bool lhs_has_no_time_granularity = false;
+			bool rhs_has_no_time_granularity = false;
+			if (time_start == 0 && time_end == 0)
+			{
+				lhs_has_no_time_granularity = true;
+			}
+			if (rhs.time_start == 0 && rhs.time_end == 0)
+			{
+				rhs_has_no_time_granularity = true;
+			}
+
+			if (lhs_has_no_time_granularity)
+			{
+				if (rhs_has_no_time_granularity)
+				{
+					return false;
+				}
+				else
+				{
+					return true;
+				}
+			}
+			else
+			{
+				if (rhs_has_no_time_granularity)
+				{
+					return true;
+				}
+				else
+				{
+					// normal case.  no-op
+				}
+			}
+
 			if (time_end > rhs.time_start)
 			{
 				return true;
 			}
+
 			return false;
+
 		}
 
 		void setStart(std::int64_t const & time_start_)

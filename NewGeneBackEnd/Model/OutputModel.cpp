@@ -20456,12 +20456,10 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 			}
 
-			//ExecuteSQL(result);
 			//messager.UpdateProgressBarValue(1000);
 			//boost::format msg("Processed %1% of %2% temporary rows this stage: performing transaction");
 			//msg % current_rows_stepped % current_number_rows_to_sort;
 			//messager.SetPerformanceLabel(msg.str());
-			//EndTransaction();
 
 		}
 
