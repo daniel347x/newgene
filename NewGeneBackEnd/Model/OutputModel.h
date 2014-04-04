@@ -726,6 +726,9 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				int K; // the multiplicity
 
 				// Random sampling
+				bool merge_adjacent_rows_with_identical_data_on_secondary_keys;
+				bool random_sampling;
+				std::int64_t random_sampling_number_rows;
 				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number);
 				void RandomSamplerFillDataForChildGroups(AllWeightings & allWeightings);
 				void RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
@@ -1252,10 +1255,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				// To be options / settings integrated later
 				bool remove_self_kads;
-				bool merge_adjacent_rows_with_identical_data_on_secondary_keys;
-				bool random_sampling;
 				bool random_sampling_old;
-				std::int64_t random_sampling_number_rows;
 
 				// optimization
 				std::vector<std::string> test_strings;

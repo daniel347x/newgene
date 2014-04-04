@@ -1410,7 +1410,7 @@ class VariableGroupTimeSliceData
 		VariableGroupBranchesAndLeavesVector branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves in all variable groups
 
-		void PruneTimeUnits(TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit);
+		void PruneTimeUnits(TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit, bool const merge_adjacent_rows_with_identical_data_on_secondary_keys);
 
 };
 

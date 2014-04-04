@@ -1928,7 +1928,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 
 #endif
 
-void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit)
+void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit, bool const merge_adjacent_rows_with_identical_data_on_secondary_keys)
 {
 
 	// ********************************************************************************************** //
@@ -1948,13 +1948,14 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 	// are outside the range indicated by "current time slice" in relation to "original time slice".
 	// Note that each "hit" element contains possibly MANY output rows, all corresponding
 	// to a fixed (sub-)time-width that is exactly equal to the time width corresponding
-	// to a single unit of time at the time range granularity selected by the user for output.
+	// to a single unit of time at the time range granularity corresponding to the primary variable group.
 	// I.e., for "day", the time unit is 1 day.
 	// Further note that each TIME SLICE can cover (in this example) many days -
 	// this is because rows of raw input data can also cover multiple days.
 	//
 	// Finally, note that if a time slice within the above "day" scenario (and this equally
-	// applies to any time range granularity chosen by the user) is pruned into a width smaller than
+	// applies to any time range granularity corresponding to the primary variable group)
+	// is pruned into a width smaller than
 	// a day (which can happen during child variable group merges), the number of "time units"
 	// in the resulting "hits" variable could round to 0.  However, the algorithm guarantees
 	// that in this scenario, no matter how small the time slice is being pruned to, there
@@ -1963,6 +1964,25 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 	// "day" time slice - but with sub-day granularity.  This is desired so that all K-ads
 	// are successfully output.
 	// ********************************************************************************************** //
+
+	if (merge_adjacent_rows_with_identical_data_on_secondary_keys)
+	{
+		// If rows are being merged (when possible) in the output,
+		// this function does not apply.
+		// Only if rows are being output in identical time units
+		// (or sub-time-units, if such a row has been split into
+		// sub-time-units by child data merges) does this routine apply.
+		// Also note that this routine processes the "hits" data cache
+		// containing all output rows for the given branch, distributed
+		// over even "time unit" chunks corresponding to the time granularity
+		// corresponding to the primary variable group, and the "hits" data
+		// is only so distributed for random sampling (which could still
+		// call this function, but only if rows are not being merged,
+		// because even with random sampling, after the sampling is complete,
+		// the user still has the option to display the results with
+		// rows consolidated, in which case this function, again, won't be called).
+		return;
+	}
 
 	if (!originalTimeSlice.hasTimeGranularity() || !currentTimeSlice.hasTimeGranularity())
 	{
