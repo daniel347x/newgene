@@ -1579,6 +1579,7 @@ public:
 	bool RetrieveNextBranchAndLeaves(int const K);
 	void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
 	void ResetBranchCaches(bool const empty_all = false);
+	void ConsolidateRowsWithinBranch(Branch const & branch);
 
 protected:
 
@@ -1598,8 +1599,6 @@ protected:
 
 	// Merge time slice data into a map element
 	bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
-
-	void ConsolidateRowsWithinBranch(Branch const & branch);
 
 	void GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves);
 	void GenerateAllOutputRows(int const K, Branch const & branch, Leaves const & leaves);

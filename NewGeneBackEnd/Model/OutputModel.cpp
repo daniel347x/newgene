@@ -541,7 +541,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		if (true) // Consolidate data mode is on
 		{
-			allWeightings.ConsolidateData(random_sampling);
+			ConsolidateData(random_sampling, allWeightings);
 			if (failed || CheckCancelled()) return;
 		}
 
@@ -21565,7 +21565,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreenDirect(AllWeightings & allWeightings)
 {
 
 	std::string setting_path_to_kad_output = CheckOutputFileExists();
@@ -22199,5 +22199,81 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 	allWeightings.sorted_rows.clear();
 	allWeightings.sorted_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
 	saved_historic_rows.clear();
+
+}
+
+void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings)
+{
+
+	std::string setting_path_to_kad_output = CheckOutputFileExists();
+
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
+
+	if (setting_path_to_kad_output.empty())
+	{
+		return;
+	}
+
+	std::fstream output_file;
+	output_file.open(setting_path_to_kad_output, std::ios::out | std::ios::trunc);
+
+	if (!output_file.good())
+	{
+		boost::format msg("Cannot open output file %1%");
+		msg % setting_path_to_kad_output;
+		SetFailureMessage(msg.str());
+		failed = true;
+		return;
+	}
+
+	// Write columns headers
+	int column_index = 0;
+	bool first = true;
+	std::for_each(final_result.second.columns_in_view.begin(),
+		final_result.second.columns_in_view.end(), [this, &output_file, &first, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
+	{
+
+		++column_index;
+
+		if (column_index >= final_result.second.columns_in_view.size() - 1)
+		{
+			return; // for now, do not output datetime columns
+		}
+
+		if (!first)
+		{
+			output_file << ",";
+		}
+		first = false;
+
+		output_file << unformatted_column.column_name_in_original_data_table;
+		if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+		{
+			output_file << "_";
+			output_file << boost::lexical_cast<std::string>(unformatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
+		}
+
+	});
+	output_file << std::endl;
+
+
+	std::int64_t rows_written = 0;
+
+	std::for_each(allWeightings.sorted_rows.cbegin(), allWeightings.sorted_rows.cend(), [&](decltype(allWeightings.sorted_rows)::value_type const & output_row)
+	{
+		bool first = true;
+		std::for_each(output_row.output_row.cbegin(), output_row.output_row.cend(), [&](InstanceData const & data)
+		{
+			if (!first)
+			{
+				output_file << ",";
+			}
+			first = false;
+			output_file << data;
+		});
+	});
 
 }
