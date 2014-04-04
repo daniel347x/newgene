@@ -917,6 +917,45 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K)
 
 }
 
+void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch, Leaves const & leaves)
+{
+
+	boost::multiprecision::cpp_int which_time_unit = -1;  // -1 means "full sampling for branch" - no need to break down into time units (which have identical full sets)
+
+	branch.hits[which_time_unit].clear;
+	branch.remaining[which_time_unit].clear;
+
+	static int saved_range = -1;
+
+	BranchOutputRow single_leaf_combination;
+
+	bool skip = false;
+	if (static_cast<size_t>(K) >= leaves.size())
+	{
+		skip = true;
+		for (int n = 0; n < static_cast<int>(leaves.size()); ++n)
+		{
+			single_leaf_combination.Insert(n);
+		}
+		single_leaf_combination.SaveCache();
+		branch.remaining[which_time_unit].insert(single_leaf_combination);
+	}
+
+	if (K <= 0)
+	{
+		return;
+	}
+
+	if (!skip)
+	{
+		PopulateAllLeafCombinations(which_time_unit, K, branch, leaves);
+	}
+
+	branch.hits[which_time_unit].insert(branch.remaining[which_time_unit].begin(), branch.remaining[which_time_unit].end());
+	branch.remaining[which_time_unit].clear();
+
+}
+
 void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves)
 {
 
@@ -1393,13 +1432,33 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 void AllWeightings::PrepareRandomSamples(int const K)
 {
 
-	Branch branch;
-	Leaves leaves;
-	TimeSlice time_slice;
-	BranchOutputRow outputRow;
 	while (RetrieveNextBranchAndLeaves(K))
 	{
+		// It's all happening in the condition
 	}
+
+}
+
+void AllWeightings::PrepareFullSamples()
+{
+
+	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
+	{
+
+		TimeSlice const & the_slice = timeSlice.first;
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+
+		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+		{
+			std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+			{
+				GenerateAllOutputRows(AllWeightings.K, branch_and_leaves.first, branch_and_leaves.second);
+			});
+
+		});
+
+	});
 
 }
 
@@ -1450,6 +1509,58 @@ BranchOutputRow::~BranchOutputRow()
 }
 
 #ifdef _DEBUG
+void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
+{
+
+	bool startinf = false;
+	bool endinf = false;
+
+	sdata += "<TIMESTAMP_START>";
+	if (!time_slice.hasTimeGranularity())
+	{
+		if (time_slice.startsAtNegativeInfinity())
+		{
+			sdata += "NEG_INF";
+			startinf = true;
+		}
+	}
+	if (!startinf)
+	{
+		sdata += boost::lexical_cast<std::string>(time_slice.getStart());
+	}
+	sdata += "</TIMESTAMP_START>";
+
+	sdata += "<TIMESTAMP_END>";
+	if (!time_slice.hasTimeGranularity())
+	{
+		if (time_slice.endsAtPlusInfinity())
+		{
+			sdata += "INF";
+			endinf = true;
+		}
+	}
+	if (!endinf)
+	{
+		sdata += boost::lexical_cast<std::string>(time_slice.getEnd());
+	}
+	sdata += "</TIMESTAMP_END>";
+
+	sdata += "<DATETIME_START>";
+	if (!startinf)
+	{
+		sdata += TimeRange::convertTimestampToString(time_slice.getStart());
+	}
+	sdata += "</DATETIME_START>";
+
+	sdata += "<DATETIME_END>";
+	if (!endinf)
+	{
+		sdata += TimeRange::convertTimestampToString(time_slice.getEnd());
+	}
+	sdata += "</DATETIME_END>";
+
+}
+
 void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys)
 {
 	int index = 0;
@@ -1678,58 +1789,6 @@ void SpitWeighting(std::string & sdata, Weighting const & weighting)
 	sdata += "</WEIGHTING_VALUE>";
 }
 
-void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
-{
-
-	bool startinf = false;
-	bool endinf = false;
-
-	sdata += "<TIMESTAMP_START>";
-	if (!time_slice.hasTimeGranularity())
-	{
-		if (time_slice.startsAtNegativeInfinity())
-		{
-			sdata += "NEG_INF";
-			startinf = true;
-		}
-	}
-	if (!startinf)
-	{
-		sdata += boost::lexical_cast<std::string>(time_slice.getStart());
-	}
-	sdata += "</TIMESTAMP_START>";
-
-	sdata += "<TIMESTAMP_END>";
-	if (!time_slice.hasTimeGranularity())
-	{
-		if (time_slice.endsAtPlusInfinity())
-		{
-			sdata += "INF";
-			endinf = true;
-		}
-	}
-	if (!endinf)
-	{
-		sdata += boost::lexical_cast<std::string>(time_slice.getEnd());
-	}
-	sdata += "</TIMESTAMP_END>";
-
-	sdata += "<DATETIME_START>";
-	if (!startinf)
-	{
-		sdata += TimeRange::convertTimestampToString(time_slice.getStart());
-	}
-	sdata += "</DATETIME_START>";
-
-	sdata += "<DATETIME_END>";
-	if (!endinf)
-	{
-		sdata += TimeRange::convertTimestampToString(time_slice.getEnd());
-	}
-	sdata += "</DATETIME_END>";
-
-}
-
 void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file)
 {
 
@@ -1771,6 +1830,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 			sdata_.push_back(std::string());
 			sdata = &sdata_.back();
 		}
+
 		*sdata += "<TIME_SLICE>";
 
 		TimeSlice const & the_slice = timeSlice.first;
@@ -1820,6 +1880,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 		*sdata += "</VARIABLE_GROUPS_BRANCHES_AND_LEAVES>";
 
 		*sdata += "</TIME_SLICE>";
+
 	});
 	*sdata += "</TIME_SLICES>";
 

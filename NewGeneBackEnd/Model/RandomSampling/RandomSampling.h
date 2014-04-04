@@ -1127,6 +1127,7 @@ class AllWeightings
 		void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
 		void PrepareRandomNumbers(int how_many);
 		void PrepareRandomSamples(int const K);
+		void PrepareFullSamples();
 		bool RetrieveNextBranchAndLeaves(int const K);
 		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
 		void ResetBranchCaches(bool const empty_all = false);
@@ -1151,6 +1152,7 @@ class AllWeightings
 		bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
 
 		void GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves);
+		void GenerateAllOutputRows(int const K, Branch const & branch, Leaves const & leaves);
 
 		static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_ , TimeSlices::value_type const & map_entry_)
 		{

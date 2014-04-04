@@ -1251,7 +1251,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				bool merge_adjacent_rows_with_identical_data_on_secondary_keys;
 				bool random_sampling;
 				bool random_sampling_old;
-				std::int64_t random_sampling_rows_per_stage;
+				std::int64_t random_sampling_number_rows;
 
 				// optimization
 				std::vector<std::string> test_strings;

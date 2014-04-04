@@ -500,7 +500,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.PrepareRandomNumbers(samples);
 		if (failed || CheckCancelled()) return;
 
-		allWeightings.PrepareRandomSamples(K);
+		if (random_sampling)
+		{
+			allWeightings.PrepareRandomSamples(K);
+		}
+		else
+		{
+			allWeightings.PrepareFullSamples();
+		}
 		if (failed || CheckCancelled()) return;
 
 		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
