@@ -1940,6 +1940,14 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
+	std::int64_t leftWidth = 0;
+	std::int64_t middleWidth = 0;
+	std::int64_t rightWidth = 0;
+
+	bool useLeft = false;
+	bool useMiddle = false;
+	bool useRight = false;
+
 	// Time slices get split apart, but never merged together, in the context of this function.
 
 	// Note the fact that when time slices are MERGED it is the context of CONSOLIDATED output,
@@ -1964,99 +1972,10 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 		{
 
 			// left of original is by itself, right of original overlaps entire current with nothing left over
-			std::int64_t leftWidth = currentTimeSlice.getStart() - originalTimeSlice.getStart();
-			std::int64_t rightWidth = currentTimeSlice.getEnd() - currentTimeSlice.getStart();
+			leftWidth = currentTimeSlice.getStart() - originalTimeSlice.getStart();
+			rightWidth = currentTimeSlice.getEnd() - currentTimeSlice.getStart();
 
-			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
-			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
-
-			std::int64_t leftRounded = static_cast<std::int64_t>(leftUnits + 0.5);
-			std::int64_t rightRounded = static_cast<std::int64_t>(rightUnits + 0.5);
-
-			// Handle very rare rounding issues to ensure that all "hits" entries are included somewhere
-			if (leftRounded + rightRounded != originalWidth)
-			{
-				if (leftRounded + rightRounded - originalWidth != 1 && leftRounded + rightRounded - originalWidth != -1)
-				{
-					boost::format msg("Logic error when pruning time slice: time unit counts do not match");
-					throw NewGeneException() << newgene_error_description(msg.str());
-				}
-				if (leftRounded + rightRounded - originalWidth == 1)
-				{
-					if (leftRounded > 1)
-					{
-						--leftRounded;
-					}
-					else
-					{
-						--rightRounded;
-					}
-				}
-				else if (leftRounded + rightRounded - originalWidth == -1)
-				{
-					if (leftRounded == 0)
-					{
-						++leftRounded;
-					}
-					else
-					{
-						++rightRounded;
-					}
-				}
-			}
-
-			if (leftRounded < 0 || rightRounded < 0 || leftRounded > originalWidth || rightRounded > originalWidth)
-			{
-				boost::format msg("Logic error when pruning time slice: time unit counts do not match after adjustment");
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
-
-			bool left_was_zero = false;
-			bool right_was_zero = false;
-			if (leftRounded == 0)
-			{
-				left_was_zero = true;
-				++leftRounded;
-			}
-			if (rightRounded == 0)
-			{
-				right_was_zero = true;
-				++rightRounded;
-			}
-
-			std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> new_hits;
-			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = branches_and_leaves;
-			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
-			{
-				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
-				{
-					auto const & hits = branch_and_leaves.first.hits;
-
-					// throw away left
-					std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & hit)
-					{
-						std::int64_t hit_time_index = hit.first;
-						std::int64_t hit_time_index_one_based = hit_time_index;
-						bool matches_left = false;
-						bool matches_right = false;
-						if (hit_time_index_one_based <= leftRounded)
-						{
-							// matches left
-							matches_left = true;
-						}
-						if (hit_time_index_one_based > originalWidth - rightRounded)
-						{
-							matches_right = true;
-						}
-
-						// Throw away left
-						if (matches_right)
-						{
-							new_hits[hit_time_index - (originalWidth - rightRounded)] = hit.second;
-						}
-					});
-				});
-			});
+			useRight = true;
 
 		}
 		else
@@ -2064,17 +1983,11 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 
 			// original end is past current end
 			// left of original is by itself, current is completely overlapped by original, right of original is by itself
-			std::int64_t leftWidth = currentTimeSlice.getStart() - originalTimeSlice.getStart();
-			std::int64_t middleWidth = currentTimeSlice.getEnd() - currentTimeSlice.getStart();
-			std::int64_t rightWidth = originalTimeSlice.getEnd() - currentTimeSlice.getEnd();
+			leftWidth = currentTimeSlice.getStart() - originalTimeSlice.getStart();
+			middleWidth = currentTimeSlice.getEnd() - currentTimeSlice.getStart();
+			rightWidth = originalTimeSlice.getEnd() - currentTimeSlice.getEnd();
 
-			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
-			long double middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
-			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
-
-			std::int64_t leftRounded = static_cast<std::int64_t>(leftUnits + 0.5);
-			std::int64_t middleRounded = static_cast<std::int64_t>(middleUnits + 0.5);
-			std::int64_t rightRounded = static_cast<std::int64_t>(rightUnits + 0.5);
+			useMiddle = true;
 
 		}
 	}
@@ -2097,14 +2010,16 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 
 			// original end is past current end
 			// Left edges are the same, entire current overlaps original, and right side of original is by itself on the right
-			std::int64_t leftWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
-			std::int64_t rightWidth = originalTimeSlice.getEnd() - currentTimeSlice.getEnd();
+			leftWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
+			rightWidth = originalTimeSlice.getEnd() - currentTimeSlice.getEnd();
 
-			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
-			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+			leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
+			rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
 
-			std::int64_t leftRounded = static_cast<std::int64_t>(leftUnits + 0.5);
-			std::int64_t rightRounded = static_cast<std::int64_t>(rightUnits + 0.5);
+			leftRounded = static_cast<std::int64_t>(leftUnits + 0.5);
+			rightRounded = static_cast<std::int64_t>(rightUnits + 0.5);
+
+			useLeft = true;
 
 		}
 	}
@@ -2139,5 +2054,223 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 		boost::format msg("Attempting to prune time units that do not overlap!");
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
+
+	long double leftUnits = 0.0;
+	long double middleUnits = 0.0;
+	long double rightUnits = 0.0;
+
+	std::int64_t leftRounded = 0;
+	std::int64_t middleRounded = 0;
+	std::int64_t rightRounded = 0;
+
+	leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
+	middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
+	rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+
+	leftRounded = static_cast<std::int64_t>(leftUnits + 0.5);
+	middleRounded = static_cast<std::int64_t>(middleUnits + 0.5);
+	rightRounded = static_cast<std::int64_t>(rightUnits + 0.5);
+
+	// Handle very rare rounding issues to ensure that all "hits" entries are included somewhere
+	if (useLeft || useRight)
+	{
+
+		if (leftRounded + rightRounded != originalWidth)
+		{
+			if (leftRounded + rightRounded - originalWidth != 1 && leftRounded + rightRounded - originalWidth != -1)
+			{
+				boost::format msg("Logic error when pruning time slice: time unit counts do not match");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+			if (leftRounded + rightRounded - originalWidth == 1)
+			{
+				if (leftRounded > 1)
+				{
+					--leftRounded;
+				}
+				else
+				{
+					--rightRounded;
+				}
+			}
+			else if (leftRounded + rightRounded - originalWidth == -1)
+			{
+				if (leftRounded == 0)
+				{
+					++leftRounded;
+				}
+				else
+				{
+					++rightRounded;
+				}
+			}
+		}
+
+		if (leftRounded < 0 || rightRounded < 0 || leftRounded > originalWidth || rightRounded > originalWidth)
+		{
+			boost::format msg("Logic error when pruning time slice: time unit counts do not match after adjustment");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+	}
+	else if (useMiddle)
+	{
+		if (leftRounded + rightRounded + middleRounded - originalWidth != 1 && leftRounded + rightRounded + middleRounded - originalWidth != -1)
+		{
+			boost::format msg("Logic error when pruning time slice: time unit counts do not match");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		if (leftRounded + rightRounded + middleRounded - originalWidth == 1)
+		{
+			if (leftRounded > 1)
+			{
+				--leftRounded;
+			}
+			else if (middleRounded > 1)
+			{
+				--middleRounded;
+			}
+			else
+			{
+				--rightRounded;
+			}
+		}
+		else if (leftRounded + rightRounded + middleRounded - originalWidth == -1)
+		{
+			if (leftRounded == 0)
+			{
+				++leftRounded;
+			}
+			else if (middleRounded == 0)
+			{
+				++middleRounded;
+			}
+			else
+			{
+				++rightRounded;
+			}
+		}
+	}
+
+	if (leftRounded < 0 || rightRounded < 0 || middleRounded < 0 || leftRounded > originalWidth || rightRounded > originalWidth || middleRounded > originalWidth)
+	{
+		boost::format msg("Logic error when pruning time slice: time unit counts do not match after adjustment");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	bool left_was_zero = false;
+	bool middle_was_zero = false;
+	bool right_was_zero = false;
+	if (leftRounded == 0)
+	{
+		left_was_zero = true;
+		++leftRounded;
+	}
+	if (rightRounded == 0)
+	{
+		right_was_zero = true;
+		++rightRounded;
+	}
+	if (middleRounded == 0)
+	{
+		middle_was_zero = true;
+		++middleRounded; // display at least one row with this data, not 0
+	}
+
+	std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> new_hits;
+	VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = branches_and_leaves;
+	std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+	{
+		std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+		{
+
+			auto const & hits = branch_and_leaves.first.hits;
+
+			std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & hit)
+			{
+				std::int64_t hit_time_index = hit.first;
+				std::int64_t hit_time_index_one_based = hit_time_index;
+				bool matches_left = false;
+				bool matches_right = false;
+				bool matches_middle = false;
+				
+				// Determine if matches left
+				if (hit_time_index_one_based <= leftRounded)
+				{
+					// matches left
+					matches_left = true;
+				}
+
+				// Determine if matches right
+				if (hit_time_index_one_based > originalWidth - rightRounded)
+				{
+					matches_right = true;
+				}
+				 
+				// Determine if matches middle
+				if (left_was_zero)
+				{
+					if (hit_time_index_one_based <= middleRounded)
+					{
+						matches_middle = true;
+					}
+				}
+				else if (right_was_zero)
+				{
+					if (hit_time_index_one_based > originalWidth - middleRounded)
+					{
+						matches_middle = true;
+					}
+				}
+				else if (hit_time_index_one_based > leftRounded && hit_time_index_one_based <= (originalWidth - rightRounded))
+				{
+					matches_middle = true;
+				}
+
+				if (useRight)
+				{
+					if (matches_right)
+					{
+						new_hits[hit_time_index - (originalWidth - rightRounded)] = hit.second;
+					}
+				}
+				else
+				if (useLeft)
+				{
+					if (matches_left)
+					{
+						new_hits[hit_time_index] = hit.second;
+					}
+				}
+				else
+				if (useMiddle)
+				{
+					if (matches_middle)
+					{
+						if (left_was_zero)
+						{
+							new_hits[hit_time_index] = hit.second;
+						}
+						else if (right_was_zero)
+						{
+							new_hits[hit_time_index - (originalWidth - middleRounded)] = hit.second;
+						}
+						else
+						{
+							new_hits[hit_time_index - leftRounded] = hit.second;
+						}
+					}
+				}
+
+			});
+
+			hits.clear();
+			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](decltype(new_hits)::value_type & new_hit)
+			{
+				hits[new_hit.first] = new_hit.second;
+			});
+
+		});
+	});
 
 }
