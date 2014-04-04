@@ -544,10 +544,42 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// IMPORTANT:
 		// Disallow "separation" mode for time granularity = none
 		// ************************************************************ //
-		if (true) // Consolidate data mode is on
+		if (merge_adjacent_rows_with_identical_data_on_secondary_keys) // Consolidate data mode is on
 		{
+			// Eliminates the division of sets of output rows within
+			// each branch among internal (to the branch)
+			// "time unit entries" (each such entry containing
+			// data for only a single time unit corresponding to the
+			// primary variable group - noting that it is possible
+			// for a single branch to contain *multiple* such time units;
+			// i.e., the primary variable group has "month" time granularity,
+			// but some branches (corresponding to rows of raw input data)
+			// span multiple months.
+			// Note that the merging of child groups can split
+			// branches corresponding to only a SINGLE time unit
+			// into branches corresponding to SUB-time units;
+			// such as a "second" granularity child group
+			// intersecting a month.
+			// (Even time slices with multiple months in this example
+			// can be split such that one or two resulting time slices
+			// has such a sub-month width.)
+			// This latter case is handled properly by the "PruneTimeSlice()"
+			// function, guaranteeing that even in such sub-time-unit
+			// branches, the rows appear once.
+			// See detailed comments in the "PruneTimeSlice()" function.
 			ConsolidateData(random_sampling, allWeightings);
 			if (failed || CheckCancelled()) return;
+		}
+		else
+		{
+			// no-op: When data is being "un-consolidated" -
+			// i.e., displayed with one row of output data
+			// per time granularity unit of the primary variable group
+			// (or sub-time-units if child merges have split
+			// individual time unit rows),
+			// the necessary splitting of time slices
+			// (which can contain multiple time units)
+			// occurs in "RandomSamplingWriteResultsToFileOrScreen()".
 		}
 
 		messager.AppendKadStatusText("Writing results to disk...", this);
