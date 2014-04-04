@@ -1512,9 +1512,7 @@ public:
 
 		if (mode & CREATE_ROW_MODE__INSTANCE_DATA_VECTOR)
 		{
-			if (!first)
-			{
-			}
+			data.push_back(data);
 		}
 
 		first = false;

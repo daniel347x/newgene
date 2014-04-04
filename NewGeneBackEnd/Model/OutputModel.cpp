@@ -22099,13 +22099,17 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 						create_output_row_visitor::output_file = nullptr;
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
 
-						incoming.emplace(the_slice, incoming_row);
+						incoming.emplace(the_slice, create_output_row_visitor::data);
+						create_output_row_visitor::data.clear();
 					});
 
 					std::vector<MergedTimeSliceRow> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
 					std::vector<MergedTimeSliceRow> only_previous(ongoing_merged_rows.size());
 					std::vector<MergedTimeSliceRow> only_new(incoming.size());
 
+					// ************************************************************************************************************************************************************** //
+					// Find out which rows match just in terms of DATA (not time) between the incoming, and the previous, sets of rows
+					// ************************************************************************************************************************************************************** //
 					auto finalpos = std::set_intersection(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), intersection.begin());
 					auto finalpos_previous = std::set_difference(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), only_previous.begin());
 					auto finalpos_incoming = std::set_difference(incoming.cbegin(), incoming.cend(), ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), only_new.begin());
@@ -22113,6 +22117,12 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 					intersection.resize(finalpos - intersection.begin());
 					only_previous.resize(finalpos_previous - only_previous.begin());
 					only_new.resize(finalpos_incoming - only_new.begin());
+
+					// ************************************************************************************************************************************************************** //
+					// Any rows that match in terms of DATA are also known to be adjacent in TIME,
+					// and these can now be placed into the ongoing set.
+					// Those previous rows that did not match are stashed away.
+					// ************************************************************************************************************************************************************** //
 
 					// Intersection now contains all previous rows that matched with incoming rows,
 					// and they have been properly extended.
