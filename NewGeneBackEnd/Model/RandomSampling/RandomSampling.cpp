@@ -1462,6 +1462,61 @@ void AllWeightings::PrepareFullSamples(int const K)
 
 }
 
+void AllWeightings::ConsolidateData(bool const random_sampling)
+{
+
+	if (random_sampling)
+	{
+
+		// ************************************************************************************************************* //
+		// This is a necessary preparatory phase, internal to each branch within individual time slices,
+		// before identical rows can be merged across adjacent time slices.
+		//
+		// In the random sampling case, the output rows that are stored inside each branch
+		// are further separated (binned) into fixed-width time units.
+		// Identical output rows can appear in different bins (but only once within each bin).
+		// Rows are identical if their leaves are identical (this guarantees that all secondary
+		// data will be identical), regardless of which bin within the given branch they lie in.
+		//
+		// In "Consolidate" mode, we consolidate the output into as few rows as possible.
+		// This means that if adjacent rows (time-wise) contain identical data except for the time window,
+		// we will merge these into a single row with the combined time window.
+		//
+		// Because rows in different bins with identical leaves are identical within a branch,
+		// here we simply take advantage of std::set's uniqueness guarantee by looping through
+		// all bins (time units) and inserting all output rows into a single set within the branch.
+		//
+		// The "time unit" index given to this set has the special value of -1.
+		// Because inserts of duplicate data into the set are rejected, this effectively merges
+		// all output rows across time units (bins) within each branch into a single set of rows
+		// for each branch.
+		//
+		// Once this is complete, we are ready to move on to the main consolidation phase
+		// ... namely, merging identical rows *across* time slices.
+		// ************************************************************************************************************* //
+
+		std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
+		{
+
+			TimeSlice const & the_slice = timeSlice.first;
+			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+
+			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			{
+				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				{
+					GenerateAllOutputRows(K, branch_and_leaves.first, branch_and_leaves.second);
+				});
+
+			});
+
+		});
+
+	}
+
+}
+
 BranchOutputRow::BranchOutputRow()
 {
 }

@@ -813,7 +813,15 @@ class BranchOutputRow
 	private: // for debugging convenience, make public; but be sure it builds when private
 #	endif
 	
-		// Index into the branch's Leaf set
+		// Index into the branch's Leaf set.
+		// This *uniquely* defines the row.
+		// Any two BranchOutputRow's in the same branch
+		// with the same set of primary leaves
+		// ... is guaranteed to have identical
+		// secondary data for all variable groups.
+		// This includes the primary top-level variable group,
+		// the non-primary top-level variable groups,
+		// and all child variable groups.
 		std::set<int> primary_leaves;
 
 	public:
@@ -1131,6 +1139,7 @@ class AllWeightings
 		bool RetrieveNextBranchAndLeaves(int const K);
 		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
 		void ResetBranchCaches(bool const empty_all = false);
+		void ConsolidateData(bool const random_sampling);
 
 	protected:
 

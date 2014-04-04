@@ -539,6 +539,12 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
 		if (failed || CheckCancelled()) return;
 
+		if (true) // Consolidate data mode is on
+		{
+			allWeightings.ConsolidateData(random_sampling);
+			if (failed || CheckCancelled()) return;
+		}
+
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
 		RandomSamplingWriteResultsToFileOrScreen(allWeightings);
