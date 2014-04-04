@@ -1432,7 +1432,6 @@ class AllWeightings
 		bool RetrieveNextBranchAndLeaves(int const K);
 		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
 		void ResetBranchCaches(bool const empty_all = false);
-		void ConsolidateData(bool const random_sampling);
 
 	protected:
 
@@ -1486,6 +1485,14 @@ class create_output_row_visitor : public boost::static_visitor<>
 
 public:
 
+	enum MODE
+	{
+		CREATE_ROW_MODE__NONE = 0
+		, CREATE_ROW_MODE__OUTPUT_FILE = 1
+		, CREATE_ROW_MODE__INSTANCE_DATA_VECTOR = 2
+		, CREATE_ROW_MODE__PREPARED_STATEMENT = 4
+	};
+
 	create_output_row_visitor(bool & first_)
 		: first(first_)
 	{}
@@ -1493,15 +1500,30 @@ public:
 	template <typename T>
 	void operator()(const T & data) const
 	{
-		if (!first)
+
+		if (mode & CREATE_ROW_MODE__OUTPUT_FILE)
 		{
-			output_file << ",";
+			if (!first)
+			{
+				output_file << ",";
+			}
+			output_file << data;
 		}
+
+		if (mode & CREATE_ROW_MODE__INSTANCE_DATA_VECTOR)
+		{
+			if (!first)
+			{
+			}
+		}
+
 		first = false;
-		output_file << data;
+
 	}
 
-	static std::fstream & output_file;
+	static std::fstream * output_file;
+	static std::vector<InstanceData> data;
+	static int mode;
 	bool & first;
 
 };

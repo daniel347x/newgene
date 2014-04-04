@@ -21679,302 +21679,11 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						return;
 					}
 
-					first = true;
-
-					// First, the branch primary keys
-					std::for_each(branch.primary_keys.cbegin(), branch.primary_keys.cend(), [&](DMUInstanceData const & data)
-					{
-						boost::apply_visitor(create_output_row_visitor(first), data);
-					});
-
-					// Then, the leaf primary keys - for multiple leaves
-					// (this is the K-ad)
-					int numberLeavesHandled = 0;
-					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
-					{
-						Leaf & leaf = branch.leaves_cache[leafIndex];
-
-						// For the case K = 1, there ARE no primary keys for this leaf.
-						// But this is still covered here, see comments starting next line.
-						// In the K = 1 case, the branch has one and only one leaf object with no primary keys
-						// (just a data lookup), and everything is guaranteed to be output from the *branch* in this case.
-						// But the branch data has already been output, above, so we're set in the K=1 case.
-						// (Note that every output row has one leaf index in the K=1 case, pointing to this branch's single leaf).
-						//
-						// For the K > N case (i.e., there are more leaves requested by the user
-						// than there are leaves available for this branch),
-						// see the following code block after this std::for_each() exits.
-						std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
-						{
-							boost::apply_visitor(create_output_row_visitor(first), data);
-						});
-						++numberLeavesHandled;
-					});
-
-					// Fill in remaining leaf slots with blanks for the case K > N.
-					// Note that K >= 1, and N >= 1.
-					// Note that the K = 1 case corresponds to no data in any leaves,
-					// and all primary key data will be output from the *branch*.
-					// which has already been done, above.
-					// (The K = 1 case is indicated by "which_primary_index_has_multiplicity_greater_than_1 == -1".)
-					if (which_primary_index_has_multiplicity_greater_than_1 != -1)
-					{
-						int numberColumnsInTheDMUWithMultiplicityGreaterThan1 = biggest_counts[0].second[which_primary_index_has_multiplicity_greater_than_1].second;
-						for (int n = numberLeavesHandled; n < K; ++n)
-						{
-							for (int nk = 0; nk < numberColumnsInTheDMUWithMultiplicityGreaterThan1; ++n)
-							{
-								boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
-							}
-						}
-					}
-
-					// Then, the primary top-level variable group secondary data.
-					// This info is stored in each leaf.
-					numberLeavesHandled = 0;
-					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
-					{
-						Leaf & leaf = branch.leaves_cache[leafIndex];
-
-						// Even the K=1 case is handled in the "index_into_raw_data > 0" block,
-						// because although the leaf has no primary keys,
-						// **it does have an index to data** (See RandomSampling_ReadData_AddToTimeSlices(),
-						//   where the leaf's data index is set regardless of whether there are DMU columns for the leaf.)
-						// Further, this secondary data is guaranteed to be present,
-						// because it came from the same row of input data that the branch+leaf (or branch, for K=1) did.
-						if (leaf.index_into_raw_data > 0) // index_into_raw_data is 1-based because it corresponds to SQLite's automatically-generated "rowid" column.
-						{
-							SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
-							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
-							{
-								boost::apply_visitor(create_output_row_visitor(first), data);
-							});
-						}
-						else
-						{
-							// no data available.  Import should always place blanks, so this should never happen.
-							boost::format msg("Logic error: Missing primary variable group data (there isn't even blank data).");
-							throw NewGeneException() << newgene_error_description(msg.str());
-						}
-						++numberLeavesHandled;
-					});
-
-					// Fill in remaining leaf slots with blanks for the case K > N.
-					// See comments for identical scenario above, where the leaf primary data is being output.
-					if (which_primary_index_has_multiplicity_greater_than_1 != -1)
-					{
-						int numberSecondaryColumns = top_level_number_secondary_columns[top_level_vg_index];
-						for (int n = numberLeavesHandled; n < K; ++n)
-						{
-							for (int nk = 0; nk < numberSecondaryColumns; ++n)
-							{
-								boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
-							}
-						}
-					}
-
-					// Then, the non-primary top-level variable group secondary data.
-					// This info is stored in the leaf also.
-					//
-					// Show secondary data grouped by variable group,
-					// then by multiplicity.
-					// There might be multiple fields for each variable group and within each multiplicity,
-					// ... so the logic is a bit non-trivial to get the display order right.
-					int numberTopLevelGroups = static_cast<int>(primary_variable_groups_vector.size());
-					for (int vgNumber = 0; vgNumber < numberTopLevelGroups; ++vgNumber)
-					{
-						for (int multiplicity = 0; multiplicity < K; ++multiplicity)
-						{
-
-							bool matchedVariableGroup = false;
-							bool matchedMultiplicity = false;
-
-							// Find the variable group and leaf that is desired.
-							// Some variable groups have no data, in which case they will not be in the list;
-							// this case is covered below.
-							int testMultiplicity = 0;
-
-							// Again, the K=1 case is covered here.
-							// In the K=1 case, there is one leaf per output row,
-							// and this leaf has no primary keys,
-							// but it has the same secondary key information as any other leaf -
-							// for both the primary variable group, and all non-primary top-level variable groups.
-							// I.e., the non-primary top-level variable groups populate their
-							// "other_top_level_indices_into_raw_data" variable in the same way that the K>1 case does
-							//  (see RandomSampling_ReadData_AddToTimeSlices(), the VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL case,
-							//   for where "other_top_level_indices_into_raw_data" is populated (regardless of the
-							//   K=1 case where there are no primary keys)).
-							std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
-							{
-
-								if (testMultiplicity != multiplicity)
-								{
-									++testMultiplicity;
-									return;
-								}
-
-								matchedMultiplicity = true;
-
-								Leaf & leaf = branch.leaves_cache[leafIndex];
-
-								// Here is where, in addition to the K>1 case, the K=1 case is supported,
-								// because "other_top_level_indices_into_raw_data" is populated
-								// regardless of whether "primary_keys" is populated for the leaf.
-								std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
-								{
-									int const vg_number = top_level_vg_and_data_index.first;
-									if (vg_number == vgNumber)
-									{
-
-										// We now have both the multiplicity and the variable group that is desired
-										// for the correct sequence of output data
-										matchedVariableGroup = true;
-
-										// *********************************************************************** //
-										// If we have ANY secondary data, which we do if we're here,
-										// then we have ALL COLUMNS of secondary data,
-										// because the schema controls this and the data is pulled from the DB,
-										// which has empty columns rather than missing columns
-										// *********************************************************************** //
-										int const vg_number = top_level_vg_and_data_index.first;
-										std::int64_t const & data_index = top_level_vg_and_data_index.second;
-										DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
-										SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
-										std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
-										{
-											boost::apply_visitor(create_output_row_visitor(first), data);
-										});
-
-									}
-								});
-								++testMultiplicity;
-							
-							});
-
-							if (matchedMultiplicity)
-							{
-								// The case of no matching data for an existing leaf,
-								// for non-primary top-level variable groups, is covered here.
-								//
-								// We have matched the multiplicity,
-								// but there was no variable group data for this multiplicity.
-								// We must fill in all secondary keys for this multiplicity with blanks
-								if (!matchedVariableGroup)
-								{
-									if (vgNumber != top_level_vg_index)
-									{
-										// Missing a variable group.  Fill with blanks.
-										int numberSecondaries = top_level_number_secondary_columns[vgNumber];
-										for (int n = 0; n < numberSecondaries; ++n)
-										{
-											boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
-										}
-									}
-								}
-							}
-							else
-							{
-								// The K > N case is covered here (missing leaves).
-								//
-								// We did not match the multiplicity.
-								// This means there are missing leaves.
-								// For the current leaf and variable group,
-								// we must now fill in the secondary keys.
-								// This "else" block could be merged with
-								// the "if" block, but for conceptual clarity it is separated.
-								if (vgNumber != top_level_vg_index)
-								{
-									int numberSecondaries = top_level_number_secondary_columns[vgNumber];
-									for (int n = 0; n < numberSecondaries; ++n)
-									{
-										boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
-									}
-								}
-							}
-						
-						}
-					}
-
-					// Then, the child variable group secondary data.
-					// This info is stored in the output row itself.
-					//
-					// Show secondary data grouped by variable group,
-					// then by multiplicity.
-					// There might be multiple fields for each variable group and within each multiplicity,
-					// ... so the logic is a bit non-trivial to get the display order right.
-					int numberChildGroups = static_cast<int>(secondary_variable_groups_vector.size());
-					for (int vgNumber = 0; vgNumber < numberChildGroups; ++vgNumber)
-					{
-						int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[vgNumber].first.identifier_parent)].second;
-						for (int multiplicity = 0; multiplicity < the_child_multiplicity; ++multiplicity)
-						{
-							bool matched = false;
-							std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
-							{
-								int const vg_number = leaf_index_mappings.first;
-								if (vg_number != vgNumber)
-								{
-									return;
-								}
-								std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
-								std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
-								{
-
-									int const leaf_number = leaf_index_mapping.first;
-									if (leaf_number != multiplicity)
-									{
-										return;
-									}
-
-									if (leaf_number < 0)
-									{
-										return;
-									}
-
-									// This is the desired variable group and multiplicity
-									matched = true;
-
-									std::int64_t const & data_index = leaf_index_mapping.second;
-									DataCache & data_cache = allWeightings.childCache[vg_number];
-									SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
-									std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
-									{
-										boost::apply_visitor(create_output_row_visitor(first), data);
-									});
-
-								});
-							});
-
-							// All cases of missing data are covered here.
-							// There was no child data that matched the given child leaf slots,
-							// which could occur in one of two ways:
-							// Either:
-							// (1) There IS data present in the corresponding primary keys
-							//     for this particular child leaf, but there is no matching child data
-							// (2) There is no data present in the corresponding primary keys
-							//     because K > N for the top-level unit of analysis for this branch
-							// In either case, this means there is no child data so we will not have
-							// an entry in "child_indices_into_raw_data" for the given
-							// variable group and leaf number.
-							// Special case: If there is no data for *any* child leaf, 
-							// there will be no entry in "child_indices_into_raw_data" for the child variable group.
-							//
-							// See "AllWeightings::MergeTimeSliceDataIntoMap()" for where "child_indices_into_raw_data" is populated:
-							// The code looks into the "helper_lookup__from_child_key_set__to_matching_output_rows" cache
-							// for the branch to lookup both the output rows, and corresponding child leaf
-							// indices within those output rows, that match against any given incoming child leaf.
-							// Therefore, "leaf_number_to_data_index" will exist for all (and only for) those
-							// matching output row / leaf indexes that match.
-							if (!matched)
-							{
-								int numberSecondaries = child_number_secondary_columns[vgNumber];
-								for (int n = 0; n < numberSecondaries; ++n)
-								{
-									boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
-								}
-							}
-						}
-					}
+					create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
+					create_output_row_visitor::output_file = &output_file;
+					CreateOutputRow(branch, outputRow, allWeightings);
+					create_output_row_visitor::output_file = nullptr;
+					create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
 
 					output_file << std::endl;
 					++rows_written;
@@ -22000,5 +21709,432 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 	boost::format msg("%1% rows written to output.");
 	msg % rows_written;
 	messager.AppendKadStatusText(msg.str(), this);
+
+}
+
+void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchOutputRow const &outputRow, AllWeightings &allWeightings)
+{
+	bool first = true;
+
+	// First, the branch primary keys
+	std::for_each(branch.primary_keys.cbegin(), branch.primary_keys.cend(), [&](DMUInstanceData const & data)
+	{
+		boost::apply_visitor(create_output_row_visitor(first), data);
+	});
+
+	// Then, the leaf primary keys - for multiple leaves
+	// (this is the K-ad)
+	int numberLeavesHandled = 0;
+	std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+	{
+		Leaf & leaf = branch.leaves_cache[leafIndex];
+
+		// For the case K = 1, there ARE no primary keys for this leaf.
+		// But this is still covered here, see comments starting next line.
+		// In the K = 1 case, the branch has one and only one leaf object with no primary keys
+		// (just a data lookup), and everything is guaranteed to be output from the *branch* in this case.
+		// But the branch data has already been output, above, so we're set in the K=1 case.
+		// (Note that every output row has one leaf index in the K=1 case, pointing to this branch's single leaf).
+		//
+		// For the K > N case (i.e., there are more leaves requested by the user
+		// than there are leaves available for this branch),
+		// see the following code block after this std::for_each() exits.
+		std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
+		{
+			boost::apply_visitor(create_output_row_visitor(first), data);
+		});
+		++numberLeavesHandled;
+	});
+
+	// Fill in remaining leaf slots with blanks for the case K > N.
+	// Note that K >= 1, and N >= 1.
+	// Note that the K = 1 case corresponds to no data in any leaves,
+	// and all primary key data will be output from the *branch*.
+	// which has already been done, above.
+	// (The K = 1 case is indicated by "which_primary_index_has_multiplicity_greater_than_1 == -1".)
+	if (which_primary_index_has_multiplicity_greater_than_1 != -1)
+	{
+		int numberColumnsInTheDMUWithMultiplicityGreaterThan1 = biggest_counts[0].second[which_primary_index_has_multiplicity_greater_than_1].second;
+		for (int n = numberLeavesHandled; n < K; ++n)
+		{
+			for (int nk = 0; nk < numberColumnsInTheDMUWithMultiplicityGreaterThan1; ++n)
+			{
+				boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
+			}
+		}
+	}
+
+	// Then, the primary top-level variable group secondary data.
+	// This info is stored in each leaf.
+	numberLeavesHandled = 0;
+	std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+	{
+		Leaf & leaf = branch.leaves_cache[leafIndex];
+
+		// Even the K=1 case is handled in the "index_into_raw_data > 0" block,
+		// because although the leaf has no primary keys,
+		// **it does have an index to data** (See RandomSampling_ReadData_AddToTimeSlices(),
+		//   where the leaf's data index is set regardless of whether there are DMU columns for the leaf.)
+		// Further, this secondary data is guaranteed to be present,
+		// because it came from the same row of input data that the branch+leaf (or branch, for K=1) did.
+		if (leaf.index_into_raw_data > 0) // index_into_raw_data is 1-based because it corresponds to SQLite's automatically-generated "rowid" column.
+		{
+			SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
+			std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+			{
+				boost::apply_visitor(create_output_row_visitor(first), data);
+			});
+		}
+		else
+		{
+			// no data available.  Import should always place blanks, so this should never happen.
+			boost::format msg("Logic error: Missing primary variable group data (there isn't even blank data).");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		++numberLeavesHandled;
+	});
+
+	// Fill in remaining leaf slots with blanks for the case K > N.
+	// See comments for identical scenario above, where the leaf primary data is being output.
+	if (which_primary_index_has_multiplicity_greater_than_1 != -1)
+	{
+		int numberSecondaryColumns = top_level_number_secondary_columns[top_level_vg_index];
+		for (int n = numberLeavesHandled; n < K; ++n)
+		{
+			for (int nk = 0; nk < numberSecondaryColumns; ++n)
+			{
+				boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
+			}
+		}
+	}
+
+	// Then, the non-primary top-level variable group secondary data.
+	// This info is stored in the leaf also.
+	//
+	// Show secondary data grouped by variable group,
+	// then by multiplicity.
+	// There might be multiple fields for each variable group and within each multiplicity,
+	// ... so the logic is a bit non-trivial to get the display order right.
+	int numberTopLevelGroups = static_cast<int>(primary_variable_groups_vector.size());
+	for (int vgNumber = 0; vgNumber < numberTopLevelGroups; ++vgNumber)
+	{
+		for (int multiplicity = 0; multiplicity < K; ++multiplicity)
+		{
+
+			bool matchedVariableGroup = false;
+			bool matchedMultiplicity = false;
+
+			// Find the variable group and leaf that is desired.
+			// Some variable groups have no data, in which case they will not be in the list;
+			// this case is covered below.
+			int testMultiplicity = 0;
+
+			// Again, the K=1 case is covered here.
+			// In the K=1 case, there is one leaf per output row,
+			// and this leaf has no primary keys,
+			// but it has the same secondary key information as any other leaf -
+			// for both the primary variable group, and all non-primary top-level variable groups.
+			// I.e., the non-primary top-level variable groups populate their
+			// "other_top_level_indices_into_raw_data" variable in the same way that the K>1 case does
+			//  (see RandomSampling_ReadData_AddToTimeSlices(), the VARIABLE_GROUP_MERGE_MODE__TOP_LEVEL case,
+			//   for where "other_top_level_indices_into_raw_data" is populated (regardless of the
+			//   K=1 case where there are no primary keys)).
+			std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
+			{
+
+				if (testMultiplicity != multiplicity)
+				{
+					++testMultiplicity;
+					return;
+				}
+
+				matchedMultiplicity = true;
+
+				Leaf & leaf = branch.leaves_cache[leafIndex];
+
+				// Here is where, in addition to the K>1 case, the K=1 case is supported,
+				// because "other_top_level_indices_into_raw_data" is populated
+				// regardless of whether "primary_keys" is populated for the leaf.
+				std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
+				{
+					int const vg_number = top_level_vg_and_data_index.first;
+					if (vg_number == vgNumber)
+					{
+
+						// We now have both the multiplicity and the variable group that is desired
+						// for the correct sequence of output data
+						matchedVariableGroup = true;
+
+						// *********************************************************************** //
+						// If we have ANY secondary data, which we do if we're here,
+						// then we have ALL COLUMNS of secondary data,
+						// because the schema controls this and the data is pulled from the DB,
+						// which has empty columns rather than missing columns
+						// *********************************************************************** //
+						int const vg_number = top_level_vg_and_data_index.first;
+						std::int64_t const & data_index = top_level_vg_and_data_index.second;
+						DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
+						SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
+						std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+						{
+							boost::apply_visitor(create_output_row_visitor(first), data);
+						});
+
+					}
+				});
+				++testMultiplicity;
+
+			});
+
+			if (matchedMultiplicity)
+			{
+				// The case of no matching data for an existing leaf,
+				// for non-primary top-level variable groups, is covered here.
+				//
+				// We have matched the multiplicity,
+				// but there was no variable group data for this multiplicity.
+				// We must fill in all secondary keys for this multiplicity with blanks
+				if (!matchedVariableGroup)
+				{
+					if (vgNumber != top_level_vg_index)
+					{
+						// Missing a variable group.  Fill with blanks.
+						int numberSecondaries = top_level_number_secondary_columns[vgNumber];
+						for (int n = 0; n < numberSecondaries; ++n)
+						{
+							boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
+						}
+					}
+				}
+			}
+			else
+			{
+				// The K > N case is covered here (missing leaves).
+				//
+				// We did not match the multiplicity.
+				// This means there are missing leaves.
+				// For the current leaf and variable group,
+				// we must now fill in the secondary keys.
+				// This "else" block could be merged with
+				// the "if" block, but for conceptual clarity it is separated.
+				if (vgNumber != top_level_vg_index)
+				{
+					int numberSecondaries = top_level_number_secondary_columns[vgNumber];
+					for (int n = 0; n < numberSecondaries; ++n)
+					{
+						boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
+					}
+				}
+			}
+
+		}
+	}
+
+	// Then, the child variable group secondary data.
+	// This info is stored in the output row itself.
+	//
+	// Show secondary data grouped by variable group,
+	// then by multiplicity.
+	// There might be multiple fields for each variable group and within each multiplicity,
+	// ... so the logic is a bit non-trivial to get the display order right.
+	int numberChildGroups = static_cast<int>(secondary_variable_groups_vector.size());
+	for (int vgNumber = 0; vgNumber < numberChildGroups; ++vgNumber)
+	{
+		int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[vgNumber].first.identifier_parent)].second;
+		for (int multiplicity = 0; multiplicity < the_child_multiplicity; ++multiplicity)
+		{
+			bool matched = false;
+			std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
+			{
+				int const vg_number = leaf_index_mappings.first;
+				if (vg_number != vgNumber)
+				{
+					return;
+				}
+				std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
+				std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
+				{
+
+					int const leaf_number = leaf_index_mapping.first;
+					if (leaf_number != multiplicity)
+					{
+						return;
+					}
+
+					if (leaf_number < 0)
+					{
+						return;
+					}
+
+					// This is the desired variable group and multiplicity
+					matched = true;
+
+					std::int64_t const & data_index = leaf_index_mapping.second;
+					DataCache & data_cache = allWeightings.childCache[vg_number];
+					SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
+					std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
+					{
+						boost::apply_visitor(create_output_row_visitor(first), data);
+					});
+
+				});
+			});
+
+			// All cases of missing data are covered here.
+			// There was no child data that matched the given child leaf slots,
+			// which could occur in one of two ways:
+			// Either:
+			// (1) There IS data present in the corresponding primary keys
+			//     for this particular child leaf, but there is no matching child data
+			// (2) There is no data present in the corresponding primary keys
+			//     because K > N for the top-level unit of analysis for this branch
+			// In either case, this means there is no child data so we will not have
+			// an entry in "child_indices_into_raw_data" for the given
+			// variable group and leaf number.
+			// Special case: If there is no data for *any* child leaf, 
+			// there will be no entry in "child_indices_into_raw_data" for the child variable group.
+			//
+			// See "AllWeightings::MergeTimeSliceDataIntoMap()" for where "child_indices_into_raw_data" is populated:
+			// The code looks into the "helper_lookup__from_child_key_set__to_matching_output_rows" cache
+			// for the branch to lookup both the output rows, and corresponding child leaf
+			// indices within those output rows, that match against any given incoming child leaf.
+			// Therefore, "leaf_number_to_data_index" will exist for all (and only for) those
+			// matching output row / leaf indexes that match.
+			if (!matched)
+			{
+				int numberSecondaries = child_number_secondary_columns[vgNumber];
+				for (int n = 0; n < numberSecondaries; ++n)
+				{
+					boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
+				}
+			}
+		}
+	}
+}
+
+void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, AllWeightings &allWeightings)
+{
+
+	if (random_sampling)
+	{
+
+		// ************************************************************************************************************* //
+		// This is a necessary preparatory phase, internal to each branch within individual time slices,
+		// before identical rows can be merged across adjacent time slices.
+		//
+		// In the random sampling case, the output rows that are stored inside each branch
+		// are further separated (binned) into fixed-width time units.
+		// Identical output rows can appear in different bins (but only once within each bin).
+		// Rows are identical if their leaves are identical (this guarantees that all secondary
+		// data will be identical), regardless of which bin within the given branch they lie in.
+		//
+		// In "Consolidate" mode, we consolidate the output into as few rows as possible.
+		// This means that if adjacent rows (time-wise) contain identical data except for the time window,
+		// we will merge these into a single row with the combined time window.
+		//
+		// Because rows in different bins with identical leaves are identical within a branch,
+		// here we simply take advantage of std::set's uniqueness guarantee by looping through
+		// all bins (time units) and inserting all output rows into a single set within the branch.
+		//
+		// The "time unit" index given to this set has the special value of -1.
+		// Because inserts of duplicate data into the set are rejected, this effectively merges
+		// all output rows across time units (bins) within each branch into a single set of rows
+		// for each branch.
+		//
+		// Once this is complete, we are ready to move on to the main consolidation phase
+		// ... namely, merging identical rows *across* time slices.
+		// ************************************************************************************************************* //
+
+		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
+		{
+
+			TimeSlice const & the_slice = timeSlice.first;
+			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+
+			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			{
+				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				{
+					allWeightings.ConsolidateRowsWithinBranch(branch_and_leaves.first);
+				});
+
+			});
+
+		});
+
+	}
+
+	std::set<MergedTimeSliceRow> saved_historic_rows;
+	std::set<MergedTimeSliceRow> ongoing_merged_rows;
+
+	TimeSlice previousTimeSlice;
+
+	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
+	{
+
+		TimeSlice const & the_slice = timeSlice.first;
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+
+		if (previousTimeSlice.DoesOverlap(the_slice))
+		{
+
+			// The current time slice is adjacent to the previous.  Merge identical rows
+
+			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			{
+				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				{
+
+					std::set<MergedTimeSliceRow> incoming;
+
+					Branch const & branch = branch_and_leaves.first;
+					auto const & incoming_rows = branch.hits[-1];
+					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](decltype(incoming_rows)::value_type const & incoming_row)
+					{
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
+						create_output_row_visitor::data.clear();
+						CreateOutputRow(branch, incoming_row, allWeightings);
+						create_output_row_visitor::output_file = nullptr;
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+						incoming.emplace(the_slice, incoming_row);
+					});
+
+					std::vector<MergedTimeSliceRow> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
+					std::vector<MergedTimeSliceRow> only_previous(ongoing_merged_rows.size());
+					std::vector<MergedTimeSliceRow> only_new(incoming.size());
+
+					auto finalpos = std::set_intersection(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), intersection.begin());
+					auto finalpos_previous = std::set_difference(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), only_previous.begin());
+					auto finalpos_incoming = std::set_difference(incoming.cbegin(), incoming.cend(), ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), only_new.begin());
+
+					intersection.resize(finalpos - intersection.begin());
+					only_previous.resize(finalpos_previous - only_previous.begin());
+					only_new.resize(finalpos_incoming - only_new.begin());
+
+					// Intersection now contains all previous rows that matched with incoming rows,
+					// and they have been properly extended.
+
+					// Set ongoing to "intersection"
+					ongoing_merged_rows.clear();
+					ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
+
+					// Now, add any new rows that were not present previously.
+					ongoing_merged_rows.insert(only_new.cbegin(), only_new.cend());
+
+					// The rows that existed previously, but do not match, now must be set aside and saved.
+					saved_historic_rows.insert(only_previous.cbegin(), only_previous.cend());
+
+				});
+
+			});
+
+		}
+
+		previousTimeSlice = the_slice;
+
+	});
 
 }

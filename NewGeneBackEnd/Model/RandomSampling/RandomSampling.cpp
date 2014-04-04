@@ -13,6 +13,10 @@
 #include <algorithm>
 #include "../../Utilities/TimeRangeHelper.h"
 
+std::fstream * create_output_row_visitor::output_file = nullptr;
+create_output_row_visitor::MODE create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+std::vector<InstanceData> create_output_row_visitor::data;
+
 AllWeightings::AllWeightings()
 : insert_random_sample_stmt(nullptr)
 {
@@ -1452,127 +1456,6 @@ void AllWeightings::PrepareFullSamples(int const K)
 			});
 
 		});
-
-	});
-
-}
-
-void AllWeightings::ConsolidateData(bool const random_sampling)
-{
-
-	if (random_sampling)
-	{
-
-		// ************************************************************************************************************* //
-		// This is a necessary preparatory phase, internal to each branch within individual time slices,
-		// before identical rows can be merged across adjacent time slices.
-		//
-		// In the random sampling case, the output rows that are stored inside each branch
-		// are further separated (binned) into fixed-width time units.
-		// Identical output rows can appear in different bins (but only once within each bin).
-		// Rows are identical if their leaves are identical (this guarantees that all secondary
-		// data will be identical), regardless of which bin within the given branch they lie in.
-		//
-		// In "Consolidate" mode, we consolidate the output into as few rows as possible.
-		// This means that if adjacent rows (time-wise) contain identical data except for the time window,
-		// we will merge these into a single row with the combined time window.
-		//
-		// Because rows in different bins with identical leaves are identical within a branch,
-		// here we simply take advantage of std::set's uniqueness guarantee by looping through
-		// all bins (time units) and inserting all output rows into a single set within the branch.
-		//
-		// The "time unit" index given to this set has the special value of -1.
-		// Because inserts of duplicate data into the set are rejected, this effectively merges
-		// all output rows across time units (bins) within each branch into a single set of rows
-		// for each branch.
-		//
-		// Once this is complete, we are ready to move on to the main consolidation phase
-		// ... namely, merging identical rows *across* time slices.
-		// ************************************************************************************************************* //
-
-		std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
-		{
-
-			TimeSlice const & the_slice = timeSlice.first;
-			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
-
-			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
-			{
-				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
-				{
-					ConsolidateRowsWithinBranch(branch_and_leaves.first);
-				});
-
-			});
-
-		});
-
-	}
-
-	std::set<MergedTimeSliceRow> saved_historic_rows;
-	std::set<MergedTimeSliceRow> ongoing_merged_rows;
-
-	TimeSlice previousTimeSlice;
-
-	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
-	{
-
-		TimeSlice const & the_slice = timeSlice.first;
-		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
-
-		if (previousTimeSlice.DoesOverlap(the_slice))
-		{
-
-			// The current time slice is adjacent to the previous.  Merge identical rows
-
-			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
-			{
-				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
-				{
-
-					std::set<MergedTimeSliceRow> incoming;
-
-					Branch const & branch = branch_and_leaves.first;
-					auto const & incoming_rows = branch.hits[-1];
-					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](decltype(incoming_rows)::value_type const & incoming_row)
-					{
-						incoming.emplace(the_slice, incoming_row);
-					});
-
-					std::vector<MergedTimeSliceRow> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
-					std::vector<MergedTimeSliceRow> only_previous(ongoing_merged_rows.size());
-					std::vector<MergedTimeSliceRow> only_new(incoming.size());
-
-					auto finalpos          = std::set_intersection(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), intersection.begin());
-					auto finalpos_previous = std::set_difference(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), only_previous.begin());
-					auto finalpos_incoming = std::set_difference(incoming.cbegin(), incoming.cend(), ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), only_new.begin());
-
-					intersection.resize(finalpos - intersection.begin());
-					only_previous.resize(finalpos_previous - only_previous.begin());
-					only_new.resize(finalpos_incoming - only_new.begin());
-
-					// Intersection now contains all previous rows that matched with incoming rows,
-					// and they have been properly extended.
-
-					// Set ongoing to "intersection"
-					ongoing_merged_rows.clear();
-					ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
-
-					// Now, add any new rows that were not present previously.
-					ongoing_merged_rows.insert(only_new.cbegin(), only_new.cend());
-
-					// The rows that existed previously, but do not match, now must be set aside and saved.
-					saved_historic_rows.insert(only_previous.cbegin(), only_previous.cend());
-
-				});
-
-			});
-
-		}
-
-		previousTimeSlice = the_slice;
 
 	});
 
