@@ -1486,9 +1486,8 @@ class create_output_row_visitor : public boost::static_visitor<>
 
 public:
 
-	create_output_row_visitor(std::fstream & output_file_, bool & first_)
-		: output_file(output_file_)
-		, first(first_)
+	create_output_row_visitor(bool & first_)
+		: first(first_)
 	{}
 
 	template <typename T>
@@ -1502,7 +1501,7 @@ public:
 		output_file << data;
 	}
 
-	std::fstream & output_file;
+	static std::fstream & output_file;
 	bool & first;
 
 };
