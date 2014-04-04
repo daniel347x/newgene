@@ -567,6 +567,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// function, guaranteeing that even in such sub-time-unit
 			// branches, the rows appear once.
 			// See detailed comments in the "PruneTimeSlice()" function.
+			//
+			// The output is stored in "consolidated_rows" of the AllWeightings object.
 			ConsolidateData(random_sampling, allWeightings);
 			if (failed || CheckCancelled()) return;
 		}
