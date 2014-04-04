@@ -506,7 +506,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		}
 		else
 		{
-			allWeightings.PrepareFullSamples();
+			allWeightings.PrepareFullSamples(K);
 		}
 		if (failed || CheckCancelled()) return;
 

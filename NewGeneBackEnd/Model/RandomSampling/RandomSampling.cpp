@@ -938,7 +938,7 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch, Le
 			single_leaf_combination.Insert(n);
 		}
 		single_leaf_combination.SaveCache();
-		branch.remaining[which_time_unit].insert(single_leaf_combination);
+		branch.remaining[which_time_unit].push_back(single_leaf_combination);
 	}
 
 	if (K <= 0)
@@ -1439,7 +1439,7 @@ void AllWeightings::PrepareRandomSamples(int const K)
 
 }
 
-void AllWeightings::PrepareFullSamples()
+void AllWeightings::PrepareFullSamples(int const K)
 {
 
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
@@ -1453,7 +1453,7 @@ void AllWeightings::PrepareFullSamples()
 		{
 			std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
 			{
-				GenerateAllOutputRows(AllWeightings.K, branch_and_leaves.first, branch_and_leaves.second);
+				GenerateAllOutputRows(K, branch_and_leaves.first, branch_and_leaves.second);
 			});
 
 		});

@@ -1127,7 +1127,7 @@ class AllWeightings
 		void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
 		void PrepareRandomNumbers(int how_many);
 		void PrepareRandomSamples(int const K);
-		void PrepareFullSamples();
+		void PrepareFullSamples(int const K);
 		bool RetrieveNextBranchAndLeaves(int const K);
 		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
 		void ResetBranchCaches(bool const empty_all = false);
