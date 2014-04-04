@@ -1406,6 +1406,16 @@ class MergedTimeSliceRow
 
 	public:
 
+		MergedTimeSliceRow(TimeSlice const & ts, BranchOutputRow const & row)
+			: time_slice(ts)
+			, output_row(row)
+		{}
+
+		MergedTimeSliceRow(MergedTimeSliceRow const & rhs)
+		{
+			*this = rhs;
+		}
+
 		bool operator<(MergedTimeSliceRow const & rhs) const
 		{
 			return (output_row < rhs.output_row);
@@ -1413,6 +1423,11 @@ class MergedTimeSliceRow
 
 		MergedTimeSliceRow & operator=(MergedTimeSliceRow const & rhs)
 		{
+			if (this == &rhs)
+			{
+				return *this;
+			}
+
 			if (output_row != rhs.output_row)
 			{
 				boost::format msg("Logic error merging MergedTimeSliceRow!  The merge should only occur for rows with identical primary keys");
@@ -1420,6 +1435,8 @@ class MergedTimeSliceRow
 			}
 
 			time_slice.Merge(rhs.time_slice);
+
+			return *this;
 		}
 
 		TimeSlice time_slice;
