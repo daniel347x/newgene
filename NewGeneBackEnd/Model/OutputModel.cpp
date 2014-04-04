@@ -21563,20 +21563,27 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 	std::for_each(final_result.second.columns_in_view.begin(),
 		final_result.second.columns_in_view.end(), [this, &output_file, &first, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
 	{
+
 		++column_index;
+
+		if (column_index >= final_result.second.columns_in_view.size() - 1)
+		{
+			return; // for now, do not output datetime columns
+		}
 
 		if (!first)
 		{
 			output_file << ",";
 		}
-
 		first = false;
+
 		output_file << unformatted_column.column_name_in_original_data_table;
 		if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 		{
 			output_file << "_";
 			output_file << boost::lexical_cast<std::string>(unformatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
 		}
+
 	});
 	output_file << std::endl;
 
