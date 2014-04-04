@@ -2184,7 +2184,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 		std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
 		{
 
-			auto const & hits = branch_and_leaves.first.hits;
+			auto & hits = branch_and_leaves.first.hits;
 
 			std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & hit)
 			{
