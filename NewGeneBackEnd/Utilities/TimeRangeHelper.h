@@ -7,6 +7,7 @@
 #ifndef Q_MOC_RUN
 #	include <boost/date_time/local_time/local_time.hpp>
 #endif
+#include "../Model/TimeGranularity.h"
 
 namespace TimeRange
 {
@@ -26,6 +27,10 @@ namespace TimeRange
 		boost::posix_time::ptime time_start_database = time_t_epoch__1970 + boost::posix_time::milliseconds(timestamp);
 		return boost::posix_time::to_simple_string(time_start_database);
 	}
+
+	// Returns the closest Unix timestamp that is equal to or higher than test_timestamp,
+	// but aligned on the given time_granularity
+	std::int64_t determineNextHighestAligningTimestamp(std::int64_t const test_timestamp, TIME_GRANULARITY const time_granularity);
 
 }
 

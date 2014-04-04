@@ -21570,6 +21570,57 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreenDirec
 				// the sub-time-unit represented by this branch.
 				// ***************************************************************************************** //
 
+				auto const found = branch.hits.find(boost::multiprecision::cpp_int(-1));
+				if (found == branch.hits.cend())
+				{
+					// Why is there a time slice with no data?  It should never have been created in the first place!
+					boost::format msg("Logic error: A time slice has no data in its branch when attempting to output data for the full sampler.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				std::set<BranchOutputRow> output_rows_for_this_full_time_slice = branch.hits[boost::multiprecision::cpp_int(-1)];
+
+				// Loop through our time range data
+				if (!timeSlice.hasTimeGranularity())
+				{
+
+					// If the time slice has no time range granularity, just spit out the rows once
+
+					std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow const & outputRow)
+					{
+
+						// We have a row to output
+
+						if (failed || CheckCancelled())
+						{
+							return;
+						}
+
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
+						create_output_row_visitor::output_file = &output_file;
+						CreateOutputRow(branch, outputRow, allWeightings);
+						create_output_row_visitor::output_file = nullptr;
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+						output_file << std::endl;
+						++rows_written;
+
+					});
+
+				}
+				else
+				{
+
+					// The time slice has time granularity.
+					// Start at the beginning, and loop through.
+
+					std::int64_t const time_start = timeSlice.getStart();
+					std::int64_t const time_end = timeSlice.getEnd();
+
+
+
+				}
+
 			}
 
 		});
