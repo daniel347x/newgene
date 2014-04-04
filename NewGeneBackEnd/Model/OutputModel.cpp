@@ -20401,7 +20401,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 								Branch branch(dmus_branch);
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, merge_adjacent_rows_with_identical_data_on_secondary_keys, random_sampling);
 
 								if (added)
 								{
@@ -20425,7 +20425,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// Add the secondary data for this non-primary top-level variable group to the cache
 								allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, merge_adjacent_rows_with_identical_data_on_secondary_keys, random_sampling);
 
 							}
 							break;
@@ -20447,7 +20447,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// which might slice the time slices, each such slice will not add any new primary leaves
 								// and the previous set of cached leaves will be persisted in the time slice copies.
 								// ************************************************************************************************** //
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, merge_adjacent_rows_with_identical_data_on_secondary_keys, random_sampling);
 
 								if (added)
 								{
