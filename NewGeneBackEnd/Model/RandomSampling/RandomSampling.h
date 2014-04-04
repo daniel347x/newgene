@@ -1224,7 +1224,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// ******************************************************************************************************** //
 		// Leaf combinations hit by the random generator.
 		//
-		// map from time unit to a set of leaf combinations hit for that time units
+		// Map from time unit to a set of leaf combinations hit for that time units
+		// Time unit index is 0-based
 		//
 		mutable std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> hits;
 		//

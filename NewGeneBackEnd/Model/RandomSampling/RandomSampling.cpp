@@ -1932,9 +1932,13 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	std::int64_t oldWidth = originalTimeSlice.WidthForWeighting(AvgMsperUnit);
-	std::int64_t currentWidth = currentTimeSlice.WidthForWeighting(AvgMsperUnit);
+	std::int64_t originalWidth = originalTimeSlice.WidthForWeighting(AvgMsperUnit);
 
+	if (originalWidth <= 0)
+	{
+		boost::format msg("Logic error when pruning time slice: original width is empty for time slice");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
 
 	// Time slices get split apart, but never merged together, in the context of this function.
 
@@ -1951,42 +1955,10 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 		}
 		else if (originalTimeSlice.getEnd() < currentTimeSlice.getEnd())
 		{
-
 			// left of original is by itself, right of original overlaps left of current, right of current is by itself
-
-			std::int64_t leftWidth = currentTimeSlice.getStart() - originalTimeSlice.getStart();
-			std::int64_t middleWidth = originalTimeSlice.getEnd() - currentTimeSlice.getStart();
-			std::int64_t rightWidth = currentTimeSlice.getEnd() - originalTimeSlice.getEnd();
-
-			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
-			long double middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
-			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
-
-			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = branches_and_leaves;
-
-			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
-			{
-				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
-				{
-					auto const & hits = branch_and_leaves.first.hits;
-					
-					// throw away left
-
-					int time_unit_index = 0;
-					std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & hit)
-					{
-						long double time_unit_index_test = boost::lexical_cast<long double>(time_unit_index);
-
-						if (time_unit_index_test < leftUnits)
-						{
-
-						}
-
-						++time_unit_index;
-					});
-				});
-			});
-
+			// The current slice must be embedded within the original slice for a legitimate prune!
+			boost::format msg("Attempting to prune time units when current exceeds bounds of previous");
+			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 		else if (originalTimeSlice.getEnd() == currentTimeSlice.getEnd())
 		{
@@ -1997,6 +1969,94 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 
 			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
 			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+
+			std::int64_t leftRounded = static_cast<std::int64_t>(leftUnits + 0.5);
+			std::int64_t rightRounded = static_cast<std::int64_t>(rightUnits + 0.5);
+
+			// Handle very rare rounding issues to ensure that all "hits" entries are included somewhere
+			if (leftRounded + rightRounded != originalWidth)
+			{
+				if (leftRounded + rightRounded - originalWidth != 1 && leftRounded + rightRounded - originalWidth != -1)
+				{
+					boost::format msg("Logic error when pruning time slice: time unit counts do not match");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+				if (leftRounded + rightRounded - originalWidth == 1)
+				{
+					if (leftRounded > 1)
+					{
+						--leftRounded;
+					}
+					else
+					{
+						--rightRounded;
+					}
+				}
+				else if (leftRounded + rightRounded - originalWidth == -1)
+				{
+					if (leftRounded == 0)
+					{
+						++leftRounded;
+					}
+					else
+					{
+						++rightRounded;
+					}
+				}
+			}
+
+			if (leftRounded < 0 || rightRounded < 0 || leftRounded > originalWidth || rightRounded > originalWidth)
+			{
+				boost::format msg("Logic error when pruning time slice: time unit counts do not match after adjustment");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
+			bool left_was_zero = false;
+			bool right_was_zero = false;
+			if (leftRounded == 0)
+			{
+				left_was_zero = true;
+				++leftRounded;
+			}
+			if (rightRounded == 0)
+			{
+				right_was_zero = true;
+				++rightRounded;
+			}
+
+			std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> new_hits;
+			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = branches_and_leaves;
+			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			{
+				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				{
+					auto const & hits = branch_and_leaves.first.hits;
+
+					// throw away left
+					std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & hit)
+					{
+						std::int64_t hit_time_index = hit.first;
+						std::int64_t hit_time_index_one_based = hit_time_index;
+						bool matches_left = false;
+						bool matches_right = false;
+						if (hit_time_index_one_based <= leftRounded)
+						{
+							// matches left
+							matches_left = true;
+						}
+						if (hit_time_index_one_based > originalWidth - rightRounded)
+						{
+							matches_right = true;
+						}
+
+						// Throw away left
+						if (matches_right)
+						{
+							new_hits[hit_time_index - (originalWidth - rightRounded)] = hit.second;
+						}
+					});
+				});
+			});
 
 		}
 		else
@@ -2012,20 +2072,20 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 			long double middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
 			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
 
+			std::int64_t leftRounded = static_cast<std::int64_t>(leftUnits + 0.5);
+			std::int64_t middleRounded = static_cast<std::int64_t>(middleUnits + 0.5);
+			std::int64_t rightRounded = static_cast<std::int64_t>(rightUnits + 0.5);
+
 		}
 	}
 	else if (originalTimeSlice.getStart() == currentTimeSlice.getStart())
 	{
 		if (originalTimeSlice.getEnd() < currentTimeSlice.getEnd())
 		{
-
 			// left of original matches left of current, entire original overlaps the left part of current, and the right of current is by itself
-			std::int64_t leftWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
-			std::int64_t rightWidth = currentTimeSlice.getEnd() - originalTimeSlice.getEnd();
-
-			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
-			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
-
+			// The current slice must be embedded within the original slice for a legitimate prune!
+			boost::format msg("Attempting to prune time units when current exceeds bounds of previous");
+			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 		else if (originalTimeSlice.getEnd() == currentTimeSlice.getEnd())
 		{
@@ -2043,47 +2103,34 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
 			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
 
+			std::int64_t leftRounded = static_cast<std::int64_t>(leftUnits + 0.5);
+			std::int64_t rightRounded = static_cast<std::int64_t>(rightUnits + 0.5);
+
 		}
 	}
 	else if (originalTimeSlice.getStart() < currentTimeSlice.getEnd())
 	{
 		if (originalTimeSlice.getEnd() < currentTimeSlice.getEnd())
 		{
-
 			// left of current is by itself, entire original is overlapped by current, right of current is by itself
-			std::int64_t leftWidth = originalTimeSlice.getStart() - currentTimeSlice.getStart();
-			std::int64_t middleWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
-			std::int64_t rightWidth = currentTimeSlice.getEnd() - originalTimeSlice.getEnd();
-
-			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
-			long double middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
-			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
-
+			// The current slice must be embedded within the original slice for a legitimate prune!
+			boost::format msg("Attempting to prune time units when current exceeds bounds of previous");
+			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 		else if (originalTimeSlice.getEnd() == currentTimeSlice.getEnd())
 		{
-
 			// left of current is by itself, entire original overlaps entire right of current exactly with nothing left over
-			std::int64_t leftWidth = originalTimeSlice.getStart() - currentTimeSlice.getStart();
-			std::int64_t rightWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
-
-			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
-			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
-
+			// The current slice must be embedded within the original slice for a legitimate prune!
+			boost::format msg("Attempting to prune time units when current exceeds bounds of previous");
+			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 		else
 		{
-
 			// original end is past current end
 			// left of current is by itself, right of current overlaps the left of original, and the right of original is by itself on the right
-			std::int64_t leftWidth = originalTimeSlice.getStart() - currentTimeSlice.getStart();
-			std::int64_t middleWidth = currentTimeSlice.getEnd() - originalTimeSlice.getStart();
-			std::int64_t rightWidth = originalTimeSlice.getEnd() - currentTimeSlice.getEnd();
-
-			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
-			long double middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
-			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
-
+			// The current slice must be embedded within the original slice for a legitimate prune!
+			boost::format msg("Attempting to prune time units when current exceeds bounds of previous");
+			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 	}
 	else
