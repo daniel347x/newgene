@@ -21485,38 +21485,92 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreenDirec
 			Branch const & branch = branchAndLeaves.first;
 			Leaves const & leaves = branchAndLeaves.second;
 
-			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & time_unit_and_rows)
+			if (random_sampling)
 			{
+				
+				// ***************************************************************************************** //
+				// In the random sampling case, the data has *already* been distributed properly
+				// across time units within each branch (each element of the "hits" data structure
+				// is one time unit within a branch, containing possibly multiple sampled rows).
+				//
+				// Just display them as-is.
+				//
+				// Note that sub-time-units are possible (if child data has split single time-unit rows
+				// into sub-time-unit pieces), but each sub-time-unit is displayed as a single row
+				// (thereby allowing for multiple rows for the same data and same time unit,
+				//  with each row representing a sub-time-unit).
+				// Such logic to create sub-units has already taken place,
+				// and each such sub-time-unit has its own, individual entry in the "hits" data structure.
+				//
+				// So we just loop through the "hits" data structure, each element corresponding to
+				// either a single full time unit or to a single sub-time-unit,
+				// and print out all the rows in that element.
+				// ***************************************************************************************** //
 
-				if (failed || CheckCancelled())
+				std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & time_unit_and_rows)
 				{
-					return;
-				}
-
-				std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
-
-				std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
-				{
-
-					// We have a row to output
 
 					if (failed || CheckCancelled())
 					{
 						return;
 					}
 
-					create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
-					create_output_row_visitor::output_file = &output_file;
-					CreateOutputRow(branch, outputRow, allWeightings);
-					create_output_row_visitor::output_file = nullptr;
-					create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+					std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
 
-					output_file << std::endl;
-					++rows_written;
+					std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
+					{
+
+						// We have a row to output
+
+						if (failed || CheckCancelled())
+						{
+							return;
+						}
+
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
+						create_output_row_visitor::output_file = &output_file;
+						CreateOutputRow(branch, outputRow, allWeightings);
+						create_output_row_visitor::output_file = nullptr;
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+						output_file << std::endl;
+						++rows_written;
+
+					});
 
 				});
 
-			});
+			}
+			else
+			{
+
+				// ***************************************************************************************** //
+				// Full sampling, but the output should *not* be consolidated -
+				// i.e., the output should be displayed with one row per
+				// unit time granularity (i.e., one row per day if the time granularity
+				// of the primary variable group is "day"),
+				// or with one row per *sub*-time-unit if child variable groups
+				// have split time units apart in that way.
+				//
+				// In the case of full sampling, the "hits" data structure described in the previous block
+				// is not populated in multiple elements.
+				//
+				// Instead, all data for the branch in the "full sampling" case is stowed away
+				// in a single "hits" element (with special-case index -1).
+				// Our job here is to display possibly *multiple* rows, each identical,
+				// for every output row in this single "hits" element with index -1.
+				//
+				// Each such duplicated output row is identical in every column except for the
+				// time-slice-start and time-slice-end columns, which properly walk through the full
+				// range of the time slice for the branch, but in steps of the time unit
+				// corresponding to the time granularity of the primary variable group.
+				// If the time slice for this branch is a *sub*-time-unit, just display one row,
+				// and the proper sub-time-unit time width for the time-slice-start and time-slice-end
+				// columns will be set to those of the branch and automatically correctly reflect
+				// the sub-time-unit represented by this branch.
+				// ***************************************************************************************** //
+
+			}
 
 		});
 
@@ -22109,9 +22163,21 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 		std::for_each(allWeightings.consolidated_rows.cbegin(), allWeightings.consolidated_rows.cend(), [&](decltype(allWeightings.consolidated_rows)::value_type const & output_row)
 		{
+
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
+
 			bool first = true;
 			std::for_each(output_row.output_row.cbegin(), output_row.output_row.cend(), [&](InstanceData const & data)
 			{
+
+				if (failed || CheckCancelled())
+				{
+					return;
+				}
+
 				if (!first)
 				{
 					output_file << ",";
@@ -22120,7 +22186,9 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 				output_file << data;
 
 				++rows_written;
+
 			});
+
 		});
 
 	}
@@ -22135,17 +22203,64 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 		{
 
+			if (failed || CheckCancelled())
+			{
+				return;
+			}
+
 			TimeSlice const & the_slice = timeSlice.first;
 			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
 			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
 
 			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 			{
+
+				if (failed || CheckCancelled())
+				{
+					return;
+				}
+
 				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
 				{
+
+					if (failed || CheckCancelled())
+					{
+						return;
+					}
+
 					Branch const & branch = branch_and_leaves.first;
 					Leaves const & leaves = branch_and_leaves.second;
+
+					if (failed || CheckCancelled())
+					{
+						return;
+					}
+
+					std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
+
+					std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
+					{
+
+						// We have a row to output
+
+						if (failed || CheckCancelled())
+						{
+							return;
+						}
+
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
+						create_output_row_visitor::output_file = &output_file;
+						CreateOutputRow(branch, outputRow, allWeightings);
+						create_output_row_visitor::output_file = nullptr;
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+						output_file << std::endl;
+						++rows_written;
+
+					});
+
 				});
+
 			});
 
 		});
