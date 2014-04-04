@@ -10,6 +10,7 @@
 #include <random>
 #include <functional>
 #include <list>
+#include <algorithm>
 #include "../../Utilities/TimeRangeHelper.h"
 
 AllWeightings::AllWeightings()
@@ -936,7 +937,6 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch, Le
 		{
 			single_leaf_combination.Insert(n);
 		}
-		single_leaf_combination.SaveCache();
 		branch.remaining[which_time_unit].push_back(single_leaf_combination);
 	}
 
@@ -975,7 +975,6 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 		{
 			test_leaf_combination.Insert(n);
 		}
-		test_leaf_combination.SaveCache();
 	}
 
 	if (K <= 0)
@@ -1044,8 +1043,6 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 					test_leaf_combination.Insert(index_of_leaf);
 				}
 
-				test_leaf_combination.SaveCache();
-
 			}
 
 		}
@@ -1094,7 +1091,6 @@ void AllWeightings::AddPositionToRemaining(boost::multiprecision::cpp_int const 
 	{
 		new_remaining.Insert(position_index);
 	});
-	new_remaining.SaveCache();
 
 	if (branch.hits[which_time_unit].count(new_remaining) == 0)
 	{
@@ -1514,7 +1510,71 @@ void AllWeightings::ConsolidateData(bool const random_sampling)
 
 	}
 
+	std::set<MergedTimeSliceRow> saved_historic_rows;
+	std::set<MergedTimeSliceRow> ongoing_merged_rows;
 
+	TimeSlice previousTimeSlice;
+
+	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
+	{
+
+		TimeSlice const & the_slice = timeSlice.first;
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+
+		if (previousTimeSlice.DoesOverlap(the_slice))
+		{
+
+			// The current time slice is adjacent to the previous.  Merge identical rows
+
+			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			{
+				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				{
+
+					std::set<MergedTimeSliceRow> incoming;
+
+					Branch const & branch = branch_and_leaves.first;
+					auto const & incoming_rows = branch.hits[-1];
+					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](decltype(incoming_rows)::value_type const & incoming_row)
+					{
+						incoming.emplace(the_slice, incoming_row);
+					});
+
+					std::vector<MergedTimeSliceRow> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
+					std::vector<MergedTimeSliceRow> only_previous(ongoing_merged_rows.size());
+					std::vector<MergedTimeSliceRow> only_new(incoming.size());
+
+					auto finalpos          = std::set_intersection(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), intersection.begin());
+					auto finalpos_previous = std::set_difference(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), incoming.cbegin(), incoming.cend(), only_previous.begin());
+					auto finalpos_incoming = std::set_difference(incoming.cbegin(), incoming.cend(), ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend(), only_new.begin());
+
+					intersection.resize(finalpos - intersection.begin());
+					only_previous.resize(finalpos_previous - only_previous.begin());
+					only_new.resize(finalpos_incoming - only_new.begin());
+
+					// Intersection now contains all previous rows that matched with incoming rows,
+					// and they have been properly extended.
+
+					// Set ongoing to "intersection"
+					ongoing_merged_rows.clear();
+					ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
+
+					// Now, add any new rows that were not present previously.
+					ongoing_merged_rows.insert(only_new.cbegin(), only_new.cend());
+
+					// The rows that existed previously, but do not match, now must be set aside and saved.
+					saved_historic_rows.insert(only_previous.cbegin(), only_previous.cend());
+
+				});
+
+			});
+
+		}
+
+		previousTimeSlice = the_slice;
+
+	});
 
 }
 

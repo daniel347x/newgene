@@ -396,6 +396,109 @@ class TimeSlice
 			}
 		}
 
+		bool DoesOverlap(TimeSlice const & rhs) const
+		{
+			// Checks if the two time slices overlap
+
+			if (none)
+			{
+
+				if (rhs.none)
+				{
+
+					if (minus_infinity && plus_infinity)
+					{
+						return true;
+					}
+					else if (minus_infinity && !plus_infinity)
+					{
+						if (rhs.minus_infinity && rhs.plus_infinity)
+						{
+							return true;
+						}
+						else if (rhs.minus_infinity && !rhs.plus_infinity)
+						{
+							return true;
+						}
+						else if (!rhs.minus_infinity && rhs.plus_infinity)
+						{
+							return time_end >= rhs.time_start;
+						}
+						else
+						{
+							boost::format msg("Logic error in TimeSlice::DoesOverlap!  RHS is declared as having no time granularity, but it is cropped on both sides");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+					}
+					else if (!minus_infinity && plus_infinity)
+					{
+						if (rhs.minus_infinity && rhs.plus_infinity)
+						{
+							return true;
+						}
+						else if (rhs.minus_infinity && !rhs.plus_infinity)
+						{
+							return time_start <= rhs.time_end;
+						}
+						else if (!rhs.minus_infinity && rhs.plus_infinity)
+						{
+							return true;
+						}
+						else
+						{
+							boost::format msg("Logic error in TimeSlice::DoesOverlap!  RHS is declared as having no time granularity, but it is cropped on both sides");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+					}
+					else
+					{
+						boost::format msg("Logic error in TimeSlice::DoesOverlap!  Current time slice is declared as having no time granularity, but it is cropped on both sides");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+				}
+				else
+				{
+
+					// We are infinite, but RHS is finite
+
+					if (minus_infinity && plus_infinity)
+					{
+						return true;
+					}
+					else if (minus_infinity && !plus_infinity)
+					{
+						return time_end >= rhs.time_start;
+					}
+					else if (!minus_infinity && plus_infinity)
+					{
+						return time_start <= rhs.time_end;
+					}
+					else
+					{
+						boost::format msg("Logic error in TimeSlice::DoesOverlap!  Current time slice is declared as having no time granularity, but it is cropped on both sides");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+
+				}
+
+			}
+			else if (rhs.none)
+			{
+				// Utilize above logic
+				return rhs.DoesOverlap(*this);
+			}
+
+			// normal case
+
+			if (time_end >= rhs.time_start && time_start <= rhs.time_end)
+			{
+				return true;
+			}
+
+			return false; 
+
+		}
+
 		inline bool IsEndTimeGreaterThanRhsStartTime(TimeSlice const & rhs) const
 		{
 
@@ -1013,17 +1116,20 @@ class BranchOutputRow
 
 	public:
 
-		void SaveCache()
-		{
-			primary_leaves_cache.clear();
-			primary_leaves_cache.insert(primary_leaves_cache.begin(), primary_leaves.begin(), primary_leaves.end());
-		}
 		std::vector<int> primary_leaves_cache; // for optimized lookup only
 
 		// Map from child variable group ID to:
 		// Map from child leaf index to:
 		// index into child variable group's raw data cache (stored in the AllWeightings instance)
 		mutable std::map<int, std::map<int, std::int64_t>> child_indices_into_raw_data;
+
+	private:
+
+		void SaveCache()
+		{
+			primary_leaves_cache.clear();
+			primary_leaves_cache.insert(primary_leaves_cache.begin(), primary_leaves.begin(), primary_leaves.end());
+		}
 
 };
 
@@ -1406,9 +1512,14 @@ class MergedTimeSliceRow
 
 	public:
 
+		MergedTimeSliceRow()
+			: empty(true)
+		{}
+
 		MergedTimeSliceRow(TimeSlice const & ts, BranchOutputRow const & row)
 			: time_slice(ts)
 			, output_row(row)
+			, empty(false)
 		{}
 
 		MergedTimeSliceRow(MergedTimeSliceRow const & rhs)
@@ -1434,6 +1545,27 @@ class MergedTimeSliceRow
 				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 
+			if (empty)
+			{
+				// Just accept RHS
+				if (rhs.empty)
+				{
+					// do nothing
+					return *this;
+				}
+				
+				time_slice = rhs.time_slice;
+				output_row = rhs.output_row;
+
+				return *this;
+			}
+
+			if (rhs.empty)
+			{
+				// nothing to do
+				return *this;
+			}
+
 			time_slice.Merge(rhs.time_slice);
 
 			return *this;
@@ -1441,6 +1573,10 @@ class MergedTimeSliceRow
 
 		TimeSlice time_slice;
 		BranchOutputRow output_row;
+
+	private:
+
+		bool empty; // When we merge, should we automatically set ourselves to the other?  Used to support default ctors for STL containers
 
 };
 
