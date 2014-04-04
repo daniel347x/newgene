@@ -22139,8 +22139,9 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 					// Intersection now contains all previous rows that matched with incoming rows,
 					// and they have been properly extended.
 
-					// Set ongoing to "intersection"
 					ongoing_merged_rows.clear();
+
+					// Set ongoing to "intersection"
 					ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
 
 					// Now, add any new rows that were not present previously.
@@ -22155,8 +22156,48 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 		}
 
+		else
+		{
+			
+			// There is a gap in the time slices.
+			// Start fresh
+
+			saved_historic_rows.insert(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend());
+
+			ongoing_merged_rows.clear();
+
+			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			{
+				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				{
+					Branch const & branch = branch_and_leaves.first;
+					auto const & incoming_rows = branch.hits[-1];
+					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](decltype(incoming_rows)::value_type const & incoming_row)
+					{
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
+						create_output_row_visitor::data.clear();
+						CreateOutputRow(branch, incoming_row, allWeightings);
+						create_output_row_visitor::output_file = nullptr;
+						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+						ongoing_merged_rows.emplace(the_slice, create_output_row_visitor::data);
+						create_output_row_visitor::data.clear();
+					});
+
+				});
+
+			});
+
+		}
+
 		previousTimeSlice = the_slice;
 
 	});
+
+	// Order the rows how we want them - first by time, then by keys
+
+	allWeightings.sorted_rows.clear();
+	allWeightings.sorted_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
+	saved_historic_rows.clear();
 
 }

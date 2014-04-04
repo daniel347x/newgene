@@ -1399,87 +1399,6 @@ typedef std::map<TimeSlice, VariableGroupTimeSliceData> TimeSlices;
 
 typedef std::pair<TimeSlice, Leaf> TimeSliceLeaf;
 
-class AllWeightings
-{
-
-	public:
-
-		AllWeightings();
-		~AllWeightings();
-
-	public:
-
-		// The main time slice data
-		TimeSlices timeSlices;
-		Weighting weighting; // sum over all time slices
-
-	public:
-
-		// Cache of secondary data: One cache for the primary top-level variable group, and a set of caches for all other variable groups (the non-primary top-level groups, and the child groups)
-		DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
-		std::map<int, DataCache> otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
-		std::map<int, DataCache> childCache; // Ditto, but for child variable groups
-
-	public:
-
-		sqlite3_stmt * insert_random_sample_stmt;
-
-		bool HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
-		void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
-		void PrepareRandomNumbers(int how_many);
-		void PrepareRandomSamples(int const K);
-		void PrepareFullSamples(int const K);
-		bool RetrieveNextBranchAndLeaves(int const K);
-		void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
-		void ResetBranchCaches(bool const empty_all = false);
-
-	protected:
-
-		bool HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
-
-		void AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const &newTimeSliceLeaf);
-
-		// Breaks an existing map entry into two pieces and returns an iterator to both.
-		void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr);
-
-		// Breaks an existing map entry into three pieces and returns an iterator to the middle piece.
-		void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr);
-
-		// Slices off the left part of the "incoming_slice" TimeSliceLeaf and returns it in the "new_left_slice" TimeSliceLeaf.
-		// The "incoming_slice" TimeSliceLeaf is adjusted to become equal to the remaining part on the right.
-		void SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice);
-
-		// Merge time slice data into a map element
-		bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
-
-		void ConsolidateRowsWithinBranch(Branch const & branch);
-
-		void GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves);
-		void GenerateAllOutputRows(int const K, Branch const & branch, Leaves const & leaves);
-
-		static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_ , TimeSlices::value_type const & map_entry_)
-		{
-
-			TimeSlice const & new_time_slice = new_time_slice_.first;
-			TimeSlice const & map_entry = map_entry_.first;
-
-			return map_entry.IsEndTimeGreaterThanRhsStartTime(new_time_slice);
-
-		}
-
-		std::set<boost::multiprecision::cpp_int> random_numbers;
-		std::set<boost::multiprecision::cpp_int>::const_iterator random_number_iterator;
-
-	private:
-
-		void AddPositionToRemaining(boost::multiprecision::cpp_int const & which_time_unit, std::vector<int> const & position, Branch const & branch);
-		bool IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves);
-		int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Leaves const & leaves);
-
-		boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K);
-
-};
-
 class create_output_row_visitor : public boost::static_visitor<>
 {
 
@@ -1596,6 +1515,115 @@ class MergedTimeSliceRow
 	private:
 
 		bool empty; // When we merge, should we automatically set ourselves to the other?  Used to support default ctors for STL containers
+
+};
+
+class SortMergedRowsByTimeThenKeys
+{
+
+public:
+
+	bool operator()(MergedTimeSliceRow const & lhs, MergedTimeSliceRow const & rhs)
+	{
+
+		if (lhs.time_slice < rhs.time_slice)
+		{
+			return true;
+		}
+
+		if (rhs.time_slice < lhs.time_slice)
+		{
+			return false;
+		}
+
+		// Equal in the time slice parameter, so go with data
+
+		return lhs.output_row < rhs.output_row;
+
+	}
+
+};
+
+class AllWeightings
+{
+
+public:
+
+	AllWeightings();
+	~AllWeightings();
+
+public:
+
+	// The main time slice data
+	TimeSlices timeSlices;
+	Weighting weighting; // sum over all time slices
+
+public:
+
+	// Cache of secondary data: One cache for the primary top-level variable group, and a set of caches for all other variable groups (the non-primary top-level groups, and the child groups)
+	DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
+	std::map<int, DataCache> otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
+	std::map<int, DataCache> childCache; // Ditto, but for child variable groups
+
+	std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> sorted_rows;
+
+public:
+
+	sqlite3_stmt * insert_random_sample_stmt;
+
+	bool HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
+	void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
+	void PrepareRandomNumbers(int how_many);
+	void PrepareRandomSamples(int const K);
+	void PrepareFullSamples(int const K);
+	bool RetrieveNextBranchAndLeaves(int const K);
+	void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
+	void ResetBranchCaches(bool const empty_all = false);
+
+protected:
+
+	bool HandleTimeSliceNormalCase(bool & added, Branch const & branch, TimeSliceLeaf & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
+
+	void AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const &newTimeSliceLeaf);
+
+	// Breaks an existing map entry into two pieces and returns an iterator to both.
+	void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr);
+
+	// Breaks an existing map entry into three pieces and returns an iterator to the middle piece.
+	void SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr);
+
+	// Slices off the left part of the "incoming_slice" TimeSliceLeaf and returns it in the "new_left_slice" TimeSliceLeaf.
+	// The "incoming_slice" TimeSliceLeaf is adjusted to become equal to the remaining part on the right.
+	void SliceOffLeft(TimeSliceLeaf & incoming_slice, std::int64_t const slicePoint, TimeSliceLeaf & new_left_slice);
+
+	// Merge time slice data into a map element
+	bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
+
+	void ConsolidateRowsWithinBranch(Branch const & branch);
+
+	void GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves);
+	void GenerateAllOutputRows(int const K, Branch const & branch, Leaves const & leaves);
+
+	static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_, TimeSlices::value_type const & map_entry_)
+	{
+
+		TimeSlice const & new_time_slice = new_time_slice_.first;
+		TimeSlice const & map_entry = map_entry_.first;
+
+		return map_entry.IsEndTimeGreaterThanRhsStartTime(new_time_slice);
+
+	}
+
+	std::set<boost::multiprecision::cpp_int> random_numbers;
+	std::set<boost::multiprecision::cpp_int>::const_iterator random_number_iterator;
+
+private:
+
+	void AddPositionToRemaining(boost::multiprecision::cpp_int const & which_time_unit, std::vector<int> const & position, Branch const & branch);
+	bool IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves);
+	int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Leaves const & leaves);
+
+	boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K);
 
 };
 
