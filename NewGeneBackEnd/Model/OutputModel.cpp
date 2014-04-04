@@ -523,9 +523,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			RandomSamplingCreateOutputTable();
 			if (failed || CheckCancelled()) return;
 
-			RandomSamplingWriteToOutputTable(allWeightings, errorMessages);
-			if (failed || CheckCancelled()) return;
-
 		}
 
 		final_result = random_sampling_schema;
@@ -21391,258 +21388,6 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 }
 
-void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreenDirect(AllWeightings & allWeightings)
-{
-
-	std::string setting_path_to_kad_output = CheckOutputFileExists();
-
-	if (failed || CheckCancelled())
-	{
-		return;
-	}
-
-	if (setting_path_to_kad_output.empty())
-	{
-		return;
-	}
-
-	std::fstream output_file;
-	output_file.open(setting_path_to_kad_output, std::ios::out | std::ios::trunc);
-
-	if (!output_file.good())
-	{
-		boost::format msg("Cannot open output file %1%");
-		msg % setting_path_to_kad_output;
-		SetFailureMessage(msg.str());
-		failed = true;
-		return;
-	}
-
-	// Write columns headers
-	int column_index = 0;
-	bool first = true;
-	std::for_each(final_result.second.columns_in_view.begin(),
-		final_result.second.columns_in_view.end(), [this, &output_file, &first, &column_index](ColumnsInTempView::ColumnInTempView & unformatted_column)
-	{
-
-		++column_index;
-
-		if (column_index >= final_result.second.columns_in_view.size() - 1)
-		{
-			return; // for now, do not output datetime columns
-		}
-
-		if (!first)
-		{
-			output_file << ",";
-		}
-		first = false;
-
-		output_file << unformatted_column.column_name_in_original_data_table;
-		if (unformatted_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
-		{
-			output_file << "_";
-			output_file << boost::lexical_cast<std::string>(unformatted_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
-		}
-
-	});
-	output_file << std::endl;
-
-
-	std::int64_t rows_written = 0;
-
-	std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
-	{
-
-		if (failed || CheckCancelled())
-		{
-			return;
-		}
-
-		TimeSlice const & timeSlice = timeSliceData.first;
-		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
-
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
-
-		// For now, assume only one variable group
-		if (variableGroupBranchesAndLeavesVector.size() > 1)
-		{
-			boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-
-		VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-		BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
-
-		std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
-		{
-
-			if (failed || CheckCancelled())
-			{
-				return;
-			}
-
-			Branch const & branch = branchAndLeaves.first;
-			Leaves const & leaves = branchAndLeaves.second;
-
-			if (random_sampling)
-			{
-				
-				// ***************************************************************************************** //
-				// In the random sampling case, the data has *already* been distributed properly
-				// across time units within each branch (each element of the "hits" data structure
-				// is one time unit within a branch, containing possibly multiple sampled rows).
-				//
-				// Just display them as-is.
-				//
-				// Note that sub-time-units are possible (if child data has split single time-unit rows
-				// into sub-time-unit pieces), but each sub-time-unit is displayed as a single row
-				// (thereby allowing for multiple rows for the same data and same time unit,
-				//  with each row representing a sub-time-unit).
-				// Such logic to create sub-units has already taken place,
-				// and each such sub-time-unit has its own, individual entry in the "hits" data structure.
-				//
-				// So we just loop through the "hits" data structure, each element corresponding to
-				// either a single full time unit or to a single sub-time-unit,
-				// and print out all the rows in that element.
-				// ***************************************************************************************** //
-
-				std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & time_unit_and_rows)
-				{
-
-					if (failed || CheckCancelled())
-					{
-						return;
-					}
-
-					std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
-
-					std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
-					{
-
-						// We have a row to output
-
-						if (failed || CheckCancelled())
-						{
-							return;
-						}
-
-						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
-						create_output_row_visitor::output_file = &output_file;
-						CreateOutputRow(branch, outputRow, allWeightings);
-						create_output_row_visitor::output_file = nullptr;
-						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
-
-						output_file << std::endl;
-						++rows_written;
-
-					});
-
-				});
-
-			}
-			else
-			{
-
-				// ***************************************************************************************** //
-				// Full sampling, but the output should *not* be consolidated -
-				// i.e., the output should be displayed with one row per
-				// unit time granularity (i.e., one row per day if the time granularity
-				// of the primary variable group is "day"),
-				// or with one row per *sub*-time-unit if child variable groups
-				// have split time units apart in that way.
-				//
-				// In the case of full sampling, the "hits" data structure described in the previous block
-				// is not populated in multiple elements.
-				//
-				// Instead, all data for the branch in the "full sampling" case is stowed away
-				// in a single "hits" element (with special-case index -1).
-				// Our job here is to display possibly *multiple* rows, each identical,
-				// for every output row in this single "hits" element with index -1.
-				//
-				// Each such duplicated output row is identical in every column except for the
-				// time-slice-start and time-slice-end columns, which properly walk through the full
-				// range of the time slice for the branch, but in steps of the time unit
-				// corresponding to the time granularity of the primary variable group.
-				// If the time slice for this branch is a *sub*-time-unit, just display one row,
-				// and the proper sub-time-unit time width for the time-slice-start and time-slice-end
-				// columns will be set to those of the branch and automatically correctly reflect
-				// the sub-time-unit represented by this branch.
-				// ***************************************************************************************** //
-
-				auto const found = branch.hits.find(boost::multiprecision::cpp_int(-1));
-				if (found == branch.hits.cend())
-				{
-					// Why is there a time slice with no data?  It should never have been created in the first place!
-					boost::format msg("Logic error: A time slice has no data in its branch when attempting to output data for the full sampler.");
-					throw NewGeneException() << newgene_error_description(msg.str());
-				}
-
-				std::set<BranchOutputRow> output_rows_for_this_full_time_slice = branch.hits[boost::multiprecision::cpp_int(-1)];
-
-				// Loop through our time range data
-				if (!timeSlice.hasTimeGranularity())
-				{
-
-					// If the time slice has no time range granularity, just spit out the rows once
-
-					std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow const & outputRow)
-					{
-
-						// We have a row to output
-
-						if (failed || CheckCancelled())
-						{
-							return;
-						}
-
-						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
-						create_output_row_visitor::output_file = &output_file;
-						CreateOutputRow(branch, outputRow, allWeightings);
-						create_output_row_visitor::output_file = nullptr;
-						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
-
-						output_file << std::endl;
-						++rows_written;
-
-					});
-
-				}
-				else
-				{
-
-					// The time slice has time granularity.
-					// Start at the beginning, and loop through.
-
-					std::int64_t const time_start = timeSlice.getStart();
-					std::int64_t const time_end = timeSlice.getEnd();
-
-
-
-				}
-
-			}
-
-		});
-
-	});
-
-	if (failed || CheckCancelled())
-	{
-		return;
-	}
-
-	if (output_file.good())
-	{
-		output_file.close();
-	}
-
-	boost::format msg("%1% rows written to output.");
-	msg % rows_written;
-	messager.AppendKadStatusText(msg.str(), this);
-
-}
-
 void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchOutputRow const &outputRow, AllWeightings &allWeightings)
 {
 	bool first = true;
@@ -22251,7 +21996,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 		// (or sub-time-unit, in case child data has split rows into pieces).
 		// The proper splitting of rows has already occurred.
 
-		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
+		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
 		{
 
 			if (failed || CheckCancelled())
@@ -22259,11 +22004,22 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 				return;
 			}
 
-			TimeSlice const & the_slice = timeSlice.first;
-			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+			TimeSlice const & timeSlice = timeSliceData.first;
+			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
 
-			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+
+			// For now, assume only one variable group
+			if (variableGroupBranchesAndLeavesVector.size() > 1)
+			{
+				boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
+			VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+			BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+
+			std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
 			{
 
 				if (failed || CheckCancelled())
@@ -22271,46 +22027,146 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 					return;
 				}
 
-				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				Branch const & branch = branchAndLeaves.first;
+				Leaves const & leaves = branchAndLeaves.second;
+
+				if (random_sampling)
 				{
 
-					if (failed || CheckCancelled())
+					// ***************************************************************************************** //
+					// In the random sampling case, the data has *already* been distributed properly
+					// across time units within each branch (each element of the "hits" data structure
+					// is one time unit within a branch, containing possibly multiple sampled rows).
+					//
+					// Just display them as-is.
+					//
+					// Note that sub-time-units are possible (if child data has split single time-unit rows
+					// into sub-time-unit pieces), but each sub-time-unit is displayed as a single row
+					// (thereby allowing for multiple rows for the same data and same time unit,
+					//  with each row representing a sub-time-unit).
+					// Such logic to create sub-units has already taken place,
+					// and each such sub-time-unit has its own, individual entry in the "hits" data structure.
+					//
+					// So we just loop through the "hits" data structure, each element corresponding to
+					// either a single full time unit or to a single sub-time-unit,
+					// and print out all the rows in that element.
+					// ***************************************************************************************** //
+
+					std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & time_unit_and_rows)
 					{
-						return;
-					}
-
-					Branch const & branch = branch_and_leaves.first;
-					Leaves const & leaves = branch_and_leaves.second;
-
-					if (failed || CheckCancelled())
-					{
-						return;
-					}
-
-					std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
-
-					std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
-					{
-
-						// We have a row to output
 
 						if (failed || CheckCancelled())
 						{
 							return;
 						}
 
-						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
-						create_output_row_visitor::output_file = &output_file;
-						CreateOutputRow(branch, outputRow, allWeightings);
-						create_output_row_visitor::output_file = nullptr;
-						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+						std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
 
-						output_file << std::endl;
-						++rows_written;
+						std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
+						{
+
+							// We have a row to output
+
+							if (failed || CheckCancelled())
+							{
+								return;
+							}
+
+							create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
+							create_output_row_visitor::output_file = &output_file;
+							CreateOutputRow(branch, outputRow, allWeightings);
+							create_output_row_visitor::output_file = nullptr;
+							create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+							output_file << std::endl;
+							++rows_written;
+
+						});
 
 					});
 
-				});
+				}
+				else
+				{
+
+					// ***************************************************************************************** //
+					// Full sampling, but the output should *not* be consolidated -
+					// i.e., the output should be displayed with one row per
+					// unit time granularity (i.e., one row per day if the time granularity
+					// of the primary variable group is "day"),
+					// or with one row per *sub*-time-unit if child variable groups
+					// have split time units apart in that way.
+					//
+					// In the case of full sampling, the "hits" data structure described in the previous block
+					// is not populated in multiple elements.
+					//
+					// Instead, all data for the branch in the "full sampling" case is stowed away
+					// in a single "hits" element (with special-case index -1).
+					// Our job here is to display possibly *multiple* rows, each identical,
+					// for every output row in this single "hits" element with index -1.
+					//
+					// Each such duplicated output row is identical in every column except for the
+					// time-slice-start and time-slice-end columns, which properly walk through the full
+					// range of the time slice for the branch, but in steps of the time unit
+					// corresponding to the time granularity of the primary variable group.
+					// If the time slice for this branch is a *sub*-time-unit, just display one row,
+					// and the proper sub-time-unit time width for the time-slice-start and time-slice-end
+					// columns will be set to those of the branch and automatically correctly reflect
+					// the sub-time-unit represented by this branch.
+					// ***************************************************************************************** //
+
+					auto const found = branch.hits.find(boost::multiprecision::cpp_int(-1));
+					if (found == branch.hits.cend())
+					{
+						// Why is there a time slice with no data?  It should never have been created in the first place!
+						boost::format msg("Logic error: A time slice has no data in its branch when attempting to output data for the full sampler.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+
+					std::set<BranchOutputRow> output_rows_for_this_full_time_slice = branch.hits[boost::multiprecision::cpp_int(-1)];
+
+					// Loop through our time range data
+					if (!timeSlice.hasTimeGranularity())
+					{
+
+						// If the time slice has no time range granularity, just spit out the rows once
+
+						std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow const & outputRow)
+						{
+
+							// We have a row to output
+
+							if (failed || CheckCancelled())
+							{
+								return;
+							}
+
+							create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
+							create_output_row_visitor::output_file = &output_file;
+							CreateOutputRow(branch, outputRow, allWeightings);
+							create_output_row_visitor::output_file = nullptr;
+							create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+							output_file << std::endl;
+							++rows_written;
+
+						});
+
+					}
+					else
+					{
+
+						// The time slice has time granularity.
+						// Start at the beginning, and loop through.
+
+						std::int64_t const time_start = timeSlice.getStart();
+						std::int64_t const time_end = timeSlice.getEnd();
+
+
+
+					}
+
+				}
 
 			});
 

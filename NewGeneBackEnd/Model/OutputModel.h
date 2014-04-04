@@ -737,7 +737,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void RandomSamplingWriteToOutputTable(AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
 				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);
 				void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex);
-				void RandomSamplingWriteResultsToFileOrScreenDirect(AllWeightings & allWeightings);
 				void CreateOutputRow(Branch const &branch, BranchOutputRow const &outputRow, AllWeightings &allWeightings);
 				void ConsolidateData(bool const random_sampling, AllWeightings &allWeightings);
 				void RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings);
