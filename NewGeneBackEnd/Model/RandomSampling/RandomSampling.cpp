@@ -110,13 +110,11 @@ bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 			// In any case, upper_bound ensures that it starts PAST any previous map elements.
 
 			if (newTimeSlice.IsStartLessThanRHSStart(startMapSlice))
-			//if (newTimeSlice.getStart() < startMapSlice.getStart())
 			{
 
 				// The new time slice starts to the left of the map element returned by upper_bound.
 
 				if (newTimeSlice.IsEndLessThanOrEqualToRHSStart(startMapSlice))
-				//if (newTimeSlice.getEnd() <= startMapSlice.getStart())
 				{
 					if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 					{
@@ -247,13 +245,11 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 	bool newTimeSliceEatenCompletelyUp = false;
 
 	if (newTimeSlice.IsStartEqualToRHSStart(mapElement))
-	//if (newTimeSlice.getStart() == mapElement.getStart())
 	{
 
 		// The new time slice starts at the left edge of the map element.
 
 		if (newTimeSlice.IsEndLessThanRHSEnd(mapElement))
-		//if (newTimeSlice.getEnd() < mapElement.getEnd())
 		{
 
 			// The new time slice starts at the left edge of the map element,
@@ -273,7 +269,6 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 
 		}
 		else if (newTimeSlice.IsEndEqualToRHSEnd(mapElement))
-		//else if (newTimeSlice.getEnd() == mapElement.getEnd())
 		{
 
 			// The new time slice exactly matches the first map element.
@@ -313,7 +308,6 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 		// but starts past its left edge.
 
 		if (newTimeSlice.IsEndLessThanRHSEnd(mapElement))
-		//if (newTimeSlice.getEnd() < mapElement.getEnd())
 		{
 
 			// The new time slice starts in the map element,
@@ -334,7 +328,6 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 
 		}
 		else if (newTimeSlice.IsEndEqualToRHSEnd(mapElement))
-		//else if (newTimeSlice.getEnd() == mapElement.getEnd())
 		{
 
 			// The new time slice starts in the map element,
@@ -546,17 +539,6 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						// into the active leaf saved in the AllWeightings instance, and used to construct the output rows.
 						// (This active leaf may also have been called previously to set other top-level variable group rows.)
 						leaf.other_top_level_indices_into_raw_data[variable_group_number] = timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number];
-
-						static bool first = true;
-						if (false && first)
-						{
-							std::string sdataleaf;
-							SpitLeaf(sdataleaf, leaf);
-
-							std::vector<std::string> sdataall;
-							SpitAllWeightings(sdataall, *this, true);
-						}
-						first = false;
 
 						added = true;
 
@@ -1236,6 +1218,20 @@ void AllWeightings::ResetBranchCaches(bool const empty_all)
 void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const number_columns_in_one_child_leaf, bool const force) const
 {
 
+	// ************************************************************************************************************************************************** //
+	// This function builds a cache:
+	// A single map for this entire branch that 
+	// maps a CHILD primary key set (i.e., a single row of child data,
+	// including the child's branch and the 0 or 1 child leaf)
+	// to a particular output row in a particular time unit in this branch,
+	// for rapid lookup later.  The map also includes the *child* leaf number in the *output*
+	// for the given row.
+	// (I.e., the *input* is just a single child row of data with at most only one child leaf,
+	//  but this single row of monadic child input data maps to a particular k-value
+	//  in the corresponding output row, because child data can appear multiple times
+	//  for a single output row.)
+	// ************************************************************************************************************************************************** //
+
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
 	{
 
@@ -1247,6 +1243,11 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 		ChildDMUInstanceDataVector child_hit_vector;
 		std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & time_unit_output_rows)
 		{
+
+			// ***************************************************************************************** //
+			// We have one time unit entry within this time slice.
+			// We proceed to build the cache
+			// ***************************************************************************************** //
 
 			for (auto outputRowPtr = time_unit_output_rows.second.cbegin(); outputRowPtr != time_unit_output_rows.second.cend(); ++outputRowPtr)
 			{
@@ -1921,3 +1922,175 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 }
 
 #endif
+
+void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit)
+{
+
+	if (!originalTimeSlice.hasTimeGranularity() || !currentTimeSlice.hasTimeGranularity())
+	{
+		boost::format msg("Attempting to prune time units with no time granularity!");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	std::int64_t oldWidth = originalTimeSlice.WidthForWeighting(AvgMsperUnit);
+	std::int64_t currentWidth = currentTimeSlice.WidthForWeighting(AvgMsperUnit);
+
+
+	// Time slices get split apart, but never merged together, in the context of this function.
+
+	// Note the fact that when time slices are MERGED it is the context of CONSOLIDATED output,
+	// a scenario where precisely the "hits" data is wiped out and consolidated.
+	// So again, in the context of this function, we are only slicing time slices, never merging.
+	if (originalTimeSlice.getStart() < currentTimeSlice.getStart())
+	{
+		if (originalTimeSlice.getEnd() <= currentTimeSlice.getStart())
+		{
+			// no overlap
+			boost::format msg("Attempting to prune time units that do not overlap!");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+		else if (originalTimeSlice.getEnd() < currentTimeSlice.getEnd())
+		{
+
+			// left of original is by itself, right of original overlaps left of current, right of current is by itself
+
+			std::int64_t leftWidth = currentTimeSlice.getStart() - originalTimeSlice.getStart();
+			std::int64_t middleWidth = originalTimeSlice.getEnd() - currentTimeSlice.getStart();
+			std::int64_t rightWidth = currentTimeSlice.getEnd() - originalTimeSlice.getEnd();
+
+			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
+			long double middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
+			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+
+			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = branches_and_leaves;
+
+			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			{
+				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				{
+					auto const & hits = branch_and_leaves.first.hits;
+					
+					// throw away left
+
+					int time_unit_index = 0;
+					std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & hit)
+					{
+						long double time_unit_index_test = boost::lexical_cast<long double>(time_unit_index);
+
+						if (time_unit_index_test < leftUnits)
+						{
+
+						}
+
+						++time_unit_index;
+					});
+				});
+			});
+
+		}
+		else if (originalTimeSlice.getEnd() == currentTimeSlice.getEnd())
+		{
+
+			// left of original is by itself, right of original overlaps entire current with nothing left over
+			std::int64_t leftWidth = currentTimeSlice.getStart() - originalTimeSlice.getStart();
+			std::int64_t rightWidth = currentTimeSlice.getEnd() - currentTimeSlice.getStart();
+
+			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
+			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+
+		}
+		else
+		{
+
+			// original end is past current end
+			// left of original is by itself, current is completely overlapped by original, right of original is by itself
+			std::int64_t leftWidth = currentTimeSlice.getStart() - originalTimeSlice.getStart();
+			std::int64_t middleWidth = currentTimeSlice.getEnd() - currentTimeSlice.getStart();
+			std::int64_t rightWidth = originalTimeSlice.getEnd() - currentTimeSlice.getEnd();
+
+			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
+			long double middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
+			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+
+		}
+	}
+	else if (originalTimeSlice.getStart() == currentTimeSlice.getStart())
+	{
+		if (originalTimeSlice.getEnd() < currentTimeSlice.getEnd())
+		{
+
+			// left of original matches left of current, entire original overlaps the left part of current, and the right of current is by itself
+			std::int64_t leftWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
+			std::int64_t rightWidth = currentTimeSlice.getEnd() - originalTimeSlice.getEnd();
+
+			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
+			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+
+		}
+		else if (originalTimeSlice.getEnd() == currentTimeSlice.getEnd())
+		{
+			// both time slices are identical
+			// nothing to do
+		}
+		else
+		{
+
+			// original end is past current end
+			// Left edges are the same, entire current overlaps original, and right side of original is by itself on the right
+			std::int64_t leftWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
+			std::int64_t rightWidth = originalTimeSlice.getEnd() - currentTimeSlice.getEnd();
+
+			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
+			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+
+		}
+	}
+	else if (originalTimeSlice.getStart() < currentTimeSlice.getEnd())
+	{
+		if (originalTimeSlice.getEnd() < currentTimeSlice.getEnd())
+		{
+
+			// left of current is by itself, entire original is overlapped by current, right of current is by itself
+			std::int64_t leftWidth = originalTimeSlice.getStart() - currentTimeSlice.getStart();
+			std::int64_t middleWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
+			std::int64_t rightWidth = currentTimeSlice.getEnd() - originalTimeSlice.getEnd();
+
+			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
+			long double middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
+			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+
+		}
+		else if (originalTimeSlice.getEnd() == currentTimeSlice.getEnd())
+		{
+
+			// left of current is by itself, entire original overlaps entire right of current exactly with nothing left over
+			std::int64_t leftWidth = originalTimeSlice.getStart() - currentTimeSlice.getStart();
+			std::int64_t rightWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
+
+			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
+			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+
+		}
+		else
+		{
+
+			// original end is past current end
+			// left of current is by itself, right of current overlaps the left of original, and the right of original is by itself on the right
+			std::int64_t leftWidth = originalTimeSlice.getStart() - currentTimeSlice.getStart();
+			std::int64_t middleWidth = currentTimeSlice.getEnd() - originalTimeSlice.getStart();
+			std::int64_t rightWidth = originalTimeSlice.getEnd() - currentTimeSlice.getEnd();
+
+			long double leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
+			long double middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
+			long double rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
+
+		}
+	}
+	else
+	{
+		// no overlap
+		boost::format msg("Attempting to prune time units that do not overlap!");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+}

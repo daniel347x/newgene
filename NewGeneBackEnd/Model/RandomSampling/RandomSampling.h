@@ -258,8 +258,12 @@ class TimeSlice
 
 		}
 
+		// ***************************************************************************** //
+		// Return the number of time slots corresponding to the given time unit
+		// ***************************************************************************** //
 		std::int64_t WidthForWeighting(std::int64_t const ms_per_unit_time) const
 		{
+			
 			if (none)
 			{
 				// This function is only called for the primary variable group.
@@ -283,6 +287,18 @@ class TimeSlice
 			}
 			// round up
 			return ret + 1;
+
+		}
+
+		static long double WidthForWeighting(std::int64_t const leftVal, std::int64_t const rightVal, std::int64_t const ms_per_unit_time)
+		{
+			std::int64_t absolute = rightVal - leftVal;
+			return WidthForWeighting(absolute, ms_per_unit_time);
+		}
+
+		static long double WidthForWeighting(std::int64_t const absolute, std::int64_t const ms_per_unit_time)
+		{
+			return boost::lexical_cast<long double>(absolute) / boost::lexical_cast<long double>(ms_per_unit_time);
 		}
 
 		TimeSlice & operator=(TimeSlice const & rhs)
@@ -1299,7 +1315,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// (including only child primary keys and selected child variables)
 		// - this corresponds to incoming child variable group (NOT non-primary top-level variable group) -
 		// to output rows for that variable group.
-		// The output rows are represented by a map from the actual iterator to a specific output row,
+		// The output rows are represented by a map from the actual pointer to a specific output row,
 		// to a vector of child leaf numbers in the output row matching the single incoming child leaf.
 		// **************************************************************************************** //
 		// **************************************************************************************** //
@@ -1392,6 +1408,8 @@ class VariableGroupTimeSliceData
 
 		VariableGroupBranchesAndLeavesVector branches_and_leaves;
 		Weighting weighting; // sum over all branches and leaves in all variable groups
+
+		void PruneTimeUnits(TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit);
 
 };
 

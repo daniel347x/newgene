@@ -508,6 +508,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		{
 			allWeightings.PrepareFullSamples(K);
 		}
+
 		if (failed || CheckCancelled()) return;
 
 		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
@@ -539,6 +540,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
 		if (failed || CheckCancelled()) return;
 
+		// ************************************************************ //
+		// IMPORTANT:
+		// Disallow "separation" mode for time granularity = none
+		// ************************************************************ //
 		if (true) // Consolidate data mode is on
 		{
 			ConsolidateData(random_sampling, allWeightings);
@@ -21366,7 +21371,8 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 {
 	
 	// **************************************************************************************** //
-	// Top-level variable groups that are *not* primary are considered child data
+	// Top-level variable groups that are *not* primary are considered child data,
+	// and are handled here
 	// **************************************************************************************** //
 
 	int current_top_level_vg_index = 0;
@@ -21401,7 +21407,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 
 	// **************************************************************************************** //
-	// Child variable groups - secondary columns
+	// Child variable groups are handled here
 	// **************************************************************************************** //
 
 	int current_child_vg_index = 0;
@@ -22014,6 +22020,14 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 
 void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, AllWeightings &allWeightings)
 {
+
+	// *************************************************************************************************************************** //
+	// *************************************************************************************************************************** //
+	// Thankfully, there is no need to MERGE the "hits" data
+	// among time slices that are merged together in this function,
+	// precisely because this function is used to ignore the time units stored in the "hits" data.
+	// *************************************************************************************************************************** //
+	// *************************************************************************************************************************** //
 
 	if (random_sampling)
 	{
