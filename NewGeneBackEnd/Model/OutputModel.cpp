@@ -22124,6 +22124,18 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 					// Those previous rows that did not match are stashed away.
 					// ************************************************************************************************************************************************************** //
 
+					// We need to extend the time slice of the "intersection" rows,
+					// which are guaranteed to have been copied by "set_intersection" from the "ongoing_merged_rows" container,
+					// and will therefore (using the custom assignment operator which always takes the element that is not empty -
+					// and the result vector contained default-constructed elements which were empty)
+					// contain the time slices from the "ongoing_merged_rows" container,
+					// guaranteeing that these time slices, which may start at different places for different rows
+					// although they all *end* at the start of the new time slice, are saved.
+					std::for_each(intersection.begin(), intersection.end(), [&](MergedTimeSliceRow & merged_row)
+					{
+						merged_row.time_slice.setEnd(the_slice.getEnd());
+					});
+
 					// Intersection now contains all previous rows that matched with incoming rows,
 					// and they have been properly extended.
 
