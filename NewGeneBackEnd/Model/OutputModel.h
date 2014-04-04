@@ -726,7 +726,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				int K; // the multiplicity
 
 				// Random sampling
-				bool merge_adjacent_rows_with_identical_data_on_secondary_keys;
+				bool consolidate_rows;
 				bool random_sampling;
 				std::int64_t random_sampling_number_rows;
 				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number);
@@ -973,7 +973,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 					outgoing_rows_of_data.insert(outgoing_rows_of_data.cend(), std::make_move_iterator(incoming_rows_of_data.begin()), std::make_move_iterator(incoming_rows_of_data.end()));
 					incoming_rows_of_data.clear();
 
-					if (consider_merging_timerange_adjacent_identical_rows && merge_adjacent_rows_with_identical_data_on_secondary_keys)
+					if (consider_merging_timerange_adjacent_identical_rows && consolidate_rows)
 					{
 						// Do a pass to merge adjacent rows timerange-wise that have identical secondary key data
 						while (outgoing_rows_of_data.size() > 1)

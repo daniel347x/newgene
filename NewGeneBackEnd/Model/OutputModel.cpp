@@ -210,7 +210,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, ms_elapsed(0)
 	, current_number_rows_to_sort(0)
 	, remove_self_kads(true)
-	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
+	, consolidate_rows(true)
 	, random_sampling_number_rows(1)
 	, random_sampling(false)
 	, random_sampling_old(false)
@@ -544,7 +544,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// IMPORTANT:
 		// Disallow "separation" mode for time granularity = none
 		// ************************************************************ //
-		if (merge_adjacent_rows_with_identical_data_on_secondary_keys) // Consolidate data mode is on
+		if (consolidate_rows) // Consolidate data mode is on
 		{
 			// Eliminates the division of sets of output rows within
 			// each branch among internal (to the branch)
@@ -20435,7 +20435,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 								Branch branch(dmus_branch);
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, merge_adjacent_rows_with_identical_data_on_secondary_keys, random_sampling);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, consolidate_rows, random_sampling);
 
 								if (added)
 								{
@@ -20459,7 +20459,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// Add the secondary data for this non-primary top-level variable group to the cache
 								allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, merge_adjacent_rows_with_identical_data_on_secondary_keys, random_sampling);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, consolidate_rows, random_sampling);
 
 							}
 							break;
@@ -20481,7 +20481,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// which might slice the time slices, each such slice will not add any new primary leaves
 								// and the previous set of cached leaves will be persisted in the time slice copies.
 								// ************************************************************************************************** //
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, merge_adjacent_rows_with_identical_data_on_secondary_keys, random_sampling);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, consolidate_rows, random_sampling);
 
 								if (added)
 								{
@@ -22310,6 +22310,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 	std::int64_t rows_written = 0;
 
+	//if (consolidate_)
 	std::for_each(allWeightings.consolidated_rows.cbegin(), allWeightings.consolidated_rows.cend(), [&](decltype(allWeightings.consolidated_rows)::value_type const & output_row)
 	{
 		bool first = true;
@@ -22321,6 +22322,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 			}
 			first = false;
 			output_file << data;
+
+			++rows_written;
 		});
 	});
 
