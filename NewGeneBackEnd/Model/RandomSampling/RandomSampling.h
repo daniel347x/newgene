@@ -1584,7 +1584,7 @@ public:
 	std::map<int, DataCache> otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
 	std::map<int, DataCache> childCache; // Ditto, but for child variable groups
 
-	std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> sorted_rows;
+	std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> consolidated_rows;
 
 public:
 

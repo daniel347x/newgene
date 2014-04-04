@@ -468,8 +468,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
-	// RANDOM_SAMPLING: The work is all done here
-	if (true) // if (random_sampling)
+	// The work of the new Sampler class is all done here
+	if (true)
 	{
 
 		K = 0;
@@ -22242,8 +22242,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 	// Order the rows how we want them - first by time, then by keys
 
-	allWeightings.sorted_rows.clear();
-	allWeightings.sorted_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
+	allWeightings.consolidated_rows.clear();
+	allWeightings.consolidated_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
 	saved_historic_rows.clear();
 
 }
@@ -22308,7 +22308,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 	std::int64_t rows_written = 0;
 
-	std::for_each(allWeightings.sorted_rows.cbegin(), allWeightings.sorted_rows.cend(), [&](decltype(allWeightings.sorted_rows)::value_type const & output_row)
+	std::for_each(allWeightings.consolidated_rows.cbegin(), allWeightings.consolidated_rows.cend(), [&](decltype(allWeightings.consolidated_rows)::value_type const & output_row)
 	{
 		bool first = true;
 		std::for_each(output_row.output_row.cbegin(), output_row.output_row.cend(), [&](InstanceData const & data)
