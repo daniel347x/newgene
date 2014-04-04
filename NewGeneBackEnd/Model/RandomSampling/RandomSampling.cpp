@@ -1928,7 +1928,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 
 #endif
 
-void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit, bool const merge_adjacent_rows_with_identical_data_on_secondary_keys)
+void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	// ********************************************************************************************** //
@@ -1963,9 +1963,30 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 	// the data output file contain *multiple* sets of rows of data that lie in the same
 	// "day" time slice - but with sub-day granularity.  This is desired so that all K-ads
 	// are successfully output.
+	//
+	// Finally, note that this function is always exited if full sampling is being performed
+	// (not random), EVEN THOUGH the full sampler must distribute rows over the time units
+	// discussed above within individual time slices that span multiple time units.
+	// However, the full sampler, in "non-consolidate" mode, uses a different approach
+	// to do this that does not involve the "hits" data member.
+	// Namely, the full sampler simply looks at how many time units there actually are
+	// corresponding to the given time slice, and just outputs the same data that many times,
+	// properly changing the time slice start & end datetimes as appropriate, of course.
+	// Only the random sampler, which randomly chooses rows from among different time units
+	// within each time slice (that is the entire purpose of the "hits" data structure and its data!)
+	// must process the "hits" when time slices are pruned.
+	//
+	// Note that we call it "pruning" time slices, but really the calling function is "splitting"
+	// existing time slices into multiple pieces, each a sub-piece of the original (never expanding)
+	// and each with an exact copy of the original piece's "hits" data, and then the calling function
+	// calls "prune" on each of the relevant sub-pieces (those that are not being thrown away).
+	//
+	// Again, the *merging* of time slices only occurs when "consolidate_rows" is true,
+	// so there's no need for this function to handle the case of EXPANDING (rather than pruning)
+	// the current time slice.
 	// ********************************************************************************************** //
 
-	if (merge_adjacent_rows_with_identical_data_on_secondary_keys)
+	if (!random_sampling || consolidate_rows)
 	{
 		// If rows are being merged (when possible) in the output,
 		// this function does not apply.
