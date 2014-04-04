@@ -393,12 +393,14 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setEnd(middle);
 	timeSlices[timeSlice] = timeSliceData;
+	timeSlices[timeSlice].PruneTimeUnits(originalMapTimeSlice, timeSlice);
 
 	newMapElementLeftPtr = timeSlices.find(timeSlice);
 
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setStart(middle);
 	timeSlices[timeSlice] = timeSliceData;
+	timeSlices[timeSlice].PruneTimeUnits(originalMapTimeSlice, timeSlice);
 
 	newMapElementRightPtr = timeSlices.find(timeSlice);
 
@@ -417,16 +419,19 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setEnd(left);
 	timeSlices[timeSlice] = timeSliceData;
+	timeSlices[timeSlice].PruneTimeUnits(originalMapTimeSlice, timeSlice);
 
 	timeSlice = originalMapTimeSlice;
 	timeSlice.Reshape(left, right);
 	timeSlices[timeSlice] = timeSliceData;
+	timeSlices[timeSlice].PruneTimeUnits(originalMapTimeSlice, timeSlice);
 
 	newMapElementMiddlePtr = timeSlices.find(timeSlice);
 
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setStart(right);
 	timeSlices[timeSlice] = timeSliceData;
+	timeSlices[timeSlice].PruneTimeUnits(originalMapTimeSlice, timeSlice);
 
 }
 
@@ -1926,6 +1931,39 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit)
 {
 
+	// ********************************************************************************************** //
+	// This function is called when time slices (and corresponding output row data)
+	// are SPLIT.
+	// Note that the opposite case - when time slices are MERGED - 
+	// it is the context of CONSOLIDATED output,
+	// a scenario where precisely the "hits" data is wiped out and consolidated
+	// so that this function would be irrelevent (and is not called).
+	// So again, in the context of this function, we are only slicing time slices, never merging.
+	// Furthermore, the calling code guarantees that time slices are only shrunk from both sides
+	// (or left the same), never expanded.
+	// So it is guaranteed that "originalTimeSlice" fully covers "currentTimeSlice".
+	//
+	// This function takes the current time slice (this instance)
+	// and recalculates its "hits" data, throwing away "hits" time units that
+	// are outside the range indicated by "current time slice" in relation to "original time slice".
+	// Note that each "hit" element contains possibly MANY output rows, all corresponding
+	// to a fixed (sub-)time-width that is exactly equal to the time width corresponding
+	// to a single unit of time at the time range granularity selected by the user for output.
+	// I.e., for "day", the time unit is 1 day.
+	// Further note that each TIME SLICE can cover (in this example) many days -
+	// this is because rows of raw input data can also cover multiple days.
+	//
+	// Finally, note that if a time slice within the above "day" scenario (and this equally
+	// applies to any time range granularity chosen by the user) is pruned into a width smaller than
+	// a day (which can happen during child variable group merges), the number of "time units"
+	// in the resulting "hits" variable could round to 0.  However, the algorithm guarantees
+	// that in this scenario, no matter how small the time slice is being pruned to, there
+	// will be at least 1 entry (set of rows) in "hits".  This will correspond to having
+	// the data output file contain *multiple* sets of rows of data that lie in the same
+	// "day" time slice - but with sub-day granularity.  This is desired so that all K-ads
+	// are successfully output.
+	// ********************************************************************************************** //
+
 	if (!originalTimeSlice.hasTimeGranularity() || !currentTimeSlice.hasTimeGranularity())
 	{
 		boost::format msg("Attempting to prune time units with no time granularity!");
@@ -1950,9 +1988,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 
 	// Time slices get split apart, but never merged together, in the context of this function.
 
-	// Note the fact that when time slices are MERGED it is the context of CONSOLIDATED output,
-	// a scenario where precisely the "hits" data is wiped out and consolidated.
-	// So again, in the context of this function, we are only slicing time slices, never merging.
 	if (originalTimeSlice.getStart() < currentTimeSlice.getStart())
 	{
 		if (originalTimeSlice.getEnd() <= currentTimeSlice.getStart())
