@@ -922,8 +922,8 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch, Le
 
 	boost::multiprecision::cpp_int which_time_unit = -1;  // -1 means "full sampling for branch" - no need to break down into time units (which have identical full sets)
 
-	branch.hits[which_time_unit].clear;
-	branch.remaining[which_time_unit].clear;
+	branch.hits[which_time_unit].clear();
+	branch.remaining[which_time_unit].clear();
 
 	static int saved_range = -1;
 
