@@ -211,7 +211,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, current_number_rows_to_sort(0)
 	, remove_self_kads(true)
 	, merge_adjacent_rows_with_identical_data_on_secondary_keys(true)
-	, random_sampling_rows_per_stage(1)
+	, random_sampling_number_rows(1)
 	, random_sampling(false)
 	, random_sampling_old(false)
 	, top_level_vg_index(0)
@@ -221,7 +221,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	//delete_tables = false;
 	//merge_adjacent_rows_with_identical_data_on_secondary_keys = false;
 	//random_sampling = true;
-	//random_sampling_rows_per_stage = 1000000;
+	//random_sampling_number_rows = 1000000;
 	messager.StartProgressBar(0, 1000);
 }
 
@@ -469,7 +469,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	}
 
 	// RANDOM_SAMPLING: The work is all done here
-	if (random_sampling)
+	if (true) // if (random_sampling)
 	{
 
 		K = 0;
@@ -494,7 +494,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
 		if (failed || CheckCancelled()) return;
 
-		std::int64_t const samples = 1000;
+		std::int64_t const samples = random_sampling_number_rows;
 
 		// The following prepares all randomly-generated output rows
 		allWeightings.PrepareRandomNumbers(samples);
@@ -639,11 +639,6 @@ void OutputModel::OutputGenerator::MergeChildGroups()
 	SqlAndColumnSet x_table_result = primary_group_merged_results;
 	SqlAndColumnSet xr_table_result = x_table_result;
 	SqlAndColumnSet duplicates_removed = xr_table_result;
-
-	if (random_sampling)
-	{
-		// First, the top-level VG's that are *not* primary
-	}
 
 	// Child tables
 	int current_child_view_name_index = 1;
@@ -2557,6 +2552,23 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Merg
 void OutputModel::OutputGenerator::DetermineNumberStages()
 {
 
+	return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	total_number_primary_rows = 0;
 	total_progress_stages = 0;
 
@@ -2753,7 +2765,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Cons
 		return SqlAndColumnSet();
 	}
 
-	if (random_sampling)
+	if (false)
 	{
 
 		// moved to another function called in a different way
@@ -8450,7 +8462,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 	// Add the ORDER BY column/s
 	//if (!count_only && debug_ordering)
-	if (!random_sampling)
+	if (true)
 	{
 
 		if (!count_only && true)
@@ -8524,7 +8536,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 				}
 			});
 
-			if (!random_sampling)
+			if (true)
 			{
 
 				// Then by columns with multiplicity greater than 1
@@ -13090,7 +13102,14 @@ void OutputModel::OutputGenerator::Prepare()
 
 	std::pair<bool, std::int64_t> info_random_sampling = model->t_general_options.getRandomSamplingInfo(model->getDb());
 	random_sampling = info_random_sampling.first;
-	random_sampling_rows_per_stage = info_random_sampling.second;
+	random_sampling_number_rows = info_random_sampling.second;
+
+	if (random_sampling && (random_sampling_number_rows <= 0))
+	{
+		boost::format msg("You have selected random sampling, but the number of desired rows to generate is 0.");
+		SetFailureMessage(msg.str());
+		failed = true;
+	}
 
 	PopulateUOAs();
 
@@ -13125,7 +13144,7 @@ void OutputModel::OutputGenerator::Prepare()
 	top_level_vg_index = 0;
 	if (primary_variable_groups_vector.size() > 1)
 	{
-		if (random_sampling)
+		if (true) // if (random_sampling)
 		{
 			if (true)
 			{
@@ -16430,7 +16449,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 {
 	std::int64_t number_rows = ObtainCount(columns);
 	boost::format msg("Multiplicity %1% - Randomizing to select a maximum of %2% rows from %3% to pass to the next stage...");
-	msg % current_multiplicity % random_sampling_rows_per_stage % number_rows;
+	msg % current_multiplicity % random_sampling_number_rows % number_rows;
 	UpdateProgressBarToNextStage(msg.str(), std::string());
 	messager.SetPerformanceLabel("Randomizing...");
 
@@ -16462,7 +16481,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Rand
 	sql_string += "(SELECT * FROM \"";
 	sql_string += columns.view_name;
 	sql_string += "\" ORDER BY RANDOM() LIMIT ";
-	sql_string += boost::lexical_cast<std::string>(random_sampling_rows_per_stage);
+	sql_string += boost::lexical_cast<std::string>(random_sampling_number_rows);
 	sql_string += ") ";
 
 	bool first = true;
