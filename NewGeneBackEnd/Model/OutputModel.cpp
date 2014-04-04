@@ -21711,7 +21711,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 					// First, the branch primary keys
 					std::for_each(branch.primary_keys.cbegin(), branch.primary_keys.cend(), [&](DMUInstanceData const & data)
 					{
-						boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+						boost::apply_visitor(create_output_row_visitor(output_file, first), data);
 					});
 
 					// Then, the leaf primary keys - for multiple leaves
@@ -21733,7 +21733,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						// see the following code block after this std::for_each() exits.
 						std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
 						{
-							boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+							boost::apply_visitor(create_output_row_visitor(output_file, first), data);
 						});
 						++numberLeavesHandled;
 					});
@@ -21751,7 +21751,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						{
 							for (int nk = 0; nk < numberColumnsInTheDMUWithMultiplicityGreaterThan1; ++n)
 							{
-								boost::apply_visitor(write_to_output_visitor(output_file, first), InstanceData(std::string()));
+								boost::apply_visitor(create_output_row_visitor(output_file, first), InstanceData(std::string()));
 							}
 						}
 					}
@@ -21774,7 +21774,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
 							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 							{
-								boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+								boost::apply_visitor(create_output_row_visitor(output_file, first), data);
 							});
 						}
 						else
@@ -21795,7 +21795,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						{
 							for (int nk = 0; nk < numberSecondaryColumns; ++n)
 							{
-								boost::apply_visitor(write_to_output_visitor(output_file, first), InstanceData(std::string()));
+								boost::apply_visitor(create_output_row_visitor(output_file, first), InstanceData(std::string()));
 							}
 						}
 					}
@@ -21869,7 +21869,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 										SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
 										std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 										{
-											boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+											boost::apply_visitor(create_output_row_visitor(output_file, first), data);
 										});
 
 									}
@@ -21894,7 +21894,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 										int numberSecondaries = top_level_number_secondary_columns[vgNumber];
 										for (int n = 0; n < numberSecondaries; ++n)
 										{
-											boost::apply_visitor(write_to_output_visitor(output_file, first), InstanceData(std::string()));
+											boost::apply_visitor(create_output_row_visitor(output_file, first), InstanceData(std::string()));
 										}
 									}
 								}
@@ -21914,7 +21914,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 									int numberSecondaries = top_level_number_secondary_columns[vgNumber];
 									for (int n = 0; n < numberSecondaries; ++n)
 									{
-										boost::apply_visitor(write_to_output_visitor(output_file, first), InstanceData(std::string()));
+										boost::apply_visitor(create_output_row_visitor(output_file, first), InstanceData(std::string()));
 									}
 								}
 							}
@@ -21966,7 +21966,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 									SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
 									std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 									{
-										boost::apply_visitor(write_to_output_visitor(output_file, first), data);
+										boost::apply_visitor(create_output_row_visitor(output_file, first), data);
 									});
 
 								});
@@ -21997,7 +21997,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 								int numberSecondaries = child_number_secondary_columns[vgNumber];
 								for (int n = 0; n < numberSecondaries; ++n)
 								{
-									boost::apply_visitor(write_to_output_visitor(output_file, first), InstanceData(std::string()));
+									boost::apply_visitor(create_output_row_visitor(output_file, first), InstanceData(std::string()));
 								}
 							}
 						}

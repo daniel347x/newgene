@@ -1481,12 +1481,12 @@ class AllWeightings
 
 };
 
-class write_to_output_visitor : public boost::static_visitor<>
+class create_output_row_visitor : public boost::static_visitor<>
 {
 
 public:
 
-	write_to_output_visitor(std::fstream & output_file_, bool & first_)
+	create_output_row_visitor(std::fstream & output_file_, bool & first_)
 		: output_file(output_file_)
 		, first(first_)
 	{}
@@ -1516,7 +1516,7 @@ class MergedTimeSliceRow
 			: empty(true)
 		{}
 
-		MergedTimeSliceRow(TimeSlice const & ts, BranchOutputRow const & row)
+		MergedTimeSliceRow(TimeSlice const & ts, std::vector<InstanceData> const & row)
 			: time_slice(ts)
 			, output_row(row)
 			, empty(false)
@@ -1572,7 +1572,7 @@ class MergedTimeSliceRow
 		}
 
 		TimeSlice time_slice;
-		BranchOutputRow output_row;
+		std::vector<InstanceData> output_row;
 
 	private:
 
