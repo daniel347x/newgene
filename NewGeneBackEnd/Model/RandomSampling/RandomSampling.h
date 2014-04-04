@@ -65,6 +65,186 @@ class TimeSlice
 			Validate();
 		}
 
+		void Merge(TimeSlice const & rhs)
+		{
+		
+			if (none)
+			{
+				if (rhs.none)
+				{
+					if (minus_infinity && plus_infinity)
+					{
+						// accept our values - we encompass, or are equal to, the incoming time slice
+					}
+					else if (minus_infinity && !plus_infinity)
+					{
+						if (rhs.minus_infinity && rhs.plus_infinity)
+						{
+							// accept the RHS values - the RHS encompasses us
+							plus_infinity = true;
+							time_end = 0;
+						}
+						else if (rhs.minus_infinity && !rhs.plus_infinity)
+						{
+							// Both us and RHS are infinite at the left, but cropped at the right.
+							// Take the larger of the right values.
+							time_end = std::max(time_end, rhs.time_end);
+						}
+						else if (!rhs.minus_infinity && rhs.plus_infinity)
+						{
+							// We are cropped at the right;
+							// RHS is cropped at the left.
+							
+							// Confirm that we overlap, with no gap between us.
+							if (time_end < rhs.time_start)
+							{
+								boost::format msg("Logic error merging time slices!  Both current time slice and RHS time slice are identified as having no time granularity, but current time slice is cropped at the right and RHS time slice is cropped at the left, and there is a gap between them.");
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
+
+							// Set ourselves back to infinite, which is the merging of ourself with RHS.
+							plus_infinity = true;
+							time_end = 0;
+
+						}
+						else
+						{
+							boost::format msg("Logic error merging time slices!  RHS time slice is identified as having no time granularity, but both endpoints are finite.");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+					}
+					else if (!minus_infinity && plus_infinity)
+					{
+						if (rhs.minus_infinity && rhs.plus_infinity)
+						{
+							// accept the RHS values - the RHS encompasses us
+							minus_infinity = true;
+							time_start = 0;
+						}
+						else if (rhs.minus_infinity && !rhs.plus_infinity)
+						{
+							// Both us and RHS are infinite,
+							// but we are cropped at the left,
+							// and RHS is cropped at the right.
+
+							// Confirm that we overlap, with no gap between us.
+							if (time_start > rhs.time_end)
+							{
+								boost::format msg("Logic error merging time slices!  Both current time slice and RHS time slice are identified as having no time granularity, but current time slice is cropped at the left and RHS time slice is cropped at the right, and there is a gap between them.");
+								throw NewGeneException() << newgene_error_description(msg.str());
+							}
+
+							// Make ourselves infinite again, to merge with RHS
+							minus_infinity = true;
+							time_start = 0;
+						}
+						else if (!rhs.minus_infinity && rhs.plus_infinity)
+						{
+							// We are cropped at the left;
+							// RHS is cropped at the left.
+
+							// Take the smaller of the left values.
+							time_start = std::min(time_start, rhs.time_start);
+						}
+						else
+						{
+							boost::format msg("Logic error merging time slices!  RHS time slice is identified as having no time granularity, but both endpoints are finite.");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+					}
+					else
+					{
+						boost::format msg("Logic error merging time slices!  Current time slice is identified as having no time granularity, but both endpoints are finite.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+				}
+				else
+				{
+
+					// We are infinite.  RHS is not.
+
+					if (minus_infinity && plus_infinity)
+					{
+						// nothing to do - remain infinite
+					}
+					else if (minus_infinity && !plus_infinity)
+					{
+						// We are cropped at the right
+
+						// Check that we overlap with RHS
+						if (time_end < rhs.time_start)
+						{
+							boost::format msg("Logic error merging time slices!  Current time slice is identified as having no time granularity (and is cropped at the right), and RHS is identified as having time granularity,  and its left edge is to the right of the current time slice's right edge.");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+
+						// Take the larger of the right values.
+						time_end = std::max(time_end, rhs.time_end);
+					}
+					else if (!minus_infinity && plus_infinity)
+					{
+						// We are cropped at the left
+
+						// Check that we overlap with RHS
+						if (time_start > rhs.time_end)
+						{
+							boost::format msg("Logic error merging time slices!  Current time slice is identified as having no time granularity (and is cropped at the left), and RHS is identified as having time granularity,  and its right edge is to the left of the current time slice's left edge.");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+
+						// Take the smaller of the left values.
+						time_start = std::min(time_start, rhs.time_start);
+					}
+					else
+					{
+						boost::format msg("Logic error merging time slices!  Current time slice is identified as having no time granularity, but both endpoints are finite.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+
+				}
+			}
+			else if (rhs.none)
+			{
+
+				// We are not infinite, but RHS is
+
+				// Utilize the above logic
+				TimeSlice dummy = rhs;
+				dummy.Merge(*this);
+				*this = dummy;
+
+			}
+			else
+			{
+
+				// Normal case: Neither LHS nor RHS are infinite
+
+				// Make sure we overlap
+
+				if (time_start > rhs.time_end)
+				{
+					boost::format msg("Logic error merging time slices!  Current time slice is to the right of RHS, with a gap between.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				if (time_end < rhs.time_start)
+				{
+					boost::format msg("Logic error merging time slices!  Current time slice is to the left of RHS, with a gap between.");
+					throw NewGeneException() << newgene_error_description(msg.str());
+				}
+
+				// Take the larger of the right values.
+				time_end = std::max(time_end, rhs.time_end);
+
+				// Take the smaller of the left values.
+				time_start = std::min(time_start, rhs.time_start);
+
+			}
+
+			Validate();
+
+		}
+
 		void CheckForAndSetNoTimeRangeGranularity()
 		{
 			if (time_start == 0 && time_end == 0)
@@ -777,9 +957,14 @@ class BranchOutputRow
 		// Destructor to debug
 		~BranchOutputRow();
 
-		bool operator==(BranchOutputRow const & rhs)
+		bool operator==(BranchOutputRow const & rhs) const
 		{
-			return primary_leaves == rhs.primary_leaves;
+			return (!(*this < rhs) && !(rhs < *this));
+		}
+
+		bool operator!=(BranchOutputRow const & rhs) const
+		{
+			return (!(*this == rhs));
 		}
 
 		bool operator<(BranchOutputRow const & rhs) const
@@ -812,7 +997,8 @@ class BranchOutputRow
 #	ifndef _DEBUG
 	private: // for debugging convenience, make public; but be sure it builds when private
 #	endif
-	
+
+		// ******************************************************************* //
 		// Index into the branch's Leaf set.
 		// This *uniquely* defines the row.
 		// Any two BranchOutputRow's in the same branch
@@ -822,6 +1008,7 @@ class BranchOutputRow
 		// This includes the primary top-level variable group,
 		// the non-primary top-level variable groups,
 		// and all child variable groups.
+		// ******************************************************************* //
 		std::set<int> primary_leaves;
 
 	public:
@@ -1011,7 +1198,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// **************************************************************************************** //
 		// **************************************************************************************** //
 		mutable std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> helper_lookup__from_child_key_set__to_matching_output_rows;
-		void ConstructChildCombinationCache(AllWeightings & allWeightings, std::vector<Leaf> & leaves_cache, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), int const number_columns_in_one_child_leaf = 0, bool const force = false) const; // Populate the above data structure
+		void ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>(), int const number_columns_in_one_child_leaf = 0, bool const force = false) const; // Populate the above data structure
 
 		// *********************************************************************************** //
 		// Every branch ALREADY has a std::set<Leaf>,
@@ -1160,6 +1347,8 @@ class AllWeightings
 		// Merge time slice data into a map element
 		bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary = std::vector<ChildToPrimaryMapping>(), std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary = std::vector<ChildToPrimaryMapping>());
 
+		void ConsolidateRowsWithinBranch(Branch const & branch);
+
 		void GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves);
 		void GenerateAllOutputRows(int const K, Branch const & branch, Leaves const & leaves);
 
@@ -1209,6 +1398,32 @@ public:
 
 	std::fstream & output_file;
 	bool & first;
+
+};
+
+class MergedTimeSliceRow
+{
+
+	public:
+
+		bool operator<(MergedTimeSliceRow const & rhs) const
+		{
+			return (output_row < rhs.output_row);
+		}
+
+		MergedTimeSliceRow & operator=(MergedTimeSliceRow const & rhs)
+		{
+			if (output_row != rhs.output_row)
+			{
+				boost::format msg("Logic error merging MergedTimeSliceRow!  The merge should only occur for rows with identical primary keys");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
+			time_slice.Merge(rhs.time_slice);
+		}
+
+		TimeSlice time_slice;
+		BranchOutputRow output_row;
 
 };
 

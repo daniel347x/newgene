@@ -587,10 +587,9 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// and this cache is copied whenever any map entry changes.
 					// *********************************************************************************** //
 					Branch const & the_current_map_branch = branchAndLeaves.first;
-					std::vector<Leaf> & leaves_cache_for_current_branch = the_current_map_branch.leaves_cache;
 
 					// The following cache will only be filled on the first pass
-					the_current_map_branch.ConstructChildCombinationCache(*this, leaves_cache_for_current_branch, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
+					the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
 
 					// *********************************************************************************** //
 					// We have an incoming child variable group branch and leaf.
@@ -1234,7 +1233,7 @@ void AllWeightings::ResetBranchCaches(bool const empty_all)
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, std::vector<Leaf> & leaves_cache, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const number_columns_in_one_child_leaf, bool const force) const
+void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary, std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary, int const number_columns_in_one_child_leaf, bool const force) const
 {
 
 	if (force || helper_lookup__from_child_key_set__to_matching_output_rows.empty())
@@ -1506,7 +1505,7 @@ void AllWeightings::ConsolidateData(bool const random_sampling)
 			{
 				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
 				{
-					GenerateAllOutputRows(K, branch_and_leaves.first, branch_and_leaves.second);
+					ConsolidateRowsWithinBranch(branch_and_leaves.first);
 				});
 
 			});
@@ -1514,6 +1513,28 @@ void AllWeightings::ConsolidateData(bool const random_sampling)
 		});
 
 	}
+
+
+
+}
+
+void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
+{
+
+	branch.hits[-1].clear();
+
+	std::set<BranchOutputRow> consolidated_rows;
+
+	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
+	{
+		if (hit.first != -1)
+		{
+			branch.hits[-1].insert(hit.second.cbegin(), hit.second.cend());
+			hit.second.clear();
+		}
+	});
+
+	branch.ConstructChildCombinationCache(*this);
 
 }
 
