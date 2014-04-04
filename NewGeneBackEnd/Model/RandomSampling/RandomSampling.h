@@ -1453,12 +1453,19 @@ public:
 			data.push_back(data);
 		}
 
+		if (mode & CREATE_ROW_MODE__PREPARED_STATEMENT)
+		{
+			BindTermToInsertStatement(insert_stmt, data, (*bindIndex)++);
+		}
+
 		first = false;
 
 	}
 
 	static std::fstream * output_file;
 	static std::vector<InstanceData> data;
+	static int * bind_index;
+	static sqlite3_stmt * insert_stmt;
 	static int mode;
 	bool & first;
 

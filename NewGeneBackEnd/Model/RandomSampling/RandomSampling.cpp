@@ -16,6 +16,8 @@
 std::fstream * create_output_row_visitor::output_file = nullptr;
 create_output_row_visitor::MODE create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
 std::vector<InstanceData> create_output_row_visitor::data;
+int * create_output_row_visitor::bind_index = nullptr;
+sqlite3_stmt * create_output_row_visitor::insert_stmt == nullptr;
 
 AllWeightings::AllWeightings()
 : insert_random_sample_stmt(nullptr)

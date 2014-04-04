@@ -21080,226 +21080,16 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 				std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
 				{
 
+					int bind_index = 0;
 
-
-
-
-
-
-
-
-
-					// ******************************** //
-
-					// INCOMPLETE LOGIC!!!!
-					// Merge with RandomSamplingWriteResultsToFileOrScreen()!
-
-					// ******************************** //
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-					// We have a row to output
-
-					if (failed || CheckCancelled())
-					{
-						return;
-					}
-
-					int bindIndex = 1;
-
-					// The branch represents the primary keys of multiplicity 1
-					std::for_each(branch.primary_keys.cbegin(), branch.primary_keys.cend(), [&](DMUInstanceData const & data)
-					{
-						BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
-					});
-
-					std::vector<std::int64_t> secondary_key_row_indices;
-					std::map<int, std::vector<std::int64_t>> other_top_level_secondary_row_indices;
-
-					// The leaves represent the primary keys of multiplicity > 1
-					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
-					{
-						Leaf & leaf = branch.leaves_cache[leafIndex];
-						std::for_each(leaf.primary_keys.cbegin(), leaf.primary_keys.cend(), [&](DMUInstanceData const & data)
-						{
-							BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
-						});
-					});
-
-					// This is the data for the primary top-level variable group
-					// secondary keys (i.e., for the dependent data)
-					std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
-					{
-						Leaf & leaf = branch.leaves_cache[leafIndex];
-						if (leaf.index_into_raw_data > 0)
-						{
-							SecondaryInstanceDataVector const & secondary_data_vector = allWeightings.dataCache[leaf.index_into_raw_data];
-							std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
-							{
-								BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
-							});
-						}
-						else
-						{
-							// no data available.  Import should always place blanks, so this should never happen.
-							boost::format msg("Logic error: Missing primary variable group data (there isn't even blank data).");
-							throw NewGeneException() << newgene_error_description(msg.str());
-						}
-					});
-
-					// Then, the non-primary top-level variable group secondary data.
-					// This info is stored in the leaf also.
-					//
-					// Show secondary data grouped by variable group,
-					// then by multiplicity.
-					// There might be multiple fields for each variable group and within each multiplicity,
-					// ... so the logic is a bit non-trivial to get the display order right.
-					int numberTopLevelGroups = static_cast<int>(primary_variable_groups_vector.size());
-					for (int vgNumber = 0; vgNumber < numberTopLevelGroups; ++vgNumber)
-					{
-						for (int multiplicity = 0; multiplicity < K; ++multiplicity)
-						{
-							bool matched = false;
-
-							// Find the variable group and leaf that is desired
-							int testMultiplicity = 0;
-							std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
-							{
-								if (testMultiplicity != multiplicity)
-								{
-									++testMultiplicity;
-									return;
-								}
-								Leaf & leaf = branch.leaves_cache[leafIndex];
-								std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
-								{
-									int const vg_number = top_level_vg_and_data_index.first;
-									if (vg_number == vgNumber)
-									{
-
-										// We now have both the multiplicity and the variable group that is desired
-										// for the correct sequence of output data
-										matched = true;
-
-										// *********************************************************************** //
-										// If we have ANY secondary data, we have ALL ROWS
-										// because the schema controls this and the data is pulled from the DB,
-										// which has empty columns rather than missing columns
-										// *********************************************************************** //
-										std::int64_t const & data_index = top_level_vg_and_data_index.second;
-										DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
-										SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
-										std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
-										{
-											BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
-										});
-
-									}
-								});
-								++testMultiplicity;
-							});
-
-							if (!matched)
-							{
-								if (vgNumber != top_level_vg_index)
-								{
-									// Missing a variable group.  Fill with blanks.
-									int numberSecondaries = top_level_number_secondary_columns[vgNumber];
-									for (int n = 0; n < numberSecondaries; ++n)
-									{
-										BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, InstanceData(std::string()), bindIndex++);
-									}
-								}
-							}
-						}
-					}
-
-					// Then, the child variable group secondary data.
-					// This info is stored in the output row itself.
-					//
-					// Show secondary data grouped by variable group,
-					// then by multiplicity.
-					// There might be multiple fields for each variable group and within each multiplicity,
-					// ... so the logic is a bit non-trivial to get the display order right.
-					int numberChildGroups = static_cast<int>(secondary_variable_groups_vector.size());
-					for (int vgNumber = 0; vgNumber < numberChildGroups; ++vgNumber)
-					{
-						int const the_child_multiplicity = child_uoas__which_multiplicity_is_greater_than_1[*(secondary_variable_groups_vector[vgNumber].first.identifier_parent)].second;
-						for (int multiplicity = 0; multiplicity < the_child_multiplicity; ++multiplicity)
-						{
-							bool matched = false;
-							std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
-							{
-								int const vg_number = leaf_index_mappings.first;
-								if (vg_number != vgNumber)
-								{
-									return;
-								}
-								std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
-								std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
-								{
-
-									int const leaf_number = leaf_index_mapping.first;
-									if (leaf_number != multiplicity)
-									{
-										return;
-									}
-
-									if (leaf_number < 0)
-									{
-										return;
-									}
-
-									// This is the desired variable group and multiplicity
-									matched = true;
-
-									std::int64_t const & data_index = leaf_index_mapping.second;
-									DataCache & data_cache = allWeightings.childCache[vg_number];
-									SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
-									std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
-									{
-										BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, data, bindIndex++);
-									});
-
-								});
-							});
-							if (!matched)
-							{
-								int numberSecondaries = child_number_secondary_columns[vgNumber];
-								for (int n = 0; n < numberSecondaries; ++n)
-								{
-									BindTermToInsertStatement(allWeightings.insert_random_sample_stmt, InstanceData(std::string()), bindIndex++);
-								}
-							}
-						}
-					}
+					create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__PREPARED_STATEMENT;
+					create_output_row_visitor::bind_index = &bind_index;
+					create_output_row_visitor::insert_stmt = allWeightings.insert_random_sample_stmt;
+					CreateOutputRow(branch, outputRow, allWeightings);
+					create_output_row_visitor::output_file = nullptr;
+					create_output_row_visitor::bind_index = nullptr;
+					create_output_row_visitor::insert_stmt = nullptr;
+					create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
 
 					int step_result = 0;
 
@@ -22310,21 +22100,60 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 	std::int64_t rows_written = 0;
 
-	//if (consolidate_)
-	std::for_each(allWeightings.consolidated_rows.cbegin(), allWeightings.consolidated_rows.cend(), [&](decltype(allWeightings.consolidated_rows)::value_type const & output_row)
+	if (consolidate_rows)
 	{
-		bool first = true;
-		std::for_each(output_row.output_row.cbegin(), output_row.output_row.cend(), [&](InstanceData const & data)
-		{
-			if (!first)
-			{
-				output_file << ",";
-			}
-			first = false;
-			output_file << data;
 
-			++rows_written;
+		// In this case, "ConsolidateRows()" has already been called,
+		// and has already populate "consolidated_rows".
+		// "consolidated_rows" contains an EXACT representation of the output,
+		// column-for-column in the correct order, with blanks populated properly,
+		// including all primary, top-level, and child secondary data
+		// (as well as all primary key data for both branch and leaves),
+		// and including all leaves.
+
+		std::for_each(allWeightings.consolidated_rows.cbegin(), allWeightings.consolidated_rows.cend(), [&](decltype(allWeightings.consolidated_rows)::value_type const & output_row)
+		{
+			bool first = true;
+			std::for_each(output_row.output_row.cbegin(), output_row.output_row.cend(), [&](InstanceData const & data)
+			{
+				if (!first)
+				{
+					output_file << ",";
+				}
+				first = false;
+				output_file << data;
+
+				++rows_written;
+			});
 		});
-	});
+
+	}
+	else
+	{
+
+		// We must display the results with one row per time unit corresponding to
+		// the time granularity of the primary variable group
+		// (or sub-time-unit, in case child data has split rows into pieces).
+		// The proper splitting of rows has already occurred.
+
+		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
+		{
+
+			TimeSlice const & the_slice = timeSlice.first;
+			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+
+			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			{
+				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				{
+					Branch const & branch = branch_and_leaves.first;
+					Leaves const & leaves = branch_and_leaves.second;
+				});
+			});
+
+		});
+
+	}
 
 }
