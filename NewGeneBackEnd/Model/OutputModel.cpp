@@ -533,9 +533,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSamplerFillDataForChildGroups(allWeightings);
 		if (failed || CheckCancelled()) return;
 
-		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
-		if (failed || CheckCancelled()) return;
-
 		if (consolidate_rows) // Consolidate data mode is on
 		{
 			// Eliminates the division of sets of output rows within
@@ -580,10 +577,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
-
-
-		std::vector<std::string> sdata;
-		SpitAllWeightings(sdata, allWeightings, true);
 
 		RandomSamplingWriteResultsToFileOrScreen(allWeightings);
 
