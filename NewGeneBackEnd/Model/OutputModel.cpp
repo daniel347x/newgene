@@ -556,10 +556,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			// (Even time slices with multiple months in this example
 			// can be split such that one or two resulting time slices
 			// has such a sub-month width.)
-			// This latter case is handled properly by the "PruneTimeSlice()"
+			// This latter case is handled properly by the "PruneTimeUnits()"
 			// function, guaranteeing that even in such sub-time-unit
 			// branches, the rows appear once.
-			// See detailed comments in the "PruneTimeSlice()" function.
+			// See detailed comments in the "PruneTimeUnits()" function.
 			//
 			// The output is stored in "consolidated_rows" of the AllWeightings object.
 			ConsolidateData(random_sampling, allWeightings);
@@ -20419,6 +20419,8 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 					try
 					{
 						
+						TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
+
 						switch (merge_mode)
 						{
 
@@ -20428,7 +20430,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 								Branch branch(dmus_branch);
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, consolidate_rows, random_sampling);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling);
 
 								if (added)
 								{
@@ -20452,7 +20454,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// Add the secondary data for this non-primary top-level variable group to the cache
 								allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, consolidate_rows, random_sampling);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling);
 
 							}
 							break;
@@ -20474,7 +20476,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// which might slice the time slices, each such slice will not add any new primary leaves
 								// and the previous set of cached leaves will be persisted in the time slice copies.
 								// ************************************************************************************************** //
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary, consolidate_rows, random_sampling);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 								if (added)
 								{
