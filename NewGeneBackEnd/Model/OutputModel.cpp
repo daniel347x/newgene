@@ -568,10 +568,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			ConsolidateData(random_sampling, allWeightings);
 			if (failed || CheckCancelled()) return;
 
-			std::vector<std::string> sdata;
-			SpitAllWeightings(sdata, allWeightings, true);
-			int m = 0;
-
 		}
 		else
 		{
