@@ -549,6 +549,14 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// for easy access.  That should remain the primary source and the Leaf cache
 		// paired with each branch should be removed.  The data is not denormalized, just duplicated,
 		// because each branch has its own Leaf cache, and currently this cache simply appears twice.
+		//
+		// Additional notes, just saying the same thing in a different way:
+		//
+		// After child and non-primary top-level VG's are merged, when clearing and rebuilding the branch leaf caches
+		// to pick up the new leaf-specific data added by the non-primary top-level VG's,
+		// do not simultaneously clear the child lookup cache, because the latter is not duplicated,
+		// nor is it out-of-date following the child/non-primary VG merge because the latter only updates the leaves,
+		// while the child lookup cache is located in the branch but outside the leaves.
 		allWeightings.ResetBranchCaches(false); // build leaf cache and empty child caches.
 		if (failed || CheckCancelled()) return;
 
