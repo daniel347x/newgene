@@ -21996,6 +21996,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 		// (or sub-time-unit, in case child data has split rows into pieces).
 		// The proper splitting of rows has already occurred.
 
+		TIME_GRANULARITY time_granularity - primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
+
 		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
 		{
 
@@ -22162,7 +22164,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						std::int64_t const time_start = timeSlice.getStart();
 						std::int64_t const time_end = timeSlice.getEnd();
 
-
+						std::int64_t const time_start_aligned_higher = TimeRange::determineAligningTimestamp(time_start, time_granularity);
 
 					}
 

@@ -21,6 +21,12 @@ namespace TimeRange
 
 	};
 
+	enum ALIGN_MODE
+	{
+		ALIGN_MODE_UP = 0
+		, ALIGHN_MODE_DOWN
+	};
+
 	inline std::string convertTimestampToString(std::int64_t const timestamp)
 	{
 		boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
@@ -30,7 +36,7 @@ namespace TimeRange
 
 	// Returns the closest Unix timestamp that is equal to or higher than test_timestamp,
 	// but aligned on the given time_granularity
-	std::int64_t determineNextHighestAligningTimestamp(std::int64_t const test_timestamp, TIME_GRANULARITY const time_granularity);
+	std::int64_t determineAligningTimestamp(std::int64_t const test_timestamp, TIME_GRANULARITY const time_granularity, ALIGN_MODE const align_mode);
 
 }
 
