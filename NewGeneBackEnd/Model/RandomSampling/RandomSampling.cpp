@@ -22,6 +22,7 @@ sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
 AllWeightings::AllWeightings()
 : insert_random_sample_stmt(nullptr)
 , numberChildVariableGroups(0)
+, time_granularity(TIME_GRANULARITY__NONE)
 {
 
 }
@@ -949,7 +950,15 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 
 	random_number -= branch.weighting.getWeightingRangeStart();
 
-	boost::multiprecision::cpp_int which_time_unit = random_number / branch.number_branch_combinations;
+	boost::multiprecision::cpp_int which_time_unit = -1;
+	if (time_granularity != TIME_GRANULARITY__NONE)
+	{
+		which_time_unit = random_number / branch.number_branch_combinations;
+	}
+	else
+	{
+		BOOST_ASSERT_MSG(random_number < branch.number_branch_combinations, "Generated random number is greater than the number of branch combinations when the time granularity is none!");
+	}
 
 	static int saved_range = -1;
 	static std::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
@@ -1282,7 +1291,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 						{
 
 							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-							child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
+							child_hit_vector_branch_components.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
 						}
 						break;
@@ -1295,13 +1304,13 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 
 							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
 
-							if (childToPrimaryMapping.leaf_number >= static_cast<int>(outputRow.primary_leaves_cache.size()))
+							if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>(outputRow.primary_leaves_cache.size()))
 							{
 								branch_component_bad = true;
 								break;
 							}
 
-							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys.size() == 0)
+							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size() == 0)
 							{
 								// This is the K=1 case - the matching leaf of the *top-level* UOA
 								// has no primary keys.  This is a logic error, as we should never match
@@ -1318,7 +1327,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
 
-							child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
+							child_hit_vector_branch_components.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
 						}
 						break;
@@ -1356,8 +1365,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 						case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
 						{
 
-							// The next DMU in the child branch's DMU sequence maps to a branch in the top-level DMU sequence
-							child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index]));
+							// The next DMU in the child leaf's DMU sequence maps to a branch in the top-level DMU sequence
+							child_hit_vector.push_back(DMUInstanceData(primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
 						}
 						break;
@@ -1368,9 +1377,9 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 							// leaf_number tells us which leaf
 							// index tells us which index in that leaf
 
-							// The next DMU in the child branch's DMU sequence maps to a leaf in the top-level DMU sequence
+							// The next DMU in the child leaf's DMU sequence maps to a leaf in the top-level DMU sequence
 
-							if (childToPrimaryMapping.leaf_number >= static_cast<int>(outputRow.primary_leaves_cache.size()))
+							if (childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf >= static_cast<int>(outputRow.primary_leaves_cache.size()))
 							{
 								// The current child leaf maps to a top-level leaf that has no data.
 								// We therefore cannot match.
@@ -1378,7 +1387,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 								break;
 							}
 
-							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys.size() == 0)
+							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size() == 0)
 							{
 								// This is the K=1 case - the matching leaf of the *top-level* UOA
 								// has no primary keys.  This is a logic error, as we should never match
@@ -1395,7 +1404,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
 
-							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number]].primary_keys[childToPrimaryMapping.index]));
+							child_hit_vector.push_back(DMUInstanceData(leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys[childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf]));
 
 						}
 						break;
@@ -1805,12 +1814,30 @@ void SpitWeighting(std::string & sdata, Weighting const & weighting)
 	sdata += "<WEIGHTING_START>";
 	sdata += weighting.getWeightingRangeStart().str();
 	sdata += "</WEIGHTING_START>";
+
 	sdata += "<WEIGHTING_END>";
 	sdata += weighting.getWeightingRangeEnd().str();
 	sdata += "</WEIGHTING_END>";
+
 	sdata += "<WEIGHTING_VALUE>";
 	sdata += weighting.getWeighting().str();
 	sdata += "</WEIGHTING_VALUE>";
+}
+
+void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping)
+{
+	sdata += "<MAPPING_TYPE>";
+	sdata += ChildToPrimaryMapping::MappingToText(childToPrimaryMapping.mapping);
+	sdata += "</MAPPING_TYPE>";
+
+	sdata += "<index_of_column_within_top_level_branch_or_single_leaf>";
+	sdata += boost::lexical_cast<std::string>(childToPrimaryMapping.index_of_column_within_top_level_branch_or_single_leaf);
+	sdata += "</index_of_column_within_top_level_branch_or_single_leaf>";
+
+	sdata += "<leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf>";
+	sdata += boost::lexical_cast<std::string>(childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf);
+	sdata += "</leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf>";
+
 }
 
 void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file)
@@ -1832,6 +1859,74 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	std::string * sdata = &sdata_.back();
 
 	*sdata += "<ALL_WEIGHTINGS>";
+
+	*sdata += "<TIME_GRANULARITY>";
+	*sdata += GetTimeGranularityText(allWeightings.time_granularity);
+	*sdata += "</TIME_GRANULARITY>";
+
+	*sdata += "<NUMBER_CHILD_VARIABLE_GROUPS>";
+	*sdata += boost::lexical_cast<std::string>(allWeightings.numberChildVariableGroups);
+	*sdata += "</NUMBER_CHILD_VARIABLE_GROUPS>";
+
+	*sdata += "<childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
+	std::for_each(allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cbegin(), allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.cend(), [&](decltype(allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1)::value_type const & oneChildGroup)
+	{
+		*sdata += "<child_group>";
+
+		*sdata += "<child_variable_group_index>";
+		*sdata += boost::lexical_cast<std::string>(oneChildGroup.first);
+		*sdata += "</child_variable_group_index>";
+		*sdata += "<column_count_for_child_dmu_with_child_multiplicity_greater_than_1>";
+		*sdata += boost::lexical_cast<std::string>(oneChildGroup.second);
+		*sdata += "</column_count_for_child_dmu_with_child_multiplicity_greater_than_1>";
+
+		*sdata += "</child_group>";
+	});
+	*sdata += "</childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
+
+	*sdata += "<CHILD_COLUMN_TO_TOP_LEVEL_COLUMN_KEY_MAPPINGs>";
+	for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
+	{
+		*sdata += "<CHILD_GROUP>";
+
+		*sdata += "<CHILD_GROUP_INDEX>";
+		*sdata += boost::lexical_cast<std::string>(c);
+		*sdata += "</CHILD_GROUP_INDEX>";
+
+		*sdata += "<CHILD_GROUP_COLUMN_MAPPINGS>";
+		*sdata += "<BRANCH_MAPPINGS>";
+		std::for_each(allWeightings.mappings_from_child_branch_to_primary.cbegin(), allWeightings.mappings_from_child_branch_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_branch_to_primary)::value_type const & oneChildGroupBranchMappings)
+		{
+			if (oneChildGroupBranchMappings.first == c)
+			{
+				std::for_each(oneChildGroupBranchMappings.second.cbegin(), oneChildGroupBranchMappings.second.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				{
+					*sdata += "<BRANCH_MAPPING>";
+					SpitChildToPrimaryKeyColumnMapping(*sdata, childToPrimaryMapping);
+					*sdata += "</BRANCH_MAPPING>";
+				});
+			}
+		});
+		*sdata += "</BRANCH_MAPPINGS>";
+		*sdata += "<LEAF_MAPPINGS>";
+		std::for_each(allWeightings.mappings_from_child_leaf_to_primary.cbegin(), allWeightings.mappings_from_child_leaf_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_leaf_to_primary)::value_type const & oneChildGroupLeafMappings)
+		{
+			if (oneChildGroupLeafMappings.first == c)
+			{
+				std::for_each(oneChildGroupLeafMappings.second.cbegin(), oneChildGroupLeafMappings.second.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				{
+					*sdata += "<LEAF_MAPPING>";
+					SpitChildToPrimaryKeyColumnMapping(*sdata, childToPrimaryMapping);
+					*sdata += "</LEAF_MAPPING>";
+				});
+			}
+		});
+		*sdata += "</LEAF_MAPPINGS>";
+		*sdata += "</CHILD_GROUP_COLUMN_MAPPINGS>";
+
+		*sdata += "</CHILD_GROUP>";
+	}
+	*sdata += "</CHILD_COLUMN_TO_TOP_LEVEL_COLUMN_KEY_MAPPINGs>";
 
 	*sdata += "<DATA_CACHE_PRIMARY>";
 	SpitDataCache(*sdata, allWeightings.dataCache);

@@ -12,6 +12,7 @@
 #endif
 #include "../../Utilities/NewGeneException.h"
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
+#include "../TimeGranularity.h"
 
 typedef boost::variant<std::int64_t, double, std::string> InstanceData;
 typedef boost::variant<std::int64_t, double, std::string> DMUInstanceData;
@@ -899,11 +900,29 @@ enum CHILD_TO_PRIMARY_MAPPING
 struct ChildToPrimaryMapping
 {
 	ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING const mapping_, int const index_, int const leaf_number_ = -1)
-	: mapping(mapping_), index(index_), leaf_number(leaf_number_) {}
+	: mapping(mapping_), index_of_column_within_top_level_branch_or_single_leaf(index_), leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf(leaf_number_) {}
 
 	CHILD_TO_PRIMARY_MAPPING mapping;
-	int index;
-	int leaf_number;
+	int index_of_column_within_top_level_branch_or_single_leaf;
+	int leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf;
+
+	static std::string MappingToText(CHILD_TO_PRIMARY_MAPPING const mapping)
+	{
+		std::string result;
+		switch (mapping)
+		{
+		case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH:
+		{ result = "CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH"; }
+			break;
+		case CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF:
+		{ result = "CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF"; }
+			break;
+		default:
+		{ result = "CHILD_TO_PRIMARY_MAPPING__UNKNOWN"; }
+			break;
+		}
+		return result;
+	}
 };
 
 enum VARIABLE_GROUP_MERGE_MODE
@@ -1628,6 +1647,7 @@ public:
 	std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_leaf_to_primary;
 	std::map<int, int> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 	int numberChildVariableGroups;
+	TIME_GRANULARITY time_granularity;
 
 	// final output in case of consolidated row output
 	std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> consolidated_rows;
@@ -1704,6 +1724,7 @@ void SpitBranch(std::string & sdata, Branch const & branch);
 void SpitWeighting(std::string & sdata, Weighting const & weighting);
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
 void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file = false);
+void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
 template< template<typename...> class T, typename... TX>
 void SpitLeaves(std::string & sdata, T<Leaf, TX...> const & leaves)
 {

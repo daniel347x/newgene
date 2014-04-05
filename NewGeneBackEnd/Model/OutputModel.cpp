@@ -474,6 +474,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	if (true)
 	{
 
+		allWeightings.time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
+
 		K = 0;
 		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
 		if (failed || CheckCancelled()) return;
@@ -563,11 +565,13 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			//
 			// The output is stored in "consolidated_rows" of the AllWeightings object.
 
-			std::vector<std::string> sdata;
-			SpitAllWeightings(sdata, allWeightings, true);
-
 			ConsolidateData(random_sampling, allWeightings);
 			if (failed || CheckCancelled()) return;
+
+			std::vector<std::string> sdata;
+			SpitAllWeightings(sdata, allWeightings, true);
+			int m = 0;
+
 		}
 		else
 		{
