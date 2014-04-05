@@ -714,7 +714,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void SetFailureMessage(std::string const & failure_message_);
 
 				// Initialize generator
-				void Prepare();
+				void Prepare(AllWeightings & allWeightings);
 				void PopulateDMUCounts();
 				void PopulateUOAs();
 				void ValidateUOAs();
@@ -737,7 +737,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number);
 				void RandomSamplerFillDataForChildGroups(AllWeightings & allWeightings);
 				void RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages);
-				SqlAndColumnSet RandomSamplingBuildSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info);
+				SqlAndColumnSet RandomSamplingBuildOutputSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info);
 				void RandomSamplingCreateOutputTable();
 				void RandomSamplingWriteToOutputTable(AllWeightings & allWeightings, std::vector<std::string> & errorMessages);
 				void PrepareInsertStatement(sqlite3_stmt *& insert_random_sample_stmt, ColumnsInTempView const & random_sampling_columns);
@@ -751,8 +751,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				std::map<int, int> top_level_number_secondary_columns;
 				std::map<int, int> child_number_secondary_columns;
 				// Functions involved in different phases of generation
-				void ObtainColumnInfoForRawDataTables(AllWeightings & allWeightings);
-				void PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,
+				void PopulateSchemaForRawDataTables(AllWeightings & allWeightings);
+				void PopulateSchemaForRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,
 					std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index);
 				void LoopThroughPrimaryVariableGroups();
 				void MergeHighLevelGroupResults();

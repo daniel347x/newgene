@@ -448,17 +448,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText("Beginning generation of K-ad output.", this);
 	messager.AppendKadStatusText("Initializing...", this);
 
-	Prepare();
+	AllWeightings allWeightings;
+
+	Prepare(allWeightings);
 
 	if (failed || CheckCancelled())
 	{
 		return;
 	}
 
-	AllWeightings allWeightings;
-
 	messager.AppendKadStatusText("Preparing input data...", this);
-	ObtainColumnInfoForRawDataTables(allWeightings);
+	PopulateSchemaForRawDataTables(allWeightings);
 
 	if (failed || CheckCancelled())
 	{
@@ -477,10 +477,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	if (true)
 	{
 
-		allWeightings.time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
-
 		K = 0;
-		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
+		random_sampling_schema = RandomSamplingBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
 		if (failed || CheckCancelled()) return;
 
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
@@ -538,10 +536,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
 		if (failed || CheckCancelled()) return;
 
-		// ************************************************************ //
-		// IMPORTANT:
-		// Disallow "separation" mode for time granularity = none
-		// ************************************************************ //
 		if (consolidate_rows) // Consolidate data mode is on
 		{
 			// Eliminates the division of sets of output rows within
@@ -586,6 +580,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
+
+
+		std::vector<std::string> sdata;
+		SpitAllWeightings(sdata, allWeightings, true);
+
 		RandomSamplingWriteResultsToFileOrScreen(allWeightings);
 
 	}
@@ -13173,7 +13172,7 @@ OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::Crea
 
 }
 
-void OutputModel::OutputGenerator::Prepare()
+void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
 {
 
 	// If we ever switch to using the SQLite "temp" mechanism, utilize temp_dot
@@ -13291,9 +13290,27 @@ void OutputModel::OutputGenerator::Prepare()
 		return;
 	}
 
+	allWeightings.time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
+
+	// ************************************************************ //
+	// IMPORTANT:
+	// Disallow "granulated output" mode for time granularity = none
+	// ************************************************************ //
+	if (!consolidate_rows && allWeightings.time_granularity == TIME_GRANULARITY__NONE)
+	{
+		boost::format msg("\"Granulated output\" mode (i.e., consolidate output rows is UNCHECKED) is not possible for the primary variable group you have selected because the primary variable group has no time granularity associated with it.  NewGene would not know how to separate the output rows into time slices.");
+		SetFailureMessage(msg.str());
+		failed = true;
+	}
+
+	if (failed || CheckCancelled())
+	{
+		return;
+	}
+
 }
 
-void OutputModel::OutputGenerator::ObtainColumnInfoForRawDataTables(AllWeightings & allWeightings)
+void OutputModel::OutputGenerator::PopulateSchemaForRawDataTables(AllWeightings & allWeightings)
 {
 
 	// ***************************************************************************************************************** //
@@ -13304,7 +13321,7 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForRawDataTables(AllWeighting
 	std::for_each(primary_variable_groups_vector.cbegin(),
 				  primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group)
 	{
-		PopulateColumnsFromRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true, primary_or_secondary_view_index);
+		PopulateSchemaForRawDataTable(the_primary_variable_group, primary_view_count, primary_variable_groups_column_info, true, primary_or_secondary_view_index);
 		++primary_or_secondary_view_index;
 	});
 
@@ -13317,7 +13334,7 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForRawDataTables(AllWeighting
 	std::for_each(secondary_variable_groups_vector.cbegin(),
 				  secondary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_secondary_variable_group)
 	{
-		PopulateColumnsFromRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_column_info, false, primary_or_secondary_view_index);
+		PopulateSchemaForRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_column_info, false, primary_or_secondary_view_index);
 		ColumnsInTempView const & childSchema = secondary_variable_groups_column_info.back();
 		DetermineInternalChildLeafCountMultiplicityGreaterThanOne(allWeightings, childSchema, primary_or_secondary_view_index);
 		++primary_or_secondary_view_index;
@@ -13325,7 +13342,7 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForRawDataTables(AllWeighting
 
 }
 
-void OutputModel::OutputGenerator::PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group, int view_count,
+void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_variable_group, int view_count,
 	std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index)
 {
 
@@ -20589,7 +20606,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 }
 
-OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info)
+OutputModel::OutputGenerator::SqlAndColumnSet OutputModel::OutputGenerator::RandomSamplingBuildOutputSchema(std::vector<ColumnsInTempView> const & primary_variable_groups_raw_data_columns, std::vector<ColumnsInTempView> const & secondary_variable_groups_column_info)
 {
 
 
