@@ -22,11 +22,15 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 	std::int64_t modulo = 0;
 	if (negfactor) { new_test_timestamp = -1 * test_timestamp; modulo = new_test_timestamp % 1000; }
 	else { modulo = test_timestamp % 1000; }
-	bpt::ptime incoming_time_no_ms = bpt::from_time_t(test_timestamp / 1000);
-	bpt::time_duration excess_ms_duration = bpt::milliseconds(modulo);
-	if (negfactor) { excess_ms_duration *= 1; }
-	bpt::ptime incoming_time(incoming_time_no_ms.date(), excess_ms_duration);
+	bpt::time_duration duration_test_timestamp = bpt::milliseconds(new_test_timestamp);
+	if (negfactor) { duration_test_timestamp *= -1; }
+	//bpt::ptime incoming_time_no_ms = bpt::from_time_t(test_timestamp / static_cast<std::int64_t>(1000));
 	bpt::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
+	bpt::time_duration excess_ms_duration = bpt::milliseconds(modulo);
+	//if (negfactor) { excess_ms_duration *= 1; }
+	bpt::ptime incoming_time(time_t_epoch__1970.date(), duration_test_timestamp);
+
+	int test_year = incoming_time.date().year();
 
 	int const milliseconds_into_day = static_cast<int>(incoming_time.time_of_day().total_milliseconds());
 	bpt::time_duration milliseconds_into_day_duration = bpt::milliseconds(milliseconds_into_day);

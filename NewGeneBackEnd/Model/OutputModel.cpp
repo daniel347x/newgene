@@ -331,9 +331,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText("", nullptr); // This will clear the pane
 	boost::posix_time::ptime now = boost::posix_time::second_clock::local_time();
 	std::string time_start_formatted = boost::posix_time::to_simple_string(now);
-	boost::format msg_start("NewGene K-ad generation: Starting run at %1%");
-	msg_start % time_start_formatted;
+	boost::format msg_start("NewGene K-ad generation");
 	messager.AppendKadStatusText(msg_start.str(), nullptr);
+	boost::format msg_starttime("Starting run at %1%");
+	msg_starttime % time_start_formatted;
+	messager.AppendKadStatusText(msg_starttime.str(), nullptr);
 
 	InputModel & input_model = model->getInputModel();
 
@@ -22278,6 +22280,10 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						bool at_least_one_regular_slice = false;
 						while ((time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP)) <= time_end)
 						{
+							if (rows_written >= 6500)
+							{
+								int m = 0;
+							}
 							current_slice.Reshape(current_time_start, time_start_aligned_higher);
 							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
 							current_time_start = time_start_aligned_higher;
