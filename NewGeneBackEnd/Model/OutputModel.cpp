@@ -21933,6 +21933,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 				{
 					Branch const & branch = branch_and_leaves.first;
 					auto const & incoming_rows = branch.hits[-1];
+					MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
 					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
 					{
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
@@ -21944,6 +21945,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 						ongoing_merged_rows.emplace(the_slice, create_output_row_visitor::data);
 						create_output_row_visitor::data.clear();
 					});
+					MergedTimeSliceRow::RHS_wins = false;
 
 				});
 
@@ -21956,13 +21958,17 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 	});
 
 	// Empty out the current ongoing rows; we've hit the end
+	MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
 	saved_historic_rows.insert(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend());
+	MergedTimeSliceRow::RHS_wins = false;
 	ongoing_merged_rows.clear();
 
 	// Order the rows how we want them - first by time, then by keys
 
 	allWeightings.consolidated_rows.clear();
+	MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
 	allWeightings.consolidated_rows.insert(saved_historic_rows.cbegin(), saved_historic_rows.cend());
+	MergedTimeSliceRow::RHS_wins = false;
 	saved_historic_rows.clear();
 
 }
