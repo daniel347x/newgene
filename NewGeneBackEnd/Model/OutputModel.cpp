@@ -21461,7 +21461,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 		int numberColumnsInTheDMUWithMultiplicityGreaterThan1 = biggest_counts[0].second[which_primary_index_has_multiplicity_greater_than_1].second;
 		for (int n = numberLeavesHandled; n < K; ++n)
 		{
-			for (int nk = 0; nk < numberColumnsInTheDMUWithMultiplicityGreaterThan1; ++n)
+			for (int nk = 0; nk < numberColumnsInTheDMUWithMultiplicityGreaterThan1; ++nk)
 			{
 				boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
 			}
@@ -21505,7 +21505,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 		int numberSecondaryColumns = top_level_number_secondary_columns[top_level_vg_index];
 		for (int n = numberLeavesHandled; n < K; ++n)
 		{
-			for (int nk = 0; nk < numberSecondaryColumns; ++n)
+			for (int nk = 0; nk < numberSecondaryColumns; ++nk)
 			{
 				boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
 			}
