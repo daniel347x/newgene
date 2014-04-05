@@ -17,7 +17,15 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 
 	namespace bpt = boost::posix_time;
 
-	bpt::ptime incoming_time = bpt::from_time_t(test_timestamp / 1000);
+	bool negfactor = (test_timestamp < 0 ? true : false);
+	std::int64_t new_test_timestamp = test_timestamp;
+	std::int64_t modulo = 0;
+	if (negfactor) { new_test_timestamp = -1 * test_timestamp; modulo = new_test_timestamp % 1000; }
+	else { modulo = test_timestamp % 1000; }
+	bpt::ptime incoming_time_no_ms = bpt::from_time_t(test_timestamp / 1000);
+	bpt::time_duration excess_ms_duration = bpt::milliseconds(modulo);
+	if (negfactor) { excess_ms_duration *= 1; }
+	bpt::ptime incoming_time(incoming_time_no_ms.date(), excess_ms_duration);
 	bpt::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
 	int const milliseconds_into_day = static_cast<int>(incoming_time.time_of_day().total_milliseconds());
