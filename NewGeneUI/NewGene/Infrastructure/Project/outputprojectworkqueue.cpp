@@ -171,6 +171,14 @@ void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_
 }
 
 /************************************************************************/
+// ACTION_CONSOLIDATE_ROWS_CHANGE
+/************************************************************************/
+void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE action_request)
+{
+	get()->getWorkService().post(DoConsolidateRowsChange(action_request, this));
+}
+
+/************************************************************************/
 // ACTION_DATETIME_RANGE_CHANGE
 /************************************************************************/
 void OutputProjectWorkQueue::ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DATETIME_RANGE_CHANGE action_request)

@@ -27,6 +27,7 @@ void Table_GENERAL_OPTIONS::Load(sqlite3 * db, OutputModel * output_model_, Inpu
 		// ****************************************************************************************//
 		do_random_sampling = (sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__DO_RANDOM_SAMPLING) != 0);
 		random_sampling_count_per_stage = sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__RANDOM_SAMPLING_COUNT_PER_STAGE);
+		consolidate_rows = (sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__CONSOLIDATE_ROWS) != 0);
 
 	}
 	if (stmt)
@@ -141,6 +142,58 @@ bool Table_GENERAL_OPTIONS::UpdateRandomSamplingCountPerStage(sqlite3 * db, Outp
 
 }
 
+bool Table_GENERAL_OPTIONS::UpdateConsolidateRows(sqlite3 * db, OutputModel & output_model_, InputModel & input_model_, DataChangeMessage & change_message)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	//Executor theExecutor(db);
+
+	std::for_each(change_message.changes.cbegin(), change_message.changes.cend(), [&db, &input_model_, this](DataChange const & change)
+	{
+		switch (change.change_type)
+		{
+		case DATA_CHANGE_TYPE::DATA_CHANGE_TYPE__OUTPUT_MODEL__CONSOLIDATE_ROWS_CHANGE:
+			{
+				switch (change.change_intention)
+				{
+				case DATA_CHANGE_INTENTION__ADD:
+				case DATA_CHANGE_INTENTION__REMOVE:
+					{
+						// Should never receive this.
+					}
+					break;
+				case DATA_CHANGE_INTENTION__UPDATE:
+					{
+						DataChangePacket_bool * packet = static_cast<DataChangePacket_bool *>(change.getPacket());
+						if (packet)
+						{
+							consolidate_rows = packet->getValue();
+							ModifyConsolidateRows(db);
+						}
+						else
+						{
+							// error condition ... todo
+						}
+					}
+				case DATA_CHANGE_INTENTION__RESET_ALL:
+					{
+						// Ditto above.
+					}
+					break;
+				}
+			}
+			break;
+		}
+	});
+
+	//theExecutor.success();
+
+	//return theExecutor.succeeded();
+	return true;
+
+}
+
 void Table_GENERAL_OPTIONS::ModifyDoRandomSampling(sqlite3 * db)
 {
 
@@ -189,7 +242,31 @@ void Table_GENERAL_OPTIONS::ModifyRandomSamplingCountPerStage(sqlite3 * db)
 
 }
 
-std::pair<bool, std::int64_t> Table_GENERAL_OPTIONS::getRandomSamplingInfo(sqlite3 * db)
+void Table_GENERAL_OPTIONS::ModifyConsolidateRows(sqlite3 * db)
+{
+
+	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
+
+	std::string sqlAdd("UPDATE GENERAL_OPTIONS SET ");
+	sqlAdd += GENERAL_OPTIONS__DO_RANDOM_SAMPLING;
+	sqlAdd += "=";
+	sqlAdd += boost::lexical_cast<std::string>(do_random_sampling ? 1 : 0);
+	sqlite3_stmt * stmt = NULL;
+	sqlite3_prepare_v2(db, sqlAdd.c_str(), sqlAdd.size() + 1, &stmt, NULL);
+	if (stmt == NULL)
+	{
+		return;
+	}
+	sqlite3_step(stmt);
+	if (stmt)
+	{
+		sqlite3_finalize(stmt);
+		stmt = nullptr;
+	}
+
+}
+
+std::tuple<bool, std::int64_t, bool> Table_GENERAL_OPTIONS::getRandomSamplingInfo(sqlite3 * db)
 {
 
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
@@ -199,7 +276,8 @@ std::pair<bool, std::int64_t> Table_GENERAL_OPTIONS::getRandomSamplingInfo(sqlit
 	sqlite3_prepare_v2(db, sql.c_str(), sql.size() + 1, &stmt, NULL);
 	if (stmt == NULL)
 	{
-		return std::make_pair<bool, std::int64_t>(false, 1);
+		std::tuple<bool, std::int64_t, bool> ret(false, 1, true);
+		return ret;
 	}
 	int step_result = 0;
 	if ((step_result = sqlite3_step(stmt)) == SQLITE_ROW)
@@ -210,6 +288,7 @@ std::pair<bool, std::int64_t> Table_GENERAL_OPTIONS::getRandomSamplingInfo(sqlit
 		// ****************************************************************************************//
 		do_random_sampling = (sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__DO_RANDOM_SAMPLING) != 0);
 		random_sampling_count_per_stage = sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__RANDOM_SAMPLING_COUNT_PER_STAGE);
+		consolidate_rows = (sqlite3_column_int(stmt, INDEX__GENERAL_OPTIONS__CONSOLIDATE_ROWS) != 0);
 
 	}
 	if (stmt)
@@ -218,7 +297,9 @@ std::pair<bool, std::int64_t> Table_GENERAL_OPTIONS::getRandomSamplingInfo(sqlit
 		stmt = nullptr;
 	}
 
-	return std::make_pair(do_random_sampling, random_sampling_count_per_stage);
+	// workaround compiler bug that will not allow temporary tuple with bool param
+	std::tuple<bool, std::int64_t, bool> ret(do_random_sampling, random_sampling_count_per_stage, consolidate_rows);
+	return ret;
 
 }
 

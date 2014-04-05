@@ -64,6 +64,7 @@ void TimeRangeBox::UpdateOutputConnections(NewGeneWidget::UPDATE_CONNECTIONS_TYP
 		connect(project->getConnector(), SIGNAL(WidgetDataRefresh(WidgetDataItem_TIMERANGE_REGION_WIDGET)), this, SLOT(WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDGET)));
 		connect(this, SIGNAL(UpdateDoRandomSampling(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE)));
 		connect(this, SIGNAL(UpdateRandomSamplingCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE)));
+		connect(this, SIGNAL(UpdateConsolidateRows(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)), outp->getConnector(), SLOT(ReceiveVariableItemChanged(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE)));
 	}
 	else if (connection_type == NewGeneWidget::RELEASE_CONNECTIONS_OUTPUT_PROJECT)
 	{
@@ -102,29 +103,46 @@ void TimeRangeBox::WidgetDataRefreshReceive(WidgetDataItem_TIMERANGE_REGION_WIDG
 
 	bool do_random_sampling = widget_data.do_random_sampling;
 	std::int64_t random_sampling_count_per_stage = widget_data.random_sampling_count_per_stage;
+	bool consolidate_rows = widget_data.consolidate_rows;
 
-	QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
-	if (checkBox)
 	{
-		bool is_checked = checkBox->isChecked();
-		if (is_checked != do_random_sampling)
+		QCheckBox * checkBox = this->findChild<QCheckBox*>("doRandomSampling");
+		if (checkBox)
 		{
-			checkBox->setChecked(do_random_sampling);
+			bool is_checked = checkBox->isChecked();
+			if (is_checked != do_random_sampling)
+			{
+				checkBox->setChecked(do_random_sampling);
+			}
 		}
 	}
 
-	QLineEdit * lineEdit = this->findChild<QLineEdit*>("randomSamplingHowManyRows");
-	if (lineEdit)
 	{
-		QString the_string = lineEdit->text();
-		std::int64_t the_number = 1;
-		if (the_string.size() > 0)
+		QLineEdit * lineEdit = this->findChild<QLineEdit*>("randomSamplingHowManyRows");
+		if (lineEdit)
 		{
-			the_number = boost::lexical_cast<std::int64_t>(the_string.toStdString());
+			QString the_string = lineEdit->text();
+			std::int64_t the_number = 1;
+			if (the_string.size() > 0)
+			{
+				the_number = boost::lexical_cast<std::int64_t>(the_string.toStdString());
+			}
+			if (the_number != random_sampling_count_per_stage)
+			{
+				lineEdit->setText(QString((boost::lexical_cast<std::string>(random_sampling_count_per_stage).c_str())));
+			}
 		}
-		if (the_number != random_sampling_count_per_stage)
+	}
+
+	{
+		QCheckBox * checkBox = this->findChild<QCheckBox*>("mergeIdenticalRows");
+		if (checkBox)
 		{
-			lineEdit->setText(QString((boost::lexical_cast<std::string>(random_sampling_count_per_stage).c_str())));
+			bool is_checked = checkBox->isChecked();
+			if (is_checked != consolidate_rows)
+			{
+				checkBox->setChecked(consolidate_rows);
+			}
 		}
 	}
 
@@ -173,5 +191,26 @@ void TimeRangeBox::on_randomSamplingHowManyRows_textChanged(const QString &)
 
 void TimeRangeBox::on_dateTimeEdit_start_editingFinished()
 {
+
+}
+
+void TimeRangeBox::on_mergeIdenticalRows_stateChanged(int arg1)
+{
+
+	UIOutputProject * project = projectManagerUI().getActiveUIOutputProject();
+	if (project == nullptr)
+	{
+		return;
+	}
+
+	QCheckBox * checkBox = this->findChild<QCheckBox*>("mergeIdenticalRows");
+	if (checkBox)
+	{
+		bool is_checked = checkBox->isChecked();
+		InstanceActionItems actionItems;
+		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
+		WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
+		emit UpdateDoRandomSampling(action_request);
+	}
 
 }

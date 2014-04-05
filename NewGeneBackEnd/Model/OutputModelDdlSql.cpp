@@ -29,7 +29,8 @@ drop table if exists [main].[GENERAL_OPTIONS];
 /* Table structure [main].[GENERAL_OPTIONS] */
 CREATE TABLE [main].[GENERAL_OPTIONS] (
   [DO_RANDOM_SAMPLING] INT NOT NULL ON CONFLICT FAIL DEFAULT 0, 
-  [RANDOM_SAMPLING_COUNT_PER_STAGE] INT NOT NULL DEFAULT 0);
+  [RANDOM_SAMPLING_COUNT_PER_STAGE] INT NOT NULL ON CONFLICT FAIL DEFAULT 0),
+  [CONSOLIDATE_ROWS] INT NOT NULL ON CONFLICT FAIL DEFAULT 0;
 
 /* Data [main].[GENERAL_OPTIONS] */
 insert into [main].[GENERAL_OPTIONS] values(0, 0);
@@ -67,6 +68,7 @@ commit transaction;
 
 /* Enable Foreign Keys */
 pragma foreign_keys = on;
+
 
 
 

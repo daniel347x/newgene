@@ -13183,9 +13183,10 @@ void OutputModel::OutputGenerator::Prepare()
 
 	initialized = true;
 
-	std::pair<bool, std::int64_t> info_random_sampling = model->t_general_options.getRandomSamplingInfo(model->getDb());
-	random_sampling = info_random_sampling.first;
-	random_sampling_number_rows = info_random_sampling.second;
+	std::tuple<bool, std::int64_t, bool> info_random_sampling = model->t_general_options.getRandomSamplingInfo(model->getDb());
+	random_sampling = std::get<0>(info_random_sampling);
+	random_sampling_number_rows = std::get<1>(info_random_sampling);
+	consolidate_rows = std::get<2>(info_random_sampling);
 
 	if (random_sampling && (random_sampling_number_rows <= 0))
 	{

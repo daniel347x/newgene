@@ -16,6 +16,7 @@ enum WIDGET_ACTIONS
 	, ACTION_KAD_COUNT_CHANGE
 	, ACTION_DO_RANDOM_SAMPLING_CHANGE
 	, ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE
+	, ACTION_CONSOLIDATE_ROWS_CHANGE
 	, ACTION_DATETIME_RANGE_CHANGE
 	, ACTION_GENERATE_OUTPUT
 
@@ -779,6 +780,24 @@ class WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE> : p
 		}
 };
 typedef WidgetActionItemRequest<ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE> WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE;
+
+/************************************************************************/
+// ACTION_CONSOLIDATE_ROWS_CHANGE
+/************************************************************************/
+template<>
+class WidgetActionItemRequest<ACTION_CONSOLIDATE_ROWS_CHANGE> : public WidgetActionItemRequest_base
+{
+	public:
+		WidgetActionItemRequest<ACTION_CONSOLIDATE_ROWS_CHANGE>(WIDGET_ACTION_ITEM_REQUEST_REASON const reason_ = WIDGET_ACTION_ITEM_REQUEST_REASON__UNKNOWN, InstanceActionItems items_ = InstanceActionItems())
+			: WidgetActionItemRequest_base(reason_, items_)
+		{
+		}
+		WidgetActionItemRequest<ACTION_CONSOLIDATE_ROWS_CHANGE>(WidgetActionItemRequest<ACTION_CONSOLIDATE_ROWS_CHANGE> const & rhs)
+			: WidgetActionItemRequest_base(rhs)
+		{
+		}
+};
+typedef WidgetActionItemRequest<ACTION_CONSOLIDATE_ROWS_CHANGE> WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE;
 
 /************************************************************************/
 // ACTION_DATETIME_RANGE_CHANGE

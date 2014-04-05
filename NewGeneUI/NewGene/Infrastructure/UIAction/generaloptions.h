@@ -49,4 +49,23 @@ class RandomSamplingCountPerStageChange : public DoOutputAction<ACTION_RANDOM_SA
 
 };
 
+class DoConsolidateRowsChange : public DoOutputAction<ACTION_CONSOLIDATE_ROWS_CHANGE>
+{
+
+	public:
+
+		DoConsolidateRowsChange(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE & action_request_, OutputProjectWorkQueue * queue_)
+			: DoOutputAction<ACTION_CONSOLIDATE_ROWS_CHANGE>(static_cast<WidgetActionItemRequest<ACTION_CONSOLIDATE_ROWS_CHANGE>>(action_request_), queue_)
+		{
+
+		}
+
+		void operator()()
+		{
+			UIMessagerSingleShot messager(queue->get()->messager);
+			uiactionManagerUI().getBackendManager().DoConsolidateRowsChange(messager.get(), action_request, queue->get()->backend());
+		}
+
+};
+
 #endif // GENERALOPTIONS_H

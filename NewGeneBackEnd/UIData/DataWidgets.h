@@ -415,20 +415,23 @@ template<>
 class WidgetDataItemRequest<TIMERANGE_REGION_WIDGET> : public WidgetDataItemRequest_base
 {
 public:
-	WidgetDataItemRequest<TIMERANGE_REGION_WIDGET>(bool const do_random_sampling_ = false, std::int64_t random_sampling_count_per_stage_ = 1, WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+	WidgetDataItemRequest<TIMERANGE_REGION_WIDGET>(bool const do_random_sampling_ = false, std::int64_t random_sampling_count_per_stage_ = 1, bool consolidate_rows_ = true, WIDGET_DATA_ITEM_REQUEST_REASON const reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
 		: WidgetDataItemRequest_base(reason_, identifier_)
 		, do_random_sampling(do_random_sampling_)
 		, random_sampling_count_per_stage(random_sampling_count_per_stage_)
+		, consolidate_rows(consolidate_rows_)
 	{
 	}
 	WidgetDataItemRequest<TIMERANGE_REGION_WIDGET>(WidgetDataItemRequest<TIMERANGE_REGION_WIDGET> const & rhs)
 		: WidgetDataItemRequest_base(rhs)
 		, do_random_sampling(rhs.do_random_sampling)
 		, random_sampling_count_per_stage(rhs.random_sampling_count_per_stage)
+		, consolidate_rows(rhs.consolidate_rows)
 	{
 	}
 	bool do_random_sampling;
 	std::int64_t random_sampling_count_per_stage;
+	bool consolidate_rows;
 };
 typedef WidgetDataItemRequest<TIMERANGE_REGION_WIDGET> WidgetDataItemRequest_TIMERANGE_REGION_WIDGET;
 
@@ -436,10 +439,11 @@ template<>
 class WidgetDataItem<TIMERANGE_REGION_WIDGET> : public WidgetDataItem_base
 {
 public:
-	WidgetDataItem<TIMERANGE_REGION_WIDGET>(bool const do_random_sampling_ = false, std::int64_t random_sampling_count_per_stage_ = 1, WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
+	WidgetDataItem<TIMERANGE_REGION_WIDGET>(bool const do_random_sampling_ = false, std::int64_t random_sampling_count_per_stage_ = 1, bool const consolidate_rows_ = true, WIDGET_DATA_ITEM_REQUEST_REASON const request_reason_ = WIDGET_DATA_ITEM_REQUEST_REASON__UNKNOWN, WidgetInstanceIdentifier identifier_ = WidgetInstanceIdentifier())
 		: WidgetDataItem_base(request_reason_, identifier_)
 		, do_random_sampling(do_random_sampling_)
 		, random_sampling_count_per_stage(random_sampling_count_per_stage_)
+		, consolidate_rows(consolidate_rows_)
 	{
 	}
 	WidgetDataItem<TIMERANGE_REGION_WIDGET>(WidgetDataItemRequest_base const & request_obj)
@@ -450,21 +454,25 @@ public:
 			WidgetDataItemRequest_TIMERANGE_REGION_WIDGET const & date_time_request = dynamic_cast<WidgetDataItemRequest_TIMERANGE_REGION_WIDGET const &>(request_obj);
 			do_random_sampling = date_time_request.do_random_sampling;
 			random_sampling_count_per_stage = date_time_request.random_sampling_count_per_stage;
+			consolidate_rows = date_time_request.consolidate_rows;
 		}
 		catch (std::bad_cast &)
 		{
 			do_random_sampling = false;
 			random_sampling_count_per_stage = 1;
+			consolidate_rows = true;
 		}
 	}
 	WidgetDataItem<TIMERANGE_REGION_WIDGET>(WidgetDataItem<TIMERANGE_REGION_WIDGET> const & rhs)
 		: WidgetDataItem_base(rhs)
 		, do_random_sampling(rhs.do_random_sampling)
 		, random_sampling_count_per_stage(rhs.random_sampling_count_per_stage)
+		, consolidate_rows(rhs.consolidate_rows)
 	{
 	}
 	bool do_random_sampling;
 	std::int64_t random_sampling_count_per_stage;
+	bool consolidate_rows;
 };
 typedef WidgetDataItem<TIMERANGE_REGION_WIDGET> WidgetDataItem_TIMERANGE_REGION_WIDGET;
 

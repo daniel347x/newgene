@@ -54,7 +54,7 @@
         <widget class="NewGeneDateTimeWidget" name="dateTimeEdit_start">
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>75</width>
            <height>0</height>
           </size>
          </property>
@@ -63,6 +63,9 @@
            <width>150</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="displayFormat">
+          <string>M/d/yyyy</string>
          </property>
          <property name="calendarPopup">
           <bool>true</bool>
@@ -95,7 +98,7 @@
         <widget class="NewGeneDateTimeWidget" name="dateTimeEdit_end">
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>75</width>
            <height>0</height>
           </size>
          </property>
@@ -104,6 +107,9 @@
            <width>150</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="displayFormat">
+          <string>M/d/yyyy</string>
          </property>
          <property name="calendarPopup">
           <bool>true</bool>
@@ -133,7 +139,7 @@
        <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Limit to this many rows per multiplicity:</string>
+          <string>How many random rows:</string>
          </property>
         </widget>
        </item>
@@ -150,6 +156,13 @@
          </property>
          <property name="maxLength">
           <number>32767</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="mergeIdenticalRows">
+         <property name="text">
+          <string>Merge identical adjacent output rows</string>
          </property>
         </widget>
        </item>

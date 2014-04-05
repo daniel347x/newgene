@@ -32,6 +32,7 @@ class TimeRangeBox : public QFrame, public NewGeneWidget // do not reorder base 
 	signals:
 		void UpdateDoRandomSampling(WidgetActionItemRequest_ACTION_DO_RANDOM_SAMPLING_CHANGE);
 		void UpdateRandomSamplingCount(WidgetActionItemRequest_ACTION_RANDOM_SAMPLING_COUNT_PER_STAGE_CHANGE);
+		void UpdateConsolidateRow(WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE);
 		void RefreshWidget(WidgetDataItemRequest_TIMERANGE_REGION_WIDGET);
 
 	public slots:
@@ -44,6 +45,7 @@ class TimeRangeBox : public QFrame, public NewGeneWidget // do not reorder base 
 		void on_doRandomSampling_stateChanged(int arg1);
 		void on_randomSamplingHowManyRows_textChanged(const QString &arg1);
 		void on_dateTimeEdit_start_editingFinished();
+		void on_mergeIdenticalRows_stateChanged(int arg1);
 };
 
 #endif // TIMERANGEBOX_H
