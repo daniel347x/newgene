@@ -1162,7 +1162,7 @@ boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, i
 
 }
 
-void AllWeightings::ResetBranchCaches(bool const empty_all)
+void AllWeightings::ResetBranchCaches(bool const clear_child_lookup)
 {
 
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
@@ -1188,16 +1188,13 @@ void AllWeightings::ResetBranchCaches(bool const empty_all)
 
 			Branch const & branch = branchAndLeaves.first;
 			Leaves const & leaves = branchAndLeaves.second;
-			branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 
-			if (empty_all)
+			if (clear_child_lookup)
 			{
-				branch.leaves_cache.clear();
+				branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 			}
-			else
-			{
-				branch.CreateLeafCache(leaves);
-			}
+
+			branch.CreateLeafCache(leaves);
 
 		});
 
