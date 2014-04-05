@@ -1673,7 +1673,7 @@ public:
 
 	sqlite3_stmt * insert_random_sample_stmt;
 
-	bool HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling);
+	bool HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling);
 	void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
 	void PrepareRandomNumbers(std::int64_t how_many);
 	void PrepareRandomSamples(int const K);

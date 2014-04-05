@@ -37,7 +37,7 @@ AllWeightings::~AllWeightings()
 	}
 }
 
-bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+bool AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
@@ -194,7 +194,7 @@ bool AllWeightings::HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & n
 		}
 		else
 		{
-			bool added_recurse = HandleBranchAndLeaf(branch, newTimeSliceLeaf, variable_group_number, merge_mode, AvgMsperUnit, consolidate_rows, random_sampling);
+			bool added_recurse = HandleIncomingNewBranchAndLeaf(branch, newTimeSliceLeaf, variable_group_number, merge_mode, AvgMsperUnit, consolidate_rows, random_sampling);
 			if (added_recurse)
 			{
 				added = true; // It could have been true previously, so never set to false
@@ -480,12 +480,21 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 		// This case will only be hit for the primary variable group!
 
-		VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_number);
-		BranchesAndLeaves & newBranchesAndLeaves = newVariableGroupBranch.branches_and_leaves;
-		newBranchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
-		variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
+		if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
+		{
+			VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_number);
+			BranchesAndLeaves & newBranchesAndLeaves = newVariableGroupBranch.branches_and_leaves;
+			newBranchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
+			variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
 
-		added = true;
+			added = true;
+		}
+
+		else
+		{
+			boost::format msg("Logic error: Attempting to add a new branch when merging a non-primary variable group!");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
 
 	}
 	else
