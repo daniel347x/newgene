@@ -21835,6 +21835,10 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
 
 						incoming.emplace(the_slice, create_output_row_visitor::data);
+
+						MergedTimeSliceRow const & test_row = *incoming.cbegin();
+						std::vector<InstanceData> const & test_vector = test_row.output_row;
+
 						create_output_row_visitor::data.clear();
 					});
 

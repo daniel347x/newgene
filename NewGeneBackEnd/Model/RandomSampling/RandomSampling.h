@@ -1565,6 +1565,7 @@ class MergedTimeSliceRow
 				
 				time_slice = rhs.time_slice;
 				output_row = rhs.output_row;
+				empty = rhs.empty;
 
 				return *this;
 			}
