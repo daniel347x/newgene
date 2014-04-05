@@ -1301,7 +1301,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 								// --> //     is_current_index_a_top_level_primary_group_branch = true;
 								// --> // }
 
-								boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1");
+								boost::format msg("Logic error: attempting to match child branch data to a leaf in the top-level unit of analysis when K=1.  There can be no leaves when K=1.");
 								throw NewGeneException() << newgene_error_description(msg.str());
 							}
 
