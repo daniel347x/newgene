@@ -1477,6 +1477,12 @@ void AllWeightings::PrepareFullSamples(int const K)
 void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 {
 
+	if (time_granularity == TIME_GRANULARITY__NONE)
+	{
+		// The data is already stored in a single time unit within this branch at index -1
+		return;
+	}
+
 	branch.hits[-1].clear();
 
 	std::set<BranchOutputRow> consolidated_rows;
