@@ -38,6 +38,20 @@ std::int64_t TimeRange::determineNextHighestAligningTimestamp(std::int64_t const
 	bpt::time_duration difference_minutes_seconds = seconds_into_day_duration - minutes_into_day_duration;
 	bpt::time_duration difference_hours_minutes = minutes_into_day_duration - hours_into_day_duration;
 
+	bpt::ptime date_rounded(incoming_time.date());
+
+	int const year = date_rounded.date().year();
+	boost::posix_time::ptime date_year(boost::gregorian::date(year, 1, 1));
+	bpt::time_duration difference_between_incoming_and_year = incoming_time - date_year;
+
+	int const month = date_rounded.date().month();
+	boost::posix_time::ptime date_month(boost::gregorian::date(year, month, 1));
+	bpt::time_duration difference_between_incoming_and_month = incoming_time - date_month;
+
+	int const day = date_rounded.date().day();
+	boost::posix_time::ptime date_day(boost::gregorian::date(year, month, day));
+	bpt::time_duration difference_between_incoming_and_day = incoming_time - date_day;
+
 	bpt::ptime result;
 
 	switch (time_granularity)
@@ -54,8 +68,8 @@ std::int64_t TimeRange::determineNextHighestAligningTimestamp(std::int64_t const
 					round_up = true;
 				}
 
-				// Set the result, but rounded *down* to the nearest second
-				result = bpt::ptime(incoming_time.date(), seconds_into_day_duration);
+				// Set the result, but rounded to nearest second at or above incoming timestamp
+				result = bpt::ptime(date_rounded.date(), seconds_into_day_duration);
 				if (round_up)
 				{
 					result += bpt::seconds(1);
@@ -75,8 +89,8 @@ std::int64_t TimeRange::determineNextHighestAligningTimestamp(std::int64_t const
 					round_up = true;
 				}
 
-				// Set the result, but rounded *down* to the nearest second
-				result = bpt::ptime(incoming_time.date(), minutes_into_day_duration);
+				// Set the result, but rounded to nearest minute at or above incoming timestamp
+				result = bpt::ptime(date_rounded.date(), minutes_into_day_duration);
 				if (round_up)
 				{
 					result += bpt::minutes(1);
@@ -96,8 +110,8 @@ std::int64_t TimeRange::determineNextHighestAligningTimestamp(std::int64_t const
 					round_up = true;
 				}
 
-				// Set the result, but rounded *down* to the nearest second
-				result = bpt::ptime(incoming_time.date(), hours_into_day_duration);
+				// Set the result, but rounded to nearest hour at or above incoming timestamp
+				result = bpt::ptime(date_rounded.date(), hours_into_day_duration);
 				if (round_up)
 				{
 					result += bpt::hours(1);
@@ -108,67 +122,131 @@ std::int64_t TimeRange::determineNextHighestAligningTimestamp(std::int64_t const
 
 		case TIME_GRANULARITY__DAY:
 			{
-				result = day;
+
+				bool round_up = false;
+				if (difference_between_incoming_and_day.total_seconds() > 0)
+				{
+					round_up = true;
+				}
+
+				// Set the result, but rounded to nearest hour at or above incoming timestamp
+				result = date_day;
+				if (round_up)
+				{
+					result += boost::gregorian::days(1);
+				}
+		
 			}
 			break;
 
 		case TIME_GRANULARITY__WEEK:
 			{
-				result = week;
+				boost::format msg("Rounding to nearest week is not currently supported.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 			break;
 
 		case TIME_GRANULARITY__MONTH:
 			{
-				result = month;
+
+				bool round_up = false;
+				if (difference_between_incoming_and_month.total_seconds() > 0)
+				{
+					round_up = true;
+				}
+
+				// Set the result, but rounded to nearest hour at or above incoming timestamp
+				result = date_month;
+				if (round_up)
+				{
+					result += boost::gregorian::months(1);
+				}
+
 			}
 			break;
 
 		case TIME_GRANULARITY__QUARTER:
 			{
-				result = quarter;
+				boost::format msg("Rounding to nearest quarter is not currently supported.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 			break;
 
 		case TIME_GRANULARITY__YEAR:
 			{
-				result = year;
+				result = date_year;
 			}
 			break;
 
 		case TIME_GRANULARITY__BIENNIAL:
 			{
-				result = biennial;
+				boost::format msg("Rounding to nearest biennial is not currently supported.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 			break;
 
 		case TIME_GRANULARITY__QUADRENNIAL:
 			{
-				result = quadrennial;
+				boost::format msg("Rounding to nearest quadrennial is not currently supported.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 			break;
 
 		case TIME_GRANULARITY__DECADE:
 			{
-				result = decade;
+
+				if (year % 10 != 0)
+				{
+					int new_decade_year = year - (year % 10) + 10;
+					boost::posix_time::ptime date_decade(boost::gregorian::date(new_decade_year, 1, 1));
+					result = date_decade;
+				}
+				else
+				{
+					result = date_year;
+				}
+
 			}
 			break;
 
 		case TIME_GRANULARITY__CENTURY:
 			{
-				result = century;
+
+				if (year % 100 != 0)
+				{
+					int new_decade_century = year - (year % 100) + 100;
+					boost::posix_time::ptime date_century(boost::gregorian::date(new_decade_century, 1, 1));
+					result = date_century;
+				}
+				else
+				{
+					result = date_year;
+				}
+
 			}
 			break;
 
 		case TIME_GRANULARITY__MILLENIUM:
 			{
-				result = millenium;
+
+				if (year % 1000 != 0)
+				{
+					int new_decade_millenium = year - (year % 1000) + 1000;
+					boost::posix_time::ptime date_millenium(boost::gregorian::date(new_decade_millenium, 1, 1));
+					result = date_millenium;
+				}
+				else
+				{
+					result = date_year;
+				}
+			
 			}
 			break;
 
 		default:
 			{
-				// no-op;
+				boost::format msg("Invalid time range specification in round-to-align calculation.");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 			break;
 
