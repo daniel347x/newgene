@@ -1,4 +1,5 @@
 #include "TimeGranularity.h"
+#include "../Utilities/NewGeneException.h"
 
 std::int64_t AvgMsperUnit(TIME_GRANULARITY const time_granularity)
 {
@@ -103,7 +104,8 @@ std::int64_t AvgMsperUnit(TIME_GRANULARITY const time_granularity)
 
 		default:
 			{
-				// no-op;
+				boost::format msg("Invalid time granularity in AvgMsperUnit()");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 			break;
 
@@ -201,7 +203,7 @@ std::string GetTimeGranularityText(TIME_GRANULARITY const time_granularity)
 
 		default:
 			{
-				// no-op;
+				result = "TIME_GRANULARITY__NONE";
 			}
 			break;
 
