@@ -104,8 +104,9 @@ std::int64_t AvgMsperUnit(TIME_GRANULARITY const time_granularity)
 
 		default:
 			{
-				boost::format msg("Invalid time granularity in AvgMsperUnit()");
-				throw NewGeneException() << newgene_error_description(msg.str());
+				// 0 is acceptable - calling function will handle this case
+				//boost::format msg("Invalid time granularity in AvgMsperUnit()");
+				//throw NewGeneException() << newgene_error_description(msg.str());
 			}
 			break;
 
