@@ -20,47 +20,89 @@ std::int64_t TimeRange::determineNextHighestAligningTimestamp(std::int64_t const
 	bpt::ptime incoming_time = bpt::from_time_t(test_timestamp / 1000);
 	bpt::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
+	int const milliseconds_into_day = incoming_time.time_of_day().total_milliseconds();
+	bpt::time_duration milliseconds_into_day_duration = bpt::milliseconds(milliseconds_into_day);
+
+	int const seconds_into_day = incoming_time.time_of_day().total_seconds();
+	bpt::time_duration seconds_into_day_duration = bpt::seconds(seconds_into_day);
+
+	int minutes_into_day = seconds_into_day / 60;
+	bpt::time_duration minutes_into_day_duration = bpt::minutes(minutes_into_day);
+
+	int hours_into_day = minutes_into_day / 60;
+	bpt::time_duration hours_into_day_duration = bpt::hours(hours_into_day);
+
+	// Use the difference between the time durations
+	// to round as desired
+	bpt::time_duration difference_seconds_milliseconds = milliseconds_into_day_duration - seconds_into_day_duration;
+	bpt::time_duration difference_minutes_seconds = seconds_into_day_duration - minutes_into_day_duration;
+	bpt::time_duration difference_hours_minutes = minutes_into_day_duration - hours_into_day_duration;
+
+	bpt::ptime result;
+
 	switch (time_granularity)
 	{
 
 		case TIME_GRANULARITY__SECOND:
 			{
-				// Get number of seconds into the day represented by incoming_time
-				bpt::time_duration seconds_into_day = bpt::seconds(incoming_time.time_of_day().total_seconds());
-				bpt::time_duration milliseconds_into_day = bpt::seconds(incoming_time.time_of_day().total_milliseconds());
 
-				// Use the difference between the time duration in seconds
-				// and the time duration in milliseconds
-				// to round to the nearest second
-				bpt::time_duration difference_seconds_milliseconds = milliseconds_into_day - seconds_into_day;
 				bool round_up = false;
-				if (difference_seconds_milliseconds.total_milliseconds() > 500)
+
+				// Always round up - do not round to nearest!
+				if (difference_seconds_milliseconds.total_milliseconds() > 0)
 				{
 					round_up = true;
 				}
 
 				// Set the result, but rounded *down* to the nearest second
-				bpt::ptime result(incoming_time.date(), seconds_into_day);
+				result = bpt::ptime(incoming_time.date(), seconds_into_day_duration);
 				if (round_up)
 				{
 					result += bpt::seconds(1);
 				}
 
-				boost::posix_time::time_duration ms_epoch = result - time_t_epoch__1970;
-
-				return ms_epoch.total_milliseconds();
 			}
 			break;
 
 		case TIME_GRANULARITY__MINUTE:
 			{
-				result = minute;
+
+				bool round_up = false;
+
+				// Always round up - do not round to nearest!
+				if (difference_minutes_seconds.total_seconds() > 0)
+				{
+					round_up = true;
+				}
+
+				// Set the result, but rounded *down* to the nearest second
+				result = bpt::ptime(incoming_time.date(), minutes_into_day_duration);
+				if (round_up)
+				{
+					result += bpt::minutes(1);
+				}
+
 			}
 			break;
 
 		case TIME_GRANULARITY__HOUR:
 			{
-				result = hour;
+
+				bool round_up = false;
+
+				// Always round up - do not round to nearest!
+				if (difference_hours_minutes.total_seconds() > 0)
+				{
+					round_up = true;
+				}
+
+				// Set the result, but rounded *down* to the nearest second
+				result = bpt::ptime(incoming_time.date(), hours_into_day_duration);
+				if (round_up)
+				{
+					result += bpt::hours(1);
+				}
+
 			}
 			break;
 
@@ -131,5 +173,9 @@ std::int64_t TimeRange::determineNextHighestAligningTimestamp(std::int64_t const
 			break;
 
 	}
+
+	bpt::time_duration ms_epoch = result - time_t_epoch__1970;
+
+	return ms_epoch.total_milliseconds();
 
 }
