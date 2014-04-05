@@ -21806,21 +21806,38 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
-		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 		if (previousTimeSlice.DoesOverlap(the_slice))
 		{
 
 			// The current time slice is adjacent to the previous.  Merge identical rows
 
-			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			// We have a single time slice here
+
+			std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 			{
+
+				// One primary variable group for the current time slice (for now, this is all that is supported).
+				// Iterate through all of its branches (fixed values of raw data for the primary keys that are not part of the K-ad; i.e., have multiplicity 1)
 				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
 				{
 
+					// Here is a single branch and its leaves, corresponding to the primary variable group and the current time slice.
 					std::set<MergedTimeSliceRow> incoming;
 
 					Branch const & branch = branch_and_leaves.first;
+
+					// ***************************************************************************************************** //
+					// All data within a single branch is guaranteed to have been consolidated into index -1.
+					// This was either done in the block above (for random sampling),
+					// or it was done automatically by full sampling (in the case of full sampling,
+					// the data within each branch is always placed into index -1
+					// and "granulated" only upon output).
+					// Special case exception: Random sampling with the primary variable group having no time granularity.
+					// In this case, the random sampling algorithm will place all results into index -1,
+					// so the above block that consolidates to index -1 is not necessary.
+					// ***************************************************************************************************** //
 					auto const & incoming_rows = branch.hits[-1];
 					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
 					{
@@ -21879,7 +21896,9 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 					// Set ongoing to "intersection"
 					ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
 
-					// Now, add any new rows that were not present previously.
+					// Now, add any new rows that were not present previously...
+					// these are new rows from this time slice that did not intersect the previous rows
+					// in terms of data columns.
 					ongoing_merged_rows.insert(only_new.cbegin(), only_new.cend());
 
 					// The rows that existed previously, but do not match, now must be set aside and saved.
@@ -21901,7 +21920,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 			ongoing_merged_rows.clear();
 
-			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+			std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 			{
 				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
 				{
@@ -21928,6 +21947,10 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 		previousTimeSlice = the_slice;
 
 	});
+
+	// Empty out the current ongoing rows; we've hit the end
+	saved_historic_rows.insert(ongoing_merged_rows.cbegin(), ongoing_merged_rows.cend());
+	ongoing_merged_rows.clear();
 
 	// Order the rows how we want them - first by time, then by keys
 
