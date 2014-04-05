@@ -7,6 +7,7 @@ std::string OutputModelDDLSQL()
 
 
 
+
 /**************************/
 /*                        */
 /* OutputModelDefault.SQL */
@@ -33,7 +34,7 @@ CREATE TABLE [main].[GENERAL_OPTIONS] (
   [CONSOLIDATE_ROWS] INT NOT NULL ON CONFLICT FAIL DEFAULT 0;
 
 /* Data [main].[GENERAL_OPTIONS] */
-insert into [main].[GENERAL_OPTIONS] values(0, 0);
+insert into [main].[GENERAL_OPTIONS] values(0, 0, 1);
 
 
 /* Drop table [main].[KAD_COUNT] */
@@ -54,6 +55,8 @@ CREATE TABLE [main].[TIMERANGE_SELECTED] (
   [TIMERANGE_START] INT64, 
   [TIMERANGE_END] INT64);
 
+insert into [main].[TIMERANGE_SELECTED] values(0, 0);
+
 /* Drop table [main].[VG_SET_MEMBERS_SELECTED] */
 drop table if exists [main].[VG_SET_MEMBERS_SELECTED];
 
@@ -68,6 +71,7 @@ commit transaction;
 
 /* Enable Foreign Keys */
 pragma foreign_keys = on;
+
 
 
 
