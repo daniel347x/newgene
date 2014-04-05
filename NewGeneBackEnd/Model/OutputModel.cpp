@@ -216,6 +216,7 @@ OutputModel::OutputGenerator::OutputGenerator(Messager & messager_, OutputModel 
 	, random_sampling_old(false)
 	, top_level_vg_index(0)
 	, K(0)
+	, overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf(0)
 {
 	//debug_ordering = true;
 	//delete_tables = false;
@@ -14819,6 +14820,9 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 		}
 
 	});
+
+	overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf = overall_primary_key_sequence_number;
+
 }
 
 void OutputModel::OutputGenerator::RemoveDuplicatesFromPrimaryKeyMatches(std::int64_t const & current_rows_stepped, SqlAndColumnSet & result,
@@ -21302,116 +21306,129 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		std::for_each(primary_variable_groups_column_info[0].columns_in_view.cbegin(), primary_variable_groups_column_info[0].columns_in_view.cend(), [&](decltype(primary_variable_groups_column_info[0].columns_in_view)::value_type const & primary_variable_group_set_member)
 		{
 
-			std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&](PrimaryKeySequence::PrimaryKeySequenceEntry const & full_kad_key_info)
+			int overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf = 0;
+			for (; overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf < overall_total_number_of_primary_key_columns_including_all_branch_columns_and_all_leaves_and_all_columns_internal_to_each_leaf; ++overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf)
 			{
 
-				bool is_current_index_a_top_level_primary_group_branch = false;
-				if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
-				{
-					is_current_index_a_top_level_primary_group_branch = true;
-				}
-
-				std::for_each(full_kad_key_info.variable_group_info_for_primary_keys.cbegin(),
-					full_kad_key_info.variable_group_info_for_primary_keys.cend(), [&](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_primary_not_child_variable_group)
+				std::for_each(sequence.primary_key_sequence_info.cbegin(), sequence.primary_key_sequence_info.cend(), [&](PrimaryKeySequence::PrimaryKeySequenceEntry const & full_kad_key_info)
 				{
 
-					// The primary key information we seek here is for the TOP LEVEL variable group
-					if (full_kad_key_info_primary_not_child_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_variable_groups_column_info[0].variable_groups[0]))
+					// Enforce that the sequence number appears in order
+
+					if (overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf !=
+						full_kad_key_info.sequence_number_in_all_primary_keys)
+					{
+						return;
+					}
+
+					bool is_current_index_a_top_level_primary_group_branch = false;
+					if (full_kad_key_info.total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group == 1)
+					{
+						is_current_index_a_top_level_primary_group_branch = true;
+					}
+
+					std::for_each(full_kad_key_info.variable_group_info_for_primary_keys.cbegin(),
+						full_kad_key_info.variable_group_info_for_primary_keys.cend(), [&](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_primary_not_child_variable_group)
 					{
 
-						if (!full_kad_key_info_primary_not_child_variable_group.column_name.empty())
+						// The primary key information we seek here is for the TOP LEVEL variable group
+						if (full_kad_key_info_primary_not_child_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, primary_variable_groups_column_info[0].variable_groups[0]))
 						{
 
-							if (boost::iequals(full_kad_key_info_primary_not_child_variable_group.table_column_name, primary_variable_group_set_member.column_name_in_original_data_table))
+							if (!full_kad_key_info_primary_not_child_variable_group.column_name.empty())
 							{
 
-								// Valid TOP-LEVEL primary key in sequence of TOP-LEVEL primary keys
-
-								std::for_each(full_kad_key_info.variable_group_info_for_primary_keys.cbegin(),
-									full_kad_key_info.variable_group_info_for_primary_keys.cend(), [&](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_child_variable_group)
+								if (boost::iequals(full_kad_key_info_primary_not_child_variable_group.table_column_name, primary_variable_group_set_member.column_name_in_original_data_table))
 								{
 
-									// The primary key information we seek is that for our own, CHILD, variable group
-									if (full_kad_key_info_child_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, child_variable_group_raw_data_columns.variable_groups[0]))
+									// Valid TOP-LEVEL primary key in sequence of TOP-LEVEL primary keys
+
+									std::for_each(full_kad_key_info.variable_group_info_for_primary_keys.cbegin(),
+										full_kad_key_info.variable_group_info_for_primary_keys.cend(), [&](PrimaryKeySequence::VariableGroup_PrimaryKey_Info const & full_kad_key_info_child_variable_group)
 									{
 
-										if (!full_kad_key_info_child_variable_group.column_name.empty())
+										// The primary key information we seek is that for our own, CHILD, variable group
+										if (full_kad_key_info_child_variable_group.vg_identifier.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE, child_variable_group_raw_data_columns.variable_groups[0]))
 										{
 
-											if (full_kad_key_info_child_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 0)
+											if (!full_kad_key_info_child_variable_group.column_name.empty())
 											{
-												// There are no columns in this DMU for our current child variable group
-												return;
-											}
 
-											// This primary key is guaranteed to be a primary key in our child variable group,
-											// with columns present,
-											// AND it appears in the proper order of the top-level primary keys
+												if (full_kad_key_info_child_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 0)
+												{
+													// There are no columns in this DMU for our current child variable group
+													return;
+												}
 
-											bool is_child_group_branch = false;
-											if (full_kad_key_info_child_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
-											{
-												is_child_group_branch = true;
-											}
+												// This primary key is guaranteed to be a primary key in our child variable group,
+												// with columns present,
+												// AND it appears in the proper order of the top-level primary keys
 
-											if (is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
-											{
-												mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
-												allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
-											}
-											else
-											if (is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
-											{
-												mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
-												allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
-											}
-											else
-											if (!is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
-											{
-												mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
-												allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
-											}
-											else if (!is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
-											{
-												mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
-												allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
-											}
-											else
-											{
-												boost::format msg("No mapping possible from child to primary DMU!");
-												throw NewGeneException() << newgene_error_description(msg.str());
+												bool is_child_group_branch = false;
+												if (full_kad_key_info_child_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+												{
+													is_child_group_branch = true;
+												}
+
+												if (is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
+												{
+													mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
+													allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
+												}
+												else
+												if (is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
+												{
+													mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
+													allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
+												}
+												else
+												if (!is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
+												{
+													mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
+													allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
+												}
+												else if (!is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
+												{
+													mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
+													allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
+												}
+												else
+												{
+													boost::format msg("No mapping possible from child to primary DMU!");
+													throw NewGeneException() << newgene_error_description(msg.str());
+												}
+
 											}
 
 										}
 
-									}
+									});
 
-								});
-
-								if (is_current_index_a_top_level_primary_group_branch)
-								{
-									++current_primary_branch_index;
-								}
-								else
-								{
-									++current_primary_internal_leaf_index;
-									if (full_kad_key_info.sequence_number_within_dmu_category_primary_uoa + 1 == full_kad_key_info.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
+									if (is_current_index_a_top_level_primary_group_branch)
 									{
-										++current_primary_leaf_number;
-										current_primary_internal_leaf_index = 0;
+										++current_primary_branch_index;
 									}
+									else
+									{
+										++current_primary_internal_leaf_index;
+										if (full_kad_key_info.sequence_number_within_dmu_category_primary_uoa + 1 == full_kad_key_info.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
+										{
+											++current_primary_leaf_number;
+											current_primary_internal_leaf_index = 0;
+										}
+									}
+
 								}
 
 							}
 
 						}
 
-					}
+					});
 
 				});
 
-			});
-
+			}
 
 		});
 
