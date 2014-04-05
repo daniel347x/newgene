@@ -130,40 +130,81 @@
         </spacer>
        </item>
        <item>
-        <widget class="QCheckBox" name="doRandomSampling">
-         <property name="text">
-          <string>Random Sampling</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>How many random rows:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="randomSamplingHowManyRows">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="inputMask">
-          <string/>
-         </property>
-         <property name="maxLength">
-          <number>32767</number>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QCheckBox" name="mergeIdenticalRows">
          <property name="text">
           <string>Merge identical adjacent output rows</string>
          </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Random Sampling</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="doRandomSampling">
+            <property name="text">
+             <string>Perform random sampling</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>How many random rows:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="randomSamplingHowManyRows">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="inputMask">
+             <string/>
+            </property>
+            <property name="maxLength">
+             <number>32767</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+         <zorder>doRandomSampling</zorder>
+         <zorder>doRandomSampling</zorder>
+         <zorder>randomSamplingHowManyRows</zorder>
+         <zorder>verticalSpacer</zorder>
+         <zorder>verticalSpacer_2</zorder>
+         <zorder>label_3</zorder>
         </widget>
        </item>
       </layout>

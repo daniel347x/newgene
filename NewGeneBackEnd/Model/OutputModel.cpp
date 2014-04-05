@@ -22279,10 +22279,6 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						while ((time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP)) <= time_end)
 						{
 							current_slice.Reshape(current_time_start, time_start_aligned_higher);
-							if (rows_written >= 1647746)
-							{
-								int m = 0;
-							}
 							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
 							current_time_start = time_start_aligned_higher;
 							current_start_time_incremented_by_1_ms = current_time_start + 1;
