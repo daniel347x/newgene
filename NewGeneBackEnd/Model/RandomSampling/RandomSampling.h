@@ -1321,7 +1321,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// **************************************************************************************** //
 		// **************************************************************************************** //
 		mutable std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> helper_lookup__from_child_key_set__to_matching_output_rows;
-		void ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, int const number_columns_in_one_child_leaf, bool const force) const; // Populate the above data structure
+		void ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, bool const force) const; // Populate the above data structure
 
 		// *********************************************************************************** //
 		// Every branch ALREADY has a std::set<Leaf>,
@@ -1594,6 +1594,8 @@ public:
 	// For each child variable group, a vector of mapping from the child key columns to the top-level key columns
 	std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_branch_to_primary;
 	std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_leaf_to_primary;
+	std::map<int, int> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
+	int numberChildVariableGroups;
 
 	// final output in case of consolidated row output
 	std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> consolidated_rows;

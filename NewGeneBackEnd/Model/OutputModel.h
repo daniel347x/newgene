@@ -472,7 +472,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						}
 
 						void Clear();
-						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & preliminary_sorted_top_level_variable_group_result_columns, sqlite3_stmt * stmt_result,
+						void PopulateFromCurrentRowInDatabase(ColumnsInTempView const & column_schema, sqlite3_stmt * stmt_result,
 															  XR_TABLE_CATEGORY const xr_table_category, bool const obtain_rowid = false);
 
 						SavedRowData & GetSavedRowData() { return *this; }
@@ -732,6 +732,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				// For each child variable group, a vector of mapping from the child key columns to the top-level key columns
 				std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_branch_to_primary;
 				std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_leaf_to_primary;
+				std::map<int, int> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 				OutputModel::OutputGenerator::SqlAndColumnSet CreateTableOfSelectedVariablesFromRawData(ColumnsInTempView const & variable_group_raw_data_columns, int const group_number);
 				void RandomSamplerFillDataForChildGroups(AllWeightings & allWeightings);
 				void RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & primary_variable_group_x1_columns, int const primary_group_number, AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages);
@@ -744,6 +745,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void ConsolidateData(bool const random_sampling, AllWeightings &allWeightings);
 				void RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings);
 				void OutputGranulatedRow(TimeSlice const & current_time_slice, std::set<BranchOutputRow> &output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t &rows_written);
+				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(AllWeightings & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index);
 
 				std::map<int, int> top_level_number_secondary_columns;
 				std::map<int, int> child_number_secondary_columns;
@@ -778,7 +780,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				};
 
 				// Functions involved in different phases of generation
-				void ObtainColumnInfoForRawDataTables();
+				void ObtainColumnInfoForRawDataTables(AllWeightings & allWeightings);
 				void PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,
 					std::vector<ColumnsInTempView> & variable_groups_column_info, bool const & is_primary, int const primary_or_secondary_view_index);
 				void LoopThroughPrimaryVariableGroups();

@@ -21,6 +21,7 @@ sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
 
 AllWeightings::AllWeightings()
 : insert_random_sample_stmt(nullptr)
+, numberChildVariableGroups(0)
 {
 
 }
@@ -583,7 +584,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					Branch const & the_current_map_branch = branchAndLeaves.first;
 
 					// The following cache will only be filled on the first pass
-					the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, static_cast<int>(timeSliceLeaf.second.primary_keys.size()));
+					the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, false);
 
 					// *********************************************************************************** //
 					// We have an incoming child variable group branch and leaf.
@@ -1217,7 +1218,7 @@ void AllWeightings::ResetBranchCaches(bool const empty_all)
 
 }
 
-void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, int const number_columns_in_one_child_leaf, bool const force) const
+void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, bool const force) const
 {
 
 	// ************************************************************************************************************************************************** //
@@ -1269,7 +1270,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 				bool branch_component_bad = false;
 
 				// First in the "child DMU" vector are the child's BRANCH DMU values
-				std::for_each(mappings_from_child_branch_to_primary.cbegin(), mappings_from_child_branch_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				std::for_each(allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cbegin(), allWeightings.mappings_from_child_branch_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
 					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the branch)
@@ -1344,7 +1345,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 				bool missing_top_level_leaf = false;
 				child_hit_vector.clear();
 				child_hit_vector.insert(child_hit_vector.begin(), child_hit_vector_branch_components.begin(), child_hit_vector_branch_components.end());
-				std::for_each(mappings_from_child_leaf_to_primary.cbegin(), mappings_from_child_leaf_to_primary.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				std::for_each(allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cbegin(), allWeightings.mappings_from_child_leaf_to_primary[variable_group_number].cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 
 					// We have the next DMU data in the sequence of DMU's for the child branch/leaf (we're working on the leaf)
@@ -1408,7 +1409,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 					++child_leaf_index_crossing_multiple_child_leaves;
 					++child_leaf_index_within_a_single_child_leaf;
 
-					if (child_leaf_index_within_a_single_child_leaf == number_columns_in_one_child_leaf)
+					if (child_leaf_index_within_a_single_child_leaf == allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1[variable_group_number])
 					{
 						if (!missing_top_level_leaf)
 						{
@@ -1480,7 +1481,10 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 		}
 	});
 
-	branch.ConstructChildCombinationCache(*this);
+	for (int c = 0; c < numberChildVariableGroups; ++c)
+	{
+		branch.ConstructChildCombinationCache(*this, c, true);
+	}
 
 }
 

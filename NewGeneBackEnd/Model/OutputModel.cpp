@@ -452,8 +452,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		return;
 	}
 
+	AllWeightings allWeightings;
+
 	messager.AppendKadStatusText("Preparing input data...", this);
-	ObtainColumnInfoForRawDataTables();
+	ObtainColumnInfoForRawDataTables(allWeightings);
 
 	if (failed || CheckCancelled())
 	{
@@ -475,8 +477,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		K = 0;
 		random_sampling_schema = RandomSamplingBuildSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
 		if (failed || CheckCancelled()) return;
-
-		AllWeightings allWeightings;
 
 		primary_variable_group_column_sets.push_back(SqlAndColumnSets());
 		SqlAndColumnSets & primary_group_column_sets = primary_variable_group_column_sets.back();
@@ -3033,14 +3033,36 @@ void OutputModel::OutputGenerator::SavedRowData::Clear()
 	number_of_multiplicities = 0;
 }
 
-void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & sorted_result_columns, sqlite3_stmt * stmt_result,
+void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGreaterThanOne(AllWeightings & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index)
+{
+
+	int internal_leaf_dmu_count = 0;
+	std::for_each(column_schema.columns_in_view.cbegin(),
+		column_schema.columns_in_view.cend(), [&](ColumnsInTempView::ColumnInTempView const & one_column)
+	{
+
+		if (one_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+		{
+			if (one_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+			{
+				++internal_leaf_dmu_count;
+			}
+		}
+
+	});
+
+	childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1[child_variable_group_index] = internal_leaf_dmu_count;
+
+}
+
+void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabase(ColumnsInTempView const & column_schema, sqlite3_stmt * stmt_result,
 	XR_TABLE_CATEGORY const xr_table_category, bool const obtain_rowid)
 {
 
 	Clear();
 
-	int datetime_start_column_index_of_possible_duplicate = (int)sorted_result_columns.columns_in_view.size() - 2;
-	int datetime_end_column_index_of_possible_duplicate = (int)sorted_result_columns.columns_in_view.size() - 1;
+	int datetime_start_column_index_of_possible_duplicate = (int)column_schema.columns_in_view.size() - 2;
+	int datetime_end_column_index_of_possible_duplicate = (int)column_schema.columns_in_view.size() - 1;
 	std::int64_t datetime_start_of_possible_duplicate = sqlite3_column_int64(stmt_result, datetime_start_column_index_of_possible_duplicate);
 	std::int64_t datetime_end_of_possible_duplicate = sqlite3_column_int64(stmt_result, datetime_end_column_index_of_possible_duplicate);
 
@@ -3055,9 +3077,9 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	bool on_other_side_of_first_dates = false;
 	bool on_other_side_of_second_dates = false;
 	int reverse_index_to_final_relevant_date_column = (int)
-			sorted_result_columns.columns_in_view.size(); // ensures that even if there is only one inner table, it will match as the final inner table
-	std::for_each(sorted_result_columns.columns_in_view.crbegin(),
-				  sorted_result_columns.columns_in_view.crend(), [this, &reverse_index_to_final_relevant_date_column, &sorted_result_columns, &reached_first_dates, &reached_second_dates, &on_other_side_of_first_dates, &on_other_side_of_second_dates, &first_variable_group, &current_column](
+			column_schema.columns_in_view.size(); // ensures that even if there is only one inner table, it will match as the final inner table
+	std::for_each(column_schema.columns_in_view.crbegin(),
+				  column_schema.columns_in_view.crend(), [this, &reverse_index_to_final_relevant_date_column, &column_schema, &reached_first_dates, &reached_second_dates, &on_other_side_of_first_dates, &on_other_side_of_second_dates, &first_variable_group, &current_column](
 					  ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
 	{
 		if (possible_duplicate_view_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
@@ -3087,7 +3109,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 		++current_column;
 	});
 
-	int column_index_of_start_of_final_inner_table = (int)sorted_result_columns.columns_in_view.size() - reverse_index_to_final_relevant_date_column;
+	int column_index_of_start_of_final_inner_table = (int)column_schema.columns_in_view.size() - reverse_index_to_final_relevant_date_column;
 
 	int column_data_type = 0;
 	std::int64_t data_int64 = 0;
@@ -3097,27 +3119,30 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	current_column = 0;
 	reached_first_dates = false;
 	on_other_side_of_first_dates = false;
+
+	// not_first_variable_group is deprecated.  See comments below
 	bool not_first_variable_group = false;
-	std::for_each(sorted_result_columns.columns_in_view.cbegin(),
-				  sorted_result_columns.columns_in_view.cend(), [this, &xr_table_category, &not_first_variable_group, &column_index_of_start_of_final_inner_table, &sorted_result_columns, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_float, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](
-					  ColumnsInTempView::ColumnInTempView const & possible_duplicate_view_column)
+
+	std::for_each(column_schema.columns_in_view.cbegin(),
+				  column_schema.columns_in_view.cend(), [this, &xr_table_category, &not_first_variable_group, &column_index_of_start_of_final_inner_table, &column_schema, &reached_first_dates, &on_other_side_of_first_dates, &first_variable_group, &data_int64, &data_float, &data_string, &data_long, &stmt_result, &column_data_type, &current_column](
+					  ColumnsInTempView::ColumnInTempView const & one_column)
 	{
 
-		inner_table_number.push_back(possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
+		inner_table_number.push_back(one_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set);
 
-		if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+		if (one_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 		{
-			if (possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category >
+			if (one_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category >
 				number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns)
 			{
 				number_of_columns__in_a_single_inner_table__for_the_columns_only_having_the_dmu_category_with_multiplicity_greater_than_one__but_this_info_is_present_for_all_primary_key_columns =
-					possible_duplicate_view_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
+					one_column.total_k_count__within_uoa_corresponding_to_current_variable_group__for_current_dmu_category;
 			}
 		}
 
-		if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > number_of_multiplicities)
+		if (one_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set > number_of_multiplicities)
 		{
-			number_of_multiplicities = possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
+			number_of_multiplicities = one_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set;
 		}
 
 		if (failed || OutputModel::OutputGenerator::CheckCancelled())
@@ -3127,11 +3152,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 		if (current_column == 0)
 		{
-			first_variable_group = possible_duplicate_view_column.variable_group_associated_with_current_inner_table;
+			first_variable_group = one_column.variable_group_associated_with_current_inner_table;
 		}
 
-		if (possible_duplicate_view_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
-			&& possible_duplicate_view_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+		if (one_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY
+			&& one_column.column_type != ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 		{
 			reached_first_dates = true;
 		}
@@ -3148,20 +3173,26 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			}
 		}
 
+		// not_first_variable_group has been deprecated.
+		// It was previously necessary, because when
+		// merging variable groups of all sorts,
+		// each variable group supplied its own, redundant,
+		// duplicate copy of all primary keys (including branch and all leaf keys).
+		// We wanted to use only the first set of branch and all leaf keys.
 		if (!not_first_variable_group)
 		{
-			if (sorted_result_columns.not_first_variable_group_column_index != -1)
+			if (column_schema.not_first_variable_group_column_index != -1)
 			{
-				if (current_column == sorted_result_columns.not_first_variable_group_column_index)
+				if (current_column == column_schema.not_first_variable_group_column_index)
 				{
 					not_first_variable_group = true;
 				}
 			}
-			else if (!possible_duplicate_view_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE,
+			else if (!one_column.variable_group_associated_with_current_inner_table.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__STRING_CODE,
 					 first_variable_group))
 			{
 				not_first_variable_group = true;
-				sorted_result_columns.not_first_variable_group_column_index = current_column;
+				column_schema.not_first_variable_group_column_index = current_column;
 			}
 		}
 
@@ -3185,11 +3216,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				add_as_column_in_all_but_final_inner_table = true;
 			}
 
-			if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			if (one_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+				if (one_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
-					if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
+					if (one_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
 					{
 						add_as_primary_key_column = true;
 					}
@@ -3202,26 +3233,26 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				}
 			}
 
-			if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			if (one_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
+				if (one_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group > 1)
 				{
 					add_as_primary_key_with_multiplicity_greater_than_1 = true;
 				}
 			}
 
-			if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
+			if (one_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__PRIMARY)
 			{
-				if (possible_duplicate_view_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
+				if (one_column.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 1)
 				{
-					if (possible_duplicate_view_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
+					if (one_column.current_multiplicity__of__current_inner_table__within__current_vg_inner_table_set == 1)
 					{
 						add_as_primary_key_with_multiplicity_equal_to_1 = true;
 					}
 				}
 			}
 
-			if (possible_duplicate_view_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
+			if (one_column.column_type == ColumnsInTempView::ColumnInTempView::COLUMN_TYPE__SECONDARY)
 			{
 				add_as_secondary_key_column = true;
 			}
@@ -3237,6 +3268,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 			}
 
 
+			// not_first_variable_group is deprecated.  See comments above
 			if (add_as_column_in_final_inner_table && !not_first_variable_group)
 			{
 				is_index_in_final_inner_table.push_back(true);
@@ -3246,6 +3278,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_in_final_inner_table.push_back(false);
 			}
 
+			// not_first_variable_group is deprecated.  See comments above
 			if (add_as_column_in_all_but_final_inner_table && !not_first_variable_group)
 			{
 				is_index_in_all_but_final_inner_table.push_back(true);
@@ -3255,6 +3288,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_in_all_but_final_inner_table.push_back(false);
 			}
 
+			// not_first_variable_group is deprecated.  See comments above
 			if (add_as_primary_key_column && !not_first_variable_group)
 			{
 				is_index_a_primary_key.push_back(true);
@@ -3273,6 +3307,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_a_secondary_key.push_back(false);
 			}
 
+			// not_first_variable_group is deprecated.  See comments above
 			if (add_as_primary_key_with_multiplicity_greater_than_1 && !not_first_variable_group)
 			{
 				is_index_a_primary_key_with_outer_multiplicity_greater_than_1.push_back(true);
@@ -3282,6 +3317,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_a_primary_key_with_outer_multiplicity_greater_than_1.push_back(false);
 			}
 
+			// not_first_variable_group is deprecated.  See comments above
 			if (add_as_primary_key_with_multiplicity_equal_to_1 && !not_first_variable_group)
 			{
 				is_index_a_primary_key_with_outer_multiplicity_equal_to_1.push_back(true);
@@ -3291,6 +3327,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_a_primary_key_with_outer_multiplicity_equal_to_1.push_back(false);
 			}
 
+			// not_first_variable_group is deprecated.  See comments above
 			if (add_as_primary_key_column_in_final_inner_table && !not_first_variable_group)
 			{
 				is_index_a_primary_key_in_the_final_inner_table.push_back(true);
@@ -3300,6 +3337,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 				is_index_a_primary_key_in_the_final_inner_table.push_back(false);
 			}
 
+			// not_first_variable_group is deprecated.  See comments above
 			if (add_as_primary_key_column_in_all_but_final_inner_table && !not_first_variable_group)
 			{
 				is_index_a_primary_key_in_not_the_final_inner_table.push_back(true);
@@ -3311,7 +3349,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 		}
 
-		bool add_as_secondary_datetime_column = possible_duplicate_view_column.originally_datetime;
+		bool add_as_secondary_datetime_column = one_column.originally_datetime;
 
 		column_data_type = sqlite3_column_type(stmt_result, current_column);
 
@@ -3587,15 +3625,15 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 		rowid = data_int64;
 	}
 
-	if (sorted_result_columns.not_first_variable_group_column_index == -1)
+	if (column_schema.not_first_variable_group_column_index == -1)
 	{
 		// ALL columns are in the first variable group - set this index one past the end
-		sorted_result_columns.not_first_variable_group_column_index = (int)sorted_result_columns.columns_in_view.size();
+		column_schema.not_first_variable_group_column_index = (int)column_schema.columns_in_view.size();
 	}
 
 	if (number_of_columns_in_inner_table == 0)
 	{
-		number_of_columns_in_inner_table = (int)sorted_result_columns.columns_in_view.size();
+		number_of_columns_in_inner_table = (int)column_schema.columns_in_view.size();
 	}
 
 }
@@ -13247,9 +13285,12 @@ void OutputModel::OutputGenerator::Prepare()
 
 }
 
-void OutputModel::OutputGenerator::ObtainColumnInfoForRawDataTables()
+void OutputModel::OutputGenerator::ObtainColumnInfoForRawDataTables(AllWeightings & allWeightings)
 {
 
+	// ***************************************************************************************************************** //
+	// Build schemas for top-level variable groups (this includes the primary variable group)
+	// ***************************************************************************************************************** //
 	int primary_view_count = 0;
 	int primary_or_secondary_view_index = 0;
 	std::for_each(primary_variable_groups_vector.cbegin(),
@@ -13259,12 +13300,18 @@ void OutputModel::OutputGenerator::ObtainColumnInfoForRawDataTables()
 		++primary_or_secondary_view_index;
 	});
 
+	// ***************************************************************************************************************** //
+	// Build schemas for child variable groups
+	// ***************************************************************************************************************** //
 	int secondary_view_count = 0;
 	primary_or_secondary_view_index = 0;
+	allWeightings.numberChildVariableGroups = static_cast<int>(secondary_variable_groups_vector.size());
 	std::for_each(secondary_variable_groups_vector.cbegin(),
 				  secondary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_secondary_variable_group)
 	{
 		PopulateColumnsFromRawDataTable(the_secondary_variable_group, secondary_view_count, secondary_variable_groups_column_info, false, primary_or_secondary_view_index);
+		ColumnsInTempView const & childSchema = secondary_variable_groups_column_info.back();
+		DetermineInternalChildLeafCountMultiplicityGreaterThanOne(allWeightings, childSchema, primary_or_secondary_view_index);
 		++primary_or_secondary_view_index;
 	});
 
