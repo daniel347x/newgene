@@ -1535,12 +1535,6 @@ class MergedTimeSliceRow
 				return *this;
 			}
 
-			if (output_row != rhs.output_row)
-			{
-				boost::format msg("Logic error merging MergedTimeSliceRow!  The merge should only occur for rows with identical primary keys");
-				throw NewGeneException() << newgene_error_description(msg.str());
-			}
-
 			if (empty)
 			{
 				// Just accept RHS
@@ -1560,6 +1554,12 @@ class MergedTimeSliceRow
 			{
 				// nothing to do
 				return *this;
+			}
+
+			if (output_row != rhs.output_row)
+			{
+				boost::format msg("Logic error merging MergedTimeSliceRow!  The merge should only occur for rows with identical primary keys");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
 
 			time_slice.Merge(rhs.time_slice);
