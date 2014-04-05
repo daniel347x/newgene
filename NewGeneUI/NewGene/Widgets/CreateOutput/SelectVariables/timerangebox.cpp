@@ -210,7 +210,7 @@ void TimeRangeBox::on_mergeIdenticalRows_stateChanged(int arg1)
 		InstanceActionItems actionItems;
 		actionItems.push_back(std::make_pair(WidgetInstanceIdentifier(), std::shared_ptr<WidgetActionItem>(static_cast<WidgetActionItem*>(new WidgetActionItem__Checkbox(is_checked)))));
 		WidgetActionItemRequest_ACTION_CONSOLIDATE_ROWS_CHANGE action_request(WIDGET_ACTION_ITEM_REQUEST_REASON__UPDATE_ITEMS, actionItems);
-		emit UpdateDoRandomSampling(action_request);
+		emit UpdateConsolidateRows(action_request);
 	}
 
 }
