@@ -20193,9 +20193,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 }
 
 void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(ColumnsInTempView const & variable_group_selected_columns_schema, int const variable_group_number,
-	AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages,
-	std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary,
-	std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary)
+	AllWeightings & allWeightings, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::vector<std::string> & errorMessages)
 {
 
 	{
@@ -20430,7 +20428,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 								Branch branch(dmus_branch);
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 								if (added)
 								{
@@ -20454,7 +20452,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// Add the secondary data for this non-primary top-level variable group to the cache
 								allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 
 							}
 							break;
@@ -21250,9 +21248,6 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		// top-level variable group's branch or a specific index in one of its specific leaves.
 		// **************************************************************************************** //
 
-		std::vector<ChildToPrimaryMapping> mappings_from_child_branch_to_primary;
-		std::vector<ChildToPrimaryMapping> mappings_from_child_leaf_to_primary;
-
 		int current_primary_branch_index = 0;
 		int current_primary_internal_leaf_index = 0;
 		int current_primary_leaf_number = 0;
@@ -21313,21 +21308,25 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 
 											if (is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
 											{
-												mappings_from_child_branch_to_primary.push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
+												mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
+												allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
 											}
 											else
 											if (is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
 											{
-												mappings_from_child_leaf_to_primary.push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
+												mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
+												allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_BRANCH, current_primary_branch_index));
 											}
 											else
 											if (!is_current_index_a_top_level_primary_group_branch && is_child_group_branch)
 											{
-												mappings_from_child_branch_to_primary.push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
+												mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
+												allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
 											}
 											else if (!is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
 											{
-												mappings_from_child_leaf_to_primary.push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
+												mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
+												allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
 											}
 											else
 											{
@@ -21382,7 +21381,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 		// **************************************************************************************** //
 
 		std::vector<std::string> errorMessages;
-		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, current_child_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__CHILD, errorMessages);
 
 		++current_child_vg_index;
 
@@ -21742,7 +21741,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 			{
 				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
 				{
-					allWeightings.ConsolidateRowsWithinBranch(branch_and_leaves.first);
+					allWeightings.ConsolidateRowsWithinBranch(branch_and_leaves.first, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
 				});
 
 			});
