@@ -1641,14 +1641,14 @@ void SpitHits(std::string & sdata, std::map<boost::multiprecision::cpp_int, std:
 	sdata += "<HITS>";
 	std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hitsEntry)
 	{
-		sdata += "<HIT>";
+		sdata += "<HIT_TIME_UNIT>";
 		sdata += "<TIME_UNIT_INDEX>";
 		sdata += boost::lexical_cast<std::string>(hitsEntry.first);
 		sdata += "</TIME_UNIT_INDEX>";
-		sdata += "<OUTPUT_ROWS_CORRESPONDING_TO_TIME_UNIT>";
+		sdata += "<OUTPUT_ROWS>";
 		SpitSetOfOutputRows(sdata, hitsEntry.second);
-		sdata += "</OUTPUT_ROWS_CORRESPONDING_TO_TIME_UNIT>";
-		sdata += "</HIT>";
+		sdata += "</OUTPUT_ROWS>";
+		sdata += "</HIT_TIME_UNIT>";
 	});
 	sdata += "</HITS>";
 }
@@ -1779,9 +1779,7 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	SpitKeys(sdata, branch.primary_keys);
 	sdata += "</PRIMARY_KEYS>";
 
-	sdata += "<HITS>";
 	SpitHits(sdata, branch.hits);
-	sdata += "</HITS>";
 
 	sdata += "<CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
 	SpitChildLookup(sdata, branch.helper_lookup__from_child_key_set__to_matching_output_rows);
