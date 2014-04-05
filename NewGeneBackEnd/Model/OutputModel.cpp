@@ -20475,7 +20475,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 								Branch branch(dmus_branch);
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling);
 
 								if (added)
 								{
@@ -20499,7 +20499,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// Add the secondary data for this non-primary top-level variable group to the cache
 								allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
 
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling);
 
 							}
 							break;
@@ -20521,7 +20521,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// which might slice the time slices, each such slice will not add any new primary leaves
 								// and the previous set of cached leaves will be persisted in the time slice copies.
 								// ************************************************************************************************** //
-								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+								bool added = allWeightings.HandleBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling);
 
 								if (added)
 								{
@@ -21225,12 +21225,6 @@ void OutputModel::OutputGenerator::PrepareInsertStatement(sqlite3_stmt *& insert
 
 }
 
-void OutputModel::OutputGenerator::BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex)
-{
-	bind_visitor visitor(insert_random_sample_stmt, bindIndex);
-	boost::apply_visitor(visitor, data);
-}
-
 void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeightings & allWeightings)
 {
 	
@@ -21777,7 +21771,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 		// ... namely, merging identical rows *across* time slices.
 		// ************************************************************************************************************* //
 
-		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
+		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 		{
 
 			TimeSlice const & the_slice = timeSlice.first;
@@ -21788,7 +21782,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 			{
 				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
 				{
-					allWeightings.ConsolidateRowsWithinBranch(branch_and_leaves.first, mappings_from_child_branch_to_primary, mappings_from_child_leaf_to_primary);
+					allWeightings.ConsolidateRowsWithinBranch(branch_and_leaves.first);
 				});
 
 			});
@@ -21802,7 +21796,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 	TimeSlice previousTimeSlice;
 
-	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
+	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 	{
 
 		TimeSlice const & the_slice = timeSlice.first;
@@ -21823,7 +21817,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 					Branch const & branch = branch_and_leaves.first;
 					auto const & incoming_rows = branch.hits[-1];
-					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](decltype(incoming_rows)::value_type const & incoming_row)
+					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
 					{
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
 						create_output_row_visitor::data.clear();
@@ -21904,7 +21898,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 				{
 					Branch const & branch = branch_and_leaves.first;
 					auto const & incoming_rows = branch.hits[-1];
-					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](decltype(incoming_rows)::value_type const & incoming_row)
+					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
 					{
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
 						create_output_row_visitor::data.clear();
@@ -21970,7 +21964,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 		++column_index;
 
-		if (column_index >= final_result.second.columns_in_view.size() - 1)
+		if (column_index >= static_cast<int>(final_result.second.columns_in_view.size()) - 1)
 		{
 			return; // for now, do not output datetime columns
 		}

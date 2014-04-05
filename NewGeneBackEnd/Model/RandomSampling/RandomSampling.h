@@ -1418,6 +1418,38 @@ typedef std::map<TimeSlice, VariableGroupTimeSliceData> TimeSlices;
 
 typedef std::pair<TimeSlice, Leaf> TimeSliceLeaf;
 
+class bind_visitor : public boost::static_visitor<>
+{
+
+public:
+
+	bind_visitor(sqlite3_stmt * stmt_, int const bindIndex_)
+		: stmt(stmt_)
+		, bindIndex(bindIndex_)
+	{}
+
+	void operator()(std::int64_t const & data)
+	{
+		sqlite3_bind_int64(stmt, bindIndex, data);
+	}
+
+	void operator()(double const & data)
+	{
+		sqlite3_bind_double(stmt, bindIndex, data);
+	}
+
+	void operator()(std::string const & data)
+	{
+		sqlite3_bind_text(stmt, bindIndex, data.c_str(), static_cast<int>(data.size()), SQLITE_STATIC);
+	}
+
+	sqlite3_stmt * stmt;
+	int const bindIndex;
+
+};
+
+void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex);
+
 class create_output_row_visitor : public boost::static_visitor<>
 {
 
@@ -1436,26 +1468,26 @@ public:
 	{}
 
 	template <typename T>
-	void operator()(const T & data) const
+	void operator()(const T & data_value) const
 	{
 
 		if (mode & CREATE_ROW_MODE__OUTPUT_FILE)
 		{
 			if (!first)
 			{
-				output_file << ",";
+				(*output_file) << ",";
 			}
-			output_file << data;
+			(*output_file) << data_value;
 		}
 
 		if (mode & CREATE_ROW_MODE__INSTANCE_DATA_VECTOR)
 		{
-			data.push_back(data);
+			data.push_back(data_value);
 		}
 
 		if (mode & CREATE_ROW_MODE__PREPARED_STATEMENT)
 		{
-			BindTermToInsertStatement(insert_stmt, data, (*bindIndex)++);
+			BindTermToInsertStatement(insert_stmt, data_value, (*bind_index)++);
 		}
 
 		first = false;
@@ -1606,7 +1638,7 @@ public:
 
 	bool HandleBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling);
 	void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);
-	void PrepareRandomNumbers(int how_many);
+	void PrepareRandomNumbers(std::int64_t how_many);
 	void PrepareRandomSamples(int const K);
 	void PrepareFullSamples(int const K);
 	bool RetrieveNextBranchAndLeaves(int const K);

@@ -749,36 +749,6 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 				std::map<int, int> top_level_number_secondary_columns;
 				std::map<int, int> child_number_secondary_columns;
-				class bind_visitor : public boost::static_visitor<>
-				{
-
-				public:
-
-					bind_visitor(sqlite3_stmt * stmt_, int const bindIndex_)
-						: stmt(stmt_)
-						, bindIndex(bindIndex_)
-					{}
-
-					void operator()(std::int64_t const & data)
-					{
-						sqlite3_bind_int64(stmt, bindIndex, data);
-					}
-
-					void operator()(double const & data)
-					{
-						sqlite3_bind_double(stmt, bindIndex, data);
-					}
-
-					void operator()(std::string const & data)
-					{
-						sqlite3_bind_text(stmt, bindIndex, data.c_str(), static_cast<int>(data.size()), SQLITE_STATIC);
-					}
-
-					sqlite3_stmt * stmt;
-					int const bindIndex;
-
-				};
-
 				// Functions involved in different phases of generation
 				void ObtainColumnInfoForRawDataTables(AllWeightings & allWeightings);
 				void PopulateColumnsFromRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,

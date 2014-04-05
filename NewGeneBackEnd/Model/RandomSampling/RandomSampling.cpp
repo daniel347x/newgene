@@ -762,7 +762,7 @@ void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch co
 	timeSlices[newTimeSliceLeaf.first] = variableGroupTimeSliceData;
 }
 
-void AllWeightings::PrepareRandomNumbers(int how_many)
+void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 {
 
 	if (weighting.getWeighting() < 1)
@@ -2090,12 +2090,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 			leftWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
 			rightWidth = originalTimeSlice.getEnd() - currentTimeSlice.getEnd();
 
-			leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
-			rightUnits = TimeSlice::WidthForWeighting(rightWidth, AvgMsperUnit);
-
-			leftRounded = static_cast<std::int64_t>(leftUnits + 0.5);
-			rightRounded = static_cast<std::int64_t>(rightUnits + 0.5);
-
 			useLeft = true;
 
 		}
@@ -2263,10 +2257,10 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 
 			auto & hits = branch_and_leaves.first.hits;
 
-			std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & hit)
+			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hit)
 			{
-				std::int64_t hit_time_index = hit.first;
-				std::int64_t hit_time_index_one_based = hit_time_index;
+				boost::multiprecision::cpp_int hit_time_index = hit.first;
+				boost::multiprecision::cpp_int hit_time_index_one_based = hit_time_index;
 				bool matches_left = false;
 				bool matches_right = false;
 				bool matches_middle = false;
@@ -2342,7 +2336,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 			});
 
 			hits.clear();
-			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](decltype(new_hits)::value_type & new_hit)
+			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & new_hit)
 			{
 				hits[new_hit.first] = new_hit.second;
 			});
@@ -2350,4 +2344,10 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 		});
 	});
 
+}
+
+void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, InstanceData const & data, int bindIndex)
+{
+	bind_visitor visitor(insert_random_sample_stmt, bindIndex);
+	boost::apply_visitor(visitor, data);
 }
