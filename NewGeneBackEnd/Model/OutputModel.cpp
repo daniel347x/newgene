@@ -22275,15 +22275,17 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						std::int64_t current_time_start = time_start_aligned_higher;
 						std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
 
+						bool at_least_one_regular_slice = false;
 						while ((time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP)) <= time_end)
 						{
 							current_slice.Reshape(current_time_start, time_start_aligned_higher);
 							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
 							current_time_start = time_start_aligned_higher;
 							std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
+							at_least_one_regular_slice = true;
 						}
 
-						if (current_time_start == time_end)
+						if (current_time_start == time_end || !at_least_one_regular_slice)
 						{
 							// we're done
 						}
