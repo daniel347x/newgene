@@ -86,7 +86,7 @@ class PrimaryKeySequence
 				int total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
 				int total_kad_spin_count_for_this_dmu_category;
 				int total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group;
-				std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys; // one per variable group
+				std::vector<VariableGroup_PrimaryKey_Info> variable_group_info_for_primary_keys__top_level_and_child; // one per variable group.  Includes child variable groups.
 
 		};
 
