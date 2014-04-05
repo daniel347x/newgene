@@ -20,7 +20,7 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 	bpt::ptime incoming_time = bpt::from_time_t(test_timestamp / 1000);
 	bpt::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 
-	int const milliseconds_into_day = incoming_time.time_of_day().total_milliseconds();
+	int const milliseconds_into_day = static_cast<int>(incoming_time.time_of_day().total_milliseconds());
 	bpt::time_duration milliseconds_into_day_duration = bpt::milliseconds(milliseconds_into_day);
 
 	int const seconds_into_day = incoming_time.time_of_day().total_seconds();
