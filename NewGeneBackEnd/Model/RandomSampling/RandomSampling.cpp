@@ -1650,14 +1650,14 @@ void SpitHits(std::string & sdata, std::map<boost::multiprecision::cpp_int, std:
 	sdata += "<HITS>";
 	std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hitsEntry)
 	{
-		sdata += "<HIT_TIME_UNIT>";
+		sdata += "<TIME_UNIT>";
 		sdata += "<TIME_UNIT_INDEX>";
 		sdata += boost::lexical_cast<std::string>(hitsEntry.first);
 		sdata += "</TIME_UNIT_INDEX>";
 		sdata += "<OUTPUT_ROWS>";
 		SpitSetOfOutputRows(sdata, hitsEntry.second);
 		sdata += "</OUTPUT_ROWS>";
-		sdata += "</HIT_TIME_UNIT>";
+		sdata += "</TIME_UNIT>";
 	});
 	sdata += "</HITS>";
 }
