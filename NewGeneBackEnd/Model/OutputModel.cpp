@@ -3058,6 +3058,7 @@ void OutputModel::OutputGenerator::DetermineInternalChildLeafCountMultiplicityGr
 	});
 
 	childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1[child_variable_group_index] = internal_leaf_dmu_count;
+	allWeightings.childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1[child_variable_group_index] = internal_leaf_dmu_count;
 
 }
 
