@@ -21996,7 +21996,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 		// (or sub-time-unit, in case child data has split rows into pieces).
 		// The proper splitting of rows has already occurred.
 
-		TIME_GRANULARITY time_granularity - primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
+		TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
 
 		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
 		{
@@ -22164,7 +22164,39 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						std::int64_t const time_start = timeSlice.getStart();
 						std::int64_t const time_end = timeSlice.getEnd();
 
-						std::int64_t const time_start_aligned_higher = TimeRange::determineAligningTimestamp(time_start, time_granularity);
+						std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(time_start, time_granularity, TimeRange::ALIGN_MODE_UP);
+						std::int64_t time_end_aligned_lower = TimeRange::determineAligningTimestamp(time_end, time_granularity, TimeRange::ALIGN_MODE_DOWN);
+
+						TimeSlice current_slice;
+
+						if (time_start != time_start_aligned_higher)
+						{
+							// There is a piece of the incoming time slice at the front that does not line up
+							current_slice.Reshape(time_start, time_start_aligned_higher);
+							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
+						}
+
+						std::int64_t current_time_start = time_start_aligned_higher;
+						std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
+
+						while ((time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP)) <= time_end)
+						{
+							current_slice.Reshape(current_time_start, time_start_aligned_higher);
+							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
+							current_time_start = time_start_aligned_higher;
+							std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
+						}
+
+						if (current_time_start == time_end)
+						{
+							// we're done
+						}
+						else
+						{
+							// There is a piece of the incoming time slice at the end that does not line up
+							current_slice.Reshape(current_time_start, time_end);
+							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
+						}
 
 					}
 
@@ -22175,5 +22207,33 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 		});
 
 	}
+
+}
+
+void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current_time_slice, std::set<BranchOutputRow> &output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t & rows_written)
+{
+
+	// current_time_slice to be used when the time-slice-start and time-slice-end rows are output
+
+	std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow const & outputRow)
+	{
+
+		// We have a row to output
+
+		if (failed || CheckCancelled())
+		{
+			return;
+		}
+
+		create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
+		create_output_row_visitor::output_file = &output_file;
+		CreateOutputRow(branch, outputRow, allWeightings);
+		create_output_row_visitor::output_file = nullptr;
+		create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
+
+		output_file << std::endl;
+		++rows_written;
+
+	});
 
 }

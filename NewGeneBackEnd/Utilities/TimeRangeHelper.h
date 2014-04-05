@@ -24,7 +24,7 @@ namespace TimeRange
 	enum ALIGN_MODE
 	{
 		ALIGN_MODE_UP = 0
-		, ALIGHN_MODE_DOWN
+		, ALIGN_MODE_DOWN
 	};
 
 	inline std::string convertTimestampToString(std::int64_t const timestamp)
