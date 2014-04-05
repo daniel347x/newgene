@@ -249,7 +249,7 @@ void Table_GENERAL_OPTIONS::ModifyConsolidateRows(sqlite3 * db)
 	std::lock_guard<std::recursive_mutex> data_lock(data_mutex);
 
 	std::string sqlAdd("UPDATE GENERAL_OPTIONS SET ");
-	sqlAdd += GENERAL_OPTIONS__DO_RANDOM_SAMPLING;
+	sqlAdd += GENERAL_OPTIONS__CONSOLIDATE_ROWS;
 	sqlAdd += "=";
 	sqlAdd += boost::lexical_cast<std::string>(do_random_sampling ? 1 : 0);
 	sqlite3_stmt * stmt = NULL;
