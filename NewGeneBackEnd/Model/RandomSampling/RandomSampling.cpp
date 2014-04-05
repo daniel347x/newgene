@@ -1982,13 +1982,9 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 			{
 				*sdata += "<BRANCH_AND_LEAVES>";
 
-				*sdata += "<BRANCH>";
 				SpitBranch(*sdata, branch_and_leaves.first);
-				*sdata += "</BRANCH>";
 
-				*sdata += "<LEAVES>";
 				SpitLeaves(*sdata, branch_and_leaves.second);
-				*sdata += "</LEAVES>";
 
 				*sdata += "</BRANCH_AND_LEAVES>";
 			});
