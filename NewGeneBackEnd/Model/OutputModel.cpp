@@ -21364,7 +21364,8 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 					mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
 					allWeightings.mappings_from_child_branch_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
 				}
-				else if (!is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
+				else
+				if (!is_current_index_a_top_level_primary_group_branch && !is_child_group_branch)
 				{
 					mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
 					allWeightings.mappings_from_child_leaf_to_primary[current_child_vg_index].push_back(ChildToPrimaryMapping(CHILD_TO_PRIMARY_MAPPING__MAPS_TO_LEAF, current_primary_internal_leaf_index, current_primary_leaf_number));
