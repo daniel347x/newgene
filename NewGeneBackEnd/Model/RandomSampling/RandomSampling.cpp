@@ -18,6 +18,7 @@ int create_output_row_visitor::mode = static_cast<int>(create_output_row_visitor
 std::vector<InstanceData> create_output_row_visitor::data;
 int * create_output_row_visitor::bind_index = nullptr;
 sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
+bool MergedTimeSliceRow::RHS_wins = false;
 
 AllWeightings::AllWeightings()
 : insert_random_sample_stmt(nullptr)
@@ -625,38 +626,6 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 							});
 
 						}
-					}
-
-					if (false)
-					{
-
-						std::string keys;
-						SpitKeys(keys, dmu_keys);
-
-						std::string helper;
-						SpitChildLookup(helper, the_current_map_branch.helper_lookup__from_child_key_set__to_matching_output_rows);
-
-						std::string hits_;
-						SpitHits(hits_, the_current_map_branch.hits);
-
-						std::string datacache("Primary data cache: ");
-						SpitDataCache(datacache, dataCache);
-
-						std::string otherdatacaches("Primary data cache: ");
-						SpitDataCaches(otherdatacaches, otherTopLevelCache);
-
-						std::string childdatacaches("Primary data cache: ");
-						SpitDataCaches(childdatacaches, childCache);
-
-						std::string newbranch;
-						SpitBranch(newbranch, branch);
-
-						std::string existingbranch;
-						SpitBranch(existingbranch, the_current_map_branch);
-
-						std::string branchvals;
-						SpitKeys(branchvals, the_current_map_branch.primary_keys);
-
 					}
 
 				});

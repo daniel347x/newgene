@@ -1554,6 +1554,14 @@ class MergedTimeSliceRow
 				return *this;
 			}
 
+			if (RHS_wins)
+			{
+				time_slice = rhs.time_slice;
+				output_row = rhs.output_row;
+				empty = rhs.empty;
+				return *this;
+			}
+
 			if (empty)
 			{
 				// Just accept RHS
@@ -1570,16 +1578,16 @@ class MergedTimeSliceRow
 				return *this;
 			}
 
-			if (rhs.empty)
-			{
-				// nothing to do
-				return *this;
-			}
-
 			if (output_row != rhs.output_row)
 			{
 				boost::format msg("Logic error merging MergedTimeSliceRow!  The merge should only occur for rows with identical primary keys");
 				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
+			if (rhs.empty)
+			{
+				// nothing to do
+				return *this;
 			}
 
 			time_slice.Merge(rhs.time_slice);
@@ -1589,6 +1597,8 @@ class MergedTimeSliceRow
 
 		TimeSlice time_slice;
 		std::vector<InstanceData> output_row;
+
+		static bool RHS_wins; // controls how operator=() should behave.  Note: Only required because release-mode optimizer utilizes operator=() instead of ctor
 
 	private:
 

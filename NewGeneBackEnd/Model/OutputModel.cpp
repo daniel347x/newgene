@@ -21839,6 +21839,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 					// so the above block that consolidates to index -1 is not necessary.
 					// ***************************************************************************************************** //
 					auto const & incoming_rows = branch.hits[-1];
+					MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "emplace"
 					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
 					{
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
@@ -21854,6 +21855,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 						create_output_row_visitor::data.clear();
 					});
+					MergedTimeSliceRow::RHS_wins = false;
 
 					std::vector<MergedTimeSliceRow> intersection(std::max(ongoing_merged_rows.size(), incoming.size()));
 					std::vector<MergedTimeSliceRow> only_previous(ongoing_merged_rows.size());
@@ -21893,6 +21895,9 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 					ongoing_merged_rows.clear();
 
+
+					MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
+
 					// Set ongoing to "intersection"
 					ongoing_merged_rows.insert(intersection.cbegin(), intersection.cend());
 
@@ -21903,6 +21908,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 					// The rows that existed previously, but do not match, now must be set aside and saved.
 					saved_historic_rows.insert(only_previous.cbegin(), only_previous.cend());
+
+					MergedTimeSliceRow::RHS_wins = false;
 
 				});
 
