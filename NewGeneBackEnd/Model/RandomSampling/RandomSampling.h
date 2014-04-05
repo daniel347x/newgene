@@ -324,8 +324,8 @@ class TimeSlice
 		void Reshape(std::int64_t const & new_start, std::int64_t const & new_end)
 		{
 
-			setStart(new_start);
-			setEnd(new_end);
+			setStart(new_start, false);
+			setEnd(new_end, false);
 
 			CheckForAndSetNoTimeRangeGranularity();
 
@@ -581,7 +581,7 @@ class TimeSlice
 			return false;
 		}
 
-		void setStart(std::int64_t const & time_start_)
+		void setStart(std::int64_t const & time_start_, bool const validate = true)
 		{
 			time_start = time_start_;
 
@@ -598,10 +598,13 @@ class TimeSlice
 
 			CheckForAndSetNoTimeRangeGranularity();
 
-			Validate();
+			if (validate)
+			{
+				Validate();
+			}
 		}
 
-		void setEnd(std::int64_t const & time_end_)
+		void setEnd(std::int64_t const & time_end_, bool const validate = true)
 		{
 			time_end = time_end_;
 
@@ -618,7 +621,10 @@ class TimeSlice
 
 			CheckForAndSetNoTimeRangeGranularity();
 
-			Validate();
+			if (validate)
+			{
+				Validate();
+			}
 		}
 
 

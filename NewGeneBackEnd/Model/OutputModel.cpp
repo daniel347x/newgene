@@ -22000,6 +22000,13 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 		return;
 	}
 
+	BOOST_SCOPE_EXIT(&output_file)
+	{
+		output_file.flush();
+		output_file.close();
+	} BOOST_SCOPE_EXIT_END
+
+	
 	// Write columns headers
 	int column_index = 0;
 	bool first = true;
