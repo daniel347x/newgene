@@ -22059,6 +22059,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 			});
 
+			output_file << std::endl;
+
 		});
 
 	}
