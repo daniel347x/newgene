@@ -398,14 +398,14 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setEnd(middle);
 	timeSlices[timeSlice] = timeSliceData;
-	timeSlices[timeSlice].PruneTimeUnits(originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
+	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
 
 	newMapElementLeftPtr = timeSlices.find(timeSlice);
 
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setStart(middle);
 	timeSlices[timeSlice] = timeSliceData;
-	timeSlices[timeSlice].PruneTimeUnits(originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
+	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
 
 	newMapElementRightPtr = timeSlices.find(timeSlice);
 
@@ -424,19 +424,19 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setEnd(left);
 	timeSlices[timeSlice] = timeSliceData;
-	timeSlices[timeSlice].PruneTimeUnits(originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
+	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
 
 	timeSlice = originalMapTimeSlice;
 	timeSlice.Reshape(left, right);
 	timeSlices[timeSlice] = timeSliceData;
-	timeSlices[timeSlice].PruneTimeUnits(originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
+	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
 
 	newMapElementMiddlePtr = timeSlices.find(timeSlice);
 
 	timeSlice = originalMapTimeSlice;
 	timeSlice.setStart(right);
 	timeSlices[timeSlice] = timeSliceData;
-	timeSlices[timeSlice].PruneTimeUnits(originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
+	timeSlices[timeSlice].PruneTimeUnits(*this, originalMapTimeSlice, timeSlice, AvgMsperUnit, consolidate_rows, random_sampling);
 
 }
 
@@ -1179,35 +1179,7 @@ void AllWeightings::ResetBranchCaches()
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
 	{
 
-		TimeSlice const & timeSlice = timeSliceData.first;
-		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceData.second;
-
-		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
-
-		// For now, assume only one variable group
-		if (variableGroupBranchesAndLeavesVector.size() > 1)
-		{
-			boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-
-		VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-		BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
-
-		std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
-		{
-
-			Branch const & branch = branchAndLeaves.first;
-			Leaves const & leaves = branchAndLeaves.second;
-
-			branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
-			branch.CreateLeafCache(leaves);
-			for (int c = 0; c < numberChildVariableGroups; ++c)
-			{
-				branch.ConstructChildCombinationCache(*this, c, true);
-			}
-
-		});
+		timeSliceData.second.ResetBranchCachesSingleTimeSlice(*this);
 
 	});
 
@@ -1493,6 +1465,37 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 		branch.ConstructChildCombinationCache(*this, c, true);
 	}
 
+}
+
+void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(AllWeightings & allWeightings)
+{
+
+	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = branches_and_leaves;
+
+	// For now, assume only one variable group
+	if (variableGroupBranchesAndLeavesVector.size() > 1)
+	{
+		boost::format msg("Only one top-level variable group is currently supported for the random and full sampler in ConsolidateHits().");
+		throw NewGeneException() << newgene_error_description(msg.str());
+	}
+
+	VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+	BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+
+	std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
+	{
+
+		Branch const & branch = branchAndLeaves.first;
+		Leaves const & leaves = branchAndLeaves.second;
+
+		branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
+		branch.CreateLeafCache(leaves);
+		for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
+		{
+			branch.ConstructChildCombinationCache(allWeightings, c, true);
+		}
+
+	});
 }
 
 BranchOutputRow::BranchOutputRow()
@@ -2016,7 +2019,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 
 #endif
 
-void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
 	// ********************************************************************************************** //
@@ -2432,6 +2435,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 		});
 
 	});
+
+	ResetBranchCachesSingleTimeSlice(allWeightings);
 
 }
 
