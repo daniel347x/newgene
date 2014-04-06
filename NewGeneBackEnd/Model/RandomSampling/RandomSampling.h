@@ -1610,18 +1610,36 @@ public:
 	void operator()(const T & data_value) const
 	{
 
-		if (boost::lexical_cast<std::string>(data_value) == "Austria-Hungary")
-		{
-			int m = 0;
-		}
-
 		if (mode & CREATE_ROW_MODE__OUTPUT_FILE)
 		{
+
 			if (!first)
 			{
 				(*output_file) << ",";
+				
+#				ifdef _DEBUG
+				row_in_process += ",";
+#				endif
 			}
+
+#			ifdef _DEBUG
+			else
+			{
+				row_in_process.clear();
+			}
+#			endif
+
 			(*output_file) << data_value;
+
+#			ifdef _DEBUG
+			row_in_process += boost::lexical_cast<std::string>(data_value);
+			int m = 0;
+			if (row_in_process == "257,2,255,2,300,1918")
+			{
+				int n = 0;
+			}
+#			endif
+
 		}
 
 		if (mode & CREATE_ROW_MODE__INSTANCE_DATA_VECTOR)
@@ -1638,6 +1656,7 @@ public:
 
 	}
 
+	static std::string row_in_process;
 	static std::fstream * output_file;
 	static std::vector<InstanceData> data;
 	static int * bind_index;

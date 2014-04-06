@@ -22130,8 +22130,12 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 		TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
 
+		int which_time_slice = 0;
+
 		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
 		{
+
+			++which_time_slice;
 
 			if (failed || CheckCancelled())
 			{

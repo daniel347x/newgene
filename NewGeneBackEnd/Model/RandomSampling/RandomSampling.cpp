@@ -19,6 +19,7 @@ std::vector<InstanceData> create_output_row_visitor::data;
 int * create_output_row_visitor::bind_index = nullptr;
 sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
 bool MergedTimeSliceRow::RHS_wins = false;
+std::string create_output_row_visitor::row_in_process;
 
 AllWeightings::AllWeightings()
 : insert_random_sample_stmt(nullptr)
@@ -2198,6 +2199,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 		//boost::format msg("Logic error when pruning time slice: original width is empty for time slice");
 		//throw NewGeneException() << newgene_error_description(msg.str());
+
+		originalWidth = 1;
 	}
 
 	bool useLeft = false;
@@ -2556,6 +2559,11 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 				}
 
 			});
+
+			if (new_hits.empty())
+			{
+				int m = 0;
+			}
 
 			hits.clear();
 			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & new_hit)
