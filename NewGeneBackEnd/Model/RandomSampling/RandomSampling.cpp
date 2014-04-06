@@ -1349,8 +1349,8 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 
 							if (outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf] >= static_cast<int>(leaves_cache.size()))
 							{
-								std::vector<std::string> sdata;
-								SpitAllWeightings(sdata, allWeightings, true);
+								boost::format msg("Logic error: Output rows saved with the branch point to leaf indexes that do not exist in the branch!");
+								throw NewGeneException() << newgene_error_description(msg.str());
 							}
 
 							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size() == 0)
