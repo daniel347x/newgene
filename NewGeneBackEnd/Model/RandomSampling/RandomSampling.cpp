@@ -1025,6 +1025,15 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 
 	}
 
+	std::for_each(test_leaf_combination.primary_leaves.cbegin(), test_leaf_combination.primary_leaves.cend(), [&](int const & index)
+	{
+		if (index >= leaves.size())
+		{
+			boost::format msg("Attempting to generate an output row whose leaf indexes point outside the range of available leaves for the given branch!");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+	});
+
 	// It might easily be a duplicate - random sampling will produce multiple hits on the same row
 	// because some rows can have a heavier weight than other rows;
 	// this is handled by storing a map of every *time unut* (corresponding to the primary variable group)
