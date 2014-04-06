@@ -494,17 +494,44 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 		if (failed || CheckCancelled()) return;
 
-		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
+		// *************************************************** //
+		// Build leaf cache and empty child leaf mapping to output row caches.
+		// Note that after these caches are built here,
+		// *the child lookup never changes* when the non-primary top-level
+		// and child variable groups are merged, because the child lookup are
+		// part of the branch itself and the *leaf indexes* do not change
+		// within the leaf cache - the only thing that is modified
+		// later when the child/top-level VG's are merged is one thing:
+		// the top-level VG's set some data in the existing leaves
+		// to track the secondary data for those top-level groups
+		// associated with the leaves (but the leaf indexes do not change).
+		// Therefore, the leaf cache needs to be rebuilt later
+		// (but not the child lookup cache), just to pick up the new
+		// data associated with the leaves, but the indexes do not change...
+		// so the ResetBranchCaches() function is called a second time, later,
+		// after the child and top-level groups are completely merged,
+		// but passing "false" to ResetBranchCaches() so that only
+		// the leaf caches are rebuilt, not the child lookup cache.
+		// This rebuilding is necessary so that the rows can be
+		// properly consolidated and written to output,
+		// which occurs *after* all child and top-level VG's have been merged.
+		// *************************************************** //
+		allWeightings.ResetBranchCaches();
 		if (failed || CheckCancelled()) return;
 
-		std::int64_t const samples = random_sampling_number_rows;
-
-		// The following prepares all randomly-generated output rows
-		allWeightings.PrepareRandomNumbers(samples);
+		// Calculate weightings even for full sampling,
+		// for use with progress bar
+		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
 		if (failed || CheckCancelled()) return;
 
 		if (random_sampling)
 		{
+			std::int64_t const samples = random_sampling_number_rows;
+
+			// The following prepares all randomly-generated output rows
+			allWeightings.PrepareRandomNumbers(samples);
+			if (failed || CheckCancelled()) return;
+
 			allWeightings.PrepareRandomSamples(K);
 		}
 		else
@@ -512,9 +539,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			allWeightings.PrepareFullSamples(K);
 		}
 
-		if (failed || CheckCancelled()) return;
-
-		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
 		if (failed || CheckCancelled()) return;
 
 		if (false)

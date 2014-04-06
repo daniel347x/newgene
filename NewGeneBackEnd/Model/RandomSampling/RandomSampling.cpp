@@ -1025,14 +1025,16 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 
 	}
 
+#	ifdef _DEBUG
 	std::for_each(test_leaf_combination.primary_leaves.cbegin(), test_leaf_combination.primary_leaves.cend(), [&](int const & index)
 	{
-		if (index >= leaves.size())
+		if (index >= static_cast<int>(leaves.size()))
 		{
 			boost::format msg("Attempting to generate an output row whose leaf indexes point outside the range of available leaves for the given branch!");
 			throw NewGeneException() << newgene_error_description(msg.str());
 		}
 	});
+#	endif
 
 	// It might easily be a duplicate - random sampling will produce multiple hits on the same row
 	// because some rows can have a heavier weight than other rows;
@@ -1369,6 +1371,12 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 								// We therefore cannot match.
 								missing_top_level_leaf = true;
 								break;
+							}
+
+							if (outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf] >= leaves_cache.size())
+							{
+								std::vector<std::string> sdata;
+								SpitAllWeightings(sdata, allWeightings, true);
 							}
 
 							if (leaves_cache[outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf]].primary_keys.size() == 0)
