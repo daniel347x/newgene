@@ -22305,44 +22305,17 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						std::int64_t const time_start = timeSlice.getStart();
 						std::int64_t const time_end = timeSlice.getEnd();
 
-						std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(time_start, time_granularity, TimeRange::ALIGN_MODE_UP);
-						std::int64_t time_end_aligned_lower = TimeRange::determineAligningTimestamp(time_end, time_granularity, TimeRange::ALIGN_MODE_DOWN);
+						std::int64_t current_time_start = time_start;
 
-						TimeSlice current_slice;
-
-						if (time_start != time_start_aligned_higher)
+						while (current_time_start < time_end)
 						{
-							// There is a piece of the incoming time slice at the front that does not line up
-							current_slice.Reshape(time_start, time_start_aligned_higher);
+							std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
+							std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
+							std::int64_t time_to_use_for_end = time_start_aligned_higher;
+							if (time_start_aligned_higher > time_end) { time_to_use_for_end = time_end; }
+							TimeSlice current_slice(current_time_start, time_to_use_for_end);
 							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
-						}
-
-						std::int64_t current_time_start = time_start_aligned_higher;
-						std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
-
-						bool at_least_one_regular_slice = false;
-						while ((time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP)) <= time_end)
-						{
-							if (rows_written >= 6500)
-							{
-								int m = 0;
-							}
-							current_slice.Reshape(current_time_start, time_start_aligned_higher);
-							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
-							current_time_start = time_start_aligned_higher;
-							current_start_time_incremented_by_1_ms = current_time_start + 1;
-							at_least_one_regular_slice = true;
-						}
-
-						if (current_time_start == time_end || !at_least_one_regular_slice)
-						{
-							// we're done
-						}
-						else
-						{
-							// There is a piece of the incoming time slice at the end that does not line up
-							current_slice.Reshape(current_time_start, time_end);
-							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
+							current_time_start = time_to_use_for_end;
 						}
 
 					}
