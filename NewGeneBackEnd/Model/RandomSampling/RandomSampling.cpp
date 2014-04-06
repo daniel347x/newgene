@@ -483,8 +483,9 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 		if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 		{
 			VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_number);
-			BranchesAndLeaves & newBranchesAndLeaves = newVariableGroupBranch.branches_and_leaves;
-			newBranchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
+			Branches & newBranchesAndLeaves = newVariableGroupBranch.branches;
+			branch.InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
+			newBranchesAndLeaves.insert(branch);
 			variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
 
 			added = true;
@@ -505,7 +506,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 		// In any case, retrieve the existing set of branches for this variable group.
 
 		VariableGroupBranchesAndLeaves & variableGroupBranch = *VariableGroupBranchesAndLeavesPtr;
-		BranchesAndLeaves & branchesAndLeaves = variableGroupBranch.branches_and_leaves;
+		Branches & branches = variableGroupBranch.branches;
 
 		switch (merge_mode)
 		{
@@ -520,7 +521,13 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				// ... (the first one - emplace does nothing if the entry already exists).
 				// ... (Note that the leaf points to a specific row of secondary data.)
 				// *********************************************************************************** //
-				branchesAndLeaves[branch].emplace(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
+				auto branchPtr = branches.find(branch);
+				if (branchPtr == branches.cend())
+				{
+					auto inserted = branches.insert(branch);
+					branchPtr = inserted.first;
+				}
+				branchPtr->InsertLeaf(timeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch, if one doesn't already exist there
 
 				added = true;
 
@@ -532,8 +539,8 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				
 				// Let's take a peek and see if our branch is already present
 
-				BranchesAndLeaves::iterator branchAndLeavesPtr = branchesAndLeaves.find(branch);
-				if (branchAndLeavesPtr != branchesAndLeaves.end())
+				Branches::iterator branchPtr = branches.find(branch);
+				if (branchPtr != branches.end())
 				{
 					
 					// *********************************************************************************** //
@@ -541,9 +548,9 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// We want to see if this branch contains the incoming leaf, or not.
 					// *********************************************************************************** //
 
-					Leaves & leaves = branchAndLeavesPtr->second;
-					auto leafPtr = leaves.find(timeSliceLeaf.second);
-					if (leafPtr != leaves.end())
+					Branch const & current_branch = *branchPtr;
+
+					if (current_branch.doesLeafExist(timeSliceLeaf.second))
 					{
 
 						// This branch *does* contain the incoming leaf!
@@ -552,7 +559,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						// Note that many different OUTPUT ROWS might reference this leaf;
 						// perhaps even multiple times within a single output row.  Fine!
 
-						Leaf const & leaf = *leafPtr;
+						Leaf const & leaf = current_branch.getExistingLeaf(timeSliceLeaf.second);
 
 						// pass the index over from the incoming leaf (which contains only the index for the current top-level variable group being merged in)
 						// into the active leaf saved in the AllWeightings instance, and used to construct the output rows.
@@ -581,7 +588,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 				// For each, we have a set of output rows.
 				// *********************************************************************************** //
 
-				std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
+				std::for_each(branches.begin(), branches.end(), [&](Branch const & the_current_map_branch)
 				{
 
 					// *********************************************************************************** //
@@ -592,7 +599,6 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// in which we are nested, has already set the "leaves_cache" cache,
 					// and this cache is copied whenever any map entry changes.
 					// *********************************************************************************** //
-					Branch const & the_current_map_branch = branchAndLeaves.first;
 
 					// The following cache will only be filled on the first pass
 					the_current_map_branch.ConstructChildCombinationCache(*this, variable_group_number, false);
@@ -682,20 +688,19 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 		std::for_each(variableGroupBranchesAndLeavesVector.begin(), variableGroupBranchesAndLeavesVector.end(), [&](VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves)
 		{
 			
-			BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+			Branches & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 			Weighting & variableGroupBranchesAndLeavesWeighting = variableGroupBranchesAndLeaves.weighting;
 			variableGroupBranchesAndLeavesWeighting.setWeightingRangeStart(currentWeighting);
 
-			std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
+			std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)
 			{
 
-				Branch const & branch = branchAndLeaves.first;
-				Leaves & leaves = branchAndLeaves.second;
+				//Leaves & leaves = branchAndLeaves.second;
 
 				Weighting & branchWeighting = branch.weighting;
 
 				// Count the leaves
-				int numberLeaves = static_cast<int>(leaves.size());
+				int numberLeaves = static_cast<int>(branch.numberLeaves());
 
 				// The number of K-ad combinations for this branch is easily calculated.
 				// It is just the binomial coefficient (assuming K <= N)
@@ -735,8 +740,10 @@ void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch co
 	VariableGroupTimeSliceData variableGroupTimeSliceData;
 	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 	VariableGroupBranchesAndLeaves newVariableGroupBranch(variable_group_number);
-	BranchesAndLeaves & newBranchesAndLeaves = newVariableGroupBranch.branches_and_leaves;
-	newBranchesAndLeaves[branch].emplace(newTimeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
+	Branches & newBranchesAndLeaves = newVariableGroupBranch.branches;
+	newBranchesAndLeaves.insert(branch);
+	Branch const & current_branch = *(newBranchesAndLeaves.find(branch));
+	current_branch.InsertLeaf(newTimeSliceLeaf.second); // add Leaf to the set of Leaves attached to the new Branch
 	variableGroupBranchesAndLeavesVector.push_back(newVariableGroupBranch);
 	timeSlices[newTimeSliceLeaf.first] = variableGroupTimeSliceData;
 }
@@ -859,12 +866,11 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K)
 
 	VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
 
-	BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+	Branches const & branches = variableGroupBranchesAndLeaves.branches;
 		
 	// Pick a branch randomly (with weight!)
-	BranchesAndLeaves::const_iterator branchesAndLeavesPtr = std::lower_bound(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), random_number, [&](std::pair<Branch const, Leaves> const & testBranchAndLeaves, boost::multiprecision::cpp_int const & test_random_number)
+	Branches::const_iterator branchesPtr = std::lower_bound(branches.cbegin(), branches.cend(), random_number, [&](Branch const & testBranch, boost::multiprecision::cpp_int const & test_random_number)
 	{
-		Branch const & testBranch = testBranchAndLeaves.first;
 		if (testBranch.weighting.getWeightingRangeEnd() < test_random_number)
 		{
 			return true;
@@ -872,12 +878,10 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K)
 		return false;
 	});
 
-	const Branch & new_branch = branchesAndLeavesPtr->first;
-
-	Leaves const & tmp_leaves = branchesAndLeavesPtr->second;
+	const Branch & new_branch = *branchesPtr;
 
 	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData
-	GenerateOutputRow(random_number, K, new_branch, tmp_leaves);
+	GenerateOutputRow(random_number, K, new_branch);
 
 	++random_number_iterator;
 
@@ -885,7 +889,7 @@ bool AllWeightings::RetrieveNextBranchAndLeaves(int const K)
 
 }
 
-void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch, Leaves const & leaves)
+void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch)
 {
 
 	boost::multiprecision::cpp_int which_time_unit = -1;  // -1 means "full sampling for branch" - no need to break down into time units (which have identical full sets)
@@ -898,10 +902,10 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch, Le
 	BranchOutputRow single_leaf_combination;
 
 	bool skip = false;
-	if (static_cast<size_t>(K) >= leaves.size())
+	if (K >= branch.numberLeaves())
 	{
 		skip = true;
-		for (int n = 0; n < static_cast<int>(leaves.size()); ++n)
+		for (int n = 0; n < static_cast<int>(branch.numberLeaves()); ++n)
 		{
 			single_leaf_combination.Insert(n);
 		}
@@ -915,7 +919,7 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch, Le
 
 	if (!skip)
 	{
-		PopulateAllLeafCombinations(which_time_unit, K, branch, leaves);
+		PopulateAllLeafCombinations(which_time_unit, K, branch);
 	}
 
 	branch.hits[which_time_unit].insert(branch.remaining[which_time_unit].begin(), branch.remaining[which_time_unit].end());
@@ -923,7 +927,7 @@ void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch, Le
 
 }
 
-void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves)
+void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch)
 {
 
 	random_number -= branch.weighting.getWeightingRangeStart();
@@ -944,10 +948,10 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 	BranchOutputRow test_leaf_combination;
 
 	bool skip = false;
-	if (static_cast<size_t>(K) >= leaves.size())
+	if (K >= branch.numberLeaves())
 	{
 		skip = true;
-		for (int n = 0; n < static_cast<int>(leaves.size()); ++n)
+		for (int n = 0; n < branch.numberLeaves(); ++n)
 		{
 			test_leaf_combination.Insert(n);
 		}
@@ -980,7 +984,7 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 
 				if (branch.remaining[which_time_unit].size() == 0)
 				{
-					PopulateAllLeafCombinations(which_time_unit, K, branch, leaves);
+					PopulateAllLeafCombinations(which_time_unit, K, branch);
 				}
 
 				std::uniform_int_distribution<size_t> distribution(0, branch.remaining[which_time_unit].size() - 1);
@@ -996,7 +1000,7 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 			{
 
 				std::vector<int> remaining_leaves;
-				for (size_t n = 0; n < leaves.size(); ++n)
+				for (int n = 0; n < branch.numberLeaves(); ++n)
 				{
 					remaining_leaves.push_back(n);
 				}
@@ -1028,7 +1032,7 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 #	ifdef _DEBUG
 	std::for_each(test_leaf_combination.primary_leaves.cbegin(), test_leaf_combination.primary_leaves.cend(), [&](int const & index)
 	{
-		if (index >= static_cast<int>(leaves.size()))
+		if (index >= branch.numberLeaves())
 		{
 			boost::format msg("Attempting to generate an output row whose leaf indexes point outside the range of available leaves for the given branch!");
 			throw NewGeneException() << newgene_error_description(msg.str());
@@ -1044,7 +1048,7 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 
 }
 
-void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves)
+void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch)
 {
 
 	boost::multiprecision::cpp_int total_added = 0;
@@ -1060,7 +1064,7 @@ void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int c
 	{
 
 		AddPositionToRemaining(which_time_unit, position, branch);
-		bool succeeded = IncrementPosition(K, position, leaves);
+		bool succeeded = IncrementPosition(K, position, branch);
 
 		BOOST_ASSERT_MSG(succeeded || (total_added + 1) == branch.number_branch_combinations, "Invalid logic in position incrementer in sampler!");
 
@@ -1086,12 +1090,12 @@ void AllWeightings::AddPositionToRemaining(boost::multiprecision::cpp_int const 
 
 }
 
-bool AllWeightings::IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves)
+bool AllWeightings::IncrementPosition(int const K, std::vector<int> & position, Branch const & branch)
 {
 
 	int sub_k_being_managed = K;
 	
-	int new_leaf = IncrementPositionManageSubK(K, sub_k_being_managed, position, leaves);
+	int new_leaf = IncrementPositionManageSubK(K, sub_k_being_managed, position, branch);
 
 	if (new_leaf == -1)
 	{
@@ -1103,10 +1107,10 @@ bool AllWeightings::IncrementPosition(int const K, std::vector<int> & position, 
 
 }
 
-int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std::vector<int> & position, Leaves const & leaves)
+int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std::vector<int> & position, Branch const & branch)
 {
 
-	int number_leaves = static_cast<int>(leaves.size());
+	int number_leaves = static_cast<int>(branch.numberLeaves());
 
 	int max_leaf_for_subk = number_leaves - 1 - (K - subK_); // this is the highest possible value of the leaf index that the given subK can be pointing to.
 	// i.e., if there are 10 leaves and K=3,
@@ -1126,7 +1130,7 @@ int AllWeightings::IncrementPositionManageSubK(int const K, int const subK_, std
 			// All done!
 			return -1;
 		}
-		int previous_k_new_leaf = IncrementPositionManageSubK(K, subK, position, leaves);
+		int previous_k_new_leaf = IncrementPositionManageSubK(K, subK, position, branch);
 		if (previous_k_new_leaf == -1)
 		{
 			// All done, as reported by nested call!
@@ -1345,7 +1349,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 								break;
 							}
 
-							if (outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf] >= leaves_cache.size())
+							if (outputRow.primary_leaves_cache[childToPrimaryMapping.leaf_number_in_top_level_group__only_applicable_when_child_key_column_points_to_top_level_column_that_is_in_top_level_leaf] >= static_cast<int>(leaves_cache.size()))
 							{
 								std::vector<std::string> sdata;
 								SpitAllWeightings(sdata, allWeightings, true);
@@ -1427,9 +1431,9 @@ void AllWeightings::PrepareFullSamples(int const K)
 
 		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 		{
-			std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 			{
-				GenerateAllOutputRows(K, branch_and_leaves.first, branch_and_leaves.second);
+				GenerateAllOutputRows(K, branch);
 			});
 
 		});
@@ -1480,16 +1484,13 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(AllWeightings 
 	}
 
 	VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-	BranchesAndLeaves & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+	Branches & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 
-	std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](std::pair<Branch const, Leaves> & branchAndLeaves)
+	std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)
 	{
 
-		Branch const & branch = branchAndLeaves.first;
-		Leaves const & leaves = branchAndLeaves.second;
-
 		branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
-		branch.CreateLeafCache(leaves);
+		branch.CreateLeafCache();
 		for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
 		{
 			branch.ConstructChildCombinationCache(allWeightings, c, true);
@@ -1796,7 +1797,7 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
 
 	sdata += "<ALL_THE_LEAVES_FOR_THIS_BRANCH>";
-	SpitLeaves(sdata, branch.leaves_cache);
+	SpitLeaves(sdata, branch);
 	sdata += "</ALL_THE_LEAVES_FOR_THIS_BRANCH>";
 
 	sdata += "<NUMBER_OF_LEAF_COMBINATIONS>";
@@ -1979,13 +1980,13 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 			*sdata += "</WEIGHTING>";
 
 			*sdata += "<BRANCHES_AND_LEAVES>";
-			std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 			{
 				*sdata += "<BRANCH_AND_LEAVES>";
 
-				SpitBranch(*sdata, branch_and_leaves.first);
+				SpitBranch(*sdata, branch);
 
-				SpitLeaves(*sdata, branch_and_leaves.second);
+				SpitLeaves(*sdata, branch);
 
 				*sdata += "</BRANCH_AND_LEAVES>";
 			});
@@ -2343,10 +2344,10 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 	std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 	{
 
-		std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+		std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & current_branch)
 		{
 
-			auto & hits = branch_and_leaves.first.hits;
+			auto & hits = current_branch.hits;
 
 			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hit)
 			{

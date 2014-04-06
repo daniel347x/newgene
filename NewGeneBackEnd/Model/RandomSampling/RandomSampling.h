@@ -1261,10 +1261,6 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Used for optimization purposes only
 		mutable std::map<boost::multiprecision::cpp_int, std::vector<BranchOutputRow>> remaining;
 
-		// Commented out for now
-		//mutable std::vector<BranchOutputRow> hits_consolidated; // After-the-fact: Merge identical hits across time units within this branch
-
-
 		// **************************************************************************************** //
 		// **************************************************************************************** //
 		// Indices into cached secondary data tables for child groups.
@@ -1348,6 +1344,55 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		mutable std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> helper_lookup__from_child_key_set__to_matching_output_rows;
 		void ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, bool const force) const; // Populate the above data structure
 
+		void InsertLeaf(Leaf const & leaf) const
+		{
+			leaves.insert(leaf);
+			CreateLeafCache();
+		}
+
+		void ClearLeaves()
+		{
+			leaves.clear();
+			CreateLeafCache();
+		}
+
+		Leaf & getLeafAtIndex(int const & leaf_index)
+		{
+			return leaves_cache[leaf_index];
+		}
+
+		Leaf const & getLeafAtIndex(int const & leaf_index) const
+		{
+			return leaves_cache[leaf_index];
+		}
+
+		int numberLeaves() const
+		{
+			return static_cast<int>(leaves.size());
+		}
+
+		bool doesLeafExist(Leaf const & leaf) const
+		{
+			auto const leafPtr = leaves.find(leaf);
+			if (leafPtr == leaves.cend())
+			{
+				return false;
+			}
+			return true;
+		}
+
+		Leaf const & getExistingLeaf(Leaf const & leaf) const
+		{
+			auto const leafPtr = leaves.find(leaf);
+			return *leafPtr;
+		}
+
+	private:
+
+		mutable Leaves leaves;
+
+	public:
+
 		// *********************************************************************************** //
 		// Every branch ALREADY has a std::set<Leaf>,
 		// so we're already one-to-one with each branch.
@@ -1371,11 +1416,16 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// The official location of the leaves are contained in the AllWeightings instance.
 		// This cache stores only the subset of leaves
 		mutable std::vector<Leaf> leaves_cache;
-		void CreateLeafCache(Leaves const & leaves) const
+
+	public:
+
+		void CreateLeafCache() const
 		{
 			leaves_cache.clear();
 			leaves_cache.insert(leaves_cache.begin(), leaves.cbegin(), leaves.cend());
 		}
+
+	public:
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 #		ifdef _DEBUG
@@ -1394,7 +1444,7 @@ typedef PrimaryKeysGroupingMultiplicityOne Branch;
 // ******************************************************************************************************** //
 // (Only one, since currently only one primary top-level variable group is supported)
 //
-typedef std::map<Branch, Leaves> BranchesAndLeaves;
+typedef std::set<Branch> Branches;
 //
 // ******************************************************************************************************** //
 // ******************************************************************************************************** //
@@ -1411,7 +1461,7 @@ class VariableGroupBranchesAndLeaves
 		{}
 
 		int variable_group_number; // unused: Always the single primary top-level variable group identifier
-		BranchesAndLeaves branches_and_leaves;
+		Branches branches;
 		Weighting weighting; // sum over all branches and leaves
 
 		bool operator==(int const & rhs) const
@@ -1680,7 +1730,7 @@ public:
 	void PrepareRandomSamples(int const K);
 	void PrepareFullSamples(int const K);
 	bool RetrieveNextBranchAndLeaves(int const K);
-	void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
+	void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch);
 	void ResetBranchCaches();
 	void ConsolidateRowsWithinBranch(Branch const & branch);
 
@@ -1703,8 +1753,8 @@ protected:
 	// Merge time slice data into a map element
 	bool MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLeaf const & timeSliceLeaf, TimeSlices::iterator & mapElementPtr, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode);
 
-	void GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch, Leaves const & leaves);
-	void GenerateAllOutputRows(int const K, Branch const & branch, Leaves const & leaves);
+	void GenerateOutputRow(boost::multiprecision::cpp_int random_number, int const K, Branch const & branch);
+	void GenerateAllOutputRows(int const K, Branch const & branch);
 
 	static bool is_map_entry_end_time_greater_than_new_time_slice_start_time(TimeSliceLeaf const & new_time_slice_, TimeSlices::value_type const & map_entry_)
 	{
@@ -1722,8 +1772,8 @@ protected:
 private:
 
 	void AddPositionToRemaining(boost::multiprecision::cpp_int const & which_time_unit, std::vector<int> const & position, Branch const & branch);
-	bool IncrementPosition(int const K, std::vector<int> & position, Leaves const & leaves);
-	int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Leaves const & leaves);
+	bool IncrementPosition(int const K, std::vector<int> & position, Branch const & branch);
+	int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Branch const & branch);
 
 	boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K);
 
@@ -1743,12 +1793,12 @@ void SpitWeighting(std::string & sdata, Weighting const & weighting);
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
 void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file = false);
 void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
-template< template<typename...> class T, typename... TX>
-void SpitLeaves(std::string & sdata, T<Leaf, TX...> const & leaves)
+void SpitLeaves(std::string & sdata, Branch const & branch)
 {
 	sdata += "<LEAVES>";
 	int index = 0;
-	std::for_each(leaves.cbegin(), leaves.cend(), [&](Leaf const & leaf)
+	branch.CreateLeafCache();
+	std::for_each(branch.leaves_cache.cbegin(), branch.leaves_cache.cend(), [&](Leaf const & leaf)
 	{
 		sdata += "<LEAF>";
 		sdata += "<LEAF_NUMBER>";

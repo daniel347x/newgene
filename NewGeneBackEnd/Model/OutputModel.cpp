@@ -21144,18 +21144,15 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 		}
 
 		VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-		BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+		Branches const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 
-		std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
+		std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](Branch const & branch)
 		{
 
 			if (failed || CheckCancelled())
 			{
 				return;
 			}
-
-			Branch const & branch = branchAndLeaves.first;
-			Leaves const & leaves = branchAndLeaves.second;
 
 			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & time_unit_and_rows)
 			{
@@ -21805,9 +21802,9 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 			{
-				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & the_branch)
 				{
-					allWeightings.ConsolidateRowsWithinBranch(branch_and_leaves.first);
+					allWeightings.ConsolidateRowsWithinBranch(the_branch);
 				});
 
 			});
@@ -21840,13 +21837,11 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 				// One primary variable group for the current time slice (for now, this is all that is supported).
 				// Iterate through all of its branches (fixed values of raw data for the primary keys that are not part of the K-ad; i.e., have multiplicity 1)
-				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 				{
 
 					// Here is a single branch and its leaves, corresponding to the primary variable group and the current time slice.
 					std::set<MergedTimeSliceRow> incoming;
-
-					Branch const & branch = branch_and_leaves.first;
 
 					// ***************************************************************************************************** //
 					// All data within a single branch is guaranteed to have been consolidated into index -1.
@@ -21949,9 +21944,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 			std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 			{
-				std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
+				std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 				{
-					Branch const & branch = branch_and_leaves.first;
 					auto const & incoming_rows = branch.hits[-1];
 					MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "insert"
 					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
@@ -22135,18 +22129,15 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 			}
 
 			VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-			BranchesAndLeaves const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches_and_leaves;
+			Branches const & branchesAndLeaves = variableGroupBranchesAndLeaves.branches;
 
-			std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](std::pair<Branch const, Leaves> const & branchAndLeaves)
+			std::for_each(branchesAndLeaves.cbegin(), branchesAndLeaves.cend(), [&](Branch const & branch)
 			{
 
 				if (failed || CheckCancelled())
 				{
 					return;
 				}
-
-				Branch const & branch = branchAndLeaves.first;
-				Leaves const & leaves = branchAndLeaves.second;
 
 				if (random_sampling)
 				{
