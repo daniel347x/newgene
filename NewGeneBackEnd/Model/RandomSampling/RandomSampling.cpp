@@ -2089,6 +2089,25 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 	if (!random_sampling)
 	{
+		// ************************************************************* //
+		// For full sampling, the equivalent to this "prune" algorithm -
+		// which handles WEIGHTS across non-uniform slices -
+		// is handled in the OUTPUT TO DISK routine,
+		// where an algorithm loops through all time slices
+		// and outputs them X times, once per time unit or fraction
+		// of a time unit.
+		// We do the equivalent thing in this function by
+		// making sure to include all rows even for fractions
+		// of a time unit, but to divide rows among full-sized
+		// time units that are being separated;
+		// OUR output routine will also output X times, once
+		// per time unit or fraction of a time unit,
+		// where the time units are carried by the bins
+		// managed in this function, rather than by the time window
+		// of the full slice which gets cut into time unit pieces
+		// (or fraction thereof), as is the case for the full sampling algorithm.
+		// ************************************************************* //
+
 		// If rows are being merged (when possible) in the output,
 		// this function does not apply.
 		// Only if rows are being output in identical time units
@@ -2236,8 +2255,12 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 		}
 		else if (originalTimeSlice.getEnd() == currentTimeSlice.getEnd())
 		{
+
 			// both time slices are identical
-			// nothing to do
+			// Treat this as the middle piece
+			middleWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
+			useMiddle = true;
+
 		}
 		else
 		{
