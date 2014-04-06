@@ -1461,6 +1461,25 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		{
 			leaves_cache.clear();
 			leaves_cache.insert(leaves_cache.begin(), leaves.cbegin(), leaves.cend());
+
+#			ifdef _DEBUG
+			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hitsEntry)
+			{
+				std::set<BranchOutputRow> const & hits = hitsEntry.second;
+				std::for_each(hits.cbegin(), hits.cend(), [&](BranchOutputRow const & outputRow)
+				{
+					std::for_each(outputRow.primary_leaves.cbegin(), outputRow.primary_leaves.cend(), [&](int const & index_into_leaf_cache)
+					{
+						if (index_into_leaf_cache > static_cast<int>(leaves_cache.size()))
+						{
+							boost::format msg("Output rows in branch have invalid leaf cache index!");
+							throw NewGeneException() << newgene_error_description(msg.str());
+						}
+					});
+				});
+			});
+#			endif
+
 		}
 
 	public:
