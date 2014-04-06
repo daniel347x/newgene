@@ -2433,16 +2433,20 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 			});
 
+			current_branch.ValidateOutputRowLeafIndexes();
+
 			hits.clear();
 			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & new_hit)
 			{
 				hits[new_hit.first] = new_hit.second;
 			});
 
+			current_branch.ValidateOutputRowLeafIndexes();
+
 		});
 
 	});
-
+	
 	ResetBranchCachesSingleTimeSlice(allWeightings);
 
 }

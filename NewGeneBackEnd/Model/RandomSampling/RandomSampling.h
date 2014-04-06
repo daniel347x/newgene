@@ -1457,11 +1457,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 	public:
 
-		void ResetLeafCache() const
+		void ValidateOutputRowLeafIndexes() const
 		{
-			leaves_cache.clear();
-			leaves_cache.insert(leaves_cache.begin(), leaves.cbegin(), leaves.cend());
-
 #			ifdef _DEBUG
 			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hitsEntry)
 			{
@@ -1479,7 +1476,13 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 				});
 			});
 #			endif
+		}
 
+		void ResetLeafCache() const
+		{
+			leaves_cache.clear();
+			leaves_cache.insert(leaves_cache.begin(), leaves.cbegin(), leaves.cend());
+			ValidateOutputRowLeafIndexes();
 		}
 
 	public:
