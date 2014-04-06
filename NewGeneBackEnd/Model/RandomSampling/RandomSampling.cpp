@@ -2114,7 +2114,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 	std::int64_t originalWidth = originalTimeSlice.WidthForWeighting(AvgMsperUnit);
 
-	if (originalWidth <= 0)
+	if (originalWidth < 0)
 	{
 		boost::format msg("Logic error when pruning time slice: original width is empty for time slice");
 		throw NewGeneException() << newgene_error_description(msg.str());
@@ -2123,6 +2123,63 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 	std::int64_t leftWidth = 0;
 	std::int64_t middleWidth = 0;
 	std::int64_t rightWidth = 0;
+
+	if (originalWidth == 0)
+	{
+		// Do not throw.
+		// Child groups can enter and break a large primary slice into a miniscule sliver.
+		// When this happens, that sliver will have 0 weight since weight is an integer (and rounded).
+		// Because it is a child, we want the row to be output, because its time range
+		// will indicate that it is a sliver.
+		//
+		// The way to handle this is the following.
+		//
+		// Any time slices LARGER than one time unit that get spliced should properly
+		// be pruned relative to the amount they've been sliced.
+		// That way, in the output, the total weight (as represented by the number of rows,
+		// which is proportional to the number of time units on average)
+		// will remain correct (unbiased sampling) because the output rows
+		// will all have this "unit" width, so the weights will add up properly.
+		//
+		// However, any SINGLE-UNIT slices that get cut SMALLER than a single time unit -
+		// or, any slices that get a piece shaved off that is smaller than a single time unit -
+		// should still appear in the output.  In this case, their time range will indicate to 
+		// the end user their proper weight.  However, internally, they will hold a weight of 1 time unit
+		// and be treated that way.
+		// 
+		// In the 0 case we can bypass the calculations below that determine how many "time units" (hits)
+		// to divvy between the spliced pieces.  We just add them all to the single target piece.
+		//
+		// In the calculation below, all widths will nicely turn to 0,
+		// but the proper target piece will still be properly selected.
+		// The code below handles the 0 case just fine, stepping it up to 1 for the target piece.
+		//
+		// Look at the comments in the "random sampling, non-consolidated" case
+		// in the function that writes the final data to the output file
+		// to see how the time ranges are used in relation to their presence in the "hits" time indexes.
+		//
+		// In short, we *leave the data available* no matter how small the time slice is,
+		// and let the output routine ensure that the time widths properly weight the slices.
+		//
+		// [.............][.............][.............][.............][.............][.............][.............][.............]
+		//             |____A____|       |______________B_____________]
+		//
+		// In this example, each [.............] corresponds to a time unit with some output rows - on average, the dots each represent an output row.
+		// B is a time slice that evenly covers two time units.
+		// A covers just a sliver of one time unit, but A, since it is being merged in, will actually be sliced and its left sliver
+		// will contain ALL of the output rows from the left time unit (and ditto for the right piece of A);
+		// You can see that the algorithm that outputs the data will simply output all rows in the sliver,
+		// but the sliver will have a very narrow range, so the weighting still works out.  (The algorithm
+		// will also output the big left chunk of the first time unit with all the same rows and the bigger time range.)
+		//
+		// For this algorithm to work, it is critical that the PRIMARY variable group always arrive in multiples
+		// of the time unit, and evenly aligned.  The data import and time granularity of the unit of analysis assure this.
+		//
+		// It's all about counting
+
+		//boost::format msg("Logic error when pruning time slice: original width is empty for time slice");
+		//throw NewGeneException() << newgene_error_description(msg.str());
+	}
 
 	bool useLeft = false;
 	bool useMiddle = false;
@@ -2242,7 +2299,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 	middleRounded = static_cast<std::int64_t>(middleUnits + 0.5);
 	rightRounded = static_cast<std::int64_t>(rightUnits + 0.5);
 
-	// Handle very rare rounding issues to ensure that all "hits" entries are included somewhere
+	// Handle rounding issues to ensure that all "hits" entries are included somewhere
 	if (useLeft || useRight)
 	{
 
@@ -2286,39 +2343,42 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 	}
 	else if (useMiddle)
 	{
-		if (leftRounded + rightRounded + middleRounded - originalWidth != 1 && leftRounded + rightRounded + middleRounded - originalWidth != -1)
+		if (leftRounded + middleRounded + rightRounded != originalWidth)
 		{
-			boost::format msg("Logic error when pruning time slice: time unit counts do not match");
-			throw NewGeneException() << newgene_error_description(msg.str());
-		}
-		if (leftRounded + rightRounded + middleRounded - originalWidth == 1)
-		{
-			if (leftRounded > 1)
+			if (leftRounded + rightRounded + middleRounded - originalWidth != 1 && leftRounded + rightRounded + middleRounded - originalWidth != -1)
 			{
-				--leftRounded;
+				boost::format msg("Logic error when pruning time slice: time unit counts do not match");
+				throw NewGeneException() << newgene_error_description(msg.str());
 			}
-			else if (middleRounded > 1)
+			if (leftRounded + rightRounded + middleRounded - originalWidth == 1)
 			{
-				--middleRounded;
+				if (leftRounded > 1)
+				{
+					--leftRounded;
+				}
+				else if (middleRounded > 1)
+				{
+					--middleRounded;
+				}
+				else
+				{
+					--rightRounded;
+				}
 			}
-			else
+			else if (leftRounded + rightRounded + middleRounded - originalWidth == -1)
 			{
-				--rightRounded;
-			}
-		}
-		else if (leftRounded + rightRounded + middleRounded - originalWidth == -1)
-		{
-			if (leftRounded == 0)
-			{
-				++leftRounded;
-			}
-			else if (middleRounded == 0)
-			{
-				++middleRounded;
-			}
-			else
-			{
-				++rightRounded;
+				if (leftRounded == 0)
+				{
+					++leftRounded;
+				}
+				else if (middleRounded == 0)
+				{
+					++middleRounded;
+				}
+				else
+				{
+					++rightRounded;
+				}
 			}
 		}
 	}
@@ -2329,6 +2389,37 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
+	// As noted above in the comments regarding 0 width,
+	// we display at least one row with this data, not 0,
+	// because slicing pieces *smaller* than unit time
+	// is handled by the time range in the output,
+	// and only happens during non-primary merges so 
+	// therefore the weighting isn't messed up.
+	//
+	// To reiterate: As long as 
+	// SUM[(output rows)*(time width)]
+	// remains the same, the algorithm remains unbiased.
+	// We achieve this here in two ways, depending on the circumstance.
+	//
+	// (1) Time slices larger than a unit get cut down to a smaller number of units.
+	//     In this case, by dividing the output rows into the different resulting
+	//     slices (recall that the data is the same, on average),
+	//     such that the total number of rows remains the same,
+	//     since the time slice width total also remains the same
+	//     (each new time slice is a multiple of a number of time units in this extreme),
+	//     the above formula holds.  (Note that when the data is output,
+	//     rows are only listed as having UNIT width, even if they are inside
+	//     a time slice with larger than unit width, which allows the above
+	//     formula to hold.)
+	//
+	// (2) Time slices appear that are less than a time unit in width.
+	//     In this scenario, instead of dividing the time slices between the target pruned slices,
+	//     we instead keep all slices in all pieces.  In this way, the total width across
+	//     the slices multiplied by the slices remains the same, so the above
+	//     formula holds.  (Note here that each output row will have its time be LESS
+	//     than a unit, analagous to the above case where each time slice is output
+	//     as just a single time unit, even if in a time slice that is larger than a single time unit,
+	//     so for an analagous reason the formula holds.)
 	bool left_was_zero = false;
 	bool middle_was_zero = false;
 	bool right_was_zero = false;
@@ -2345,7 +2436,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 	if (middleRounded == 0)
 	{
 		middle_was_zero = true;
-		++middleRounded; // display at least one row with this data, not 0
+		++middleRounded;
 	}
 
 	std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> new_hits;

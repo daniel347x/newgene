@@ -1610,6 +1610,11 @@ public:
 	void operator()(const T & data_value) const
 	{
 
+		if (boost::lexical_cast<std::string>(data_value) == "Austria-Hungary")
+		{
+			int m = 0;
+		}
+
 		if (mode & CREATE_ROW_MODE__OUTPUT_FILE)
 		{
 			if (!first)

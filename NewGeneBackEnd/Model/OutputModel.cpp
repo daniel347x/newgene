@@ -3519,6 +3519,11 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 
 					data_string = reinterpret_cast<char const *>(sqlite3_column_text(stmt_result, current_column));
 
+					if (boost::lexical_cast<std::string>(data_string) == "Austria-Hungary")
+					{
+						int m = 0;
+					}
+
 					// Special case!  Construction of final K-ad output, so commas need to be removed
 					if (xr_table_category == XR_TABLE_CATEGORY::KAD_RESULTS)
 					{
@@ -21712,11 +21717,16 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 					}
 
 					// This is the desired variable group and multiplicity
-					matched = true;
 
 					std::int64_t const & data_index = leaf_index_mapping.second;
 					DataCache & data_cache = allWeightings.childCache[vg_number];
 					SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
+
+					if (!secondary_data_vector.empty())
+					{
+						matched = true;
+					}
+
 					std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
 					{
 						boost::apply_visitor(create_output_row_visitor(first), data);
@@ -22102,10 +22112,9 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 				first = false;
 				output_file << data;
 
-				++rows_written;
-
 			});
 
+			++rows_written;
 			output_file << std::endl;
 
 		});
@@ -22181,6 +22190,18 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						{
 							return;
 						}
+
+						// TODO when outputting time associated with each slice:
+						// Use the algorithm for the "full sampling case", below,
+						// to get the time range corresponding to each "hits" time unit.
+						// Note that time slivers may appear that will have a copy of the data
+						// that their adjacent larger time-sub-slices, each sub-slice
+						// corresponding to a single "hits" entry.
+						//
+						// Just match up the iterations in the loop below for full sampling
+						// with the number of "hits" sub-slices in this loop
+						// (there should be the same number of loop iterations - throw
+						// an exception if there is not).
 
 						std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
 
