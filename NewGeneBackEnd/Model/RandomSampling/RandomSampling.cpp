@@ -2320,7 +2320,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 		}
 	}
 
-	if (leftRounded < 0 || rightRounded < 0 || middleRounded < 0 || leftRounded > originalWidth || rightRounded > originalWidth || middleRounded > originalWidth)
+	if (leftRounded < 0 || rightRounded < 0 || middleRounded < 0 || leftRounded > originalWidth || rightRounded > originalWidth || middleRounded > originalWidth || (leftRounded + middleRounded + rightRounded != originalWidth) )
 	{
 		boost::format msg("Logic error when pruning time slice: time unit counts do not match after adjustment");
 		throw NewGeneException() << newgene_error_description(msg.str());
@@ -2353,10 +2353,25 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 		std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & current_branch)
 		{
 
+			// Single branch
+
+			std::set<int> indices_test;
+
 			auto & hits = current_branch.hits;
 
 			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hit)
 			{
+
+				// Single time unit in branch, with its own set of rows
+
+				std::for_each(hit.second.cbegin(), hit.second.cend(), [&](BranchOutputRow const & row)
+				{
+					std::for_each(row.primary_leaves.cbegin(), row.primary_leaves.cend(), [&](int const leaf_cache_index)
+					{
+						indices_test.insert(leaf_cache_index);
+					});
+				});
+
 				boost::multiprecision::cpp_int hit_time_index = hit.first;
 				boost::multiprecision::cpp_int hit_time_index_one_based = hit_time_index;
 				bool matches_left = false;
@@ -2435,10 +2450,20 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 			current_branch.ValidateOutputRowLeafIndexes();
 
+			std::set<int> new_indices_test;
+
 			hits.clear();
 			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & new_hit)
 			{
 				hits[new_hit.first] = new_hit.second;
+
+				std::for_each(new_hit.second.cbegin(), new_hit.second.cend(), [&](BranchOutputRow const & row)
+				{
+					std::for_each(row.primary_leaves.cbegin(), row.primary_leaves.cend(), [&](int const leaf_cache_index)
+					{
+						new_indices_test.insert(leaf_cache_index);
+					});
+				});
 			});
 
 			current_branch.ValidateOutputRowLeafIndexes();
