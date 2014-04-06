@@ -1451,8 +1451,6 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 
 	branch.hits[-1].clear();
 
-	std::set<BranchOutputRow> consolidated_rows;
-
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
 	{
 		if (hit.first != -1)
@@ -1461,6 +1459,8 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 			hit.second.clear();
 		}
 	});
+
+	branch.hits.erase(++branch.hits.begin(), branch.hits.end());
 
 	for (int c = 0; c < numberChildVariableGroups; ++c)
 	{
