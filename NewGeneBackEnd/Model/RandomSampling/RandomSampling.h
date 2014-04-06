@@ -1177,6 +1177,21 @@ class BranchOutputRow
 typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 typedef std::set<Leaf> Leaves;
 
+#ifdef _DEBUG
+void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys);
+void SpitDataCache(std::string & sdata, DataCache const & dataCache);
+void SpitDataCaches(std::string & sdata, std::map<int, DataCache> const & dataCaches);
+void SpitHits(std::string & sdata, std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & hits);
+void SpitSetOfOutputRows(std::string & sdata, std::set<BranchOutputRow> const & setOfRows);
+void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
+void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup);
+void SpitLeaf(std::string & sdata, Leaf const & leaf);
+void SpitWeighting(std::string & sdata, Weighting const & weighting);
+void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
+void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file = false);
+void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
+#endif
+
 // "Branch"
 class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 {
@@ -1233,6 +1248,25 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			leaves_cache = rhs.leaves_cache;
 			return *this;
 		}
+
+#		ifdef _DEBUG
+		void SpitLeaves(std::string & sdata) const
+		{
+			int index = 0;
+			std::for_each(leaves_cache.cbegin(), leaves_cache.cend(), [&](Leaf const & leaf)
+			{
+				sdata += "<LEAF>";
+				sdata += "<LEAF_NUMBER>";
+				sdata += boost::lexical_cast<std::string>(index);
+				sdata += "</LEAF_NUMBER>";
+				sdata += "<LEAF_DATA>";
+				SpitLeaf(sdata, leaf);
+				sdata += "</LEAF_DATA>";
+				++index;
+				sdata += "</LEAF>";
+			});
+		}
+#		endif
 
 		// The following must be MUTABLE
 		// because the BRANCH is used as the KEY for various maps...
@@ -1391,7 +1425,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		mutable Leaves leaves;
 
-	public:
+	private:
 
 		// *********************************************************************************** //
 		// Every branch ALREADY has a std::set<Leaf>,
@@ -1436,6 +1470,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 typedef PrimaryKeysGroupingMultiplicityOne Branch;
 
+#ifdef _DEBUG
+void SpitBranch(std::string & sdata, Branch const & branch);
+#endif
 
 
 // ******************************************************************************************************** //
@@ -1778,42 +1815,5 @@ private:
 	boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K);
 
 };
-
-#ifdef _DEBUG
-void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys);
-void SpitDataCache(std::string & sdata, DataCache const & dataCache);
-void SpitDataCaches(std::string & sdata, std::map<int, DataCache> const & dataCaches);
-void SpitHits(std::string & sdata, std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & hits);
-void SpitSetOfOutputRows(std::string & sdata, std::set<BranchOutputRow> const & setOfRows); 
-void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
-void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup);
-void SpitLeaf(std::string & sdata, Leaf const & leaf);
-void SpitBranch(std::string & sdata, Branch const & branch);
-void SpitWeighting(std::string & sdata, Weighting const & weighting);
-void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
-void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file = false);
-void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
-void SpitLeaves(std::string & sdata, Branch const & branch)
-{
-	sdata += "<LEAVES>";
-	int index = 0;
-	branch.CreateLeafCache();
-	std::for_each(branch.leaves_cache.cbegin(), branch.leaves_cache.cend(), [&](Leaf const & leaf)
-	{
-		sdata += "<LEAF>";
-		sdata += "<LEAF_NUMBER>";
-		sdata += boost::lexical_cast<std::string>(index);
-		sdata += "</LEAF_NUMBER>";
-		sdata += "<LEAF_DATA>";
-		SpitLeaf(sdata, leaf);
-		sdata += "</LEAF_DATA>";
-		++index;
-		sdata += "</LEAF>";
-	});
-	sdata += "</LEAVES>";
-}
-
-//void SpitChildHit(std::string & sdata, std::map<int, std::map<int, std::int64_t>>);
-#endif
 
 #endif

@@ -21467,7 +21467,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 	int numberLeavesHandled = 0;
 	std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 	{
-		Leaf & leaf = branch.leaves_cache[leafIndex];
+		Leaf const & leaf = branch.getLeafAtIndex(leafIndex);
 
 		// For the case K = 1, there ARE no primary keys for this leaf.
 		// But this is still covered here, see comments starting next line.
@@ -21509,7 +21509,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 	numberLeavesHandled = 0;
 	std::for_each(outputRow.primary_leaves_cache.cbegin(), outputRow.primary_leaves_cache.cend(), [&](int const & leafIndex)
 	{
-		Leaf & leaf = branch.leaves_cache[leafIndex];
+		Leaf const & leaf = branch.getLeafAtIndex(leafIndex);
 
 		// Even the K=1 case is handled in the "index_into_raw_data > 0" block,
 		// because although the leaf has no primary keys,
@@ -21590,7 +21590,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 
 				matchedMultiplicity = true;
 
-				Leaf & leaf = branch.leaves_cache[leafIndex];
+				Leaf const & leaf = branch.getLeafAtIndex(leafIndex);
 
 				// Here is where, in addition to the K>1 case, the K=1 case is supported,
 				// because "other_top_level_indices_into_raw_data" is populated

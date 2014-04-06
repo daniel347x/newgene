@@ -1797,7 +1797,7 @@ void SpitBranch(std::string & sdata, Branch const & branch)
 	sdata += "</CHILD_KEY_LOOKUP_TO_QUICKLY_DETERMINE_IF_ANY_PARTICULAR_CHILD_KEYSET_EXISTS_FOR_ANY_OUTPUT_ROW_FOR_THIS_BRANCH>";
 
 	sdata += "<ALL_THE_LEAVES_FOR_THIS_BRANCH>";
-	SpitLeaves(sdata, branch);
+	branch.SpitLeaves(sdata);
 	sdata += "</ALL_THE_LEAVES_FOR_THIS_BRANCH>";
 
 	sdata += "<NUMBER_OF_LEAF_COMBINATIONS>";
@@ -1986,7 +1986,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 
 				SpitBranch(*sdata, branch);
 
-				SpitLeaves(*sdata, branch);
+				branch.SpitLeaves(*sdata);
 
 				*sdata += "</BRANCH_AND_LEAVES>";
 			});
@@ -2016,6 +2016,14 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 		file_.close();
 	}
 
+}
+
+void SpitLeaves(std::string & sdata, Branch const & branch)
+{
+	sdata += "<LEAVES>";
+	branch.CreateLeafCache();
+	branch.SpitLeaves(sdata);
+	sdata += "</LEAVES>";
 }
 
 #endif
