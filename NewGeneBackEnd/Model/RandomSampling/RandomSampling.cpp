@@ -24,6 +24,7 @@ AllWeightings::AllWeightings()
 : insert_random_sample_stmt(nullptr)
 , numberChildVariableGroups(0)
 , time_granularity(TIME_GRANULARITY__NONE)
+, random_rows_added(0)
 {
 
 }
@@ -1042,6 +1043,7 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 	// because some rows can have a heavier weight than other rows;
 	// this is handled by storing a map of every *time unut* (corresponding to the primary variable group)
 	// and all leaf combinations that have been hit for that time unit.
+	++random_rows_added;
 	branch.hits[which_time_unit].insert(test_leaf_combination);
 
 }
@@ -1440,7 +1442,7 @@ void AllWeightings::PrepareFullSamples(int const K)
 
 }
 
-void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
+void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & orig_random_number_rows)
 {
 
 	if (time_granularity == TIME_GRANULARITY__NONE)
@@ -1455,6 +1457,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 	{
 		if (hit.first != -1)
 		{
+			orig_random_number_rows += hit.second.size();
 			branch.hits[-1].insert(hit.second.cbegin(), hit.second.cend());
 			hit.second.clear();
 		}
@@ -2084,7 +2087,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 	// the current time slice.
 	// ********************************************************************************************** //
 
-	if (!random_sampling || consolidate_rows)
+	if (!random_sampling)
 	{
 		// If rows are being merged (when possible) in the output,
 		// this function does not apply.

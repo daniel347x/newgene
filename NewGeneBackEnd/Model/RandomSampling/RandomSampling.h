@@ -1779,6 +1779,7 @@ public:
 	std::map<int, int> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 	int numberChildVariableGroups;
 	TIME_GRANULARITY time_granularity;
+	std::int64_t random_rows_added;
 
 	// final output in case of consolidated row output
 	std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> consolidated_rows;
@@ -1795,7 +1796,7 @@ public:
 	bool RetrieveNextBranchAndLeaves(int const K);
 	void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch);
 	void ResetBranchCaches();
-	void ConsolidateRowsWithinBranch(Branch const & branch);
+	void ConsolidateRowsWithinBranch(Branch const & branch, int & orig_random_number_rows);
 
 protected:
 

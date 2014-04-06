@@ -21768,6 +21768,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 	// *************************************************************************************************************************** //
 	// *************************************************************************************************************************** //
 
+	int orig_random_number_rows = 0;
+
 	if (random_sampling)
 	{
 
@@ -21809,7 +21811,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 			{
 				std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & the_branch)
 				{
-					allWeightings.ConsolidateRowsWithinBranch(the_branch);
+					allWeightings.ConsolidateRowsWithinBranch(the_branch, orig_random_number_rows);
 				});
 
 			});
@@ -21822,6 +21824,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 	std::set<MergedTimeSliceRow> ongoing_merged_rows;
 
 	TimeSlice previousTimeSlice;
+
+	int orig_row_count = 0;
 
 	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 	{
@@ -21874,6 +21878,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 						std::vector<InstanceData> const & test_vector = test_row.output_row;
 
 						create_output_row_visitor::data.clear();
+
+						++orig_row_count;
 					});
 					MergedTimeSliceRow::RHS_wins = false;
 
@@ -21963,6 +21969,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 
 						ongoing_merged_rows.emplace(the_slice, create_output_row_visitor::data);
 						create_output_row_visitor::data.clear();
+
+						++orig_row_count;
 					});
 					MergedTimeSliceRow::RHS_wins = false;
 
