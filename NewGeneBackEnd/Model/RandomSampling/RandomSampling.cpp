@@ -1173,7 +1173,7 @@ boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, i
 
 }
 
-void AllWeightings::ResetBranchCaches(bool const clear_child_lookup)
+void AllWeightings::ResetBranchCaches()
 {
 
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
@@ -1200,12 +1200,12 @@ void AllWeightings::ResetBranchCaches(bool const clear_child_lookup)
 			Branch const & branch = branchAndLeaves.first;
 			Leaves const & leaves = branchAndLeaves.second;
 
-			if (clear_child_lookup)
-			{
-				branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
-			}
-
+			branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
 			branch.CreateLeafCache(leaves);
+			for (int c = 0; c < numberChildVariableGroups; ++c)
+			{
+				branch.ConstructChildCombinationCache(*this, c, true);
+			}
 
 		});
 
@@ -2339,6 +2339,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 	VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = branches_and_leaves;
 	std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 	{
+
 		std::for_each(variableGroupBranchesAndLeaves.branches_and_leaves.cbegin(), variableGroupBranchesAndLeaves.branches_and_leaves.cend(), [&](std::pair<Branch const, Leaves> const & branch_and_leaves)
 		{
 
@@ -2429,6 +2430,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(TimeSlice const & originalTimeSl
 			});
 
 		});
+
 	});
 
 }

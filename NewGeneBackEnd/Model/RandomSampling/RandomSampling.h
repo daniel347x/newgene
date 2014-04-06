@@ -1680,7 +1680,7 @@ public:
 	void PrepareFullSamples(int const K);
 	bool RetrieveNextBranchAndLeaves(int const K);
 	void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch, Leaves const & leaves);
-	void ResetBranchCaches(bool const clear_child_lookup = true);
+	void ResetBranchCaches();
 	void ConsolidateRowsWithinBranch(Branch const & branch);
 
 protected:

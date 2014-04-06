@@ -496,25 +496,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		// *************************************************** //
 		// Build leaf cache and empty child leaf mapping to output row caches.
-		// Note that after these caches are built here,
-		// *the child lookup never changes* when the non-primary top-level
-		// and child variable groups are merged, because the child lookup are
-		// part of the branch itself and the *leaf indexes* do not change
-		// within the leaf cache - the only thing that is modified
-		// later when the child/top-level VG's are merged is one thing:
-		// the top-level VG's set some data in the existing leaves
-		// to track the secondary data for those top-level groups
-		// associated with the leaves (but the leaf indexes do not change).
-		// Therefore, the leaf cache needs to be rebuilt later
-		// (but not the child lookup cache), just to pick up the new
-		// data associated with the leaves, but the indexes do not change...
-		// so the ResetBranchCaches() function is called a second time, later,
-		// after the child and top-level groups are completely merged,
-		// but passing "false" to ResetBranchCaches() so that only
-		// the leaf caches are rebuilt, not the child lookup cache.
-		// This rebuilding is necessary so that the rows can be
-		// properly consolidated and written to output,
-		// which occurs *after* all child and top-level VG's have been merged.
 		// *************************************************** //
 		allWeightings.ResetBranchCaches();
 		if (failed || CheckCancelled()) return;
@@ -562,7 +543,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSamplerFillDataForChildGroups(allWeightings);
 		if (failed || CheckCancelled()) return;
 
-		// Pass FALSE so that the child leaf lookup remains in place.
 		// The following function will clear and re-populate its internal
 		// cache of Leaf objects (which were updated by RandomSamplerFillDataForChildGroups()
 		// by the non-primary top-level variable groups with indexes into their
@@ -576,12 +556,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		//
 		// Additional notes, just saying the same thing in a different way:
 		//
-		// After child and non-primary top-level VG's are merged, when clearing and rebuilding the branch leaf caches
-		// to pick up the new leaf-specific data added by the non-primary top-level VG's,
-		// do not simultaneously clear the child lookup cache, because the latter is not duplicated,
-		// nor is it out-of-date following the child/non-primary VG merge because the latter only updates the leaves,
-		// while the child lookup cache is located in the branch but outside the leaves.
-		allWeightings.ResetBranchCaches(false); // build leaf cache and empty child caches.
+		// After child and non-primary top-level VG's are merged, clear and rebuild the branch leaf caches
+		// to pick up the new leaf-specific data added by the non-primary top-level VG's.
+		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
 		if (failed || CheckCancelled()) return;
 
 		if (consolidate_rows) // Consolidate data mode is on
