@@ -606,6 +606,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
 
+#		ifdef _DEBUG
+		std::vector<std::string> sdata;
+		SpitAllWeightings(sdata, allWeightings, true);
+#		endif
+
 		RandomSamplingWriteResultsToFileOrScreen(allWeightings);
 
 	}
