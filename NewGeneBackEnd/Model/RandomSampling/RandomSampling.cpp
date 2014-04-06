@@ -559,12 +559,10 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						// Note that many different OUTPUT ROWS might reference this leaf;
 						// perhaps even multiple times within a single output row.  Fine!
 
-						Leaf const & leaf = current_branch.getExistingLeaf(timeSliceLeaf.second);
-
 						// pass the index over from the incoming leaf (which contains only the index for the current top-level variable group being merged in)
 						// into the active leaf saved in the AllWeightings instance, and used to construct the output rows.
 						// (This active leaf may also have been called previously to set other top-level variable group rows.)
-						leaf.other_top_level_indices_into_raw_data[variable_group_number] = timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number];
+						current_branch.setTopGroupIndexIntoRawData(timeSliceLeaf.second, variable_group_number, timeSliceLeaf.second.other_top_level_indices_into_raw_data[variable_group_number]);
 
 						added = true;
 
@@ -1490,7 +1488,7 @@ void VariableGroupTimeSliceData::ResetBranchCachesSingleTimeSlice(AllWeightings 
 	{
 
 		branch.helper_lookup__from_child_key_set__to_matching_output_rows.clear();
-		branch.CreateLeafCache();
+		branch.ResetLeafCache();
 		for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
 		{
 			branch.ConstructChildCombinationCache(allWeightings, c, true);
@@ -2021,7 +2019,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 void SpitLeaves(std::string & sdata, Branch const & branch)
 {
 	sdata += "<LEAVES>";
-	branch.CreateLeafCache();
+	branch.ResetLeafCache();
 	branch.SpitLeaves(sdata);
 	sdata += "</LEAVES>";
 }

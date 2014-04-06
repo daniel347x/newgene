@@ -1215,6 +1215,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, hits{ rhs.hits }
 			, remaining{ rhs.remaining }
 			, number_branch_combinations{ rhs.number_branch_combinations }
+			, leaves { rhs.leaves }
 			, leaves_cache{ rhs.leaves_cache }
 		{
 		}
@@ -1230,6 +1231,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			hits = rhs.hits;
 			remaining = rhs.remaining;
 			number_branch_combinations = rhs.number_branch_combinations;
+			leaves = rhs.leaves;
 			leaves_cache = rhs.leaves_cache;
 			return *this;
 		}
@@ -1245,6 +1247,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			hits = rhs.hits;
 			remaining = rhs.remaining;
 			number_branch_combinations = rhs.number_branch_combinations;
+			leaves = rhs.leaves;
 			leaves_cache = rhs.leaves_cache;
 			return *this;
 		}
@@ -1381,13 +1384,13 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		void InsertLeaf(Leaf const & leaf) const
 		{
 			leaves.insert(leaf);
-			CreateLeafCache();
+			ResetLeafCache();
 		}
 
 		void ClearLeaves()
 		{
 			leaves.clear();
-			CreateLeafCache();
+			ResetLeafCache();
 		}
 
 		Leaf & getLeafAtIndex(int const & leaf_index)
@@ -1415,10 +1418,11 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			return true;
 		}
 
-		Leaf const & getExistingLeaf(Leaf const & leaf) const
+		void setTopGroupIndexIntoRawData(Leaf const & existingLeaf, int const variable_group_number, std::int64_t const other_top_level_index_into_raw_data) const
 		{
-			auto const leafPtr = leaves.find(leaf);
-			return *leafPtr;
+			auto const leafPtr = leaves.find(existingLeaf);
+			leafPtr->other_top_level_indices_into_raw_data[variable_group_number] = other_top_level_index_into_raw_data;
+			ResetLeafCache();
 		}
 
 	private:
@@ -1453,7 +1457,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 	public:
 
-		void CreateLeafCache() const
+		void ResetLeafCache() const
 		{
 			leaves_cache.clear();
 			leaves_cache.insert(leaves_cache.begin(), leaves.cbegin(), leaves.cend());
