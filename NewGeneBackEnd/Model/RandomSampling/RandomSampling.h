@@ -1659,7 +1659,33 @@ class MergedTimeSliceRow
 
 		MergedTimeSliceRow(MergedTimeSliceRow const & rhs)
 		{
+			// The optimizing compiler sometimes 
+			// re-uses an existing object instead
+			// of constructing a new one in a non-trivial way.
+			// When this constructor is called in an optimizing circumstance,
+			// the compiler really means it.
+			//
+			// The code has already been roughly tested and
+			// we know that in the Debug build, there are
+			// never issues revealed with use of the "RHS_wins"
+			// flag, because the error condition in operator=()
+			// (where a throw occurs) is never reached
+			// ... except in release mode...
+			// ... so we know it's OK to set RHS_wins
+			// true here, since it covers all possible
+			// cases correctly (albeit it covers the
+			// different cases correctly for different reasons,
+			// which is unintuitive).
+			//
+			// Obviously this code is not thread-safe,
+			// but that would be probably easily fixed
+			// were it to become important.
+			// For now - only a single output project
+			// work queue thread will ever access this function.
+			bool oldRHSWins = RHS_wins;
+			RHS_wins = true;
 			*this = rhs;
+			RHS_wins = oldRHSWins;
 		}
 
 		bool operator<(MergedTimeSliceRow const & rhs) const
