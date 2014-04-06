@@ -10,9 +10,9 @@ std::int64_t AvgMsperUnit(TIME_GRANULARITY const time_granularity)
 	static std::int64_t hour = minute * 60;
 	static std::int64_t day = hour * 24;
 	static std::int64_t week = day * 7;
-	static std::int64_t month = (std::int64_t)((double)week * 4.354166666666666670); // for AVERAGE purposes only - 52.25 / 12; average includes leap year
-	static std::int64_t quarter = (std::int64_t)((double)week * 13.0625); // Average includes leap year
-	static std::int64_t year = (std::int64_t)((double)week * 52.25);   // Average includes leap year
+	static std::int64_t month = (std::int64_t)((long double)day * 30.4375 + 0.5); // for AVERAGE purposes only - (365.25 / 12) days; average includes leap year; 0.5 is for rounding
+	static std::int64_t quarter = (std::int64_t)((long double)day * 91.3125 + 0.5); // (365.25 / 4) days - Average includes leap year; 0.5 is for rounding
+	static std::int64_t year = (std::int64_t)((long double)day * 365.25 + 0.5);   // Average includes leap year; 0.5 is for rounding
 	static std::int64_t biennial = year * 2;
 	static std::int64_t quadrennial = year * 4;
 	static std::int64_t decade = year * 10;

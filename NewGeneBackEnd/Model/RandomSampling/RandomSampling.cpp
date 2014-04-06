@@ -2459,7 +2459,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 				// Single time unit in branch, with its own set of rows
 
 				boost::multiprecision::cpp_int hit_time_index = hit.first;
-				boost::multiprecision::cpp_int hit_time_index_one_based = hit_time_index;
+				boost::multiprecision::cpp_int hit_time_index_one_based = hit_time_index + 1;
 				bool matches_left = false;
 				bool matches_right = false;
 				bool matches_middle = false;
