@@ -21424,7 +21424,11 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
 
-				if (!is_current_index_a_top_level_primary_group_branch)
+				if (is_current_index_a_top_level_primary_group_branch)
+				{
+					++current_primary_branch_index;
+				}
+				else
 				{
 					++current_primary_internal_leaf_index;
 					if (full_kad_key_info.sequence_number_within_dmu_category_primary_uoa + 1 == full_kad_key_info.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)
