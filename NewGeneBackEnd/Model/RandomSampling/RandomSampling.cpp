@@ -2487,8 +2487,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 		++middleRounded;
 	}
 
-	return;
-
 	std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> new_hits;
 	VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = branches_and_leaves;
 	std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)

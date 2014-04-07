@@ -494,12 +494,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 		if (failed || CheckCancelled()) return;
 
-		std::vector<std::string> sdata;
-		SpitAllWeightings(sdata, allWeightings, true);
-
-		failed = true;
-		return;
-
 		// *************************************************** //
 		// Build leaf cache and empty child leaf mapping to output row caches.
 		// *************************************************** //
