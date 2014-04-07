@@ -40,7 +40,7 @@ AllWeightings::~AllWeightings()
 	}
 }
 
-bool AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
+std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling, TimeSlices::iterator mapIterator_, bool const useIterator)
 {
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
@@ -64,6 +64,10 @@ bool AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSl
 	TimeSlices::iterator existing_one_past_end_slice   = timeSlices.end();
 
 	TimeSlices::iterator mapIterator;
+	if (useIterator)
+	{
+		mapIterator = mapIterator_;
+	}
 	bool normalCase = false;
 
 	if (existing_start_slice == existing_one_past_end_slice)
@@ -90,7 +94,11 @@ bool AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSl
 		// ********************************************************************************************* //
 		// ********************************************************************************************* //
 
-		TimeSlices::iterator startMapSlicePtr = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &AllWeightings::is_map_entry_end_time_greater_than_new_time_slice_start_time);
+		if (!useIterator)
+		{
+			mapIterator = std::upper_bound(timeSlices.begin(), timeSlices.end(), newTimeSliceLeaf, &AllWeightings::is_map_entry_end_time_greater_than_new_time_slice_start_time);
+		}
+		TimeSlices::iterator startMapSlicePtr = mapIterator;
 		bool start_of_new_slice_is_past_end_of_map = false;
 		if (startMapSlicePtr == existing_one_past_end_slice)
 		{
@@ -173,6 +181,7 @@ bool AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSl
 
 	}
 
+	bool call_again = false;
 	if (normalCase)
 	{
 		// This is the normal case.  The incoming new slice is guaranteed to have
@@ -197,15 +206,15 @@ bool AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSl
 		}
 		else
 		{
-			bool added_recurse = HandleIncomingNewBranchAndLeaf(branch, newTimeSliceLeaf, variable_group_number, merge_mode, AvgMsperUnit, consolidate_rows, random_sampling);
-			if (added_recurse)
-			{
-				added = true; // It could have been true previously, so never set to false
-			}
+			// We have a chunk left and there is at least one map element to the right of this
+			// remaining chunk's starting point.
+			// That one map element could start anywhere to the right, though...
+			// there could be a gap.
+			call_again = true;
 		}
 	}
 
-	return added;
+	return std::make_tuple(added, call_again, mapIterator);
 
 }
 

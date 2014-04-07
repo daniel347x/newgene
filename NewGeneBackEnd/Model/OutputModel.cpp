@@ -20594,8 +20594,22 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
 								Branch branch(dmus_branch);
 
-								bool added = allWeightings.HandleIncomingNewBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling);
-
+								bool call_again = false;
+								bool added = false;
+								bool first = true;
+								TimeSlices::iterator mapIterator;
+								while (first || call_again)
+								{
+									first = false;
+									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+									bool added_recurse = std::get<0>(ret);
+									if (added_recurse)
+									{
+										added = true;
+									}
+									call_again = std::get<1>(ret);
+									mapIterator = std::get<2>(ret);
+								}
 								if (added)
 								{
 									// Add the secondary data for this primary variable group to the cache
@@ -20615,10 +20629,27 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// so that it can be set in the corresponding leaf already present for the branch
 								leaf.other_top_level_indices_into_raw_data[variable_group_number] = sorting_row_of_data.rowid;
 
-								// Add the secondary data for this non-primary top-level variable group to the cache
-								allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
-
-								bool added = allWeightings.HandleIncomingNewBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling);
+								bool call_again = false;
+								bool added = false;
+								bool first = true;
+								TimeSlices::iterator mapIterator;
+								while (first || call_again)
+								{
+									first = false;
+									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+									bool added_recurse = std::get<0>(ret);
+									if (added_recurse)
+									{
+										added = true;
+									}
+									call_again = std::get<1>(ret);
+									mapIterator = std::get<2>(ret);
+								}
+								if (added)
+								{
+									// Add the secondary data for this non-primary top-level variable group to the cache
+									allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
+								}
 
 							}
 							break;
@@ -20640,8 +20671,22 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								// which might slice the time slices, each such slice will not add any new primary leaves
 								// and the previous set of cached leaves will be persisted in the time slice copies.
 								// ************************************************************************************************** //
-								bool added = allWeightings.HandleIncomingNewBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling);
-
+								bool call_again = false;
+								bool added = false;
+								bool first = true;
+								TimeSlices::iterator mapIterator;
+								while (first || call_again)
+								{
+									first = false;
+									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+									bool added_recurse = std::get<0>(ret);
+									if (added_recurse)
+									{
+										added = true;
+									}
+									call_again = std::get<1>(ret);
+									mapIterator = std::get<2>(ret);
+								}
 								if (added)
 								{
 									// Add the secondary data for this child variable group to the cache
