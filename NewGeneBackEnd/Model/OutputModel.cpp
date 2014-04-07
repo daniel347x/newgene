@@ -13493,15 +13493,15 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 			for (auto const & variable_group_set_member : variables_in_group)
 			{
 
-				bool has_multiplicity_greater_than_1 = false;
+				int count_of_this_raw_variable_column_in_final_output = 0;
 				for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 				{
 					if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
 					{
-						has_multiplicity_greater_than_1 = true;
-						break;
+						++count_of_this_raw_variable_column_in_final_output;
 					}
 				}
+				bool has_multiplicity_greater_than_1 = count_of_this_raw_variable_column_in_final_output > 1;
 
 				if (has_multiplicity_greater_than_1)
 				{
@@ -13709,37 +13709,6 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 								matched = true;
 							}
 
-
-							// DN removed Wednesday, Mar 26, 2014 after careful review.
-							// Only affects child variable groups, and is simply wrong.
-							// Note that for smaller child variable groups, it will match multiple times,
-							// and the last hit will overwrite others and persist.
-
-							//else
-							//{
-							//	// deal with child tables that have a smaller number of columns in this DMU category
-							//	// than the primary variable groups do.
-							//	if (current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group
-							//		<
-							//		current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category)
-							//	{
-
-							//		// matching the above condition means we're a child variable group
-							//		// and that the current column in this child variable group
-							//		// is a DMU that has a smaller count in the child than in the primary variable group
-
-							//		if (current_variable_group_primary_key_entry.current_outer_multiplicity_of_this_primary_key__in_relation_to__the_uoa_corresponding_to_the_current_variable_group___same_as___current_inner_table_number_within_the_inner_table_set_corresponding_to_the_current_variable_group
-							//			<= current_variable_group_primary_key_entry.total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category)
-							//		{
-							//			// The current column corresponds to the first inner table of the top-level variable groups,
-							//			// though it corresponds to the second or greater inner table of a current child variable group.
-							//			// i.e., this is the second or following call to this function corresponding to a second or
-							//			// higher multiplicity of a child variable group.
-
-							//			matched = true;
-							//		}
-							//	}
-							//}
 
 							if (matched)
 							{
