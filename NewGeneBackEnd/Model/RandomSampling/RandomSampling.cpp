@@ -1913,7 +1913,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	});
 	*sdata += "</childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
 
-	*sdata += "<CHILD_COLUMN_TO_TOP_LEVEL_COLUMN_KEY_MAPPINGs>";
+	*sdata += "<CHILD_COLUMN_TO_TOP_LEVEL_COLUMN_KEY_MAPPINGS>";
 	for (int c = 0; c < allWeightings.numberChildVariableGroups; ++c)
 	{
 		*sdata += "<CHILD_GROUP>";
@@ -1955,7 +1955,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 
 		*sdata += "</CHILD_GROUP>";
 	}
-	*sdata += "</CHILD_COLUMN_TO_TOP_LEVEL_COLUMN_KEY_MAPPINGs>";
+	*sdata += "</CHILD_COLUMN_TO_TOP_LEVEL_COLUMN_KEY_MAPPINGS>";
 
 	*sdata += "<DATA_CACHE_PRIMARY>";
 	SpitDataCache(*sdata, allWeightings.dataCache);
