@@ -2725,7 +2725,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 					}
 					else
 					{
-						current_hit_width = AvgMsperUnit;
+						current_hit_width = static_cast<long double>(AvgMsperUnit);
 					}
 
 					long double hit_end_position = hit_start_position + current_hit_width;

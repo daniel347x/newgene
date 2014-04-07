@@ -494,6 +494,16 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 		if (failed || CheckCancelled()) return;
 
+		std::vector<std::string> sdata;
+		SpitAllWeightings(sdata, allWeightings, true);
+
+		boost::format msgdone("Done spitting to XML.");
+		messager.AppendKadStatusText(msgdone.str(), this);
+
+		failed = true;
+		return;
+
+
 		// *************************************************** //
 		// Build leaf cache and empty child leaf mapping to output row caches.
 		// *************************************************** //
@@ -20580,7 +20590,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 				if (!bad)
 				{
 
-					try
+					//try
 					{
 						
 						TIME_GRANULARITY time_granularity = primary_variable_groups_vector[top_level_vg_index].first.time_granularity;
@@ -20705,15 +20715,15 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 						}
 
 					}
-					catch (boost::exception & e)
-					{
-						bad = true;
-						if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
-						{
-							boost::format msg("Error: %1%");
-							errorMessages.push_back(error_desc->c_str());
-						}
-					}
+					//catch (boost::exception & e)
+					//{
+					//	bad = true;
+					//	if (std::string const * error_desc = boost::get_error_info<newgene_error_description>(e))
+					//	{
+					//		boost::format msg("Error: %1%");
+					//		errorMessages.push_back(error_desc->c_str());
+					//	}
+					//}
 
 				}
 
@@ -21981,7 +21991,17 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 					// so the above block that consolidates to index -1 is not necessary.
 					// ***************************************************************************************************** //
 					auto const & incoming_rows = branch.hits[-1];
-					MergedTimeSliceRow::RHS_wins = true; // optimizer might call operator=() during "emplace"
+
+
+					// To support random sampling,
+					// do a loop here over the hits,
+					// being sure divisions perfectly match,
+					// and setting the initial division to the start of the slice
+					// and the end division to the end of the slice.
+
+
+
+					MergedTimeSliceRow::RHS_wins = true; // optimizer might call copy constructor, which calls operator=(), during "emplace"
 					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
 					{
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
@@ -22396,7 +22416,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							}
 							else
 							{
-								current_hit_width = avgMsperUnit;
+								current_hit_width = static_cast<long double>(avgMsperUnit);
 							}
 
 							long double hit_end_position = hit_start_position + current_hit_width;
@@ -22406,7 +22426,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 							std::set<BranchOutputRow> output_rows_for_this_full_time_slice = time_unit_hit.second;
 
-							TimeSlice current_slice(hit_start_position, hit_end_position);
+							TimeSlice current_slice(static_cast<std::int64_t>(hit_start_position + 0.5), static_cast<std::int64_t>(hit_end_position + 0.5));
 							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
 
 						}
