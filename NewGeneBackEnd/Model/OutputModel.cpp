@@ -22228,118 +22228,47 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 					return;
 				}
 
-				if (random_sampling)
+				// ***************************************************************************************** //
+				// Full sampling, but the output should *not* be consolidated -
+				// i.e., the output should be displayed with one row per
+				// unit time granularity (i.e., one row per day if the time granularity
+				// of the primary variable group is "day"),
+				// or with one row per *sub*-time-unit if child variable groups
+				// have split time units apart in that way.
+				//
+				// In the case of full sampling, the "hits" data structure described in the previous block
+				// is not populated in multiple elements.
+				//
+				// Instead, all data for the branch in the "full sampling" case is stowed away
+				// in a single "hits" element (with special-case index -1).
+				// Our job here is to display possibly *multiple* rows, each identical,
+				// for every output row in this single "hits" element with index -1.
+				//
+				// Each such duplicated output row is identical in every column except for the
+				// time-slice-start and time-slice-end columns, which properly walk through the full
+				// range of the time slice for the branch, but in steps of the time unit
+				// corresponding to the time granularity of the primary variable group.
+				// If the time slice for this branch is a *sub*-time-unit, just display one row,
+				// and the proper sub-time-unit time width for the time-slice-start and time-slice-end
+				// columns will be set to those of the branch and automatically correctly reflect
+				// the sub-time-unit represented by this branch.
+				// ***************************************************************************************** //
+
+
+				if (!timeSlice.hasTimeGranularity())
 				{
 
-					// ***************************************************************************************** //
-					// In the random sampling case, the data has *already* been distributed properly
-					// across time units within each branch (each element of the "hits" data structure
-					// is one time unit within a branch, containing possibly multiple sampled rows).
-					//
-					// Just display them as-is.
-					//
-					// Note that sub-time-units are possible (if child data has split single time-unit rows
-					// into sub-time-unit pieces), but each sub-time-unit is displayed as a single row
-					// (thereby allowing for multiple rows for the same data and same time unit,
-					//  with each row representing a sub-time-unit).
-					// Such logic to create sub-units has already taken place,
-					// and each such sub-time-unit has its own, individual entry in the "hits" data structure.
-					//
-					// So we just loop through the "hits" data structure, each element corresponding to
-					// either a single full time unit or to a single sub-time-unit,
-					// and print out all the rows in that element.
-					// ***************************************************************************************** //
+					// If the time slice has no time range granularity, just spit out the rows once
 
-					std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & time_unit_and_rows)
+					for (auto const & time_unit_hit : branch.hits)
 					{
 
-						if (failed || CheckCancelled())
-						{
-							return;
-						}
+						// *********************************************************************************** //
+						// There should be only one hit unit at index -1
+						// ... so this loop should only be entered once
+						// *********************************************************************************** //
 
-						// TODO when outputting time associated with each slice:
-						// Use the algorithm for the "full sampling case", below,
-						// to get the time range corresponding to each "hits" time unit.
-						// Note that time slivers may appear that will have a copy of the data
-						// that their adjacent larger time-sub-slices, each sub-slice
-						// corresponding to a single "hits" entry.
-						//
-						// Just match up the iterations in the loop below for full sampling
-						// with the number of "hits" sub-slices in this loop
-						// (there should be the same number of loop iterations - throw
-						// an exception if there is not).
-
-						std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
-
-						std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
-						{
-
-							// We have a row to output
-
-							if (failed || CheckCancelled())
-							{
-								return;
-							}
-
-							create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__OUTPUT_FILE;
-							create_output_row_visitor::output_file = &output_file;
-							CreateOutputRow(branch, outputRow, allWeightings);
-							create_output_row_visitor::output_file = nullptr;
-							create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
-
-							output_file << std::endl;
-							++rows_written;
-
-						});
-
-					});
-
-				}
-				else
-				{
-
-					// ***************************************************************************************** //
-					// Full sampling, but the output should *not* be consolidated -
-					// i.e., the output should be displayed with one row per
-					// unit time granularity (i.e., one row per day if the time granularity
-					// of the primary variable group is "day"),
-					// or with one row per *sub*-time-unit if child variable groups
-					// have split time units apart in that way.
-					//
-					// In the case of full sampling, the "hits" data structure described in the previous block
-					// is not populated in multiple elements.
-					//
-					// Instead, all data for the branch in the "full sampling" case is stowed away
-					// in a single "hits" element (with special-case index -1).
-					// Our job here is to display possibly *multiple* rows, each identical,
-					// for every output row in this single "hits" element with index -1.
-					//
-					// Each such duplicated output row is identical in every column except for the
-					// time-slice-start and time-slice-end columns, which properly walk through the full
-					// range of the time slice for the branch, but in steps of the time unit
-					// corresponding to the time granularity of the primary variable group.
-					// If the time slice for this branch is a *sub*-time-unit, just display one row,
-					// and the proper sub-time-unit time width for the time-slice-start and time-slice-end
-					// columns will be set to those of the branch and automatically correctly reflect
-					// the sub-time-unit represented by this branch.
-					// ***************************************************************************************** //
-
-					auto const found = branch.hits.find(boost::multiprecision::cpp_int(-1));
-					if (found == branch.hits.cend())
-					{
-						// Why is there a time slice with no data?  It should never have been created in the first place!
-						boost::format msg("Logic error: A time slice has no data in its branch when attempting to output data for the full sampler.");
-						throw NewGeneException() << newgene_error_description(msg.str());
-					}
-
-					std::set<BranchOutputRow> output_rows_for_this_full_time_slice = branch.hits[boost::multiprecision::cpp_int(-1)];
-
-					// Loop through our time range data
-					if (!timeSlice.hasTimeGranularity())
-					{
-
-						// If the time slice has no time range granularity, just spit out the rows once
+						std::set<BranchOutputRow> output_rows_for_this_full_time_slice = time_unit_hit.second;
 
 						std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow const & outputRow)
 						{
@@ -22363,8 +22292,67 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						});
 
 					}
-					else
+
+				}
+				else
+				{
+
+					bool first_hit_is_a_sliver = false;
+					bool last_hit_is_a_sliver = false;
+
+					std::int64_t current_starting_time = timeSlice.getStart();
+					std::int64_t current_aligned_down_time = TimeRange::determineAligningTimestamp(current_starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
+					long double start_sliver_width = 0.0;
+					if (current_aligned_down_time < current_starting_time)
 					{
+						first_hit_is_a_sliver = true;
+						start_sliver_width = static_cast<long double>(current_starting_time - current_aligned_down_time);
+					}
+
+					std::int64_t current_ending_time = timeSlice.getEnd();
+					std::int64_t current_aligned_up_time = TimeRange::determineAligningTimestamp(current_ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
+					long double end_sliver_width = 0.0;
+					if (current_aligned_up_time > current_ending_time)
+					{
+						last_hit_is_a_sliver = true;
+						end_sliver_width = static_cast<long double>(current_aligned_up_time - current_ending_time);
+					}
+
+					long double hit_total_distance_so_far = 0.0;
+					std::int64_t hit_number = 0;
+					std::int64_t total_hits = branch.hits.size();
+
+					for (auto const & time_unit_hit : branch.hits)
+					{
+
+						++hit_number;
+
+
+						long double hit_start_position = hit_total_distance_so_far;
+						long double current_hit_width = 0.0;
+
+						if (hit_number == 1 && first_hit_is_a_sliver)
+						{
+							current_hit_width = start_sliver_width;
+						}
+						else
+						if (hit_number == total_hits && last_hit_is_a_sliver)
+						{
+							current_hit_width = end_sliver_width;
+						}
+						else
+						{
+							current_hit_width = 1.0;
+						}
+
+						long double hit_end_position = hit_start_position + current_hit_width;
+						hit_total_distance_so_far = hit_end_position;
+
+
+
+						std::set<BranchOutputRow> output_rows_for_this_full_time_slice = time_unit_hit.second;
+
+						// Loop through our time range data
 
 						// The time slice has time granularity.
 						// Start at the beginning, and loop through.
