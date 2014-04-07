@@ -13429,7 +13429,7 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 		{
 			for (auto & primary_key_entry__output__including_multiplicities : sequence.primary_key_sequence_info)
 			{
-				if (variable_group_set_member.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].vg_identifier))
+				if (*variable_group_set_member.code == primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
 				{
 					primary_key_entry__output__including_multiplicities.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg = primary_column_index;
 					++primary_column_index;

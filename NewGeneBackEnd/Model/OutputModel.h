@@ -82,7 +82,8 @@ class PrimaryKeySequence
 				WidgetInstanceIdentifier dmu_category;
 				int sequence_number_within_dmu_category_spin_control;
 				int sequence_number_within_dmu_category_primary_uoa;
-				int sequence_number_in_all_primary_keys;
+				int sequence_number_in_all_primary_keys__of__global_primary_key_sequence_metadata__NOT__of_order_columns_appear_in_top_level_vg;
+				int sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg;
 				int total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category;
 				int total_kad_spin_count_for_this_dmu_category;
 				int total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group;
