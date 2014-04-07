@@ -2234,7 +2234,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 				// both time slices are identical
 				// Treat this as the middle piece
 				widthMiddleFloat = static_cast<long double>(originalTimeSlice.getEnd() - originalTimeSlice.getStart());
-				widthRightFloat = true;
+
+				useMiddle = true;
 
 			}
 			else
@@ -2303,6 +2304,10 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 	bool left_was_zero = false;
 	bool middle_was_zero = false;
 	bool right_was_zero = false;
+
+	std::int64_t leftRounded = 0;
+	std::int64_t middleRounded = 0;
+	std::int64_t rightRounded = 0;
 
 	std::int64_t originalWidth = originalTimeSlice.WidthForWeighting(AvgMsperUnit);
 
@@ -2435,6 +2440,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 				// both time slices are identical
 				// Treat this as the middle piece
 				middleWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
+
 				useMiddle = true;
 
 			}
@@ -2485,10 +2491,6 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 		long double leftUnits = 0.0;
 		long double middleUnits = 0.0;
 		long double rightUnits = 0.0;
-
-		std::int64_t leftRounded = 0;
-		std::int64_t middleRounded = 0;
-		std::int64_t rightRounded = 0;
 
 		leftUnits = TimeSlice::WidthForWeighting(leftWidth, AvgMsperUnit);
 		middleUnits = TimeSlice::WidthForWeighting(middleWidth, AvgMsperUnit);
@@ -2654,92 +2656,200 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 		std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & current_branch)
 		{
 
+			// ************************************************************** //
 			// Single branch
+			// ************************************************************** //
 
 			new_hits.clear();
 
 			auto & hits = current_branch.hits;
 
+
+			bool first_hit_is_a_sliver = false;
+			bool last_hit_is_a_sliver = false;
+
+			std::int64_t current_starting_time = originalTimeSlice.getStart();
+			std::int64_t current_aligned_down_time = TimeRange::determineAligningTimestamp(current_starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
+			long double start_sliver_width = 0.0;
+			if (current_aligned_down_time < current_starting_time)
+			{
+				first_hit_is_a_sliver = true;
+				start_sliver_width = static_cast<long double>(current_starting_time - current_aligned_down_time);
+			}
+
+			std::int64_t current_ending_time = originalTimeSlice.getEnd();
+			std::int64_t current_aligned_up_time = TimeRange::determineAligningTimestamp(current_ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
+			long double end_sliver_width = 0.0;
+			if (current_aligned_up_time > current_ending_time)
+			{
+				last_hit_is_a_sliver = true;
+				end_sliver_width = static_cast<long double>(current_aligned_up_time - current_ending_time);
+			}
+
+			long double hit_total_distance_so_far = 0.0;
+			std::int64_t hit_number = 0;
+			std::int64_t total_hits = hits.size();
 			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hit)
 			{
 
+				// ************************************************************** //
 				// Single time unit in branch, with its own set of rows
+				// ************************************************************** //
 
-				boost::multiprecision::cpp_int hit_time_index = hit.first;
-				boost::multiprecision::cpp_int hit_time_index_one_based = hit_time_index + 1;
-				bool matches_left = false;
-				bool matches_right = false;
-				bool matches_middle = false;
-				
-				// Determine if matches left
-				if (hit_time_index_one_based <= leftRounded)
+				if (true)
 				{
-					// matches left
-					matches_left = true;
+
+					++hit_number;
+
+
+					long double hit_start_position = hit_total_distance_so_far;
+					long double current_hit_width = 0.0;
+
+					if (hit_number == 1 && first_hit_is_a_sliver)
+					{
+						current_hit_width = start_sliver_width;
+					}
+					else
+					if (hit_number == total_hits && last_hit_is_a_sliver)
+					{
+						current_hit_width = end_sliver_width;
+					}
+					else
+					{
+						current_hit_width = 1.0;
+					}
+
+					long double hit_end_position = hit_start_position + current_hit_width;
+
+					hit_total_distance_so_far = hit_end_position;
+
+					bool leftOverlaps = false;
+					if (hit_start_position < UnitsLeftFloat)
+					{
+						leftOverlaps = true;
+					}
+
+					bool middleOverlaps = false;
+					if (hit_start_position < UnitsLeftFloat + UnitsMiddleFloat && hit_end_position > UnitsLeftFloat)
+					{
+						middleOverlaps = true;
+					}
+
+					bool rightOverlaps = false;
+					if (hit_end_position > UnitsLeftFloat + UnitsMiddleFloat)
+					{
+						rightOverlaps = true;
+					}
+
+					if (useRight)
+					{
+						if (rightOverlaps)
+						{
+							new_hits[hit_number-1] = hit.second;
+						}
+					}
+					else
+					if (useLeft)
+					{
+						if (leftOverlaps)
+						{
+							new_hits[hit_number - 1] = hit.second;
+						}
+					}
+					else
+					if (useMiddle)
+					{
+						if (middleOverlaps)
+						{
+							new_hits[hit_number - 1] = hit.second;
+						}
+					}
+
 				}
 
-				// Determine if matches right
-				if (hit_time_index_one_based > originalWidth - rightRounded)
+
+
+
+
+				if (false)
 				{
-					matches_right = true;
-				}
-				 
-				// Determine if matches middle
-				if (left_was_zero)
-				{
-					if (hit_time_index_one_based <= middleRounded)
+					boost::multiprecision::cpp_int hit_time_index = hit.first;
+					boost::multiprecision::cpp_int hit_time_index_one_based = hit_time_index + 1;
+					bool matches_left = false;
+					bool matches_right = false;
+					bool matches_middle = false;
+
+					// Determine if matches left
+					if (hit_time_index_one_based <= leftRounded)
+					{
+						// matches left
+						matches_left = true;
+					}
+
+					// Determine if matches right
+					if (hit_time_index_one_based > originalWidth - rightRounded)
+					{
+						matches_right = true;
+					}
+
+					// Determine if matches middle
+					if (left_was_zero)
+					{
+						if (hit_time_index_one_based <= middleRounded)
+						{
+							matches_middle = true;
+						}
+					}
+					else if (right_was_zero)
+					{
+						if (hit_time_index_one_based > originalWidth - middleRounded)
+						{
+							matches_middle = true;
+						}
+					}
+					else if (hit_time_index_one_based > leftRounded && hit_time_index_one_based <= (originalWidth - rightRounded))
 					{
 						matches_middle = true;
 					}
-				}
-				else if (right_was_zero)
-				{
-					if (hit_time_index_one_based > originalWidth - middleRounded)
-					{
-						matches_middle = true;
-					}
-				}
-				else if (hit_time_index_one_based > leftRounded && hit_time_index_one_based <= (originalWidth - rightRounded))
-				{
-					matches_middle = true;
-				}
 
-				if (useRight)
-				{
-					if (matches_right)
+					if (useRight)
 					{
-						new_hits[hit_time_index - (originalWidth - rightRounded)] = hit.second;
+						if (matches_right)
+						{
+							new_hits[hit_time_index - (originalWidth - rightRounded)] = hit.second;
+						}
 					}
-				}
-				else
-				if (useLeft)
-				{
-					if (matches_left)
+					else
+					if (useLeft)
 					{
-						new_hits[hit_time_index] = hit.second;
-					}
-				}
-				else
-				if (useMiddle)
-				{
-					if (matches_middle)
-					{
-						if (left_was_zero)
+						if (matches_left)
 						{
 							new_hits[hit_time_index] = hit.second;
 						}
-						else if (right_was_zero)
+					}
+					else
+					if (useMiddle)
+					{
+						if (matches_middle)
 						{
-							new_hits[hit_time_index - (originalWidth - middleRounded)] = hit.second;
-						}
-						else
-						{
-							new_hits[hit_time_index - leftRounded] = hit.second;
+							if (left_was_zero)
+							{
+								new_hits[hit_time_index] = hit.second;
+							}
+							else if (right_was_zero)
+							{
+								new_hits[hit_time_index - (originalWidth - middleRounded)] = hit.second;
+							}
+							else
+							{
+								new_hits[hit_time_index - leftRounded] = hit.second;
+							}
 						}
 					}
 				}
 
 			});
+
 
 			if (new_hits.empty())
 			{
