@@ -2293,9 +2293,9 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 		long double AvgMsperUnitFloat = static_cast<long double>(AvgMsperUnit);
 
-		long double UnitsLeftFloat = widthLeftFloat / AvgMsperUnitFloat;
-		long double UnitsMiddleFloat = widthMiddleFloat / AvgMsperUnitFloat;
-		long double UnitsRightFloat = widthRightFloat / AvgMsperUnitFloat;
+		long double UnitsLeftFloat = widthLeftFloat; // / AvgMsperUnitFloat;
+		long double UnitsMiddleFloat = widthMiddleFloat; // / AvgMsperUnitFloat;
+		long double UnitsRightFloat = widthRightFloat; // / AvgMsperUnitFloat;
 
 	}
 
@@ -2725,7 +2725,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 					}
 					else
 					{
-						current_hit_width = 1.0;
+						current_hit_width = AvgMsperUnit;
 					}
 
 					long double hit_end_position = hit_start_position + current_hit_width;

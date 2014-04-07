@@ -22342,84 +22342,113 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 				else
 				{
 
-					bool first_hit_is_a_sliver = false;
-					bool last_hit_is_a_sliver = false;
-
-					std::int64_t current_starting_time = timeSlice.getStart();
-					std::int64_t current_aligned_down_time = TimeRange::determineAligningTimestamp(current_starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
-					long double start_sliver_width = 0.0;
-					if (current_aligned_down_time < current_starting_time)
-					{
-						first_hit_is_a_sliver = true;
-						start_sliver_width = static_cast<long double>(current_starting_time - current_aligned_down_time);
-					}
-
-					std::int64_t current_ending_time = timeSlice.getEnd();
-					std::int64_t current_aligned_up_time = TimeRange::determineAligningTimestamp(current_ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
-					long double end_sliver_width = 0.0;
-					if (current_aligned_up_time > current_ending_time)
-					{
-						last_hit_is_a_sliver = true;
-						end_sliver_width = static_cast<long double>(current_aligned_up_time - current_ending_time);
-					}
-
-					long double hit_total_distance_so_far = 0.0;
-					std::int64_t hit_number = 0;
-					std::int64_t total_hits = branch.hits.size();
-
-					for (auto const & time_unit_hit : branch.hits)
+					if (random_sampling)
 					{
 
-						++hit_number;
+						std::int64_t avgMsperUnit = AvgMsperUnit(allWeightings.time_granularity);
 
+						bool first_hit_is_a_sliver = false;
+						bool last_hit_is_a_sliver = false;
 
-						long double hit_start_position = hit_total_distance_so_far;
-						long double current_hit_width = 0.0;
-
-						if (hit_number == 1 && first_hit_is_a_sliver)
+						std::int64_t current_starting_time = timeSlice.getStart();
+						std::int64_t current_aligned_down_time = TimeRange::determineAligningTimestamp(current_starting_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_DOWN);
+						long double start_sliver_width = 0.0;
+						if (current_aligned_down_time < current_starting_time)
 						{
-							current_hit_width = start_sliver_width;
-						}
-						else
-						if (hit_number == total_hits && last_hit_is_a_sliver)
-						{
-							current_hit_width = end_sliver_width;
-						}
-						else
-						{
-							current_hit_width = 1.0;
+							first_hit_is_a_sliver = true;
+							start_sliver_width = static_cast<long double>(current_starting_time - current_aligned_down_time);
 						}
 
-						long double hit_end_position = hit_start_position + current_hit_width;
-						hit_total_distance_so_far = hit_end_position;
-
-
-
-						std::set<BranchOutputRow> output_rows_for_this_full_time_slice = time_unit_hit.second;
-
-						// Loop through our time range data
-
-						// The time slice has time granularity.
-						// Start at the beginning, and loop through.
-
-						std::int64_t const time_start = timeSlice.getStart();
-						std::int64_t const time_end = timeSlice.getEnd();
-
-						std::int64_t current_time_start = time_start;
-
-						while (current_time_start < time_end)
+						std::int64_t current_ending_time = timeSlice.getEnd();
+						std::int64_t current_aligned_up_time = TimeRange::determineAligningTimestamp(current_ending_time, allWeightings.time_granularity, TimeRange::ALIGN_MODE_UP);
+						long double end_sliver_width = 0.0;
+						if (current_aligned_up_time > current_ending_time)
 						{
-							std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
-							std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
-							std::int64_t time_to_use_for_end = time_start_aligned_higher;
-							if (time_start_aligned_higher > time_end) { time_to_use_for_end = time_end; }
-							TimeSlice current_slice(current_time_start, time_to_use_for_end);
+							last_hit_is_a_sliver = true;
+							end_sliver_width = static_cast<long double>(current_aligned_up_time - current_ending_time);
+						}
+
+						long double hit_total_distance_so_far = 0.0;
+						std::int64_t hit_number = 0;
+						std::int64_t total_hits = branch.hits.size();
+
+						for (auto const & time_unit_hit : branch.hits)
+						{
+
+							// *********************************************************************************** //
+							// Expect this loop to be hit many times
+							// *********************************************************************************** //
+
+							++hit_number;
+
+
+							long double hit_start_position = hit_total_distance_so_far;
+							long double current_hit_width = 0.0;
+
+							if (hit_number == 1 && first_hit_is_a_sliver)
+							{
+								current_hit_width = start_sliver_width;
+							}
+							else
+							if (hit_number == total_hits && last_hit_is_a_sliver)
+							{
+								current_hit_width = end_sliver_width;
+							}
+							else
+							{
+								current_hit_width = avgMsperUnit;
+							}
+
+							long double hit_end_position = hit_start_position + current_hit_width;
+							hit_total_distance_so_far = hit_end_position;
+
+
+
+							std::set<BranchOutputRow> output_rows_for_this_full_time_slice = time_unit_hit.second;
+
+							TimeSlice current_slice(hit_start_position, hit_end_position);
 							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
-							current_time_start = time_to_use_for_end;
+
 						}
 
 					}
+					else
+					{
 
+						for (auto const & time_unit_hit : branch.hits)
+						{
+
+							// *********************************************************************************** //
+							// There should be only one hit unit at index -1
+							// ... so this loop should only be entered once
+							// *********************************************************************************** //
+
+							std::set<BranchOutputRow> output_rows_for_this_full_time_slice = time_unit_hit.second;
+
+							// Loop through our time range data
+
+							// The time slice has time granularity.
+							// Start at the beginning, and loop through.
+
+							std::int64_t const time_start = timeSlice.getStart();
+							std::int64_t const time_end = timeSlice.getEnd();
+
+							std::int64_t current_time_start = time_start;
+
+							while (current_time_start < time_end)
+							{
+								std::int64_t current_start_time_incremented_by_1_ms = current_time_start + 1;
+								std::int64_t time_start_aligned_higher = TimeRange::determineAligningTimestamp(current_start_time_incremented_by_1_ms, time_granularity, TimeRange::ALIGN_MODE_UP);
+								std::int64_t time_to_use_for_end = time_start_aligned_higher;
+								if (time_start_aligned_higher > time_end) { time_to_use_for_end = time_end; }
+								TimeSlice current_slice(current_time_start, time_to_use_for_end);
+								OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
+								current_time_start = time_to_use_for_end;
+							}
+
+						}
+
+					}
 				}
 
 			});

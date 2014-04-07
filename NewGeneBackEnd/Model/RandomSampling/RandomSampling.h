@@ -5,6 +5,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <tuple>
 #ifndef Q_MOC_RUN
 #	include <boost/multiprecision/number.hpp>
 #	include <boost/multiprecision/cpp_int.hpp>
