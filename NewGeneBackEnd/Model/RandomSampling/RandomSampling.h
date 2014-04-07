@@ -1893,8 +1893,8 @@ protected:
 
 	}
 
-	std::set<boost::multiprecision::cpp_int> random_numbers;
-	std::set<boost::multiprecision::cpp_int>::const_iterator random_number_iterator;
+	std::vector<boost::multiprecision::cpp_int> random_numbers;
+	std::vector<boost::multiprecision::cpp_int>::const_iterator random_number_iterator;
 
 private:
 

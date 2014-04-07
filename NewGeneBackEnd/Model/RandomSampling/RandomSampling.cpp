@@ -799,32 +799,27 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 	// window of discrete values), including no-replacement.
 	bool reverse_mode = false;
 	std::vector<boost::multiprecision::cpp_int> remaining;
-	while (random_numbers.size() < static_cast<size_t>(how_many))
+	std::vector<boost::multiprecision::cpp_int>::const_iterator remainingPtr;
+	std::set<boost::multiprecision::cpp_int> tmp_random_numbers;
+	while (tmp_random_numbers.size() < static_cast<size_t>(how_many))
 	{
 
 		// Check if we've consumed over 50% of the random numbers available
 		if (reverse_mode)
 		{
 
-			if (remaining.empty())
+			tmp_random_numbers.insert(*remainingPtr);
+
+			++remainingPtr;
+
+			if (remainingPtr == remaining.cend())
 			{
-				// TODO: warning
-				//boost::format msg("Too many output rows have been requested for the given data set.");
-				//throw NewGeneException() << newgene_error_description(msg.str());
 				break;
 			}
 
-			std::uniform_int_distribution<size_t> remaining_distribution(0, remaining.size() - 1);
-			size_t which_remaining_random_number = remaining_distribution(engine);
-
-			random_numbers.insert(remaining[which_remaining_random_number]);
-
-			auto remainingPtr = remaining.begin() + which_remaining_random_number;
-			remaining.erase(remainingPtr);
-
 		}
 		else
-		if (boost::multiprecision::cpp_int(random_numbers.size()) > weighting.getWeighting() / 2)
+		if (boost::multiprecision::cpp_int(tmp_random_numbers.size()) > weighting.getWeighting() / 2)
 		{
 			// Over 50% of the available numbers are already consumed.
 			// It must be a "somewhat" small number of available numbers.
@@ -832,21 +827,44 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 			// Begin pulling numbers randomly from the remaining set available.
 			for (boost::multiprecision::cpp_int n = 0; n < weighting.getWeighting(); ++n)
 			{
-				if (random_numbers.count(n) == 0)
+				if (tmp_random_numbers.count(n) == 0)
 				{
 					remaining.push_back(n);
 				}
 			}
 
+			if (remaining.size() == 0)
+			{
+				boost::format msg("No random numbers generated.");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+
+			std::random_shuffle(remaining.begin(), remaining.end(), [&](size_t max_random)
+			{
+				std::uniform_int_distribution<size_t> remaining_distribution(0, max_random - 1);
+				size_t which_remaining_random_number = remaining_distribution(engine);
+				return which_remaining_random_number;
+			});
+
 			// Prepare reverse mode, but do not populate a new random number
+			remainingPtr = remaining.cbegin();
 			reverse_mode = true;
 		}
 		else
 		{
-			random_numbers.insert(distribution(engine));
+			tmp_random_numbers.insert(distribution(engine));
 		}
 
 	}
+
+	random_numbers.insert(random_numbers.begin(), tmp_random_numbers.cbegin(), tmp_random_numbers.cend());
+	std::random_shuffle(random_numbers.begin(), random_numbers.end(), [&](size_t max_random)
+	{
+		std::uniform_int_distribution<size_t> remaining_distribution(0, max_random - 1);
+		size_t which_remaining_random_number = remaining_distribution(engine);
+		return which_remaining_random_number;
+	});
+
 
 	random_number_iterator = random_numbers.cbegin();
 
