@@ -257,7 +257,16 @@ class TimeSlice
 				minus_infinity = true;
 				plus_infinity = true;
 			}
+		}
 
+		std::int64_t getWidth() const
+		{
+			if (none && (minus_infinity || plus_infinity))
+			{
+				boost::format msg("Attempting to get the width of an infinite time slice!");
+				throw NewGeneException() << newgene_error_description(msg.str());
+			}
+			return getEnd() - getStart();
 		}
 
 		// ***************************************************************************** //

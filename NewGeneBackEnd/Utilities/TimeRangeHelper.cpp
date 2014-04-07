@@ -5,6 +5,7 @@
 #endif
 
 // Returns the closest Unix timestamp that is equal to or higher than test_timestamp,
+// or equal to or lower than test_timestamp (depending on ALIGN_MODE),
 // but aligned on the given time_granularity
 std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_timestamp, TIME_GRANULARITY const time_granularity, ALIGN_MODE const align_mode)
 {
@@ -46,9 +47,9 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 
 	// Use the difference between the time durations
 	// to round as desired
-	bpt::time_duration difference_seconds_milliseconds = milliseconds_into_day_duration - seconds_into_day_duration;
-	bpt::time_duration difference_minutes_seconds = seconds_into_day_duration - minutes_into_day_duration;
-	bpt::time_duration difference_hours_minutes = minutes_into_day_duration - hours_into_day_duration;
+	bpt::time_duration difference_milliseconds_seconds = milliseconds_into_day_duration - seconds_into_day_duration;
+	bpt::time_duration difference_seconds_minutes = seconds_into_day_duration - minutes_into_day_duration;
+	bpt::time_duration difference_minutes_hours = minutes_into_day_duration - hours_into_day_duration;
 
 	bpt::ptime date_rounded(incoming_time.date());
 
@@ -72,17 +73,15 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 		case TIME_GRANULARITY__SECOND:
 			{
 
-				bool round_up = false;
+				bool exact_match = false;
 
-				// Always round up - do not round to nearest!
-				if (difference_seconds_milliseconds.total_milliseconds() > 0)
+				if (difference_milliseconds_seconds.total_milliseconds() == 0)
 				{
-					round_up = true;
+					exact_match = true;
 				}
 
-				// Set the result, but rounded to nearest second at or above incoming timestamp
 				result = bpt::ptime(date_rounded.date(), seconds_into_day_duration);
-				if (round_up && align_mode == ALIGN_MODE_UP)
+				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += bpt::seconds(1);
 				}
@@ -93,17 +92,15 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 		case TIME_GRANULARITY__MINUTE:
 			{
 
-				bool round_up = false;
+				bool exact_match = false;
 
-				// Always round up - do not round to nearest!
-				if (difference_minutes_seconds.total_milliseconds() > 0)
+				if (difference_seconds_minutes.total_milliseconds() == 0)
 				{
-					round_up = true;
+					exact_match = true;
 				}
 
-				// Set the result, but rounded to nearest minute at or above incoming timestamp
 				result = bpt::ptime(date_rounded.date(), minutes_into_day_duration);
-				if (round_up && align_mode == ALIGN_MODE_UP)
+				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += bpt::minutes(1);
 				}
@@ -114,17 +111,15 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 		case TIME_GRANULARITY__HOUR:
 			{
 
-				bool round_up = false;
+				bool exact_match = false;
 
-				// Always round up - do not round to nearest!
-				if (difference_hours_minutes.total_milliseconds() > 0)
+				if (difference_minutes_hours.total_milliseconds() == 0)
 				{
-					round_up = true;
+					exact_match = true;
 				}
 
-				// Set the result, but rounded to nearest hour at or above incoming timestamp
 				result = bpt::ptime(date_rounded.date(), hours_into_day_duration);
-				if (round_up && align_mode == ALIGN_MODE_UP)
+				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += bpt::hours(1);
 				}
@@ -135,15 +130,14 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 		case TIME_GRANULARITY__DAY:
 			{
 
-				bool round_up = false;
-				if (difference_between_incoming_and_day.total_milliseconds() > 0)
+				bool exact_match = false;
+				if (difference_between_incoming_and_day.total_milliseconds() == 0)
 				{
-					round_up = true;
+					exact_match = true;
 				}
 
-				// Set the result, but rounded to nearest hour at or above incoming timestamp
 				result = date_day;
-				if (round_up && align_mode == ALIGN_MODE_UP)
+				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += boost::gregorian::days(1);
 				}
@@ -161,15 +155,14 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 		case TIME_GRANULARITY__MONTH:
 			{
 
-				bool round_up = false;
-				if (difference_between_incoming_and_month.total_milliseconds() > 0)
+				bool exact_match = false;
+				if (difference_between_incoming_and_month.total_milliseconds() == 0)
 				{
-					round_up = true;
+					exact_match = true;
 				}
 
-				// Set the result, but rounded to nearest hour at or above incoming timestamp
 				result = date_month;
-				if (round_up && align_mode == ALIGN_MODE_UP)
+				if (!exact_match && align_mode == ALIGN_MODE_UP)
 				{
 					result += boost::gregorian::months(1);
 				}
@@ -187,12 +180,12 @@ std::int64_t TimeRange::determineAligningTimestamp(std::int64_t const test_times
 		case TIME_GRANULARITY__YEAR:
 			{
 				result = date_year;
-				if (difference_between_incoming_and_year.total_milliseconds() > 0)
+				if (difference_between_incoming_and_year.total_milliseconds() == 0)
 				{
 					// round to next year
 					result += boost::gregorian::years(1);
 				}
-		}
+			}
 			break;
 
 		case TIME_GRANULARITY__BIENNIAL:
