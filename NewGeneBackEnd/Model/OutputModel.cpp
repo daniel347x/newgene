@@ -606,10 +606,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
 
-#		ifdef _DEBUG
+//#		ifdef _DEBUG
 		std::vector<std::string> sdata;
 		SpitAllWeightings(sdata, allWeightings, true);
-#		endif
+//#		endif
 
 		RandomSamplingWriteResultsToFileOrScreen(allWeightings);
 
@@ -13266,47 +13266,22 @@ void OutputModel::OutputGenerator::Prepare(AllWeightings & allWeightings)
 	top_level_vg_index = 0;
 	if (primary_variable_groups_vector.size() > 1)
 	{
-		if (true) // if (random_sampling)
+		std::vector<WidgetInstanceIdentifier> variableGroupOptions;
+		std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
 		{
-			if (true)
-			{
-				std::vector<WidgetInstanceIdentifier> variableGroupOptions;
-				std::for_each(primary_variable_groups_vector.cbegin(), primary_variable_groups_vector.cend(), [&](std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & vg_to_selected)
-				{
-					variableGroupOptions.push_back(vg_to_selected.first);
-				});
-				boost::format msgTitle("Select top-level variable group");
-				boost::format msgQuestion("There are multiple variable groups with the same set of unit of analysis fields that might be used as the \"primary\" variable group for the run.  Please select one to use as the primary variable group for this run:");
+			variableGroupOptions.push_back(vg_to_selected.first);
+		});
+		boost::format msgTitle("Select top-level variable group");
+		boost::format msgQuestion("There are multiple variable groups with the same set of unit of analysis fields that might be used as the \"primary\" variable group for the run.  Please select one to use as the primary variable group for this run:");
 
-				// 0-based
-				top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
+		// 0-based
+		top_level_vg_index = static_cast<size_t>(messager.ShowOptionMessageBox(msgTitle.str(), msgQuestion.str(), variableGroupOptions));
 
-				if (top_level_vg_index == -1)
-				{
-					// user cancelled
-					failed = true;
-					return;
-				}
-				//top_level_vg_index = 0;
-			}
-			else
-			{
-				boost::format msg("Multiple top-level variable groups are not currently supported.");
-				SetFailureMessage(msg.str());
-				failed = true;
-			}
-		}
-		else
+		if (top_level_vg_index == -1)
 		{
-			boost::format
-				msg("Because you have multiple top-level variable groups selected, it is possible that some rows over the same time range will contain data for one (or more) but not all of these variable groups, and not the others.  However, a *subset* of data in the other variable groups might have valid data over this time range.  In this case, that valid data will appear as NULL in the output for this run.  This is probably minor, but to prevent this, perform a run with only one top-level variable group selected.");
-			bool do_continue = messager.ShowQuestionMessageBox(std::string("Continue?"), msg.str());
-
-			if (!do_continue)
-			{
-				cancelled = true;
-				return;
-			}
+			// user cancelled
+			failed = true;
+			return;
 		}
 	}
 
@@ -13440,6 +13415,28 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 	{
 		variables_in_group_sorted.insert(variable_group_set_member);
 	});
+
+	if (primary_or_secondary_view_index == top_level_vg_index)
+	{
+		// This is the *primary* top-level variable group.
+		// Now that we are loading this, this is the first time
+		// we know about or care about the sequence of primary key fields
+		// in the output.
+		// It is time to set this information in the "sequence" object.
+
+		int primary_column_index = 0;
+		for (auto const & variable_group_set_member : variables_in_group)
+		{
+			for (auto & primary_key_entry__output__including_multiplicities : sequence.primary_key_sequence_info)
+			{
+				if (variable_group_set_member.IsEqual(WidgetInstanceIdentifier::EQUALITY_CHECK_TYPE__UUID, primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].vg_identifier))
+				{
+					primary_key_entry__output__including_multiplicities.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg = primary_column_index;
+					++primary_column_index;
+				}
+			}
+		}
+	}
 
 	WidgetInstanceIdentifiers datetime_columns = input_model->t_vgp_data_metadata__datetime_columns.getIdentifiers(vg_data_table_name);
 
@@ -14419,7 +14416,8 @@ void OutputModel::OutputGenerator::PopulatePrimaryKeySequenceInfo()
 			current_primary_key_sequence.dmu_category = the_dmu_category;
 			current_primary_key_sequence.sequence_number_within_dmu_category_spin_control = k_sequence_number_count_for_given_dmu_category_out_of_total_spin_count_for_that_dmu_category;
 			current_primary_key_sequence.sequence_number_within_dmu_category_primary_uoa = k_sequence_number_count_for_given_dmu_category_out_of_k_count_for_primary_uoa_for_that_dmu_category;
-			current_primary_key_sequence.sequence_number_in_all_primary_keys = overall_primary_key_sequence_number;
+			current_primary_key_sequence.sequence_number_in_all_primary_keys__of__global_primary_key_sequence_metadata__NOT__of_order_columns_appear_in_top_level_vg = overall_primary_key_sequence_number;
+			current_primary_key_sequence.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg = -1; // We do not know this yet.  We will fill this in when we populate the schema for the primary top-level variable group.
 			current_primary_key_sequence.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category = k_count_for_primary_uoa_for_given_dmu_category;
 			current_primary_key_sequence.total_kad_spin_count_for_this_dmu_category = total_spin_control_k_count_for_given_dmu_category;
 
@@ -21360,7 +21358,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 				// Enforce that the sequence number appears in order
 
 				if (overall_top_level_primary_key_sequence_number_including_branch_and_all_leaves_and_all_columns_within_each_leaf !=
-					full_kad_key_info.sequence_number_in_all_primary_keys)
+					full_kad_key_info.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg)
 				{
 					return;
 				}
@@ -21380,6 +21378,10 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 				if (full_kad_key_info_child_variable_group.total_outer_multiplicity__in_total_kad__for_current_dmu_category__for_current_variable_group == 0)
 				{
 					// There are no columns in this DMU for our current child variable group
+					if (is_current_index_a_top_level_primary_group_branch)
+					{
+						++current_primary_branch_index;
+					}
 					return;
 				}
 
@@ -21422,11 +21424,7 @@ void OutputModel::OutputGenerator::RandomSamplerFillDataForChildGroups(AllWeight
 					throw NewGeneException() << newgene_error_description(msg.str());
 				}
 
-				if (is_current_index_a_top_level_primary_group_branch)
-				{
-					++current_primary_branch_index;
-				}
-				else
+				if (!is_current_index_a_top_level_primary_group_branch)
 				{
 					++current_primary_internal_leaf_index;
 					if (full_kad_key_info.sequence_number_within_dmu_category_primary_uoa + 1 == full_kad_key_info.total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category)

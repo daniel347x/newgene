@@ -1547,7 +1547,7 @@ BranchOutputRow::~BranchOutputRow()
 {
 }
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 {
 
@@ -2028,7 +2028,7 @@ void SpitLeaves(std::string & sdata, Branch const & branch)
 	sdata += "</LEAVES>";
 }
 
-#endif
+//#endif
 
 void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, TimeSlice const & originalTimeSlice, TimeSlice const & currentTimeSlice, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {

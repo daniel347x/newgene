@@ -1139,7 +1139,7 @@ class BranchOutputRow
 		}
 
 #	ifndef _DEBUG
-	private: // for debugging convenience, make public; but be sure it builds when private
+//	private: // for debugging convenience, make public; but be sure it builds when private
 #	endif
 
 		// ******************************************************************* //
@@ -1177,7 +1177,7 @@ class BranchOutputRow
 typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 typedef std::set<Leaf> Leaves;
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys);
 void SpitDataCache(std::string & sdata, DataCache const & dataCache);
 void SpitDataCaches(std::string & sdata, std::map<int, DataCache> const & dataCaches);
@@ -1190,7 +1190,7 @@ void SpitWeighting(std::string & sdata, Weighting const & weighting);
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
 void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file = false);
 void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
-#endif
+//#endif
 
 // "Branch"
 class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
@@ -1252,7 +1252,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			return *this;
 		}
 
-#		ifdef _DEBUG
+//#		ifdef _DEBUG
 		void SpitLeaves(std::string & sdata) const
 		{
 			int index = 0;
@@ -1269,7 +1269,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 				sdata += "</LEAF>";
 			});
 		}
-#		endif
+//#		endif
 
 		// The following must be MUTABLE
 		// because the BRANCH is used as the KEY for various maps...
@@ -1496,9 +1496,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 typedef PrimaryKeysGroupingMultiplicityOne Branch;
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 void SpitBranch(std::string & sdata, Branch const & branch);
-#endif
+//#endif
 
 
 // ******************************************************************************************************** //
