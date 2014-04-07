@@ -448,7 +448,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText("Beginning generation of K-ad output.", this);
 	messager.AppendKadStatusText("Initializing...", this);
 
-	AllWeightings allWeightings;
+	AllWeightings allWeightings(messager);
 
 	Prepare(allWeightings);
 
@@ -494,6 +494,12 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 		if (failed || CheckCancelled()) return;
 
+		std::vector<std::string> sdata;
+		SpitAllWeightings(sdata, allWeightings, true);
+
+		failed = true;
+		return;
+
 		// *************************************************** //
 		// Build leaf cache and empty child leaf mapping to output row caches.
 		// *************************************************** //
@@ -504,6 +510,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// for use with progress bar
 		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
 		if (failed || CheckCancelled()) return;
+
+		boost::format msg("Total number of combinations that NewGene must store in memory: %1%");
+		msg % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting());
+		messager.AppendKadStatusText(msg.str(), this);
 
 		if (random_sampling)
 		{
@@ -606,10 +616,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
 
-//#		ifdef _DEBUG
-		std::vector<std::string> sdata;
-		SpitAllWeightings(sdata, allWeightings, true);
-//#		endif
+#		ifdef _DEBUG
+		//std::vector<std::string> sdata;
+		//SpitAllWeightings(sdata, allWeightings, true);
+#		endif
 
 		RandomSamplingWriteResultsToFileOrScreen(allWeightings);
 

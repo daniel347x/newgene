@@ -21,11 +21,12 @@ sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
 bool MergedTimeSliceRow::RHS_wins = false;
 std::string create_output_row_visitor::row_in_process;
 
-AllWeightings::AllWeightings()
+AllWeightings::AllWeightings(Messager & messager_)
 : insert_random_sample_stmt(nullptr)
 , numberChildVariableGroups(0)
 , time_granularity(TIME_GRANULARITY__NONE)
 , random_rows_added(0)
+, messager(messager_)
 {
 
 }
@@ -667,8 +668,13 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 
 	boost::multiprecision::cpp_int currentWeighting = 0;
 
+	std::int64_t branch_count = 0;
+	std::int64_t time_slice_count = 0;
+
 	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceEntry)
 	{
+
+		++time_slice_count;
 
 		TimeSlice const & timeSlice = timeSliceEntry.first;
 		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second;
@@ -695,6 +701,8 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 			std::for_each(branchesAndLeaves.begin(), branchesAndLeaves.end(), [&](Branch const & branch)
 			{
 
+				++branch_count;
+
 				//Leaves & leaves = branchAndLeaves.second;
 
 				Weighting & branchWeighting = branch.weighting;
@@ -714,12 +722,16 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 
 				// clear the hits cache
 				branch.hits.clear();
-
+				
 				// Holes between time slices are handled here, as well as the standard case of no holes between time slices -
 				// There is no gap in the sequence of discretized weight values in branches.
 				branchWeighting.setWeighting(timeSlice.WidthForWeighting(ms_per_unit_time) * branch.number_branch_combinations);
 				branchWeighting.setWeightingRangeStart(currentWeighting);
 				currentWeighting += branchWeighting.getWeighting();
+
+				//boost::format msg("New weighting being added for branch: %1%");
+				//msg % boost::lexical_cast<std::string>(weighting.getWeighting());
+				//messager.AppendKadStatusText(msg.str(), this);
 
 				variableGroupBranchesAndLeavesWeighting.addWeighting(branchWeighting.getWeighting());
 
@@ -732,6 +744,10 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 		weighting.addWeighting(variableGroupTimeSliceDataWeighting.getWeighting());
 
 	});
+
+	boost::format msg("%1% time slices and %2% branches");
+	msg % time_slice_count % branch_count;
+	messager.AppendKadStatusText(msg.str(), this);
 
 }
 
@@ -2209,6 +2225,12 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 	// Time slices get split apart, but never merged together, in the context of this function.
 
+
+	// ************************************************************************************************* //
+	// This is the critical block that deals properly with unbiased random sampling
+	// to handle time slices that are not aligned on unit time boundaries
+	// (with the unit defined by the unit of analysis)
+	// ************************************************************************************************* //
 	if (originalTimeSlice.getStart() < currentTimeSlice.getStart())
 	{
 		if (originalTimeSlice.getEnd() <= currentTimeSlice.getStart())
@@ -2270,7 +2292,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 			// original end is past current end
 			// Left edges are the same, entire current overlaps original, and right side of original is by itself on the right
-			leftWidth = originalTimeSlice.getEnd() - originalTimeSlice.getStart();
+			leftWidth = currentTimeSlice.getEnd() - currentTimeSlice.getStart();
 			rightWidth = originalTimeSlice.getEnd() - currentTimeSlice.getEnd();
 
 			useLeft = true;
@@ -2465,9 +2487,11 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 		++middleRounded;
 	}
 
+	return;
+
 	std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> new_hits;
-	VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = branches_and_leaves;
-	std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
+	VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = branches_and_leaves;
+	std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 	{
 
 		std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & current_branch)

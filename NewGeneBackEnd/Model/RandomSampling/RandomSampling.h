@@ -13,6 +13,7 @@
 #include "../../Utilities/NewGeneException.h"
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
 #include "../TimeGranularity.h"
+#include "../../Messager/Messager.h"
 
 typedef boost::variant<std::int64_t, double, std::string> InstanceData;
 typedef boost::variant<std::int64_t, double, std::string> DMUInstanceData;
@@ -1807,7 +1808,7 @@ class AllWeightings
 
 public:
 
-	AllWeightings();
+	AllWeightings(Messager & messager_);
 	~AllWeightings();
 
 public:
@@ -1830,6 +1831,7 @@ public:
 	int numberChildVariableGroups;
 	TIME_GRANULARITY time_granularity;
 	std::int64_t random_rows_added;
+	Messager & messager;
 
 	// final output in case of consolidated row output
 	std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> consolidated_rows;

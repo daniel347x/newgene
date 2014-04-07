@@ -12,6 +12,7 @@ TARGET = NewGene
 TEMPLATE = app
 
 win32: QMAKE_CXXFLAGS_RELEASE += -Zi
+#win32: QMAKE_LFLAGS_RELEASE   += /INCREMENTAL:NO /DEBUG /HEAP:1000000000
 win32: QMAKE_LFLAGS_RELEASE   += /INCREMENTAL:NO /DEBUG
 win32: QMAKE_CXXFLAGS += /F 32000000 # doesn't work
 win32: QMAKE_LFLAGS   += /STACK:32000000
@@ -147,7 +148,7 @@ SOURCES += main.cpp\
 	Widgets/ManageInput/VGs/newgenemanagevgs.cpp \
 	Widgets/ManageInput/DMUs/displaydmusregion.cpp \
 	Widgets/Utilities/qsortfilterproxymodel_numberslast.cpp \
-    Widgets/Utilities/dialoghelper.cpp
+	Widgets/Utilities/dialoghelper.cpp
 
 HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/CreateOutput/newgenecreateoutput.h \
@@ -268,7 +269,7 @@ HEADERS  += Widgets/newgenemainwindow.h \
 	Widgets/Utilities/qsortfilterproxymodel_numberslast.h \
 	Infrastructure/UIAction/uoamanagement.h \
 	Infrastructure/UIAction/vgmanagement.h \
-    Widgets/Utilities/dialoghelper.h
+	Widgets/Utilities/dialoghelper.h
 
 FORMS    += Widgets/newgenemainwindow.ui \
 	Widgets/CreateOutput/newgenecreateoutput.ui \
