@@ -494,16 +494,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSampling_ReadData_AddToTimeSlices(selected_raw_data_table_schema.second, top_level_vg_index, allWeightings, VARIABLE_GROUP_MERGE_MODE__PRIMARY, errorMessages);
 		if (failed || CheckCancelled()) return;
 
-		std::vector<std::string> sdata;
-		SpitAllWeightings(sdata, allWeightings, true);
-
-		boost::format msgdone("Done spitting to XML.");
-		messager.AppendKadStatusText(msgdone.str(), this);
-
-		failed = true;
-		return;
-
-
 		// *************************************************** //
 		// Build leaf cache and empty child leaf mapping to output row caches.
 		// *************************************************** //
@@ -20608,10 +20598,11 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								bool added = false;
 								bool first = true;
 								TimeSlices::iterator mapIterator;
+								auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
 								while (first || call_again)
 								{
 									first = false;
-									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
 									bool added_recurse = std::get<0>(ret);
 									if (added_recurse)
 									{
@@ -20643,10 +20634,11 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								bool added = false;
 								bool first = true;
 								TimeSlices::iterator mapIterator;
+								auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
 								while (first || call_again)
 								{
 									first = false;
-									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
 									bool added_recurse = std::get<0>(ret);
 									if (added_recurse)
 									{
@@ -20685,10 +20677,11 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								bool added = false;
 								bool first = true;
 								TimeSlices::iterator mapIterator;
+								auto incomingTimeSliceLeaf = std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf);
 								while (first || call_again)
 								{
 									first = false;
-									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, std::make_pair(TimeSlice(sorting_row_of_data.datetime_start, sorting_row_of_data.datetime_end), leaf), variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
+									std::tuple<bool, bool, TimeSlices::iterator> ret = allWeightings.HandleIncomingNewBranchAndLeaf(branch, incomingTimeSliceLeaf, variable_group_number, merge_mode, AvgMsperUnit(time_granularity), consolidate_rows, random_sampling, mapIterator, call_again);
 									bool added_recurse = std::get<0>(ret);
 									if (added_recurse)
 									{
