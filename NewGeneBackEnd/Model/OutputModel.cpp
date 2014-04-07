@@ -13416,26 +13416,114 @@ void OutputModel::OutputGenerator::PopulateSchemaForRawDataTable(std::pair<Widge
 		variables_in_group_sorted.insert(variable_group_set_member);
 	});
 
+	// Check if this is the *primary* top-level variable group.
+	// If so, now that we are loading it, this is the first time
+	// we know about or care about the sequence of primary key fields
+	// in the output.
+	// It is time to set this information in the global "sequence" metadata object.
 	if (primary_or_secondary_view_index == top_level_vg_index)
 	{
-		// This is the *primary* top-level variable group.
-		// Now that we are loading this, this is the first time
-		// we know about or care about the sequence of primary key fields
-		// in the output.
-		// It is time to set this information in the "sequence" object.
 
-		int primary_column_index = 0;
+		int primary_vg_output_column_sequence = 0;
+
+		// First, the keys of multiplicity 1
+		// ... which always appear first in the output
 		for (auto const & variable_group_set_member : variables_in_group)
 		{
-			for (auto & primary_key_entry__output__including_multiplicities : sequence.primary_key_sequence_info)
+				
+			int count_of_this_raw_variable_column_in_final_output = 0;
+			for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
 			{
-				if (*variable_group_set_member.code == primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+				if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
 				{
-					primary_key_entry__output__including_multiplicities.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg = primary_column_index;
-					++primary_column_index;
+					++count_of_this_raw_variable_column_in_final_output;
 				}
 			}
+
+			if (count_of_this_raw_variable_column_in_final_output == 1)
+			{
+
+				int main_sequence_test = 0;
+				for (auto & primary_key_entry__output__including_multiplicities : sequence.primary_key_sequence_info)
+				{
+					if (*variable_group_set_member.code == primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+					{
+						primary_key_entry__output__including_multiplicities.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg = primary_vg_output_column_sequence;
+						++primary_vg_output_column_sequence;
+					}
+				}
+
+			}
+
 		}
+	
+		// Next, the keys of multiplicity > 1
+		// ... which always appear later in the output
+		int multiplicity_count_test = 0;
+		for (auto const & variable_group_set_member : variables_in_group)
+		{
+
+			int count_of_this_raw_variable_column_in_final_output = 0;
+			for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
+			{
+				if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+				{
+					++count_of_this_raw_variable_column_in_final_output;
+				}
+			}
+
+			if (count_of_this_raw_variable_column_in_final_output > 1)
+			{
+				if (multiplicity_count_test > 0)
+				{
+					if (multiplicity_count_test != count_of_this_raw_variable_column_in_final_output)
+					{
+						boost::format msg("Logic error: Every DMU column in the DMU with multiplicity greater than 1 must have the same multiplicity.");
+						throw NewGeneException() << newgene_error_description(msg.str());
+					}
+				}
+				multiplicity_count_test = count_of_this_raw_variable_column_in_final_output;
+			}
+
+		}
+
+		for (int current_multiplicity = 0; current_multiplicity < multiplicity_count_test; ++current_multiplicity)
+		{
+
+			for (auto const & variable_group_set_member : variables_in_group)
+			{
+
+				bool has_multiplicity_greater_than_1 = false;
+				for (auto & primary_key_entry__test_sequence : sequence.primary_key_sequence_info)
+				{
+					if (*variable_group_set_member.code == primary_key_entry__test_sequence.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+					{
+						has_multiplicity_greater_than_1 = true;
+						break;
+					}
+				}
+
+				if (has_multiplicity_greater_than_1)
+				{
+					int test_multiplicity = 0;
+					for (auto & primary_key_entry__output__including_multiplicities : sequence.primary_key_sequence_info)
+					{
+						if (*variable_group_set_member.code == primary_key_entry__output__including_multiplicities.variable_group_info_for_primary_keys__top_level_and_child[top_level_vg_index].column_name_no_uuid)
+						{
+							if (test_multiplicity == current_multiplicity)
+							{
+								primary_key_entry__output__including_multiplicities.sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg = primary_vg_output_column_sequence;
+								++primary_vg_output_column_sequence;
+							}
+							++test_multiplicity;
+						}
+					}
+				}
+
+			}
+
+		}
+
 	}
 
 	WidgetInstanceIdentifiers datetime_columns = input_model->t_vgp_data_metadata__datetime_columns.getIdentifiers(vg_data_table_name);

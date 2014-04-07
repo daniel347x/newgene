@@ -35,6 +35,7 @@ class PrimaryKeySequence
 					, total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group(-1) // will be populated later
 					, total_number_columns_for_dmu_category__internal_to_uoa_corresponding_to_this_variable_group(0) // will only be populated later if exists
 					, total_number_columns_for_dmu_category__internal_to_the_uoa_corresponding_to_primary_uoa_for_the_same_dmu_category(-1) // will be populated later
+					, is_primary_column_selected(false)
 				{}
 
 			public:
@@ -78,6 +79,16 @@ class PrimaryKeySequence
 		{
 
 			public:
+
+				PrimaryKeySequenceEntry()
+					: sequence_number_within_dmu_category_spin_control{ -1 }
+					, sequence_number_within_dmu_category_primary_uoa{ -1 }
+					, sequence_number_in_all_primary_keys__of__global_primary_key_sequence_metadata__NOT__of_order_columns_appear_in_top_level_vg{ -1 }
+					, sequence_number_in_all_primary_keys__of__order_columns_appear_in_top_level_vg{ -1 }
+					, total_k_count_within_high_level_variable_group_uoa_for_this_dmu_category{ -1 }
+					, total_kad_spin_count_for_this_dmu_category{ -1 }
+					, total_outer_multiplicity__for_the_current_dmu_category__corresponding_to_the_uoa_corresponding_to_top_level_variable_group{ -1 }
+				{}
 
 				WidgetInstanceIdentifier dmu_category;
 				int sequence_number_within_dmu_category_spin_control;
