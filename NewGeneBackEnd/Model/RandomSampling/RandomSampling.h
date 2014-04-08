@@ -1827,8 +1827,6 @@ class MergedTimeSliceRow
 
 };
 
-typedef std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys, boost::fast_pool_allocator<MergedTimeSliceRow>> fast__mergedtimeslicerow_set;
-
 class SortMergedRowsByTimeThenKeys
 {
 
@@ -1854,6 +1852,8 @@ public:
 	}
 
 };
+
+typedef std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys, boost::fast_pool_allocator<MergedTimeSliceRow>> fast__mergedtimeslicerow_set;
 
 class AllWeightings
 {
@@ -1981,7 +1981,7 @@ public:
 	void PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch);
 	void ResetBranchCaches();
 	void ConsolidateRowsWithinBranch(Branch const & branch, int & orig_random_number_rows);
-	void getChildToBranchColumnMappingsUsage(size_t & usage, std::map<int, std::vector<ChildToPrimaryMapping>> const & childToBranchColumnMappings) const;
+	void getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const;
 	void getDataCacheUsage(size_t & usage, DataCache const & dataCache) const;
 	void getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf = true) const;
 	void getLeafUsage(size_t & usage, Leaf const & leaf) const;

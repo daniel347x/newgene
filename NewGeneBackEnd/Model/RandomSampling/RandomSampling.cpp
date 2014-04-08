@@ -1752,7 +1752,7 @@ void SpitDataCache(std::string & sdata, DataCache const & dataCache)
 	sdata += "</DATA_CACHE>";
 }
 
-void SpitDataCaches(std::string & sdata, std::map<int, DataCache> const & dataCaches)
+void SpitDataCaches(std::string & sdata, fast_int_to_data_cache_map const & dataCaches)
 {
 	sdata += "<DATA_CACHES>";
 	std::for_each(dataCaches.cbegin(), dataCaches.cend(), [&](std::pair<int const, DataCache> const & dataEntry)
@@ -3211,7 +3211,7 @@ void AllWeightings::getDataCacheUsage(size_t & usage, DataCache const & dataCach
 	}
 }
 
-void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, std::map<int, std::vector<ChildToPrimaryMapping>> const & childToBranchColumnMappings) const
+void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const
 {
 	for (auto const & single_mappings_from_child_branch_to_primary : childToBranchColumnMappings)
 	{
