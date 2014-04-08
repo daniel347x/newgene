@@ -1906,7 +1906,7 @@ public:
 			sdata += "; ";
 
 			sdata += "sizeConsolidatedRows: ";
-			sdata += boost::lexical_cast<std::string>();
+			sdata += boost::lexical_cast<std::string>(sizeConsolidatedRows);
 			sdata += "; ";
 
 			sdata += "sizeRandomNumbers: ";

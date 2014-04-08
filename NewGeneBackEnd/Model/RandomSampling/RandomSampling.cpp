@@ -3052,7 +3052,7 @@ void AllWeightings::getMySize() const
 				// leaves
 				for (auto const & leaf : leaves)
 				{
-					getLeafUsage(mySize.sizeTimeSlices);
+					getLeafUsage(mySize.sizeTimeSlices, leaf);
 				}
 
 				// helper_lookup__from_child_key_set__to_matching_output_rows
@@ -3174,7 +3174,6 @@ void AllWeightings::getInstanceDataVectorUsage(size_t & usage, std::vector<Insta
 	{
 		usage += boost::apply_visitor(size_of_visitor(), instanceData);
 	}
-	return usage;
 }
 
 void AllWeightings::getDataCacheUsage(size_t & usage, DataCache const & dataCache) const
