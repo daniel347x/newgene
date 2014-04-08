@@ -477,7 +477,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// The work of the new Sampler class is all done here
 	if (true)
 	{
-
+		
 		K = 0;
 		random_sampling_schema = RandomSamplingBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
 		if (failed || CheckCancelled()) return;

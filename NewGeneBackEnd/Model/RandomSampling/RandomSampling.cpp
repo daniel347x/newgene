@@ -1033,8 +1033,24 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 	// this is handled by storing a map of every *time unut* (corresponding to the primary variable group)
 	// and all leaf combinations that have been hit for that time unit.
 	++random_rows_added;
-	branch.hits[which_time_unit].insert(test_leaf_combination);
 
+	static size_t bytes_allocated = 0;
+	auto insert_result = branch.hits[which_time_unit].insert(test_leaf_combination);
+	bool inserted = insert_result.second;
+	if (inserted)
+	{
+		bytes_allocated += sizeof(test_leaf_combination);
+		if (random_rows_added % 1000 == 0)
+		{
+			std::string sdata;
+			getMySize();
+			mySize.spitSizes(sdata);
+			boost::format mytxt("%1% calls to insert an output row; %2% bytes allocated in this way.  Size of AllWeightings: %3%");
+			mytxt % inserted % bytes_allocated % sdata;
+			messager.AppendKadStatusText(mytxt.str(), nullptr);
+		}
+	}
+	
 }
 
 void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch)
@@ -2934,4 +2950,254 @@ void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, Instanc
 {
 	bind_visitor visitor(insert_random_sample_stmt, bindIndex);
 	boost::apply_visitor(visitor, data);
+}
+
+void AllWeightings::getMySize() const
+{
+
+	memset(&mySize, '\0', sizeof(mySize));
+
+	mySize.sizePod += sizeof(*this);
+	mySize.totalSize += mySize.sizePod;
+
+	// random_numbers
+	for (auto const & random_number : random_numbers)
+	{
+		mySize.sizeRandomNumbers += sizeof(random_number);
+	}
+	mySize.totalSize += mySize.sizeRandomNumbers;
+
+	//consolidated_rows
+	for (auto const & mergedTimeSliceRow : consolidated_rows)
+	{
+		mySize.sizeConsolidatedRows += sizeof(mergedTimeSliceRow);
+		getInstanceDataVectorUsage(mySize.sizeConsolidatedRows, mergedTimeSliceRow.output_row);
+	}
+	mySize.totalSize += mySize.sizeConsolidatedRows;
+
+	// mappings_from_child_branch_to_primary
+	getChildToBranchColumnMappingsUsage(mySize.sizeMappingsFromChildBranchToPrimary, mappings_from_child_branch_to_primary);
+	mySize.totalSize += mySize.sizeMappingsFromChildBranchToPrimary;
+
+	// mappings_from_child_branch_to_primary
+	getChildToBranchColumnMappingsUsage(mySize.sizeMappingFromChildLeafToPrimary, mappings_from_child_leaf_to_primary);
+	mySize.totalSize += mySize.sizeMappingFromChildLeafToPrimary;
+
+	// childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1
+	for (auto const & single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 : childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1)
+	{
+		mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.first);
+		mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.second);
+	}
+	mySize.totalSize += mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
+
+	// dataCache
+	getDataCacheUsage(mySize.sizeDataCache, dataCache);
+	mySize.totalSize += mySize.sizeDataCache;
+
+	// otherTopLevelCache
+	for (auto const & single_otherTopLevelCache : otherTopLevelCache)
+	{
+		mySize.sizeOtherTopLevelCache += sizeof(single_otherTopLevelCache.first);
+		getDataCacheUsage(mySize.sizeOtherTopLevelCache, single_otherTopLevelCache.second);
+	}
+	mySize.totalSize += mySize.sizeOtherTopLevelCache;
+
+	// childCache
+	for (auto const & single_childCache : childCache)
+	{
+		mySize.sizeChildCache += sizeof(single_childCache.first);
+		getDataCacheUsage(mySize.sizeChildCache, single_childCache.second);
+	}
+	mySize.totalSize += mySize.sizeChildCache;
+
+	// timeSlices
+	for (auto const & timeSlice : timeSlices)
+	{
+		mySize.sizeTimeSlices += sizeof(timeSlice.first);
+		mySize.sizeTimeSlices += sizeof(timeSlice.second);
+
+		auto const & branches_and_leaves = timeSlice.second.branches_and_leaves;
+
+		for (auto const & variableGroupBranchesAndLeaves : branches_and_leaves)
+		{
+			mySize.sizeTimeSlices += sizeof(variableGroupBranchesAndLeaves);
+
+			Branches const & branches = variableGroupBranchesAndLeaves.branches;
+
+			for (auto const & branch : branches)
+			{
+				mySize.sizeTimeSlices += sizeof(branch);
+
+				getInstanceDataVectorUsage(mySize.sizeTimeSlices, branch.primary_keys, false);
+
+				auto const & hits = branch.hits;
+				auto const & remaining = branch.remaining;
+				auto const & helper_lookup__from_child_key_set__to_matching_output_rows = branch.helper_lookup__from_child_key_set__to_matching_output_rows;
+				auto const & leaves = branch.leaves;
+				auto const & leaves_cache = branch.leaves_cache;
+
+				mySize.sizeTimeSlices += sizeof(hits);
+				mySize.sizeTimeSlices += sizeof(remaining);
+				mySize.sizeTimeSlices += sizeof(helper_lookup__from_child_key_set__to_matching_output_rows);
+				mySize.sizeTimeSlices += sizeof(leaves);
+				mySize.sizeTimeSlices += sizeof(leaves_cache);
+
+				// leaves_cache
+				for (auto const & leaf : leaves_cache)
+				{
+					getLeafUsage(mySize.sizeTimeSlices, leaf);
+				}
+
+				// leaves
+				for (auto const & leaf : leaves)
+				{
+					getLeafUsage(mySize.sizeTimeSlices);
+				}
+
+				// helper_lookup__from_child_key_set__to_matching_output_rows
+				for (auto const & child_lookup_from_child_data_to_rows : helper_lookup__from_child_key_set__to_matching_output_rows)
+				{
+					mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.first);
+					mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.second);
+
+					auto const & childDMUInstanceDataVector = child_lookup_from_child_data_to_rows.first;
+					auto const & outputRowsToChildDataMap = child_lookup_from_child_data_to_rows.second;
+
+					getInstanceDataVectorUsage(mySize.sizeTimeSlices, childDMUInstanceDataVector);
+
+					mySize.sizeTimeSlices += sizeof(outputRowsToChildDataMap);
+					for (auto const & outputRowToChildDataMap : outputRowsToChildDataMap)
+					{
+						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.first);
+						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.second);
+
+						auto const & child_leaf_indices = outputRowToChildDataMap.second;
+
+						for (auto const & child_leaf_index : child_leaf_indices)
+						{
+							mySize.sizeTimeSlices += sizeof(child_leaf_index);
+						}
+					}
+				}
+
+				// remaining
+				for (auto const & remaining_rows : remaining)
+				{
+					auto const & remaining_time_unit = remaining_rows.first;
+					auto const & remainingOutputRows = remaining_rows.second;
+
+					mySize.sizeTimeSlices += sizeof(remaining_time_unit);
+					mySize.sizeTimeSlices += sizeof(remainingOutputRows);
+
+					for (auto const & outputRow : remainingOutputRows)
+					{
+						getSizeOutputRow(mySize.sizeTimeSlices, outputRow);
+					}
+				}
+
+				// hits
+				for (auto const & time_unit_hit : hits)
+				{
+					mySize.sizeTimeSlices += sizeof(time_unit_hit.first);
+					mySize.sizeTimeSlices += sizeof(time_unit_hit.second);
+					
+					auto const & outputRows = time_unit_hit.second;
+
+					for (auto const & outputRow : outputRows)
+					{
+						getSizeOutputRow(mySize.sizeTimeSlices, outputRow);
+					}
+				}
+			}
+		}
+
+	}
+	mySize.totalSize += mySize.sizeTimeSlices;
+
+}
+
+void AllWeightings::getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const
+{
+	usage += sizeof(outputRow);
+
+	auto const & primary_leaves = outputRow.primary_leaves;
+	auto const & primary_leaves_cache = outputRow.primary_leaves_cache;
+	auto const & child_indices_into_raw_data = outputRow.child_indices_into_raw_data;
+
+	for (auto const & primary_leaf : primary_leaves)
+	{
+		usage += sizeof(primary_leaf);
+	}
+	for (auto const & primary_leaf : primary_leaves_cache)
+	{
+		usage += sizeof(primary_leaf);
+	}
+
+	for (auto const & single_child_indices_into_raw_data : child_indices_into_raw_data)
+	{
+		usage += sizeof(single_child_indices_into_raw_data.first);
+		usage += sizeof(single_child_indices_into_raw_data.second);
+
+		auto const & the_child_lookup_map = single_child_indices_into_raw_data.second;
+
+		for (auto const & the_child_lookup_map_entry : the_child_lookup_map)
+		{
+			usage += sizeof(the_child_lookup_map_entry.first);
+			usage += sizeof(the_child_lookup_map_entry.second);
+		}
+	}
+}
+
+void AllWeightings::getLeafUsage(size_t & usage, Leaf const & leaf) const
+{
+	usage += sizeof(leaf);
+
+	getInstanceDataVectorUsage(usage, leaf.primary_keys);
+
+	auto const & other_top_level_indices_into_raw_data = leaf.other_top_level_indices_into_raw_data;
+
+	for (auto const & single_other_top_level_indices_into_raw_data : other_top_level_indices_into_raw_data)
+	{
+		usage += sizeof(single_other_top_level_indices_into_raw_data.first);
+		usage += sizeof(single_other_top_level_indices_into_raw_data.second);
+	}
+}
+
+void AllWeightings::getInstanceDataVectorUsage(size_t & usage, std::vector<InstanceData> const & instanceDataVector, bool const includeSelf) const
+{
+	if (includeSelf)
+	{
+		usage += sizeof(instanceDataVector);
+	}
+	for (auto const & instanceData : instanceDataVector)
+	{
+		usage += boost::apply_visitor(size_of_visitor(), instanceData);
+	}
+	return usage;
+}
+
+void AllWeightings::getDataCacheUsage(size_t & usage, DataCache const & dataCache) const
+{
+	for (auto const & rowIdToData : dataCache)
+	{
+		usage += sizeof(rowIdToData.first);
+		getInstanceDataVectorUsage(usage, rowIdToData.second);
+	}
+}
+
+void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, std::map<int, std::vector<ChildToPrimaryMapping>> const & childToBranchColumnMappings) const
+{
+	for (auto const & single_mappings_from_child_branch_to_primary : childToBranchColumnMappings)
+	{
+		usage += sizeof(single_mappings_from_child_branch_to_primary.first);
+		usage += sizeof(single_mappings_from_child_branch_to_primary.second);
+
+		auto const & childToPrimaryMappingVector = single_mappings_from_child_branch_to_primary.second;
+
+		for (auto const & childToPrimaryMapping : childToPrimaryMappingVector)
+		{
+			usage += sizeof(childToPrimaryMapping);
+		}
+	}
 }

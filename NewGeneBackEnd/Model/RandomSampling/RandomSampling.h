@@ -1045,6 +1045,19 @@ class PrimaryKeysGrouping
 
 };
 
+class size_of_visitor : public boost::static_visitor<size_t>
+{
+
+public:
+
+	template <typename T>
+	size_t operator()(T const & rhs) const
+	{
+		return sizeof(rhs);
+	}
+
+};
+
 // "Leaf"
 class PrimaryKeysGroupingMultiplicityGreaterThanOne : public PrimaryKeysGrouping
 {
@@ -1437,10 +1450,12 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		}
 
 	private:
+	public: // debugging access
 
 		mutable Leaves leaves;
 
 	private:
+	public: // debugging access
 
 		// *********************************************************************************** //
 		// Every branch ALREADY has a std::set<Leaf>,
@@ -1829,6 +1844,85 @@ public:
 
 public:
 
+	struct SizeOfSampler
+	{
+		SizeOfSampler()
+			: sizePod{ 0 }
+			, sizeTimeSlices{ 0 }
+			, sizeDataCache{ 0 }
+			, sizeOtherTopLevelCache{ 0 }
+			, sizeChildCache{ 0 }
+			, sizeMappingsFromChildBranchToPrimary{ 0 }
+			, sizeMappingFromChildLeafToPrimary{ 0 }
+			, size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1{ 0 }
+			, sizeConsolidatedRows{ 0 }
+			, sizeRandomNumbers{ 0 }
+			, totalSize{ 0 }
+		{}
+		size_t sizePod;
+		size_t sizeTimeSlices;
+		size_t sizeDataCache;
+		size_t sizeOtherTopLevelCache;
+		size_t sizeChildCache;
+		size_t sizeMappingsFromChildBranchToPrimary;
+		size_t sizeMappingFromChildLeafToPrimary;
+		size_t size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
+		size_t sizeConsolidatedRows;
+		size_t sizeRandomNumbers;
+		size_t totalSize;
+
+		void spitSizes(std::string & sdata)
+		{
+			sdata += "sizePod: ";
+			sdata += boost::lexical_cast<std::string>(sizePod);
+			sdata += "; ";
+
+			sdata += "sizeTimeSlices: ";
+			sdata += boost::lexical_cast<std::string>(sizeTimeSlices);
+			sdata += "; ";
+
+			sdata += "sizeDataCache: ";
+			sdata += boost::lexical_cast<std::string>(sizeDataCache);
+			sdata += "; ";
+
+			sdata += "sizeOtherTopLevelCache: ";
+			sdata += boost::lexical_cast<std::string>(sizeOtherTopLevelCache);
+			sdata += "; ";
+
+			sdata += "sizeChildCache: ";
+			sdata += boost::lexical_cast<std::string>(sizeChildCache);
+			sdata += "; ";
+
+			sdata += "sizeMappingsFromChildBranchToPrimary: ";
+			sdata += boost::lexical_cast<std::string>(sizeMappingsFromChildBranchToPrimary);
+			sdata += "; ";
+
+			sdata += "sizeMappingFromChildLeafToPrimary: ";
+			sdata += boost::lexical_cast<std::string>(sizeMappingFromChildLeafToPrimary);
+			sdata += "; ";
+
+			sdata += "size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1: ";
+			sdata += boost::lexical_cast<std::string>(size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1);
+			sdata += "; ";
+
+			sdata += "sizeConsolidatedRows: ";
+			sdata += boost::lexical_cast<std::string>();
+			sdata += "; ";
+
+			sdata += "sizeRandomNumbers: ";
+			sdata += boost::lexical_cast<std::string>(sizeRandomNumbers);
+			sdata += "; ";
+
+			sdata += "totalSize: ";
+			sdata += boost::lexical_cast<std::string>(totalSize);
+			sdata += "; ";
+
+		}
+	};
+
+	mutable SizeOfSampler mySize;
+	void getMySize() const;
+
 	// Cache of secondary data: One cache for the primary top-level variable group, and a set of caches for all other variable groups (the non-primary top-level groups, and the child groups)
 	DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
 	std::map<int, DataCache> otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
@@ -1860,6 +1954,11 @@ public:
 	void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch);
 	void ResetBranchCaches();
 	void ConsolidateRowsWithinBranch(Branch const & branch, int & orig_random_number_rows);
+	void getChildToBranchColumnMappingsUsage(size_t & usage, std::map<int, std::vector<ChildToPrimaryMapping>> const & childToBranchColumnMappings) const;
+	void getDataCacheUsage(size_t & usage, DataCache const & dataCache) const;
+	void getInstanceDataVectorUsage(size_t & usage, std::vector<InstanceData> const & instanceDataVector, bool const includeSelf = true) const;
+	void getLeafUsage(size_t & usage, Leaf const & leaf) const;
+	void getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const;
 
 protected:
 
