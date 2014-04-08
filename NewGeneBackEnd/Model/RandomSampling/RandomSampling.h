@@ -10,6 +10,7 @@
 #	include <boost/multiprecision/number.hpp>
 #	include <boost/multiprecision/cpp_int.hpp>
 #	include <boost/variant.hpp>
+#	include <boost/pool/pool_alloc.hpp>
 #endif
 #include "../../Utilities/NewGeneException.h"
 #include "../../sqlite/sqlite-amalgamation-3071700/sqlite3.h"
@@ -20,9 +21,15 @@ typedef boost::variant<std::int64_t, double, std::string> InstanceData;
 typedef boost::variant<std::int64_t, double, std::string> DMUInstanceData;
 typedef boost::variant<std::int64_t, double, std::string> SecondaryInstanceData;
 
-typedef std::vector<DMUInstanceData> DMUInstanceDataVector;
-typedef DMUInstanceDataVector ChildDMUInstanceDataVector;
-typedef std::vector<SecondaryInstanceData> SecondaryInstanceDataVector;
+typedef std::vector<InstanceData, boost::pool_allocator<InstanceData>> InstanceDataVector;
+typedef InstanceDataVector DMUInstanceDataVector;
+typedef InstanceDataVector ChildDMUInstanceDataVector;
+typedef InstanceDataVector SecondaryInstanceDataVector;
+
+typedef std::vector<int, boost::pool_allocator<int>> fast_int_vector;
+typedef std::set<int, std::less<int>, boost::fast_pool_allocator<int>> fast_int_set;
+typedef std::map<int, std::int64_t, std::less<int>, boost::fast_pool_allocator<std::pair<int const, std::int64_t>>> fast_int_to_int64_map;
+typedef std::map<int, fast_int_to_int64_map, std::less<int>, boost::fast_pool_allocator<std::pair<int const, fast_int_to_int64_map>>> fast__int__to__fast_int_to_int64_map;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
 typedef std::map<std::int64_t, SecondaryInstanceDataVector> DataCache;
@@ -1080,34 +1087,34 @@ public:
 		, other_top_level_indices_into_raw_data{ rhs.other_top_level_indices_into_raw_data }
 		{}
 
-		PrimaryKeysGroupingMultiplicityGreaterThanOne & operator=(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
+	PrimaryKeysGroupingMultiplicityGreaterThanOne & operator=(PrimaryKeysGroupingMultiplicityGreaterThanOne const & rhs)
+	{
+		if (&rhs == this)
 		{
-			if (&rhs == this)
-			{
-				return *this;
-			}
-			PrimaryKeysGrouping::operator=(rhs);
-			index_into_raw_data = rhs.index_into_raw_data;
-			other_top_level_indices_into_raw_data = rhs.other_top_level_indices_into_raw_data;
 			return *this;
 		}
+		PrimaryKeysGrouping::operator=(rhs);
+		index_into_raw_data = rhs.index_into_raw_data;
+		other_top_level_indices_into_raw_data = rhs.other_top_level_indices_into_raw_data;
+		return *this;
+	}
 
-		PrimaryKeysGroupingMultiplicityGreaterThanOne & operator=(PrimaryKeysGroupingMultiplicityGreaterThanOne const && rhs)
+	PrimaryKeysGroupingMultiplicityGreaterThanOne & operator=(PrimaryKeysGroupingMultiplicityGreaterThanOne const && rhs)
+	{
+		if (&rhs == this)
 		{
-			if (&rhs == this)
-			{
-				return *this;
-			}
-			PrimaryKeysGrouping::operator=(std::move(rhs));
-			index_into_raw_data = rhs.index_into_raw_data;
-			other_top_level_indices_into_raw_data = rhs.other_top_level_indices_into_raw_data;
 			return *this;
 		}
+		PrimaryKeysGrouping::operator=(std::move(rhs));
+		index_into_raw_data = rhs.index_into_raw_data;
+		other_top_level_indices_into_raw_data = rhs.other_top_level_indices_into_raw_data;
+		return *this;
+	}
 
-		std::int64_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
+	std::int64_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
 
-		// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
-		mutable std::map<int, std::int64_t> other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
+	// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
+	mutable fast_int_to_int64_map other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
 
 };
 
@@ -1177,16 +1184,16 @@ class BranchOutputRow
 		// the non-primary top-level variable groups,
 		// and all child variable groups.
 		// ******************************************************************* //
-		std::set<int> primary_leaves;
+		fast_int_set primary_leaves;
 
 	public:
 
-		std::vector<int> primary_leaves_cache; // for optimized lookup only
+		fast_int_vector primary_leaves_cache; // for optimized lookup only
 
 		// Map from child variable group ID to:
 		// Map from child leaf index to:
 		// index into child variable group's raw data cache (stored in the AllWeightings instance)
-		mutable std::map<int, std::map<int, std::int64_t>> child_indices_into_raw_data;
+		mutable fast__int__to__fast_int_to_int64_map child_indices_into_raw_data;
 
 	private:
 
@@ -1199,14 +1206,23 @@ class BranchOutputRow
 };
 
 typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
-typedef std::set<Leaf> Leaves;
+
+typedef std::vector<Leaf, boost::pool_allocator<Leaf>> fast_leaf_vector;
+typedef std::set<Leaf, std::less<Leaf>, boost::fast_pool_allocator<Leaf>> Leaves;
+
+typedef std::vector<BranchOutputRow, boost::pool_allocator<BranchOutputRow>> fast_branch_output_row_vector;
+typedef std::set <BranchOutputRow, std::less<BranchOutputRow>, boost::fast_pool_allocator<BranchOutputRow>> fast_branch_output_row_set;
+typedef std::map<BranchOutputRow const *, fast_int_vector, std::less<BranchOutputRow const *>, boost::fast_pool_allocator<std::pair<BranchOutputRow const * const, fast_int_vector>>> fast_branch_output_row_ptr__to__fast_int_vector;
+typedef std::map<std::int64_t, fast_branch_output_row_set, std::less<std::int64_t>, boost::fast_pool_allocator<std::pair<std::int64_t const, fast_branch_output_row_set>>> fast__int64__to__fast_branch_output_row_set;
+typedef std::map<std::int64_t, fast_branch_output_row_vector, std::less<std::int64_t>, boost::fast_pool_allocator<std::pair<std::int64_t const, fast_branch_output_row_vector>>> fast__int64__to__fast_branch_output_row_vector;
+typedef std::map<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_int_vector, std::less<ChildDMUInstanceDataVector>, boost::fast_pool_allocator<std::pair<ChildDMUInstanceDataVector const, fast_branch_output_row_ptr__to__fast_int_vector>>> fast__lookup__from_child_dmu_set__to__output_rows;
 
 //#ifdef _DEBUG
 void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys);
 void SpitDataCache(std::string & sdata, DataCache const & dataCache);
 void SpitDataCaches(std::string & sdata, std::map<int, DataCache> const & dataCaches);
-void SpitHits(std::string & sdata, std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & hits);
-void SpitSetOfOutputRows(std::string & sdata, std::set<BranchOutputRow> const & setOfRows);
+void SpitHits(std::string & sdata, std::map<std::int64_t, fast_branch_output_row_set> const & hits);
+void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const & setOfRows);
 void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
 void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup);
 void SpitLeaf(std::string & sdata, Leaf const & leaf);
@@ -1313,14 +1329,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Map from time unit to a set of leaf combinations hit for that time units
 		// Time unit index is 0-based
 		//
-		mutable std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> hits;
+		mutable fast__int64__to__fast_branch_output_row_set hits;
 		//
 		// ******************************************************************************************************** //
 		// ******************************************************************************************************** //
 
 
 		// Used for optimization purposes only
-		mutable std::map<boost::multiprecision::cpp_int, std::vector<BranchOutputRow>> remaining;
+		mutable fast__int64__to__fast_branch_output_row_vector remaining;
 
 		// **************************************************************************************** //
 		// **************************************************************************************** //
@@ -1395,14 +1411,15 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// The following data structure is a helper index that maps the *FULL* child DMU set
 		// (including the single child leaf, if any)
 		// representing an incoming row of data from a child variable group raw data table
-		// (including only child primary keys and selected child variables)
+		// (including only child primary keys and selected child variables in the incoming row)
 		// - this corresponds to incoming child variable group (NOT non-primary top-level variable group) -
 		// to output rows for that variable group.
 		// The output rows are represented by a map from the actual pointer to a specific output row,
 		// to a vector of child leaf numbers in the output row matching the single incoming child leaf.
 		// **************************************************************************************** //
 		// **************************************************************************************** //
-		mutable std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> helper_lookup__from_child_key_set__to_matching_output_rows;
+		mutable fast__lookup__from_child_dmu_set__to__output_rows helper_lookup__from_child_key_set__to_matching_output_rows;
+
 		void ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, bool const force) const; // Populate the above data structure
 
 		void InsertLeaf(Leaf const & leaf) const
@@ -1434,7 +1451,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		bool doesLeafExist(Leaf const & leaf) const
 		{
-			auto const leafPtr = leaves.find(leaf);
+			auto const leafPtr = leaves.find(leaf); 
 			if (leafPtr == leaves.cend())
 			{
 				return false;
@@ -1479,7 +1496,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Cache the leaves for this branch.  This is a CACHE only.
 		// The official location of the leaves are contained in the AllWeightings instance.
 		// This cache stores only the subset of leaves
-		mutable std::vector<Leaf> leaves_cache;
+		mutable fast_leaf_vector leaves_cache;
 
 	public:
 
@@ -1515,7 +1532,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		mutable boost::multiprecision::cpp_int number_branch_combinations;
 #		ifdef _DEBUG
-		mutable std::string number_branch_combinations_string;
+		//mutable std::string number_branch_combinations_string;
 #		endif
 
 };
@@ -1684,7 +1701,7 @@ public:
 
 	static std::string row_in_process;
 	static std::fstream * output_file;
-	static std::vector<InstanceData> data;
+	static InstanceDataVector data;
 	static int * bind_index;
 	static sqlite3_stmt * insert_stmt;
 	static int mode;
@@ -1701,7 +1718,7 @@ class MergedTimeSliceRow
 			: empty(true)
 		{}
 
-		MergedTimeSliceRow(TimeSlice const & ts, std::vector<InstanceData> const & row)
+		MergedTimeSliceRow(TimeSlice const & ts, InstanceDataVector const & row)
 			: time_slice(ts)
 			, output_row(row)
 			, empty(false)
@@ -1792,7 +1809,7 @@ class MergedTimeSliceRow
 		}
 
 		TimeSlice time_slice;
-		std::vector<InstanceData> output_row;
+		InstanceDataVector output_row;
 
 		static bool RHS_wins; // controls how operator=() should behave.  Note: Only required because release-mode optimizer utilizes operator=() instead of ctor
 
@@ -1951,12 +1968,12 @@ public:
 	void PrepareRandomSamples(int const K);
 	void PrepareFullSamples(int const K);
 	bool RetrieveNextBranchAndLeaves(int const K);
-	void PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch);
+	void PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch);
 	void ResetBranchCaches();
 	void ConsolidateRowsWithinBranch(Branch const & branch, int & orig_random_number_rows);
 	void getChildToBranchColumnMappingsUsage(size_t & usage, std::map<int, std::vector<ChildToPrimaryMapping>> const & childToBranchColumnMappings) const;
 	void getDataCacheUsage(size_t & usage, DataCache const & dataCache) const;
-	void getInstanceDataVectorUsage(size_t & usage, std::vector<InstanceData> const & instanceDataVector, bool const includeSelf = true) const;
+	void getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf = true) const;
 	void getLeafUsage(size_t & usage, Leaf const & leaf) const;
 	void getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const;
 
@@ -1997,7 +2014,7 @@ protected:
 
 private:
 
-	void AddPositionToRemaining(boost::multiprecision::cpp_int const & which_time_unit, std::vector<int> const & position, Branch const & branch);
+	void AddPositionToRemaining(std::int64_t const & which_time_unit, std::vector<int> const & position, Branch const & branch);
 	bool IncrementPosition(int const K, std::vector<int> & position, Branch const & branch);
 	int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Branch const & branch);
 

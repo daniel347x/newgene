@@ -757,7 +757,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void CreateOutputRow(Branch const &branch, BranchOutputRow const &outputRow, AllWeightings &allWeightings);
 				void ConsolidateData(bool const random_sampling, AllWeightings &allWeightings);
 				void RandomSamplingWriteResultsToFileOrScreen(AllWeightings & allWeightings);
-				void OutputGranulatedRow(TimeSlice const & current_time_slice, std::set<BranchOutputRow> &output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t &rows_written);
+				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set &output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t &rows_written);
 				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(AllWeightings & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index);
 
 				std::map<int, int> top_level_number_secondary_columns;

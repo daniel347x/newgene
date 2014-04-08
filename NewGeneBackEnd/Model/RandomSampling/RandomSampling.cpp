@@ -15,7 +15,7 @@
 
 std::fstream * create_output_row_visitor::output_file = nullptr;
 int create_output_row_visitor::mode = static_cast<int>(create_output_row_visitor::CREATE_ROW_MODE__NONE);
-std::vector<InstanceData> create_output_row_visitor::data;
+InstanceDataVector create_output_row_visitor::data;
 int * create_output_row_visitor::bind_index = nullptr;
 sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
 bool MergedTimeSliceRow::RHS_wins = false;
@@ -33,6 +33,19 @@ AllWeightings::AllWeightings(Messager & messager_)
 
 AllWeightings::~AllWeightings()
 {
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(InstanceData)>::release_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(int)>::release_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>::release_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(int)>::release_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, std::int64_t>)>::release_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, fast_int_to_int64_map>)>::release_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(BranchOutputRow)>::release_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<std::int64_t const, fast_branch_output_row_set>)>::release_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<std::int64_t const, fast_branch_output_row_vector>)>::release_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<BranchOutputRow const * const, fast_int_vector>)>::release_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<ChildDMUInstanceDataVector const, fast_branch_output_row_ptr__to__fast_int_vector>)>::release_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(Leaf)>::release_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>::release_memory();
 	if (insert_random_sample_stmt)
 	{
 		sqlite3_finalize(insert_random_sample_stmt);
@@ -632,7 +645,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 						{
 
 							BranchOutputRow const & outputRow = *matchingOutputRowPtr->first;
-							std::vector<int> const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
+							fast_int_vector const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
 
 							// Loop through all matching output row child leaves
 							std::for_each(matchingOutputChildLeaves.cbegin(), matchingOutputChildLeaves.cend(), [&](int const matching_child_leaf_index)
@@ -641,7 +654,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 								auto const found = outputRow.child_indices_into_raw_data.find(variable_group_number);
 								if (found == outputRow.child_indices_into_raw_data.cend())
 								{
-									outputRow.child_indices_into_raw_data[variable_group_number] = std::map<int, std::int64_t>();
+									outputRow.child_indices_into_raw_data[variable_group_number] = fast_int_to_int64_map();
 								}
 								auto & outputRowLeafIndexToSecondaryDataCacheIndex = outputRow.child_indices_into_raw_data[variable_group_number];
 								outputRowLeafIndexToSecondaryDataCacheIndex[matching_child_leaf_index] = timeSliceLeaf.second.index_into_raw_data;
@@ -654,7 +667,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					}
 
 				});
-
+				 
 			}
 			break;
 
@@ -725,7 +738,6 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 				branch.number_branch_combinations = 1; // covers K > numberLeaves condition, and numberLeaves == 0 condition
 				if (K <= numberLeaves)
 				{
-					//branch.number_branch_combinations = boost::math::binomial_coefficient<boost::multiprecision::cpp_int>(numberLeaves, K);
 					branch.number_branch_combinations = BinomialCoefficient(numberLeaves, K);
 				}
 
@@ -880,7 +892,7 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 void AllWeightings::GenerateAllOutputRows(int const K, Branch const & branch)
 {
 
-	boost::multiprecision::cpp_int which_time_unit = -1;  // -1 means "full sampling for branch" - no need to break down into time units (which have identical full sets)
+	std::int64_t which_time_unit = -1;  // -1 means "full sampling for branch" - no need to break down into time units (which have identical full sets)
 
 	branch.hits[which_time_unit].clear();
 	branch.remaining[which_time_unit].clear();
@@ -920,10 +932,11 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 
 	random_number -= branch.weighting.getWeightingRangeStart();
 
-	boost::multiprecision::cpp_int which_time_unit = -1;
-	if (time_granularity != TIME_GRANULARITY__NONE)
+	std::int64_t which_time_unit = -1;
+	if (time_granularity != TIME_GRANULARITY__NONE) 
 	{
-		which_time_unit = random_number / branch.number_branch_combinations;
+		boost::multiprecision::cpp_int which_time_unit_ = random_number / branch.number_branch_combinations;
+		which_time_unit = which_time_unit_.convert_to<std::int64_t>();
 	}
 	else
 	{
@@ -1056,7 +1069,7 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 	
 }
 
-void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int const & which_time_unit, int const K, Branch const & branch)
+void AllWeightings::PopulateAllLeafCombinations(std::int64_t const & which_time_unit, int const K, Branch const & branch)
 {
 
 	boost::multiprecision::cpp_int total_added = 0;
@@ -1082,7 +1095,7 @@ void AllWeightings::PopulateAllLeafCombinations(boost::multiprecision::cpp_int c
 
 }
 
-void AllWeightings::AddPositionToRemaining(boost::multiprecision::cpp_int const & which_time_unit, std::vector<int> const & position, Branch const & branch)
+void AllWeightings::AddPositionToRemaining(std::int64_t const & which_time_unit, std::vector<int> const & position, Branch const & branch)
 {
 
 	BranchOutputRow new_remaining;
@@ -1693,7 +1706,7 @@ void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice)
 
 }
 
-void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys)
+void SpitKeys(std::string & sdata, DMUInstanceDataVector const & dmu_keys)
 {
 	int index = 0;
 	sdata += "<DATA_VALUES>";
@@ -1742,10 +1755,10 @@ void SpitDataCaches(std::string & sdata, std::map<int, DataCache> const & dataCa
 	sdata += "</DATA_CACHES>";
 }
 
-void SpitHits(std::string & sdata, std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> const & hits)
+void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits)
 {
 	sdata += "<HITS>";
-	std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hitsEntry)
+	std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<std::int64_t const, fast_branch_output_row_set> const & hitsEntry)
 	{
 		sdata += "<TIME_UNIT>";
 		sdata += "<TIME_UNIT_INDEX>";
@@ -1759,7 +1772,7 @@ void SpitHits(std::string & sdata, std::map<boost::multiprecision::cpp_int, std:
 	sdata += "</HITS>";
 }
 
-void SpitSetOfOutputRows(std::string & sdata, std::set<BranchOutputRow> const & setOfRows)
+void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const & setOfRows)
 {
 	sdata += "<SET_OF_ROWS>";
 	int index = 0;
@@ -1790,7 +1803,7 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 	sdata += "</INDICES_FOR_THIS_SINGLE_ROW_POINTING_INTO_LEAF_SET_FOR_THIS_BRANCH>";
 
 	sdata += "<CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW>";
-	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & childindices)
+	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](std::pair<int const, fast_int_to_int64_map> const & childindices)
 	{
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA>";
 		sdata += "<VARIABLE_GROUP_NUMBER>";
@@ -1814,10 +1827,10 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 	sdata += "</ROW>";
 }
 
-void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup)
+void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__output_rows const & helperLookup)
 {
 	sdata += "<LIST_OF_CHILD_KEYLISTS_THAT_MATCH_SOMETHING_IN_THIS_BRANCH>";
-	std::for_each(helperLookup.cbegin(), helperLookup.cend(), [&](std::pair<ChildDMUInstanceDataVector const, std::map<BranchOutputRow const *, std::vector<int>>> const & helper)
+	std::for_each(helperLookup.cbegin(), helperLookup.cend(), [&](std::pair<ChildDMUInstanceDataVector const, fast_branch_output_row_ptr__to__fast_int_vector> const & helper)
 	{
 		sdata += "<CHILD_KEYLIST_THAT_MATCHES_SOMETHING_IN_THIS_BRANCH>";
 
@@ -1826,7 +1839,7 @@ void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, s
 		sdata += "</CHILD_DMU_KEYS>";
 
 		sdata += "<ROWS_CONTAINING_DATA_THAT_INCLUDES_THE_GIVEN_CHILD_KEYS>";
-		std::for_each(helper.second.cbegin(), helper.second.cend(), [&](std::pair<BranchOutputRow const *, std::vector<int>> const & helperrow)
+		std::for_each(helper.second.cbegin(), helper.second.cend(), [&](std::pair<BranchOutputRow const *, fast_int_vector> const & helperrow)
 		{
 			sdata += "<ROW_CONTAINING_DATA_THAT_INCLUDES_THE_GIVEN_CHILD_KEYS>";
 
@@ -2725,7 +2738,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 
 
-	std::map<boost::multiprecision::cpp_int, std::set<BranchOutputRow>> new_hits;
+	fast__int64__to__fast_branch_output_row_set new_hits;
 	VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = branches_and_leaves;
 	std::for_each(variableGroupBranchesAndLeavesVector.cbegin(), variableGroupBranchesAndLeavesVector.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 	{
@@ -2766,7 +2779,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 			long double hit_total_distance_so_far = 0.0;
 			std::int64_t hit_number = 0;
 			std::int64_t total_hits = hits.size();
-			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hit)
+			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<std::int64_t const, fast_branch_output_row_set> const & hit)
 			{
 
 				// ************************************************************** //
@@ -2850,8 +2863,8 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 				if (false)
 				{
-					boost::multiprecision::cpp_int hit_time_index = hit.first;
-					boost::multiprecision::cpp_int hit_time_index_one_based = hit_time_index + 1;
+					std::int64_t hit_time_index = hit.first;
+					std::int64_t hit_time_index_one_based = hit_time_index + 1;
 					bool matches_left = false;
 					bool matches_right = false;
 					bool matches_middle = false;
@@ -2934,7 +2947,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 			}
 
 			hits.clear();
-			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & new_hit)
+			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](std::pair<std::int64_t const, fast_branch_output_row_set> const & new_hit)
 			{
 				hits[new_hit.first] = new_hit.second;
 			});
@@ -3167,7 +3180,7 @@ void AllWeightings::getLeafUsage(size_t & usage, Leaf const & leaf) const
 	}
 }
 
-void AllWeightings::getInstanceDataVectorUsage(size_t & usage, std::vector<InstanceData> const & instanceDataVector, bool const includeSelf) const
+void AllWeightings::getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf) const
 {
 	if (includeSelf)
 	{

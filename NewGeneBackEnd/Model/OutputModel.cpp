@@ -518,7 +518,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.CalculateWeightings(K, AvgMsperUnit(primary_variable_groups_vector[top_level_vg_index].first.time_granularity));
 		if (failed || CheckCancelled()) return;
 
-		boost::format msg("Total number of combinations that NewGene must store in memory: %1%");
+		boost::format msg("Total number of unconsolidated rows for this choice of K-ad: %1%");
 		msg % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str();
 		messager.AppendKadStatusText(msg.str(), this);
 
@@ -527,7 +527,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			std::int64_t const samples = random_sampling_number_rows;
 
 			// The following prepares all randomly-generated output rows
-			boost::format myGenerateRandomSamples("Generating %1% random numbers between 1 and %2% to use to randomly select rows ...");
+			boost::format myGenerateRandomSamples("Generating %1% random numbers between 1 and %2% to be used to select random rows ...");
 			myGenerateRandomSamples % boost::lexical_cast<std::string>(samples).c_str() % boost::lexical_cast<std::string>(allWeightings.weighting.getWeighting()).c_str();
 			messager.AppendKadStatusText(myGenerateRandomSamples.str(), this);
 
@@ -548,7 +548,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			boost::format mytxtA("Completed pre-populating randomly selected rows.  Size of AllWeightings: %1%");
 			mytxtA % sdata.c_str();
 			messager.AppendKadStatusText(mytxtA.str(), this);
-		}
+		}   
 		else
 		{
 			boost::format myPrepareFullSamples("Pre-populating the complete set of %1% rows of primary variable group data into RAM...");
@@ -21338,7 +21338,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 				return;
 			}
 
-			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & time_unit_and_rows)
+			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<std::int64_t const, fast_branch_output_row_set> const & time_unit_and_rows)
 			{
 
 				if (failed || CheckCancelled())
@@ -21346,7 +21346,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 					return;
 				}
 
-				std::set<BranchOutputRow> const & outputRows = time_unit_and_rows.second;
+				fast_branch_output_row_set const & outputRows = time_unit_and_rows.second;
 
 				std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
 				{
@@ -21872,14 +21872,14 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 		for (int multiplicity = 0; multiplicity < the_child_multiplicity; ++multiplicity)
 		{
 			bool matched = false;
-			std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, std::map<int, std::int64_t>> const & leaf_index_mappings)
+			std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, fast_int_to_int64_map> const & leaf_index_mappings)
 			{
 				int const vg_number = leaf_index_mappings.first;
 				if (vg_number != vgNumber)
 				{
 					return;
 				}
-				std::map<int, std::int64_t> const & leaf_number_to_data_index = leaf_index_mappings.second;
+				fast_int_to_int64_map const & leaf_number_to_data_index = leaf_index_mappings.second;
 				std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
 				{
 
@@ -22073,7 +22073,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 						incoming.emplace(the_slice, create_output_row_visitor::data);
 
 						MergedTimeSliceRow const & test_row = *incoming.cbegin();
-						std::vector<InstanceData> const & test_vector = test_row.output_row;
+						InstanceDataVector const & test_vector = test_row.output_row;
 
 						create_output_row_visitor::data.clear();
 
@@ -22393,7 +22393,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						// ... so this loop should only be entered once
 						// *********************************************************************************** //
 
-						std::set<BranchOutputRow> output_rows_for_this_full_time_slice = time_unit_hit.second;
+						fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second;
 
 						std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow const & outputRow)
 						{
@@ -22484,7 +22484,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 
 
-							std::set<BranchOutputRow> output_rows_for_this_full_time_slice = time_unit_hit.second;
+							fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second;
 
 							TimeSlice current_slice(static_cast<std::int64_t>(hit_start_position + 0.5), static_cast<std::int64_t>(hit_end_position + 0.5));
 							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
@@ -22503,7 +22503,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							// ... so this loop should only be entered once
 							// *********************************************************************************** //
 
-							std::set<BranchOutputRow> output_rows_for_this_full_time_slice = time_unit_hit.second;
+							fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second;
 
 							// Loop through our time range data
 
@@ -22539,7 +22539,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 }
 
-void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current_time_slice, std::set<BranchOutputRow> &output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t & rows_written)
+void OutputModel::OutputGenerator::OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set &output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t & rows_written)
 {
 
 	// current_time_slice to be used when the time-slice-start and time-slice-end rows are output
