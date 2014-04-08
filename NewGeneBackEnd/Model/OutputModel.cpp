@@ -477,6 +477,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// The work of the new Sampler class is all done here
 	if (true)
 	{
+
+		std::string sdata;
 		
 		K = 0;
 		random_sampling_schema = RandomSamplingBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
@@ -515,14 +517,34 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			std::int64_t const samples = random_sampling_number_rows;
 
 			// The following prepares all randomly-generated output rows
+			boost::format myPrepareRandomSamples("Pre-populating %1% randomly selected rows of primary variable group data into RAM (out of %2% total rows) ...");
+			myPrepareRandomSamples % samples % allWeightings.weighting.getWeighting();
+			messager.AppendKadStatusText(myPrepareRandomSamples.str(), nullptr);
 			allWeightings.PrepareRandomNumbers(samples);
 			if (failed || CheckCancelled()) return;
 
 			allWeightings.PrepareRandomSamples(K);
+
+			sdata.clear();
+			allWeightings.getMySize();
+			allWeightings.mySize.spitSizes(sdata);
+			boost::format mytxtA("Completed pre-populating randomly selected rows.  Size of AllWeightings: %1%");
+			mytxtA % sdata;
+			messager.AppendKadStatusText(mytxtA.str(), nullptr);
 		}
 		else
 		{
+			boost::format myPrepareFullSamples("Pre-populating the complete set of %1% rows of primary variable group data into RAM...");
+			myPrepareFullSamples % allWeightings.weighting.getWeighting();
+			messager.AppendKadStatusText(myPrepareFullSamples.str(), nullptr);
 			allWeightings.PrepareFullSamples(K);
+
+			sdata.clear();
+			allWeightings.getMySize();
+			allWeightings.mySize.spitSizes(sdata);
+			boost::format mytxtB("Completed pre-populating full selection of rows.  Size of AllWeightings: %1%");
+			mytxtB % sdata;
+			messager.AppendKadStatusText(mytxtB.str(), nullptr);
 		}
 
 		if (failed || CheckCancelled()) return;
@@ -545,8 +567,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		// *BOTH* child variable groups *AND*
 		// non-primary top-level variable groups
 		// ********************************************************************************* //
+		boost::format myFillChildren("Merging in secondary variable group data...");
+		messager.AppendKadStatusText(myFillChildren.str(), nullptr);
 		RandomSamplerFillDataForChildGroups(allWeightings);
 		if (failed || CheckCancelled()) return;
+
+		sdata.clear();
+		allWeightings.getMySize();
+		allWeightings.mySize.spitSizes(sdata);
+		boost::format mytxt2("Completed merging secondary groups.  Size of AllWeightings: %1%");
+		mytxt2 % sdata;
+		messager.AppendKadStatusText(mytxt2.str(), nullptr);
 
 		// The following function will clear and re-populate its internal
 		// cache of Leaf objects (which were updated by RandomSamplerFillDataForChildGroups()
@@ -563,8 +594,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		//
 		// After child and non-primary top-level VG's are merged, clear and rebuild the branch leaf caches
 		// to pick up the new leaf-specific data added by the non-primary top-level VG's.
+		boost::format myResetCaches("Building caches to map secondary columns to final output rows...");
+		messager.AppendKadStatusText(myResetCaches.str(), nullptr);
 		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
 		if (failed || CheckCancelled()) return;
+
+		sdata.clear();
+		allWeightings.getMySize();
+		allWeightings.mySize.spitSizes(sdata);
+		boost::format mytxt3("Completed building caches.  Size of AllWeightings: %1%");
+		mytxt3 % sdata;
+		messager.AppendKadStatusText(mytxt3.str(), nullptr);
 
 		if (consolidate_rows) // Consolidate data mode is on
 		{
@@ -592,8 +632,17 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			//
 			// The output is stored in "consolidated_rows" of the AllWeightings object.
 
+			boost::format myConsolidateRows("Consolidating adjacent rows...");
+			messager.AppendKadStatusText(myConsolidateRows.str(), nullptr);
 			ConsolidateData(random_sampling, allWeightings);
 			if (failed || CheckCancelled()) return;
+
+			sdata.clear();
+			allWeightings.getMySize();
+			allWeightings.mySize.spitSizes(sdata);
+			boost::format mytxtC("Completed consolidating adjacent rows.  Size of AllWeightings: %1%");
+			mytxtC % sdata;
+			messager.AppendKadStatusText(mytxtC.str(), nullptr);
 
 		}
 		else

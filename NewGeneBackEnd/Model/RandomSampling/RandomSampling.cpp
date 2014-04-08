@@ -1039,15 +1039,18 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 	if (inserted)
 	{
 		++random_rows_added;
-		bytes_allocated += sizeof(test_leaf_combination);
-		if (random_rows_added % 10000 == 0)
+		if (false)
 		{
-			std::string sdata;
-			getMySize();
-			mySize.spitSizes(sdata);
-			boost::format mytxt("%1% calls that inserted an output row; %2% bytes allocated in this way.  Size of AllWeightings: %3%");
-			mytxt % random_rows_added % bytes_allocated % sdata;
-			messager.AppendKadStatusText(mytxt.str(), nullptr);
+			bytes_allocated += sizeof(test_leaf_combination);
+			if (random_rows_added % 10000 == 0)
+			{
+				std::string sdata;
+				getMySize();
+				mySize.spitSizes(sdata);
+				boost::format mytxt("%1% calls that inserted an output row; %2% bytes allocated in this way.  Size of AllWeightings: %3%");
+				mytxt % random_rows_added % bytes_allocated % sdata;
+				messager.AppendKadStatusText(mytxt.str(), nullptr);
+			}
 		}
 	}
 	
