@@ -19,6 +19,7 @@
 
 typedef std::basic_string<char, std::char_traits<char>, boost::pool_allocator<char>> fast_string;
 
+typedef std::map<int, int, std::less<int>, boost::fast_pool_allocator<std::pair<int const, int>>> fast_int_to_int_map;
 typedef boost::variant<std::int64_t, double, fast_string> InstanceData;
 typedef boost::variant<std::int64_t, double, fast_string> DMUInstanceData;
 typedef boost::variant<std::int64_t, double, fast_string> SecondaryInstanceData;
@@ -34,7 +35,9 @@ typedef std::map<int, std::int64_t, std::less<int>, boost::fast_pool_allocator<s
 typedef std::map<int, fast_int_to_int64_map, std::less<int>, boost::fast_pool_allocator<std::pair<int const, fast_int_to_int64_map>>> fast__int__to__fast_int_to_int64_map;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
-typedef std::map<std::int64_t, SecondaryInstanceDataVector> DataCache;
+typedef std::map<std::int64_t, SecondaryInstanceDataVector, std::less<std::int64_t>, boost::fast_pool_allocator<std::pair<std::int64_t const, SecondaryInstanceDataVector>>> DataCache;
+
+typedef std::map<int, DataCache, std::less<int>, boost::fast_pool_allocator<std::pair<int const, DataCache>>> fast_int_to_data_cache_map;
 
 class AllWeightings;
 
@@ -951,6 +954,9 @@ struct ChildToPrimaryMapping
 	}
 };
 
+typedef std::vector<ChildToPrimaryMapping, boost::pool_allocator<ChildToPrimaryMapping>> fast_vector_childtoprimarymapping;
+typedef std::map<int, fast_vector_childtoprimarymapping, std::less<int>, boost::fast_pool_allocator<std::pair<int const, fast_vector_childtoprimarymapping>>> fast_int_to_childtoprimarymappingvector;
+
 enum VARIABLE_GROUP_MERGE_MODE
 {
 	VARIABLE_GROUP_MERGE_MODE__UNKNOWN
@@ -1552,7 +1558,7 @@ void SpitBranch(std::string & sdata, Branch const & branch);
 // ******************************************************************************************************** //
 // (Only one, since currently only one primary top-level variable group is supported)
 //
-typedef std::set<Branch> Branches;
+typedef std::set<Branch, std::less<Branch>, boost::fast_pool_allocator<Branch>> Branches;
 //
 // ******************************************************************************************************** //
 // ******************************************************************************************************** //
@@ -1583,7 +1589,7 @@ class VariableGroupBranchesAndLeaves
 
 };
 
-typedef std::vector<VariableGroupBranchesAndLeaves> VariableGroupBranchesAndLeavesVector;
+typedef std::vector<VariableGroupBranchesAndLeaves, boost::pool_allocator<VariableGroupBranchesAndLeaves>> VariableGroupBranchesAndLeavesVector;
 
 class VariableGroupTimeSliceData
 {
@@ -1620,7 +1626,7 @@ public:
 	void operator()(double const & data)
 	{
 		sqlite3_bind_double(stmt, bindIndex, data);
-	}
+	} 
 
 	void operator()(fast_string const & data)
 	{
@@ -1821,6 +1827,8 @@ class MergedTimeSliceRow
 
 };
 
+typedef std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys, boost::fast_pool_allocator<MergedTimeSliceRow>> fast__mergedtimeslicerow_set;
+
 class SortMergedRowsByTimeThenKeys
 {
 
@@ -1944,20 +1952,20 @@ public:
 
 	// Cache of secondary data: One cache for the primary top-level variable group, and a set of caches for all other variable groups (the non-primary top-level groups, and the child groups)
 	DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
-	std::map<int, DataCache> otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
-	std::map<int, DataCache> childCache; // Ditto, but for child variable groups
+	fast_int_to_data_cache_map otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
+	fast_int_to_data_cache_map childCache; // Ditto, but for child variable groups
 
 	// For each child variable group, a vector of mapping from the child key columns to the top-level key columns
-	std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_branch_to_primary;
-	std::map<int, std::vector<ChildToPrimaryMapping>> mappings_from_child_leaf_to_primary;
-	std::map<int, int> childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
+	fast_int_to_childtoprimarymappingvector mappings_from_child_branch_to_primary;
+	fast_int_to_childtoprimarymappingvector mappings_from_child_leaf_to_primary;
+	fast_int_to_int_map childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 	int numberChildVariableGroups;
 	TIME_GRANULARITY time_granularity;
 	std::int64_t random_rows_added;
 	Messager & messager;
 
 	// final output in case of consolidated row output
-	std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> consolidated_rows;
+	fast__mergedtimeslicerow_set consolidated_rows;
 
 public:
 

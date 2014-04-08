@@ -21943,7 +21943,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 			}
 		}
 	}
-}
+} 
 
 void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, AllWeightings &allWeightings)
 {

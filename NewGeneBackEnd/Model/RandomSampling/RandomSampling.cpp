@@ -47,6 +47,15 @@ AllWeightings::~AllWeightings()
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(Leaf)>::purge_memory();
 	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>::purge_memory();
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(char)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<std::int64_t const, SecondaryInstanceDataVector>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, DataCache>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, int>)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(ChildToPrimaryMapping)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, fast_vector_childtoprimarymapping>)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>::purge_memory();
+
 	if (insert_random_sample_stmt)
 	{
 		sqlite3_finalize(insert_random_sample_stmt);
@@ -2970,7 +2979,7 @@ void BindTermToInsertStatement(sqlite3_stmt * insert_random_sample_stmt, Instanc
 }
 
 void AllWeightings::getMySize() const
-{
+{ 
 
 	memset(&mySize, '\0', sizeof(mySize));
 
