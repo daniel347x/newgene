@@ -1032,21 +1032,21 @@ void AllWeightings::GenerateOutputRow(boost::multiprecision::cpp_int random_numb
 	// because some rows can have a heavier weight than other rows;
 	// this is handled by storing a map of every *time unut* (corresponding to the primary variable group)
 	// and all leaf combinations that have been hit for that time unit.
-	++random_rows_added;
 
 	static size_t bytes_allocated = 0;
 	auto insert_result = branch.hits[which_time_unit].insert(test_leaf_combination);
 	bool inserted = insert_result.second;
 	if (inserted)
 	{
+		++random_rows_added;
 		bytes_allocated += sizeof(test_leaf_combination);
-		if (random_rows_added % 1000 == 0)
+		if (random_rows_added % 10000 == 0)
 		{
 			std::string sdata;
 			getMySize();
 			mySize.spitSizes(sdata);
-			boost::format mytxt("%1% calls to insert an output row; %2% bytes allocated in this way.  Size of AllWeightings: %3%");
-			mytxt % inserted % bytes_allocated % sdata;
+			boost::format mytxt("%1% calls that inserted an output row; %2% bytes allocated in this way.  Size of AllWeightings: %3%");
+			mytxt % random_rows_added % bytes_allocated % sdata;
 			messager.AppendKadStatusText(mytxt.str(), nullptr);
 		}
 	}
