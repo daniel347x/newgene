@@ -757,7 +757,7 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 	boost::format msg("%1% time slices and %2% branches");
 	msg % time_slice_count % branch_count;
 	messager.AppendKadStatusText(msg.str(), this);
-
+	
 }
 
 void AllWeightings::AddNewTimeSlice(int const & variable_group_number, Branch const & branch, TimeSliceLeaf const & newTimeSliceLeaf)

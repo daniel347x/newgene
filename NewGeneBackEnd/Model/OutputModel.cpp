@@ -437,7 +437,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 	if (!debug_sql_file.is_open())
 	{
-		// for now - harmless
+		boost::format msg("Unable to open logfile.");
+		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
 	current_progress_stage = 0;
