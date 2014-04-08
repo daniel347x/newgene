@@ -14,7 +14,7 @@
 #include "../../Utilities/TimeRangeHelper.h"
 
 std::fstream * create_output_row_visitor::output_file = nullptr;
-int create_output_row_visitor::mode = static_cast<int>(create_output_row_visitor::CREATE_ROW_MODE__NONE);
+int create_output_row_visitor::mode = static_cast<int>(create_output_row_visitor::CREATE_ROW_MODE__NONE); 
 InstanceDataVector create_output_row_visitor::data;
 int * create_output_row_visitor::bind_index = nullptr;
 sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
@@ -33,19 +33,20 @@ AllWeightings::AllWeightings(Messager & messager_)
 
 AllWeightings::~AllWeightings()
 {
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(InstanceData)>::release_memory();
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(int)>::release_memory();
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>::release_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(int)>::release_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, std::int64_t>)>::release_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, fast_int_to_int64_map>)>::release_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(BranchOutputRow)>::release_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<std::int64_t const, fast_branch_output_row_set>)>::release_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<std::int64_t const, fast_branch_output_row_vector>)>::release_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<BranchOutputRow const * const, fast_int_vector>)>::release_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<ChildDMUInstanceDataVector const, fast_branch_output_row_ptr__to__fast_int_vector>)>::release_memory();
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(Leaf)>::release_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>::release_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(InstanceData)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(int)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(int)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, std::int64_t>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, fast_int_to_int64_map>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(BranchOutputRow)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<std::int64_t const, fast_branch_output_row_set>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<std::int64_t const, fast_branch_output_row_vector>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<BranchOutputRow const * const, fast_int_vector>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<ChildDMUInstanceDataVector const, fast_branch_output_row_ptr__to__fast_int_vector>)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(Leaf)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(char)>::purge_memory();
 	if (insert_random_sample_stmt)
 	{
 		sqlite3_finalize(insert_random_sample_stmt);
@@ -60,7 +61,7 @@ std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBra
 
 	newTimeSlice.Validate();
 
-	bool added = false; // true if there is a match
+	bool added = false; // true if there is a match 
 
 	if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 	{

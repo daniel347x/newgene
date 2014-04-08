@@ -17,9 +17,11 @@
 #include "../TimeGranularity.h"
 #include "../../Messager/Messager.h"
 
-typedef boost::variant<std::int64_t, double, std::string> InstanceData;
-typedef boost::variant<std::int64_t, double, std::string> DMUInstanceData;
-typedef boost::variant<std::int64_t, double, std::string> SecondaryInstanceData;
+typedef std::basic_string<char, std::char_traits<char>, boost::pool_allocator<char>> fast_string;
+
+typedef boost::variant<std::int64_t, double, fast_string> InstanceData;
+typedef boost::variant<std::int64_t, double, fast_string> DMUInstanceData;
+typedef boost::variant<std::int64_t, double, fast_string> SecondaryInstanceData;
 
 typedef std::vector<InstanceData, boost::pool_allocator<InstanceData>> InstanceDataVector;
 typedef InstanceDataVector DMUInstanceDataVector;
@@ -1620,7 +1622,7 @@ public:
 		sqlite3_bind_double(stmt, bindIndex, data);
 	}
 
-	void operator()(std::string const & data)
+	void operator()(fast_string const & data)
 	{
 		sqlite3_bind_text(stmt, bindIndex, data.c_str(), static_cast<int>(data.size()), SQLITE_STATIC);
 	}
@@ -1699,13 +1701,13 @@ public:
 
 	}
 
-	static std::string row_in_process;
+	static std::string row_in_process; 
 	static std::fstream * output_file;
 	static InstanceDataVector data;
 	static int * bind_index;
-	static sqlite3_stmt * insert_stmt;
+	static sqlite3_stmt * insert_stmt; 
 	static int mode;
-	bool & first;
+	bool & first; 
 
 };
 

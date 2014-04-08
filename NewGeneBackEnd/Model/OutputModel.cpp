@@ -532,7 +532,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText(myGenerateRandomSamples.str(), this);
 
 			allWeightings.PrepareRandomNumbers(samples);
-			if (failed || CheckCancelled()) return;
+			if (failed || CheckCancelled()) return; 
 
 			// The following prepares all randomly-generated output rows
 			boost::format myPrepareRandomSamples("Done generating random numbers.  Pre-populating %1% randomly selected rows of primary variable group data into RAM (out of %2% total rows) ...");
@@ -3218,7 +3218,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 	int column_data_type = 0;
 	std::int64_t data_int64 = 0;
 	long double data_float = 0.0;
-	std::string data_string;
+	fast_string data_string;
 	long double data_long = 0.0;
 	current_column = 0;
 	reached_first_dates = false;
@@ -3473,7 +3473,7 @@ void OutputModel::OutputGenerator::SavedRowData::PopulateFromCurrentRowInDatabas
 					{
 						boost::posix_time::ptime time_t_epoch__1970(boost::gregorian::date(1970, 1, 1));
 						boost::posix_time::ptime time_database = time_t_epoch__1970 + boost::posix_time::milliseconds(data_int64);
-						std::string time_formatted = boost::posix_time::to_simple_string(time_database);
+						fast_string time_formatted = boost::posix_time::to_simple_string(time_database).c_str();
 						current_parameter_strings.push_back(time_formatted);
 						current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
 						binding = std::make_pair(SQLExecutor::STRING, std::make_pair((int)current_parameter_strings.size() - 1, current_column));
@@ -4628,7 +4628,7 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 
 						if (current_row_of_data.is_index_a_primary_key_with_outer_multiplicity_greater_than_1[current_index])
 						{
-							inner_multiplicity_string_vector.push_back(current_row_of_data.current_parameter_strings[string_index_current]);
+							inner_multiplicity_string_vector.push_back(current_row_of_data.current_parameter_strings[string_index_current].c_str());
 						}
 
 					}
@@ -4764,7 +4764,7 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 
 						if (previous_row_of_data.is_index_a_primary_key_with_outer_multiplicity_greater_than_1[previous_index])
 						{
-							inner_multiplicity_string_vector.push_back(previous_row_of_data.current_parameter_strings[string_index_previous]);
+							inner_multiplicity_string_vector.push_back(previous_row_of_data.current_parameter_strings[string_index_previous].c_str());
 						}
 
 					}
@@ -5249,7 +5249,7 @@ void OutputModel::OutputGenerator::MergeRows(SavedRowData & merged_data_row, Sav
 
 					std::vector<std::string> & the_strings = saved_strings_deque.front();
 					merged_data_row.current_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
-					merged_data_row.current_parameter_strings.push_back(the_strings[inner_multiplicity_current_index]);
+					merged_data_row.current_parameter_strings.push_back(the_strings[inner_multiplicity_current_index].c_str());
 
 					merged_data_row.indices_of_all_columns.push_back(std::make_pair(SQLExecutor::STRING, std::make_pair((int)merged_data_row.current_parameter_strings.size() - 1, current_index)));
 					merged_data_row.indices_of_primary_key_columns.push_back(std::make_pair(SQLExecutor::STRING, std::make_pair((int)merged_data_row.current_parameter_strings.size() - 1,
@@ -6057,7 +6057,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 
 						case SQLExecutor::STRING:
 							{
-								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors];
+								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors].c_str();
 
 								if (data_int_current != boost::lexical_cast<std::int64_t>(data_string_previous))
 								{
@@ -6110,7 +6110,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 
 						case SQLExecutor::STRING:
 							{
-								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors];
+													data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors].c_str();
 
 								if (data_float_current != boost::lexical_cast<long double>(data_string_previous))
 								{
@@ -6135,7 +6135,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 			case SQLExecutor::STRING:
 				{
 
-					data_string_current = current_row_of_data.current_parameter_strings[index_current__data_vectors];
+					data_string_current = current_row_of_data.current_parameter_strings[index_current__data_vectors].c_str();
 
 					switch (binding_previous)
 					{
@@ -6163,7 +6163,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 
 						case SQLExecutor::STRING:
 							{
-								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors];
+								data_string_previous = previous_row_of_data.current_parameter_strings[index_previous__data_vectors].c_str();
 
 								if (!boost::iequals(data_string_current, data_string_previous))
 								{
@@ -6299,7 +6299,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 
 				case SQLExecutor::STRING:
 					{
-						data_string = current_row_of_data.current_parameter_strings[index_in_data_vectors];
+						data_string = current_row_of_data.current_parameter_strings[index_in_data_vectors].c_str();
 						inner_multiplicity_string_vector.push_back(data_string);
 					}
 					break;
@@ -6493,7 +6493,7 @@ bool OutputModel::OutputGenerator::TestPrimaryKeyMatch(SavedRowData const & curr
 
 				case SQLExecutor::STRING:
 					{
-						data_string = previous_row_of_data.current_parameter_strings[index_in_data_vectors];
+						data_string = previous_row_of_data.current_parameter_strings[index_in_data_vectors].c_str();
 						inner_multiplicity_string_vector.push_back(data_string);
 					}
 					break;
@@ -7215,7 +7215,7 @@ void OutputModel::OutputGenerator::WriteRowsToFinalTable(std::deque<SavedRowData
 
 				case SQLExecutor::STRING:
 					{
-						data_string = row_of_data.current_parameter_strings[string_index];
+						data_string = row_of_data.current_parameter_strings[string_index].c_str();
 						++string_index;
 						bound_parameter_strings.push_back(data_string);
 						bound_parameter_which_binding_to_use.push_back(SQLExecutor::STRING);
@@ -10788,7 +10788,7 @@ bool OutputModel::OutputGenerator::CreateNewXRRow(SavedRowData const & current_r
 				case SQLExecutor::STRING:
 					{
 
-						data_string = current_row_of_data.current_parameter_strings[current_row_of_data.indices_of_all_columns[index].second.first];
+						data_string = current_row_of_data.current_parameter_strings[current_row_of_data.indices_of_all_columns[index].second.first].c_str();
 
 						// ... just populate the single data structures that hold all data across all inner tables
 						// ... (including possible null data for the newly added columns)
@@ -15407,7 +15407,7 @@ bool OutputModel::OutputGenerator::SavedRowData::TestLessEqual(SavedRowData cons
 
 			case SQLExecutor::STRING:
 				{
-					generator.test_strings.push_back(current_parameter_strings[binding_info.second.first]);
+					generator.test_strings.push_back(current_parameter_strings[binding_info.second.first].c_str());
 				}
 				break;
 
@@ -15477,7 +15477,7 @@ bool OutputModel::OutputGenerator::SavedRowData::TestLessEqual(SavedRowData cons
 
 					case SQLExecutor::STRING:
 						{
-							generator.rhs_test_strings.push_back(rhs.current_parameter_strings[rhs_binding_info.second.first]);
+							generator.rhs_test_strings.push_back(rhs.current_parameter_strings[rhs_binding_info.second.first].c_str());
 						}
 						break;
 
@@ -15824,7 +15824,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							{
 
 								std::string data_string_rhs =
-									rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first];
+									rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first].c_str();
 								std::int64_t data_rhs_converted = boost::lexical_cast<std::int64_t>(data_string_rhs);
 
 								if (data_int64 < data_rhs_converted)
@@ -15902,7 +15902,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							{
 
 								std::string data_string_rhs =
-									rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first];
+									rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first].c_str();
 								long double data_rhs_converted = boost::lexical_cast<long double>(data_string_rhs);
 
 								if (data_float < data_rhs_converted)
@@ -15930,7 +15930,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 			case SQLExecutor::STRING:
 				{
 
-					std::string data_string = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[current_info.second.first];
+					std::string data_string = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[current_info.second.first].c_str();
 
 					switch (rhs_binding)
 					{
@@ -15981,7 +15981,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							{
 
 								std::string data_string_rhs =
-									rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first];
+									rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.indices_of_all_columns[current_info.second.second].second.first].c_str();
 
 								if (data_string < data_string_rhs)
 								{
@@ -16215,7 +16215,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							case SQLExecutor::STRING:
 								{
 
-									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first];
+									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first].c_str();
 									std::int64_t data_rhs_converted = boost::lexical_cast<std::int64_t>(data_string_rhs);
 
 									if (data_int64 < data_rhs_converted)
@@ -16290,7 +16290,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							case SQLExecutor::STRING:
 								{
 
-									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first];
+									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first].c_str();
 									long double data_rhs_converted = boost::lexical_cast<long double>(data_string_rhs);
 
 									if (data_float < data_rhs_converted)
@@ -16318,7 +16318,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 				case SQLExecutor::STRING:
 					{
 
-						std::string data_string = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second.first];
+						std::string data_string = the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info.second.first].c_str();
 
 						switch (binding_info_rhs.first)
 						{
@@ -16366,7 +16366,7 @@ bool OutputModel::OutputGenerator::TimeRangeSorter::operator<(TimeRangeSorter co
 							case SQLExecutor::STRING:
 								{
 
-									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first];
+									std::string data_string_rhs = rhs.the_data_row_to_be_sorted__with_guaranteed_primary_key_match_on_all_but_last_inner_table.current_parameter_strings[binding_info_rhs.second.first].c_str();
 
 									if (data_string < data_string_rhs)
 									{
@@ -18746,7 +18746,7 @@ void OutputModel::OutputGenerator::SavedRowData::SwapBindings(std::vector<std::s
 
 				case SQLExecutor::STRING:
 					{
-						current_parameter_strings.push_back(new_strings[current_string_index]);
+						current_parameter_strings.push_back(new_strings[current_string_index].c_str());
 					}
 					break;
 
@@ -19398,7 +19398,7 @@ void OutputModel::OutputGenerator::SavedRowData::ReturnAllNonNullPrimaryKeyGroup
 
 		if (binding.first != SQLExecutor::NULL_BINDING)
 		{
-			inner_table_primary_key_group.push_back(current_parameter_strings[index_in_data_vector]);
+			inner_table_primary_key_group.push_back(current_parameter_strings[index_in_data_vector].c_str());
 		}
 
 		++column_index;
@@ -20204,7 +20204,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 							case SQLExecutor::STRING:
 								{
 
-									std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first];
+									std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first].c_str();
 
 									if (boost::lexical_cast<std::int64_t>(previous_string) != current_int)
 									{
@@ -20269,7 +20269,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 							case SQLExecutor::STRING:
 								{
 
-									std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first];
+									std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first].c_str();
 
 									if (boost::lexical_cast<long double>(previous_string) != current_float)
 									{
@@ -20300,7 +20300,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 				case SQLExecutor::STRING:
 					{
 
-						std::string const & current_string = current_row.current_parameter_strings[current_binding.second.first];
+						std::string const & current_string = current_row.current_parameter_strings[current_binding.second.first].c_str();
 
 						switch (previous_binding.first)
 						{
@@ -20334,7 +20334,7 @@ bool OutputModel::OutputGenerator::CheckForIdenticalData(ColumnsInTempView const
 							case SQLExecutor::STRING:
 								{
 
-									std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first];
+									std::string const & previous_string = previous_row.current_parameter_strings[previous_binding.second.first].c_str();
 
 									if (previous_string != current_string)
 									{
@@ -21687,7 +21687,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 		{
 			for (int nk = 0; nk < numberColumnsInTheDMUWithMultiplicityGreaterThan1; ++nk)
 			{
-				boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
+				boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
 			}
 		}
 	}
@@ -21731,7 +21731,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 		{
 			for (int nk = 0; nk < numberSecondaryColumns; ++nk)
 			{
-				boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
+				boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
 			}
 		}
 	}
@@ -21830,7 +21830,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 						int numberSecondaries = top_level_number_secondary_columns[vgNumber];
 						for (int n = 0; n < numberSecondaries; ++n)
 						{
-							boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
+							boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
 						}
 					}
 				}
@@ -21850,7 +21850,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 					int numberSecondaries = top_level_number_secondary_columns[vgNumber];
 					for (int n = 0; n < numberSecondaries; ++n)
 					{
-						boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
+						boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
 					}
 				}
 			}
@@ -21938,7 +21938,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 				int numberSecondaries = child_number_secondary_columns[vgNumber];
 				for (int n = 0; n < numberSecondaries; ++n)
 				{
-					boost::apply_visitor(create_output_row_visitor(first), InstanceData(std::string()));
+					boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
 				}
 			}
 		}
@@ -22075,7 +22075,7 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 						MergedTimeSliceRow const & test_row = *incoming.cbegin();
 						InstanceDataVector const & test_vector = test_row.output_row;
 
-						create_output_row_visitor::data.clear();
+						create_output_row_visitor::data.clear(); 
 
 						++orig_row_count;
 					});

@@ -493,7 +493,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 
 						std::int64_t datetime_start;
 						std::int64_t datetime_end;
-						std::vector<std::string> current_parameter_strings;
+						std::vector<fast_string> current_parameter_strings;
 						std::vector<std::int64_t> current_parameter_ints;
 						std::vector<long double> current_parameter_floats;
 						std::vector<SQLExecutor::WHICH_BINDING> current_parameter_which_binding_to_use;
@@ -760,8 +760,8 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void OutputGranulatedRow(TimeSlice const & current_time_slice, fast_branch_output_row_set &output_rows_for_this_full_time_slice, std::fstream & output_file, Branch const & branch, AllWeightings & allWeightings, std::int64_t &rows_written);
 				void DetermineInternalChildLeafCountMultiplicityGreaterThanOne(AllWeightings & allWeightings, ColumnsInTempView const & column_schema, int const child_variable_group_index);
 
-				std::map<int, int> top_level_number_secondary_columns;
-				std::map<int, int> child_number_secondary_columns;
+				std::map<int, int> top_level_number_secondary_columns; 
+				std::map<int, int> child_number_secondary_columns; 
 				// Functions involved in different phases of generation
 				void PopulateSchemaForRawDataTables(AllWeightings & allWeightings);
 				void PopulateSchemaForRawDataTable(std::pair<WidgetInstanceIdentifier, WidgetInstanceIdentifiers> const & the_primary_variable_group, int view_count,
