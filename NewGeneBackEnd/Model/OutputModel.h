@@ -502,7 +502,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 						// Use these vectors to obtain the data you want.
 						// First, get the binding and index into the proper bound vector, above.
 						// Then, retrieve the data from the bound vector, above.
-						// ************************************************************************************************* // 
+						// ************************************************************************************************* //  
 
 						// std::pair<SQLExecutor::WHICH_BINDING, std::pair<int, int>> contains the following data:
 						// WHICH_BINDING, the index in the corresponding bound vector (above), and the column number

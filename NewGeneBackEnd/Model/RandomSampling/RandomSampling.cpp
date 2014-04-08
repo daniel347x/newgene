@@ -59,7 +59,7 @@ AllWeightings::~AllWeightings()
 	if (insert_random_sample_stmt)
 	{
 		sqlite3_finalize(insert_random_sample_stmt);
-		insert_random_sample_stmt = nullptr;
+		insert_random_sample_stmt = nullptr; 
 	}
 }
 

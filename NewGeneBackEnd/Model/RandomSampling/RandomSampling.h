@@ -17,27 +17,27 @@
 #include "../TimeGranularity.h"
 #include "../../Messager/Messager.h"
 
-typedef std::basic_string<char, std::char_traits<char>, boost::pool_allocator<char>> fast_string;
+typedef std::basic_string<char, std::char_traits<char>, boost::pool_allocator<char, boost::default_user_allocator_malloc_free>> fast_string;
 
-typedef std::map<int, int, std::less<int>, boost::fast_pool_allocator<std::pair<int const, int>>> fast_int_to_int_map;
+typedef std::map<int, int, std::less<int>, boost::fast_pool_allocator<std::pair<int const, int>, boost::default_user_allocator_malloc_free>> fast_int_to_int_map;
 typedef boost::variant<std::int64_t, double, fast_string> InstanceData;
 typedef boost::variant<std::int64_t, double, fast_string> DMUInstanceData;
 typedef boost::variant<std::int64_t, double, fast_string> SecondaryInstanceData;
 
-typedef std::vector<InstanceData, boost::pool_allocator<InstanceData>> InstanceDataVector;
+typedef std::vector<InstanceData, boost::pool_allocator<InstanceData, boost::default_user_allocator_malloc_free>> InstanceDataVector;
 typedef InstanceDataVector DMUInstanceDataVector;
 typedef InstanceDataVector ChildDMUInstanceDataVector;
 typedef InstanceDataVector SecondaryInstanceDataVector;
 
-typedef std::vector<int, boost::pool_allocator<int>> fast_int_vector;
-typedef std::set<int, std::less<int>, boost::fast_pool_allocator<int>> fast_int_set;
-typedef std::map<int, std::int64_t, std::less<int>, boost::fast_pool_allocator<std::pair<int const, std::int64_t>>> fast_int_to_int64_map;
-typedef std::map<int, fast_int_to_int64_map, std::less<int>, boost::fast_pool_allocator<std::pair<int const, fast_int_to_int64_map>>> fast__int__to__fast_int_to_int64_map;
+typedef std::vector<int, boost::pool_allocator<int, boost::default_user_allocator_malloc_free>> fast_int_vector;
+typedef std::set<int, std::less<int>, boost::fast_pool_allocator<int, boost::default_user_allocator_malloc_free>> fast_int_set;
+typedef std::map<int, std::int64_t, std::less<int>, boost::fast_pool_allocator<std::pair<int const, std::int64_t>, boost::default_user_allocator_malloc_free>> fast_int_to_int64_map;
+typedef std::map<int, fast_int_to_int64_map, std::less<int>, boost::fast_pool_allocator<std::pair<int const, fast_int_to_int64_map>, boost::default_user_allocator_malloc_free>> fast__int__to__fast_int_to_int64_map;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
-typedef std::map<std::int64_t, SecondaryInstanceDataVector, std::less<std::int64_t>, boost::fast_pool_allocator<std::pair<std::int64_t const, SecondaryInstanceDataVector>>> DataCache;
+typedef std::map<std::int64_t, SecondaryInstanceDataVector, std::less<std::int64_t>, boost::fast_pool_allocator<std::pair<std::int64_t const, SecondaryInstanceDataVector>, boost::default_user_allocator_malloc_free>> DataCache;
 
-typedef std::map<int, DataCache, std::less<int>, boost::fast_pool_allocator<std::pair<int const, DataCache>>> fast_int_to_data_cache_map;
+typedef std::map<int, DataCache, std::less<int>, boost::fast_pool_allocator<std::pair<int const, DataCache>, boost::default_user_allocator_malloc_free>> fast_int_to_data_cache_map;
 
 class AllWeightings;
 
@@ -954,8 +954,8 @@ struct ChildToPrimaryMapping
 	}
 };
 
-typedef std::vector<ChildToPrimaryMapping, boost::pool_allocator<ChildToPrimaryMapping>> fast_vector_childtoprimarymapping;
-typedef std::map<int, fast_vector_childtoprimarymapping, std::less<int>, boost::fast_pool_allocator<std::pair<int const, fast_vector_childtoprimarymapping>>> fast_int_to_childtoprimarymappingvector;
+typedef std::vector<ChildToPrimaryMapping, boost::pool_allocator<ChildToPrimaryMapping, boost::default_user_allocator_malloc_free>> fast_vector_childtoprimarymapping;
+typedef std::map<int, fast_vector_childtoprimarymapping, std::less<int>, boost::fast_pool_allocator<std::pair<int const, fast_vector_childtoprimarymapping>, boost::default_user_allocator_malloc_free>> fast_int_to_childtoprimarymappingvector;
 
 enum VARIABLE_GROUP_MERGE_MODE
 {
@@ -1215,15 +1215,15 @@ class BranchOutputRow
 
 typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 
-typedef std::vector<Leaf, boost::pool_allocator<Leaf>> fast_leaf_vector;
-typedef std::set<Leaf, std::less<Leaf>, boost::fast_pool_allocator<Leaf>> Leaves;
+typedef std::vector<Leaf, boost::pool_allocator<Leaf, boost::default_user_allocator_malloc_free>> fast_leaf_vector;
+typedef std::set<Leaf, std::less<Leaf>, boost::fast_pool_allocator<Leaf, boost::default_user_allocator_malloc_free>> Leaves;
 
-typedef std::vector<BranchOutputRow, boost::pool_allocator<BranchOutputRow>> fast_branch_output_row_vector;
-typedef std::set <BranchOutputRow, std::less<BranchOutputRow>, boost::fast_pool_allocator<BranchOutputRow>> fast_branch_output_row_set;
-typedef std::map<BranchOutputRow const *, fast_int_vector, std::less<BranchOutputRow const *>, boost::fast_pool_allocator<std::pair<BranchOutputRow const * const, fast_int_vector>>> fast_branch_output_row_ptr__to__fast_int_vector;
-typedef std::map<std::int64_t, fast_branch_output_row_set, std::less<std::int64_t>, boost::fast_pool_allocator<std::pair<std::int64_t const, fast_branch_output_row_set>>> fast__int64__to__fast_branch_output_row_set;
-typedef std::map<std::int64_t, fast_branch_output_row_vector, std::less<std::int64_t>, boost::fast_pool_allocator<std::pair<std::int64_t const, fast_branch_output_row_vector>>> fast__int64__to__fast_branch_output_row_vector;
-typedef std::map<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_int_vector, std::less<ChildDMUInstanceDataVector>, boost::fast_pool_allocator<std::pair<ChildDMUInstanceDataVector const, fast_branch_output_row_ptr__to__fast_int_vector>>> fast__lookup__from_child_dmu_set__to__output_rows;
+typedef std::vector<BranchOutputRow, boost::pool_allocator<BranchOutputRow, boost::default_user_allocator_malloc_free>> fast_branch_output_row_vector;
+typedef std::set <BranchOutputRow, std::less<BranchOutputRow>, boost::fast_pool_allocator<BranchOutputRow, boost::default_user_allocator_malloc_free>> fast_branch_output_row_set;
+typedef std::map<BranchOutputRow const *, fast_int_vector, std::less<BranchOutputRow const *>, boost::fast_pool_allocator<std::pair<BranchOutputRow const * const, fast_int_vector>, boost::default_user_allocator_malloc_free>> fast_branch_output_row_ptr__to__fast_int_vector;
+typedef std::map<std::int64_t, fast_branch_output_row_set, std::less<std::int64_t>, boost::fast_pool_allocator<std::pair<std::int64_t const, fast_branch_output_row_set>, boost::default_user_allocator_malloc_free>> fast__int64__to__fast_branch_output_row_set;
+typedef std::map<std::int64_t, fast_branch_output_row_vector, std::less<std::int64_t>, boost::fast_pool_allocator<std::pair<std::int64_t const, fast_branch_output_row_vector>, boost::default_user_allocator_malloc_free>> fast__int64__to__fast_branch_output_row_vector;
+typedef std::map<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_int_vector, std::less<ChildDMUInstanceDataVector>, boost::fast_pool_allocator<std::pair<ChildDMUInstanceDataVector const, fast_branch_output_row_ptr__to__fast_int_vector>, boost::default_user_allocator_malloc_free>> fast__lookup__from_child_dmu_set__to__output_rows;
 
 //#ifdef _DEBUG
 void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys);
@@ -1558,7 +1558,7 @@ void SpitBranch(std::string & sdata, Branch const & branch);
 // ******************************************************************************************************** //
 // (Only one, since currently only one primary top-level variable group is supported)
 //
-typedef std::set<Branch, std::less<Branch>, boost::fast_pool_allocator<Branch>> Branches;
+typedef std::set<Branch, std::less<Branch>, boost::fast_pool_allocator<Branch, boost::default_user_allocator_malloc_free>> Branches;
 //
 // ******************************************************************************************************** //
 // ******************************************************************************************************** //
@@ -1589,7 +1589,7 @@ class VariableGroupBranchesAndLeaves
 
 };
 
-typedef std::vector<VariableGroupBranchesAndLeaves, boost::pool_allocator<VariableGroupBranchesAndLeaves>> VariableGroupBranchesAndLeavesVector;
+typedef std::vector<VariableGroupBranchesAndLeaves, boost::pool_allocator<VariableGroupBranchesAndLeaves, boost::default_user_allocator_malloc_free>> VariableGroupBranchesAndLeavesVector;
 
 class VariableGroupTimeSliceData
 {
@@ -1853,7 +1853,7 @@ public:
 
 };
 
-typedef std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys, boost::fast_pool_allocator<MergedTimeSliceRow>> fast__mergedtimeslicerow_set;
+typedef std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys, boost::fast_pool_allocator<MergedTimeSliceRow, boost::default_user_allocator_malloc_free>> fast__mergedtimeslicerow_set;
 
 class AllWeightings
 {
@@ -1970,7 +1970,7 @@ public:
 public:
 
 	sqlite3_stmt * insert_random_sample_stmt;
-
+	 
 	// Returns "added", "continue handling slice", and "next map iterator"
 	std::tuple<bool, bool, TimeSlices::iterator> HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & timeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling, TimeSlices::iterator mapIterator_ = TimeSlices::iterator(), bool const useIterator = false);
 	void CalculateWeightings(int const K, std::int64_t const ms_per_unit_time);

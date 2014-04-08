@@ -21938,7 +21938,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 				int numberSecondaries = child_number_secondary_columns[vgNumber];
 				for (int n = 0; n < numberSecondaries; ++n)
 				{
-					boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string()));
+					boost::apply_visitor(create_output_row_visitor(first), InstanceData(fast_string())); 
 				}
 			}
 		}
