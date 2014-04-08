@@ -858,77 +858,22 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 	}
 
 	random_numbers.insert(random_numbers.begin(), tmp_random_numbers.cbegin(), tmp_random_numbers.cend());
-	std::random_shuffle(random_numbers.begin(), random_numbers.end(), [&](size_t max_random)
+
+
+	// Optimization - profiler shows a vast time spent in lower_bound elsewhere,
+	// so optimize by keeping the random numbers sorted and process them in order.
+	if (false)
 	{
-		std::uniform_int_distribution<size_t> remaining_distribution(0, max_random - 1);
-		size_t which_remaining_random_number = remaining_distribution(engine);
-		return which_remaining_random_number;
-	});
+		std::random_shuffle(random_numbers.begin(), random_numbers.end(), [&](size_t max_random)
+		{
+			std::uniform_int_distribution<size_t> remaining_distribution(0, max_random - 1);
+			size_t which_remaining_random_number = remaining_distribution(engine);
+			return which_remaining_random_number;
+		});
+	}
 
 
 	random_number_iterator = random_numbers.cbegin();
-
-}
-
-bool AllWeightings::RetrieveNextBranchAndLeaves(int const K)
-{
-	
-	if (random_number_iterator == random_numbers.cend())
-	{
-		return false;
-	}
-
-	boost::multiprecision::cpp_int const & random_number = *random_number_iterator;
-
-#	ifdef _DEBUG
-	std::string val1 = random_number.str();
-#	endif
-
-	BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
-
-	TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
-	{
-		VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
-		if (testVariableGroupTimeSliceData.weighting.getWeightingRangeEnd() < test_random_number)
-		{
-			return true;
-		}
-		return false;
-	});
-
-	TimeSlice const & timeSlice = timeSlicePtr->first;
-	VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second;
-	VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
-
-	// For now, assume only one variable group
-	if (variableGroupBranchesAndLeavesVector.size() > 1)
-	{
-		boost::format msg("Only one top-level variable group is currently supported for the random and full sampler.");
-		throw NewGeneException() << newgene_error_description(msg.str());
-	}
-
-	VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
-
-	Branches const & branches = variableGroupBranchesAndLeaves.branches;
-		
-	// Pick a branch randomly (with weight!)
-	Branches::const_iterator branchesPtr = std::lower_bound(branches.cbegin(), branches.cend(), random_number, [&](Branch const & testBranch, boost::multiprecision::cpp_int const & test_random_number)
-	{
-		if (testBranch.weighting.getWeightingRangeEnd() < test_random_number)
-		{
-			return true;
-		}
-		return false;
-	});
-
-	const Branch & new_branch = *branchesPtr;
-
-	// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData
-	GenerateOutputRow(random_number, K, new_branch);
-
-	++random_number_iterator;
-
-	return true;
 
 }
 
@@ -1456,9 +1401,93 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 void AllWeightings::PrepareRandomSamples(int const K)
 {
 
-	while (RetrieveNextBranchAndLeaves(K))
+	TimeSlices::const_iterator timeSlicePtr = timeSlices.cbegin();
+	boost::multiprecision::cpp_int currentMapElementHighEndWeight = timeSlicePtr->second.weighting.getWeightingRangeEnd();
+
+	while (true)
 	{
-		// It's all happening in the condition
+
+		if (random_number_iterator == random_numbers.cend())
+		{
+			break;
+		}
+
+		boost::multiprecision::cpp_int const & random_number = *random_number_iterator;
+
+#	ifdef _DEBUG
+		std::string val1 = random_number.str();
+#	endif
+
+		BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
+
+		// Optimization: The incoming random numbers are sorted.
+		// Profiling shows that even in Release mode,
+		// well over 90% of the time in the selection and creation
+		// of random rows is spent in this block.
+		// Optimization here is critical.
+		bool optimization = true;
+		if (optimization)
+		{
+
+			while (random_number > currentMapElementHighEndWeight)
+			{
+				// The current map element is still good!
+				++timeSlicePtr;
+
+				// optimization: No safety check on iterator.  We assume all random numbers are within the map.
+				currentMapElementHighEndWeight = timeSlicePtr->second.weighting.getWeightingRangeEnd();
+
+			}
+
+		}
+		else
+		{
+
+			// no optimization - the random number could lie in any map element
+			TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
+			{
+				VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
+				if (testVariableGroupTimeSliceData.weighting.getWeightingRangeEnd() < test_random_number)
+				{
+					return true;
+				}
+				return false;
+			});
+
+		}
+
+		TimeSlice const & timeSlice = timeSlicePtr->first;
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second;
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
+
+		// For now, assume only one variable group
+		if (variableGroupBranchesAndLeavesVector.size() > 1)
+		{
+			boost::format msg("Only one top-level variable group is currently supported for the random and full sampler.");
+			throw NewGeneException() << newgene_error_description(msg.str());
+		}
+
+		VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves = variableGroupBranchesAndLeavesVector[0];
+
+		Branches const & branches = variableGroupBranchesAndLeaves.branches;
+
+		// Pick a branch randomly (with weight!)
+		Branches::const_iterator branchesPtr = std::lower_bound(branches.cbegin(), branches.cend(), random_number, [&](Branch const & testBranch, boost::multiprecision::cpp_int const & test_random_number)
+		{
+			if (testBranch.weighting.getWeightingRangeEnd() < test_random_number)
+			{
+				return true;
+			}
+			return false;
+		});
+
+		const Branch & new_branch = *branchesPtr;
+
+		// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData
+		GenerateOutputRow(random_number, K, new_branch);
+
+		++random_number_iterator;
+
 	}
 
 }
