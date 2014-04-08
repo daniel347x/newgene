@@ -1501,7 +1501,7 @@ void AllWeightings::PrepareRandomSamples(int const K)
 			}
 			return false;
 		});
-
+		 
 		const Branch & new_branch = *branchesPtr;
 
 		// random_number is now an actual *index* to which combination of leaves in this VariableGroupTimeSliceData
