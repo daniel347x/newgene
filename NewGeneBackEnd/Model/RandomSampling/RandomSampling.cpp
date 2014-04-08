@@ -1418,14 +1418,13 @@ void AllWeightings::PrepareRandomSamples(int const K)
 		std::string val1 = random_number.str();
 #	endif
 
-		BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
+		bool optimization = true;
 
 		// Optimization: The incoming random numbers are sorted.
 		// Profiling shows that even in Release mode,
 		// well over 90% of the time in the selection and creation
 		// of random rows is spent in this block.
 		// Optimization here is critical.
-		bool optimization = true;
 		if (optimization)
 		{
 
@@ -1444,6 +1443,9 @@ void AllWeightings::PrepareRandomSamples(int const K)
 		{
 
 			// no optimization - the random number could lie in any map element
+
+			BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
+
 			TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
 			{
 				VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
