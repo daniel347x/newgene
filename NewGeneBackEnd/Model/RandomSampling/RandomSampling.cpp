@@ -735,7 +735,7 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 
 				//boost::format msg("New weighting being added for branch: %1%");
 				//msg % boost::lexical_cast<std::string>(weighting.getWeighting());
-				//messager.AppendKadStatusText(msg.str(), this);
+				//messager.AppendKadStatusText(msg.str(), nullptr);
 
 				variableGroupBranchesAndLeavesWeighting.addWeighting(branchWeighting.getWeighting());
 
@@ -751,7 +751,7 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 
 	boost::format msg("%1% time slices and %2% branches");
 	msg % time_slice_count % branch_count;
-	messager.AppendKadStatusText(msg.str(), this);
+	messager.AppendKadStatusText(msg.str(), nullptr);
 	
 }
 
