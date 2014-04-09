@@ -20550,7 +20550,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 						case SQLExecutor::INT64:
 							{
-								dmus_leaf.push_back(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]);
+								dmus_leaf.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
 							}
 							break;
 
@@ -20601,7 +20601,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 						case SQLExecutor::INT64:
 							{
-								dmus_branch.push_back(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]);
+								dmus_branch.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
 							}
 							break;
 
@@ -20655,7 +20655,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 						case SQLExecutor::INT64:
 							{
-								secondary_data.push_back(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]);
+								secondary_data.push_back(static_cast<std::int32_t>(sorting_row_of_data.current_parameter_ints[index_in_bound_vector]));
 							}
 							break;
 
@@ -20699,7 +20699,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 							case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
 							{
 
-								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
+								Leaf leaf(dmus_leaf, static_cast<std::int32_t>(sorting_row_of_data.rowid));
 								Branch branch(dmus_branch);
 
 								bool call_again = false;
@@ -20722,7 +20722,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								if (added)
 								{
 									// Add the secondary data for this primary variable group to the cache
-									allWeightings.dataCache[sorting_row_of_data.rowid] = secondary_data;
+									allWeightings.dataCache[static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
 								}
 
 							}
@@ -20736,7 +20736,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 								// Set the secondary data index into the above cache for this non-primary top-level variable group
 								// so that it can be set in the corresponding leaf already present for the branch
-								leaf.other_top_level_indices_into_raw_data[variable_group_number] = sorting_row_of_data.rowid;
+								leaf.other_top_level_indices_into_raw_data[static_cast<std::int16_t>(variable_group_number)] = static_cast<std::int32_t>(sorting_row_of_data.rowid);
 
 								bool call_again = false;
 								bool added = false;
@@ -20758,7 +20758,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								if (added)
 								{
 									// Add the secondary data for this non-primary top-level variable group to the cache
-									allWeightings.otherTopLevelCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
+									allWeightings.otherTopLevelCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
 								}
 
 							}
@@ -20769,7 +20769,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 
 								// pack the child data index into the main leaf for use in the function called below - because this leaf is TEMPORARY
 								// (this data will be unpacked from the temporary leaf and put into the proper place in the function called below)
-								Leaf leaf(dmus_leaf, sorting_row_of_data.rowid);
+								Leaf leaf(dmus_leaf, static_cast<std::int16_t>(sorting_row_of_data.rowid));
 								Branch branch(dmus_branch);
 
 								// ************************************************************************************************** //
@@ -20801,7 +20801,7 @@ void OutputModel::OutputGenerator::RandomSampling_ReadData_AddToTimeSlices(Colum
 								if (added)
 								{
 									// Add the secondary data for this child variable group to the cache
-									allWeightings.childCache[variable_group_number][sorting_row_of_data.rowid] = secondary_data;
+									allWeightings.childCache[static_cast<std::int16_t>(variable_group_number)][static_cast<std::int32_t>(sorting_row_of_data.rowid)] = secondary_data;
 								}
 
 							}
@@ -21841,7 +21841,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 						// which has empty columns rather than missing columns
 						// *********************************************************************** //
 						int const vg_number = top_level_vg_and_data_index.first;
-						std::int64_t const & data_index = top_level_vg_and_data_index.second;
+						std::int32_t const & data_index = top_level_vg_and_data_index.second;
 						DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
 						SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
 						std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
@@ -21937,7 +21937,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 
 					// This is the desired variable group and multiplicity
 
-					std::int64_t const & data_index = leaf_index_mapping.second;
+					std::int32_t const & data_index = leaf_index_mapping.second;
 					DataCache & data_cache = allWeightings.childCache[vg_number];
 					SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
 

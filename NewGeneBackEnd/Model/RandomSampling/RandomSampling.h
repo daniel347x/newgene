@@ -1114,7 +1114,7 @@ public:
 	, index_into_raw_data{ 0 }
 	{}
 
-	PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int64_t const & index_into_raw_data_ = 0)
+	PrimaryKeysGroupingMultiplicityGreaterThanOne(DMUInstanceDataVector const & dmuInstanceDataVector, std::int32_t const & index_into_raw_data_ = 0)
 		: PrimaryKeysGrouping(dmuInstanceDataVector)
 		, index_into_raw_data{ index_into_raw_data_ }
 	{}
@@ -1149,7 +1149,7 @@ public:
 		return *this;
 	}
 
-	std::int64_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
+	std::int32_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
 
 	// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
 	mutable fast_short_to_int_map other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
@@ -1500,7 +1500,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			return true;
 		}
 
-		void setTopGroupIndexIntoRawData(Leaf const & existingLeaf, int const variable_group_number, std::int64_t const other_top_level_index_into_raw_data) const
+		void setTopGroupIndexIntoRawData(Leaf const & existingLeaf, int const variable_group_number, std::int32_t const other_top_level_index_into_raw_data) const
 		{
 			auto const leafPtr = leaves.find(existingLeaf);
 			leafPtr->other_top_level_indices_into_raw_data[variable_group_number] = other_top_level_index_into_raw_data;
@@ -1652,7 +1652,7 @@ public:
 		, bindIndex(bindIndex_)
 	{}
 
-	void operator()(std::int64_t const & data)
+	void operator()(std::int32_t const & data)
 	{
 		sqlite3_bind_int64(stmt, bindIndex, data);
 	}
