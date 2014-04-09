@@ -55,6 +55,7 @@ AllWeightings::~AllWeightings()
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>::purge_memory();
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>::purge_memory();
 	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<TimeSlice const, VariableGroupTimeSliceData>)>::purge_memory();
 
 	if (insert_random_sample_stmt)
 	{
@@ -142,7 +143,7 @@ std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBra
 
 			// The start of the new slice is to the left of the end of the map
 
-			TimeSlice const & startMapSlice = startMapSlicePtr->first;
+			TimeSlice const & startMapSlice = startMapSlicePtr->first();
 
 			// The new time slice MIGHT start to the left of the map element returned by upper_bound.
 			// Or it might not - it might start IN or at the left edge of this element.
@@ -173,7 +174,7 @@ std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBra
 					// Slice off the left-most piece of the new time slice
 					// (and add it to the map if appropriate)
 					TimeSliceLeaf new_left_slice;
-					SliceOffLeft(newTimeSliceLeaf, startMapSlicePtr->first.getStart(), new_left_slice);
+					SliceOffLeft(newTimeSliceLeaf, startMapSlicePtr->first().getStart(), new_left_slice);
 
 					if (merge_mode == VARIABLE_GROUP_MERGE_MODE__PRIMARY)
 					{
@@ -274,7 +275,7 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 	bool added_new = false;
 
 	TimeSlice const & newTimeSlice = newTimeSliceLeaf.first;
-	TimeSlice const & mapElement   = mapElementPtr->first;
+	TimeSlice const & mapElement   = mapElementPtr->first();
 
 	TimeSlices::iterator newMapElementLeftPtr;
 	TimeSlices::iterator newMapElementMiddlePtr;
@@ -424,9 +425,9 @@ bool AllWeightings::HandleTimeSliceNormalCase(bool & added, Branch const & branc
 void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const middle, TimeSlices::iterator & newMapElementLeftPtr, TimeSlices::iterator & newMapElementRightPtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
-	TimeSlice timeSlice = existingMapElementPtr->first;
+	TimeSlice timeSlice = existingMapElementPtr->first();
 	TimeSlice originalMapTimeSlice = timeSlice;
-	VariableGroupTimeSliceData const timeSliceData = existingMapElementPtr->second;
+	VariableGroupTimeSliceData const timeSliceData = existingMapElementPtr->second();
 
 	timeSlices.erase(existingMapElementPtr);
 
@@ -450,9 +451,9 @@ void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElemen
 void AllWeightings::SliceMapEntry(TimeSlices::iterator const & existingMapElementPtr, std::int64_t const left, std::int64_t const right, TimeSlices::iterator & newMapElementMiddlePtr, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling)
 {
 
-	TimeSlice timeSlice = existingMapElementPtr->first;
+	TimeSlice timeSlice = existingMapElementPtr->first();
 	TimeSlice originalMapTimeSlice = timeSlice;
-	VariableGroupTimeSliceData const timeSliceData = existingMapElementPtr->second;
+	VariableGroupTimeSliceData const timeSliceData = existingMapElementPtr->second();
 
 	timeSlices.erase(existingMapElementPtr);
 
@@ -500,7 +501,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 	bool added = false;
 
-	VariableGroupTimeSliceData & variableGroupTimeSliceData = mapElementPtr->second;
+	VariableGroupTimeSliceData & variableGroupTimeSliceData = mapElementPtr->second();
 	VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 	// Note: Currently, only one primary top-level variable group is supported.
@@ -651,11 +652,11 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 					// Loop through all matching output rows
 					if (!no_matches_for_this_child)
 					{
-						for (auto matchingOutputRowPtr = matchingOutputRows->second.cbegin(); matchingOutputRowPtr != matchingOutputRows->second.cend(); ++matchingOutputRowPtr)
+						for (auto matchingOutputRowPtr = matchingOutputRows->second().cbegin(); matchingOutputRowPtr != matchingOutputRows->second().cend(); ++matchingOutputRowPtr)
 						{
 
-							BranchOutputRow const & outputRow = *matchingOutputRowPtr->first;
-							fast_int_vector const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
+							BranchOutputRow const & outputRow = *matchingOutputRowPtr->first();
+							fast_int_vector const & matchingOutputChildLeaves = matchingOutputRowPtr->second();
 
 							// Loop through all matching output row child leaves
 							std::for_each(matchingOutputChildLeaves.cbegin(), matchingOutputChildLeaves.cend(), [&](int const matching_child_leaf_index)
@@ -703,13 +704,13 @@ void AllWeightings::CalculateWeightings(int const K, std::int64_t const ms_per_u
 	std::int64_t branch_count = 0;
 	std::int64_t time_slice_count = 0;
 
-	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceEntry)
+	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](TimeSlices::value_type const & timeSliceEntry)
 	{
 
 		++time_slice_count;
 
-		TimeSlice const & timeSlice = timeSliceEntry.first;
-		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second;
+		TimeSlice const & timeSlice = timeSliceEntry.first();
+		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSliceEntry.second();
 		VariableGroupBranchesAndLeavesVector & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 		Weighting & variableGroupTimeSliceDataWeighting = variableGroupTimeSliceData.weighting;
 
@@ -1211,10 +1212,10 @@ boost::multiprecision::cpp_int AllWeightings::BinomialCoefficient(int const N, i
 void AllWeightings::ResetBranchCaches()
 {
 
-	std::for_each(timeSlices.begin(), timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
+	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](TimeSlices::value_type const  & timeSliceData)
 	{
 
-		timeSliceData.second.ResetBranchCachesSingleTimeSlice(*this);
+		timeSliceData.second().ResetBranchCachesSingleTimeSlice(*this);
 
 	});
 
@@ -1254,7 +1255,7 @@ void PrimaryKeysGroupingMultiplicityOne::ConstructChildCombinationCache(AllWeigh
 			// We proceed to build the cache
 			// ***************************************************************************************** //
 
-			for (auto outputRowPtr = time_unit_output_rows.second.cbegin(); outputRowPtr != time_unit_output_rows.second.cend(); ++outputRowPtr)
+			for (auto outputRowPtr = time_unit_output_rows.second().cbegin(); outputRowPtr != time_unit_output_rows.second().cend(); ++outputRowPtr)
 			{
 
 				// ******************************************************************************************************** //
@@ -1444,7 +1445,7 @@ void AllWeightings::PrepareRandomSamples(int const K)
 {
 
 	TimeSlices::const_iterator timeSlicePtr = timeSlices.cbegin();
-	boost::multiprecision::cpp_int currentMapElementHighEndWeight = timeSlicePtr->second.weighting.getWeightingRangeEnd();
+	boost::multiprecision::cpp_int currentMapElementHighEndWeight = timeSlicePtr->second().weighting.getWeightingRangeEnd();
 
 	while (true)
 	{
@@ -1472,11 +1473,12 @@ void AllWeightings::PrepareRandomSamples(int const K)
 
 			while (random_number > currentMapElementHighEndWeight)
 			{
+
 				// The current map element is still good!
 				++timeSlicePtr;
 
 				// optimization: No safety check on iterator.  We assume all random numbers are within the map.
-				currentMapElementHighEndWeight = timeSlicePtr->second.weighting.getWeightingRangeEnd();
+				currentMapElementHighEndWeight = timeSlicePtr->second().weighting.getWeightingRangeEnd();
 
 			}
 
@@ -1488,9 +1490,9 @@ void AllWeightings::PrepareRandomSamples(int const K)
 
 			BOOST_ASSERT_MSG(random_number >= 0 && random_number < weighting.getWeighting() && weighting.getWeightingRangeStart() == 0 && weighting.getWeightingRangeEnd() == weighting.getWeighting() - 1, "Invalid weights in RetrieveNextBranchAndLeaves().");
 
-			TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
+			TimeSlices::const_iterator timeSlicePtr = std::lower_bound(timeSlices.cbegin(), timeSlices.cend(), random_number, [&](TimeSlices::value_type const & timeSliceData, boost::multiprecision::cpp_int const & test_random_number)
 			{
-				VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second;
+				VariableGroupTimeSliceData const & testVariableGroupTimeSliceData = timeSliceData.second();
 				if (testVariableGroupTimeSliceData.weighting.getWeightingRangeEnd() < test_random_number)
 				{
 					return true;
@@ -1500,8 +1502,8 @@ void AllWeightings::PrepareRandomSamples(int const K)
 
 		}
 
-		TimeSlice const & timeSlice = timeSlicePtr->first;
-		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second;
+		TimeSlice const & timeSlice = timeSlicePtr->first();
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlicePtr->second();
 		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 		// For now, assume only one variable group
@@ -1542,8 +1544,8 @@ void AllWeightings::PrepareFullSamples(int const K)
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
 	{
 
-		TimeSlice const & the_slice = timeSlice.first;
-		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+		TimeSlice const & the_slice = timeSlice.first();
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second();
 		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
 
 		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
@@ -1570,13 +1572,13 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 
 	branch.hits[-1].clear();
 
-	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
+	std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](decltype(branch.hits)::value_type const & hit)
 	{
-		if (hit.first != -1)
+		if (hit.first() != -1)
 		{
-			orig_random_number_rows += hit.second.size();
-			branch.hits[-1].insert(hit.second.cbegin(), hit.second.cend());
-			hit.second.clear();
+			orig_random_number_rows += hit.second().size();
+			branch.hits[-1].insert(hit.second().cbegin(), hit.second().cend());
+			hit.second().clear();
 		}
 	});
 
@@ -1738,14 +1740,14 @@ void SpitKeys(std::string & sdata, DMUInstanceDataVector const & dmu_keys)
 void SpitDataCache(std::string & sdata, DataCache const & dataCache)
 {
 	sdata += "<DATA_CACHE>";
-	std::for_each(dataCache.cbegin(), dataCache.cend(), [&](std::pair<std::int64_t const, SecondaryInstanceDataVector> const & dataEntry)
+	std::for_each(dataCache.cbegin(), dataCache.cend(), [&](DataCache::value_type const & dataEntry)
 	{
 		sdata += "<DATA_CACHE_ELEMENT>";
 		sdata += "<INDEX_WITHIN_DATA_CACHE>";
-		sdata += boost::lexical_cast<std::string>(dataEntry.first);
+		sdata += boost::lexical_cast<std::string>(dataEntry.first());
 		sdata += "</INDEX_WITHIN_DATA_CACHE>";
 		sdata += "<DATA_VALUES_WITHIN_DATA_CACHE>";
-		SpitKeys(sdata, dataEntry.second);
+		SpitKeys(sdata, dataEntry.second());
 		sdata += "</DATA_VALUES_WITHIN_DATA_CACHE>";
 		sdata += "</DATA_CACHE_ELEMENT>";
 	});
@@ -1755,12 +1757,12 @@ void SpitDataCache(std::string & sdata, DataCache const & dataCache)
 void SpitDataCaches(std::string & sdata, fast_int_to_data_cache_map const & dataCaches)
 {
 	sdata += "<DATA_CACHES>";
-	std::for_each(dataCaches.cbegin(), dataCaches.cend(), [&](std::pair<int const, DataCache> const & dataEntry)
+	std::for_each(dataCaches.cbegin(), dataCaches.cend(), [&](fast_int_to_data_cache_map::value_type const & dataEntry)
 	{
 		sdata += "<DATA_CACHE_NUMBER>";
-		sdata += boost::lexical_cast<std::string>(dataEntry.first);
+		sdata += boost::lexical_cast<std::string>(dataEntry.first());
 		sdata += "</DATA_CACHE_NUMBER>";
-		SpitDataCache(sdata, dataEntry.second);
+		SpitDataCache(sdata, dataEntry.second());
 	});
 	sdata += "</DATA_CACHES>";
 }
@@ -1768,14 +1770,14 @@ void SpitDataCaches(std::string & sdata, fast_int_to_data_cache_map const & data
 void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits)
 {
 	sdata += "<HITS>";
-	std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<std::int64_t const, fast_branch_output_row_set> const & hitsEntry)
+	std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set::value_type const & hitsEntry)
 	{
 		sdata += "<TIME_UNIT>";
 		sdata += "<TIME_UNIT_INDEX>";
-		sdata += boost::lexical_cast<std::string>(hitsEntry.first);
+		sdata += boost::lexical_cast<std::string>(hitsEntry.first());
 		sdata += "</TIME_UNIT_INDEX>";
 		sdata += "<OUTPUT_ROWS>";
-		SpitSetOfOutputRows(sdata, hitsEntry.second);
+		SpitSetOfOutputRows(sdata, hitsEntry.second());
 		sdata += "</OUTPUT_ROWS>";
 		sdata += "</TIME_UNIT>";
 	});
@@ -1813,20 +1815,20 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 	sdata += "</INDICES_FOR_THIS_SINGLE_ROW_POINTING_INTO_LEAF_SET_FOR_THIS_BRANCH>";
 
 	sdata += "<CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW>";
-	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](std::pair<int const, fast_int_to_int64_map> const & childindices)
+	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](fast__int__to__fast_int_to_int64_map::value_type const & childindices)
 	{
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA>";
 		sdata += "<VARIABLE_GROUP_NUMBER>";
-		sdata += boost::lexical_cast<std::string>(childindices.first);
+		sdata += boost::lexical_cast<std::string>(childindices.first());
 		sdata += "</VARIABLE_GROUP_NUMBER>";
-		std::for_each(childindices.second.cbegin(), childindices.second.cend(), [&](std::pair<int const, std::int64_t> const & childleaves)
+		std::for_each(childindices.second().cbegin(), childindices.second().cend(), [&](fast_int_to_int64_map::value_type const & childleaves)
 		{
 			sdata += "<SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW>";
 			sdata += "<LEAF_NUMBER>";
-			sdata += boost::lexical_cast<std::string>(childleaves.first);
+			sdata += boost::lexical_cast<std::string>(childleaves.first());
 			sdata += "</LEAF_NUMBER>";
 			sdata += "<INDEX_OF_LEAF_IN_CHILD_DATA_CACHE>";
-			sdata += boost::lexical_cast<std::string>(childleaves.second);
+			sdata += boost::lexical_cast<std::string>(childleaves.second());
 			sdata += "</INDEX_OF_LEAF_IN_CHILD_DATA_CACHE>";
 			sdata += "</SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW>";
 		});
@@ -1840,25 +1842,25 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__output_rows const & helperLookup)
 {
 	sdata += "<LIST_OF_CHILD_KEYLISTS_THAT_MATCH_SOMETHING_IN_THIS_BRANCH>";
-	std::for_each(helperLookup.cbegin(), helperLookup.cend(), [&](std::pair<ChildDMUInstanceDataVector const, fast_branch_output_row_ptr__to__fast_int_vector> const & helper)
+	std::for_each(helperLookup.cbegin(), helperLookup.cend(), [&](fast__lookup__from_child_dmu_set__to__output_rows::value_type const & helper)
 	{
 		sdata += "<CHILD_KEYLIST_THAT_MATCHES_SOMETHING_IN_THIS_BRANCH>";
 
 		sdata += "<CHILD_DMU_KEYS>";
-		SpitKeys(sdata, helper.first);
+		SpitKeys(sdata, helper.first());
 		sdata += "</CHILD_DMU_KEYS>";
 
 		sdata += "<ROWS_CONTAINING_DATA_THAT_INCLUDES_THE_GIVEN_CHILD_KEYS>";
-		std::for_each(helper.second.cbegin(), helper.second.cend(), [&](std::pair<BranchOutputRow const *, fast_int_vector> const & helperrow)
+		std::for_each(helper.second().cbegin(), helper.second().cend(), [&](fast_branch_output_row_ptr__to__fast_int_vector::value_type const & helperrow)
 		{
 			sdata += "<ROW_CONTAINING_DATA_THAT_INCLUDES_THE_GIVEN_CHILD_KEYS>";
 
 			sdata += "<SINGLE_ROW_CONTAINING_DATA_THAT_INCLUDES_THE_GIVEN_CHILD_KEYS>";
-			SpitOutputRow(sdata, *helperrow.first);
+			SpitOutputRow(sdata, *helperrow.first());
 			sdata += "</SINGLE_ROW_CONTAINING_DATA_THAT_INCLUDES_THE_GIVEN_CHILD_KEYS>";
 
 			sdata += "<WHICH_CHILD_LEAF_NUMBERS_IN_THE_FULL_ROW_MATCH_THIS_CHILD_LEAF_KEY_DATA>";
-			std::for_each(helperrow.second.cbegin(), helperrow.second.cend(), [&](int const & leafindex)
+			std::for_each(helperrow.second().cbegin(), helperrow.second().cend(), [&](int const & leafindex)
 			{
 				sdata += "<CHILD_LEAF_NUMBER_THAT_MATCHES_THE_GIVEN_CHILD_LEAF_KEY_DATA>";
 				sdata += boost::lexical_cast<std::string>(leafindex);
@@ -1885,14 +1887,14 @@ void SpitLeaf(std::string & sdata, Leaf const & leaf)
 	SpitKeys(sdata, leaf.primary_keys);
 	sdata += "</LEAF_DMU_DATALIST>";
 	sdata += "<OTHER_NON_PRIMARY_TOP_LEVEL_INDICES__ONE_PER_LEAF__POINTING_INTO_DATA_CACHE>";
-	std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & leafindicesintorawdata)
+	std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_int_to_int64_map::value_type const & leafindicesintorawdata)
 	{
 		sdata += "<VARIABLE_GROUP>";
 		sdata += "<VARIABLE_GROUP_NUMBER>";
-		sdata += boost::lexical_cast<std::string>(leafindicesintorawdata.first);
+		sdata += boost::lexical_cast<std::string>(leafindicesintorawdata.first());
 		sdata += "</VARIABLE_GROUP_NUMBER>";
 		sdata += "<INDEX_POINTING_TO_SINGLE_LEAF_RAW_DATA>";
-		sdata += boost::lexical_cast<std::string>(leafindicesintorawdata.second);
+		sdata += boost::lexical_cast<std::string>(leafindicesintorawdata.second());
 		sdata += "</INDEX_POINTING_TO_SINGLE_LEAF_RAW_DATA>";
 		sdata += "</VARIABLE_GROUP>";
 	});
@@ -1994,10 +1996,10 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 		*sdata += "<child_group>";
 
 		*sdata += "<child_variable_group_index>";
-		*sdata += boost::lexical_cast<std::string>(oneChildGroup.first);
+		*sdata += boost::lexical_cast<std::string>(oneChildGroup.first());
 		*sdata += "</child_variable_group_index>";
 		*sdata += "<column_count_for_child_dmu_with_child_multiplicity_greater_than_1>";
-		*sdata += boost::lexical_cast<std::string>(oneChildGroup.second);
+		*sdata += boost::lexical_cast<std::string>(oneChildGroup.second());
 		*sdata += "</column_count_for_child_dmu_with_child_multiplicity_greater_than_1>";
 
 		*sdata += "</child_group>";
@@ -2017,9 +2019,9 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 		*sdata += "<BRANCH_MAPPINGS>";
 		std::for_each(allWeightings.mappings_from_child_branch_to_primary.cbegin(), allWeightings.mappings_from_child_branch_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_branch_to_primary)::value_type const & oneChildGroupBranchMappings)
 		{
-			if (oneChildGroupBranchMappings.first == c)
+			if (oneChildGroupBranchMappings.first() == c)
 			{
-				std::for_each(oneChildGroupBranchMappings.second.cbegin(), oneChildGroupBranchMappings.second.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				std::for_each(oneChildGroupBranchMappings.second().cbegin(), oneChildGroupBranchMappings.second().cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 					*sdata += "<BRANCH_MAPPING>";
 					SpitChildToPrimaryKeyColumnMapping(*sdata, childToPrimaryMapping);
@@ -2031,9 +2033,9 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 		*sdata += "<LEAF_MAPPINGS>";
 		std::for_each(allWeightings.mappings_from_child_leaf_to_primary.cbegin(), allWeightings.mappings_from_child_leaf_to_primary.cend(), [&](decltype(allWeightings.mappings_from_child_leaf_to_primary)::value_type const & oneChildGroupLeafMappings)
 		{
-			if (oneChildGroupLeafMappings.first == c)
+			if (oneChildGroupLeafMappings.first() == c)
 			{
-				std::for_each(oneChildGroupLeafMappings.second.cbegin(), oneChildGroupLeafMappings.second.cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
+				std::for_each(oneChildGroupLeafMappings.second().cbegin(), oneChildGroupLeafMappings.second().cend(), [&](ChildToPrimaryMapping const & childToPrimaryMapping)
 				{
 					*sdata += "<LEAF_MAPPING>";
 					SpitChildToPrimaryKeyColumnMapping(*sdata, childToPrimaryMapping);
@@ -2072,8 +2074,8 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 
 		*sdata += "<TIME_SLICE>";
 
-		TimeSlice const & the_slice = timeSlice.first;
-		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+		TimeSlice const & the_slice = timeSlice.first();
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second();
 		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
 
 		*sdata += "<TIME>";
@@ -2789,7 +2791,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 			long double hit_total_distance_so_far = 0.0;
 			std::int64_t hit_number = 0;
 			std::int64_t total_hits = hits.size();
-			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<std::int64_t const, fast_branch_output_row_set> const & hit)
+			std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set::value_type const & hit)
 			{
 
 				// ************************************************************** //
@@ -2845,7 +2847,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 					{
 						if (rightOverlaps)
 						{
-							new_hits[hit_number-1] = hit.second;
+							new_hits[hit_number-1] = hit.second();
 						}
 					}
 					else
@@ -2853,7 +2855,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 					{
 						if (leftOverlaps)
 						{
-							new_hits[hit_number - 1] = hit.second;
+							new_hits[hit_number - 1] = hit.second();
 						}
 					}
 					else
@@ -2861,7 +2863,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 					{
 						if (middleOverlaps)
 						{
-							new_hits[hit_number - 1] = hit.second;
+							new_hits[hit_number - 1] = hit.second();
 						}
 					}
 
@@ -2873,7 +2875,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 
 				if (false)
 				{
-					std::int64_t hit_time_index = hit.first;
+					std::int64_t hit_time_index = hit.first();
 					std::int64_t hit_time_index_one_based = hit_time_index + 1;
 					bool matches_left = false;
 					bool matches_right = false;
@@ -2916,7 +2918,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 					{
 						if (matches_right)
 						{
-							new_hits[hit_time_index - (originalWidth - rightRounded)] = hit.second;
+							new_hits[hit_time_index - (originalWidth - rightRounded)] = hit.second();
 						}
 					}
 					else
@@ -2924,7 +2926,7 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 					{
 						if (matches_left)
 						{
-							new_hits[hit_time_index] = hit.second;
+							new_hits[hit_time_index] = hit.second();
 						}
 					}
 					else
@@ -2934,15 +2936,15 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 						{
 							if (left_was_zero)
 							{
-								new_hits[hit_time_index] = hit.second;
+								new_hits[hit_time_index] = hit.second();
 							}
 							else if (right_was_zero)
 							{
-								new_hits[hit_time_index - (originalWidth - middleRounded)] = hit.second;
+								new_hits[hit_time_index - (originalWidth - middleRounded)] = hit.second();
 							}
 							else
 							{
-								new_hits[hit_time_index - leftRounded] = hit.second;
+								new_hits[hit_time_index - leftRounded] = hit.second();
 							}
 						}
 					}
@@ -2957,9 +2959,9 @@ void VariableGroupTimeSliceData::PruneTimeUnits(AllWeightings & allWeightings, T
 			}
 
 			hits.clear();
-			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](std::pair<std::int64_t const, fast_branch_output_row_set> const & new_hit)
+			std::for_each(new_hits.cbegin(), new_hits.cend(), [&](fast__int64__to__fast_branch_output_row_set::value_type const & new_hit)
 			{
-				hits[new_hit.first] = new_hit.second;
+				hits[new_hit.first()] = new_hit.second();
 			});
 
 			current_branch.ValidateOutputRowLeafIndexes();
@@ -3012,8 +3014,8 @@ void AllWeightings::getMySize() const
 	// childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1
 	for (auto const & single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 : childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1)
 	{
-		mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.first);
-		mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.second);
+		mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.first());
+		mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.second());
 	}
 	mySize.totalSize += mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 
@@ -3024,26 +3026,26 @@ void AllWeightings::getMySize() const
 	// otherTopLevelCache
 	for (auto const & single_otherTopLevelCache : otherTopLevelCache)
 	{
-		mySize.sizeOtherTopLevelCache += sizeof(single_otherTopLevelCache.first);
-		getDataCacheUsage(mySize.sizeOtherTopLevelCache, single_otherTopLevelCache.second);
+		mySize.sizeOtherTopLevelCache += sizeof(single_otherTopLevelCache.first());
+		getDataCacheUsage(mySize.sizeOtherTopLevelCache, single_otherTopLevelCache.second());
 	}
 	mySize.totalSize += mySize.sizeOtherTopLevelCache;
 
 	// childCache
 	for (auto const & single_childCache : childCache)
 	{
-		mySize.sizeChildCache += sizeof(single_childCache.first);
-		getDataCacheUsage(mySize.sizeChildCache, single_childCache.second);
+		mySize.sizeChildCache += sizeof(single_childCache.first());
+		getDataCacheUsage(mySize.sizeChildCache, single_childCache.second());
 	}
 	mySize.totalSize += mySize.sizeChildCache;
 
 	// timeSlices
 	for (auto const & timeSlice : timeSlices)
 	{
-		mySize.sizeTimeSlices += sizeof(timeSlice.first);
-		mySize.sizeTimeSlices += sizeof(timeSlice.second);
+		mySize.sizeTimeSlices += sizeof(timeSlice.first());
+		mySize.sizeTimeSlices += sizeof(timeSlice.second());
 
-		auto const & branches_and_leaves = timeSlice.second.branches_and_leaves;
+		auto const & branches_and_leaves = timeSlice.second().branches_and_leaves;
 
 		for (auto const & variableGroupBranchesAndLeaves : branches_and_leaves)
 		{
@@ -3084,21 +3086,21 @@ void AllWeightings::getMySize() const
 				// helper_lookup__from_child_key_set__to_matching_output_rows
 				for (auto const & child_lookup_from_child_data_to_rows : helper_lookup__from_child_key_set__to_matching_output_rows)
 				{
-					mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.first);
-					mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.second);
+					mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.first());
+					mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.second());
 
-					auto const & childDMUInstanceDataVector = child_lookup_from_child_data_to_rows.first;
-					auto const & outputRowsToChildDataMap = child_lookup_from_child_data_to_rows.second;
+					auto const & childDMUInstanceDataVector = child_lookup_from_child_data_to_rows.first();
+					auto const & outputRowsToChildDataMap = child_lookup_from_child_data_to_rows.second();
 
 					getInstanceDataVectorUsage(mySize.sizeTimeSlices, childDMUInstanceDataVector);
 
 					mySize.sizeTimeSlices += sizeof(outputRowsToChildDataMap);
 					for (auto const & outputRowToChildDataMap : outputRowsToChildDataMap)
 					{
-						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.first);
-						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.second);
+						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.first());
+						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.second());
 
-						auto const & child_leaf_indices = outputRowToChildDataMap.second;
+						auto const & child_leaf_indices = outputRowToChildDataMap.second();
 
 						for (auto const & child_leaf_index : child_leaf_indices)
 						{
@@ -3110,8 +3112,8 @@ void AllWeightings::getMySize() const
 				// remaining
 				for (auto const & remaining_rows : remaining)
 				{
-					auto const & remaining_time_unit = remaining_rows.first;
-					auto const & remainingOutputRows = remaining_rows.second;
+					auto const & remaining_time_unit = remaining_rows.first();
+					auto const & remainingOutputRows = remaining_rows.second();
 
 					mySize.sizeTimeSlices += sizeof(remaining_time_unit);
 					mySize.sizeTimeSlices += sizeof(remainingOutputRows);
@@ -3125,10 +3127,10 @@ void AllWeightings::getMySize() const
 				// hits
 				for (auto const & time_unit_hit : hits)
 				{
-					mySize.sizeTimeSlices += sizeof(time_unit_hit.first);
-					mySize.sizeTimeSlices += sizeof(time_unit_hit.second);
+					mySize.sizeTimeSlices += sizeof(time_unit_hit.first());
+					mySize.sizeTimeSlices += sizeof(time_unit_hit.second());
 					
-					auto const & outputRows = time_unit_hit.second;
+					auto const & outputRows = time_unit_hit.second();
 
 					for (auto const & outputRow : outputRows)
 					{
@@ -3162,15 +3164,15 @@ void AllWeightings::getSizeOutputRow(size_t & usage, BranchOutputRow const & out
 
 	for (auto const & single_child_indices_into_raw_data : child_indices_into_raw_data)
 	{
-		usage += sizeof(single_child_indices_into_raw_data.first);
-		usage += sizeof(single_child_indices_into_raw_data.second);
+		usage += sizeof(single_child_indices_into_raw_data.first());
+		usage += sizeof(single_child_indices_into_raw_data.second());
 
-		auto const & the_child_lookup_map = single_child_indices_into_raw_data.second;
+		auto const & the_child_lookup_map = single_child_indices_into_raw_data.second();
 
 		for (auto const & the_child_lookup_map_entry : the_child_lookup_map)
 		{
-			usage += sizeof(the_child_lookup_map_entry.first);
-			usage += sizeof(the_child_lookup_map_entry.second);
+			usage += sizeof(the_child_lookup_map_entry.first());
+			usage += sizeof(the_child_lookup_map_entry.second());
 		}
 	}
 }
@@ -3185,8 +3187,8 @@ void AllWeightings::getLeafUsage(size_t & usage, Leaf const & leaf) const
 
 	for (auto const & single_other_top_level_indices_into_raw_data : other_top_level_indices_into_raw_data)
 	{
-		usage += sizeof(single_other_top_level_indices_into_raw_data.first);
-		usage += sizeof(single_other_top_level_indices_into_raw_data.second);
+		usage += sizeof(single_other_top_level_indices_into_raw_data.first());
+		usage += sizeof(single_other_top_level_indices_into_raw_data.second());
 	}
 }
 
@@ -3206,8 +3208,8 @@ void AllWeightings::getDataCacheUsage(size_t & usage, DataCache const & dataCach
 {
 	for (auto const & rowIdToData : dataCache)
 	{
-		usage += sizeof(rowIdToData.first);
-		getInstanceDataVectorUsage(usage, rowIdToData.second);
+		usage += sizeof(rowIdToData.first());
+		getInstanceDataVectorUsage(usage, rowIdToData.second());
 	}
 }
 
@@ -3215,10 +3217,10 @@ void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int
 {
 	for (auto const & single_mappings_from_child_branch_to_primary : childToBranchColumnMappings)
 	{
-		usage += sizeof(single_mappings_from_child_branch_to_primary.first);
-		usage += sizeof(single_mappings_from_child_branch_to_primary.second);
+		usage += sizeof(single_mappings_from_child_branch_to_primary.first());
+		usage += sizeof(single_mappings_from_child_branch_to_primary.second());
 
-		auto const & childToPrimaryMappingVector = single_mappings_from_child_branch_to_primary.second;
+		auto const & childToPrimaryMappingVector = single_mappings_from_child_branch_to_primary.second();
 
 		for (auto const & childToPrimaryMapping : childToPrimaryMappingVector)
 		{
