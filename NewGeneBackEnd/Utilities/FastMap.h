@@ -7,8 +7,14 @@
 #	include <boost/pool/pool_alloc.hpp>
 #endif
 
+
+#include <map>
+
+template<typename K, typename V, class Comp_ = std::less<K>>
+using FastMap = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K const, V>>>;
+
 template<typename K_, typename V_, class Comp_ = std::less<K_>>
-class FastMap
+class FastMap_
 {
 
 public:
@@ -33,7 +39,8 @@ public:
 		}
 	};
 
-	typedef std::set<MyMutableKeyValue, FastMapComparator, boost::fast_pool_allocator<MyMutableKeyValue, boost::default_user_allocator_malloc_free>> FastSet;
+	//typedef std::set<MyMutableKeyValue, FastMapComparator, boost::fast_pool_allocator<MyMutableKeyValue, boost::default_user_allocator_malloc_free>> FastSet;
+	typedef std::set<MyMutableKeyValue, FastMapComparator, boost::fast_pool_allocator<MyMutableKeyValue>> FastSet;
 
 	FastSet fastSet;
 
