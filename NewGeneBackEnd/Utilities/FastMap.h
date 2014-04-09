@@ -35,7 +35,7 @@ public:
 	{
 		bool operator()(MyMutableKeyValue const & lhs, MyMutableKeyValue const & rhs)
 		{
-			return Comp_()(lhs.first(), rhs.first());
+			return Comp_()(lhs.first, rhs.first);
 		}
 	};
 
@@ -82,13 +82,13 @@ public:
 	{
 		auto found = std::lower_bound(fastSet.begin(), fastSet.end(), key, [&](MyMutableKeyValue const & element, K_ const & key_)
 		{
-			return Comp_()(element.first(), key);
+			return Comp_()(element.first, key);
 		});
 		if (found == fastSet.end())
 		{
 			return found;
 		}
-		if (!Comp_()(found->first(), key) && !Comp_()(key, found->first()))
+		if (!Comp_()(found->first, key) && !Comp_()(key, found->first))
 		{
 			return found;
 		}
@@ -99,13 +99,13 @@ public:
 	{
 		auto found = std::lower_bound(fastSet.cbegin(), fastSet.cend(), key, [&](MyMutableKeyValue const & element, K_ const & key_)
 		{
-			return Comp_()(element.first(), key);
+			return Comp_()(element.first, key);
 		});
 		if (found == fastSet.cend())
 		{
 			return found;
 		}
-		if (!Comp_()(found->first(), key) && !Comp_()(key, found->first()))
+		if (!Comp_()(found->first, key) && !Comp_()(key, found->first))
 		{
 			return found;
 		}
@@ -129,9 +129,9 @@ public:
 		{
 			// item does not yet exist, so create one
 			auto inserted = fastSet.emplace(key, element_type::second_type());
-			return (inserted.first)->second();
+			return (inserted.first)->second;
 		}
-		return found->second();
+		return found->second;
 	}
 
 };

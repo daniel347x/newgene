@@ -21,25 +21,26 @@
 
 typedef std::basic_string<char, std::char_traits<char>, boost::pool_allocator<char>> fast_string;
 
-typedef FastMap<int, int> fast_int_to_int_map;
-typedef boost::variant<std::int64_t, double, fast_string> InstanceData;
-typedef boost::variant<std::int64_t, double, fast_string> DMUInstanceData;
-typedef boost::variant<std::int64_t, double, fast_string> SecondaryInstanceData;
+typedef FastMap<std::int8_t, std::int8_t> fast_short_to_short_map;
+typedef boost::variant<std::int32_t, double, fast_string> InstanceData;
+typedef boost::variant<std::int32_t, double, fast_string> DMUInstanceData;
+typedef boost::variant<std::int32_t, double, fast_string> SecondaryInstanceData;
 
 typedef std::vector<InstanceData, boost::pool_allocator<InstanceData>> InstanceDataVector;
 typedef InstanceDataVector DMUInstanceDataVector;
 typedef InstanceDataVector ChildDMUInstanceDataVector;
 typedef InstanceDataVector SecondaryInstanceDataVector;
 
+typedef std::vector<std::int8_t, boost::pool_allocator<std::int8_t>> fast_short_vector;
 typedef std::vector<int, boost::pool_allocator<int>> fast_int_vector;
 typedef std::set<int, std::less<int>, boost::fast_pool_allocator<int>> fast_int_set;
-typedef FastMap<int, std::int64_t> fast_int_to_int64_map;
-typedef FastMap<int, fast_int_to_int64_map> fast__int__to__fast_int_to_int64_map;
+typedef FastMap<std::int16_t, std::int32_t> fast_short_to_int_map;
+typedef FastMap<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
-typedef FastMap<std::int64_t, SecondaryInstanceDataVector> DataCache;
+typedef FastMap<std::int32_t, SecondaryInstanceDataVector> DataCache;
 
-typedef FastMap<int, DataCache> fast_int_to_data_cache_map;
+typedef FastMap<std::int16_t, DataCache> fast_short_to_data_cache_map;
 
 class AllWeightings;
 
@@ -1151,7 +1152,7 @@ public:
 	std::int64_t index_into_raw_data; // For the primary top-level variable group - the index of this leaf into the secondary data cache
 
 	// The variable group index for this map will always skip the index of the primary top-level variable group - that value is stored in the above variable.
-	mutable fast_int_to_int64_map other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
+	mutable fast_short_to_int_map other_top_level_indices_into_raw_data; // For the non-primary top-level variable groups - the index of this leaf into the secondary data cache (mapped by variable group index)
 
 };
 
@@ -1215,7 +1216,7 @@ class BranchOutputRow
 		// This *uniquely* defines the row.
 		// Any two BranchOutputRow's in the same branch
 		// with the same set of primary leaves
-		// ... is guaranteed to have identical
+		// ... are guaranteed to have identical
 		// secondary data for all variable groups.
 		// This includes the primary top-level variable group,
 		// the non-primary top-level variable groups,
@@ -1230,7 +1231,7 @@ class BranchOutputRow
 		// Map from child variable group ID to:
 		// Map from child leaf index to:
 		// index into child variable group's raw data cache (stored in the AllWeightings instance)
-		mutable fast__int__to__fast_int_to_int64_map child_indices_into_raw_data;
+		mutable fast__short__to__fast_short_to_int_map child_indices_into_raw_data;
 
 	private:
 
@@ -1249,15 +1250,15 @@ typedef std::set<Leaf, std::less<Leaf>, boost::fast_pool_allocator<Leaf>> Leaves
 
 typedef std::vector<BranchOutputRow, boost::pool_allocator<BranchOutputRow>> fast_branch_output_row_vector;
 typedef std::set <BranchOutputRow, std::less<BranchOutputRow>, boost::fast_pool_allocator<BranchOutputRow>> fast_branch_output_row_set;
-typedef FastMap<BranchOutputRow const *, fast_int_vector> fast_branch_output_row_ptr__to__fast_int_vector;
+typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
 typedef FastMap<std::int64_t, fast_branch_output_row_set> fast__int64__to__fast_branch_output_row_set;
 typedef FastMap<std::int64_t, fast_branch_output_row_vector> fast__int64__to__fast_branch_output_row_vector;
-typedef FastMap<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_int_vector> fast__lookup__from_child_dmu_set__to__output_rows;
+typedef FastMap<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
 
 //#ifdef _DEBUG
 void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys);
 void SpitDataCache(std::string & sdata, DataCache const & dataCache);
-void SpitDataCaches(std::string & sdata, fast_int_to_data_cache_map const & dataCaches);
+void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & dataCaches);
 void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits);
 void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const & setOfRows);
 void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
@@ -1542,10 +1543,10 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		void ValidateOutputRowLeafIndexes() const
 		{
-#			ifdef _DEBUG
+#			ifdef _DEBUG 
 			std::for_each(hits.cbegin(), hits.cend(), [&](decltype(hits)::value_type const & hitsEntry)
 			{
-				fast_branch_output_row_set const & hits = hitsEntry.second();
+				fast_branch_output_row_set const & hits = hitsEntry.second;
 				std::for_each(hits.cbegin(), hits.cend(), [&](BranchOutputRow const & outputRow)
 				{
 					std::for_each(outputRow.primary_leaves.cbegin(), outputRow.primary_leaves.cend(), [&](int const & index_into_leaf_cache)
@@ -1558,7 +1559,7 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 					});
 				});
 			});
-#			endif
+#			endif 
 		}
 
 		void ResetLeafCache() const
@@ -1985,13 +1986,13 @@ public:
 
 	// Cache of secondary data: One cache for the primary top-level variable group, and a set of caches for all other variable groups (the non-primary top-level groups, and the child groups)
 	DataCache dataCache; // caches secondary key data for the primary variable group, required to create final results in a fashion that can be migrated (partially) to disk via LIFO to support huge monadic input datasets used in the construction of kads
-	fast_int_to_data_cache_map otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
-	fast_int_to_data_cache_map childCache; // Ditto, but for child variable groups
+	fast_short_to_data_cache_map otherTopLevelCache; // Ditto, but for non-primary top-level variable groups
+	fast_short_to_data_cache_map childCache; // Ditto, but for child variable groups
 
 	// For each child variable group, a vector of mapping from the child key columns to the top-level key columns
 	fast_int_to_childtoprimarymappingvector mappings_from_child_branch_to_primary;
 	fast_int_to_childtoprimarymappingvector mappings_from_child_leaf_to_primary;
-	fast_int_to_int_map childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
+	fast_short_to_short_map childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 	int numberChildVariableGroups;
 	TIME_GRANULARITY time_granularity;
 	std::int64_t random_rows_added;
@@ -2048,7 +2049,7 @@ protected:
 	{
 
 		TimeSlice const & new_time_slice = new_time_slice_.first;
-		TimeSlice const & map_entry = map_entry_.first();
+		TimeSlice const & map_entry = map_entry_.first;
 
 		return map_entry.IsEndTimeGreaterThanRhsStartTime(new_time_slice);
 
