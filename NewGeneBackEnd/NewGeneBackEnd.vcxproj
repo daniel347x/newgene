@@ -147,6 +147,7 @@
     <ClInclude Include="UIData\DataChanges.h" />
     <ClInclude Include="UIData\DataWidgets.h" />
     <ClInclude Include="UIData\UIDataManager.h" />
+    <ClInclude Include="Utilities\FastMap.h" />
     <ClInclude Include="Utilities\NewGeneException.h" />
     <ClInclude Include="Utilities\Semaphore.h" />
     <ClInclude Include="Utilities\TimeRangeHelper.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="UIData\DataChanges.cpp" />
     <ClCompile Include="UIData\DataWidgets.cpp" />
     <ClCompile Include="UIData\UIDataManager.cpp" />
+    <ClCompile Include="Utilities\FastMap.cpp" />
     <ClCompile Include="Utilities\NewGeneException.cpp" />
     <ClCompile Include="Utilities\TimeRangeHelper.cpp" />
     <ClCompile Include="Utilities\UUID.cpp" />

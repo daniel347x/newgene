@@ -21307,7 +21307,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 
 	PrepareInsertStatement(allWeightings.insert_random_sample_stmt, random_sampling_columns);
 
-	std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
+	std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices::value_type const & timeSliceData)
 	{
 
 		if (failed || CheckCancelled())
@@ -21315,8 +21315,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 			return;
 		}
 
-		TimeSlice const & timeSlice = timeSliceData.first;
-		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
+		TimeSlice const & timeSlice = timeSliceData.first();
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second();
 
 		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
@@ -21338,7 +21338,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 				return;
 			}
 
-			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](std::pair<std::int64_t const, fast_branch_output_row_set> const & time_unit_and_rows)
+			std::for_each(branch.hits.cbegin(), branch.hits.cend(), [&](fast__int64__to__fast_branch_output_row_set::value_type const & time_unit_and_rows)
 			{
 
 				if (failed || CheckCancelled())
@@ -21346,7 +21346,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteToOutputTable(AllWeighting
 					return;
 				}
 
-				fast_branch_output_row_set const & outputRows = time_unit_and_rows.second;
+				fast_branch_output_row_set const & outputRows = time_unit_and_rows.second();
 
 				std::for_each(outputRows.cbegin(), outputRows.cend(), [&](BranchOutputRow const & outputRow)
 				{
@@ -21783,9 +21783,9 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 				// Here is where, in addition to the K>1 case, the K=1 case is supported,
 				// because "other_top_level_indices_into_raw_data" is populated
 				// regardless of whether "primary_keys" is populated for the leaf.
-				std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](std::pair<int const, std::int64_t> const & top_level_vg_and_data_index)
+				std::for_each(leaf.other_top_level_indices_into_raw_data.cbegin(), leaf.other_top_level_indices_into_raw_data.cend(), [&](fast_int_to_int64_map::value_type const & top_level_vg_and_data_index)
 				{
-					int const vg_number = top_level_vg_and_data_index.first;
+					int const vg_number = top_level_vg_and_data_index.first();
 					if (vg_number == vgNumber)
 					{
 
@@ -21799,8 +21799,8 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 						// because the schema controls this and the data is pulled from the DB,
 						// which has empty columns rather than missing columns
 						// *********************************************************************** //
-						int const vg_number = top_level_vg_and_data_index.first;
-						std::int64_t const & data_index = top_level_vg_and_data_index.second;
+						int const vg_number = top_level_vg_and_data_index.first();
+						std::int64_t const & data_index = top_level_vg_and_data_index.second();
 						DataCache & data_cache = allWeightings.otherTopLevelCache[vg_number];
 						SecondaryInstanceDataVector const & secondary_data_vector = data_cache[data_index];
 						std::for_each(secondary_data_vector.cbegin(), secondary_data_vector.cend(), [&](SecondaryInstanceData const & data)
@@ -21872,18 +21872,18 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 		for (int multiplicity = 0; multiplicity < the_child_multiplicity; ++multiplicity)
 		{
 			bool matched = false;
-			std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](std::pair<int const, fast_int_to_int64_map> const & leaf_index_mappings)
+			std::for_each(outputRow.child_indices_into_raw_data.cbegin(), outputRow.child_indices_into_raw_data.cend(), [&](fast__int__to__fast_int_to_int64_map::value_type const & leaf_index_mappings)
 			{
-				int const vg_number = leaf_index_mappings.first;
+				int const vg_number = leaf_index_mappings.first();
 				if (vg_number != vgNumber)
 				{
 					return;
 				}
-				fast_int_to_int64_map const & leaf_number_to_data_index = leaf_index_mappings.second;
-				std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](std::pair<int const, std::int64_t> const & leaf_index_mapping)
+				fast_int_to_int64_map const & leaf_number_to_data_index = leaf_index_mappings.second();
+				std::for_each(leaf_number_to_data_index.cbegin(), leaf_number_to_data_index.cend(), [&](fast_int_to_int64_map::value_type const & leaf_index_mapping)
 				{
 
-					int const leaf_number = leaf_index_mapping.first;
+					int const leaf_number = leaf_index_mapping.first();
 					if (leaf_number != multiplicity)
 					{
 						return;
@@ -21896,7 +21896,7 @@ void OutputModel::OutputGenerator::CreateOutputRow(Branch const &branch, BranchO
 
 					// This is the desired variable group and multiplicity
 
-					std::int64_t const & data_index = leaf_index_mapping.second;
+					std::int64_t const & data_index = leaf_index_mapping.second();
 					DataCache & data_cache = allWeightings.childCache[vg_number];
 					SecondaryInstanceDataVector & secondary_data_vector = data_cache[data_index];
 
@@ -21991,8 +21991,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 		std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 		{
 
-			TimeSlice const & the_slice = timeSlice.first;
-			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+			TimeSlice const & the_slice = timeSlice.first();
+			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second();
 			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
 
 			std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
@@ -22018,8 +22018,8 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 	{
 
-		TimeSlice const & the_slice = timeSlice.first;
-		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
+		TimeSlice const & the_slice = timeSlice.first();
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second();
 		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
 		if (previousTimeSlice.DoesOverlap(the_slice))
@@ -22320,7 +22320,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 		int which_time_slice = 0;
 
-		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](std::pair<TimeSlice const, VariableGroupTimeSliceData> & timeSliceData)
+		std::for_each(allWeightings.timeSlices.begin(), allWeightings.timeSlices.end(), [&](TimeSlices::value_type const & timeSliceData)
 		{
 
 			++which_time_slice;
@@ -22330,8 +22330,8 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 				return;
 			}
 
-			TimeSlice const & timeSlice = timeSliceData.first;
-			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second;
+			TimeSlice const & timeSlice = timeSliceData.first();
+			VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSliceData.second();
 
 			VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeavesVector = variableGroupTimeSliceData.branches_and_leaves;
 
@@ -22393,7 +22393,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 						// ... so this loop should only be entered once
 						// *********************************************************************************** //
 
-						fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second;
+						fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second();
 
 						std::for_each(output_rows_for_this_full_time_slice.cbegin(), output_rows_for_this_full_time_slice.cend(), [&](BranchOutputRow const & outputRow)
 						{
@@ -22484,7 +22484,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 
 
 
-							fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second;
+							fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second();
 
 							TimeSlice current_slice(static_cast<std::int64_t>(hit_start_position + 0.5), static_cast<std::int64_t>(hit_end_position + 0.5));
 							OutputGranulatedRow(current_slice, output_rows_for_this_full_time_slice, output_file, branch, allWeightings, rows_written);
@@ -22503,7 +22503,7 @@ void OutputModel::OutputGenerator::RandomSamplingWriteResultsToFileOrScreen(AllW
 							// ... so this loop should only be entered once
 							// *********************************************************************************** //
 
-							fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second;
+							fast_branch_output_row_set output_rows_for_this_full_time_slice = time_unit_hit.second();
 
 							// Loop through our time range data
 

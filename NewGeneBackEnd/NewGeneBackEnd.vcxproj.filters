@@ -354,6 +354,9 @@
     <ClInclude Include="Model\RandomSampling\RandomSampling.h">
       <Filter>Header Files\Model\RandomSampling</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\FastMap.h">
+      <Filter>Header Files\Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -589,6 +592,9 @@
     </ClCompile>
     <ClCompile Include="Model\RandomSampling\RandomSampling.cpp">
       <Filter>Source Files\Model\RandomSampling</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\FastMap.cpp">
+      <Filter>Source Files\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
