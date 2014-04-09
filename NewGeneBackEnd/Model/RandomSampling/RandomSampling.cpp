@@ -37,25 +37,25 @@ AllWeightings::~AllWeightings()
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(int)>::purge_memory();
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>::purge_memory();
 	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(int)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, std::int64_t>)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, fast_int_to_int64_map>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_int64_map::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__int__to__fast_int_to_int64_map::value_type)>::purge_memory();
 	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(BranchOutputRow)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<std::int64_t const, fast_branch_output_row_set>)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<std::int64_t const, fast_branch_output_row_vector>)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<BranchOutputRow const * const, fast_int_vector>)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<ChildDMUInstanceDataVector const, fast_branch_output_row_ptr__to__fast_int_vector>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_set::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_vector::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_branch_output_row_ptr__to__fast_int_vector::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows::value_type)>::purge_memory();
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(Leaf)>::purge_memory();
 	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>::purge_memory();
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(char)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<std::int64_t const, SecondaryInstanceDataVector>)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, DataCache>)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, int>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(DataCache::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_data_cache_map::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_int_map::value_type)>::purge_memory();
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(ChildToPrimaryMapping)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<int const, fast_vector_childtoprimarymapping>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_childtoprimarymappingvector::value_type)>::purge_memory();
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>::purge_memory();
 	boost::singleton_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>::purge_memory();
 	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(std::pair<TimeSlice const, VariableGroupTimeSliceData>)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>::purge_memory();
 
 	if (insert_random_sample_stmt)
 	{
