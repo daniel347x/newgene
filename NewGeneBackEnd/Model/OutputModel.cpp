@@ -449,7 +449,48 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	messager.AppendKadStatusText("Beginning generation of K-ad output.", this);
 	messager.AppendKadStatusText("Initializing...", this);
 
-	AllWeightings allWeightings(messager);
+
+
+	// ******************************************************************************************* //
+	// ******************************************************************************************* //
+	// ******************************************************************************************* //
+	//
+	// Do NOT use managed memory, shared_ptr, or unique_ptr!
+	// NEVER delete this object!
+	// Instead, let the pointer fall off the stack,
+	// and we manage ALL of the heap memory contained in the object ourselves
+	// via the Boost Memory pool.
+	//
+	// This way, all of the objects and sub-objects created by the AllWeightings instance
+	// will be deleted at the end of the K-ad run in one fell swoop
+	// by a call to Boost Pool's "purge_memory()", without calling (or needing to call)
+	// any destructors.
+	//
+	// The reason is that the data structures are so intricately nested,
+	// and the heap so fragmented, that it literally requires 20 full minutes on one of the world's most
+	// powerful CPU's to clean up the memory and exit the K-ad routine after NewGene completes writing 
+	// the output to file (during which time NewGene can't be used) for a reasonably complex run.
+	//
+	// We don't need to call any of those destructors, because they have no desired side effects,
+	// so why not just purge a memory pool and be done in one second?
+	// This is the point of a custom allocator, and we use the Boost Pool's custom memory allocator
+	// to manage all of the memory ourselves in this way.
+	//
+	// Therefore, we never delete the following object.
+	//
+	// Note that a few bytes of data from the "POD-style" AllWeightings instance data members *do* leak
+	// (not any nested data, however) - but this is trivial.  NewGene could run thousands of K-ad
+	// routines of *any* complexity without being shut down and the leak would barely even be a tick on the scale.
+	//
+	// ******************************************************************************************* //
+	// ******************************************************************************************* //
+	// ******************************************************************************************* //
+	AllWeightings * allWeightings_ = new AllWeightings(messager); // SEE NOTE!  Do not delete this object!
+	AllWeightings & allWeightings = *allWeightings_;
+	BOOST_SCOPE_EXIT(this_)
+	{
+		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
+	} BOOST_SCOPE_EXIT_END
 
 	Prepare(allWeightings);
 

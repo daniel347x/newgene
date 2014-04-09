@@ -33,35 +33,7 @@ AllWeightings::AllWeightings(Messager & messager_)
 
 AllWeightings::~AllWeightings()
 {
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(InstanceData)>::purge_memory();
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(int)>::purge_memory();
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(int)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_int64_map::value_type)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__int__to__fast_int_to_int64_map::value_type)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(BranchOutputRow)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_set::value_type)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_vector::value_type)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_branch_output_row_ptr__to__fast_int_vector::value_type)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows::value_type)>::purge_memory();
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(Leaf)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>::purge_memory();
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(char)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(DataCache::value_type)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_data_cache_map::value_type)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_int_map::value_type)>::purge_memory();
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(ChildToPrimaryMapping)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_childtoprimarymappingvector::value_type)>::purge_memory();
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>::purge_memory();
-	boost::singleton_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>::purge_memory();
-	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>::purge_memory();
-
-	if (insert_random_sample_stmt)
-	{
-		sqlite3_finalize(insert_random_sample_stmt);
-		insert_random_sample_stmt = nullptr; 
-	}
+	// Never called: This is how we utilize the Boost memory pool
 }
 
 std::tuple<bool, bool, TimeSlices::iterator> AllWeightings::HandleIncomingNewBranchAndLeaf(Branch const & branch, TimeSliceLeaf & newTimeSliceLeaf, int const & variable_group_number, VARIABLE_GROUP_MERGE_MODE const merge_mode, std::int64_t const AvgMsperUnit, bool const consolidate_rows, bool const random_sampling, TimeSlices::iterator mapIterator_, bool const useIterator)
@@ -3227,4 +3199,61 @@ void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int
 			usage += sizeof(childToPrimaryMapping);
 		}
 	}
+}
+
+// only for use when we will never touch this object again.  For use with Boost memory pool.
+void AllWeightings::ClearWeightings()
+{
+	std::for_each(timeSlices.begin(), timeSlices.end(), [&](decltype(timeSlices)::value_type & timeSlice)
+	{
+		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSlice.second();
+		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
+		variableGroupTimeSliceData.weighting.ClearWeighting();
+		std::for_each(variableGroupBranchesAndLeaves.begin(), variableGroupBranchesAndLeaves.end(), [&](VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves)
+		{
+			variableGroupBranchesAndLeaves.weighting.ClearWeighting();
+			std::for_each(variableGroupBranchesAndLeaves.branches.begin(), variableGroupBranchesAndLeaves.branches.end(), [&](Branch & branch)
+			{
+				branch.weighting.ClearWeighting();
+				branch.number_branch_combinationsPtr.release(); // The one cpp_int that is not part of a Weighting instance
+			});
+		});
+	});
+	weighting.ClearWeighting();
+	random_numbers.clear();
+}
+
+void AllWeightings::Clear()
+{
+	if (insert_random_sample_stmt)
+	{
+		sqlite3_finalize(insert_random_sample_stmt);
+		insert_random_sample_stmt = nullptr;
+	}
+
+	ClearWeightings();
+
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(InstanceData)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(int)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(int)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_int64_map::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__int__to__fast_int_to_int64_map::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(BranchOutputRow)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_set::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__int64__to__fast_branch_output_row_vector::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_branch_output_row_ptr__to__fast_int_vector::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast__lookup__from_child_dmu_set__to__output_rows::value_type)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(Leaf)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Leaf)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(char)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(DataCache::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_data_cache_map::value_type)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_int_map::value_type)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(ChildToPrimaryMapping)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_childtoprimarymappingvector::value_type)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(MergedTimeSliceRow)>::purge_memory();
+	boost::singleton_pool<boost::pool_allocator_tag, sizeof(VariableGroupBranchesAndLeaves)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>::purge_memory();
+	boost::singleton_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>::purge_memory();
 }

@@ -6,6 +6,7 @@
 #include <set>
 #include <map>
 #include <tuple>
+#include <memory>
 #ifndef Q_MOC_RUN
 #	include <boost/multiprecision/number.hpp>
 #	include <boost/multiprecision/cpp_int.hpp>
@@ -835,17 +836,23 @@ class Weighting
 	public:
 
 		Weighting()
-			: weighting{ 0 }
-			, weighting_range_start{ 0 }
-			, weighting_range_end{ 0 }
+			: weightingPtr{ new boost::multiprecision::cpp_int }
+			, weighting_range_startPtr{ new boost::multiprecision::cpp_int }
+			, weighting_range_endPtr{ new boost::multiprecision::cpp_int }
+			, weighting{ *weightingPtr}
+			, weighting_range_start{ *weighting_range_startPtr }
+			, weighting_range_end{ *weighting_range_endPtr }
 		{
 			InternalSetWeighting();
 		}
 
 		Weighting(Weighting const & rhs)
-			: weighting{ rhs.weighting }
-			, weighting_range_start{ rhs.weighting_range_start }
-			, weighting_range_end{ rhs.weighting_range_end }
+			: weightingPtr{ new boost::multiprecision::cpp_int{rhs.weighting} }
+			, weighting_range_startPtr{ new boost::multiprecision::cpp_int{ rhs.weighting_range_start } }
+			, weighting_range_endPtr{ new boost::multiprecision::cpp_int{ rhs.weighting_range_end } }
+			, weighting{ *weightingPtr }
+			, weighting_range_start{ *weighting_range_startPtr }
+			, weighting_range_end{ *weighting_range_endPtr }
 		{
 			InternalSetWeighting();
 		}
@@ -897,11 +904,32 @@ class Weighting
 			return weighting_range_end;
 		}
 
+		void ClearWeighting()
+		{
+			// For use in conjunction with Boost Pool, a bulk memory pool,
+			// because we will never delete the objects that own Weighting instances,
+			// so we must explicitly delete these from the outside.
+			//
+			// This function should only be called when we KNOW that we will
+			// never need this weighting instance ever again.
+			// Obviously the "weighting" references will become dangling references
+			// after this function exits.
+			weightingPtr.release();
+			weighting_range_startPtr.release();
+			weighting_range_endPtr.release();
+		}
+
 	private:
 	
-		boost::multiprecision::cpp_int weighting;
-		boost::multiprecision::cpp_int weighting_range_start;
-		boost::multiprecision::cpp_int weighting_range_end;
+		// Yes - these are RAW pointers,
+		// because we are using a memory pool
+		// and never deleting them
+		std::unique_ptr<boost::multiprecision::cpp_int> weightingPtr;
+		std::unique_ptr<boost::multiprecision::cpp_int> weighting_range_startPtr;
+		std::unique_ptr<boost::multiprecision::cpp_int> weighting_range_endPtr;
+		boost::multiprecision::cpp_int & weighting;
+		boost::multiprecision::cpp_int & weighting_range_start;
+		boost::multiprecision::cpp_int & weighting_range_end;
 #		ifdef _DEBUG
 		std::string weighting_string;
 		std::string weighting_range_start_string;
@@ -1249,12 +1277,14 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 		PrimaryKeysGroupingMultiplicityOne()
 			: PrimaryKeysGrouping{ DMUInstanceDataVector() }
-			, number_branch_combinations{ 0 }
+			, number_branch_combinationsPtr{ new boost::multiprecision::cpp_int }
+			, number_branch_combinations{ *number_branch_combinationsPtr }
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
-			, number_branch_combinations{ 0 }
+			, number_branch_combinationsPtr{new boost::multiprecision::cpp_int }
+			, number_branch_combinations{ *number_branch_combinationsPtr }
 		{
 		}
 
@@ -1263,7 +1293,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, weighting{ rhs.weighting }
 			, hits{ rhs.hits }
 			, remaining{ rhs.remaining }
-			, number_branch_combinations{ rhs.number_branch_combinations }
+			, number_branch_combinationsPtr{ new boost::multiprecision::cpp_int{ rhs.number_branch_combinations } }
+			, number_branch_combinations{ *number_branch_combinationsPtr }
 			, leaves { rhs.leaves }
 			, leaves_cache{ rhs.leaves_cache }
 		{
@@ -1539,7 +1570,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 
 	public:
 
-		mutable boost::multiprecision::cpp_int number_branch_combinations;
+		mutable std::unique_ptr<boost::multiprecision::cpp_int> number_branch_combinationsPtr;
+		boost::multiprecision::cpp_int & number_branch_combinations;
 #		ifdef _DEBUG
 		//mutable std::string number_branch_combinations_string;
 #		endif
@@ -1987,6 +2019,8 @@ public:
 	void getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf = true) const;
 	void getLeafUsage(size_t & usage, Leaf const & leaf) const;
 	void getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const;
+	void ClearWeightings(); // only for use when we will never touch this object again.  For use with Boost memory pool.
+	void Clear(); // ditto
 
 protected:
 
