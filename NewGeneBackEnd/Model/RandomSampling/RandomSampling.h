@@ -1228,11 +1228,11 @@ typedef std::map<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fas
 //#ifdef _DEBUG
 void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys);
 void SpitDataCache(std::string & sdata, DataCache const & dataCache);
-void SpitDataCaches(std::string & sdata, std::map<int, DataCache> const & dataCaches);
-void SpitHits(std::string & sdata, std::map<std::int64_t, fast_branch_output_row_set> const & hits);
+void SpitDataCaches(std::string & sdata, fast_int_to_data_cache_map const & dataCaches);
+void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits);
 void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const & setOfRows);
 void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
-void SpitChildLookup(std::string & sdata, std::map<ChildDMUInstanceDataVector, std::map<BranchOutputRow const *, std::vector<int>>> const & helperLookup);
+void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__output_rows const & helperLookup);
 void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitWeighting(std::string & sdata, Weighting const & weighting);
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
@@ -1511,9 +1511,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		void ValidateOutputRowLeafIndexes() const
 		{
 #			ifdef _DEBUG
-			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, std::set<BranchOutputRow>> const & hitsEntry)
+			std::for_each(hits.cbegin(), hits.cend(), [&](std::pair<boost::multiprecision::cpp_int const, fast_branch_output_row_set> const & hitsEntry)
 			{
-				std::set<BranchOutputRow> const & hits = hitsEntry.second;
+				fast_branch_output_row_set const & hits = hitsEntry.second;
 				std::for_each(hits.cbegin(), hits.cend(), [&](BranchOutputRow const & outputRow)
 				{
 					std::for_each(outputRow.primary_leaves.cbegin(), outputRow.primary_leaves.cend(), [&](int const & index_into_leaf_cache)
@@ -1604,7 +1604,7 @@ class VariableGroupTimeSliceData
 
 };
 
-typedef std::map<TimeSlice, VariableGroupTimeSliceData> TimeSlices;
+typedef std::map<TimeSlice, VariableGroupTimeSliceData, std::less<TimeSlice>, boost::fast_pool_allocator<std::pair<TimeSlice const, VariableGroupTimeSliceData>, boost::default_user_allocator_malloc_free>> TimeSlices;
 
 typedef std::pair<TimeSlice, Leaf> TimeSliceLeaf;
 
