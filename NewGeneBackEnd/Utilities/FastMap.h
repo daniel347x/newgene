@@ -4,7 +4,7 @@
 #include <utility>
 #include <set>
 
-template<typename K_, typename V_, class Comp_, class Alloc_>
+template<typename K_, typename V_, class Comp_ = std::less<K_>>
 class FastMap
 {
 
@@ -30,7 +30,7 @@ public:
 		}
 	};
 
-	typedef std::set<MyMutableKeyValue, FastMapComparator, Alloc_> FastSet;
+	typedef std::set<MyMutableKeyValue, FastMapComparator, boost::fast_pool_allocator<MyMutableKeyValue, boost::default_user_allocator_malloc_free>> FastSet;
 
 	FastSet fastSet;
 
