@@ -904,7 +904,7 @@ class Weighting
 			return weighting_range_end;
 		}
 
-		void ClearWeighting()
+		void ClearWeighting() const
 		{
 			// For use in conjunction with Boost Pool, a bulk memory pool,
 			// because we will never delete the objects that own Weighting instances,
@@ -924,9 +924,9 @@ class Weighting
 		// Yes - these are RAW pointers,
 		// because we are using a memory pool
 		// and never deleting them
-		std::unique_ptr<boost::multiprecision::cpp_int> weightingPtr;
-		std::unique_ptr<boost::multiprecision::cpp_int> weighting_range_startPtr;
-		std::unique_ptr<boost::multiprecision::cpp_int> weighting_range_endPtr;
+		mutable std::unique_ptr<boost::multiprecision::cpp_int> weightingPtr;
+		mutable std::unique_ptr<boost::multiprecision::cpp_int> weighting_range_startPtr;
+		mutable std::unique_ptr<boost::multiprecision::cpp_int> weighting_range_endPtr;
 		boost::multiprecision::cpp_int & weighting;
 		boost::multiprecision::cpp_int & weighting_range_start;
 		boost::multiprecision::cpp_int & weighting_range_end;

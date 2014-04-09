@@ -3,6 +3,9 @@
 
 #include <utility>
 #include <set>
+#ifndef Q_MOC_RUN
+#	include <boost/pool/pool_alloc.hpp>
+#endif
 
 template<typename K_, typename V_, class Comp_ = std::less<K_>>
 class FastMap

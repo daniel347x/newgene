@@ -487,7 +487,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// ******************************************************************************************* //
 	AllWeightings * allWeightings_ = new AllWeightings(messager); // SEE NOTE!  Do not delete this object!
 	AllWeightings & allWeightings = *allWeightings_;
-	BOOST_SCOPE_EXIT(this_)
+	BOOST_SCOPE_EXIT(&allWeightings)
 	{
 		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
 	} BOOST_SCOPE_EXIT_END

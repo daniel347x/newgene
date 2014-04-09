@@ -3204,15 +3204,15 @@ void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int
 // only for use when we will never touch this object again.  For use with Boost memory pool.
 void AllWeightings::ClearWeightings()
 {
-	std::for_each(timeSlices.begin(), timeSlices.end(), [&](decltype(timeSlices)::value_type & timeSlice)
+	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
 	{
-		VariableGroupTimeSliceData & variableGroupTimeSliceData = timeSlice.second();
+		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second();
 		VariableGroupBranchesAndLeavesVector const & variableGroupBranchesAndLeaves = variableGroupTimeSliceData.branches_and_leaves;
 		variableGroupTimeSliceData.weighting.ClearWeighting();
-		std::for_each(variableGroupBranchesAndLeaves.begin(), variableGroupBranchesAndLeaves.end(), [&](VariableGroupBranchesAndLeaves & variableGroupBranchesAndLeaves)
+		std::for_each(variableGroupBranchesAndLeaves.cbegin(), variableGroupBranchesAndLeaves.cend(), [&](VariableGroupBranchesAndLeaves const & variableGroupBranchesAndLeaves)
 		{
 			variableGroupBranchesAndLeaves.weighting.ClearWeighting();
-			std::for_each(variableGroupBranchesAndLeaves.branches.begin(), variableGroupBranchesAndLeaves.branches.end(), [&](Branch & branch)
+			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 			{
 				branch.weighting.ClearWeighting();
 				branch.number_branch_combinationsPtr.release(); // The one cpp_int that is not part of a Weighting instance
