@@ -1261,6 +1261,7 @@ typedef FastSet<Leaf> Leaves;
 
 typedef std::vector<BranchOutputRow> std_branch_output_row_vector; 
 typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;
+typedef FastVector<BranchOutputRow, 4096> fast_branch_output_row_vector_huge;
 typedef FastSet<BranchOutputRow> fast_branch_output_row_set;
 
 typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
@@ -1268,11 +1269,11 @@ typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_r
 
 typedef FastMap<std::int64_t, fast_branch_output_row_set> fast__int64__to__fast_branch_output_row_set;
 typedef FastMap<std::int64_t, fast_branch_output_row_vector> fast__int64__to__fast_branch_output_row_vector;
- 
+
 //typedef FastMap<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
 typedef FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
 
-//#ifdef _DEBUG
+//#ifdef _DEBUG 
 void SpitKeys(std::string & sdata, FastVector<DMUInstanceData> const & dmu_keys);
 void SpitDataCache(std::string & sdata, DataCache const & dataCache); 
 void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & dataCaches);
@@ -1297,13 +1298,15 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			: PrimaryKeysGrouping{ DMUInstanceDataVector() }
 			, number_branch_combinationsPtr{ new boost::multiprecision::cpp_int }
 			, number_branch_combinations{ *number_branch_combinationsPtr }
+			, consolidated_hits_end_index{ 0 }
 		{}
 
 		PrimaryKeysGroupingMultiplicityOne(DMUInstanceDataVector const & dmuInstanceDataVector)
 			: PrimaryKeysGrouping(dmuInstanceDataVector)
 			, number_branch_combinationsPtr{new boost::multiprecision::cpp_int }
 			, number_branch_combinations{ *number_branch_combinationsPtr }
-		{
+			, consolidated_hits_end_index{ 0 }
+			{
 		}
 
 		PrimaryKeysGroupingMultiplicityOne(PrimaryKeysGroupingMultiplicityOne const & rhs)
@@ -1315,7 +1318,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			, number_branch_combinations{ *number_branch_combinationsPtr }
 			, leaves { rhs.leaves }
 			, leaves_cache{ rhs.leaves_cache }
-		{
+			, consolidated_hits_end_index{ rhs.consolidated_hits_end_index }
+			{
 		}
 
 		PrimaryKeysGroupingMultiplicityOne & operator=(PrimaryKeysGroupingMultiplicityOne const & rhs)
@@ -1331,6 +1335,8 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			number_branch_combinations = rhs.number_branch_combinations;
 			leaves = rhs.leaves;
 			leaves_cache = rhs.leaves_cache;
+			hits_consolidated = rhs.hits_consolidated;
+			consolidated_hits_end_index = rhs.consolidated_hits_end_index;
 			return *this;
 		}
 
@@ -1342,11 +1348,13 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 			}
 			PrimaryKeysGrouping::operator=(std::move(rhs));
 			weighting = rhs.weighting;
-			hits = rhs.hits;
-			remaining = rhs.remaining;
+			hits = std::move(rhs.hits);
+			remaining = std::move(rhs.remaining);
 			number_branch_combinations = rhs.number_branch_combinations;
-			leaves = rhs.leaves;
-			leaves_cache = rhs.leaves_cache;
+			leaves = std::move(rhs.leaves);
+			leaves_cache = std::move(rhs.leaves_cache);
+			hits_consolidated = std::move(rhs.hits_consolidated);
+			consolidated_hits_end_index = rhs.consolidated_hits_end_index;
 			return *this;
 		}
 
@@ -1388,8 +1396,9 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// Time unit index is 0-based
 		//
 		mutable fast__int64__to__fast_branch_output_row_set hits;
-		//mutable fast_branch_output_row_vector hits_consolidated;
-		mutable std_branch_output_row_vector hits_consolidated;
+		mutable fast_branch_output_row_vector_huge hits_consolidated;
+		mutable fast_branch_output_row_vector_huge::iterator consolidated_hits_end_index; // We use this to avoid deleting duplicates at the end, which is a performance bottleneck
+		//mutable std_branch_output_row_vector hits_consolidated;
 		//
 		// ******************************************************************************************************** //
 		// ******************************************************************************************************** //

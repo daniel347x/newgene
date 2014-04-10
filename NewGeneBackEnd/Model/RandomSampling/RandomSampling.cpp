@@ -1572,12 +1572,30 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 
 	// Optimization: no need to clear -1, and besides with the current algorithm, it's never filled if we are in this function in any case
 	//branch.hits[-1].clear(); 
-	 
+
+	// Optimization required: first, reserve memory
+	std::int64_t reserve_size = 0;
+	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
+	{
+		if (hit.first != -1)
+		{
+			reserve_size += hit.second.size();
+		}
+	});
+
+	// Optimization required: first, reserve memory
+	// ... profiler shows that 99% of time in "consolidating rows" routine
+	//     is spend expanding the vector in the boost-managed memory pool,
+	//     and with standard-allocator backed pool, heap becomes so fragmented
+	//     when running 1,000,000 rows that we crash
+	branch.hits_consolidated.reserve(reserve_size);
+
+	// Now consolidate the output rows from the time-unit subslices into a single sorted vector
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
 	{ 
 		if (hit.first != -1)
-		{
-			orig_random_number_rows += hit.second.size(); 
+		{ 
+			orig_random_number_rows += hit.second.size();
 			for (auto iter = std::begin(hit.second); iter != std::end(hit.second);)
 			{
 				// Profiler shows that about half the time in the "consolidating rows" phase
@@ -1600,13 +1618,14 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 
 			// Memory allocation error when NOT deleting the above "hit" vector,
 			// so attempt it here to give it a chance to delete more in bulk.
-			hit.second.clear();
+			//hit.second.clear();
 
 		}
 	});
 
 	std::sort(branch.hits_consolidated.begin(), branch.hits_consolidated.end());
-	branch.hits_consolidated.erase(std::unique(branch.hits_consolidated.begin(), branch.hits_consolidated.end()), branch.hits_consolidated.end());
+	//branch.hits_consolidated.erase(std::unique(branch.hits_consolidated.begin(), branch.hits_consolidated.end()), branch.hits_consolidated.end());
+	branch.consolidated_hits_end_index = std::unique(branch.hits_consolidated.begin(), branch.hits_consolidated.end()); // Do not erase!! Optimization
 
 	// ditto above
 	//branch.hits.erase(++branch.hits.begin(), branch.hits.end());
@@ -3052,7 +3071,8 @@ void AllWeightings::ClearWeightingsAndRemainingBranchJunk()
 				// // No! The data structure has been switched back to the boost memory pool and changed to a vector,
 				// // in an attempt to get the optimization to work.
 				// Actually, yes.
-				branch.hits_consolidated.clear();
+				// Actually, no.
+				//branch.hits_consolidated.clear();
 
 				branch.weighting.ClearWeighting();
 				branch.number_branch_combinationsPtr.release(); // The one cpp_int that is not part of a Weighting instance
