@@ -1570,7 +1570,8 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 		return;
 	}
 
-	branch.hits[-1].clear();
+	// Optimization: no need to clear -1, and besides with the current algorithm, it's never filled if we are in this function in any case
+	//branch.hits[-1].clear();
 	 
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
 	{ 
@@ -1581,8 +1582,13 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 			{
 				// Profiler shows that about half the time in the "consolidating rows" phase
 				// is spent creating new memory here.
-				branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter)));
-				
+
+				// Optimization!  Profiler shows that over 95% of time in the "consolidating rows" routine
+				// is *now* spent inserting into the "Boost memory-pool backed" hits[-1].
+				// This is terrible performance, so we must use a std::set.
+				//branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter)));
+				branch.hits_consolidated.insert(std::move(const_cast<BranchOutputRow &>(*iter))); 
+
 				// Even after the std::move, above, the Boost memory pool deallocation of the space for the object itself
 				// is requiring 90%+ of the time for the "consolidating rows" routine.
 				// Therefore, leave the (empty) elements in place, and later when looping through consolidated rows
@@ -1594,7 +1600,8 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 		}
 	});
 
-	branch.hits.erase(++branch.hits.begin(), branch.hits.end());
+	// ditto above
+	//branch.hits.erase(++branch.hits.begin(), branch.hits.end());
 
 	// Disable for now.  Profiler shows a major hit is taken here during "consolidating rows" phase.
 	// Since we don't NEED to look up in this cache AFTER the "consolidating rows" phase,
@@ -3017,7 +3024,7 @@ void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int
 }
 
 // only for use when we will never touch this object again.  For use with Boost memory pool.
-void AllWeightings::ClearWeightings()
+void AllWeightings::ClearWeightingsAndRemainingBranchJunk()
 {
 	std::for_each(timeSlices.cbegin(), timeSlices.cend(), [&](decltype(timeSlices)::value_type const & timeSlice)
 	{
@@ -3029,8 +3036,15 @@ void AllWeightings::ClearWeightings()
 			variableGroupBranchesAndLeaves.weighting.ClearWeighting();
 			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 			{
+
+				// Due to optimization and use of branch.hits_consolidated, the sole case of a regular,
+				// non-Boost memory pool data structure (besides the cpp_int structures),
+				// we must manually delete it here.
+				branch.hits_consolidated.clear();
+
 				branch.weighting.ClearWeighting();
 				branch.number_branch_combinationsPtr.release(); // The one cpp_int that is not part of a Weighting instance
+
 			});
 		});
 	});
@@ -3127,7 +3141,10 @@ void AllWeightings::Clear()
 		insert_random_sample_stmt = nullptr;
 	}
 
-	ClearWeightings();
+	random_numbers.clear();
+
+	ClearWeightingsAndRemainingBranchJunk();
+
 	purge_pool<boost::pool_allocator_tag, sizeof(InstanceData)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(int)>();
 	purge_pool<boost::pool_allocator_tag, sizeof(BranchOutputRow)>();
