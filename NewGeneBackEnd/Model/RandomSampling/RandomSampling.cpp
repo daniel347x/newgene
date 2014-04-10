@@ -522,7 +522,7 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 		{
 
 			case VARIABLE_GROUP_MERGE_MODE__PRIMARY:
-			{
+			{ 
 
 				// *********************************************************************************** //
 				// This is where multiple rows with duplicated primary keys 
@@ -3227,6 +3227,7 @@ void AllWeightings::getSizeOutputRow(size_t & usage, BranchOutputRow const & out
 
 	// primary_leaves is a set
 	auto const & primary_leaves = outputRow.primary_leaves;
+	mySize.numberMapNodes += primary_leaves.size();
 
 	// primary_leaves_cache is a vector
 	auto const & primary_leaves_cache = outputRow.primary_leaves_cache;
