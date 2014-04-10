@@ -21,6 +21,8 @@ sqlite3_stmt * create_output_row_visitor::insert_stmt = nullptr;
 bool MergedTimeSliceRow::RHS_wins = false;
 std::string create_output_row_visitor::row_in_process;
 
+int Weighting::how_many_weightings = 0;
+ 
 AllWeightings::AllWeightings(Messager & messager_)
 : insert_random_sample_stmt(nullptr)
 , numberChildVariableGroups(0)
@@ -1745,33 +1747,52 @@ void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & da
 
 void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits)
 {
-	sdata += "<HITS>";
+	sdata += "<TIME_UNITS>";
+
+	sdata += "<TIME_UNITS_MAP_ITSELF>";
+	sdata += sizeof(hits);
+	sdata += "</TIME_UNITS_MAP_ITSELF>";
+
 	std::for_each(hits.cbegin(), hits.cend(), [&](fast__int64__to__fast_branch_output_row_set::value_type const & hitsEntry)
 	{
 		sdata += "<TIME_UNIT>";
+
+		sdata += "<TIME_UNIT_MAP_ITSELF>";
+		sdata += sizeof(hitsEntry);
+		sdata += "</TIME_UNIT_MAP_ITSELF>";
+
 		sdata += "<TIME_UNIT_INDEX>";
 		sdata += boost::lexical_cast<std::string>(hitsEntry.first);
 		sdata += "</TIME_UNIT_INDEX>";
 		sdata += "<OUTPUT_ROWS>";
 		SpitSetOfOutputRows(sdata, hitsEntry.second);
 		sdata += "</OUTPUT_ROWS>";
+
 		sdata += "</TIME_UNIT>";
 	});
-	sdata += "</HITS>";
+	sdata += "</TIME_UNITS>";
 }
 
 void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const & setOfRows)
 {
 	sdata += "<SET_OF_ROWS>";
+
+	sdata += "<SET_OF_ROWS_MAP_ITSELF>";
+	sdata += sizeof(setOfRows);
+	sdata += "</SET_OF_ROWS_MAP_ITSELF>";
+
 	int index = 0;
 	std::for_each(setOfRows.cbegin(), setOfRows.cend(), [&](BranchOutputRow const & row)
 	{
 		sdata += "<SINGLE_ROW>";
+
 		sdata += "<ROW_NUMBER>";
 		sdata += boost::lexical_cast<std::string>(index);
 		sdata += "</ROW_NUMBER>";
 		SpitOutputRow(sdata, row);
+
 		sdata += "</SINGLE_ROW>";
+
 		++index;
 	});
 	sdata += "</SET_OF_ROWS>";
@@ -1780,6 +1801,10 @@ void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const &
 void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 {
 	sdata += "<ROW>";
+
+	sdata += "<ROW_OBJECT_ITSELF>";
+	sdata += sizeof(row);
+	sdata += "</ROW_OBJECT_ITSELF>";
 
 	sdata += "<INDICES_FOR_THIS_SINGLE_ROW_POINTING_INTO_LEAF_SET_FOR_THIS_BRANCH>";
 	std::for_each(row.primary_leaves.cbegin(), row.primary_leaves.cend(), [&](int const & leafindex)
@@ -1791,15 +1816,24 @@ void SpitOutputRow(std::string & sdata, BranchOutputRow const & row)
 	sdata += "</INDICES_FOR_THIS_SINGLE_ROW_POINTING_INTO_LEAF_SET_FOR_THIS_BRANCH>";
 
 	sdata += "<CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW>";
+	sdata += "<CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
+	sdata += sizeof(row.child_indices_into_raw_data);
+	sdata += "</CHILD_SECONDARY_DATA_CORRESPONDING_TO_THIS_OUTPUT_ROW_MAP_ITSELF>";
 	std::for_each(row.child_indices_into_raw_data.cbegin(), row.child_indices_into_raw_data.cend(), [&](fast__short__to__fast_short_to_int_map::value_type const & childindices)
 	{
 		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA>";
+		sdata += "<SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA_OBJECT_ITSELF>";
+		sdata += sizeof(childindices);
+		sdata += "</SPECIFIC_VARIABLE_GROUP_CHILD_SECONDARY_DATA_OBJECT_ITSELF>";
 		sdata += "<VARIABLE_GROUP_NUMBER>";
 		sdata += boost::lexical_cast<std::string>(childindices.first);
 		sdata += "</VARIABLE_GROUP_NUMBER>";
 		std::for_each(childindices.second.cbegin(), childindices.second.cend(), [&](fast_short_to_int_map::value_type const & childleaves)
 		{
 			sdata += "<SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW>";
+			sdata += "<SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW_OBJECT_ITSELF>";
+			sdata += sizeof(childleaves);
+			sdata += "</SINGLE_LEAF_OF_CHILD_DATA_FOR_THIS_OUTPUT_ROW_OBJECT_ITSELF>";
 			sdata += "<LEAF_NUMBER>";
 			sdata += boost::lexical_cast<std::string>(childleaves.first);
 			sdata += "</LEAF_NUMBER>";
@@ -1938,13 +1972,15 @@ void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMappi
 
 }
 
-void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file)
+void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file, std::string const & file_name_appending_string)
 {
 
 	std::fstream file_;
 	if (to_file)
 	{
-		file_.open("all_weightings.xml", std::ofstream::out | std::ios::trunc);
+		boost::format filenametxt("all_weightings.%1%.xml");
+		filenametxt % file_name_appending_string;
+		file_.open(filenametxt.str(), std::ofstream::out | std::ios::trunc);
 		if (!file_.is_open())
 		{
 			std::string theerr = strerror(errno);
@@ -1957,6 +1993,11 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	std::string * sdata = &sdata_.back();
 
 	*sdata += "<ALL_WEIGHTINGS>";
+
+	allWeightings.getMySize();
+	*sdata += "<ALL_WEIGHTINGS_TOTAL_SIZE>";
+	allWeightings.mySize.spitSizes(*sdata);
+	*sdata += "</ALL_WEIGHTINGS_TOTAL_SIZE>";
 
 	*sdata += "<TIME_GRANULARITY>";
 	*sdata += GetTimeGranularityText(allWeightings.time_granularity);
@@ -2039,6 +2080,9 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	*sdata += "</DATA_CACHES_CHILDREN>";
 
 	*sdata += "<TIME_SLICES>";
+	*sdata += "<TIME_SLICES_MAP_ITSELF>";
+	*sdata += sizeof(allWeightings.timeSlices);
+	*sdata += "</TIME_SLICES_MAP_ITSELF>";
 	std::for_each(allWeightings.timeSlices.cbegin(), allWeightings.timeSlices.cend(), [&](decltype(allWeightings.timeSlices)::value_type const & timeSlice)
 	{
 
@@ -2049,6 +2093,10 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 		}
 
 		*sdata += "<TIME_SLICE>";
+
+		*sdata += "<TIME_SLICE_MAP_ITSELF>";
+		*sdata += sizeof(timeSlice);
+		*sdata += "</TIME_SLICE_MAP_ITSELF>";
 
 		TimeSlice const & the_slice = timeSlice.first;
 		VariableGroupTimeSliceData const & variableGroupTimeSliceData = timeSlice.second;
@@ -2067,6 +2115,10 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 		{
 			*sdata += "<VARIABLE_GROUP_BRANCHES_AND_LEAVES>";
 
+			*sdata += "<VARIABLE_GROUP_BRANCHES_AND_LEAVES_MAP_ITSELF>";
+			*sdata += sizeof(variableGroupBranchesAndLeaves);
+			*sdata += "</VARIABLE_GROUP_BRANCHES_AND_LEAVES_MAP_ITSELF>";
+
 			*sdata += "<VARIABLE_GROUP_NUMBER>";
 			*sdata += boost::lexical_cast<std::string>(variableGroupBranchesAndLeaves.variable_group_number);
 			*sdata += "</VARIABLE_GROUP_NUMBER>";
@@ -2075,18 +2127,22 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 			SpitWeighting(*sdata, variableGroupBranchesAndLeaves.weighting);
 			*sdata += "</WEIGHTING>";
 
-			*sdata += "<BRANCHES_AND_LEAVES>";
+			*sdata += "<BRANCHES_WITH_LEAVES>";
 			std::for_each(variableGroupBranchesAndLeaves.branches.cbegin(), variableGroupBranchesAndLeaves.branches.cend(), [&](Branch const & branch)
 			{
-				*sdata += "<BRANCH_AND_LEAVES>";
+				*sdata += "<BRANCH_WITH_LEAVES>";
+
+				*sdata += "<BRANCH_WITH_LEAVES_MAP_ITSELF>";
+				*sdata += sizeof(branch);
+				*sdata += "</BRANCH_WITH_LEAVES_MAP_ITSELF>";
 
 				SpitBranch(*sdata, branch);
 
 				branch.SpitLeaves(*sdata);
 
-				*sdata += "</BRANCH_AND_LEAVES>";
+				*sdata += "</BRANCH_WITH_LEAVES>";
 			});
-			*sdata += "</BRANCHES_AND_LEAVES>";
+			*sdata += "</BRANCHES_WITH_LEAVES>";
 
 			*sdata += "</VARIABLE_GROUP_BRANCHES_AND_LEAVES>";
 		});
@@ -2965,6 +3021,7 @@ void AllWeightings::getMySize() const
 	mySize.totalSize += mySize.sizePod;
 
 	// random_numbers
+	//mySize.sizeRandomNumbers += sizeof(random_numbers);
 	for (auto const & random_number : random_numbers)
 	{
 		mySize.sizeRandomNumbers += sizeof(random_number);
@@ -2972,65 +3029,87 @@ void AllWeightings::getMySize() const
 	mySize.totalSize += mySize.sizeRandomNumbers;
 
 	//consolidated_rows
+	//mySize.sizeConsolidatedRows += sizeof(consolidated_rows);
+	mySize.numberMapNodes += consolidated_rows.size();
 	for (auto const & mergedTimeSliceRow : consolidated_rows)
 	{
 		mySize.sizeConsolidatedRows += sizeof(mergedTimeSliceRow);
-		getInstanceDataVectorUsage(mySize.sizeConsolidatedRows, mergedTimeSliceRow.output_row);
+		getInstanceDataVectorUsage(mySize.sizeConsolidatedRows, mergedTimeSliceRow.output_row, false);
 	}
 	mySize.totalSize += mySize.sizeConsolidatedRows;
 
 	// mappings_from_child_branch_to_primary
+	//mySize.sizeMappingsFromChildBranchToPrimary += sizeof(mappings_from_child_branch_to_primary);
 	getChildToBranchColumnMappingsUsage(mySize.sizeMappingsFromChildBranchToPrimary, mappings_from_child_branch_to_primary);
 	mySize.totalSize += mySize.sizeMappingsFromChildBranchToPrimary;
 
 	// mappings_from_child_branch_to_primary
+	//mySize.sizeMappingFromChildLeafToPrimary += sizeof(mappings_from_child_leaf_to_primary);
 	getChildToBranchColumnMappingsUsage(mySize.sizeMappingFromChildLeafToPrimary, mappings_from_child_leaf_to_primary);
 	mySize.totalSize += mySize.sizeMappingFromChildLeafToPrimary;
 
 	// childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1
+	//mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1);
+	mySize.numberMapNodes += childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.size();
 	for (auto const & single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 : childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1)
 	{
+		//mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1);
 		mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.first);
 		mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1 += sizeof(single_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1.second);
 	}
 	mySize.totalSize += mySize.size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1;
 
 	// dataCache
+	//mySize.sizeDataCache += sizeof(dataCache);
 	getDataCacheUsage(mySize.sizeDataCache, dataCache);
 	mySize.totalSize += mySize.sizeDataCache;
 
 	// otherTopLevelCache
+	//mySize.sizeOtherTopLevelCache += sizeof(otherTopLevelCache);
+	mySize.numberMapNodes += otherTopLevelCache.size();
 	for (auto const & single_otherTopLevelCache : otherTopLevelCache)
 	{
-		mySize.sizeOtherTopLevelCache += sizeof(single_otherTopLevelCache.first);
+		mySize.sizeOtherTopLevelCache += sizeof(single_otherTopLevelCache);
 		getDataCacheUsage(mySize.sizeOtherTopLevelCache, single_otherTopLevelCache.second);
 	}
 	mySize.totalSize += mySize.sizeOtherTopLevelCache;
 
 	// childCache
+	//mySize.sizeChildCache += sizeof(childCache);
+	mySize.numberMapNodes += childCache.size();
 	for (auto const & single_childCache : childCache)
 	{
-		mySize.sizeChildCache += sizeof(single_childCache.first);
+		mySize.sizeChildCache += sizeof(single_childCache);
 		getDataCacheUsage(mySize.sizeChildCache, single_childCache.second);
 	}
 	mySize.totalSize += mySize.sizeChildCache;
 
 	// timeSlices
+	mySize.sizeTimeSlices += sizeof(timeSlices);
 	for (auto const & timeSlice : timeSlices)
 	{
 		mySize.sizeTimeSlices += sizeof(timeSlice.first);
 		mySize.sizeTimeSlices += sizeof(timeSlice.second);
 
+		// branches_and_leaves is a vector
 		auto const & branches_and_leaves = timeSlice.second.branches_and_leaves;
 
 		for (auto const & variableGroupBranchesAndLeaves : branches_and_leaves)
 		{
+
+			// variableGroupBranchesAndLeaves is an object of a class
+
 			mySize.sizeTimeSlices += sizeof(variableGroupBranchesAndLeaves);
 
+			// branches is a set
 			Branches const & branches = variableGroupBranchesAndLeaves.branches;
 
+			mySize.numberMapNodes += branches.size();
 			for (auto const & branch : branches)
 			{
+
+				// branch is an object of a class
+
 				mySize.sizeTimeSlices += sizeof(branch);
 
 				getInstanceDataVectorUsage(mySize.sizeTimeSlices, branch.primary_keys, false);
@@ -3041,25 +3120,36 @@ void AllWeightings::getMySize() const
 				auto const & leaves = branch.leaves;
 				auto const & leaves_cache = branch.leaves_cache;
 
-				mySize.sizeTimeSlices += sizeof(hits);
-				mySize.sizeTimeSlices += sizeof(remaining);
-				mySize.sizeTimeSlices += sizeof(helper_lookup__from_child_key_set__to_matching_output_rows);
-				mySize.sizeTimeSlices += sizeof(leaves);
-				mySize.sizeTimeSlices += sizeof(leaves_cache);
+				// // Already calculated in sizeof(branch)
+				//mySize.sizeTimeSlices += sizeof(hits);
+				//mySize.sizeTimeSlices += sizeof(remaining);
+				//mySize.sizeTimeSlices += sizeof(helper_lookup__from_child_key_set__to_matching_output_rows);
+				//mySize.sizeTimeSlices += sizeof(leaves);
+				//mySize.sizeTimeSlices += sizeof(leaves_cache);
+
+
+				// leaves_cache is a vector
 
 				// leaves_cache
 				for (auto const & leaf : leaves_cache)
 				{
+					mySize.sizeTimeSlices += sizeof(leaf);
 					getLeafUsage(mySize.sizeTimeSlices, leaf);
 				}
+
+
+				// leaves is a set
+				mySize.numberMapNodes += leaves.size();
 
 				// leaves
 				for (auto const & leaf : leaves)
 				{
+					mySize.sizeTimeSlices += sizeof(leaf);
 					getLeafUsage(mySize.sizeTimeSlices, leaf);
 				}
 
-				// helper_lookup__from_child_key_set__to_matching_output_rows
+				// helper_lookup__from_child_key_set__to_matching_output_rows is a map
+				mySize.numberMapNodes += helper_lookup__from_child_key_set__to_matching_output_rows.size();
 				for (auto const & child_lookup_from_child_data_to_rows : helper_lookup__from_child_key_set__to_matching_output_rows)
 				{
 					mySize.sizeTimeSlices += sizeof(child_lookup_from_child_data_to_rows.first);
@@ -3070,46 +3160,55 @@ void AllWeightings::getMySize() const
 
 					getInstanceDataVectorUsage(mySize.sizeTimeSlices, childDMUInstanceDataVector);
 
-					mySize.sizeTimeSlices += sizeof(outputRowsToChildDataMap);
+					mySize.numberMapNodes += outputRowsToChildDataMap.size();
 					for (auto const & outputRowToChildDataMap : outputRowsToChildDataMap)
 					{
 						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.first);
 						mySize.sizeTimeSlices += sizeof(outputRowToChildDataMap.second);
 
+						// child_leaf_indices is a vector
 						auto const & child_leaf_indices = outputRowToChildDataMap.second;
 
 						for (auto const & child_leaf_index : child_leaf_indices)
 						{
+							// POD
 							mySize.sizeTimeSlices += sizeof(child_leaf_index);
 						}
 					}
 				}
 
-				// remaining
+				// remaining is a map
+				mySize.numberMapNodes += remaining.size();
 				for (auto const & remaining_rows : remaining)
 				{
 					auto const & remaining_time_unit = remaining_rows.first;
 					auto const & remainingOutputRows = remaining_rows.second;
+
+					// remainingOutputRows is a vector
 
 					mySize.sizeTimeSlices += sizeof(remaining_time_unit);
 					mySize.sizeTimeSlices += sizeof(remainingOutputRows);
 
 					for (auto const & outputRow : remainingOutputRows)
 					{
+						// outputRow is an object that is an instance of the BranchOutputRow class
 						getSizeOutputRow(mySize.sizeTimeSlices, outputRow);
 					}
 				}
 
-				// hits
+				// hits is a map
+				mySize.numberMapNodes += hits.size();
 				for (auto const & time_unit_hit : hits)
 				{
 					mySize.sizeTimeSlices += sizeof(time_unit_hit.first);
 					mySize.sizeTimeSlices += sizeof(time_unit_hit.second);
 					
+					// outputRows is a vector
 					auto const & outputRows = time_unit_hit.second;
 
 					for (auto const & outputRow : outputRows)
 					{
+						// outputRow is an object that is an instance of the BranchOutputRow class
 						getSizeOutputRow(mySize.sizeTimeSlices, outputRow);
 					}
 				}
@@ -3125,9 +3224,15 @@ void AllWeightings::getSizeOutputRow(size_t & usage, BranchOutputRow const & out
 {
 	usage += sizeof(outputRow);
 
+	// primary_leaves is a set
 	auto const & primary_leaves = outputRow.primary_leaves;
+
+	// primary_leaves_cache is a vector
 	auto const & primary_leaves_cache = outputRow.primary_leaves_cache;
+
+	// child_indices_into_raw_data is a map
 	auto const & child_indices_into_raw_data = outputRow.child_indices_into_raw_data;
+	mySize.numberMapNodes += child_indices_into_raw_data.size();
 
 	for (auto const & primary_leaf : primary_leaves)
 	{
@@ -3143,7 +3248,9 @@ void AllWeightings::getSizeOutputRow(size_t & usage, BranchOutputRow const & out
 		usage += sizeof(single_child_indices_into_raw_data.first);
 		usage += sizeof(single_child_indices_into_raw_data.second);
 
+		// the_child_lookup_map is a map from POD to POD
 		auto const & the_child_lookup_map = single_child_indices_into_raw_data.second;
+		mySize += the_child_lookup_map.size();
 
 		for (auto const & the_child_lookup_map_entry : the_child_lookup_map)
 		{
@@ -3155,7 +3262,7 @@ void AllWeightings::getSizeOutputRow(size_t & usage, BranchOutputRow const & out
 
 void AllWeightings::getLeafUsage(size_t & usage, Leaf const & leaf) const
 {
-	usage += sizeof(leaf);
+	//usage += sizeof(leaf);
 
 	getInstanceDataVectorUsage(usage, leaf.primary_keys);
 
@@ -3176,21 +3283,26 @@ void AllWeightings::getInstanceDataVectorUsage(size_t & usage, InstanceDataVecto
 	}
 	for (auto const & instanceData : instanceDataVector)
 	{
-		usage += boost::apply_visitor(size_of_visitor(), instanceData);
+		// Boost Variant is stack-based
+		usage += sizeof(instanceData);
+		//usage += boost::apply_visitor(size_of_visitor(), instanceData);
 	}
 }
 
 void AllWeightings::getDataCacheUsage(size_t & usage, DataCache const & dataCache) const
 {
+	mySize.numberMapNodes += dataCache.size();
 	for (auto const & rowIdToData : dataCache)
 	{
 		usage += sizeof(rowIdToData.first);
+		usage += sizeof(rowIdToData.second);
 		getInstanceDataVectorUsage(usage, rowIdToData.second);
 	}
 }
 
 void AllWeightings::getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const
 {
+	mySize.numberMapNodes += childToBranchColumnMappings.size();
 	for (auto const & single_mappings_from_child_branch_to_primary : childToBranchColumnMappings)
 	{
 		usage += sizeof(single_mappings_from_child_branch_to_primary.first);

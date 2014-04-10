@@ -10,8 +10,8 @@
 
 #include <map>
 
-template<typename K, typename V, class Comp_ = std::less<K>>
-using FastMap = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K const, V>>>;
+template<typename K, typename V, unsigned MAX_SIZE = 32, class Comp_ = std::less<K>>
+using FastMap = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K const, V>>, boost::default_user_allocator_new_delete, boost::mutex, MAX_SIZE>;
 
 template<typename K_, typename V_, class Comp_ = std::less<K_>>
 class FastMap_

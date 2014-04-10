@@ -836,6 +836,8 @@ class Weighting
 
 	public:
 
+		static int how_many_weightings;
+		 
 		Weighting()
 			: weightingPtr{ new boost::multiprecision::cpp_int }
 			, weighting_range_startPtr{ new boost::multiprecision::cpp_int }
@@ -844,6 +846,7 @@ class Weighting
 			, weighting_range_start{ *weighting_range_startPtr }
 			, weighting_range_end{ *weighting_range_endPtr }
 		{
+			++how_many_weightings;
 			InternalSetWeighting();
 		}
 
@@ -855,7 +858,13 @@ class Weighting
 			, weighting_range_start{ *weighting_range_startPtr }
 			, weighting_range_end{ *weighting_range_endPtr }
 		{
+			++how_many_weightings;
 			InternalSetWeighting();
+		}
+
+		~Weighting()
+		{
+			--how_many_weightings;
 		}
 
 		Weighting & operator=(Weighting const & rhs)
@@ -1266,7 +1275,7 @@ void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__
 void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitWeighting(std::string & sdata, Weighting const & weighting);
 void SpitTimeSlice(std::string & sdata, TimeSlice const & time_slice);
-void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file = false);
+void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & allWeightings, bool const to_file, std::string const & file_name_appending_string);
 void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
 //#endif
 
@@ -1908,7 +1917,8 @@ public:
 	struct SizeOfSampler
 	{
 		SizeOfSampler()
-			: sizePod{ 0 }
+			: numberMapNodes{ 0 }
+			, sizePod{ 0 }
 			, sizeTimeSlices{ 0 }
 			, sizeDataCache{ 0 }
 			, sizeOtherTopLevelCache{ 0 }
@@ -1920,6 +1930,8 @@ public:
 			, sizeRandomNumbers{ 0 }
 			, totalSize{ 0 }
 		{}
+
+		size_t numberMapNodes;
 		size_t sizePod;
 		size_t sizeTimeSlices;
 		size_t sizeDataCache;
@@ -1934,49 +1946,54 @@ public:
 
 		void spitSizes(std::string & sdata)
 		{
-			sdata += "sizePod: ";
-			sdata += boost::lexical_cast<std::string>(sizePod);
-			sdata += "; ";
 
-			sdata += "sizeTimeSlices: ";
-			sdata += boost::lexical_cast<std::string>(sizeTimeSlices);
-			sdata += "; ";
-
-			sdata += "sizeDataCache: ";
-			sdata += boost::lexical_cast<std::string>(sizeDataCache);
-			sdata += "; ";
-
-			sdata += "sizeOtherTopLevelCache: ";
-			sdata += boost::lexical_cast<std::string>(sizeOtherTopLevelCache);
-			sdata += "; ";
-
-			sdata += "sizeChildCache: ";
-			sdata += boost::lexical_cast<std::string>(sizeChildCache);
-			sdata += "; ";
-
-			sdata += "sizeMappingsFromChildBranchToPrimary: ";
-			sdata += boost::lexical_cast<std::string>(sizeMappingsFromChildBranchToPrimary);
-			sdata += "; ";
-
-			sdata += "sizeMappingFromChildLeafToPrimary: ";
-			sdata += boost::lexical_cast<std::string>(sizeMappingFromChildLeafToPrimary);
-			sdata += "; ";
-
-			sdata += "size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1: ";
-			sdata += boost::lexical_cast<std::string>(size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1);
-			sdata += "; ";
-
-			sdata += "sizeConsolidatedRows: ";
-			sdata += boost::lexical_cast<std::string>(sizeConsolidatedRows);
-			sdata += "; ";
-
-			sdata += "sizeRandomNumbers: ";
-			sdata += boost::lexical_cast<std::string>(sizeRandomNumbers);
-			sdata += "; ";
-
-			sdata += "totalSize: ";
+			sdata += "<TOTAL_SIZE>";
 			sdata += boost::lexical_cast<std::string>(totalSize);
-			sdata += "; ";
+			sdata += "</TOTAL_SIZE>";
+
+			sdata += "<TOTAL_NUMBER_MAP_NODES>";
+			sdata += boost::lexical_cast<std::string>(totalSize);
+			sdata += "</TOTAL_NUMBER_MAP_NODES>";
+
+			sdata += "<SIZE_INSTANCE>";
+			sdata += boost::lexical_cast<std::string>(sizePod);
+			sdata += "</SIZE_INSTANCE>";
+
+			sdata += "<SIZE_TIME_SLICES>";
+			sdata += boost::lexical_cast<std::string>(sizeTimeSlices);
+			sdata += "</SIZE_TIME_SLICES>";
+
+			sdata += "<SIZE_DATA_CACHE>";
+			sdata += boost::lexical_cast<std::string>(sizeDataCache);
+			sdata += "</SIZE_DATA_CACHE>";
+
+			sdata += "<SIZE_OTHER_TOP_LEVEL_CACHES>";
+			sdata += boost::lexical_cast<std::string>(sizeOtherTopLevelCache);
+			sdata += "</SIZE_OTHER_TOP_LEVEL_CACHES>";
+
+			sdata += "<SIZE_CHILD_CACHES>";
+			sdata += boost::lexical_cast<std::string>(sizeChildCache);
+			sdata += "</SIZE_CHILD_CACHES>";
+
+			sdata += "<SIZE_MAPPING_FROM_CHILD_BRANCH_TO_PRIMARY>";
+			sdata += boost::lexical_cast<std::string>(sizeMappingsFromChildBranchToPrimary);
+			sdata += "</SIZE_MAPPING_FROM_CHILD_BRANCH_TO_PRIMARY>";
+
+			sdata += "<SIZE_MAPPING_FROM_CHILD_LEAF_TO_PRIMARY>";
+			sdata += boost::lexical_cast<std::string>(sizeMappingFromChildLeafToPrimary);
+			sdata += "</SIZE_MAPPING_FROM_CHILD_LEAF_TO_PRIMARY>";
+
+			sdata += "<SIZE_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
+			sdata += boost::lexical_cast<std::string>(size_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1);
+			sdata += "</SIZE_childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
+
+			sdata += "<SIZE_CONSOLIDATED_ROWS>";
+			sdata += boost::lexical_cast<std::string>(sizeConsolidatedRows);
+			sdata += "</SIZE_CONSOLIDATED_ROWS>";
+
+			sdata += "<SIZE_RANDOM_NUMBERS>";
+			sdata += boost::lexical_cast<std::string>(sizeRandomNumbers);
+			sdata += "</SIZE_RANDOM_NUMBERS>";
 
 		}
 	};
@@ -2017,7 +2034,7 @@ public:
 	void ConsolidateRowsWithinBranch(Branch const & branch, int & orig_random_number_rows);
 	void getChildToBranchColumnMappingsUsage(size_t & usage, fast_int_to_childtoprimarymappingvector const & childToBranchColumnMappings) const;
 	void getDataCacheUsage(size_t & usage, DataCache const & dataCache) const;
-	void getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf = true) const;
+	void getInstanceDataVectorUsage(size_t & usage, InstanceDataVector const & instanceDataVector, bool const includeSelf = false) const;
 	void getLeafUsage(size_t & usage, Leaf const & leaf) const;
 	void getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const;
 	void ClearWeightings(); // only for use when we will never touch this object again.  For use with Boost memory pool.

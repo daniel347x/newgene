@@ -620,15 +620,21 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		final_result = random_sampling_schema;
 
+		std::vector<std::string> spitsizes;
+		SpitAllWeightings(spitsizes, allWeightings, true, "prior_to_child_cache");
+
 		// ********************************************************************************* //
 		// The following function populates (merges)
 		// *BOTH* child variable groups *AND*
 		// non-primary top-level variable groups
-		// ********************************************************************************* //
+		// ********************************************************************************* // 
 		boost::format myFillChildren("Merging in secondary variable group data...");
 		messager.AppendKadStatusText(myFillChildren.str(), this);
 		RandomSamplerFillDataForChildGroups(allWeightings);
 		if (failed || CheckCancelled()) return;
+
+		std::vector<std::string> spitsizes;
+		SpitAllWeightings(spitsizes, allWeightings, true, "child_cache_complete");
 
 		sdata.clear();
 		allWeightings.getMySize();
