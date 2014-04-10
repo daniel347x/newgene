@@ -487,8 +487,10 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	// ******************************************************************************************* //
 	AllWeightings * allWeightings_ = new AllWeightings(messager); // SEE NOTE!  Do not delete this object!
 	AllWeightings & allWeightings = *allWeightings_;
-	BOOST_SCOPE_EXIT(&allWeightings)
+	BOOST_SCOPE_EXIT(&allWeightings, &model, &input_model)
 	{
+		sqlite3_db_release_memory(model->getDb());
+		sqlite3_db_release_memory(input_model.getDb());
 		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
 	} BOOST_SCOPE_EXIT_END
 
