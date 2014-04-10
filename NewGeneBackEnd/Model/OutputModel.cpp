@@ -584,11 +584,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 			allWeightings.PrepareRandomSamples(K);
 
-			sdata.clear();
-			allWeightings.getMySize();
-			allWeightings.mySize.spitSizes(sdata);
-			boost::format mytxtA("Completed pre-populating randomly selected rows.  Size of AllWeightings: %1%");
-			mytxtA % sdata.c_str();
+			//sdata.clear();
+			//allWeightings.getMySize();
+			//allWeightings.mySize.spitSizes(sdata);
+			boost::format mytxtA("Completed pre-populating randomly selected rows.");
+			//mytxtA % sdata.c_str();
 			messager.AppendKadStatusText(mytxtA.str(), this);
 		}   
 		else
@@ -598,11 +598,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText(myPrepareFullSamples.str(), this);
 			allWeightings.PrepareFullSamples(K);
 
-			sdata.clear();
-			allWeightings.getMySize();
-			allWeightings.mySize.spitSizes(sdata);
-			boost::format mytxtB("Completed pre-populating full selection of rows.  Size of AllWeightings: %1%");
-			mytxtB % sdata.c_str();
+			//sdata.clear();
+			//allWeightings.getMySize();
+			//allWeightings.mySize.spitSizes(sdata);
+			boost::format mytxtB("Completed pre-populating full selection of rows.");
+			//mytxtB % sdata.c_str();
 			messager.AppendKadStatusText(mytxtB.str(), this);
 		}
 
@@ -618,7 +618,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			if (failed || CheckCancelled()) return;
 			 
 		}
-		 
+		  
 		final_result = random_sampling_schema;
 
 		//std::vector<std::string> spitsizes;
@@ -637,11 +637,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		//spitsizes.clear();
 		//SpitAllWeightings(spitsizes, allWeightings, true, "child_cache_complete");
 
-		sdata.clear();
-		allWeightings.getMySize();
-		allWeightings.mySize.spitSizes(sdata);
-		boost::format mytxt2("Completed merging secondary groups.  Size of AllWeightings: %1%");
-		mytxt2 % sdata.c_str();
+		//sdata.clear();
+		//allWeightings.getMySize();
+		//allWeightings.mySize.spitSizes(sdata);
+		boost::format mytxt2("Completed merging secondary groups.");
+		//mytxt2 % sdata.c_str();
 		messager.AppendKadStatusText(mytxt2.str(), this);
 
 		// The following function will clear and re-populate its internal
@@ -664,11 +664,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.ResetBranchCaches(); // build leaf cache and empty child caches.
 		if (failed || CheckCancelled()) return;
 
-		sdata.clear();
-		allWeightings.getMySize();
-		allWeightings.mySize.spitSizes(sdata);
-		boost::format mytxt3("Completed building caches.  Size of AllWeightings: %1%");
-		mytxt3 % sdata.c_str();
+		//sdata.clear();
+		//allWeightings.getMySize();
+		//allWeightings.mySize.spitSizes(sdata);
+		boost::format mytxt3("Completed building caches.");
+		//mytxt3 % sdata.c_str();
 		messager.AppendKadStatusText(mytxt3.str(), this);
 
 		if (consolidate_rows) // Consolidate data mode is on
@@ -702,11 +702,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			ConsolidateData(random_sampling, allWeightings);
 			if (failed || CheckCancelled()) return;
 
-			sdata.clear();
-			allWeightings.getMySize();
-			allWeightings.mySize.spitSizes(sdata);
-			boost::format mytxtC("Completed consolidating adjacent rows.  Size of AllWeightings: %1%");
-			mytxtC % sdata.c_str();
+			//sdata.clear();
+			//allWeightings.getMySize();
+			//allWeightings.mySize.spitSizes(sdata);
+			boost::format mytxtC("Completed consolidating adjacent rows.");
+			//mytxtC % sdata.c_str();
 			messager.AppendKadStatusText(mytxtC.str(), this);
 
 		}

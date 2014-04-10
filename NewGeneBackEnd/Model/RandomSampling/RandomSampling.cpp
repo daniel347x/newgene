@@ -1573,7 +1573,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 	branch.hits[-1].clear();
 	 
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
-	{
+	{ 
 		if (hit.first != -1)
 		{
 			orig_random_number_rows += hit.second.size();
@@ -1582,7 +1582,14 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 				// Profiler shows that about half the time in the "consolidating rows" phase
 				// is spent creating new memory here.
 				branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter)));
-				hit.second.erase(iter++);
+				
+				// Even after the std::move, above, the Boost memory pool deallocation of the space for the object itself
+				// is requiring 90%+ of the time for the "consolidating rows" routine.
+				// Therefore, leave the (empty) elements in place, and later when looping through consolidated rows
+				// just skip all but the -1 index of branch.hits.
+				// We'll gladly pay the cost in memory in exchange for rapidly speeding up the "consolidating rows" stage.
+
+				//hit.second.erase(iter++);
 			}
 		}
 	});

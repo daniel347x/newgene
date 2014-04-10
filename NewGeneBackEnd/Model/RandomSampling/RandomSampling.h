@@ -1259,7 +1259,7 @@ typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 typedef FastVector<Leaf> fast_leaf_vector;
 typedef FastSet<Leaf> Leaves;
 
-typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;
+typedef FastVector<BranchOutputRow> fast_branch_output_row_vector; 
 typedef FastSet<BranchOutputRow> fast_branch_output_row_set;
 
 typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
