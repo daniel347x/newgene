@@ -1672,7 +1672,8 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 			// Memory allocation error when NOT deleting the above "hit" vector,
 			// so attempt it here to give it a chance to delete more in bulk.
 			// Actually ... try it now
-			hit.second.clear();
+			// Nope.  Causes MASSIVE hang for many minutes to handle memory
+			//hit.second.clear();
 
 		}
 	});
