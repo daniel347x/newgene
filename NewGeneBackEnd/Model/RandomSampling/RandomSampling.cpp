@@ -1586,7 +1586,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 				// Optimization!  Profiler shows that over 95% of time in the "consolidating rows" routine
 				// is *now* spent inserting into the "Boost memory-pool backed" hits[-1].
 				// This is terrible performance, so we must use a std::set.
-				//branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter)));
+				//branch.hits[-1].insert(std::move(const_cast<BranchOutputRow &>(*iter))); 
 				branch.hits_consolidated.emplace_back(std::move(const_cast<BranchOutputRow &>(*iter))); 
 
 				// Even after the std::move, above, the Boost memory pool deallocation of the space for the object itself
@@ -1597,6 +1597,11 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch, int & ori
 
 				//hit.second.erase(iter++);
 			}
+
+			// Memory allocation error when NOT deleting the above "hit" vector,
+			// so attempt it here to give it a chance to delete more in bulk.
+			hit.second.clear();
+
 		}
 	});
 
