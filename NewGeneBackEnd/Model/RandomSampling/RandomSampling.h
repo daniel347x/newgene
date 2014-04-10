@@ -36,8 +36,8 @@ typedef FastVector<int> fast_int_vector;
 typedef FastSet<int> fast_int_set;
 typedef FastMap<std::int16_t, std::int32_t> fast_short_to_int_map;
 
-//typedef FastMap<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
-typedef FastMapFlat<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
+typedef FastMap<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
+//typedef FastMapFlat<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
 typedef FastMap<std::int32_t, SecondaryInstanceDataVector> DataCache;
@@ -1286,7 +1286,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 void SpitChildToPrimaryKeyColumnMapping(std::string & sdata, ChildToPrimaryMapping const & childToPrimaryMapping);
 //#endif
 
-// "Branch"
+// "Branch" 
 class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 {
 

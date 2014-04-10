@@ -618,11 +618,11 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			if (failed || CheckCancelled()) return;
 
 		}
-
+		 
 		final_result = random_sampling_schema;
 
-		std::vector<std::string> spitsizes;
-		SpitAllWeightings(spitsizes, allWeightings, true, "prior_to_child_cache");
+		//std::vector<std::string> spitsizes;
+		//SpitAllWeightings(spitsizes, allWeightings, true, "prior_to_child_cache");
 
 		// ********************************************************************************* //
 		// The following function populates (merges)
@@ -634,8 +634,8 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		RandomSamplerFillDataForChildGroups(allWeightings);
 		if (failed || CheckCancelled()) return; 
 
-		spitsizes.clear();
-		SpitAllWeightings(spitsizes, allWeightings, true, "child_cache_complete");
+		//spitsizes.clear();
+		//SpitAllWeightings(spitsizes, allWeightings, true, "child_cache_complete");
 
 		sdata.clear();
 		allWeightings.getMySize();

@@ -511,9 +511,9 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 	else
 	{
 
-		// Branches already exists for this variable group.
+		// Branches already exists.
 		// The incoming branch might match one of these, or it might not.
-		// In any case, retrieve the existing set of branches for this variable group.
+		// In any case, retrieve the existing set of branches.
 
 		VariableGroupBranchesAndLeaves & variableGroupBranch = *VariableGroupBranchesAndLeavesPtr;
 		Branches & branches = variableGroupBranch.branches;
