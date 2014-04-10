@@ -1277,7 +1277,7 @@ void SpitDataCache(std::string & sdata, DataCache const & dataCache);
 void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & dataCaches);
 void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits);
 void SpitSetOfOutputRows(std::string & sdata, fast_branch_output_row_set const & setOfRows);
-void SpitOutputRow(std::string & sdata, BranchOutputRow const & row);
+void SpitOutputRow(std::string & sdata, BranchOutputRow const & row); 
 void SpitChildLookup(std::string & sdata, fast__lookup__from_child_dmu_set__to__output_rows const & helperLookup);
 void SpitLeaf(std::string & sdata, Leaf const & leaf);
 void SpitWeighting(std::string & sdata, Weighting const & weighting);
@@ -1477,7 +1477,12 @@ class PrimaryKeysGroupingMultiplicityOne : public PrimaryKeysGrouping
 		// **************************************************************************************** //
 		mutable fast__lookup__from_child_dmu_set__to__output_rows helper_lookup__from_child_key_set__to_matching_output_rows;
 
-		void ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, bool const force) const; // Populate the above data structure
+		// Cache for use with "consolidating rows" phase, if it is every necessary!
+		// Currently, this will never be filled, because we have no need to perform the lookup after rows have been consolidated,
+		// and the profiler shows a major hit during the consolidating of rows in managing this cache, so disable it.
+		mutable fast__lookup__from_child_dmu_set__to__output_rows helper_lookup__from_child_key_set__to_matching_output_rows_consolidating;
+
+		void ConstructChildCombinationCache(AllWeightings & allWeightings, int const variable_group_number, bool const force, bool const is_consolidating = false) const; // Populate the above data structure
 
 		void InsertLeaf(Leaf const & leaf) const
 		{
