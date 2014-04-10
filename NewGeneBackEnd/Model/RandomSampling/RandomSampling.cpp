@@ -3209,56 +3209,57 @@ void purge_pool()
 	// Therefore, we simply loop through all reasonable possibilities for the size of a node.
 	// This is a negligible operation if there is no pool at the given size.
 
+	// Smallest possible size of the internal node in bytes, followed by additional byte guesses up to 48 additional bytes
+	boost::singleton_pool < TAG, SIZE + 0,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 1,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 2,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 3,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 4,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 5,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 6,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 7,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 8,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 9,  boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 10, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 11, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 12, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 13, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 14, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 15, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 16, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 17, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 18, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 19, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 20, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 21, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 22, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 23, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 24, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 25, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 26, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 27, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 28, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 29, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 30, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 31, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 32, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 33, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 34, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 35, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 36, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 37, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 38, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 39, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 40, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 41, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 42, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 43, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 44, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 45, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 46, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 47, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
+	boost::singleton_pool < TAG, SIZE + 48, boost::default_user_allocator_malloc_free, boost::details::pool::null_mutex>::purge_memory();
 
-	boost::singleton_pool<TAG, SIZE>::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 1 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 2 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 3 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 4 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 5 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 6 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 7 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 8 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 9 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 10 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 11 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 12 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 13 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 14 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 15 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 16 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 17 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 18 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 19 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 20 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 21 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 22 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 23 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 24 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 25 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 26 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 27 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 28 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 29 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 30 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 31 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 32 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 33 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 34 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 35 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 36 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 37 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 38 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 39 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 40 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 41 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 42 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 43 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 44 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 45 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 46 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 47 >::purge_memory();
-	boost::singleton_pool < TAG, SIZE + 48 >::purge_memory();
 }
 
 void AllWeightings::Clear()
@@ -3270,7 +3271,7 @@ void AllWeightings::Clear()
 	{
 		sqlite3_finalize(insert_random_sample_stmt);
 		insert_random_sample_stmt = nullptr;
-	}
+	} 
 
 	ClearWeightingsAndRemainingBranchJunk();
 

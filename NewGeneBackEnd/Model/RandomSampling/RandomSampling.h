@@ -1294,11 +1294,11 @@ class BranchOutputRow
 typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 
 typedef FastVector<Leaf> fast_leaf_vector;
-typedef FastSet<Leaf> Leaves;
+typedef FastSet<Leaf> Leaves; 
 
 //typedef std::vector<BranchOutputRow> std_branch_output_row_vector;
 typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;
-typedef FastVector<BranchOutputRow, 4096> fast_branch_output_row_vector_huge;
+typedef FastVector<BranchOutputRow> fast_branch_output_row_vector_huge; // no difference at this point because code pre-allocates full size, so extra template param was removed
 typedef FastSet<BranchOutputRow> fast_branch_output_row_set;
 
 typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
