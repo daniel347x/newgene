@@ -1642,14 +1642,14 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 	//     is spend expanding the vector in the boost-managed memory pool,
 	//     and with standard-allocator backed pool, heap becomes so fragmented
 	//     when running 1,000,000 rows that we crash
-	branch.hits_consolidated.reserve(reserve_size);
+	branch.hits_consolidated.reserve(static_cast<size_t>(reserve_size));
 
 	// Now consolidate the output rows from the time-unit subslices into a single sorted vector
 	std::for_each(branch.hits.begin(), branch.hits.end(), [&](decltype(branch.hits)::value_type & hit)
 	{
 		if (hit.first != -1)
 		{
-			for (auto iter = std::begin(hit.second); iter != std::end(hit.second);)
+			for (auto iter = std::begin(hit.second); iter != std::end(hit.second); ++iter)
 			{
 				// Profiler shows that about half the time in the "consolidating rows" phase
 				// is spent creating new memory here.
@@ -1671,7 +1671,7 @@ void AllWeightings::ConsolidateRowsWithinBranch(Branch const & branch)
 
 			// Memory allocation error when NOT deleting the above "hit" vector,
 			// so attempt it here to give it a chance to delete more in bulk.
-			hit.second.clear();
+			//hit.second.clear();
 
 		}
 	});
@@ -3298,4 +3298,5 @@ void AllWeightings::Clear()
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(fast_int_to_childtoprimarymappingvector::value_type)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(Branch)>();
 	purge_pool<boost::fast_pool_allocator_tag, sizeof(TimeSlices::value_type)>();
+
 }

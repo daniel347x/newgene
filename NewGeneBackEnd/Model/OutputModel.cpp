@@ -22154,11 +22154,11 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 						// In this case, for optimization, the rows for each branch are stored in branch.hits_consolidated
 						auto & incoming_rows = branch.hits_consolidated;
 						std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
-									  //for (fast_branch_output_row_vector_huge::iterator rowiter = incoming_rows.begin(); rowiter != branch.consolidated_hits_end_index; ++rowiter)
+						//for (fast_branch_output_row_vector_huge::iterator rowiter = incoming_rows.begin(); rowiter != branch.consolidated_hits_end_index; ++rowiter)
 						{
-							BranchOutputRow const & incoming_row = *rowiter;
+							//BranchOutputRow const & incoming_row = *rowiter;
 							EmplaceIncomingRowFromTimeSliceBranchDuringConsolidation(allWeightings, branch, incoming_row, incoming, the_slice, orig_row_count);
-						}
+						});
 					}
 					else
 					{
