@@ -492,6 +492,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 		allWeightings.Clear(); // This is the routine that purges all of the memory from the pool.
 	} BOOST_SCOPE_EXIT_END
 
+		create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
 	Prepare(allWeightings);
 
 	if (failed || CheckCancelled())
@@ -22112,17 +22113,17 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
 					{
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
-						create_output_row_visitor::data.clear();
+						allWeightings.create_output_row_visitor_global_data_cache.clear();
 						CreateOutputRow(branch, incoming_row, allWeightings);
 						create_output_row_visitor::output_file = nullptr;
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
 
-						incoming.emplace(the_slice, create_output_row_visitor::data);
+						incoming.emplace(the_slice, allWeightings.create_output_row_visitor_global_data_cache);
 
 						MergedTimeSliceRow const & test_row = *incoming.cbegin();
 						InstanceDataVector const & test_vector = test_row.output_row;
 
-						create_output_row_visitor::data.clear(); 
+						allWeightings.create_output_row_visitor_global_data_cache.clear();
 
 						++orig_row_count;
 					});
@@ -22207,13 +22208,13 @@ void OutputModel::OutputGenerator::ConsolidateData(bool const random_sampling, A
 					std::for_each(incoming_rows.cbegin(), incoming_rows.cend(), [&](BranchOutputRow const & incoming_row)
 					{
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__INSTANCE_DATA_VECTOR;
-						create_output_row_visitor::data.clear();
+						allWeightings.create_output_row_visitor_global_data_cache.clear();
 						CreateOutputRow(branch, incoming_row, allWeightings);
 						create_output_row_visitor::output_file = nullptr;
 						create_output_row_visitor::mode = create_output_row_visitor::CREATE_ROW_MODE__NONE;
 
-						ongoing_merged_rows.emplace(the_slice, create_output_row_visitor::data);
-						create_output_row_visitor::data.clear();
+						ongoing_merged_rows.emplace(the_slice, allWeightings.create_output_row_visitor_global_data_cache);
+						allWeightings.create_output_row_visitor_global_data_cache.clear();
 
 						++orig_row_count;
 					});

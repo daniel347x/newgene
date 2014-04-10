@@ -1738,7 +1738,7 @@ public:
 
 		if (mode & CREATE_ROW_MODE__INSTANCE_DATA_VECTOR)
 		{
-			data.push_back(data_value);
+			data->push_back(data_value);
 		}
 
 		if (mode & CREATE_ROW_MODE__PREPARED_STATEMENT)
@@ -1752,7 +1752,7 @@ public:
 
 	static std::string row_in_process; 
 	static std::fstream * output_file;
-	static InstanceDataVector data;
+	static InstanceDataVector * data;
 	static int * bind_index;
 	static sqlite3_stmt * insert_stmt; 
 	static int mode;
@@ -2082,6 +2082,10 @@ private:
 	int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Branch const & branch);
 
 	boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K);
+
+public:
+
+	InstanceData create_output_row_visitor_global_data_cache;
 
 };
 
