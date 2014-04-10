@@ -522,8 +522,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	if (true)
 	{
 
-		std::string sdata;
-
 		K = 0;
 		random_sampling_schema = RandomSamplingBuildOutputSchema(primary_variable_groups_column_info, secondary_variable_groups_column_info);
 
@@ -597,11 +595,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 			allWeightings.PrepareRandomSamples(K);
 
-			//sdata.clear();
-			//allWeightings.getMySize();
-			//allWeightings.mySize.spitSizes(sdata);
 			boost::format mytxtA("Completed pre-populating randomly selected rows.");
-			//mytxtA % sdata.c_str();
 			messager.AppendKadStatusText(mytxtA.str(), this);
 
 			allWeightings.ClearRandomNumbers();
@@ -614,17 +608,9 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 			messager.AppendKadStatusText(myPrepareFullSamples.str(), this);
 			allWeightings.PrepareFullSamples(K);
 
-			//sdata.clear();
-			//allWeightings.getMySize();
-			//allWeightings.mySize.spitSizes(sdata);
 			boost::format mytxtB("Completed pre-populating full selection of rows.");
-			//mytxtB % sdata.c_str();
 			messager.AppendKadStatusText(mytxtB.str(), this);
 		}
-
-		std::vector<std::string> sout;
-		SpitAllWeightings(sout, allWeightings, true, std::string("AfterLoadingPrimary"));
-		std::vector<std::string>().swap(sout);
 
 		if (failed || CheckCancelled()) { return; }
 
@@ -642,9 +628,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		final_result = random_sampling_schema;
 
-		//std::vector<std::string> spitsizes;
-		//SpitAllWeightings(spitsizes, allWeightings, true, "prior_to_child_cache");
-
 		// ********************************************************************************* //
 		// The following function populates (merges)
 		// *BOTH* child variable groups *AND*
@@ -656,14 +639,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		if (failed || CheckCancelled()) { return; }
 
-		//spitsizes.clear();
-		//SpitAllWeightings(spitsizes, allWeightings, true, "child_cache_complete");
-
-		//sdata.clear();
-		//allWeightings.getMySize();
-		//allWeightings.mySize.spitSizes(sdata);
 		boost::format mytxt2("Completed merging secondary groups.");
-		//mytxt2 % sdata.c_str();
 		messager.AppendKadStatusText(mytxt2.str(), this);
 
 		// The following function will clear and re-populate its internal
@@ -687,14 +663,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		if (failed || CheckCancelled()) { return; }
 
-		SpitAllWeightings(sout, allWeightings, true, std::string("AfterLoadingChildren"));
-		std::vector<std::string>().swap(sout);
-
-		//sdata.clear();
-		//allWeightings.getMySize();
-		//allWeightings.mySize.spitSizes(sdata);
 		boost::format mytxt3("Completed building caches.");
-		//mytxt3 % sdata.c_str();
 		messager.AppendKadStatusText(mytxt3.str(), this);
 
 		if (consolidate_rows) // Consolidate data mode is on
@@ -729,14 +698,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 			if (failed || CheckCancelled()) { return; }
 
-			SpitAllWeightings(sout, allWeightings, true, std::string("AfterConsolidating"));
-			std::vector<std::string>().swap(sout);
-
-			//sdata.clear();
-			//allWeightings.getMySize();
-			//allWeightings.mySize.spitSizes(sdata);
 			boost::format mytxtC("Completed consolidating adjacent rows.");
-			//mytxtC % sdata.c_str();
 			messager.AppendKadStatusText(mytxtC.str(), this);
 
 		}
@@ -754,11 +716,6 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 
 		messager.AppendKadStatusText("Writing results to disk...", this);
 		messager.SetPerformanceLabel("Writing results to disk...");
-
-#		ifdef _DEBUG
-		//std::vector<std::string> sdata;
-		//SpitAllWeightings(sdata, allWeightings, true);
-#		endif
 
 		RandomSamplingWriteResultsToFileOrScreen(allWeightings);
 
