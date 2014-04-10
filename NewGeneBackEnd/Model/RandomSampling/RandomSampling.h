@@ -2111,7 +2111,6 @@ class AllWeightings
 		void getSizeOutputRow(size_t & usage, BranchOutputRow const & outputRow) const;
 		void ClearWeightingsAndRemainingBranchJunk(); // only for use when we will never touch this object again.  For use with Boost memory pool.
 		void Clear(); // ditto
-		void ClearRandomNumbers() { random_numbers.clear();  }
 
 	protected:
 
@@ -2150,7 +2149,12 @@ class AllWeightings
 		}
 
 		std::vector<boost::multiprecision::cpp_int> random_numbers;
-		std::vector<boost::multiprecision::cpp_int>::const_iterator random_number_iterator;
+		std::vector<boost::multiprecision::cpp_int>::const_iterator random_number_iterator; // unused for now
+		void ClearRandomNumbers()
+		{
+			// random_numbers.clear() does not usually deallocate!!!
+			std::vector<boost::multiprecision::cpp_int>().swap(random_numbers);
+		}
 
 	private:
 

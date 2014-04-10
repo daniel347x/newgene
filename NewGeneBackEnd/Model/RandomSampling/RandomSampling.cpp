@@ -812,7 +812,7 @@ void AllWeightings::PrepareRandomNumbers(std::int64_t how_many)
 		throw NewGeneException() << newgene_error_description(msg.str());
 	}
 
-	random_numbers.clear();
+	ClearRandomNumbers();
 	boost::random::mt19937 engine(static_cast<std::int32_t>(std::time(0)));
 	boost::random::uniform_int_distribution<boost::multiprecision::cpp_int> distribution(weighting.getWeightingRangeStart(), weighting.getWeightingRangeEnd());
 
@@ -3180,9 +3180,6 @@ void AllWeightings::ClearWeightingsAndRemainingBranchJunk()
 		});
 	});
 	weighting.ClearWeighting();
-
-	// random_numbers.clear() does not usually deallocate!!!
-	std::vector<boost::multiprecision::cpp_int>().swap(random_numbers);
 
 }
 
