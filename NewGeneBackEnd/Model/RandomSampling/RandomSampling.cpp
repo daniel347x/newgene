@@ -2005,7 +2005,7 @@ void SpitAllWeightings(std::vector<std::string> & sdata_, AllWeightings const & 
 	*sdata += "</TIME_GRANULARITY>";
 
 	*sdata += "<NUMBER_CHILD_VARIABLE_GROUPS>";
-	*sdata += boost::lexical_cast<std::string>(allWeightings.numberChildVariableGroups); 
+	*sdata += boost::lexical_cast<std::string>(allWeightings.numberChildVariableGroups);  
 	*sdata += "</NUMBER_CHILD_VARIABLE_GROUPS>";
 
 	*sdata += "<childInternalToOneLeafColumnCountForDMUWithMultiplicityGreaterThan1>";
@@ -3421,6 +3421,9 @@ void purge_pool()
 
 void AllWeightings::Clear()
 {
+
+	create_output_row_visitor::data.clear();
+
 	if (insert_random_sample_stmt)
 	{
 		sqlite3_finalize(insert_random_sample_stmt);

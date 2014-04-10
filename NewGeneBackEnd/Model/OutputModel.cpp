@@ -21,7 +21,7 @@
 
 // Table name SQL tokens
 // (to search for quotes around table names)
-// CREATE
+// CREATE 
 // UPDATE
 // INSERT
 // JOIN

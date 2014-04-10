@@ -1996,7 +1996,7 @@ public:
 			sdata += "</SIZE_RANDOM_NUMBERS>";
 
 		}
-	};
+	}; 
 
 	mutable SizeOfSampler mySize;
 	void getMySize() const;
