@@ -7,7 +7,7 @@
 #	include <boost/multiprecision/cpp_dec_float.hpp>
 #	include <boost/assert.hpp>
 #endif
-#include <random>
+#include <random> 
 #include <functional>
 #include <list>
 #include <algorithm>
@@ -633,6 +633,8 @@ bool AllWeightings::MergeTimeSliceDataIntoMap(Branch const & branch, TimeSliceLe
 
 							BranchOutputRow const & outputRow = *matchingOutputRowPtr->first;
 							fast_short_vector const & matchingOutputChildLeaves = matchingOutputRowPtr->second;
+
+							// matchingOutputChildLeaves is a vector
 
 							// Loop through all matching output row child leaves
 							for (auto matchingOutputChildLeavesPtr = matchingOutputChildLeaves.cbegin(); matchingOutputChildLeavesPtr != matchingOutputChildLeaves.cend(); ++matchingOutputChildLeavesPtr)

@@ -731,7 +731,7 @@ class OutputModel : public Model<OUTPUT_MODEL_SETTINGS_NAMESPACE::OUTPUT_MODEL_S
 				void PopulateUOAs();
 				void ValidateUOAs();
 				void DetermineChildMultiplicitiesGreaterThanOne();
-				void PopulateVariableGroups(); 
+				void PopulateVariableGroups();  
 				void PopulatePrimaryKeySequenceInfo();
 
 				size_t top_level_vg_index; // in case there are multiple top-level variable groups, which one to use as primary (the others will be treated as children)

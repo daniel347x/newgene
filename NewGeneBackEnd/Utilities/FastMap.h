@@ -5,13 +5,32 @@
 #include <set>
 #ifndef Q_MOC_RUN
 #	include <boost/pool/pool_alloc.hpp>
+#	include <boost/container/flat_map.hpp>
+#	include <boost/container/flat_set.hpp>
 #endif
 
-
 #include <map>
+#include <vector>
+#include <set>
 
-template<typename K, typename V, unsigned MAX_SIZE = 32, class Comp_ = std::less<K>>
+template<typename K, unsigned MAX_SIZE = 32>
+using FastVector = std::vector<K, boost::pool_allocator<K, boost::default_user_allocator_new_delete, boost::mutex, MAX_SIZE>>;
+
+template<typename K, typename V, class Comp_ = std::less<K>, unsigned MAX_SIZE = 32>
 using FastMap = std::map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K const, V>, boost::default_user_allocator_new_delete, boost::mutex, MAX_SIZE>>;
+
+template<typename K, typename V, class Comp_ = std::less<K>, unsigned MAX_SIZE = 32>
+using FastMapFlat = boost::container::flat_map<K, V, Comp_, boost::fast_pool_allocator<std::pair<K const, V>, boost::default_user_allocator_new_delete, boost::mutex, MAX_SIZE>>;
+
+template<typename K, class Comp_ = std::less<K>, unsigned MAX_SIZE = 32>
+using FastSet = std::set<K, Comp_, boost::fast_pool_allocator<K, boost::default_user_allocator_new_delete, boost::mutex, MAX_SIZE>>;
+
+template<typename K, class Comp_ = std::less<K>, unsigned MAX_SIZE = 32>
+using FastSetFlat = boost::container::flat_set<K, Comp_, boost::fast_pool_allocator<K, boost::default_user_allocator_new_delete, boost::mutex, MAX_SIZE>>;
+
+
+
+// Deprecated and unused
 
 template<typename K_, typename V_, class Comp_ = std::less<K_>>
 class FastMap_

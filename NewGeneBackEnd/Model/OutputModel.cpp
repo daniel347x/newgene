@@ -493,7 +493,7 @@ void OutputModel::OutputGenerator::GenerateOutput(DataChangeMessage & change_res
 	} BOOST_SCOPE_EXIT_END
 
 	create_output_row_visitor::data = &allWeightings.create_output_row_visitor_global_data_cache;
-	Prepare(allWeightings);
+	Prepare(allWeightings); 
 
 	if (failed || CheckCancelled())
 	{

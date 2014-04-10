@@ -26,16 +26,18 @@ typedef boost::variant<std::int32_t, double, fast_string> InstanceData;
 typedef boost::variant<std::int32_t, double, fast_string> DMUInstanceData;
 typedef boost::variant<std::int32_t, double, fast_string> SecondaryInstanceData;
 
-typedef std::vector<InstanceData, boost::pool_allocator<InstanceData>> InstanceDataVector;
+typedef FastVector<InstanceData> InstanceDataVector;
 typedef InstanceDataVector DMUInstanceDataVector;
 typedef InstanceDataVector ChildDMUInstanceDataVector;
 typedef InstanceDataVector SecondaryInstanceDataVector;
 
-typedef std::vector<std::int16_t, boost::pool_allocator<std::int16_t>> fast_short_vector;
-typedef std::vector<int, boost::pool_allocator<int>> fast_int_vector;
-typedef std::set<int, std::less<int>, boost::fast_pool_allocator<int>> fast_int_set;
+typedef FastVector<std::int16_t> fast_short_vector;
+typedef FastVector<int> fast_int_vector;
+typedef FastSet<int> fast_int_set;
 typedef FastMap<std::int16_t, std::int32_t> fast_short_to_int_map;
-typedef FastMap<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
+
+//typedef FastMap<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
+typedef FastMapFlat<std::int16_t, fast_short_to_int_map> fast__short__to__fast_short_to_int_map;
 
 // Row ID -> secondary data for that row for a given (unspecified) leaf
 typedef FastMap<std::int32_t, SecondaryInstanceDataVector> DataCache;
@@ -993,7 +995,7 @@ struct ChildToPrimaryMapping
 	}
 };
 
-typedef std::vector<ChildToPrimaryMapping, boost::pool_allocator<ChildToPrimaryMapping>> fast_vector_childtoprimarymapping;
+typedef FastVector<ChildToPrimaryMapping> fast_vector_childtoprimarymapping;
 typedef FastMap<int, fast_vector_childtoprimarymapping> fast_int_to_childtoprimarymappingvector;
 
 enum VARIABLE_GROUP_MERGE_MODE
@@ -1254,18 +1256,23 @@ class BranchOutputRow
 
 typedef PrimaryKeysGroupingMultiplicityGreaterThanOne Leaf;
 
-typedef std::vector<Leaf, boost::pool_allocator<Leaf>> fast_leaf_vector;
-typedef std::set<Leaf, std::less<Leaf>, boost::fast_pool_allocator<Leaf>> Leaves;
+typedef FastVector<Leaf> fast_leaf_vector;
+typedef FastSet<Leaf> Leaves;
 
-typedef std::vector<BranchOutputRow, boost::pool_allocator<BranchOutputRow>> fast_branch_output_row_vector;
-typedef std::set <BranchOutputRow, std::less<BranchOutputRow>, boost::fast_pool_allocator<BranchOutputRow>> fast_branch_output_row_set;
-typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
+typedef FastVector<BranchOutputRow> fast_branch_output_row_vector;
+typedef FastSet<BranchOutputRow> fast_branch_output_row_set;
+
+//typedef FastMap<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
+typedef FastMapFlat<BranchOutputRow const *, fast_short_vector> fast_branch_output_row_ptr__to__fast_short_vector;
+
 typedef FastMap<std::int64_t, fast_branch_output_row_set> fast__int64__to__fast_branch_output_row_set;
 typedef FastMap<std::int64_t, fast_branch_output_row_vector> fast__int64__to__fast_branch_output_row_vector;
-typedef FastMap<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
+
+//typedef FastMap<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
+typedef FastMapFlat<ChildDMUInstanceDataVector, fast_branch_output_row_ptr__to__fast_short_vector> fast__lookup__from_child_dmu_set__to__output_rows;
 
 //#ifdef _DEBUG
-void SpitKeys(std::string & sdata, std::vector<DMUInstanceData> const & dmu_keys);
+void SpitKeys(std::string & sdata, FastVector<DMUInstanceData> const & dmu_keys);
 void SpitDataCache(std::string & sdata, DataCache const & dataCache);
 void SpitDataCaches(std::string & sdata, fast_short_to_data_cache_map const & dataCaches);
 void SpitHits(std::string & sdata, fast__int64__to__fast_branch_output_row_set const & hits);
@@ -1601,7 +1608,8 @@ void SpitBranch(std::string & sdata, Branch const & branch);
 // ******************************************************************************************************** //
 // (Only one, since currently only one primary top-level variable group is supported)
 //
-typedef std::set<Branch, std::less<Branch>, boost::fast_pool_allocator<Branch>> Branches;
+//typedef FastSet<Branch> Branches;
+typedef FastSetFlat<Branch> Branches;
 //
 // ******************************************************************************************************** //
 // ******************************************************************************************************** //
@@ -1632,7 +1640,7 @@ class VariableGroupBranchesAndLeaves
 
 };
 
-typedef std::vector<VariableGroupBranchesAndLeaves, boost::pool_allocator<VariableGroupBranchesAndLeaves>> VariableGroupBranchesAndLeavesVector;
+typedef FastVector<VariableGroupBranchesAndLeaves> VariableGroupBranchesAndLeavesVector;
 
 class VariableGroupTimeSliceData
 {
@@ -1896,7 +1904,7 @@ public:
 
 };
 
-typedef std::set<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys, boost::fast_pool_allocator<MergedTimeSliceRow>> fast__mergedtimeslicerow_set;
+typedef FastSet<MergedTimeSliceRow, SortMergedRowsByTimeThenKeys> fast__mergedtimeslicerow_set;
 
 class AllWeightings
 {
@@ -2081,7 +2089,7 @@ private:
 	bool IncrementPosition(int const K, std::vector<int> & position, Branch const & branch);
 	int IncrementPositionManageSubK(int const K, int const subK, std::vector<int> & position, Branch const & branch);
 
-	boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K);
+	boost::multiprecision::cpp_int BinomialCoefficient(int const N, int const K); 
 
 public:
 
